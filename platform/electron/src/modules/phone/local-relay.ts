@@ -5,7 +5,7 @@ import path from 'node:path';
 import type {Duplex} from 'node:stream';
 import {resolveWorldFile} from '../../world/world-file.ts';
 import {acceptWebSocket,refuseUpgrade,type TextSocket} from './web-socket.ts';
-import {WORLD_PROTOCOL,WORLD_SOCKET_PATH,WORLD_TOKEN,worldTokenFrom} from '../../../../../contracts/web-world.ts';
+import {WORLD_PAGE_CSP_META,WORLD_PROTOCOL,WORLD_SOCKET_PATH,WORLD_TOKEN,worldTokenFrom,worldWebCsp} from '../../../../../contracts/web-world.ts';
 
 // Worldlet in a browser on this computer, served by this computer (owner decision 2026-10-13: "我们不要存，用户应该从他
 // 安装worldlet的设备直接serve"; core/phone/README.md#web). The app answers on 127.0.0.1 with the browser page (ui/web,
@@ -135,8 +135,10 @@ export async function serveLocalRelay({relay,pageRoot,ports}:{relay:LocalRelay,p
    'Content-Security-Policy':"default-src 'self'; img-src 'self' data:; frame-ancestors 'none'"});
   res.end(data);
  }
- // The interface build, read-only: GET and HEAD, files inside it after resolving links, types the page loads. The page
- // keeps its own Content-Security-Policy (a meta tag); the answer adds that no other site may frame it.
+ // The interface build, read-only: GET and HEAD, files inside it after resolving links, types the page loads. The World
+ // document's Content-Security-Policy is the web variant, as a header (contracts/web-world.ts worldWebCsp): its own
+ // meta tag, the app window's policy, is taken out. Any other page keeps its own and the answer adds that no other
+ // site may frame it.
  async function answerWorld(route:WorldRoute,url:URL,req:http.IncomingMessage,res:http.ServerResponse){
   if(req.method!=='GET'&&req.method!=='HEAD'){res.writeHead(405,{Allow:'GET, HEAD'}).end();return;}
   if(url.pathname==='/world'){res.writeHead(302,{Location:'/world/'}).end();return;}
@@ -144,9 +146,14 @@ export async function serveLocalRelay({relay,pageRoot,ports}:{relay:LocalRelay,p
   const file=await resolveWorldFile(worldRoot.root,url.pathname.slice('/world'.length));
   const type=file&&WORLD_TYPES[path.extname(file).toLowerCase()];
   if(!file||!type){res.writeHead(404).end();return;}
+  const headers={'Content-Type':type,'Cache-Control':'no-cache','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Cross-Origin-Resource-Policy':'same-origin'};
+  if(file===path.join(worldRoot.root,'index.html')){
+   const page=Buffer.from((await fs.promises.readFile(file,'utf8')).replace(WORLD_PAGE_CSP_META,''));
+   res.writeHead(200,{...headers,'Content-Length':page.length,'Content-Security-Policy':worldWebCsp(`http://${String(req.headers.host)}`)});
+   res.end(req.method==='HEAD'?undefined:page);return;
+  }
   const stat=await fs.promises.stat(file);
-  res.writeHead(200,{'Content-Type':type,'Content-Length':stat.size,'Cache-Control':'no-cache','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer',
-   'Cross-Origin-Resource-Policy':'same-origin',...(type.startsWith('text/html')?{'Content-Security-Policy':"frame-ancestors 'none'"}:{})});
+  res.writeHead(200,{...headers,'Content-Length':stat.size,...(type.startsWith('text/html')?{'Content-Security-Policy':"frame-ancestors 'none'"}:{})});
   if(req.method==='HEAD'){res.end();return;}
   fs.createReadStream(file).on('error',()=>res.destroy()).pipe(res);
  }

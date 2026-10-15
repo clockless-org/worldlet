@@ -17,7 +17,7 @@ import qrcode from 'qrcode-generator';
 import {withTempDir} from './test-temp.ts';
 import {launchTestBrowser,pageErrors,waitForWorld} from './browser-test.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {WEB_DENIED_MESSAGE,WEB_PAGE_FEATURES,WORLD_PROTOCOL,worldLinkToken,worldTokenProtocol} from '../contracts/web-world.ts';
+import {WEB_DENIED_MESSAGE,WEB_PAGE_FEATURES,WEB_PAGE_UNAVAILABLE,WORLD_PROTOCOL,worldLinkToken,worldTokenProtocol,worldWebCsp} from '../contracts/web-world.ts';
 import {nodeVaultStorage,VAULT_KEY_FILE} from '../platform/node/src/vault-storage.ts';
 import {askControl,CONTROL_SOCKET_LIMIT,controlSocketTooLong,serveControl} from '../platform/node/src/control.ts';
 import {app,BrowserWindow,BaseWindow,DESKTOP_ONLY,dialog,Notification,shell} from '../platform/node/src/electron-shim.ts';
@@ -261,6 +261,13 @@ await withTempDir('wl-',async temp=>{
   const upgrade=(headers:Record<string,string>)=>ask('/world/socket',{Connection:'Upgrade',Upgrade:'websocket','Sec-WebSocket-Version':'13','Sec-WebSocket-Key':'dGhlIHNhbXBsZSBub25jZQ==',...headers});
   const here=`127.0.0.1:${port}`,origin=`http://${here}`,protocols=`${WORLD_PROTOCOL}, ${worldTokenProtocol(token)}`;
   assert.equal(await ask('/world/',{Host:here}),200,'the World page is served');
+  // Its policy is the web variant, as a header, and the app window's meta tag is gone (contracts/web-world.ts).
+  const served=await new Promise<{headers:http.IncomingHttpHeaders;body:string}>((resolve,reject)=>http.get({host:'127.0.0.1',port,path:'/world/',headers:{Host:here}},response=>{
+   let body='';response.setEncoding('utf8');response.on('data',chunk=>{body+=chunk;});response.on('end',()=>resolve({headers:response.headers,body}));}).on('error',reject));
+  assert.equal(served.headers['content-security-policy'],worldWebCsp(origin),'the World page carries the web policy');
+  assert.match(String(served.headers['content-security-policy']),new RegExp(`connect-src 'self' ws://${here.replace(/\./g,'\\.')}/world/socket;`),'it connects only to its own origin and socket');
+  assert.ok(!/http-equiv="Content-Security-Policy"/i.test(served.body)&&served.body.includes('world-startup.js'),'without the window\'s meta policy');
+  assert.equal(Number(served.headers['content-length']),Buffer.byteLength(served.body));
   assert.equal(await ask('/world/',{Host:`worldlet.example.com:${port}`}),421,'a request for another name is refused');
   assert.equal(await ask('/world/%2e%2e/%2e%2e/vault.json',{Host:here}),404,'nothing outside the interface build');
   assert.equal(await ask('/world/local-tools/sessions.py',{Host:here}),404,'only what the page loads');
@@ -274,7 +281,10 @@ await withTempDir('wl-',async temp=>{
   const browser=await launchTestBrowser();
   try{
    const context=await browser.newContext({viewport:{width:1440,height:900}});
-   const page=await context.newPage(),errors=pageErrors(page);
+   const page=await context.newPage(),errors=pageErrors(page),policy:string[]=[];
+   // Anything the page's policy blocked, from the console and from the document's own violation events.
+   page.on('console',message=>{if(/Content Security Policy|Content-Security-Policy/i.test(message.text()))policy.push(message.text());});
+   await page.addInitScript(()=>document.addEventListener('securitypolicyviolation',event=>console.error(`Content Security Policy: ${event.violatedDirective} ${event.blockedURI}`)));
    await page.goto(link.href);
    await waitForWorld(page);
    await page.waitForFunction(()=>(document.querySelector('#notionWorld') as HTMLElement&{sceneMetrics?:{renderer?:string}})?.sceneMetrics?.renderer==='pixi-webgl',undefined,{timeout:120_000});
@@ -285,6 +295,12 @@ await withTempDir('wl-',async temp=>{
    assert.equal(await refused({action:'dataBackup',operation:'restore',id:'x'}),WEB_DENIED_MESSAGE,'restore is refused');
    assert.equal(await refused({action:'phonePair',kind:'phone',operation:'start'}),WEB_DENIED_MESSAGE,'pairing is refused');
    assert.equal(await refused({action:'deleteSourceData',provider:'gmail'}),WEB_DENIED_MESSAGE,'local data deletion is refused');
+   // And what the page's window cannot do, though the page hides it: the native browser, YouTube, sound, the
+   // microphone and the desktop Companion, each with the reason Fox's tools give.
+   assert.equal(await refused({action:'browserShow',url:'https://example.com/'}),WEB_PAGE_UNAVAILABLE.websitePages,'a native website view is refused');
+   assert.equal(await refused({action:'browserCommand',operation:'navigate',args:{url:'https://example.com/'},agent:true}),WEB_PAGE_UNAVAILABLE.websitePages,'and driving one');
+   assert.equal(await refused({action:'speechStart',language:'en'}),WEB_PAGE_UNAVAILABLE.voice,'the microphone is refused');
+   assert.equal(await refused({action:'analyticsConfig'}),WEB_DENIED_MESSAGE,'the page gets no web capture, so it posts nothing to /ingest');
    const status=await page.evaluate(()=>(window as any).worldletWebHost.request({action:'phonePair',kind:'web',operation:'status'}));
    assert.ok(status&&typeof status.state==='string'&&!('link' in status),'a pairing status comes without its link');
    // What the page's window cannot do arrives in the handshake (web-page-features-check.ts): no YouTube in the World, no
@@ -310,6 +326,11 @@ await withTempDir('wl-',async temp=>{
    await page.evaluate(()=>{location.hash='';});
    if(screenshot){fs.mkdirSync(path.dirname(screenshot),{recursive:true});await page.screenshot({path:screenshot});}
    assert.deepEqual(errors,[],'no page errors');
+   assert.deepEqual(policy,[],'nothing the page loads breaks its policy');
+   // The policy is in force: the page cannot reach another origin, and the check sees the attempt.
+   assert.equal(await page.evaluate(()=>fetch('https://example.com/').then(()=>'reached',()=>'blocked')),'blocked','another origin is out of reach');
+   await page.waitForTimeout(200);
+   assert.ok(policy.some(line=>line.includes('connect-src')),'and the attempt is seen: '+policy.join(' | '));
    // One World page at a time: a second tab takes over and the first says where the World is.
    const second=await context.newPage();
    await second.goto(link.href);
@@ -318,7 +339,7 @@ await withTempDir('wl-',async temp=>{
    assert.match(await page.locator('#nativeNotice').textContent()||'',/open in another browser tab/);
    await second.getByText(title).first().waitFor({timeout:30_000});
   }finally{await browser.close();}
-  console.log('PASS node host World in a browser: the real World (pixi-webgl) with its item, one page at a time; another Host, Origin or token and denied actions are refused; the page hears what its window cannot do, leaves out YouTube, sound, the microphone and window buttons, and opens the Browser\'s page in a new tab');
+  console.log('PASS node host World in a browser: the real World (pixi-webgl) with its item under the web policy with no violation, one page at a time; another Host, Origin or token, denied actions and what the page\'s window cannot do are refused; the page hears what its window cannot do, leaves out YouTube, sound, the microphone and window buttons, and opens the Browser\'s page in a new tab');
  }finally{
   if(process.platform==='win32')child.send({type:'worldlet:stop'});else child.kill('SIGTERM');
   const code=await Promise.race([exited,new Promise<'hung'>(resolve=>setTimeout(()=>resolve('hung'),20_000))]);

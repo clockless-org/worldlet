@@ -38,7 +38,7 @@ const host:Host={
  provide:(name,service)=>{services.set(name,service);return service;},
  use:name=>{if(!services.has(name))throw Error('Missing host service '+name);return services.get(name) as any;},
  optional:name=>services.get(name) as any,
- onPageReload:()=>{},onQuit:()=>{},onPageLoaded:()=>{},onStarted:()=>{},
+ onPageReload:()=>{},onQuit:()=>{},onPageLoaded:()=>{},onPageConnected:()=>{},onStarted:()=>{},
  diagnostics:{record:()=>{},log:()=>{}}
 };
 const identity=()=>Object.fromEntries(INSTALLATION_KEYS.map(key=>[key,preferences.get(key)]));

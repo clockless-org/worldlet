@@ -4,6 +4,8 @@
 // over "one page at a time": the window stays the World's page, a browser's page is an extra one (the newest browser
 // tab takes over an older one), events and snapshots reach both, window calls only the window, and a call about a Fox
 // turn goes back to the page that started it. The Agent's `world/link` adds this computer's link to the room link.
+// The World document carries the web policy as a header in place of the window's meta tag, and the host refuses what
+// the page's window cannot do (WEB_PAGE_ACTIONS).
 // Electron itself does not run here: main.ts only wires these pieces together.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -16,7 +18,7 @@ import {createLocalRelay,serveLocalRelay} from '../platform/electron/src/modules
 import {createWebPage} from '../platform/electron/src/host/web-page.ts';
 import {createPagePair,serveWorldWeb,WORLD_LINK_FILE,WORLD_TOKEN_VAULT} from '../platform/electron/src/host/world-web.ts';
 import type {PageBridge} from '../platform/electron/src/host/types.ts';
-import {WEB_DENIED_MESSAGE,WEB_PAGE_FEATURES,WORLD_ELSEWHERE_CODE,WORLD_PROTOCOL,worldLinkToken,worldTokenProtocol} from '../contracts/web-world.ts';
+import {WEB_DENIED_MESSAGE,WEB_PAGE_ACTIONS,WEB_PAGE_FEATURES,WEB_PAGE_UNAVAILABLE,WORLD_ELSEWHERE_CODE,WORLD_PAGE_CSP,WORLD_PROTOCOL,webDenied,worldLinkToken,worldTokenProtocol,worldWebCsp} from '../contracts/web-world.ts';
 import {worldLinkReply} from '../core/phone/index.ts';
 
 const opened:Duplex[]=[];
@@ -62,7 +64,8 @@ const within=<T>(promise:Promise<T>,what:string)=>Promise.race([promise,new Prom
 await withTempDir('worldlet-world-web-',async root=>{
  // 1. The link: a token the vault keeps, the link in an owner-only file, the same across a restart.
  const secrets=new Map<string,string>(),vault={get:(id:string)=>secrets.get(id)??null,set:(id:string,secret:string)=>void secrets.set(id,secret)};
- const webRoot=path.join(root,'WorldletWeb');fs.mkdirSync(webRoot);fs.writeFileSync(path.join(webRoot,'index.html'),'<!doctype html><title>World</title>');
+ const webRoot=path.join(root,'WorldletWeb');fs.mkdirSync(webRoot);fs.writeFileSync(path.join(webRoot,'index.html'),`<!doctype html><meta http-equiv="Content-Security-Policy" content="${WORLD_PAGE_CSP}"><title>World</title>`);
+ fs.writeFileSync(path.join(webRoot,'gallery.html'),'<!doctype html><title>Gallery</title>');
  const server=await serveLocalRelay({relay:createLocalRelay(),pageRoot:path.join(root,'open'),ports:[0]});
  try{
   // The window's page, as host/page.ts gives it: what it was called with, and whether it is loaded.
@@ -85,8 +88,22 @@ await withTempDir('worldlet-world-web-',async root=>{
 
   // 2. The guards, as the Node host's.
   const here=`127.0.0.1:${server.port}`,origin=`http://${here}`,protocols=`${WORLD_PROTOCOL}, ${worldTokenProtocol(token)}`;
-  const page=await new Promise<number>(resolve=>http.get({host:'127.0.0.1',port:server.port,path:'/world/',headers:{Host:here}},response=>{response.resume();resolve(response.statusCode||0);}));
-  assert.equal(page,200,'the World page is served');
+  const get=(pathname:string,host=here)=>new Promise<{status:number;headers:http.IncomingHttpHeaders;body:string}>((resolve,reject)=>http.get({host:'127.0.0.1',port:server.port,path:pathname,headers:{Host:host}},response=>{
+   let body='';response.setEncoding('utf8');response.on('data',chunk=>{body+=chunk;});response.on('end',()=>resolve({status:response.statusCode||0,headers:response.headers,body}));}).on('error',reject));
+  const page=await get('/world/');
+  assert.equal(page.status,200,'the World page is served');
+  // The web policy as a header, for the name the browser used, in place of the window's meta tag.
+  assert.equal(page.headers['content-security-policy'],worldWebCsp(origin),'the World page carries the web policy');
+  assert.equal(page.body,'<!doctype html><title>World</title>','and the window\'s meta policy is taken out');
+  assert.equal(Number(page.headers['content-length']),Buffer.byteLength(page.body));
+  assert.equal((await get('/world/index.html',`localhost:${server.port}`)).headers['content-security-policy'],worldWebCsp(`http://localhost:${server.port}`),'by either name');
+  assert.equal((await get('/world/gallery.html')).headers['content-security-policy'],"frame-ancestors 'none'",'another page keeps its own policy');
+  const policy=worldWebCsp(origin);
+  assert.ok(policy.includes(`connect-src 'self' ws://${here}/world/socket;`)&&policy.includes("frame-ancestors 'none'"),'it connects only to its own origin and socket, and no site frames it');
+  assert.ok(!/worldlet:|https:/.test(policy),'and reaches no other origin');
+  // The window's policy is the one the interface build writes, unchanged.
+  assert.ok(fs.readFileSync(path.join(import.meta.dirname,'build-native-ui.ts'),'utf8').includes('content="${WORLD_PAGE_CSP}"'),'the build writes the window\'s policy');
+  assert.equal(WORLD_PAGE_CSP,"default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; font-src 'self'; img-src 'self' data: blob: https://i.ytimg.com https://yt3.ggpht.com https://yt3.googleusercontent.com; connect-src 'self' worldlet://app; worker-src blob:; media-src 'self' data:; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'",'the window keeps its policy');
   assert.equal((await connect(server.port,{Host:`worldlet.example.com:${server.port}`,Origin:origin,'Sec-WebSocket-Protocol':protocols})).status,421,'another Host is refused');
   assert.equal((await connect(server.port,{Host:here,Origin:'https://worldlet.example.com','Sec-WebSocket-Protocol':protocols})).status,403,'another Origin is refused');
   assert.equal((await connect(server.port,{Host:here,Origin:origin,'Sec-WebSocket-Protocol':WORLD_PROTOCOL})).status,401,'a missing token is refused');
@@ -100,7 +117,18 @@ await withTempDir('worldlet-world-web-',async root=>{
   assert.deepEqual(await within(first.next(frame=>frame.a===1),'denied'),{a:1,ok:false,error:WEB_DENIED_MESSAGE},'WEB_DENIED holds');
   first.send({q:2,body:{action:'phonePair',kind:'local',operation:'world'}});
   assert.deepEqual(await within(first.next(frame=>frame.a===2),'world link denied'),{a:2,ok:false,error:WEB_DENIED_MESSAGE},'a browser\'s page cannot ask for the World link');
+  // What the page's window cannot do is refused too, with the reason Fox's tools give, before the router.
+  let request=10;
+  for(const [feature,actions] of Object.entries(WEB_PAGE_ACTIONS))for(const action of Object.keys(actions!)){
+   first.send({q:++request,body:{action,operation:'show'}});
+   assert.deepEqual(await within(first.next(frame=>frame.a===request),action),{a:request,ok:false,error:WEB_PAGE_UNAVAILABLE[feature as keyof typeof WEB_PAGE_UNAVAILABLE]},action+' is refused');
+  }
   assert.deepEqual(dispatched,[],'and the router never saw them');
+  first.send({q:++request,body:{action:'browserCommand',operation:'visitedSites',args:{},agent:false}});
+  await within(first.next(frame=>frame.a===request),'visitedSites');
+  assert.deepEqual(dispatched.splice(0),[{action:'browserCommand',operation:'visitedSites',args:{},agent:false}],'the sites the browser visited stay readable');
+  assert.equal(webDenied({action:'analyticsConfig'}),WEB_DENIED_MESSAGE,'no web capture in a browser, so nothing goes to /ingest');
+  assert.equal(webDenied({action:'snapshot'}),'','the World itself is not refused');
   assert.equal(pages.page.ready(),true);
 
   // A Fox turn the browser's page started: its tool calls go back to it, not to the window.
@@ -153,7 +181,7 @@ await withTempDir('worldlet-world-web-',async root=>{
   web.close();
   assert.equal(await within(second.closed,'host stops'),1001,'the browser page is closed when the app quits');
   assert.equal(pages.page.ready(),true,'and the window stays');
-  console.log('PASS world web beside the window: the same guards (Host 421, Origin 403, token 401, WEB_DENIED); a browser\'s page is extra: the window keeps the World, the newest browser tab takes over an older one, events and snapshots reach both, window calls only the window, and a Fox turn\'s calls go back to the page that started it');
+  console.log('PASS world web beside the window: the same guards (Host 421, Origin 403, token 401, WEB_DENIED, WEB_PAGE_ACTIONS) and the web policy in place of the window\'s; a browser\'s page is extra: the window keeps the World, the newest browser tab takes over an older one, events and snapshots reach both, window calls only the window, and a Fox turn\'s calls go back to the page that started it');
  }finally{for(const socket of opened)socket.destroy();await server.close();}
 });
 
