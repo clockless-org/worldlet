@@ -75,7 +75,9 @@ World from another device without that is a later step.
 
 `node worldlet.cjs <command>` asks the running host over its control socket, `control.sock` in the library (owner-only,
 0600; a named pipe on Windows), and prints the answer. The answer goes only to the asker's stdout; the host logs
-nothing of it. With no host running it says so and exits with code 3.
+nothing of it. With no host running it says so and exits with code 3. A unix socket path holds at most 103 bytes on
+macOS (107 on Linux): with a library deeper than that, the host starts without a control socket and both sides say the
+library path is too long, rather than binding a path cut short.
 
 | Command | What it does |
 | --- | --- |
