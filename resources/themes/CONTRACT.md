@@ -18,12 +18,12 @@ flowchart LR
 ```text
 package/
   theme.json          # contractVersion: 3, id, title, assets, presentation, optional updatedAt
-  presentation.json   # tokens, fonts, optional hud, sound, icons, artifact, appletPresets, appletScenes and sceneMaterials
+  presentation.json   # tokens, fonts, optional worldMap, hud, sound, icons, weatherIcons, artifact, appletPresets, appletScenes and sceneMaterials
   assets/             # every picture, sound, font and licence the JSON names
   *.json              # other data the host's World code reads (the Village's lamps.json, assets/art.json)
 ```
 
-`theme.json` fixes `assets: "assets"` and `presentation: "presentation.json"`; any other field is refused. `presentation.json` holds only `tokens`, `fonts`, `hud`, `sound`, `icons`, `artifact`, `appletPresets`, `appletScenes` and `sceneMaterials`. Image registration records painted surface bounds; executable layouts, viewport CSS and placement of host controls remain the host’s responsibility.
+`theme.json` fixes `assets: "assets"` and `presentation: "presentation.json"`; any other field is refused. `presentation.json` holds only `tokens`, `fonts`, `worldMap`, `hud`, `sound`, `icons`, `weatherIcons`, `artifact`, `appletPresets`, `appletScenes` and `sceneMaterials`. Image registration records painted surface bounds; executable layouts, viewport CSS and placement of host controls remain the host’s responsibility.
 
 Themes do not have release version numbers. Optional `updatedAt` records the last source modification as a UTC timestamp (for example, `2026-10-10T07:10:00Z`); it is informational. `contractVersion` alone controls compatibility; source hashes identify the copied contents.
 
