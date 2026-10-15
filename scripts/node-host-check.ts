@@ -19,6 +19,7 @@ import {launchTestBrowser,pageErrors,waitForWorld} from './browser-test.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {WEB_DENIED_MESSAGE,WEB_PAGE_FEATURES,WORLD_PROTOCOL,worldLinkToken,worldTokenProtocol} from '../contracts/web-world.ts';
 import {nodeVaultStorage,VAULT_KEY_FILE} from '../platform/node/src/vault-storage.ts';
+import {askControl,CONTROL_SOCKET_LIMIT,controlSocketTooLong,serveControl} from '../platform/node/src/control.ts';
 import {app,BrowserWindow,BaseWindow,DESKTOP_ONLY,dialog,Notification,shell} from '../platform/node/src/electron-shim.ts';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
@@ -55,9 +56,32 @@ await withTempDir('worldlet-node-vault-',dir=>{
 });
 console.log('PASS node host vault storage: sealed under an owner-only key, unreadable with another key or once changed');
 
+// The control socket refuses a path the system would cut short (macOS binds at most 103 bytes, Linux 107) instead of
+// binding a shorter one it cannot remove on close, which left the next start with the address in use.
+await withTempDir('worldlet-node-control-',async dir=>{
+ let deep=dir;while(Buffer.byteLength(path.join(deep,'control.sock'))<=CONTROL_SOCKET_LIMIT)deep=path.join(deep,'library-folder-with-a-long-name');
+ fs.mkdirSync(deep,{recursive:true});
+ const file=path.join(deep,'control.sock');
+ assert.match(controlSocketTooLong(file),/library path is too long for a control socket/);
+ assert.equal(controlSocketTooLong(file,4096),'');
+ if(process.platform!=='win32'){
+  await assert.rejects(serveControl(file,async()=>({lines:[]})),/library path is too long for a control socket/,'the host says why it has no control socket');
+  assert.ok(!fs.existsSync(file),'and binds nothing');
+  await assert.rejects(askControl(file,{command:'status'}),/library path is too long/,'the command line says the same');
+  const short=path.join(dir,'control.sock'),server=await serveControl(short,async()=>({lines:['ok']}));
+  assert.deepEqual(await askControl(short,{command:'status'}),{lines:['ok']},'a path that fits works');
+  await new Promise(resolve=>server.close(resolve));
+  assert.ok(!fs.existsSync(short),'and is removed on close');
+ }
+},process.platform==='win32'?os.tmpdir():'/tmp');
+console.log('PASS node host control socket: a library path too long for a unix socket is refused with its reason, not cut short');
+
 // 3. The built host. Its program folder holds WorldletWeb, as an installed copy does.
 if(!fs.existsSync(path.join(web,'applet-runtime.json')))execFileSync('npm',['run','build:native-ui'],{cwd:root,stdio:'inherit',shell:process.platform==='win32'});
-await withTempDir('worldlet-node-host-',async temp=>{
+// The control socket is bound in the library, so on POSIX the library sits under /tmp: macOS's own temp folder is too
+// deep for a unix socket path (control.ts CONTROL_SOCKET_LIMIT).
+const shortTemp=process.platform==='win32'?os.tmpdir():'/tmp';
+await withTempDir('wl-',async temp=>{
  const program=path.join(temp,'program'),library=path.join(temp,'library');
  execFileSync(process.execPath,[path.join(root,'scripts/build-node-host.ts'),'--out',program],{cwd:root,stdio:'inherit'});
  fs.symlinkSync(web,path.join(program,'WorldletWeb'),process.platform==='win32'?'junction':'dir');
@@ -302,4 +326,4 @@ await withTempDir('worldlet-node-host-',async temp=>{
   assert.equal(code,0,'stops cleanly with a World page open: '+out.slice(-400));
   assert.ok(!out.includes(fs.readFileSync(path.join(seeded,'world-link.txt'),'utf8').trim().split('#t=')[1]),'stdout never holds the token');
  }
-});
+},shortTemp);

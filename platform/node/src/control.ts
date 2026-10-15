@@ -12,6 +12,16 @@ import {terminalQr} from './qr.ts';
 /** The socket in the library; on Windows a named pipe, named after the library. */
 export const CONTROL_SOCKET='control.sock';
 export const controlSocketPath=(root:string)=>process.platform==='win32'?`\\\\.\\pipe\\worldlet-${crypto.createHash('sha256').update(path.resolve(root).toLowerCase()).digest('hex').slice(0,16)}`:path.join(root,CONTROL_SOCKET);
+/** The longest unix socket path, in bytes, the system binds whole (`sun_path` less its terminating NUL: 104 on macOS
+ * and the BSDs, 108 on Linux). A longer one is cut short without a word, so the host would bind one path and remove
+ * another on close, and the next start would find the address in use. */
+export const CONTROL_SOCKET_LIMIT=process.platform==='linux'?107:103;
+/** Why `file` cannot be the control socket (its path is too long for a unix socket), or '' when it can. */
+export function controlSocketTooLong(file:string,limit=CONTROL_SOCKET_LIMIT):string {
+ if(process.platform==='win32')return '';
+ const bytes=Buffer.byteLength(file);
+ return bytes>limit?`The library path is too long for a control socket (${bytes} bytes, at most ${limit}): ${file}. Use a library with a shorter path (WORLDLET_PROFILE_ROOT).`:'';
+}
 export const CONTROL_COMMANDS=['setup','link','status','register'] as const;
 export type ControlCommand=typeof CONTROL_COMMANDS[number];
 export type ControlRequest={command:ControlCommand;agent?:string};
@@ -31,6 +41,8 @@ export function readControlRequest(value:unknown):ControlRequest|null {
  * is gone is replaced; one a running host answers on is not (that host keeps it, and this one has no control). The
  * socket is owner-only (0600) from the moment it exists. */
 export async function serveControl(file:string,answer:(request:ControlRequest)=>Promise<ControlReply>):Promise<net.Server> {
+ const tooLong=controlSocketTooLong(file);
+ if(tooLong)throw Error(tooLong);
  if(process.platform!=='win32'&&fs.existsSync(file)){
   if(await answers(file))throw Error('Another Worldlet is running on this library.');
   fs.rmSync(file,{force:true});
@@ -68,6 +80,8 @@ const answers=(file:string)=>new Promise<boolean>(resolve=>{
 
 /** Asks the running host once. Null: no host answers on this library. */
 export function askControl(file:string,request:ControlRequest,timeout=180_000):Promise<ControlReply|null> {
+ const tooLong=controlSocketTooLong(file);
+ if(tooLong)return Promise.reject(Error(tooLong));
  return new Promise((resolve,reject)=>{
   let text='',connected=false;
   const socket=net.connect(file,()=>{connected=true;socket.write(JSON.stringify(request)+'\n');});
