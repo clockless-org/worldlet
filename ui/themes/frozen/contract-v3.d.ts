@@ -126,9 +126,11 @@ export interface ThemeTokens {
 }
 export interface ThemePresentation {
     tokens: ThemeTokens;
+    /** Bundled faces. Family defaults to the filename without its extension; use it in the token/material font stacks. */
     fonts: readonly {
         file: string;
         license: string;
+        family?: string;
     }[];
     hud?: ThemeHud;
     sound?: ThemeSound;

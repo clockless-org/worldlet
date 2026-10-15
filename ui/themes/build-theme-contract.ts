@@ -75,7 +75,8 @@ export interface ThemeAppletPreset {
 export interface ThemeTokens {bodyFont:string;displayFont:string;bodySize:number;titleSize:number;ink:string;paper:string;accent:string;focus:string;radius:number;controlHeight:number}
 export interface ThemePresentation {
  tokens:ThemeTokens;
- fonts:readonly {file:string;license:string}[];
+ /** Bundled faces. Family defaults to the filename without its extension; use it in the token/material font stacks. */
+ fonts:readonly {file:string;license:string;family?:string}[];
  hud?:ThemeHud;
  sound?:ThemeSound;
  /** The theme's own picture of each Applet, by Applet key. The host shows it wherever it pictures that Applet (the World, lists, history, onboarding); an Applet left out keeps the host's picture. */
@@ -114,7 +115,7 @@ export function parseThemePresentation(value:unknown):ThemePresentation {
  const t=p.tokens;for(const k of ['bodyFont','displayFont','ink','paper','accent','focus'])need(text(t[k]),'token '+k);
  for(const k of ['bodySize','titleSize','radius','controlHeight'])need(Number.isFinite(t[k])&&t[k]>0,'token '+k);
  need(t.bodySize>=12&&t.controlHeight>=32,'readable type and controls');
- need(Array.isArray(p.fonts),'fonts');for(const f of p.fonts){themeAssetPath(f.file);themeAssetPath(f.license);}
+ need(Array.isArray(p.fonts),'fonts');for(const f of p.fonts){themeAssetPath(f.file);themeAssetPath(f.license);need(f.family===undefined||(text(f.family)&&/^[a-zA-Z0-9 _.-]+$/.test(f.family)),'font family');}
  const object=(v:unknown)=>!!v&&typeof v==='object'&&!Array.isArray(v),picture=(v:unknown)=>/\.(png|webp|svg)$/.test(themeAssetPath(v));
  if(p.hud!==undefined){
   const h=p.hud;need(object(h),'hud');

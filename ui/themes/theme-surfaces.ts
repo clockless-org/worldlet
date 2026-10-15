@@ -22,10 +22,11 @@ const environment=():{surfaces?:BuiltSurfaces}|undefined=>(globalThis as any).__
 /** The active theme's built surfaces, or none for a theme (or a build) without them. */
 export function themeSurfaces():BuiltSurfaces|null{return environment()?.surfaces||null;}
 
-/** Resolve the authored lettering before a live switch; failed files can be retried. */
-export async function prepareThemeFonts(surfaces:BuiltSurfaces|null){
+/** Register bundled faces once per family/URL, for static packages and legacy surface declarations alike.
+ * Loading is independent of the built World environment; failed files leave the cache so a later request can retry. */
+export async function prepareThemeFontFiles(fonts:readonly {family:string;src:string}[]){
  if(typeof document==='undefined'||typeof FontFace==='undefined')return;
- await Promise.all(Object.values(surfaces?.fonts||{}).map(font=>{
+ await Promise.all(fonts.map(font=>{
   const key=font.family+'\u0000'+font.src;
   let pending=loadedFonts.get(key);
   if(!pending){
@@ -35,6 +36,11 @@ export async function prepareThemeFonts(surfaces:BuiltSurfaces|null){
   }
   return pending;
  }));
+}
+
+/** Resolve the authored surface lettering; failed files can be retried. */
+export async function prepareThemeFonts(surfaces:BuiltSurfaces|null){
+ await prepareThemeFontFiles(Object.values(surfaces?.fonts||{}));
 }
 
 /** Sets the active theme's surfaces on the document, clearing the previous theme's first. */

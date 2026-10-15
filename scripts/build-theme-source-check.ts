@@ -27,6 +27,10 @@ try{
  // The host lays out the World and Applet pages; a presentation that places them is refused.
  assert.throws(()=>parseThemePresentation({...presentation,world:{}}),/presentation fields/);
  assert.throws(()=>parseThemePresentation({...presentation,tokens:{...presentation.tokens,bodySize:9}}),/readable/);
+ // Font aliases are optional; old filename-only declarations remain valid.
+ assert.doesNotThrow(()=>parseThemePresentation({...presentation,fonts:[{file:'assets/Display.woff2',license:'assets/LICENSE.txt'}]}));
+ assert.doesNotThrow(()=>parseThemePresentation({...presentation,fonts:[{file:'assets/title.woff2',license:'assets/LICENSE.txt',family:'Package Display'}]}));
+ for(const family of ['',null,42,'Name, serif','url(remote)'])assert.throws(()=>parseThemePresentation({...presentation,fonts:[{file:'assets/title.woff2',license:'assets/LICENSE.txt',family}]}),/font family/);
  // HUD material and sound are optional; a malformed one fails before it is shown. The companion is not a theme's.
  assert.doesNotThrow(()=>parseThemePresentation({...presentation,hud:{skin:{log:{image:'assets/p.svg',slice:[4,4,4,4],width:4}}},sound:{events:{'mail.received':'assets/m.wav'}}}));
  assert.throws(()=>parseThemePresentation({...presentation,hud:{skin:{bubble:{image:'assets/p.svg',slice:[4,4,4,4],width:4}}}}),/hud skin/);

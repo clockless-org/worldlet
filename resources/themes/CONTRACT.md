@@ -34,7 +34,7 @@ The importer accepts only static files (`json`, `png`, `webp`, `jpg`, `svg`, fon
 | Field | What the host does with it |
 | --- | --- |
 | `tokens` | The theme's type and colours: `bodyFont`, `displayFont`, `bodySize` (at least 12), `titleSize`, `ink`, `paper`, `accent`, `focus`, `radius`, `controlHeight` (at least 32). |
-| `fonts` | Bundled font files, each with its `license` file. Shared fonts use an empty list. |
+| `fonts` | Bundled font files, each with its `license` file and optional `family` name. Family defaults to the filename without its extension. Shared fonts use an empty list. |
 | `hud.skin` (optional) | Nine-slice pictures for the shared HUD pieces `attention`, `note`, `back`, `log`, `button`, `card` and `frame`: `image` (`png`, `webp` or `svg`), `slice` insets in image pixels and drawn `width` in CSS pixels (at most 64). |
 | `sound.events` (optional) | An audio file per business event: `applet.arrived`, `mail.received`, `task.working`, `task.succeeded`, `task.failed`, `task.cancelled`. |
 | `icons` (optional) | The theme's picture of an Applet by Applet key (`png`, `webp` or `svg`). The host shows it everywhere it pictures that Applet: the World, lists, history, the world log and the first-use gathering. |
@@ -44,6 +44,12 @@ The importer accepts only static files (`json`, `png`, `webp`, `jpg`, `svg`, fon
 | `artifact` (optional) | How the theme's Artifacts look, as static files ([Artifacts](#artifacts)). |
 
 Anything left out keeps the shared look, sounds and pictures.
+
+### Bundled fonts
+
+The host registers each bundled font with the browser as the declared `family`, or the filename without its extension when omitted (`assets/fonts/Display.woff2` becomes `Display`). Reference that name in `tokens.bodyFont`, `tokens.displayFont` or a scene material's font stack. Family names use letters, digits, spaces, underscores, periods or hyphens; omit CSS quotes and fallback names from `family` itself.
+
+Fonts load from published package URLs, even before the built World environment exists. The system fallback paints during loading. Repeated requests share one face per family/URL; a failed request can be retried through `prepareBuildThemeFonts()`. If the first family in `tokens.displayFont` names a bundled face, the host also assigns that face to its shared display and label roles. Packages without bundled fonts retain the shared HUD font declarations.
 
 ### Custom Applet art presets
 
