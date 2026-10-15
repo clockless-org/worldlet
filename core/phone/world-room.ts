@@ -2,7 +2,7 @@ import {base64url,fromBase64url,openBox,PAIR_PROTOCOL,sealBox,type PairKeys,type
 import {ROOM_LINK_MODE} from './room.ts';
 
 // The full World on another device, met in the pairing room (README.md#the-world-on-another-device): the World page,
-// a static copy of the interface build that holds no data (later at worldlet.ai/world/<version>/), joins the room from
+// a static copy of the interface build that holds no data (served at worldlet.ai/world/<version>/), joins the room from
 // its link's fragment as the `phone` side, and this computer answers it with the same frames it sends a browser's World
 // page on this computer over its socket (contracts/web-world.ts). The room only forwards; it stores nothing. A `world`
 // pairing has its own secret, separate from the Center-only `web` link, so either can be turned off alone.

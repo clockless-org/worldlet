@@ -3,7 +3,7 @@
 // reordering refused) and ROOM_ALLOWED. 2. The host's side in process (world-room-link.ts, host/web-page.ts with
 // roomDenied, createPagePair's third page) against the memory room, with a page written out from core's helpers.
 // 3. The real thing: the built Node host meets the built World bundle, served as static files at /world/<version>/
-// beside a room stand-in on one local origin (as worldlet.ai will serve both), in headless Chromium. The page renders
+// beside a room stand-in on one local origin (as worldlet.ai serves both), under the hosted policy, in headless Chromium. The page renders
 // the World (pixi-webgl) with its seeded item, asks only what ROOM_ALLOWED lets through, and every room message stays
 // under the room's size limit.
 import assert from 'node:assert/strict';
@@ -23,7 +23,7 @@ import {resolveWorldFile} from '../platform/electron/src/world/world-file.ts';
 import {createWorldRoomLink,WORLD_ROOM_VAULT} from '../platform/electron/src/modules/phone/world-room-link.ts';
 import {createWebPage} from '../platform/electron/src/host/web-page.ts';
 import {createPagePair,NO_PAGE} from '../platform/electron/src/host/world-web.ts';
-import {ROOM_ALLOWED,ROOM_DENIED_MESSAGE,WEB_DENIED_MESSAGE,WEB_PAGE_FEATURES,WEB_PAGE_UNAVAILABLE,roomDenied} from '../contracts/web-world.ts';
+import {ROOM_ALLOWED,ROOM_DENIED_MESSAGE,WEB_DENIED_MESSAGE,WEB_PAGE_FEATURES,WEB_PAGE_UNAVAILABLE,WORLD_PAGE_CSP_META,roomDenied,worldRoomCsp} from '../contracts/web-world.ts';
 import {canRenderWorld,withWorldLink,worldLinkFromWeb,newPairSecret,openHello,pairKeys,readWorldRoomFrame,readWorldRoomLink,roomEntry,sealJoin,worldBundlePath,worldRoomLink,worldRoomNonce,worldRoomSession,WORLD_ROOM_PIECE,ROOM_PROTOCOL,isWorldRoomPage} from '../core/phone/index.ts';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
@@ -60,10 +60,17 @@ const within=<T>(promise:Promise<T>,what:string,ms=10_000)=>Promise.race([promis
  await assert.rejects(worldRoomSession(keys,host,worldRoomNonce(),'page').open(readWorldRoomFrame(pieces[0])!.box),'another session\'s piece is refused');
  await assert.rejects(worldRoomSession(keys,host,page,'desktop').open(readWorldRoomFrame(pieces[0])!.box),'and one going the other way');
 
+ // The policy the relay sends with the bundle's page: its own folder and the room, nothing else, and no framing.
+ const policy=worldRoomCsp('https://worldlet.ai'+worldBundlePath('2026.1015.1'));
+ assert.match(policy,/(^|; )connect-src https:\/\/worldlet\.ai\/world\/2026\.1015\.1\/ wss:\/\/worldlet\.ai\/api\/room\/;/,'connect-src: the bundle and the room');
+ assert.match(policy,/frame-ancestors 'none'$/);
+ assert.ok(!policy.includes("'self'")&&!/\*/.test(policy),'not the whole site, and no other site');
+ assert.throws(()=>worldRoomCsp('https://worldlet.ai/open/'),/Not a World bundle folder/);
  for(const action of ['snapshot','agentChat','worldItemStatus','artifacts','appContent','calendarEvents','widgets'])assert.equal(roomDenied({action}),'',action+' is allowed');
  assert.equal(roomDenied({action:'artifactPages',operation:'get'}),'');
- assert.equal(roomDenied({action:'artifactPages',operation:'show'}),ROOM_DENIED_MESSAGE,'no native view on the computer\'s screen');
- for(const action of ['connect','modelSettings','harnessConnections','settings','widgetPlayer','madeGamePlayer','openInstalledApplet','appUpdate','exportDiagnostics','madeGameDelete','deleteWorldItem','nothing'])assert.equal(roomDenied({action}),ROOM_DENIED_MESSAGE,action+' is refused');
+ // The native views that show what Fox made say why, as on a browser on that computer (WEB_PAGE_ACTIONS).
+ for(const body of [{action:'artifactPages',operation:'show'},{action:'widgetPlayer',operation:'show'},{action:'madeGamePlayer',operation:'show'}])assert.equal(roomDenied(body),WEB_PAGE_UNAVAILABLE.madePages,body.action+': no native view on the computer\'s screen');
+ for(const action of ['connect','modelSettings','harnessConnections','settings','openInstalledApplet','appUpdate','exportDiagnostics','madeGameDelete','deleteWorldItem','nothing'])assert.equal(roomDenied({action}),ROOM_DENIED_MESSAGE,action+' is refused');
  assert.equal(roomDenied({action:'phonePair',kind:'world',operation:'status'}),ROOM_DENIED_MESSAGE,'pairing, even its status');
  assert.equal(roomDenied({action:'dataBackup'}),WEB_DENIED_MESSAGE,'WEB_DENIED holds first');
  assert.equal(roomDenied({action:'browserShow'}),WEB_PAGE_UNAVAILABLE.websitePages,'and what a browser window cannot do');
@@ -171,6 +178,14 @@ await withTempDir('wl-room-',async temp=>{
   const match=/^\/world\/[^/]+(\/.*)$/.exec(url.pathname)??(url.pathname.startsWith('/open/')?[url.pathname,url.pathname.endsWith('/')?url.pathname+'index.html':url.pathname]:null);
   const file=match&&await resolveWorldFile(realRoot,match[1]);
   if(!file||!TYPES[path.extname(file).toLowerCase()]){res.writeHead(404).end();return;}
+  // The World document as the relay serves it: the hosted policy as a header in place of the window's meta tag
+  // (contracts/web-world.ts worldRoomCsp), so the page below is checked under the policy worldlet.ai sends.
+  const bundle=/^\/world\/[^/]+\//.exec(url.pathname)?.[0];
+  if(bundle&&file===path.join(realRoot,'index.html')){
+   const html=fs.readFileSync(file,'utf8');
+   assert.match(html,WORLD_PAGE_CSP_META,'the bundle\'s page carries the window\'s policy, which the relay takes out');
+   res.writeHead(200,{'Content-Type':TYPES['.html'],'Content-Security-Policy':worldRoomCsp(`http://${req.headers.host}${bundle}`)});res.end(html.replace(WORLD_PAGE_CSP_META,''));return;
+  }
   res.writeHead(200,{'Content-Type':TYPES[path.extname(file).toLowerCase()]});fs.createReadStream(file).pipe(res);
  })().catch(()=>{res.writeHead(500).end();}));
  server.on('upgrade',(req,socket:Duplex,head)=>{
@@ -214,7 +229,8 @@ await withTempDir('wl-room-',async temp=>{
   const browser=await launchTestBrowser();
   try{
    const context=await browser.newContext({viewport:{width:1280,height:800}});
-   const page=await context.newPage(),errors=pageErrors(page);
+   const page=await context.newPage(),errors=pageErrors(page),blocked:string[]=[];
+   page.on('console',message=>{if(/Content Security Policy/i.test(message.text()))blocked.push(message.text());});
    // The browser link the person gets (room-link.txt, `world/link`): on a computer it opens the full World.
    await page.goto(roomLink);
    await page.waitForURL(url=>/^\/world\/[^/]+\/$/.test(new URL(url).pathname),{timeout:30_000});
@@ -230,6 +246,8 @@ await withTempDir('wl-room-',async temp=>{
    assert.equal(await ask({action:'speechStart'}),WEB_PAGE_UNAVAILABLE.voice,'the microphone is refused');
    assert.equal(await page.evaluate(()=>document.documentElement.dataset.worldClosed??''),'','the World stays open');
    assert.deepEqual(errors,[],'no page errors');
+   assert.deepEqual(blocked,[],'the hosted policy blocks nothing the World needs');
+   assert.equal(await page.evaluate(()=>fetch('/api/feedback').then(()=>'reached',()=>'blocked')),'blocked','and the page reaches nothing else on its origin');
    // A second device takes the World; the first says where it is.
    const second=await context.newPage();
    await second.goto(link);
@@ -247,7 +265,7 @@ await withTempDir('wl-room-',async temp=>{
   }finally{await browser.close();}
   assert.ok(roomMessages>10,'the World went through the room');
   assert.deepEqual(oversized,[],'every room message under the room\'s limit');
-  console.log(`PASS world room end to end: the Node host writes the World link for another device and the browser link carries it; that link opens the full World on a computer and keeps the Center on a phone; the built World bundle, served as static files beside a room stand-in, joins from the fragment and renders the World (pixi-webgl) with its item; ROOM_ALLOWED, WEB_DENIED and WEB_PAGE_ACTIONS refused in the host; one device at a time; ${roomMessages} room messages, none over the room's limit`);
+  console.log(`PASS world room end to end: the Node host writes the World link for another device and the browser link carries it; that link opens the full World on a computer and keeps the Center on a phone; the built World bundle, served as static files beside a room stand-in under the policy worldlet.ai sends (worldRoomCsp: nothing blocked it needs, nothing else on the origin reached), joins from the fragment and renders the World (pixi-webgl) with its item; ROOM_ALLOWED, WEB_DENIED and WEB_PAGE_ACTIONS refused in the host; one device at a time; ${roomMessages} room messages, none over the room's limit`);
  }finally{
   if(process.platform==='win32')child.send({type:'worldlet:stop'});else child.kill('SIGTERM');
   const code=await Promise.race([exited,new Promise<'hung'>(resolve=>setTimeout(()=>resolve('hung'),20_000))]);

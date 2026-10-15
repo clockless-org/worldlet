@@ -6,12 +6,13 @@ import {pageErrors,worldUrl,openCompanionPanel,waitForWorld} from './browser-tes
 const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try{
  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'}),errors=pageErrors(page);
- await page.addInitScript(()=>{const w=window as any;w.calls=[];w.pairing={state:'none'};w.agentPairing={state:'none'};w.webPairing={state:'none'};w.localPairing={state:'none'};Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{w.copied=text;}}});
+ await page.addInitScript(()=>{const w=window as any;w.calls=[];w.pairing={state:'none'};w.agentPairing={state:'none'};w.webPairing={state:'none'};w.localPairing={state:'none'};w.worldPairing={state:'none'};Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{w.copied=text;}}});
   w.webkit={messageHandlers:{worldlet:{async postMessage(b){w.calls.push(b);
   if(b.action==='snapshot')return {workspaceId:'phone-fixture',revision:0,sources:[],knowledge:[],worldItems:[],connections:[],onboarding:{completed:true},sampleEnabled:false,cloudConsent:true};
   if(b.action==='modelStatus')return {available:true,cloudAllowed:true};
-  if(b.action==='phonePair'&&b.kind==='web'){const link='https://worldlet.ai/open/#v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Studio+Mac';if(b.operation==='start')w.webPairing={state:'waiting',link};if(b.operation==='end')w.webPairing={state:'none'};if(b.operation==='background')w.webPairing={state:'paired',link,phone:{name:'Chrome on Mac',version:'web'},seenAt:Date.now()};return w.webPairing;}
+  if(b.action==='phonePair'&&b.kind==='web'){const link='https://worldlet.ai/open/#v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Studio+Mac';if(b.operation==='start')w.webPairing={state:'waiting',link};if(b.operation==='end'){w.webPairing={state:'none'};w.worldPairing={state:'none'};}if(b.operation==='background')w.webPairing={state:'paired',link,phone:{name:'Chrome on Mac',version:'web'},seenAt:Date.now()};return w.webPairing;}
   if(b.action==='phonePair'&&b.kind==='local'){const link='http://127.0.0.1:47630/open/#v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Studio+Mac';if(b.operation==='start')w.localPairing={state:'waiting',link};if(b.operation==='end')w.localPairing={state:'none'};if(b.operation==='background')w.localPairing={state:'paired',link,phone:{name:'Chrome on Mac',version:'web'},seenAt:Date.now()};return w.localPairing;}
+  if(b.action==='phonePair'&&b.kind==='world'){if(b.operation==='open'&&w.worldPairing.state==='none')w.worldPairing={state:'waiting',link:'https://worldlet.ai/world/2026.1015.1/#v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Studio+Mac&m=room'};return w.worldPairing;}
   if(b.action==='phonePair'&&b.kind==='agent'){if(b.operation==='start')w.agentPairing={state:'waiting',link:'worldlet://agent?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Studio+Mac'};if(b.operation==='end')w.agentPairing={state:'none'};return w.agentPairing;}
   if(b.action==='phonePair'){if(b.operation==='start')w.pairing={state:'waiting',link:'worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Studio+Mac'};if(b.operation==='end'){w.pairing={state:'none'};setTimeout(()=>w.dispatchEvent(new CustomEvent('worldlet:phone-status',{detail:w.pairing})));}return w.pairing;}
   if(b.action==='phonePublish')return {sent:true};
@@ -75,6 +76,22 @@ await web.getByText('Opened in Chrome on Mac · Active now').waitFor();
  await web.getByRole('button',{name:'Copy link',exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='phonePair'&&c.kind==='local').map(c=>c.operation)),['status','start','open','background','end']);
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='phonePair'&&c.kind==='web').map(c=>c.operation)),['status','start','end']);
+ // The full World on another device (core/phone/README.md#the-world-on-another-device): Open the World opens its link
+ // in a browser here, the page says when another device has it open, and that alone lets Worldlet run in background
+ // (a computer's browser goes straight on to the World, so the Center's own pairing may never complete).
+ await web.getByRole('button',{name:'Open the World',exact:true}).click();
+ await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='phonePair'&&c.kind==='world'&&c.operation==='open'));
+ await web.getByRole('button',{name:'Cancel',exact:true}).waitFor();
+ assert.equal(await web.getByRole('button',{name:'Run in background',exact:true}).count(),0,'not before a device opened it');
+ await page.evaluate(()=>{const w=window as any;w.worldPairing={...w.worldPairing,state:'paired',phone:null,seenAt:Date.now()};window.dispatchEvent(new CustomEvent('worldlet:world-pair-status',{detail:w.worldPairing}));});
+ await web.getByText('The full World opened on another device · Active now').waitFor();
+ await web.getByRole('button',{name:'Run in background',exact:true}).click();
+ await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='phonePair'&&c.kind==='world'&&c.operation==='background'));
+ await web.getByRole('button',{name:'Turn off',exact:true}).click();
+ await page.waitForFunction(()=>(window as any).calls.filter(c=>c.action==='phonePair'&&c.kind==='web'&&c.operation==='end').length===2);
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:world-pair-status',{detail:{state:'none'}})));
+ await web.getByRole('button',{name:'Run in background',exact:true}).waitFor({state:'detached'});
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='phonePair'&&c.kind==='world').map(c=>c.operation)),['status','open','background'],'the World is turned off with the browser link');
  await page.keyboard.press('Escape');
  // A chat line from the phone is the person's own message to Fox; an unknown message is taken and ignored.
  assert.equal(await page.evaluate(()=>(window as any).worldletPhoneMessage({type:'chat',id:'c1',text:'What is next?'})),true);

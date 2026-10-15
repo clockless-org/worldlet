@@ -3,7 +3,7 @@ import type {WorldHostFrame} from '../../contracts/web-world.ts';
 import {isWorldRoomPage,openHello,pairKeys,readWorldRoomFrame,readWorldRoomLink,roomEntry,sealJoin,worldRoomNonce,worldRoomSession,type PairKeys,type WorldRoomSession} from '../../core/phone/index.ts';
 import {createFrameHost,notice} from './web-host.ts';
 // The World page on another device (core/phone/README.md#the-world-on-another-device, core/phone/world-room.ts): the
-// same World bundle, served as static files that hold no data (later at worldlet.ai/world/<version>/), joins this
+// same World bundle, served as static files that hold no data (served at worldlet.ai/world/<version>/), joins this
 // computer in the pairing room from its link's fragment and speaks the frames a World page in a browser on that computer
 // speaks over its socket (web-host.ts), each sealed with the pairing's key and cut in pieces. The room is on the
 // origin that served the page. host.ts picks this only when the app gave the page no `worldletHost` and the page is

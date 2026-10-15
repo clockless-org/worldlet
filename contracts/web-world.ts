@@ -40,6 +40,17 @@ export function worldWebCsp(origin:string):string {
  return `default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self' ${socket}${WORLD_SOCKET_PATH}; worker-src blob:; media-src 'self' data:; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`;
 }
 
+/** The World bundle's policy where the relay hosts it for another device (core/phone/README.md#the-world-on-another-device,
+ * `bundle`: its folder's address, `https://worldlet.ai/world/<version>/`), sent as a header in place of the meta tag.
+ * The page loads only that folder's files and talks only to them and to the pairing room on the same origin
+ * (`wss://…/api/room/`): not to the rest of the site, and to no other site. No other site may frame it. */
+export function worldRoomCsp(bundle:string):string {
+ const url=new URL(bundle);
+ if(!/^https?:$/.test(url.protocol)||!/^\/world\/[^/]+\/$/.test(url.pathname))throw new Error('Not a World bundle folder: '+bundle);
+ const own=url.origin+url.pathname,room=url.origin.replace(/^http/,'ws')+'/api/room/';
+ return `default-src 'none'; script-src ${own} 'wasm-unsafe-eval'; style-src ${own}; font-src ${own}; img-src ${own} data: blob:; connect-src ${own} ${room}; worker-src blob:; media-src ${own} data:; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`;
+}
+
 /** Frames on the socket, all JSON text.
  * Host → page: `h` the handshake, `a` the answer to a request, `c` a call of a page global, `v` an event (`doc`: on
  * document), `x` the page was closed by the host (`elsewhere`: a newer page took over).
@@ -54,9 +65,11 @@ export type WorldPageFrame={q:number;body:Record<string,unknown>}|{r:number;valu
 /** What a World page in a web browser cannot do, though the app's window can, sent in the handshake (`h.features`):
  * the page turns these HostFeatures off whatever the snapshot says (platform/bridge/features.ts). Websites and the
  * Browser open in a new tab instead of a native view; YouTube, the World's sound, music players, voice and the desktop
- * Companion window are hidden; the corner leaves no room for window buttons the page does not have. */
+ * Companion window are hidden; what Fox made that shows in a native view (a moment Applet's page, a made game) says it
+ * needs the app, and a card keeps its template instead of its page; the corner leaves no room for window buttons the
+ * page does not have. */
 export const WEB_PAGE_FEATURES:Readonly<Partial<Record<keyof HostFeatures,false>>>=Object.freeze({
- websitePages:false,youtube:false,worldAudio:false,localMusic:false,voice:false,desktopCompanion:false,leadingWindowControls:false,
+ websitePages:false,youtube:false,worldAudio:false,localMusic:false,voice:false,desktopCompanion:false,madePages:false,leadingWindowControls:false,
 });
 /** What Fox's tools (and the page) answer when they need one of those. */
 export const WEB_PAGE_UNAVAILABLE:Readonly<Partial<Record<keyof HostFeatures,string>>>=Object.freeze({
@@ -66,6 +79,7 @@ export const WEB_PAGE_UNAVAILABLE:Readonly<Partial<Record<keyof HostFeatures,str
  localMusic:'Music players on this computer are not available in a browser window. They need the Worldlet app on this computer.',
  voice:'Voice is not available in a browser window. Type to Fox instead, or use the Worldlet app on this computer.',
  desktopCompanion:'Fox\'s desktop Companion is not available in a browser window. It needs the Worldlet app on this computer.',
+ madePages:'Things and games Fox made open in the Worldlet app on your computer, not in a browser window.',
 });
 /** The close code a page that was taken over receives. */
 export const WORLD_ELSEWHERE_CODE=4001;
@@ -108,6 +122,8 @@ export const WEB_PAGE_ACTIONS:Readonly<Partial<Record<keyof HostFeatures,Readonl
  // Speech: the microphone and Fox's spoken replies through this computer's speakers.
  voice:Object.freeze({speechStart:true,speechKeep:true,speechTalk:true,speechStop:true,speechCancel:true,microphones:true,speakReply:true}),
  desktopCompanion:Object.freeze({desktopCompanionState:true,desktopCompanionSize:true,desktopCompanionDrag:true,desktopCompanionHide:true,desktopCompanionPointer:true,companionMenu:true}),
+ // The native views that show what Fox made over the app's window; whether a card has a page, and making one, stay.
+ madePages:Object.freeze({widgetPlayer:true,madeGamePlayer:true,artifactPages:Object.freeze({except:Object.freeze(['get','make'])})}),
 });
 /** Why a browser's World page may not make this request, or '' when it may: WEB_DENIED, then WEB_PAGE_ACTIONS. */
 export function webDenied(body:unknown):string {
