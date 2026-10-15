@@ -1,16 +1,19 @@
 /** Settings › Agent › Access: each Agent that reaches this World's tools on its own (core/agent/GRANTS.md, host
  * `agentAccess`), with when it was last used, what it may do and what it last asked for, and Revoke, which asks once
  * more in the page, then removes that Agent's key so it can no longer reach the World; and, for each connected
- * Service, "Can read <Service>", which gives or takes back that Service's read Grant at once; and "Can ask you" and "Can
- * take work" (Agent asks, core/agent/GRANTS.md#agent-asks), the same way. Plain words: the page names
+ * Service, "Can read <Service>", which gives or takes back that Service's read Grant at once; "Can ask you" and "Can
+ * take work" (Agent asks, core/agent/GRANTS.md#agent-asks), and "Can see your board" and "Can set up your board"
+ * (core/board/README.md), the same way. Plain words: the page names
  * places in the World and what was allowed, never tokens, endpoints or MCP. */
 import {agentButton as button,agentEl as el} from './agent-change.ts';
 type Grant={id:string;targets:string[];access:'read'|'write';duration:'standing'|'once';grantedAt:string;expiresAt?:string;revokedAt?:string};
 type Audit={at:string;target:string;action:string;decision:'allowed'|'denied'|'asked';reason?:string};
 type Service={provider:string;title:string;granted:boolean};
-type Agent={id:string;name:string;harness:string;kind:'local'|'remote';createdAt:string;lastSeenAt?:string;revokedAt?:string;grants:Grant[];audit:Audit[];services?:Service[];asks?:{ask:boolean;work:boolean}};
+type Agent={id:string;name:string;harness:string;kind:'local'|'remote';createdAt:string;lastSeenAt?:string;revokedAt?:string;grants:Grant[];audit:Audit[];services?:Service[];asks?:{ask:boolean;work:boolean};board?:{read:boolean;define:boolean}};
 /** "Can ask you" and "Can take work" (core askGrant): the page names only which, never targets. */
 const ASK_TOGGLES=[['ask','Can ask you','can now ask you things in Attention','can no longer ask you things'],['work','Can take work','can now take work left for Agents','can no longer take work']] as const;
+/** "Can see your board" and "Can set up your board" (core boardGrant, core/board/README.md), the same way. */
+const BOARD_TOGGLES=[['read','Can see your board','can now see your board','can no longer see your board'],['define','Can set up your board','can now set up your board','can no longer set up your board']] as const;
 const date=(at:string)=>new Date(at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
 const time=(at:string)=>new Date(at).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
 const SHOWN_PLACES=6,SHOWN_AUDIT=5;
@@ -35,6 +38,7 @@ export function auditLine(entry:Audit):string {
  // "Can ask you" and "Can take work" (core askGrantAuditEntry), and the person's answer to one of its asks.
  if(entry.target==='asks'&&/^(un)?grant-(ask|work)$/.test(entry.action))return `${time(entry.at)} · ${entry.action.endsWith('work')?'Taking work':'Asking you'} · ${entry.action.startsWith('un')?'You turned it off':'You allowed it'}`;
  if(entry.target==='asks'&&entry.action==='answer')return `${time(entry.at)} · You answered its ask`;
+ if(entry.target==='board'&&/^(un)?grant-(read|define)$/.test(entry.action))return `${time(entry.at)} · ${entry.action.endsWith('define')?'Setting up your board':'Seeing your board'} · ${entry.action.startsWith('un')?'You turned it off':'You allowed it'}`;
  if(entry.action==='grant'||entry.action==='ungrant')return `${time(entry.at)} · ${entry.target} · ${entry.action==='grant'?'You let it read':'You stopped it reading'}`;
  return `${time(entry.at)} · ${entry.target} ${entry.action} · ${DECISION[entry.decision]??entry.decision}`;
 }
@@ -89,21 +93,26 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
     }
     words.append(services);
    }
-   if(!agent.revokedAt&&agent.asks){
-    const asks=el('div','companion-settings-access-services');
-    for(const [kind,title,on,off] of ASK_TOGGLES){
+   // "Can ask you" and "Can take work"; "Can see your board" and "Can set up your board": each gives or takes back one
+   // Grant at once, naming only which.
+   const toggles=(granted:Record<string,boolean>|undefined,list:readonly (readonly [string,string,string,string])[],operation:'Asks'|'Board',data:'asks'|'board')=>{
+    if(agent.revokedAt||!granted)return;
+    const group=el('div','companion-settings-access-services');
+    for(const [kind,title,on,off] of list){
      const label=el('label','companion-settings-access-service'),box=document.createElement('input');
-     box.type='checkbox';box.checked=!!agent.asks[kind];box.dataset.asks=kind;
+     box.type='checkbox';box.checked=!!granted[kind];box.dataset[data]=kind;
      box.onchange=async()=>{
-      const granted=box.checked;box.disabled=true;said.textContent='';
-      try{await call('agentAccess',{operation:granted?'grantAsks':'ungrantAsks',id:agent.id,kind});await draw();said.textContent=`${agent.name} ${granted?on:off}.`;}
-      catch(e){box.checked=!granted;box.disabled=false;said.textContent='Could not change that: '+((e as Error).message||'try again.');}
+      const allowed=box.checked;box.disabled=true;said.textContent='';
+      try{await call('agentAccess',{operation:(allowed?'grant':'ungrant')+operation,id:agent.id,kind});await draw();said.textContent=`${agent.name} ${allowed?on:off}.`;}
+      catch(e){box.checked=!allowed;box.disabled=false;said.textContent='Could not change that: '+((e as Error).message||'try again.');}
      };
      label.append(box,document.createTextNode(title));
-     asks.append(label);
+     group.append(label);
     }
-    words.append(asks);
-   }
+    words.append(group);
+   };
+   toggles(agent.asks,ASK_TOGGLES,'Asks','asks');
+   toggles(agent.board,BOARD_TOGGLES,'Board','board');
    row.append(words);
    if(!agent.revokedAt)row.append(button('Revoke','revoke-agent',()=>confirmRevoke(row,agent)));
    rows.append(row);

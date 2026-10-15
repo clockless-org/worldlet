@@ -92,6 +92,16 @@ export class WorldLedger {
    this.put('agent-asks',ask.id,ask);this.put('items',item.id,prepared);
   });
  }
+ // Service presets (core/accounts/services/presets.ts, core/applets/INTEGRATIONS.md#service-presets) ---------------
+ /** Every saved Service preset (`state.service-presets`), by ID. */
+ servicePresets():Row[]{return this.records('service-presets');}
+ saveServicePreset(preset:Row){this.put('service-presets',preset.id,preset);}
+ /** Removes the preset and its earlier revisions. */
+ deleteServicePreset(id:string){this.delete('service-presets',id);}
+ // The board (core/board/README.md) -------------------------------------------------------------------------------
+ /** The board's current definition and revision (`state.board`), or null with none. */
+ board():Row|null{return this.value('board','board');}
+ saveBoard(board:Row){this.put('board','board',board);}
  /** Identified history append; Core owns identity, so a retried (kind,key,id) adds no second row. */
  append(body:Row,key=''){
   if(!this.db||typeof body.kind!=='string'||typeof body.at!=='number')throw new WorldletError('Cannot save history event.');

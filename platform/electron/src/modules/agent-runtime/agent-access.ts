@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import {AGENT_AUDIT_KEEP,agentRevoked,channelDefaultGrants,grantActive,readAgentIdentity,readGrant,askGrant,askGrantAuditEntry,serviceGrantAuditEntry,serviceReadGrant} from '../../../../../core/agent/index.ts';
+import {AGENT_AUDIT_KEEP,agentRevoked,channelDefaultGrants,grantActive,readAgentIdentity,readGrant,askGrant,askGrantAuditEntry,boardGrant,boardGrantAuditEntry,serviceGrantAuditEntry,serviceReadGrant} from '../../../../../core/agent/index.ts';
 import type {AgentAuditEntry,AgentIdentity,Grant} from '../../../../../contracts/agent-identity.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 import type {AgentAccess,VaultService} from '../../host/services.ts';
@@ -93,6 +93,8 @@ export function createAgentAccess({root,vault,ledger,now=()=>new Date().toISOStr
   ungrantService(agentId,provider){return takeBack(agentId,serviceReadGrant(agentId,provider,now()),at=>serviceGrantAuditEntry(agentId,provider,false,at));},
   grantAsks(agentId,kind){return give(agentId,askGrant(agentId,kind,now()),at=>askGrantAuditEntry(agentId,kind,true,at));},
   ungrantAsks(agentId,kind){return takeBack(agentId,askGrant(agentId,kind,now()),at=>askGrantAuditEntry(agentId,kind,false,at));},
+  grantBoard(agentId,kind){return give(agentId,boardGrant(agentId,kind,now()),at=>boardGrantAuditEntry(agentId,kind,true,at));},
+  ungrantBoard(agentId,kind){return takeBack(agentId,boardGrant(agentId,kind,now()),at=>boardGrantAuditEntry(agentId,kind,false,at));},
   onRevoke(listener){listeners.push(listener);}
  };
  // A Grant the person gives or takes back in Settings (Core builds it from a name only: a Service, or ask or work), each

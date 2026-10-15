@@ -34,6 +34,7 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | Where Applet code lives | [Worldlet Applets](../ui/applets/README.md) |
 | How an Applet should look and behave | [Applet design guide](../ui/applets/DESIGN-GUIDE.md) · [motion](../ui/applets/MOTION.md) |
 | How to build one | [Applet implementation guide](../ui/applets/IMPLEMENTATION-GUIDE.md) · [integrations](../core/applets/INTEGRATIONS.md) |
+| A board of Service numbers: tabs, funnels, trends | [The board](../core/board/README.md) |
 | Cards Fox makes | [Card system](../ui/artifacts/CARD-SYSTEM.md) |
 | Worlds, styles and artwork | [Resources](../resources/README.md) · [Village world](../resources/worlds/village/README.md) |
 
@@ -54,7 +55,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **280 Markdown documents** and **745 supporting documentation files**.
+Indexed: **281 Markdown documents** and **745 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -63,7 +64,7 @@ Indexed: **280 Markdown documents** and **745 supporting documentation files**.
 | Applet runtime descriptions | 119 |
 | UI and Applet authoring references | 30 |
 | Resource and artwork records | 74 |
-| Module and service documentation | 35 |
+| Module and service documentation | 36 |
 | Website documentation and articles | 0 |
 | Documentation diagrams, previews and evidence | 745 |
 
@@ -337,7 +338,7 @@ Indexed: **280 Markdown documents** and **745 supporting documentation files**.
 
 </details>
 
-<details><summary>Module and service documentation (35)</summary>
+<details><summary>Module and service documentation (36)</summary>
 
 - [android/README.md](../android/README.md)
 - [contracts/COMPONENTS.md](../contracts/COMPONENTS.md)
@@ -351,6 +352,7 @@ Indexed: **280 Markdown documents** and **745 supporting documentation files**.
 - [core/applets/RUNTIME.md](../core/applets/RUNTIME.md)
 - [core/artifacts/README.md](../core/artifacts/README.md)
 - [core/attention/README.md](../core/attention/README.md)
+- [core/board/README.md](../core/board/README.md)
 - [core/diagnostics/ANALYTICS.md](../core/diagnostics/ANALYTICS.md)
 - [core/games/README.md](../core/games/README.md)
 - [core/items/STORAGE.md](../core/items/STORAGE.md)

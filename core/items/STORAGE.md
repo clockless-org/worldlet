@@ -15,6 +15,8 @@ SQLite is the business database. JSON is appropriate for small configuration and
 | --- | --- | --- |
 | Attention | `world.sqlite`: `state.items`, `state.reviews` | Model-processed Title, Reason, Summary, time/place, source references, user decisions |
 | Agent asks | `world.sqlite`: `state.agent-asks`, each with its Attention item `ask-<id>` in `state.items` (provider `agents`) | What Agents asked the person or left as work, its claim, answer and resolution ([Agent asks](../agent/GRANTS.md#agent-asks)) |
+| Service presets | `world.sqlite`: `state.service-presets` | Named, saved reads of a Worldlet Service, without keys ([Service presets](../applets/INTEGRATIONS.md#service-presets)) |
+| Board | `world.sqlite`: `state.board` (the definition, its revision and who defined it) | The person's board of Service presets ([the board](../board/README.md)) |
 | Source collection | `state.checks`, `state.attention-context` | Check settings/cursors; bounded, expiring source facts |
 | Execution | `state.runs`, `state.attention-budget` | Check outcomes, synthesis acknowledgements and budgets |
 | History | Non-`state.*` rows in `entries` | Local product events and references |

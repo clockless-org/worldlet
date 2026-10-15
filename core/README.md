@@ -3,7 +3,7 @@
 Platform-independent product behavior. Components, by [feature](../docs/UI-CORE-PLATFORM.md#features):
 
 - World: activity
-- Applets: applets, browser, games
+- Applets: applets, board, browser, games
 - Companion: companion
 - Attention: attention
 - Tasks: tasks (work that runs without the person)

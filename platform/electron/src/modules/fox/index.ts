@@ -253,6 +253,9 @@ export function installFox(host:Host){
   // Agent asks are an Agent's own, on the standing server under its own Grants (agent-runtime/agent-asks.ts): Fox talks
   // with the person directly, so a turn never posts or takes one.
   if(name==='agent_asks')return {error:'Asks are for Agents reaching Worldlet on their own. Ask the person here in the conversation instead.'};
+  // The board is read and set up by Agents the person allowed in Settings, under their own Grants (agent-runtime/board.ts),
+  // never by a Fox turn.
+  if(name==='world_board')return {error:'The board is for Agents the person allowed in Settings › Agent › Access. Read the Services it shows with read_service instead.'};
   // The World's browser link (`world/link`) runs here, on the host, so it works with no World page (a login launch,
   // Run in background); the guarded-write rule has already admitted it under the turn's trust.
   if(name==='share_world_link'){

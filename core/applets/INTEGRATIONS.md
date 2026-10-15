@@ -362,6 +362,18 @@ Cloudflare's own [MCP servers](https://github.com/cloudflare/mcp-server-cloudfla
 
 Verification: `node scripts/cloudflare-service-check.ts` (a fixture Cloudflare API: token and account checked before the token is kept, a refused paste that replaces nothing, the two reports and their bounds, nothing but them, refused turn, expired token, Grant target, the token in no event, journal entry, receipt, result or message).
 
+<a id="service-presets"></a>
+### Service presets
+
+A Service preset is a named, saved read of one Worldlet Service, kept in the person's own World, so that something that shows Service data (a board block) names the preset instead of repeating the read. Examples: a PostHog HogQL query for signups by week, a GitHub search over a set of repositories (`repo:example/app repo:example/site is:open is:pr`), Cloudflare's `workers` report. The shape is in [`contracts/service-presets.ts`](../../contracts/service-presets.ts); Core checks each one ([`core/accounts/services/presets.ts`](../accounts/services/presets.ts)).
+
+- **What a preset holds.** An ID chosen by whoever saves it (lowercase letters, digits and `-`, at most 48), a name (at most 80 characters, one line), the Service (`github`, `posthog` or `cloudflare`), the read (one of the Service's operations with the `id` or `query` it takes, never a cursor: a preset reads the first page), an optional note, and when it was made and last saved. Saving again under the same ID replaces it and keeps when it was made. A World keeps at most 100.
+- **Checked as the Service checks it.** The read passes the same rules its reader applies before anything is sent: one HogQL `SELECT` of at most 200 rows for `posthog/query`, one of PostHog's lists for `posthog/read`, one line of up to 256 characters for `github/search`, an `owner/repo#123` for `github/read`, one of Cloudflare's fixed reports. A stored preset is checked again when it is loaded; one that no longer passes is left out.
+- **No secrets.** A preset holds what to read, never how to sign in: the Service's key stays in the vault with its connection (`mcp:github`, `service:<name>`), and the connection keeps its own settings (PostHog's address and project, Cloudflare's account). Anything in a preset that looks like a password, token or key is refused and never kept, and so are control characters.
+- **Where it is kept.** `world.sqlite`, `state.service-presets` ([storage](../items/STORAGE.md)), in the person's own World only, never the practice World. The host action `servicePresets` (`list`; `save` with `preset`; `delete` with `id`) answers every preset after each change (`modules/sources/service-presets.ts`). It is not in `ROOM_ALLOWED`, so a World page on another device does not change presets. Saving a preset reads nothing: the Service is read only when something shows the preset, under that reader's own rules.
+
+Verification: `node scripts/service-presets-check.ts` (each Service's reads checked as its reader checks them, refused keys and control characters, the cap, a stored preset that no longer passes, and the host action on a real `world.sqlite`).
+
 ## Health, Travel and Money Applets
 
 ### Implemented routes
