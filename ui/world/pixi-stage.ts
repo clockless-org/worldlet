@@ -20,10 +20,13 @@ export function createAppletStage(host,onPick){
  window.addEventListener('worldlet:calendar-show',showCalendar);
  const hidden=(element:HTMLElement,value:boolean)=>{if(element.hidden!==value)element.hidden=value;};
  const data=(element:HTMLElement,key:string,value:string)=>{if(element.dataset[key]!==value)element.dataset[key]=value;};
+ let latestRender:Parameters<typeof render>|null=null;
+ const resize=new ResizeObserver(()=>{scene?.layout();if(latestRender)render(...latestRender);});resize.observe(panel);
  let signature='',focusSignature='',shownItems=[],allItems=[],selected=null,page=0,owner='';
  // The theme's small secondary regions (Calendar's wall date) show today's date.
  const sceneToday=(scene:AppletScene,value)=>{const day=new Date(value?.now||Date.now());for(const region of scene.regions.filter(r=>r.role==='secondary')){const small=document.createElement('small'),strong=document.createElement('strong');small.className='scene-meta';small.textContent=day.toLocaleDateString(undefined,{weekday:'short',month:'short'});strong.className='scene-title';strong.textContent=String(day.getDate());region.element.replaceChildren(small,strong);}};
  function render(room,value,visible,focused=false,_showDevice=false){
+  latestRender=[room,value,visible,focused,_showDevice];
   if(owner!==room.moduleId){owner=room.moduleId;page=0;selected=null;homeState.mode='week';homeState.offset=0;homeState.editing=null;homeState.scroll=null;homeState.undo=null;}
   if(calendarShow&&room.key==='google-calendar'){const today=new Date(value?.now||Date.now());today.setHours(12,0,0,0);homeState.mode='day';homeState.offset=Math.round((+new Date(calendarShow+'T12:00:00')-+today)/86400000);homeState.editing=null;homeState.scroll=null;calendarShow=null;}
   allItems=(value?.items||[]).filter(i=>!['done','dismissed'].includes(i.status));
@@ -44,12 +47,13 @@ export function createAppletStage(host,onPick){
   // Nothing in the panel pages (owner Order 2026-10-07): every item is shown, and the item area scrolls when they
   // do not fit. Only the calendar moves by week, which changes the dates rather than paging.
   else shownItems=items;
-  const next=JSON.stringify([room.moduleId,items,value?.connected,value?.accountLabel,value?.loaded,value?.reading,value?.error,value?.weather,value?.scope,!!value?.loadMore,page,calendar?calendarDay(value?.now):null]);if(next===signature){shownItems=previousShown;return;}signature=next;
+  scene?.layout();
+  const next=JSON.stringify([room.moduleId,scene?.metrics.compact,items,value?.sample,value?.connected,value?.accountLabel,value?.loaded,value?.reading,value?.error,value?.weather,value?.scope,!!value?.loadMore,page,calendar||room.key==='apple-reminders'?calendarDay(value?.now):null]);if(next===signature){shownItems=previousShown;return;}signature=next;
   if(scene){const pick=item=>{selected=item;onPick({action:'applet-item',id:item.id});};
    if(room.key==='gmail')shownItems=renderMailOpen(scene.primary.element,items,value,pick);
    else if(room.key==='meetings'){scene.primary.element.replaceChildren();shownItems=renderMeetingsOpen(scene.primary.element,room,items,value,pick);}
    else if(!HOME_RECORDS.includes(room.key))shownItems=renderSceneList(scene.primary.element,room,items,value,pick,room.key==='weather'?item=>weatherGlyph(item.weatherCode):undefined);
-   else{scene.primary.element.replaceChildren();shownItems=renderHomeOpen(scene.primary.element,room,items,value,homeState,pick,()=>{signature='';render(room,value,true);});sceneToday(scene,value);}
+   else{if(room.key!=='apple-reminders')scene.primary.element.replaceChildren();shownItems=renderHomeOpen(scene.primary.element,room,items,value,homeState,pick,()=>{signature='';render(room,value,true);},scene.regions);if(calendar)sceneToday(scene,value);}
    scene.layout();return;}
   panel.replaceChildren();panel.dataset.installation=String(local);panel.dataset.work=String(cards);
   panel.classList.remove('home-open','meetings-open');
@@ -80,5 +84,5 @@ export function createAppletStage(host,onPick){
    if(calendar)footer.append(move('Previous',-1));footer.append(label);if(calendar)footer.append(move('Next',1));panel.append(footer);
   }
  }
- return {render,setMotion(_value:boolean){},setSelected(room,item){owner=room.moduleId;selected=item;},select(id){selected=allItems.find(i=>i.id===id)||null;return selected;},get metrics(){return panel.hidden?null:{items:shownItems.length,shown:true,preview:false,selected:selected?.id||null,scene:scene?.metrics||null};},destroy(){window.removeEventListener('worldlet:calendar-show',showCalendar);scene?.destroy();panel.remove();focus.remove();mailNav.remove();}};
+ return {render,setMotion(_value:boolean){},setSelected(room,item){owner=room.moduleId;selected=item;},select(id){selected=allItems.find(i=>i.id===id)||null;return selected;},get metrics(){return panel.hidden?null:{items:shownItems.length,shown:true,preview:false,selected:selected?.id||null,scene:scene?.metrics||null};},destroy(){latestRender=null;resize.disconnect();window.removeEventListener('worldlet:calendar-show',showCalendar);scene?.destroy();panel.remove();focus.remove();mailNav.remove();}};
 }

@@ -1,3 +1,4 @@
+import type {AppletSceneRegion} from './scene/applet-scene.ts';
 import {renderRemindersOpen} from './apple-reminders/open.ts';
 import {renderNotesOpen} from './apple-notes/open.ts';
 import {attentionIcon} from '../attention/index.ts';
@@ -12,8 +13,8 @@ export function calendarWindow(now:number,mode:HomeOpenState['mode'],offset:numb
  const count=mode==='month'?new Date(start.getFullYear(),start.getMonth()+1,0).getDate():mode==='week'?7:1;
  return Array.from({length:count},(_,i)=>{const d=new Date(start);d.setDate(d.getDate()+i);return d;});
 }
-export function renderHomeOpen(panel,room,items,value,state:HomeOpenState,pick,redraw){
- if(room.key==='apple-reminders')return renderRemindersOpen(panel,items,value,state,pick);
+export function renderHomeOpen(panel,room,items,value,state:HomeOpenState,pick,redraw,regions:readonly AppletSceneRegion[]=[]){
+ if(room.key==='apple-reminders')return renderRemindersOpen(panel,items,value,state,pick,regions);
  if(room.key==='apple-notes')return renderNotesOpen(panel,items,value,state,pick);
  const calendar=room.key==='google-calendar',notes=room.key==='apple-notes';panel.classList.add('home-open');
  panel.dataset.homeKind=calendar?'calendar':notes?'notes':'reminders';panel.dataset.calendarMode=state.mode;
