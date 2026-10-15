@@ -1,5 +1,5 @@
 import {errorMessage} from '../files.ts';
-import {WEB_PAGE_FEATURES,WORLD_ELSEWHERE_CODE,webDenied,webReply,type WorldHostFrame} from '../../../../contracts/web-world.ts';
+import {WEB_PAGE_FEATURES,WORLD_ELSEWHERE_CODE,webDenied,webEventDetail,webReply,type WorldHostFrame} from '../../../../contracts/web-world.ts';
 import type {PageBridge} from './types.ts';
 // The World page in a web browser on this computer (contracts/web-world.ts), as a PageBridge: the host reaches it over
 // the page's socket (modules/phone/local-relay.ts) as the app reaches its own World page over IPC, and its requests go
@@ -54,8 +54,9 @@ export function createWebPage(options:WebPageOptions){
    const id=++next;
    return new Promise<T|undefined>(resolve=>{session.calls.set(id,resolve as (value:unknown)=>void);send(session.socket,{c:id,name,args});});
   },
-  event:(name,detail)=>{if(current)send(current.socket,detail===undefined?{v:name}:{v:name,detail});},
-  documentEvent:(name,detail)=>{if(current)send(current.socket,detail===undefined?{v:name,doc:true}:{v:name,detail,doc:true});},
+  // A pairing's link stays on the host here too (webEventDetail), as in replies (webReply).
+  event:(name,detail)=>{if(current)send(current.socket,detail===undefined?{v:name}:{v:name,detail:webEventDetail(name,detail)});},
+  documentEvent:(name,detail)=>{if(current)send(current.socket,detail===undefined?{v:name,doc:true}:{v:name,detail:webEventDetail(name,detail),doc:true});},
   ready:()=>current!==null,
  };
  return {

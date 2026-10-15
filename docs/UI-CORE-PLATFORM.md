@@ -84,7 +84,7 @@ page none; it talks to the host over one WebSocket at `/world/socket`, and the h
   sends to a server; the page keeps it for the tab and takes it out of the address. The host keeps it in the vault and
   writes the link only to an owner-only file, never to stdout.
 - **Less than the app.** Before the router, the host refuses `WEB_DENIED`: the pairing secrets and pairing or unpairing
-  another device (a pairing's status comes without its link), local data deletion, restore and the library backup, and
+  another device (a pairing's status, as a reply or an event, comes without its link), local data deletion, restore and the library backup, and
   the local tools that read other programs' files. The page also gets no web capture (`analyticsConfig`), so it loads
   no PostHog client and sends nothing to `/ingest`; the host serves no ingest route for it.
 - **Its own policy.** The World document is served with the web variant of the page's Content-Security-Policy as a

@@ -51,6 +51,15 @@ const within=<T>(promise:Promise<T>,what:string,ms=10_000)=>Promise.race([promis
  assert.ok(pieces.every(data=>JSON.stringify({data,to:'p1'}).length<ROOM_MESSAGE_LIMIT),'each under the room\'s limit');
  let whole:string|null=null;for(const data of pieces)whole=await browser.open(readWorldRoomFrame(data)!.box);
  assert.equal(whole,big,'and comes back whole');
+ // Text that encodes to more bytes than characters (Chinese, escaped quotes, control characters) is cut by its encoded
+ // size, so every piece stays under the room's limit too.
+ for(const [kind,text] of [['Chinese','图书馆的借书证星期五到期。'.repeat(30_000)],['quotes','"\\'.repeat(120_000)],['control characters','\u0001'.repeat(120_000)]] as const){
+  const out=worldRoomSession(keys,host,page,'desktop'),back=worldRoomSession(keys,host,page,'page');
+  const frame=JSON.stringify({c:1,name:'worldletReceive',args:[{text}]}),sealed=await out.seal(frame);
+  assert.ok(sealed.every(data=>JSON.stringify({data,to:'p1'}).length<ROOM_MESSAGE_LIMIT),kind+': each piece under the room\'s limit');
+  let again:string|null=null;for(const data of sealed)again=await back.open(readWorldRoomFrame(data)!.box);
+  assert.equal(again,frame,kind+': and the frame comes back whole');
+ }
  const [first]=await desktop.seal('{"v":"x"}');
  await browser.open(readWorldRoomFrame(first)!.box);
  await assert.rejects(browser.open(readWorldRoomFrame(first)!.box),'a replayed piece is refused');
