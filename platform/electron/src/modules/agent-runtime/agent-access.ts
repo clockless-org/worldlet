@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import {AGENT_AUDIT_KEEP,agentRevoked,channelDefaultGrants,grantActive,readAgentIdentity,readGrant,serviceGrantAuditEntry,serviceGrantId,serviceReadGrant} from '../../../../../core/agent/index.ts';
+import {AGENT_AUDIT_KEEP,agentRevoked,channelDefaultGrants,grantActive,readAgentIdentity,readGrant,askGrant,askGrantAuditEntry,serviceGrantAuditEntry,serviceReadGrant} from '../../../../../core/agent/index.ts';
 import type {AgentAuditEntry,AgentIdentity,Grant} from '../../../../../contracts/agent-identity.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 import type {AgentAccess,VaultService} from '../../host/services.ts';
@@ -89,27 +89,32 @@ export function createAgentAccess({root,vault,ledger,now=()=>new Date().toISOStr
    for(const [key,id] of tokens)if(id===agentId)tokens.delete(key);
    for(const listener of listeners)try{listener(agentId);}catch{}
   },
-  grantService(agentId,provider){
-   const stored=load(),identity=stored.identities.find(item=>item.id===agentId),at=now();
-   const grant=serviceReadGrant(agentId,provider,at);
-   if(!identity||agentRevoked(identity,at)||!grant)return false;
-   if(stored.grants.some(item=>item.id===grant.id&&item.agentId===agentId&&grantActive(item,at)))return true;
-   stored.grants=[...stored.grants.filter(item=>item.id!==grant.id),grant];
-   save(stored);
-   try{ledger()?.recordAgentAudit(serviceGrantAuditEntry(agentId,provider,true,at) as unknown as Row,AGENT_AUDIT_KEEP);}catch{}
-   return true;
-  },
-  ungrantService(agentId,provider){
-   const stored=load(),at=now(),id=serviceGrantId(agentId,provider);
-   if(!stored.identities.some(item=>item.id===agentId)||!serviceReadGrant(agentId,provider,at))return false;
-   const grant=stored.grants.find(item=>item.id===id&&item.agentId===agentId&&grantActive(item,at));
-   if(!grant)return true;
-   grant.revokedAt=at;
-   save(stored);
-   try{ledger()?.recordAgentAudit(serviceGrantAuditEntry(agentId,provider,false,at) as unknown as Row,AGENT_AUDIT_KEEP);}catch{}
-   return true;
-  },
+  grantService(agentId,provider){return give(agentId,serviceReadGrant(agentId,provider,now()),at=>serviceGrantAuditEntry(agentId,provider,true,at));},
+  ungrantService(agentId,provider){return takeBack(agentId,serviceReadGrant(agentId,provider,now()),at=>serviceGrantAuditEntry(agentId,provider,false,at));},
+  grantAsks(agentId,kind){return give(agentId,askGrant(agentId,kind,now()),at=>askGrantAuditEntry(agentId,kind,true,at));},
+  ungrantAsks(agentId,kind){return takeBack(agentId,askGrant(agentId,kind,now()),at=>askGrantAuditEntry(agentId,kind,false,at));},
   onRevoke(listener){listeners.push(listener);}
  };
+ // A Grant the person gives or takes back in Settings (Core builds it from a name only: a Service, or ask or work), each
+ // change audited. False for an unknown Agent, a name Core does not know or, when giving, a revoked Agent.
+ function give(agentId:string,grant:Grant|null,entry:(at:string)=>AgentAuditEntry):boolean {
+  const stored=load(),identity=stored.identities.find(item=>item.id===agentId),at=now();
+  if(!identity||agentRevoked(identity,at)||!grant)return false;
+  if(stored.grants.some(item=>item.id===grant.id&&item.agentId===agentId&&grantActive(item,at)))return true;
+  stored.grants=[...stored.grants.filter(item=>item.id!==grant.id),{...grant,grantedAt:at}];
+  save(stored);
+  try{ledger()?.recordAgentAudit(entry(at) as unknown as Row,AGENT_AUDIT_KEEP);}catch{}
+  return true;
+ }
+ function takeBack(agentId:string,grant:Grant|null,entry:(at:string)=>AgentAuditEntry):boolean {
+  const stored=load(),at=now();
+  if(!stored.identities.some(item=>item.id===agentId)||!grant)return false;
+  const active=stored.grants.find(item=>item.id===grant.id&&item.agentId===agentId&&grantActive(item,at));
+  if(!active)return true;
+  active.revokedAt=at;
+  save(stored);
+  try{ledger()?.recordAgentAudit(entry(at) as unknown as Row,AGENT_AUDIT_KEEP);}catch{}
+  return true;
+ }
  return access;
 }

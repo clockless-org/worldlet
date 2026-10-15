@@ -250,6 +250,9 @@ export function installFox(host:Host){
   if(event.type!=='tool'||typeof event.name!=='string'||!event.args||typeof event.args!=='object'||Array.isArray(event.args))return null;
   const name=event.name,args=event.args as Row;
   const hosted=['prepare_home_change','prepare_notion_change','_email_review'];
+  // Agent asks are an Agent's own, on the standing server under its own Grants (agent-runtime/agent-asks.ts): Fox talks
+  // with the person directly, so a turn never posts or takes one.
+  if(name==='agent_asks')return {error:'Asks are for Agents reaching Worldlet on their own. Ask the person here in the conversation instead.'};
   // The World's browser link (`world/link`) runs here, on the host, so it works with no World page (a login launch,
   // Run in background); the guarded-write rule has already admitted it under the turn's trust.
   if(name==='share_world_link'){

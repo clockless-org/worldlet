@@ -365,7 +365,8 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
   const access=createAgentAccess({root:path.join(scratch,'access-root'),vault,ledger:()=>({recordAgentAudit:(entry:any)=>{audit.push(entry);return true;},agentAudit:(agent:string)=>audit.filter(e=>e.agentId===agent).reverse()})});
   // An install from before per-Agent tokens: its registered entry names the profile's one endpoint file.
   fs.writeFileSync(path.join(profile,STANDING_LEGACY_ENDPOINT_FILE),'{}');
-  const standing=await openStandingWorldTools({access,channel:async(name,args,agent)=>{channel.push([name,args,agent]);return hermesChannelToolAllowed({name,args})?{items:[]}:{error:HERMES_CHANNEL_READ_ONLY};}});
+  const askCalls:[string,any][]=[];
+  const standing=await openStandingWorldTools({access,asks:(agentId,args)=>{askCalls.push([agentId,args]);return {ok:true,by:agentId};},channel:async(name,args,agent)=>{channel.push([name,args,agent]);return hermesChannelToolAllowed({name,args})?{items:[]}:{error:HERMES_CHANNEL_READ_ONLY};}});
   const entry=standing.server(profile);
   assert.equal(entry.env.WORLDLET_MCP_ENDPOINT_FILE,path.join(profile,standingEndpointFile('hermes')),'Hermes Agent\'s own endpoint file');
   const endpoint=JSON.parse(fs.readFileSync(entry.env.WORLDLET_MCP_ENDPOINT_FILE,'utf8'));
@@ -530,6 +531,26 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
      assert.equal(access.ungrantService('codex','github'),true,'taking back twice changes nothing');
      assert.deepEqual(audit.filter(e=>e.agentId==='codex'&&['grant','ungrant'].includes(e.action)).map(e=>[e.target,e.action,e.grantId]),[['github','grant','codex-service-github'],['github','ungrant','codex-service-github']],'each change audited once');
      assert.deepEqual(audit.filter(e=>e.agentId==='codex'&&e.target==='github'&&e.action==='list').map(e=>e.decision),['denied','allowed','denied'],'and each call');
+     // Agent asks (core/agent/GRANTS.md#agent-asks): refused until the person lets it ask; then each call goes to the asks
+     // service as this Agent's own (an agentId in the arguments names no one), never to Fox's turn or the channel.
+     channel.length=0;askCalls.length=0;toTurn.length=0;
+     const post={target:'asks',action:'post',arguments:JSON.stringify({title:'Which plan?',choices:['A','B'],agentId:'hermes'})};
+     assert.equal((await ask('call_world_tool',post)).error,STANDING_OUTSIDE_TURN,'no asks without a Grant');
+     assert.ok(!JSON.parse(JSON.stringify(await ask('describe_world_tools',{}))).targets.includes('asks'));
+     for(const name of ['*','asks','*/*','__proto__'])assert.equal(access.grantAsks('codex',name),false,'not an ask Grant: '+name);
+     assert.equal(access.grantAsks('nobody','ask'),false,'an unknown Agent');
+     assert.equal(access.grantAsks('codex','ask'),true);
+     assert.deepEqual(await ask('call_world_tool',post),{ok:true,by:'codex'},'granted: it runs as this Agent\'s own');
+     assert.deepEqual(askCalls,[['codex',{title:'Which plan?',choices:['A','B'],agentId:'hermes',operation:'post'}]],'the host names the caller; Core drops the model\'s agentId');
+     assert.equal((await ask('call_world_tool',{target:'asks',action:'claim',arguments:'{}'})).error,STANDING_OUTSIDE_TURN,'asking is not taking work');
+     assert.equal(access.grantAsks('codex','work'),true);
+     assert.deepEqual(await ask('call_world_tool',{target:'asks',action:'claim',arguments:'{}'}),{ok:true,by:'codex'});
+     assert.deepEqual(channel,[]);assert.deepEqual(toTurn,[],'never through the channel or Fox\'s turn');
+     assert.equal(access.ungrantAsks('codex','ask'),true);
+     assert.equal((await ask('call_world_tool',post)).error,STANDING_OUTSIDE_TURN,'taken back: refused again');
+     assert.deepEqual(audit.filter(e=>e.agentId==='codex'&&e.target==='asks').map(e=>[e.action,e.decision]),
+      [['post','denied'],['grant-ask','allowed'],['post','allowed'],['claim','denied'],['grant-work','allowed'],['claim','allowed'],['ungrant-ask','allowed'],['post','denied']],'each call and change audited');
+     access.ungrantAsks('codex','work');
     }finally{release();}
    }
    // Revoked: its token and endpoint files go and its calls are refused.
@@ -539,6 +560,7 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
    assert.ok(!fs.existsSync(path.join(profile,standingEndpointFile('hermes')))&&!fs.existsSync(path.join(profile,STANDING_LEGACY_ENDPOINT_FILE)),'its endpoint files go');
    assert.ok(access.identity('hermes')?.revokedAt);
    assert.equal(access.grantService('hermes','github'),false,'a revoked Agent gets no Service');
+   assert.equal(access.grantAsks('hermes','ask'),false,'nor asks');
    const refused=await mcp('tools/call',{name:'call_world_tool',arguments:{target:'items',action:'query',arguments:'{}'}});
    assert.equal(refused.isError,true);
    standing.server(profile);assert.equal(fs.existsSync(path.join(profile,standingEndpointFile('hermes'))),false,'a revoked Agent stays revoked across runs');

@@ -111,8 +111,9 @@ assert.equal(item.id,askItemId(id(1)));assert.equal(item.provider,AGENT_ASK_PROV
 assert.equal(item.agentId,'claude-code');assert.equal(item.agentName,'Claude Code');assert.deepEqual(item.askChoices,['Small','Large']);
 assert.equal(item.attentionReason,'Claude Code asks you to choose.');assert.equal(item.sources?.[0]?.url,'https://example.com/plan');
 validateWorldItem(item as any,{start:null,end:null});
+assert.deepEqual([item.attentionContentVersion,item.reason,item.summary],[1,'Claude Code asks you','Two options.\nPick one.'],'final as the host wrote it: the card shows it with no model pass');
 const update=askAttentionItem(work,'Hermes Agent');
-assert.equal(update.kind,'update');validateWorldItem(update as any,{start:null,end:null});
+assert.equal(update.kind,'update');assert.equal(update.reason,'Hermes Agent left work for Agents');validateWorldItem(update as any,{start:null,end:null});
 assert.equal(askAttentionItem(answered,'Claude Code').status,'done');assert.equal(askAttentionItem(answered,'Claude Code').askChoice,'Large');
 assert.equal(askAttentionItem({...posted,status:'skipped'},'x').status,'dismissed');
 assert.equal(askAttentionItem(claimed,'x').status,'open');
