@@ -4,17 +4,17 @@ import {renderWorkDetail} from './work-applets.ts';
 const state=new WeakMap<HTMLElement,{selected:string;query:string}>();
 /** Optional measured session index, read-only preview and explicit continuation. The host owns every control. */
 export function renderWorkSession(region:HTMLElement,room,items,value,pick,regions:readonly AppletSceneRegion[]=[]){
- const index=regions.find(r=>r.id==='sessions'),actions=regions.find(r=>r.id==='session-actions');
- if(!index||!actions||region.closest('.applet-scene')?.getAttribute('data-compact')==='true'){delete region.dataset.sessionPreview;for(const slot of [region,index?.element,actions?.element])slot?.classList.remove('work-session-region');return null;}
+ const index=regions.find(r=>r.id==='sessions'),actions=regions.find(r=>r.id==='session-actions'),banner=regions.find(r=>r.id==='session-heading');
+ if(!index||!actions||region.closest('.applet-scene')?.getAttribute('data-compact')==='true'){delete region.dataset.sessionPreview;for(const slot of [region,index?.element,actions?.element,banner?.element])slot?.classList.remove('work-session-region');return null;}
  const saved=state.get(region)||{selected:'',query:''};state.set(region,saved);
  const el=(tag,text='',cls='')=>Object.assign(document.createElement(tag),{textContent:text,className:cls});
  const button=(text,run,cls='scene-button')=>{const b=el('button',text,cls) as HTMLButtonElement;b.type='button';b.onclick=run;return b;};
- for(const slot of [region,index.element,actions.element]){slot.replaceChildren();slot.classList.add('work-session-region');}
+ for(const slot of [region,index.element,actions.element,...banner?[banner.element]:[]]){slot.replaceChildren();slot.classList.add('work-session-region');}
  region.dataset.sessionPreview='true';
  const heading=el('h2',room.title,'work-session-brand'),caption=el('p','Local sessions','scene-meta'),search=el('input') as HTMLInputElement,list=el('nav','','work-session-list');
  search.type='search';search.placeholder='Find a session';search.setAttribute('aria-label','Find '+room.title+' session');search.value=saved.query;list.setAttribute('aria-label',room.title+' sessions');
  const refresh=button('Refresh',()=>{value.refresh?.();if(selected)void load(selected);});
- index.element.append(heading,caption,search,list,refresh);
+ if(banner){banner.element.append(heading,caption);index.element.append(el('h3','Sessions','work-session-index-title'),search,list,refresh);}else index.element.append(heading,caption,search,list,refresh);
  const head=el('header','','work-session-heading'),title=el('h2','','work-session-title'),status=el('span','','work-session-state'),body=el('div','','work-session-body'),scope=el('p','','scene-meta');head.append(title,status);region.append(head,el('p','Session record · Stored conversation and changes','scene-meta'),body);
  const open=button(value.sample?'Open sample record':'Continue work',()=>{if(selected)pick(selected);});open.dataset.kind='primary';actions.element.append(scope,open);
  let selected=null,serial=0;

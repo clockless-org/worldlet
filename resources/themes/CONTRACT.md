@@ -186,3 +186,7 @@ opens the existing session reader, and execution still requires a separate Fox
 message. Errors offer retry, stale reads cannot replace a later selection, and
 missing regions retain the ordinary session list. These are measured static
 regions, not theme-provided code or account records.
+
+An optional secondary `session-heading` region moves the Applet title and local
+session caption above the columns. The index then starts with its Sessions label;
+search, selection and continuation keep the same host-owned behavior.

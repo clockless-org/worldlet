@@ -8,6 +8,11 @@ Browse local Claude Code sessions, read saved conversations and explicitly conti
 - Executable configuration: [runtime.json](runtime.json). This Markdown describes the contract; it is not executable code.
 - Mode: **on-demand**.
 
+Measured scenes may separate the session index, saved-history preview and explicit
+continuation. An optional heading region places the application title above both
+columns. Reading history never resumes the CLI; Continue work opens the existing
+reader and execution still requires an explicit message through Fox.
+
 ## Status
 
 Use the [shared runtime status and lifecycle contract](../../../core/applets/RUNTIME.md#status-and-presentation).

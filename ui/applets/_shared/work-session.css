@@ -1,10 +1,12 @@
 #notionWorld .applet-scene .applet-scene-region.work-session-region{padding:0;gap:12px;align-items:stretch;justify-content:flex-start;text-align:left;overflow:auto;font:400 var(--scene-body-size)/1.45 var(--scene-body-font)}
 #notionWorld .applet-scene :is(.work-session-brand,.work-session-title){margin:0;color:var(--scene-ink);font:600 28px/1.2 var(--scene-body-font);overflow-wrap:anywhere}
 #notionWorld .work-session-region input{box-sizing:border-box;width:100%;min-height:36px;border:1px solid var(--scene-line);border-radius:6px;padding:7px 10px;color:var(--scene-ink);background:color-mix(in srgb,var(--scene-control) 60%,transparent);font:inherit}
-#notionWorld .work-session-list{min-height:0;overflow:auto;display:grid;gap:6px;align-content:start}
-#notionWorld .work-session-row{display:grid;gap:3px;width:100%;min-height:48px;padding:9px 12px;text-align:left;border:1px solid transparent;border-inline-start:5px solid transparent;border-radius:8px;color:var(--scene-ink);background:none;font:inherit;cursor:pointer}
-#notionWorld .work-session-row small{color:var(--scene-muted);overflow-wrap:anywhere}
-#notionWorld .work-session-row[aria-pressed=true]{border-color:var(--scene-line);border-inline-start-color:var(--scene-accent);background:color-mix(in srgb,var(--scene-accent) 15%,transparent)}
+#notionWorld .applet-scene .work-session-region[data-region=session-heading]{gap:4px;overflow:hidden}
+#notionWorld .applet-scene .work-session-index-title{margin:0;color:var(--scene-ink);font:600 16px/1.4 var(--scene-body-font)}
+#notionWorld .work-session-list{min-height:0;overflow:auto;display:grid;grid-auto-rows:max-content;gap:6px;align-content:start}
+#notionWorld .applet-scene .work-session-row{display:grid;gap:3px;width:100%;height:auto;max-height:none;min-height:48px;padding:7px 10px;text-align:left;border:1px solid transparent;border-inline-start:5px solid transparent;border-radius:8px;color:var(--scene-ink);background:none;font:14px/1.35 var(--scene-body-font);cursor:pointer}
+#notionWorld .work-session-row small{min-width:0;color:var(--scene-muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#notionWorld .applet-scene .work-session-row[aria-pressed=true]{border-color:var(--scene-line);border-inline-start-color:var(--scene-accent);background:color-mix(in srgb,var(--scene-accent) 15%,transparent)}
 #notionWorld .work-session-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 #notionWorld .work-session-state{flex:none;padding:4px 10px;border:1px solid var(--scene-line);border-radius:8px;color:var(--scene-accent);font-size:13px}
 #notionWorld .work-session-body{min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
