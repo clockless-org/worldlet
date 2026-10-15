@@ -1,12 +1,12 @@
 /** Account sources an Agent connects and reads directly. */
-export const SOURCE_PROVIDERS=['gmail','google-calendar','google-drive','github','notion','linear','paypal','todoist','supabase','posthog'];
+export const SOURCE_PROVIDERS=['gmail','google-calendar','google-drive','github','notion','linear','paypal','todoist','supabase','posthog','cloudflare'];
 /** One Google sign-in grants Mail and Calendar together. */
 export const GOOGLE_SIGN_IN=['google','gmail','google-calendar'];
 export const GOOGLE_SIGN_IN_SERVICES=['gmail','google-calendar'];
 /** A setting a token source also needs, asked for beside the token (PostHog's address and project). */
 export interface TokenField {key:string;label:string;hint?:string;value?:string;placeholder?:string;numeric?:boolean;maxLength:number}
 /** Sources that connect only with a token the person pastes (GitHub's server offers no sign-in Worldlet can register
- * for; PostHog takes a personal API key), each with the one line saying what the token needs, what the token is
+ * for; PostHog and Cloudflare take an API key), each with the one line saying what the token needs, what the token is
  * called there, the settings it also needs, and a token shape that is a common mistake. The token is checked with
  * one read before it is kept. */
 export const TOKEN_PROVIDERS:Readonly<Record<string,{hint:string;token:RegExp;label?:string;fields?:readonly TokenField[];wrong?:{token:RegExp;message:string}}>>=Object.freeze({
@@ -17,6 +17,11 @@ export const TOKEN_PROVIDERS:Readonly<Record<string,{hint:string;token:RegExp;la
    {key:'project',label:'Project ID',placeholder:'12345',hint:'The number after /project/ in your PostHog address bar.',numeric:true,maxLength:12},
   ]),
   wrong:{token:/^phc_/,message:'That is a project API key, which only sends events. Paste a personal API key (it starts with phx_).'}},
+ cloudflare:{hint:'Paste an API token with Account Analytics Read (and Zone Read and Zone Analytics Read to see your zones).',token:/^[A-Za-z0-9_-]{30,255}$/,label:'API token',
+  fields:Object.freeze([
+   {key:'account',label:'Account ID',placeholder:'32 letters and digits',hint:'The part after dash.cloudflare.com/ in your dashboard\'s address.',maxLength:40},
+  ]),
+  wrong:{token:/^[0-9a-f]{37}$/,message:'That looks like the Global API Key, which can change everything in your account. Create an API token with read-only analytics access instead.'}},
 });
 /** The token a `connect` request carries: only for a source that connects with one, required there, and shaped like a
  * token. An error never repeats what was pasted. */

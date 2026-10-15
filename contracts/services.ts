@@ -7,10 +7,11 @@ export type ServiceOperation=typeof SERVICE_OPERATIONS[number];
 /** Each Service's operations, each its own Grant target (`<provider>/<operation>`), with the arguments it requires.
  * GitHub: `list` (what is waiting for the person), `read` (one Issue or pull request by `id`) and `search` (`query`).
  * PostHog: `query` (one read-only HogQL SELECT) and `read` (a list of insights, dashboards, feature flags or
- * annotations, `id` naming which). */
+ * annotations, `id` naming which). Cloudflare: `read` only, `id` naming one of its fixed analytics reports. */
 export const SERVICE_ACTIONS:Readonly<Record<string,Readonly<Partial<Record<ServiceOperation,readonly string[]>>>>>=Object.freeze({
  github:Object.freeze({list:[],read:['id'],search:['query']}),
  posthog:Object.freeze({query:['query'],read:['id']}),
+ cloudflare:Object.freeze({read:['id']}),
 });
 /** The Services `read_service` reads. A Service's Attention reads (its Applet's registration) are the World's own
  * background reads: an Agent reads a Service only through `read_service` and a Grant naming it, never through
@@ -23,7 +24,7 @@ export interface ServiceRead {provider:string;operation:ServiceOperation;id?:str
 
 export interface ServiceComment {author:string;at?:string;text:string}
 export interface ServiceRecord {
- /** Stable within the Service (GitHub: `owner/repo#123`, what its `read` takes; PostHog: `insight/abc123`). */
+ /** Stable within the Service (GitHub: `owner/repo#123`, what its `read` takes; PostHog: `insight/abc123`; Cloudflare: `worker/api`). */
  id:string;
  title:string;
  /** The record on the Service's own website. */

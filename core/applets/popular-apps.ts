@@ -10,6 +10,8 @@ import {CURATED_READERS} from './curated-source.ts';
 const SERVICE_WEBSITES:Readonly<Record<string,{description:string;purpose:string}>>=Object.freeze({
  posthog:{description:'Use PostHog on its website. Connect it with a personal API key, and Fox and the Agents you allow can run read-only queries and list your insights, dashboards, feature flags and annotations when asked. Nothing is read in the background.',
   purpose:'Fox reads your PostHog analytics when you ask'},
+ cloudflare:{description:'Use Cloudflare on its dashboard. Connect it with a read-only API token, and Fox and the Agents you allow can read your Workers\' invocations and errors and your zones\' requests over the last day when asked. Nothing is read in the background or changed in Cloudflare.',
+  purpose:'Fox checks your Cloudflare traffic and Workers when you ask'},
 });
 /** Website/native launchers, not connected-account readers, except the Services above. */
 export const POPULAR_APPS: readonly AppletDefinition[]=entries.filter(app=>!(CURATED_READERS as readonly string[]).includes(app.key)).map(app=>{

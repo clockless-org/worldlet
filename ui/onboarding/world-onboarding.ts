@@ -6,7 +6,7 @@ import {connectionGuide} from '../applets/index.ts';
 import {WORLD_PRESETS} from '../world/index.ts';
 const el=(tag: string,text?: string,cls?: string): any=>Object.assign(document.createElement(tag),{...(text==null?{}:{textContent:text}),className:cls||''});
 const providerTitle=p=>getApp(p)?.title||{google:'Google','google-drive':'Google Drive',folder:'Local folder'}[p];
-const suggestions={home:[...HOME_NATIVE],work:['github','posthog'],library:['notion'],money:[],health:[],travel:[],people:[]};
+const suggestions={home:[...HOME_NATIVE],work:['github','posthog','cloudflare'],library:['notion'],money:[],health:[],travel:[],people:[]};
 
 // Source authorization is owned by the native Agent adapter. Never build on a click or a timer.
 export function mountWorldOnboarding({root,call,view,state:initial,toggleSample,applySnapshot}){
@@ -124,7 +124,7 @@ export function mountWorldOnboarding({root,call,view,state:initial,toggleSample,
    else if(guide)panel.append(el('p',guide.scope,'ui-caption'),el('p',guide.next,'ui-caption'),el('p',guide.user,'ui-caption'));
    if(app.capability==='connect'&&Object.hasOwn(TOKEN_PROVIDERS,app.provider))panel.append(...tokenField(app.provider,app.title));
    else if(app.capability==='connect')panel.append(button(connected?'Reconnect '+app.title:'Connect '+app.title,()=>connect(app.provider),true));
-   if(connected&&['gmail','google-calendar','notion','apple-notes','apple-reminders','todoist','google-drive','github','posthog'].includes(app.provider)){
+   if(connected&&['gmail','google-calendar','notion','apple-notes','apple-reminders','todoist','google-drive','github','posthog','cloudflare'].includes(app.provider)){
     const google=connection?.transport!=='native'&&(app.provider.startsWith('google-')||app.provider==='gmail');
     panel.append(button(google?'Disconnect Google':'Disconnect '+app.title,async()=>{await call('disconnectSource',{provider:app.provider});state=await call('snapshot');render(true);}));
     panel.append(el('p',google?'Disconnect signs out Gmail, Calendar and Drive in this Worldlet profile. What was already saved is kept. To revoke access on every device, use your Google Account’s third-party connections.':'Disconnect removes this connection. What was already saved is kept.','ui-caption'));

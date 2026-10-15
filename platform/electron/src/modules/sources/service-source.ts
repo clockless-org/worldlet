@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import {WorldletError} from '../../files.ts';
-import {POSTHOG_GATE,checkPosthog,posthogSettings,readPosthog,type ServiceGate,type ServiceHttp} from '../../../../../core/accounts/index.ts';
+import {CLOUDFLARE_API,CLOUDFLARE_GATE,POSTHOG_GATE,checkCloudflare,checkPosthog,cloudflareSettings,posthogSettings,readCloudflare,readPosthog,type ServiceGate,type ServiceHttp} from '../../../../../core/accounts/index.ts';
 import {SERVICE_ACTIONS} from '../../../../../contracts/services.ts';
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections,VaultService} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
@@ -8,10 +8,12 @@ import {validateWorldTool} from './google-source.ts';
 import {ExecutionJournal} from '../agent-runtime/journal.ts';
 
 /** Worldlet Services read over the service's own HTTPS API with a key the person pasted (contracts/services.ts,
- * core/accounts/services): PostHog, whose remote MCP server serves only PostHog Cloud and chooses its own project.
- * The connection is the World's own, in the vault as `service:<name>`: the address and project the person gave and
- * their key. Each request goes only to that address, follows no redirect and stops at the Service's time and size
- * limits (ServiceGate); the key is never logged, put in the World's state or an event, or given to an Agent. */
+ * core/accounts/services): PostHog, whose remote MCP server serves only PostHog Cloud and chooses its own project, and
+ * Cloudflare's analytics, whose own MCP servers sign in with OAuth and offer far more than reads. The connection is the
+ * World's own, in the vault as `service:<name>`: the settings the person gave (PostHog's address and project,
+ * Cloudflare's account) and their key. Each request goes only to that Service's one address, follows no redirect and
+ * stops at its time and size limits (ServiceGate); the key is never logged, put in the World's state or an event, or
+ * given to an Agent. */
 interface Definition<S> {
  gate:ServiceGate;
  /** What the person gave besides the key, checked (a ValueError says what is wrong in plain words). */
@@ -25,6 +27,7 @@ interface Definition<S> {
 const define=<S,>(definition:Definition<S>)=>definition as unknown as Definition<unknown>;
 const SERVICES:Readonly<Record<string,Definition<unknown>>>=Object.freeze({
  posthog:define({gate:POSTHOG_GATE,settings:posthogSettings,origin:settings=>settings.host,check:checkPosthog,read:readPosthog}),
+ cloudflare:define({gate:CLOUDFLARE_GATE,settings:cloudflareSettings,origin:()=>CLOUDFLARE_API,check:(http,settings)=>checkCloudflare(http,settings),read:(http,settings,body)=>readCloudflare(http,settings,body)}),
 });
 /** The Services read here; the rest of `read_service` (GitHub) runs over MCP (mcp-source.ts). */
 export const DIRECT_SERVICES:readonly string[]=Object.freeze(Object.keys(SERVICES));

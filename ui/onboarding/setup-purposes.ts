@@ -111,7 +111,7 @@ export const purposeCopy:Record<string,string[]>={
  'Pay and check your bills on Alipay’s website':['在支付宝网站付款和查看账单','Alipay のサイトで支払いや請求を確認','Paga y revisa tus facturas en la web de Alipay'],
  'Watch short videos on Douyin; Fox can find them for you':['在抖音刷短视频；Fox 可以帮你找','Douyin でショート動画を見られます。Fox が探します','Mira vídeos cortos en Douyin; Fox puede buscarlos por ti'],
  'Fox reads your PostHog analytics when you ask':['你问起时，Fox 读取你的 PostHog 分析数据','頼むと Fox が PostHog の分析を読みます','Fox lee tu analítica de PostHog cuando se lo pides'],
- 'Manage your sites on Cloudflare’s dashboard':['在 Cloudflare 控制台管理你的网站','Cloudflare のダッシュボードでサイトを管理','Gestiona tus sitios en el panel de Cloudflare'],
+ 'Fox checks your Cloudflare traffic and Workers when you ask':['你问起时，Fox 查看你的 Cloudflare 流量和 Workers','頼むと Fox が Cloudflare のトラフィックと Workers を確認','Fox revisa tu tráfico y tus Workers de Cloudflare cuando se lo pides'],
  'Check your deployments on Vercel’s website':['在 Vercel 网站查看部署','Vercel のサイトでデプロイを確認','Consulta tus despliegues en la web de Vercel'],
  'Check your sites and deploys on Netlify’s website':['在 Netlify 网站查看站点和部署','Netlify のサイトでサイトとデプロイを確認','Consulta tus sitios y despliegues en la web de Netlify'],
  'Open your Firebase projects in its console':['在 Firebase 控制台打开你的项目','Firebase のコンソールでプロジェクトを開けます','Abre tus proyectos de Firebase en su consola'],
