@@ -149,7 +149,7 @@ No account, secret or hosted service is needed to build. Checks: `npm run check:
 | --- | --- |
 | `ui/` | Shared rendering and interaction: World, Applets, Fox, Attention Center |
 | `core/` | Platform-independent product rules and data |
-| `platform/` | The Electron host: OS integration, browser engine, controlled execution |
+| `platform/` | The Electron host and the Node host (no display): OS integration, browser engine, controlled execution |
 | `harness/` | Agent backends and the reference Harness adapter |
 | `contracts/` | Shared Host/Agent interfaces and data shapes |
 | `resources/` | Worlds, styles, artwork, fonts and media |

@@ -7,7 +7,7 @@ Platform host thin; the Harness and model service are replaceable through explic
 | --- | --- | --- |
 | UI | `ui/` | Shared Web presentation, navigation, Fox and Applet interactions |
 | Core | `core/` | Pure product rules, records, scheduling decisions and validation |
-| Platform | `platform/` | Electron desktop shell, permissions, persistence, processes and browser IO |
+| Platform | `platform/` | Electron desktop shell (and the Node host for computers without a display), permissions, persistence, processes and browser IO |
 | Harness | The person's own Agent (`harness/` holds the reference adapter example and the `worldlet` skill) | Agent planning, tool loop and admitted job execution; Worldlet never customizes it |
 | Models/services | The person's provider, reached through their Agent | Inference access, quotas and usage; Worldlet provides no model |
 
@@ -57,7 +57,9 @@ Worldlet owns schedule settings and claim authority; Harness executes admitted j
 ## Chromium and trust boundaries
 
 One [Electron host](../platform/electron/README.md) serves Mac, Windows and Linux; it
-replaced the Swift/CEF and C#/WebView2 hosts (#996). The shared World UI is a separate
+replaced the Swift/CEF and C#/WebView2 hosts (#996). The [Node host](../platform/node/README.md) runs
+its modules that need no window, with no World page, for Linux and computers without a display; it
+reuses those modules through a small `electron` stand-in rather than holding product rules of its own. The shared World UI is a separate
 Chromium view from external website/media views. Only the trusted packaged World
 (`worldlet://app/index.html`) receives the Host bridge, through a `contextBridge`
 preload; the main process re-checks the sending frame. Website scripts never receive

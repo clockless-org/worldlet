@@ -3,14 +3,13 @@ import os from 'node:os';
 import path from 'node:path';
 import {app} from 'electron';
 import type {Host,Row} from '../../host/types.ts';
-import {AGENT,ANALYTICS,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,ORDER,PHONE,RUN_IN_BACKGROUND,VAULT,WIDGETS,type AgentService,type DesktopCompanionService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
+import {AGENT,ANALYTICS,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,ORDER,PHONE,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,WIDGETS,type AgentService,type RtcPageFactory,type DesktopCompanionService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
 import {WorldletError} from '../../files.ts';
 import {PHONE_LIMITS,hostAppletPlaces,threadPairs,readRemoteToHost,remoteHostInfo,phoneActionStatus,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,pairKeys,fromBase64url,sha256Hex,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../core/phone/index.ts';
 import {createPhoneRelay} from './relay.ts';
 import {createLocalRelay,serveLocalRelay} from './local-relay.ts';
 import {createRoomLink} from './room-link.ts';
 import {createRtcHost} from './rtc-host.ts';
-import {openRtcWindow} from './rtc-window.ts';
 import {createRemoteAgentHost} from './remote-host.ts';
 import {phoneWebRecording} from './web.ts';
 import {openInBrowser} from '../../system-browser.ts';
@@ -240,10 +239,12 @@ export function installPhone(host:Host){
  // over a direct line when the two can reach each other.
  // It takes no notifications; a tab seen in the last hour keeps the loop listening, so a Done from it lands at once.
  let webPaired:boolean|null=null;
+ const rtcPage=host.optional<RtcPageFactory>(RTC_PAGE);
  const browser=createRoomLink({
   vault,vaultName:'web-room',name:computerName,relay:process.env.WORLDLET_PAIR_RELAY||undefined,deliver,
-  // A browser that offers a direct line gets one (core/phone rtc.ts), run in a hidden window while it is open.
-  rtc:createRtcHost(openRtcWindow),
+  // A browser that offers a direct line gets one (core/phone rtc.ts), run on the page the host opens for it (a hidden
+  // window in the Electron host, rtc-window.ts). A host with none (the Node host, platform/node) runs the room only.
+  rtc:rtcPage?createRtcHost(rtcPage):undefined,
   onChange:status=>{
    if(status.state==='paired'&&webPaired===false)usage('phone_paired',{phone_platform:'web'});
    webPaired=status.state==='paired';

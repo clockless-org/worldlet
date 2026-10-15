@@ -244,6 +244,10 @@ export interface PhoneService {
  live?(value:Row):Promise<boolean>;
 }
 export const PHONE='phone';
+/** Opens the page that runs browsers' direct lines (modules/phone/rtc-host.ts): a hidden window in the Electron host
+ * (rtc-window.ts), provided before the modules install. A host without it runs a browser link through the room only. */
+export type RtcPageFactory=()=>import('../modules/phone/rtc-host.ts').RtcPage;
+export const RTC_PAGE='rtcPage';
 /** The person's activity fact for background admission (Core `userIdle`, #1650): seconds since their last input on
  * this computer or on an open paired phone. Owned by modules/shell. */
 export interface UserActivityService {

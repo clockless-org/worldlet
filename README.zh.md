@@ -149,7 +149,7 @@ npm run package        # 为当前系统打包桌面 App（不签名）
 | --- | --- |
 | `ui/` | 共享渲染和交互：World、Applet、Fox、Attention Center |
 | `core/` | 与平台无关的产品规则和数据 |
-| `platform/` | Electron 宿主：系统集成、浏览器引擎、受控执行 |
+| `platform/` | Electron 宿主和 Node 宿主（无显示器）：系统集成、浏览器引擎、受控执行 |
 | `harness/` | Agent 后端和参考 Harness 适配器 |
 | `contracts/` | 宿主和 Agent 共用的接口与数据形状 |
 | `resources/` | 世界、风格、美术、字体和媒体 |
