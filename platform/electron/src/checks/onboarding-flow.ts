@@ -264,7 +264,14 @@ async function mailConversation({host,js,wait,mark,press,seen}:MailContext){
   const db=store.ledger(),calls:{name:string,args:Row}[]=[];
   for(const row of db.history({since:Math.floor(since)-1,limit:2000})){
    if(!['tool.requested','harness.event'].includes(row.kind))continue;
-   const payload=db.queryWorldHistory({seq:row.seq}).events?.[0]?.payload;
+   let payload=db.queryWorldHistory({seq:row.seq}).events?.[0]?.payload;
+   // A payload over 4000 characters comes back as a stub (core/items/world-history.ts): `_source_result` carries the
+   // Mail records, so a full read of four unread threads hid the receipt (4427: Fox read Mail, the check missed it).
+   if(payload?.truncated===true&&payload.useContentOffset===true){
+    let text='',offset:number|undefined=0;
+    while(offset!==undefined){const content=db.queryWorldHistory({seq:row.seq,contentOffset:offset}).events?.[0]?.content;text+=String(content?.text??'');offset=content?.nextContentOffset;}
+    try{payload=JSON.parse(text).payload;}catch{payload=undefined;}
+   }
    if(payload&&typeof payload==='object'&&['tool','progress'].includes(payload.type)&&typeof payload.name==='string')
     calls.push({name:payload.name,args:payload.args&&typeof payload.args==='object'?payload.args:{}});
   }
