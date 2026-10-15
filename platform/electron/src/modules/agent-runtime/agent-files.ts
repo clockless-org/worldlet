@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {DatabaseSync} from 'node:sqlite';
+import {openAgentDatabase,type AgentDatabase,type AgentStatement} from './agent-database.ts';
 import {claudeCodeAgentSkill,claudeCodeConversationTitle,claudeCodeTurn,codexSessionIncluded,codexTurns,hermesConversationIncluded,hermesConversationTitle,hermesSendRoute,hermesSharedChat,hermesProfileSkill,hermesRoutine,hermesScheduleJob,hermesTurn,migrationNotesSession,piConversationTitle,piTurn,promptTemplateSkill,
  type HermesSendRoute,type MigrationRoutineResult,type MigrationTurn} from '../../../../../core/agent/index.ts';
 import {realPath as real} from '../../files.ts';
@@ -322,7 +322,7 @@ type HermesHome={root:string;profile:string|null};
 /** A session's start in seconds (Hermes stores seconds; milliseconds are accepted too). */
 const stamp=(value:unknown)=>{const n=typeof value==='string'?Number(value):value;return typeof n==='number'&&Number.isFinite(n)?n>1e12?n/1000:n:0;};
 const newer=(a:{last:number;key:string},b:{last:number;key:string})=>b.last-a.last||(a.key<b.key?-1:a.key>b.key?1:0);
-function hermesChains(db:DatabaseSync,profile:string|null,home:number):HermesChain[] {
+function hermesChains(db:AgentDatabase,profile:string|null,home:number):HermesChain[] {
  const columns=new Set((db.prepare('PRAGMA table_info(sessions)').all() as any[]).map(row=>row.name));
  const wanted=['id','parent_session_id','started_at','source','session_key','title','display_name','chat_type','chat_id','thread_id'].filter(name=>columns.has(name));
  const sessions=(db.prepare(`SELECT ${wanted.join(',')} FROM sessions`).all() as any[]).filter(hermesConversationIncluded);
@@ -337,18 +337,18 @@ function hermesChains(db:DatabaseSync,profile:string|null,home:number):HermesCha
  }
  return [...chains.values()];
 }
-function hermesMessages(db:DatabaseSync){
+function hermesMessages(db:AgentDatabase){
  const columns=new Set((db.prepare('PRAGMA table_info(messages)').all() as any[]).map(row=>row.name));
  const summary=columns.has('_compressed_summary')?',_compressed_summary AS summary':'';
  return db.prepare(`SELECT role,content,timestamp${summary} FROM messages WHERE session_id=? AND role IN ('user','assistant') ORDER BY timestamp,id`);
 }
 /** The person's and the Agent's turns of the sessions `ids`, in that order. */
-function hermesTurns(messages:ReturnType<DatabaseSync['prepare']>,ids:string[]):MigrationTurn[] {
+function hermesTurns(messages:AgentStatement,ids:string[]):MigrationTurn[] {
  const turns:MigrationTurn[]=[];
  for(const id of ids)for(const row of messages.iterate(id) as Iterable<any>){const turn=hermesTurn(row);if(turn)turns.push(turn);}
  return turns;
 }
-function hermesConversation(messages:ReturnType<DatabaseSync['prepare']>,chain:HermesChain,budget:Budget):BroughtConversation|null {
+function hermesConversation(messages:AgentStatement,chain:HermesChain,budget:Budget):BroughtConversation|null {
  const sessions=[...chain.sessions].sort((a,b)=>stamp(a.started_at)-stamp(b.started_at));
  const turns=hermesTurns(messages,sessions.map(session=>String(session.id)));
  if(!turns.length)return null;
@@ -368,7 +368,7 @@ export interface HermesWindow {
 export interface HermesWindowResult {conversations:BroughtConversation[];next:HermesCursor|null;remaining:number;bytes:number;problems:string[];truncated:boolean}
 /** One window of Hermes Agent conversations across the active profile and the others, newest activity first. */
 function hermesWindow(homes:HermesHome[],window:HermesWindow):HermesWindowResult {
- const problems:string[]=[],conversations:BroughtConversation[]=[],open:(DatabaseSync|null)[]=[],statements:(ReturnType<DatabaseSync['prepare']>|null)[]=[];
+ const problems:string[]=[],conversations:BroughtConversation[]=[],open:(AgentDatabase|null)[]=[],statements:(AgentStatement|null)[]=[];
  const budget:Budget={left:window.left??TEXT_BUDGET,truncated:false},start=budget.left;
  let next:HermesCursor|null=null,remaining=0;
  try{
@@ -378,7 +378,7 @@ function hermesWindow(homes:HermesHome[],window:HermesWindow):HermesWindowResult
    open.push(null);statements.push(null);
    if(!fs.existsSync(file)||!inside(file,home.root))return;
    try{
-    const db=new DatabaseSync(file,{readOnly:true,timeout:2000} as any);
+    const db=openAgentDatabase(file);
     db.exec('PRAGMA trusted_schema=OFF');
     open[index]=db;
     statements[index]=hermesMessages(db);
@@ -449,7 +449,7 @@ export function readOlderHermes(cursor:HermesCursor,left:number,home=os.homedir(
  * in seconds) and which Hermes home (profile) keeps it. Opened read-only; only `messages` rows of the person and the
  * Agent are read. */
 export interface HermesThread {key:string;title:string;shared?:boolean;sessions:string[];last:number;home:number}
-function hermesOpen<T>(home:string,environment:NodeJS.ProcessEnv,read:(db:DatabaseSync,profile:string|null,index:number)=>T[],only?:number):T[]|null {
+function hermesOpen<T>(home:string,environment:NodeJS.ProcessEnv,read:(db:AgentDatabase,profile:string|null,index:number)=>T[],only?:number):T[]|null {
  const root=discoverHermes(home,environment);
  if(!root)return null;
  const found:T[]=[];
@@ -457,8 +457,8 @@ function hermesOpen<T>(home:string,environment:NodeJS.ProcessEnv,read:(db:Databa
   if(only!==undefined&&index!==only)return;
   const file=path.join(entry.root,'state.db');
   if(!fs.existsSync(file)||!inside(file,entry.root))return;
-  let db:DatabaseSync|null=null;
-  try{db=new DatabaseSync(file,{readOnly:true,timeout:2000} as any);db.exec('PRAGMA trusted_schema=OFF');found.push(...read(db,entry.profile,index));}
+  let db:AgentDatabase|null=null;
+  try{db=openAgentDatabase(file);db.exec('PRAGMA trusted_schema=OFF');found.push(...read(db,entry.profile,index));}
   catch{}finally{try{db?.close();}catch{}}
  });
  return found;
@@ -524,7 +524,7 @@ export function surveyAgentHistory(id:'claude-code'|'pi'|'hermes'|'codex',home=o
   const file=path.join(base,'state.db');
   if(!fs.existsSync(file)||!inside(file,base))return 0;
   try{
-   const db=new DatabaseSync(file,{readOnly:true,timeout:2000} as any);
+   const db=openAgentDatabase(file);
    try{return (db.prepare('SELECT id,source,parent_session_id FROM sessions WHERE message_count>0 OR message_count IS NULL').all() as any[]).filter(session=>hermesConversationIncluded(session)&&!session.parent_session_id).length;}
    finally{db.close();}
   }catch{return 0;}
