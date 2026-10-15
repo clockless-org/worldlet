@@ -1,11 +1,13 @@
 /** Settings › Agent › Access: each Agent that reaches this World's tools on its own (core/agent/GRANTS.md, host
  * `agentAccess`), with when it was last used, what it may do and what it last asked for, and Revoke, which asks once
- * more in the page, then removes that Agent's key so it can no longer reach the World. Plain words: the page names
+ * more in the page, then removes that Agent's key so it can no longer reach the World; and, for each connected
+ * Service, "Can read <Service>", which gives or takes back that Service's read Grant at once. Plain words: the page names
  * places in the World and what was allowed, never tokens, endpoints or MCP. */
 import {agentButton as button,agentEl as el} from './agent-change.ts';
 type Grant={id:string;targets:string[];access:'read'|'write';duration:'standing'|'once';grantedAt:string;expiresAt?:string;revokedAt?:string};
 type Audit={at:string;target:string;action:string;decision:'allowed'|'denied'|'asked';reason?:string};
-type Agent={id:string;name:string;harness:string;kind:'local'|'remote';createdAt:string;lastSeenAt?:string;revokedAt?:string;grants:Grant[];audit:Audit[]};
+type Service={provider:string;title:string;granted:boolean};
+type Agent={id:string;name:string;harness:string;kind:'local'|'remote';createdAt:string;lastSeenAt?:string;revokedAt?:string;grants:Grant[];audit:Audit[];services?:Service[]};
 const date=(at:string)=>new Date(at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
 const time=(at:string)=>new Date(at).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
 const SHOWN_PLACES=6,SHOWN_AUDIT=5;
@@ -25,7 +27,11 @@ export function grantLine(grant:Grant):string {
  return `${verb}: ${named}${one}.`;
 }
 const DECISION:Record<Audit['decision'],string>={allowed:'Allowed',denied:'Refused',asked:'Asked you'};
-export function auditLine(entry:Audit):string {return `${time(entry.at)} · ${entry.target} ${entry.action} · ${DECISION[entry.decision]??entry.decision}`;}
+export function auditLine(entry:Audit):string {
+ // The person's own change in Settings (core serviceGrantAuditEntry), not a call.
+ if(entry.action==='grant'||entry.action==='ungrant')return `${time(entry.at)} · ${entry.target} · ${entry.action==='grant'?'You let it read':'You stopped it reading'}`;
+ return `${time(entry.at)} · ${entry.target} ${entry.action} · ${DECISION[entry.decision]??entry.decision}`;
+}
 
 export async function showAgentAccess(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){
  const box=el('div','companion-settings-approvals companion-settings-access'),said=el('p','companion-settings-status');said.setAttribute('role','status');
@@ -59,6 +65,23 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
     const log=el('ul','companion-settings-quiet companion-settings-access-audit');log.setAttribute('aria-label',`What ${agent.name} last asked for`);
     for(const entry of recent)log.append(el('li','',auditLine(entry)));
     words.append(log);
+   }
+   if(!agent.revokedAt&&agent.services?.length){
+    const services=el('div','companion-settings-access-services');
+    for(const service of agent.services){
+     const label=el('label','companion-settings-access-service'),box=document.createElement('input');
+     box.type='checkbox';box.checked=!!service.granted;box.dataset.service=service.provider;
+     box.onchange=async()=>{
+      const on=box.checked;box.disabled=true;said.textContent='';
+      try{
+       await call('agentAccess',{operation:on?'grantService':'ungrantService',id:agent.id,provider:service.provider});
+       await draw();said.textContent=on?`${agent.name} can now read ${service.title}.`:`${agent.name} can no longer read ${service.title}.`;
+      }catch(e){box.checked=!on;box.disabled=false;said.textContent='Could not change that: '+((e as Error).message||'try again.');}
+     };
+     label.append(box,document.createTextNode(`Can read ${service.title}`));
+     services.append(label);
+    }
+    words.append(services);
    }
    row.append(words);
    if(!agent.revokedAt)row.append(button('Revoke','revoke-agent',()=>confirmRevoke(row,agent)));

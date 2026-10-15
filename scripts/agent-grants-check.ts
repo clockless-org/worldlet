@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites} from '../core/agent/grants.ts';
+import {AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites} from '../core/agent/grants.ts';
 import {HERMES_CHANNEL_READ_ONLY,hermesChannelToolAllowed} from '../core/agent/hermes-server.ts';
 import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
 import {turnWriteAdmission,writeDecision} from '../core/agent/turn-trust.ts';
@@ -133,4 +133,34 @@ assert.deepEqual(worldActionOf(actions,'share_world_link',{}),{target:'world',ac
 assert.deepEqual(worldActionOf(actions,'read_world_source',{provider:'gmail'}),{target:'gmail',action:'read'});
 assert.equal(worldActionOf(actions,'_source_begin',{}),null);
 
-console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server.');
+// "Can read <Service>" (Settings › Agent › Access): exactly that Service's read targets, as a standing read Grant; nothing
+// for a name that is not a Service; never in the default Grants. A granted Agent's read_service call passes outside a
+// Fox turn, an ungranted one (or another Service's) is refused, and taking it back refuses it again.
+assert.deepEqual(serviceReadTargets('github'),['github/list','github/read','github/search']);
+assert.deepEqual(serviceReadTargets('posthog'),['posthog/query','posthog/read']);
+assert.deepEqual(serviceReadTargets('cloudflare'),['cloudflare/read']);
+for(const name of ['gmail','*','github/*','__proto__','constructor','','toString'])assert.deepEqual(serviceReadTargets(name),[],'not a Service: '+name);
+assert.equal(serviceReadGrant('codex','*/*',now),null,'a page never names its own patterns');assert.equal(serviceReadGrant('Not An Id','github',now),null);
+const githubGrant=serviceReadGrant('codex','github',now)!;
+assert.deepEqual(githubGrant,{id:'codex-service-github',agentId:'codex',targets:['github/list','github/read','github/search'],access:'read',duration:'standing',grantedAt:now});
+assert.ok(!defaults.concat(channelDefaultGrants('codex',earlier,actions)).some(g=>g.targets.some(t=>/^(github|posthog|cloudflare)\//.test(t))),'no Service in the default Grants');
+const codexDefaults=channelDefaultGrants('codex',earlier,actions);
+const serviceCall=(grants:Grant[],target:string,action:string,args:Record<string,unknown>)=>{
+ const resolved=resolveAction(actions,target,action,args);
+ assert.equal(resolved.name,'read_service');
+ return standingCallDecision({identity:codex,grants,target,action,tool:resolved.name,args:resolved.args,foxTurn:null,now});
+};
+assert.deepEqual(serviceCall(codexDefaults,'github','list',{}),{decision:'denied',reason:STANDING_OUTSIDE_TURN},'ungranted: refused');
+assert.deepEqual(serviceCall([...codexDefaults,githubGrant],'github','list',{}),{decision:'allowed',grantId:'codex-service-github'},'granted: allowed');
+assert.equal(serviceCall([...codexDefaults,githubGrant],'github','read',{id:'acme/app#1'}).decision,'allowed');
+assert.equal(serviceCall([...codexDefaults,githubGrant],'posthog','query',{query:'select 1'}).decision,'denied','another Service stays refused');
+assert.equal(serviceCall([...codexDefaults,{...githubGrant,revokedAt:earlier}],'github','list',{}).decision,'denied','taken back: refused again');
+assert.equal(serviceCall([...codexDefaults,{...githubGrant,agentId:'hermes'}],'github','list',{}).decision,'denied','another Agent\'s Grant does not count');
+assert.ok(standingActions(actions,codex,[...codexDefaults,githubGrant],false,now).some(a=>a.target==='github'),'describe_world_tools lists it once granted');
+assert.ok(!standingActions(actions,codex,codexDefaults,false,now).some(a=>a.target==='github'));
+assert.equal(serviceGranted('codex',[githubGrant],'github',now),true);assert.equal(serviceGranted('codex',[{...githubGrant,revokedAt:earlier}],'github',now),false);
+assert.equal(serviceGranted('codex',[githubGrant],'posthog',now),false);assert.equal(serviceGranted('hermes',[githubGrant],'github',now),false);
+assert.deepEqual(serviceGrantAuditEntry('codex','github',true,now),{at:now,agentId:'codex',target:'github',action:'grant',decision:'allowed',grantId:'codex-service-github',reason:'The person let this Agent read this Service in Settings.'});
+assert.equal(serviceGrantAuditEntry('codex','github',false,now).action,'ungrant');
+
+console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server, per-Service read Grants.');

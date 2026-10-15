@@ -17,6 +17,8 @@ export const SERVICE_ACTIONS:Readonly<Record<string,Readonly<Partial<Record<Serv
  * background reads: an Agent reads a Service only through `read_service` and a Grant naming it, never through
  * `read_world_source` (core/tools/gateway.ts). */
 export const SERVICE_PROVIDERS:readonly string[]=Object.freeze(Object.keys(SERVICE_ACTIONS));
+/** Each Service's name as the person knows it (Settings › Agent › Access: "Can read GitHub"). */
+export const SERVICE_TITLES:Readonly<Record<string,string>>=Object.freeze({github:'GitHub',posthog:'PostHog',cloudflare:'Cloudflare'});
 
 /** One read: an operation of the Service's (SERVICE_ACTIONS), with the `id` or `query` it takes. `cursor` continues a
  * list or search where the last page said it could. */

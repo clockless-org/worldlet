@@ -13,7 +13,8 @@ try{
   w.access=[{id:'hermes',name:'Hermes Agent',harness:'hermes',kind:'local',createdAt:'2026-10-01T09:00:00.000Z',lastSeenAt:'2026-10-14T18:30:00.000Z',
    grants:[{id:'hermes-channel-read',agentId:'hermes',targets:['items/query','history/query','companion/recall','meetings/decisions','gmail/draft','gmail/read','google-calendar/read','apple-notes/read','todoist/read','applet:mail/read'],access:'read',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'},
     {id:'hermes-channel-link',agentId:'hermes',targets:['world/link'],access:'write',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'}],
-   audit:[{at:'2026-10-14T18:30:00.000Z',agentId:'hermes',target:'items',action:'update',decision:'denied',reason:'Only reading here.'},{at:'2026-10-14T18:29:00.000Z',agentId:'hermes',target:'items',action:'query',decision:'allowed',grantId:'hermes-channel-read'}]}];
+   audit:[{at:'2026-10-14T18:30:00.000Z',agentId:'hermes',target:'items',action:'update',decision:'denied',reason:'Only reading here.'},{at:'2026-10-14T18:29:00.000Z',agentId:'hermes',target:'items',action:'query',decision:'allowed',grantId:'hermes-channel-read'}],
+   services:[{provider:'github',title:'GitHub',granted:false},{provider:'posthog',title:'PostHog',granted:true}]}];
   w.rules=[{id:'rule-00000000000000a1',allows:'npm test',agent:'default',kind:'command',main:true,grantedAt:Date.UTC(2026,9,8,12),thread:'In Fox’s main conversation',inWorld:true},{id:'rule-00000000000000a2',allows:'github › search_issues',agent:'default',kind:'tool',main:true,note:'Any arguments'}];
   w.jobs=[{id:'job-1',name:'Morning digest',kind:'prompt',paused:false,when:{cron:'0 8 * * *'},delivery:'telegram',last:{at:Date.UTC(2026,9,10,8),status:'ok'}},{id:'job-2',name:'Plant check',kind:'prompt',paused:true,when:{everySeconds:7200}}];
   w.skills=[{name:'seed-swap',description:'Organize seed swaps.',lastRanAt:Date.now()-3*86_400_000,enabled:true,removable:false},{name:'k8s',description:'Kubernetes help.',lastRanAt:null,enabled:false,removable:true}];
@@ -41,7 +42,9 @@ try{
    w.skills=change==='remove'?w.skills.filter(s=>s.name!==name):w.skills.map(s=>s.name===name?{...s,enabled:change==='enable'}:s);return {ok:true};}
   if(b.action==='harnessSkills')return {current:w.current,harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:w.current.harness==='hermes',changes:true,skills:w.skills},
    {harness:'claude-code',title:'Claude Code',inUse:false,changes:false,note:'Claude Code keeps these in the skills folder of its home (~/.claude/skills). Change them there.',skills:[{name:'release-notes',description:'Draft release notes.',lastRanAt:null}]}]};
-  if(b.action==='agentAccess'&&b.operation==='revoke'){w.access=w.access.map(a=>a.id===b.id?{...a,revokedAt:'2026-10-15T08:00:00.000Z',grants:a.grants.map(g=>({...g,revokedAt:'2026-10-15T08:00:00.000Z'}))}:a);return {ok:true};}
+  // "Can read <Service>": the page names only the Agent and the Service; the host decides the targets.
+  if(b.action==='agentAccess'&&(b.operation==='grantService'||b.operation==='ungrantService')){w.access=w.access.map(a=>a.id===b.id?{...a,services:a.services.map(s=>s.provider===b.provider?{...s,granted:b.operation==='grantService'}:s)}:a);return {ok:true};}
+  if(b.action==='agentAccess'&&b.operation==='revoke'){w.access=w.access.map(a=>a.id===b.id?{...a,services:[],revokedAt:'2026-10-15T08:00:00.000Z',grants:a.grants.map(g=>({...g,revokedAt:'2026-10-15T08:00:00.000Z'}))}:a);return {ok:true};}
   if(b.action==='agentAccess')return {agents:w.access};
   if(b.action==='harnessApprovalRules'&&b.operation==='revoke'){w.rules=w.rules.filter(r=>r.id!==b.id);return {ok:true};}
   if(b.action==='harnessApprovalRules')return {harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,revoke:'restart',note:'Hermes Agent reads these when it starts, so Worldlet restarts its own conversation with it.',rules:w.rules},
@@ -213,6 +216,17 @@ try{
  assert.equal(await hermesAccess.locator('.companion-settings-access-audit li').count(),2);
  await hermesAccess.locator('.companion-settings-access-audit li').first().getByText(/items update · Refused$/).waitFor();
  assert.doesNotMatch(await accessPart.innerText(),/\bMCP\b|token|endpoint/i,'plain words only');
+ // "Can read <Service>" for each connected Service: on and off at once, the page sending only the Agent and the Service.
+ const github=hermesAccess.getByRole('checkbox',{name:'Can read GitHub',exact:true}),posthog=hermesAccess.getByRole('checkbox',{name:'Can read PostHog',exact:true});
+ assert.deepEqual([await github.isChecked(),await posthog.isChecked()],[false,true]);
+ await github.click();
+ await accessPart.getByText('Hermes Agent can now read GitHub.',{exact:true}).waitFor();
+ assert.equal(await github.isChecked(),true);
+ await posthog.click();
+ await accessPart.getByText('Hermes Agent can no longer read PostHog.',{exact:true}).waitFor();
+ assert.equal(await posthog.isChecked(),false);
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Service$/.test(c.operation))),
+  [{action:'agentAccess',operation:'grantService',id:'hermes',provider:'github'},{action:'agentAccess',operation:'ungrantService',id:'hermes',provider:'posthog'}],'only the Agent and the Service, never targets');
  await hermesAccess.getByRole('button',{name:'Revoke',exact:true}).click();
  await hermesAccess.getByText(/^Hermes Agent will no longer reach your World's tools/).waitFor();
  assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='revoke').length),0,'Revoke asks first');
@@ -222,6 +236,7 @@ try{
  await accessPart.getByText('Hermes Agent can no longer reach your World.',{exact:true}).waitFor();
  await hermesAccess.getByText(/^On this computer\. Revoked .*2026\.$/).waitFor();
  assert.equal(await hermesAccess.getByRole('button',{name:'Revoke'}).count(),0,'nothing left to revoke');
+ assert.equal(await hermesAccess.getByRole('checkbox').count(),0,'a revoked Agent has no Service to read');
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='revoke').map(c=>c.id)),['hermes']);
  await local.locator('[data-agent=claude-code]').getByRole('button',{name:'Use',exact:true}).click();
  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='localAgent'&&c.operation==='adopt'&&c.id==='claude-code'));
@@ -343,5 +358,5 @@ try{
  await page.waitForFunction(()=>{const part=document.querySelector('#companionInfo .companion-settings-detail [data-part=accounts]'),pane=document.querySelector('#companionInfo .companion-settings-detail');if(!part||!pane)return false;const a=part.getBoundingClientRect(),b=pane.getBoundingClientRect();return a.top>=b.top-1&&a.top<b.bottom-40&&pane.scrollTop>0;});
  await page.screenshot({path:'/tmp/your-agent-accounts.png'});
  assert.deepEqual(errors,[]);
- console.log('PASS Agent: no energy or battery anywhere; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model; seven named sections (Model, Memory, Skills, Routines, Permissions, Access, Connections) with one plain line each; Memory shows what each Agent remembers, read only, with one-tap Ask it to forget for the Agent in use; Claude Code’s skills, rules and tools read-only with where to change them; pi has no routines; the Agent\'s skills and routines change only after a plain-words ask, and a routine change refreshes the Task panel; Permissions lists the Agent\'s standing rules in plain words and revokes one after asking again; Access lists each Agent with its last use, Grants and newest decisions and revokes it after asking; Accounts is the page\'s last part and old Accounts entry points land on it');
+ console.log('PASS Agent: no energy or battery anywhere; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model; seven named sections (Model, Memory, Skills, Routines, Permissions, Access, Connections) with one plain line each; Memory shows what each Agent remembers, read only, with one-tap Ask it to forget for the Agent in use; Claude Code’s skills, rules and tools read-only with where to change them; pi has no routines; the Agent\'s skills and routines change only after a plain-words ask, and a routine change refreshes the Task panel; Permissions lists the Agent\'s standing rules in plain words and revokes one after asking again; Access lists each Agent with its last use, Grants and newest decisions, gives or takes back each connected Service\'s read Grant at once and revokes it after asking; Accounts is the page\'s last part and old Accounts entry points land on it');
 }finally{await browser.close();}

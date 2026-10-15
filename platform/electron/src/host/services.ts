@@ -396,6 +396,11 @@ export interface AgentAccess {
  list(auditLimit?:number):{identity:AgentIdentity;grants:Grant[];audit:AgentAuditEntry[]}[];
  /** Stamps revokedAt, removes its token and tells listeners (its endpoint files go). */
  revoke(agentId:string):void;
+ /** "Can read <Service>" (Settings › Agent › Access): a standing read Grant naming only that Service's read targets
+  * (core serviceReadGrant), or that Grant revoked. Each change is audited. False for an unknown or revoked Agent or a
+  * name that is not a Service; the Agent's next call sees the change. */
+ grantService(agentId:string,provider:string):boolean;
+ ungrantService(agentId:string,provider:string):boolean;
  onRevoke(listener:(agentId:string)=>void):void;
 }
 export interface VaultService {

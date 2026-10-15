@@ -25,9 +25,11 @@ import {harnessConnections} from './harness-connections.ts';
 import {harnessScheduleControls} from './harness-schedule-controls.ts';
 import {harnessSkills} from './harness-skills.ts';
 import {harnessMemory} from './harness-memory.ts';
-import {AGENT_VERSIONS,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
+import {AGENT_VERSIONS,agentRevoked,serviceGranted,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {harnessTools} from './harness-services.ts';
 import {ongoingId} from '../../../../../core/tasks/index.ts';
+import {SERVICE_PROVIDERS,SERVICE_TITLES} from '../../../../../contracts/services.ts';
+import {canBuild} from '../../store/world-store.ts';
 import {harnessSend} from './harness-send.ts';
 import {harnessVoice} from './harness-voice.ts';
 import {reportOpenClawWorkspaces,surveyOpenClaw} from './openclaw-files.ts';
@@ -553,8 +555,15 @@ export function installAgentRuntime(host:Host){
  // forward); first-run setup reads it once (`requested`) and decides (core connectRequestPlan).
  let requested=connectArgument(process.argv);
  app.on('second-instance',(_event,argv)=>{const id=connectArgument(argv);if(!id)return;requested=id;host.page.event('worldlet:connect-agent');});
- /** Settings › Agent › Access (core/agent/GRANTS.md): each Agent with its last use, Grants and newest audit entries
-  * (`list`), or one revoked (`revoke`: its token and endpoint files go, revokedAt is stamped). */
+ /** Settings › Agent › Access (core/agent/GRANTS.md): each Agent with its last use, Grants, newest audit entries and,
+  * unless revoked, "Can read <Service>" for each connected Service (`list`); one revoked (`revoke`: its token and
+  * endpoint files go, revokedAt is stamped); or one Service's read Grant given or taken back (`grantService`,
+  * `ungrantService`). The page names only the Service: the targets are that Service's own reads (core serviceReadGrant),
+  * never patterns from the page. The same action as Revoke, so the same pages reach it (none on another device). */
+ const connectedServices=()=>{
+  let connections:Row[]=[];try{connections=host.store.state.connections??[];}catch{}
+  return SERVICE_PROVIDERS.filter(provider=>connections.some(c=>c.provider===provider&&canBuild(c)));
+ };
  host.register({agentAccess:async request=>{
   const access=agentAccess!;
   if(request.operation==='revoke'){
@@ -562,7 +571,21 @@ export function installAgentRuntime(host:Host){
    if(!access.identity(id))throw new WorldletError('That Agent is not known here.');
    access.revoke(id);return {ok:true};
   }
-  return {agents:access.list(AGENT_ACCESS_AUDIT).map(({identity,grants,audit})=>({...identity,grants,audit}))};
+  if(request.operation==='grantService'||request.operation==='ungrantService'){
+   const id=typeof request.id==='string'?request.id:'',provider=typeof request.provider==='string'?request.provider:'';
+   const identity=access.identity(id);
+   if(!identity)throw new WorldletError('That Agent is not known here.');
+   if(!SERVICE_PROVIDERS.includes(provider))throw new WorldletError('That is not a Service Worldlet reads.');
+   if(request.operation==='grantService'){
+    if(agentRevoked(identity,new Date().toISOString()))throw new WorldletError('This Agent was revoked.');
+    if(!connectedServices().includes(provider))throw new WorldletError(`Connect ${SERVICE_TITLES[provider]} first.`);
+    if(!access.grantService(id,provider))throw new WorldletError('Could not change that.');
+   }else if(!access.ungrantService(id,provider))throw new WorldletError('Could not change that.');
+   return {ok:true};
+  }
+  const services=connectedServices(),now=new Date().toISOString();
+  return {agents:access.list(AGENT_ACCESS_AUDIT).map(({identity,grants,audit})=>({...identity,grants,audit,
+   services:agentRevoked(identity,now)?[]:services.map(provider=>({provider,title:SERVICE_TITLES[provider],granted:serviceGranted(identity.id,grants,provider,now)}))}))};
  }});
  host.register({agentHarness:localHarnessActions(context,switchTo,noAgent,remote,vault,()=>{const id=requested;requested=null;return id;},event=>host.page.event('worldlet:hermes-setup',event),
   async id=>{if(adapter instanceof LocalHarnessAdapter&&adapter.install.id===id)await adapter.whileStopped(async()=>{});},event=>{host.page.event('worldlet:agent-check',event);
