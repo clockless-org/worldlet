@@ -72,6 +72,6 @@ function scan(dir:string){
 }
 export function checkRepository(){
  // The open-source export (scripts/oss-export.mjs) leaves out the hosted services, so a missing root is skipped.
- for(const dir of ['ui','core','contracts','platform/bridge','platform/electron','website','models','worker','harness'])if(fs.existsSync(dir))scan(dir);
+ for(const dir of ['ui','core','contracts','platform/bridge','platform/electron','platform/node','website','models','worker','harness'])if(fs.existsSync(dir))scan(dir);
  for(const edge of exceptions.keys())assert(used.has(edge)||!fs.existsSync(edge.split(' -> ')[0]),`Remove stale architecture exception: ${edge}`);
 }

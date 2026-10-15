@@ -13,7 +13,7 @@ import {HostRouter} from './host/router.ts';
 import {createPageBridge} from './host/page.ts';
 import {createDiagnostics,keepProcessOutput} from './host/diagnostics.ts';
 import {endStrayChildren,hideAllWindows,installQuitTask,relaunchAfterQuit,startPendingRelaunch,wantsQuit,withDeadline} from './host/quit.ts';
-import {hostCapabilities} from './capabilities.ts';
+import {FEATURE_OWNERS,hostCapabilities} from './capabilities.ts';
 import {registerWorldScheme,trustedWorldURL} from './world/protocol.ts';
 import {WorldWindow} from './world/window.ts';
 import {installCapture} from './world/capture.ts';
@@ -27,7 +27,8 @@ import {modules} from './modules/index.ts';
 import {runCheck} from './checks/index.ts';
 import {ensureDirectory,errorMessage} from './files.ts';
 import {createVault} from './vault.ts';
-import {ANALYTICS,DESKTOP_COMPANION,RUN_IN_BACKGROUND,VAULT,type AnalyticsService,type DesktopCompanionService} from './host/services.ts';
+import {ANALYTICS,DESKTOP_COMPANION,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,type AnalyticsService,type DesktopCompanionService,type RtcPageFactory} from './host/services.ts';
+import {openRtcWindow} from './modules/phone/rtc-window.ts';
 import type {Host} from './host/types.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
 import {backgroundLaunchWanted,startBackgroundLaunch} from './background-launch.ts';
@@ -97,8 +98,6 @@ function macDefaults(domain:string){
  }
  return values;
 }
-/** The host action or service that implements each optional feature; a feature with none is always there. */
-const FEATURE_OWNERS:Partial<Record<keyof HostFeatures,string>>={nativeAppletLaunch:'openInstalledApplet',nativeCalendar:'appleSources',appleNotes:'appleSources',appleReminders:'appleSources',voiceMemos:'voiceMemos',messages:'messages',localMusic:'localMusic',folderManagement:'folderConnection',backgroundSourceChecks:'sourceChecks',browserBookmarks:'browserBookmarks',installedAppDetection:'installedApplets',browserFoxOverlay:'browserShow',browserPictureInPicture:'browserPip',browserTaskPictureInPicture:'browserLayout',curatedSourceRead:'curatedSourceContent',localDataDeletion:'deleteSourceData',googleSignInStages:'connect'};
 const PERSISTED_REQUEST_FAILURES=['agentChat','hermesChat','connect','appContent','onboarding','foxPreferences','localAgent','localHermes'];
 
 async function start(){
@@ -145,6 +144,7 @@ async function start(){
   for(const listener of startedListeners)try{listener();}catch(error){diagnostics.record(error,'hostStarted');}
  };
  host.provide(VAULT,createVault(profile.root,profile.channel==='release'?'app.worldlet.context':profile.worktree?'app.worldlet.context.dev.wt'+profile.worktree:'app.worldlet.context.dev'));
+ host.provide<RtcPageFactory>(RTC_PAGE,openRtcWindow);
  for(const install of modules)install(host);
  // Contract check: report what this host implements, without opening a window.
  if(process.argv.includes('--host-contract-check')){
