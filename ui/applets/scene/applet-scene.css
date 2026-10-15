@@ -20,7 +20,7 @@
 .applet-scene .scene-head{flex:none;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 16px;padding-bottom:clamp(4px,1.5cqh,10px);border-bottom:1px solid var(--scene-line)}
 .applet-scene .scene-title{margin:0;min-width:0;font:600 clamp(18px,4.6cqi,var(--scene-title-size))/1.15 var(--scene-display-font);color:var(--scene-ink);overflow-wrap:anywhere}
 .applet-scene .scene-meta{margin:0;font-size:.82em;color:var(--scene-muted)}
-.applet-scene .scene-list{display:grid;gap:0;align-content:start;min-height:0}
+.applet-scene .scene-list{flex:none;display:grid;gap:0;align-content:start;min-height:0}
 .applet-scene .scene-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:clamp(8px,2cqi,16px);width:100%;min-height:var(--scene-control-height);box-sizing:border-box;
  padding:clamp(6px,1.6cqh,12px) clamp(4px,1cqi,10px);border:0;border-bottom:1px solid var(--scene-line);border-radius:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
 .applet-scene .scene-item:hover{background:color-mix(in srgb,var(--scene-accent) 9%,transparent)}
