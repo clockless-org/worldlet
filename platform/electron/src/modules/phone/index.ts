@@ -3,12 +3,13 @@ import os from 'node:os';
 import path from 'node:path';
 import {app} from 'electron';
 import type {Host,Row} from '../../host/types.ts';
-import {AGENT,ANALYTICS,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,ORDER,PHONE,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,WIDGETS,WORLD_WEB,type WorldWebService,type AgentService,type RtcPageFactory,type DesktopCompanionService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
+import {AGENT,ANALYTICS,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,ORDER,PHONE,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,WIDGETS,WORLD_ROOM_PAGE,WORLD_WEB,type WorldRoomPageService,type WorldWebService,type AgentService,type RtcPageFactory,type DesktopCompanionService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
 import {WorldletError} from '../../files.ts';
 import {PHONE_LIMITS,hostAppletPlaces,threadPairs,readRemoteToHost,remoteHostInfo,phoneActionStatus,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,pairKeys,fromBase64url,sha256Hex,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../core/phone/index.ts';
 import {createPhoneRelay} from './relay.ts';
 import {createLocalRelay,serveLocalRelay,type LocalServer} from './local-relay.ts';
 import {createRoomLink} from './room-link.ts';
+import {createWorldRoomLink} from './world-room-link.ts';
 import {createRtcHost} from './rtc-host.ts';
 import {createRemoteAgentHost} from './remote-host.ts';
 import {phoneWebRecording} from './web.ts';
@@ -294,6 +295,14 @@ export function installPhone(host:Host){
   const {origin}=await serveLocal();
   if(!local.status().link?.startsWith(origin+'/'))await local.end();
  }).catch(error=>host.diagnostics.record(error,'localBrowser'));
+ // The full World on another device (core/phone/README.md#the-world-on-another-device): a `world` pairing of its own,
+ // met in the pairing room. Each page that joins is the host's remote World page (WORLD_ROOM_PAGE), with only what
+ // ROOM_ALLOWED lets through; a host without one closes it.
+ const worldRoom=createWorldRoomLink({
+  vault,name:computerName,version,relay:process.env.WORLDLET_PAIR_RELAY||undefined,
+  accept:socket=>{const pages=host.optional<WorldRoomPageService>(WORLD_ROOM_PAGE);if(pages)pages.accept(socket);else socket.close(1011,'No World here');},
+  onChange:status=>host.page.event('worldlet:world-pair-status',status),
+ });
  const localOpen=()=>{const seen=local.status().seenAt;return !!seen&&Date.now()-seen<ACTIVE;};
  const localListening=()=>{const seen=local.status().seenAt;return !!seen&&Date.now()-seen<WEB_LISTENING;};
  const webOpen=()=>{const seen=browser.status().seenAt;return !!seen&&Date.now()-seen<ACTIVE;};
@@ -311,7 +320,7 @@ export function installPhone(host:Host){
  };
  // One loop per pairing. A long poll holds its tick while it waits, so Fox's replies reach an open side through the
  // watch below: every two seconds while Fox works and once more when it finishes, and at least every 15 seconds.
- const links=[{relay,open:phoneOpen,listening:phoneListening,phone:true},{relay:agent,open:agentOpen,listening:agentOpen,phone:false},{relay:browser,open:webOpen,listening:webListening,phone:true},{relay:local,open:localOpen,listening:localListening,phone:true}].map(link=>{
+ const links=[{relay,open:phoneOpen,listening:phoneListening,phone:true},{relay:agent,open:agentOpen,listening:agentOpen,phone:false},{relay:browser,open:webOpen,listening:webListening,phone:true},{relay:local,open:localOpen,listening:localListening,phone:true},{relay:worldRoom,open:()=>worldRoom.open,listening:()=>false,phone:false}].map(link=>{
   let timer:ReturnType<typeof setTimeout>|null=null,running=false,foxWasBusy=false,conversationAt=0,waiting:{link:string,since:number}|null=null;
   async function publishConversation(){
    conversationAt=Date.now();
@@ -323,7 +332,8 @@ export function installPhone(host:Host){
    const listen=link.relay.paired&&link.listening();
    try{
     if(await link.relay.poll(listen?WAIT:0)&&link.phone)lastActive=Date.now();
-    if(link.relay.paired){
+    // The World on another device asks for what it shows: it gets no slots.
+    if(link.relay.paired&&link.relay!==worldRoom){
      if(link.phone)await hostCenter();
      if(link.phone)await publishConversation();
      const desktop=phoneDesktop({name:computerName(),version,order:link.phone&&await orderReady()},Date.now());
@@ -368,12 +378,14 @@ export function installPhone(host:Host){
   // Kept when there is one, so a browser that opened it stays paired; a new one is checked quickly like Copy link's.
   worldLink:async()=>{const status=await browser.ensure();links[2].schedule(QUICK);return status;},
   localServer:serveLocal,
+  worldRoomLink:async()=>{const status=await worldRoom.ensure();links[4].schedule(QUICK);return status;},
  });
  host.register({
   // `kind: 'agent'` is the pairing with another Worldlet, `kind: 'web'` a browser's through the relay (another device),
-  // `kind: 'local'` a browser's on this computer, served here; otherwise the phone's.
+  // `kind: 'local'` a browser's on this computer, served here, `kind: 'world'` the full World on another device through
+  // the room; otherwise the phone's.
   phonePair:async request=>{
-   const link=links[request.kind==='agent'?1:request.kind==='web'?2:request.kind==='local'?3:0];
+   const link=links[request.kind==='agent'?1:request.kind==='web'?2:request.kind==='local'?3:request.kind==='world'?4:0];
    if(request.operation==='status')return link.relay.status();
    if(request.operation==='start'){
     if(request.kind==='local')try{await serveLocal();}catch{throw new WorldletError('Worldlet could not open a port on this computer for the browser. Copy the link instead.');}

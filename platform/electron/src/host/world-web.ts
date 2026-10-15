@@ -31,8 +31,12 @@ export function serveWorldWeb({root,webRoot,vault,server,accept}:{root:string;we
  return {link,file,origin:server.origin};
 }
 
-/** Which page the app's host reaches: its own window's World page (`native`) or a browser's (`web`). */
-export type PageOrigin='native'|'web';
+/** No page: the Node host has no window, so its pair starts with this (platform/node). */
+export const NO_PAGE:PageBridge={call:async()=>undefined,event(){},documentEvent(){},ready:()=>false};
+
+/** Which page the host reaches: the app's own window's World page (`native`), a browser's on this computer (`web`) or
+ * one on another device, met through the pairing room (`remote`). */
+export type PageOrigin='native'|'web'|'remote';
 /** Calls only the app's window answers: its native views and menus, sound, voice and the desktop Companion. A browser's
  * page has none of these (WEB_PAGE_FEATURES). */
 export const WINDOW_CALLS:ReadonlySet<string>=new Set(['worldletRestoreWorld','worldletDesktopCompanion','worldletCompanionBackdrop','worldletCompanionGeometry',
@@ -44,35 +48,37 @@ export const SHARED_CALLS:ReadonlySet<string>=new Set(['worldletReceive','worldl
 export const OWNED_CALLS:ReadonlySet<string>=new Set(['worldletAgentTool','worldletAgentEvent','worldletCloudStream']);
 const OWNERS_KEPT=500;
 
-/** The app's two World pages as the one PageBridge its modules use. The app's window is the native page and stays the
- * World's page whatever a browser does; a browser's page is an extra one beside it, with its own rule (one browser page
- * at a time, the newest takes over: host/web-page.ts), so neither takes the World from the other.
+/** The host's World pages as the one PageBridge its modules use. The app's window is the native page and stays the
+ * World's page whatever a browser does; a browser's page on this computer and one on another device are extra pages
+ * beside it, each with its own rule (one page of each at a time, the newest takes over: host/web-page.ts), so none
+ * takes the World from another.
  * - Events and the World's snapshot go to every open page.
  * - Window calls go to the native page only.
  * - A call about work a page started (by the `id` or `streamId` its request named, or the `id` the host answered with)
- *   goes to that page; anything else goes to the native page while it is loaded, else to the browser's. */
-export function createPagePair(native:PageBridge,web:PageBridge){
+ *   goes to that page; anything else goes to the first loaded of the native page, the browser's here, the remote one. */
+export function createPagePair(native:PageBridge,web:PageBridge,remote?:PageBridge){
  const owners=new Map<string,PageOrigin>();
  const own=(value:unknown,origin:PageOrigin)=>{
   if(typeof value!=='string'||!value||value.length>200)return;
   owners.delete(value);owners.set(value,origin);
   if(owners.size>OWNERS_KEPT)owners.delete(owners.keys().next().value as string);
  };
- const pageOf=(origin:PageOrigin)=>origin==='web'?web:native;
- const primary=()=>native.ready()||!web.ready()?native:web;
+ const pages:[PageOrigin,PageBridge][]=[['native',native],['web',web],...remote?[['remote',remote] as [PageOrigin,PageBridge]]:[]];
+ const pageOf=(origin:PageOrigin)=>pages.find(([name])=>name===origin)?.[1]??native;
+ const primary=()=>pages.find(([,one])=>one.ready())?.[1]??native;
  const page:PageBridge={
   call<T>(name:string,...args:unknown[]):Promise<T|undefined>{
    if(SHARED_CALLS.has(name)){
-    const answers=[native,web].filter(one=>one.ready()).map(one=>one.call<T>(name,...args));
+    const answers=pages.filter(([,one])=>one.ready()).map(([,one])=>one.call<T>(name,...args));
     return answers[0]??Promise.resolve(undefined);
    }
    if(WINDOW_CALLS.has(name))return native.call<T>(name,...args);
    const owner=OWNED_CALLS.has(name)&&typeof args[0]==='string'?owners.get(args[0]):undefined;
    return (owner&&pageOf(owner).ready()?pageOf(owner):primary()).call<T>(name,...args);
   },
-  event(name,detail){native.event(name,detail);web.event(name,detail);},
-  documentEvent(name,detail){native.documentEvent(name,detail);web.documentEvent(name,detail);},
-  ready:()=>native.ready()||web.ready(),
+  event(name,detail){for(const [,one] of pages)one.event(name,detail);},
+  documentEvent(name,detail){for(const [,one] of pages)one.documentEvent(name,detail);},
+  ready:()=>pages.some(([,one])=>one.ready()),
  };
  return {
   page,

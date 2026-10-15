@@ -121,7 +121,7 @@ leaves them out, unlike the host services, which fail closed: every app window h
   players, speech and the desktop Companion), with the same reason Fox's tools give, so a page that asks anyway
   reaches nothing on this computer's screen. The list of sites the built-in browser visited stays readable.
 
-Opening the World from another device is a later step.
+The World on another device meets the computer through the pairing room, as a third page with less trust (`ROOM_ALLOWED`): [the World on another device](../core/phone/README.md#the-world-on-another-device).
 
 CDP controls a selected target; it is not a renderer, authorization bypass or general
 component API. Agent-operated World navigation uses versioned semantic actions through

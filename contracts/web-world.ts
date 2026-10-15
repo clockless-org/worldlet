@@ -133,3 +133,37 @@ export function webReply(body:Record<string,unknown>,value:unknown):unknown {
  }
  return value;
 }
+
+/** What a World page on another device may ask for, met through the pairing room (core/phone/world-room.ts): the
+ * World, Fox, the Attention Center, artifacts and Applets, and nothing else. Settings, connections, pairing, the
+ * Harness's configuration, local tools, deletion and native views stay with this computer. The host checks this before
+ * the request reaches the router, after WEB_DENIED and WEB_PAGE_ACTIONS; `true` allows the action, a list allows only
+ * those operations. */
+export const ROOM_ALLOWED:Readonly<Record<string,true|readonly string[]>>=Object.freeze({
+ // The World: its snapshot, layout and presentation, its items and their history, the practice world, setup's steps.
+ snapshot:true,saveOverlay:true,saveSampleUI:true,setTextScale:true,setSampleEnabled:true,worldActivity:true,uiCommand:true,worldHistory:true,worldLog:true,
+ worldItemRead:true,worldItemStatus:true,taskReviewAction:true,original:true,worldWriteUndo:true,saveWorld:true,onboarding:true,usageEvent:true,reportException:true,
+ // Fox: turns, their cloud stream, the conversation, the Task panel, Applet tasks and the Agent's permission prompts.
+ agentChat:true,hermesChat:true,agentCancel:true,hermesCancel:true,agentSteer:true,hermesSteer:true,agentWarm:true,cloudRequest:true,cloudCancel:true,
+ channelReply:true,foxPreferences:true,foxTiming:true,modelStatus:true,modelHealth:true,modelSource:true,taskPanel:true,foxProactive:true,foxProactiveShown:true,
+ companionArchive:true,companionProfile:true,conversationRecall:true,appletTaskStart:true,appletTaskCancel:true,appletTasks:true,harnessApproval:true,
+ // The Attention Center: mail reviews, its pictures, ongoing work, the calendar, checks and calls.
+ emailAction:true,attentionImage:true,mailAvatar:true,ongoing:true,calendarEvents:true,runtimeTaskControl:true,worldSourceCheck:true,harnessCall:true,
+ // Artifacts: the Journal's cards, moment Applets and made games (not the native views that show them on this screen).
+ artifacts:true,artifactPageBrief:true,artifactPageSave:true,artifactPages:Object.freeze(['get']),widgets:true,widgetStart:true,widgetSave:true,widgetSource:true,
+ madeGames:true,madeGameSource:true,gameFactoryStart:true,gameFactorySave:true,
+ // Applets: what each shows from the person's connected accounts.
+ appContent:true,notionContent:true,obsidianContent:true,paypalContent:true,curatedSourceContent:true,doorDash:true,appletArt:true,siteApplets:true,
+ weatherLoad:true,weatherSave:true,weatherRequest:true,weatherLocate:true,
+});
+export const ROOM_DENIED_MESSAGE='This needs Worldlet on the computer itself, or a browser on that computer.';
+/** Why a World page on another device may not make this request, or '' when it may. */
+export function roomDenied(body:unknown):string {
+ const web=webDenied(body);
+ if(web)return web;
+ if(!body||typeof body!=='object')return ROOM_DENIED_MESSAGE;
+ const {action,operation}=body as {action?:unknown;operation?:unknown};
+ if(typeof action!=='string'||!Object.hasOwn(ROOM_ALLOWED,action))return ROOM_DENIED_MESSAGE;
+ const rule=ROOM_ALLOWED[action];
+ return rule===true||typeof operation==='string'&&rule.includes(operation)?'':ROOM_DENIED_MESSAGE;
+}

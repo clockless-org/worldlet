@@ -69,8 +69,9 @@ that the World is ready and where its link is. The server answers only this comp
 page's own origin and the token, a browser's page cannot ask for what `WEB_DENIED` lists or what its window cannot
 do (`WEB_PAGE_ACTIONS`), and the page is served under the web variant of its Content-Security-Policy, which reaches
 only its own origin and socket ([trust](../../docs/UI-CORE-PLATFORM.md#the-world-in-a-web-browser)). To reach it from another computer, forward the
-same port number over SSH (for 47630, `ssh -L 47630:127.0.0.1:47630 <computer>`) and open the link there; opening the
-World from another device without that is a later step.
+same port number over SSH (for 47630, `ssh -L 47630:127.0.0.1:47630 <computer>`) and open the link there. The host also
+makes a link for the full World on another device through the pairing room and writes it to `world-room-link.txt`
+(owner-only; [the World on another device](../../core/phone/README.md#the-world-on-another-device)).
 
 ## The `worldlet` command
 
