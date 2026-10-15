@@ -162,6 +162,9 @@
 .companion-settings-approvals,.companion-settings-worldlet-accounts{display:flex;flex-direction:column;align-items:flex-start;gap:8px;align-self:stretch}
 .companion-settings-approvals .companion-settings-row{flex-wrap:wrap}
 .companion-settings-access-audit{margin:4px 0 0;padding-left:16px}
+.companion-settings-access-services{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:4px}
+.companion-settings-access-service{display:inline-flex;align-items:center;gap:6px;margin:0;font-size:13px;color:#354132;white-space:nowrap;cursor:pointer}
+.companion-settings-access-service input{flex:0 0 auto;width:auto;min-height:0;margin:0;padding:0}
 .companion-settings-approvals code{font-size:12px;font-weight:400;overflow-wrap:anywhere}
 .companion-settings-command{flex:1 1 100%;font-size:12px;color:#656651}
 .companion-settings-command summary{cursor:pointer;min-height:0;line-height:1.4}
