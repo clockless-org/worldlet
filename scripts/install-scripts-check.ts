@@ -40,7 +40,8 @@ for(const [name,text] of [['install.sh',sh],['install.ps1',ps]])assert.doesNotMa
 const linux=sh.slice(sh.indexOf('install_linux() {'),sh.indexOf('\n}\n',sh.indexOf('install_linux() {')));
 assert.ok(linux.length>200&&sh.includes('[ "$(uname -s)" != "Linux" ] || { install_linux; exit 0; }'),'Linux runs its own branch, before the Mac checks');
 const order=(...parts:string[])=>parts.every((part,index)=>{const at=linux.indexOf(part);assert.ok(at>=0,'install.sh Linux has '+part);return index===0||linux.indexOf(parts[index-1])<at;});
-assert.ok(order('/downloads/linux.json','.sha256','[ "$expected" = "$actual" ]','tar -xzf','SHA256SUMS','ln -sfn "$label" "$home/current"','systemctl --user enable --now worldlet.service','setup --agent "$AGENT"','register --agent "$AGENT"','link </dev/null'),'Linux: checksum, unpack, file sums, current, service, setup, register, link in that order');
+assert.ok(order('/downloads/linux.json','.sha256','[ "$expected" = "$actual" ]','tar -xzf','SHA256SUMS','ln -sfn "$label" "$home/current"','systemctl --user enable --now worldlet.service','setup --agent "$AGENT"','link </dev/null'),'Linux: checksum, unpack, file sums, current, service, setup, link in that order');
+assert.ok(!linux.includes('register --agent "$AGENT"'),'Linux: setup registers Claude Code and Codex itself, so the installer does not register them twice');
 for(const part of ['loginctl enable-linger','nohup "$node" "$program"','qrencode -t ANSIUTF8','link --qr','ssh -L','$HOME/.local/bin/worldlet','for candidate in hermes openclaw claude codex'])assert.ok(linux.includes(part),'install.sh Linux has '+part);
 // agent.md (served at https://worldlet.ai/agent.md) and the Worldlet skill give an Agent the same commands, and those
 // commands exist.

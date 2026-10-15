@@ -228,7 +228,8 @@ await withTempDir('wl-room-',async temp=>{
  const exited=new Promise<number|null>(resolve=>child.on('exit',code=>resolve(code)));
  try{
   const deadline=Date.now()+30_000;
-  while(!/World link for another device ready in /.test(out)&&child.exitCode===null&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,100));
+  // Both links: the browser link is written after the World's, whose pairing it carries.
+  while(!(/World link for another device ready in /.test(out)&&/room link ready in /.test(out))&&child.exitCode===null&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,100));
   assert.match(out,/World link for another device ready in .*world-room-link\.txt/,'the host makes the World link for another device: '+out.slice(-600));
   const file=path.join(library,'world-room-link.txt'),link=fs.readFileSync(file,'utf8').trim();
   if(process.platform!=='win32')assert.equal(fs.statSync(file).mode&0o777,0o600,'owner-only');

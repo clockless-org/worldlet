@@ -17,7 +17,7 @@ register, and its [Linux package](#package), which the [one-line installer](../i
 
 | Path | Responsibility |
 | --- | --- |
-| `src/cli.ts` | The program: `worldlet.cjs <command>` is the [command line](#the-worldlet-command); anything else runs `main.ts` |
+| `src/cli.ts` | The program: `worldlet.cjs <command>` is the [command line](#the-worldlet-command) (`help` prints its usage, an unknown command the usage with code 2); with no command it runs `main.ts`, unless a host already answers on the same library (one host per library: the second exits with code 1) |
 | `src/control.ts` | The control socket (owner-only, in the library) and the command line's side of it |
 | `src/qr.ts` | The browser link's QR code drawn in a terminal (`worldlet link --qr`), white on black so it scans on any terminal |
 | `src/mcp-home.ts` | The [fixed MCP home](#one-fixed-mcp-home) and `register`: each Agent's own command, and the Worldlet skill in its skills folder |
@@ -79,7 +79,8 @@ makes a link for the full World on another device through the pairing room and w
 0600; a named pipe on Windows), and prints the answer. The answer goes only to the asker's stdout; the host logs
 nothing of it. With no host running it says so and exits with code 3. A unix socket path holds at most 103 bytes on
 macOS (107 on Linux): with a library deeper than that, the host starts without a control socket and both sides say the
-library path is too long, rather than binding a path cut short.
+library path is too long, rather than binding a path cut short. One host runs per library: a host started while another
+answers on its control socket says so and exits with code 1.
 
 | Command | What it does |
 | --- | --- |

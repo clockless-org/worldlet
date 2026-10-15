@@ -25,7 +25,7 @@ import type {Host,PageBridge} from '../../electron/src/host/types.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
 import {isWorldToolsRegistrar} from '../../../core/agent/index.ts';
 import {onboardingUnfinished} from '../../../core/onboarding/index.ts';
-import {controlSocketPath,serveControl,type ControlReply,type ControlRequest} from './control.ts';
+import {ALREADY_RUNNING,controlSocketPath,serveControl,type ControlReply,type ControlRequest} from './control.ts';
 import {mcpHome,openMcpHome,registerAgent,registeredAgents} from './mcp-home.ts';
 import {installWorld} from '../../electron/src/modules/world.ts';
 import {installFox} from '../../electron/src/modules/fox/index.ts';
@@ -72,8 +72,10 @@ let sent='';
 const failed=(body:Record<string,unknown>,error:unknown)=>{if((error as Error)?.name!=='AbortError'&&PERSISTED_REQUEST_FAILURES.includes(body.action as string))diagnostics.record(error,String(body.action),typeof body.id==='string'?body.id:'');};
 const loaded=()=>{sent='';each(loadedListeners,'pageLoaded');each(connectedListeners,'pageConnected');};
 const gone=()=>{if(!pages.page.ready())each(reloadListeners,'pageReload');};
-const web=createWebPage({platform:platformName(),dispatch:async body=>{pages.note('web',body);const value=await router.dispatch(body,null,'web');pages.note('web',body,value);return value;},loaded,gone,failed});
-const remote=createWebPage({platform:platformName(),denied:roomDenied,dispatch:async body=>{pages.note('remote',body);const value=await router.dispatch(body,null,'web');pages.note('remote',body,value);return value;},loaded,gone,failed});
+/** A page's requests go to the router; the work they name is that page's (createPagePair note). */
+const dispatchFrom=(origin:'web'|'remote')=>async(body:Record<string,unknown>)=>{pages.note(origin,body);const value=await router.dispatch(body,null,'web');pages.note(origin,body,value);return value;};
+const web=createWebPage({platform:platformName(),dispatch:dispatchFrom('web'),loaded,gone,failed});
+const remote=createWebPage({platform:platformName(),denied:roomDenied,dispatch:dispatchFrom('remote'),loaded,gone,failed});
 const pages=createPagePair(NO_PAGE,web.page,remote.page);
 /** The browser link's state is logged when it changes (the state alone; the link itself only goes into its owner-only
  * file). */
@@ -159,29 +161,23 @@ app.on('quit-requested',()=>shutdown(0));
 each(startedListeners,'hostStarted');
 log(`started ${app.getVersion()} with the library at ${profile.root}`);
 
+/** Writes a link the phone module made into its owner-only file in the library. The link carries its secret: it goes
+ * only into that file, never to stdout (a service's journal). */
+async function keepLink(file:string,what:string,operation:string,make:()=>Promise<Record<string,unknown>|undefined>|undefined){
+ try{
+  const status=await make(),link=status?.link;
+  if(typeof link!=='string'||!link)throw Error(`No ${what} was made.`);
+  writeAtomic(path.join(profile.root,file),link+'\n',0o600);
+  log(`${what} ready in ${path.join(profile.root,file)}`);
+ }catch(error){diagnostics.record(error,operation);log(`${what} failed: ${errorMessage(error)}`);}
+}
 /** The browser link (core/phone/README.md#web), made once and kept: a phone or any browser opens it to reach this
- * computer. Room only here: browsers' direct lines need WebRTC, which this host does not have yet. */
-async function roomLink(){
- // The one there is, or a new one, carrying the full World's pairing too (PhoneService.worldLink, as `world/link`).
- const status=await host.use<PhoneService>(PHONE).worldLink!() as {state:string;link?:string;error?:string};
- if(!status.link)throw Error('No browser link was made.');
- const file=path.join(profile.root,ROOM_LINK_FILE);
- writeAtomic(file,status.link+'\n',0o600);
- // The link carries its secret: it goes only into the owner-only file, never to stdout (a service's journal).
- log(`room link ready in ${file}`);
-}
-roomLink().catch(error=>{diagnostics.record(error,'roomLink');log('room link failed: '+errorMessage(error));});
-
-/** The full World's link for another device (core/phone/world-room.ts, `kind: 'world'`), made once and kept, in its
- * owner-only file beside the others: the World bundle opens it and meets this host in the pairing room. */
-async function worldRoomLink(){
- const status=await host.use<PhoneService>(PHONE).worldRoomLink?.() as {link?:string}|undefined;
- if(!status?.link)throw Error('No World link for another device was made.');
- const file=path.join(profile.root,WORLD_ROOM_LINK_FILE);
- writeAtomic(file,status.link+'\n',0o600);
- log(`World link for another device ready in ${file}`);
-}
-worldRoomLink().catch(error=>{diagnostics.record(error,'worldRoomLink');log('World link for another device failed: '+errorMessage(error));});
+ * computer. Room only here: browsers' direct lines need WebRTC, which this host does not have yet. It carries the full
+ * World's pairing too (PhoneService.worldLink, as `world/link`). */
+void keepLink(ROOM_LINK_FILE,'room link','roomLink',()=>host.use<PhoneService>(PHONE).worldLink?.());
+/** The full World's link for another device (core/phone/world-room.ts, `kind: 'world'`), made once and kept beside it:
+ * the World bundle opens it and meets this host in the pairing room. */
+void keepLink(WORLD_ROOM_LINK_FILE,'World link for another device','worldRoomLink',()=>host.use<PhoneService>(PHONE).worldRoomLink?.());
 
 /** The World on this computer (contracts/web-world.ts): the full World page, served on 127.0.0.1 beside the browser
  * link's own page, for a browser here that opens the link. The link carries a token kept in the vault; it goes only
@@ -224,5 +220,9 @@ async function answer(request:ControlRequest):Promise<ControlReply> {
   `Browser link: ${pair?.state??'unknown'} (worldlet link prints it).`,
   `MCP home: ${mcpHome()}, registered in ${registered.length?registered.join(', '):'no Agent yet'}.`]};
 }
-serveControl(controlSocketPath(profile.root),answer).then(server=>{quitListeners.push(()=>{server.close();});},error=>{diagnostics.record(error,'control');log('control socket failed: '+errorMessage(error));});
-openMcpHome().catch(error=>{diagnostics.record(error,'mcpHome');log('MCP home failed: '+errorMessage(error));});
+// Another host on this library (one that started at the same moment as this one: cli.ts turns away the rest) keeps it
+// and its MCP home, and this one stops; any other failure leaves this host running without its command line.
+serveControl(controlSocketPath(profile.root),answer).then(server=>{quitListeners.push(()=>{server.close();});},error=>{
+ log('control socket failed: '+errorMessage(error));
+ if(errorMessage(error)===ALREADY_RUNNING)shutdown(1);else diagnostics.record(error,'control');
+}).then(()=>quitting?undefined:openMcpHome()).catch(error=>{diagnostics.record(error,'mcpHome');log('MCP home failed: '+errorMessage(error));});
