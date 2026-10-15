@@ -3,7 +3,7 @@
 // its own vault storage, and stop cleanly. Its shim and vault storage are checked on their own first. Then the World
 // in a browser on this computer (contracts/web-world.ts): on a library with one item, the link it writes opens the real
 // World in headless Chromium (SwiftShader WebGL), and the server refuses another Host, another Origin, a missing token
-// and the actions a browser's page may not ask for. The `worldlet` command line (status, link, register) runs against
+// and the actions a browser's page may not ask for. The `worldlet` command line (status, link and its QR code, register) runs against
 // the host over its control socket, with fake `claude` and `codex` commands. `--screenshot <file>` keeps a picture of
 // that World.
 import assert from 'node:assert/strict';
@@ -13,6 +13,7 @@ import path from 'node:path';
 import http from 'node:http';
 import {execFileSync,spawn,spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import qrcode from 'qrcode-generator';
 import {withTempDir} from './test-temp.ts';
 import {launchTestBrowser,pageErrors,waitForWorld} from './browser-test.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
@@ -155,6 +156,17 @@ await withTempDir('worldlet-node-host-',async temp=>{
    const printed=cli('link');
    assert.equal(printed.status,0,printed.stderr);
    assert.equal(printed.stdout.trim(),link,'link prints the browser link, the same one the library keeps');
+   // `link --qr` adds the link's QR code (qr.ts): read back from its half blocks, it is the code of that link, light
+   // modules drawn white on black.
+   const coded=cli('link','--qr');
+   assert.equal(coded.status,0,coded.stderr);
+   const [first,blank,...drawn]=coded.stdout.replace(/\n$/,'').split('\n');
+   assert.equal(first,link);assert.equal(blank,'');
+   assert.ok(drawn.every(line=>line.startsWith('\u001b[37;40m')&&line.endsWith('\u001b[0m')),'white on black, reset after each line');
+   const rows=drawn.flatMap(line=>{const cells=[...line.slice(8,-4)];return [cells.map(cell=>cell==='█'||cell==='▀'),cells.map(cell=>cell==='█'||cell==='▄')];});
+   const qr=qrcode(0,'L');qr.addData(link,'Byte');qr.make();
+   const size=qr.getModuleCount();
+   for(let row=0;row<size;row++)for(let column=0;column<size;column++)assert.equal(rows[row+2][column+2],!qr.isDark(row,column),`QR module ${row},${column}`);
    assert.equal(cli('register').status,2,'register needs --agent');
    const hermes=cli('register','--agent','hermes');
    assert.equal(hermes.status,1);assert.match(hermes.stderr,/worldlet setup --agent hermes/);
@@ -196,7 +208,7 @@ await withTempDir('worldlet-node-host-',async temp=>{
    for(const agent of ['claude-code','codex'])assert.equal(mode(path.join(mcp,`worldlet-mcp-endpoint.${agent}.json`)),0o600,'the same endpoint file again, owner-only');
    assert.equal(fs.readFileSync(argvLog,'utf8'),before,'no Agent registers again');
   }finally{await running.stop();}
-  console.log('PASS node host command line: status, link and register over an owner-only control socket; Claude Code and Codex register the fixed MCP home with their own commands and get the skill; endpoint files owner-only and the same across a restart; the link never in the service log');
+  console.log('PASS node host command line: status, link (and its QR code) and register over an owner-only control socket; Claude Code and Codex register the fixed MCP home with their own commands and get the skill; endpoint files owner-only and the same across a restart; the link never in the service log');
  }
 
  // The World in a browser on this computer, on a library that finished setup and holds one item.

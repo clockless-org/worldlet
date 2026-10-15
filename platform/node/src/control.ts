@@ -1,12 +1,13 @@
 // The Node host's control socket and the `worldlet` command line (platform/node/README.md#the-worldlet-command): the
 // running host listens on an owner-only unix socket in its library, and `node worldlet.cjs <command>` asks it one
 // question and prints the answer. The answer goes only to the asker's stdout: the host never logs it, so the browser
-// link, which carries its secret, never reaches a service's journal. Node built-ins only, so the command line starts
-// without loading the host (cli.ts).
+// link, which carries its secret, never reaches a service's journal. Node built-ins and the QR code only, so the command
+// line starts without loading the host (cli.ts).
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import net from 'node:net';
 import path from 'node:path';
+import {terminalQr} from './qr.ts';
 
 /** The socket in the library; on Windows a named pipe, named after the library. */
 export const CONTROL_SOCKET='control.sock';
@@ -80,7 +81,7 @@ export function askControl(file:string,request:ControlRequest,timeout=180_000):P
 
 export const CONTROL_USAGE=`Usage: worldlet <command>
   status                 Whether Worldlet is running, its Agent, setup and the MCP registrations
-  link                   Print the browser link to this World (keep it private: it opens the World)
+  link [--qr]            Print the browser link to this World, with --qr also as a QR code (keep it private: it opens the World)
   setup --agent <id>     Choose the Agent Fox talks through, and register Worldlet's MCP server in it
   register --agent <id>  Register Worldlet's MCP server and skill in an Agent (claude-code or codex)`;
 
@@ -98,6 +99,8 @@ export async function runControlCommand(argv:string[],socket:string,{out=(text:s
  catch(error){err(`worldlet: ${(error as Error).message}\n`);return 1;}
  if(!reply){err(NOT_RUNNING+'\n');return 3;}
  if('error' in reply){err(`worldlet: ${reply.error}\n`);return 1;}
- out(reply.lines.map(line=>line+'\n').join(''));
+ // `link --qr` adds the link's QR code, drawn here: the host only hands out the link.
+ const lines=command==='link'&&rest.includes('--qr')&&reply.lines[0]?[...reply.lines,'',...terminalQr(reply.lines[0])]:reply.lines;
+ out(lines.map(line=>line+'\n').join(''));
  return 0;
 }
