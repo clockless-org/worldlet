@@ -1,3 +1,5 @@
+import {pointerPlanePoint} from '../scene/pointer-plane.ts';
+import {calendarDetails} from './regions.ts';
 import {node} from '../../components/index.ts';
 import {calendarDay} from '../../world/index.ts';
 import {calendarEventId,calendarOccurrences,localDay,CALENDAR_ALERT_MINUTES,LOCAL_CALENDAR_NAME,LOCAL_EVENT_TITLE,type LocalCalendarEvent} from '../../../core/applets/index.ts';
@@ -6,10 +8,10 @@ import {calendarEventId,calendarOccurrences,localDay,CALENDAR_ALERT_MINUTES,LOCA
 // person's own events (applet.md#local-events) move; synced events open their original as before. A repeating event
 // shows each time it happens; moving or editing one of them changes them all, and Delete can take just that one.
 
-const HOUR=40;
+const DEFAULT_HOUR=40;
 const SNAP=15,DAY_MINUTES=24*60,DRAG=4;
 type CalendarActions={save:(event:LocalCalendarEvent)=>unknown;remove:(id:string)=>unknown};
-export type CalendarState={mode:'day'|'week'|'month';offset:number;scroll?:number|null;editing?:string|null;draft?:Record<string,any>|null;undo?:LocalCalendarEvent|null};
+export type CalendarState={mode:'day'|'week'|'month';offset:number;selected?:string|null;scrollX?:number|null;scroll?:number|null;editing?:string|null;draft?:Record<string,any>|null;undo?:LocalCalendarEvent|null};
 
 /** The person's own events as Calendar items, beside the synced ones. */
 export function localCalendarItems(events:LocalCalendarEvent[]){
@@ -76,7 +78,8 @@ function series(view:any):LocalCalendarEvent {
  return {...event,start,end,skip:shift?(event.skip||[]).map((d:string)=>addDays(d,shift)):event.skip||[]};
 }
 
-export function renderCalendar({sheet,nav,body,items,value,state,days,itemButton,redraw}:{sheet:HTMLElement,nav:HTMLElement,body:HTMLElement,items:any[],value:any,state:CalendarState,days:Date[],itemButton:(item:any)=>HTMLElement,redraw:()=>void}){
+export function renderCalendar({sheet,nav,body,items,value,state,days,itemButton,redraw,details,status}:{details?:HTMLElement;status?:HTMLElement;sheet:HTMLElement,nav:HTMLElement,body:HTMLElement,items:any[],value:any,state:CalendarState,days:Date[],itemButton:(item:any)=>HTMLElement,redraw:()=>void}){
+ const HOUR=details?50:DEFAULT_HOUR;body.style.setProperty('--calendar-hour-size',HOUR+'px');
  const actions:CalendarActions|null=value?.calendar||null,now=value?.now||Date.now(),today=calendarDay(new Date(now));
  const keys=days.map(d=>calendarDay(d)),grid=state.mode!=='month';
  items=items.flatMap(item=>item.local&&item.record?.repeat&&item.record.repeat!=='none'?repeats(item,keys[0],keys[keys.length-1]):[item]);
@@ -85,16 +88,16 @@ export function renderCalendar({sheet,nav,body,items,value,state,days,itemButton
  // A save redraws the page through the host's new list, so nothing redraws after one.
  const save=(event:LocalCalendarEvent)=>{if(actions)void actions.save(series(event));};
  const edit=(id:string|null)=>{state.editing=id;state.draft=null;redraw();};
- const create=(event:LocalCalendarEvent)=>{state.editing=event.id;state.draft=null;state.undo=null;save(event);};
+ const create=(event:LocalCalendarEvent)=>{state.selected='local:'+event.id;state.editing=event.id;state.draft=null;state.undo=null;save(event);};
  // Today and New Event on the date row, as in Apple Calendar.
- const todayButton=node('button','home-calendar-today','Today');todayButton.type='button';todayButton.onclick=()=>{state.offset=0;state.scroll=null;redraw();};
+ const todayButton=node('button','home-calendar-today','Today');todayButton.type='button';todayButton.onclick=()=>{state.offset=0;state.scroll=null;state.scrollX=null;redraw();};
  const add=node('button','home-calendar-add','Add event');add.type='button';add.setAttribute('aria-label','New event');add.title='New event';
  add.disabled=!actions;add.onclick=()=>{const day=keys.includes(today)?today:keys[0];create(newCalendarEvent(day,null,null,false,now));};
  nav.prepend(todayButton);nav.append(add);
  // What the person should know: a read in progress, an error, or that their events stay here.
  const connected=!!value?.connected,note=value?.error||(value?.reading?'Reading…':!connected?'Connect a calendar with Fox to see its events. Events you add stay on this computer.':'');
  if(state.undo&&actions){const undo=state.undo,line=node('p','home-calendar-note');line.append(node('span','','Event deleted.'));const b=node('button','home-calendar-undo','Undo');b.type='button';b.onclick=()=>{state.undo=null;save(undo);};line.append(b);sheet.insertBefore(line,body);setTimeout(()=>{if(state.undo===undo){state.undo=null;line.remove();}},8000);}
- else if(note)sheet.insertBefore(node('p','home-calendar-note',note),body);
+ else if(note&&!details)sheet.insertBefore(node('p','home-calendar-note',note),body);
  // Deleting one time a repeating event happens skips that day; Undo puts the event back as it was either way.
  const remove=(event:LocalCalendarEvent,one=false)=>{if(!actions)return;const whole=series(event),day=(event as any).occurrence;state.undo=whole;state.editing=null;state.draft=null;
   if(one&&day)void actions.save({...whole,skip:[...whole.skip||[],day]});else void actions.remove(whole.id);};
@@ -104,11 +107,12 @@ export function renderCalendar({sheet,nav,body,items,value,state,days,itemButton
  const buttons=new Map<string,HTMLElement>();
  const ownButton=(item)=>{
   const button=itemButton(item);
+  if(details){button.setAttribute('aria-pressed',String(state.selected===item.id));button.onclick=()=>{if(button.dataset.dragged==='true'){delete button.dataset.dragged;return;}state.selected=item.id;state.editing=null;state.draft=null;redraw();};}
   if(!item.local)return button;
   const event=item.record as LocalCalendarEvent,key=item.id.replace(/^local:/,'');button.dataset.local='true';
   button.setAttribute('aria-label',[event.title,REPEATS[event.repeat]&&event.repeat!=='none'?REPEATS[event.repeat]:'',LOCAL_CALENDAR_NAME].filter(Boolean).join(' · '));
   if(event.repeat&&event.repeat!=='none')button.dataset.repeat=event.repeat;
-  button.onclick=()=>{if(button.dataset.dragged==='true'){delete button.dataset.dragged;return;}edit(key);};
+  if(!details)button.onclick=()=>{if(button.dataset.dragged==='true'){delete button.dataset.dragged;return;}edit(key);};
   button.onkeydown=e=>{if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove(own(key)||event,true);}};
   buttons.set(key,button);return button;
  };
@@ -152,24 +156,36 @@ export function renderCalendar({sheet,nav,body,items,value,state,days,itemButton
   column.append(head,hours);columns.push({key,column,hours,allday});body.append(column);
  }
  if(grid){
-  const firstHour=Math.min(8,...placed.filter(p=>!p.range.allDay&&keys.includes(calendarDay(p.range.start))).map(p=>p.range.start.getHours()));
-  const top=state.scroll??Math.max(0,firstHour*HOUR-8);body.scrollTop=top;
+  const firstHour=Math.min(details?9:8,...placed.filter(p=>!p.range.allDay&&keys.includes(calendarDay(p.range.start))).map(p=>p.range.start.getHours()));
+  const top=state.scroll??Math.max(0,firstHour*HOUR-(details?0:8));body.scrollTop=top;
   // Once laid out, try again in case the grid was too short to scroll yet; a scroll since then (by the person) wins.
   const placedAt=body.scrollTop;requestAnimationFrame(()=>{if(body.scrollTop===placedAt)body.scrollTop=top;});
   body.addEventListener('scroll',()=>{state.scroll=body.scrollTop;},{passive:true});
  }
  const undated=items.filter(item=>!itemRange(item)||(!item.allDay&&!calendarDay(item.start)));
  if(undated.length){const section=node('section','home-calendar-undated');section.append(node('h3','','Date not set'));for(const item of undated)section.append(itemButton(item));body.append(section);}
- if(actions)wire({body,columns,own,save,create,grid});
+ if(details&&status){
+  const visible=placed.filter(p=>p.range.allDay?keys.some(k=>k>=p.range.first&&k<=p.range.last):keys.some(k=>calendarDay(p.range.start)<=k&&calendarDay(new Date(+p.range.end-1))>=k)).map(p=>p.item);
+  const selected=visible.find(i=>i.id===state.selected)||visible[0];state.selected=selected?.id||null;
+  for(const b of body.querySelectorAll<HTMLElement>('.home-leaf'))b.setAttribute('aria-pressed',String(b.dataset.itemId===state.selected));
+  calendarDetails(details,status,selected,value,()=>edit(selected.id.replace(/^local:/,'')),()=>itemButton(selected).click());
+  if(grid&&state.mode==='week'){
+   const todayIndex=Math.max(0,keys.indexOf(today)),width=columns[0].column.offsetWidth,initial=state.scrollX??Math.min(todayIndex,Math.max(0,keys.length-4))*width;
+   body.scrollLeft=initial;requestAnimationFrame(()=>{if(body.isConnected)body.scrollLeft=initial;});
+  }
+  body.addEventListener('scroll',()=>{state.scrollX=body.scrollLeft;},{passive:true});
+ }
+ if(actions)wire({body,columns,own,save,create,grid,HOUR});
  const editing=state.editing?own(state.editing):undefined;
- if(editing)openEditor({sheet,anchor:buttons.get(state.editing!)||null,event:editing,state,save,remove,close:()=>edit(null)});
+ if(editing)openEditor({sheet:details||sheet,docked:!!details,anchor:buttons.get(state.editing!)||null,event:editing,state,save,remove,close:()=>edit(null)});
  else state.editing=null;
 }
 
 /** Pointer gestures on the grid and the month: make, move and stretch the person's own events. */
-function wire({body,columns,own,save,create,grid}){
+function wire({body,columns,own,save,create,grid,HOUR}){
  const columnAt=(x:number,y:number)=>{for(const el of document.elementsFromPoint(x,y)){const c=(el as HTMLElement).closest?.('.home-calendar-day');if(c&&body.contains(c))return columns.find(col=>col.column===c)||null;}return null;};
- const minuteAt=(hours:HTMLElement,y:number)=>clamp(snap((y-hours.getBoundingClientRect().top)/HOUR*60),0,DAY_MINUTES);
+ const rawMinute=(hours:HTMLElement,x:number,y:number)=>(pointerPlanePoint(hours,x,y)?.y??0)/HOUR*60;
+ const minuteAt=(hours:HTMLElement,x:number,y:number)=>clamp(snap(rawMinute(hours,x,y)),0,DAY_MINUTES);
  body.addEventListener('pointerdown',(e:PointerEvent)=>{
   if(e.button!==0)return;const target=e.target as HTMLElement;
   const button=target.closest('.home-leaf') as HTMLElement|null;
@@ -178,26 +194,26 @@ function wire({body,columns,own,save,create,grid}){
    return dayDrag(e,button,event);}
   if(!grid)return;
   const col=columns.find(c=>c.hours===target);if(!col)return;
-  e.preventDefault();const anchor=minuteAt(col.hours,e.clientY);let cur=anchor,moved=false;
+  e.preventDefault();const anchor=minuteAt(col.hours,e.clientX,e.clientY);let cur=anchor,moved=false;
   const draft=node('div','home-calendar-draft');draft.setAttribute('aria-hidden','true');
   const show=()=>{const from=Math.min(anchor,cur),to=Math.max(anchor,cur);draft.style.top=from/60*HOUR+'px';draft.style.height=Math.max(to-from,SNAP)/60*HOUR+'px';draft.textContent=label(col.key,from,Math.max(to,from+SNAP));};
-  const move=(m:PointerEvent)=>{const next=minuteAt(col.hours,m.clientY);if(!moved&&Math.abs(m.clientY-e.clientY)<DRAG)return;if(!moved){moved=true;col.hours.append(draft);}cur=next;show();};
+  const move=(m:PointerEvent)=>{const next=minuteAt(col.hours,m.clientX,m.clientY);if(!moved&&Math.abs(m.clientY-e.clientY)<DRAG)return;if(!moved){moved=true;col.hours.append(draft);}cur=next;show();};
   const up=()=>{removeEventListener('pointermove',move);removeEventListener('pointerup',up);removeEventListener('pointercancel',up);draft.remove();
    if(!moved)return;const from=Math.min(anchor,cur),to=Math.max(anchor,cur,from+SNAP);create(newCalendarEvent(col.key,from,to));};
   addEventListener('pointermove',move);addEventListener('pointerup',up);addEventListener('pointercancel',up);
  });
  // Double-click on empty time makes an hour-long event there.
- if(grid)for(const col of columns)col.hours.addEventListener('dblclick',(e:MouseEvent)=>{if(e.target!==col.hours)return;const from=clamp(Math.floor((e.clientY-col.hours.getBoundingClientRect().top)/HOUR*2)*30,0,DAY_MINUTES-60);create(newCalendarEvent(col.key,from,from+60));});
+ if(grid)for(const col of columns)col.hours.addEventListener('dblclick',(e:MouseEvent)=>{if(e.target!==col.hours)return;const from=clamp(Math.floor(rawMinute(col.hours,e.clientX,e.clientY)/30)*30,0,DAY_MINUTES-60);create(newCalendarEvent(col.key,from,from+60));});
  function timedDrag(e:PointerEvent,button:HTMLElement,event:LocalCalendarEvent,resize:boolean){
   e.preventDefault();const start=new Date(event.start),end=new Date(event.end),length=(+end-+start)/60000;
   const home=columns.find(c=>c.hours?.contains(button));if(!home)return;
-  const startMinute=start.getHours()*60+start.getMinutes(),grab=minuteAt(home.hours,e.clientY)-startMinute;
+  const startMinute=start.getHours()*60+start.getMinutes(),grab=rawMinute(home.hours,e.clientX,e.clientY)-startMinute;
   let moved=false,col=home,from=startMinute,to=startMinute+length;
   const move=(m:PointerEvent)=>{
    if(!moved&&Math.hypot(m.clientX-e.clientX,m.clientY-e.clientY)<DRAG)return;
    if(!moved){moved=true;button.dataset.dragging='true';}
-   if(resize){to=Math.max(from+SNAP,minuteAt(col.hours,m.clientY));}
-   else{const over=columnAt(m.clientX,m.clientY);if(over?.hours&&over!==col){col=over;col.hours.append(button);}from=clamp(minuteAt(col.hours,m.clientY)-grab,0,DAY_MINUTES-Math.min(length,DAY_MINUTES));to=from+length;}
+   if(resize){to=Math.max(from+SNAP,minuteAt(col.hours,m.clientX,m.clientY));}
+   else{const over=columnAt(m.clientX,m.clientY);if(over?.hours&&over!==col){col=over;col.hours.append(button);}from=clamp(snap(rawMinute(col.hours,m.clientX,m.clientY)-grab),0,DAY_MINUTES-Math.min(length,DAY_MINUTES));to=from+length;}
    button.style.top=from/60*HOUR+'px';button.style.height=Math.max(to-from,SNAP)/60*HOUR+'px';if(!resize){button.style.left='1px';button.style.width='calc(100% - 3px)';}
   };
   const up=()=>{removeEventListener('pointermove',move);removeEventListener('pointerup',up);removeEventListener('pointercancel',up);delete button.dataset.dragging;
@@ -221,10 +237,10 @@ function wire({body,columns,own,save,create,grid}){
 function label(day:string,from:number,to:number){const d=dayStart(day),a=new Date(+d+from*60000),b=new Date(+d+to*60000);const f=(x:Date)=>x.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});return f(a)+' – '+f(b);}
 
 /** The event's details beside it, like Apple Calendar's popover. Done or a click elsewhere saves; Esc leaves it as it was. */
-function openEditor({sheet,anchor,event,state,save,remove,close}){
+function openEditor({sheet,docked=false,anchor,event,state,save,remove,close}){
  const draft=state.draft&&state.draft.id===event.id?state.draft:null;
  const start=new Date(event.allDay?event.start+'T09:00:00':event.start),end=new Date(event.allDay?event.end+'T10:00:00':event.end);
- const form=node('form','home-event-editor');form.setAttribute('role','dialog');form.setAttribute('aria-label','Event details');
+ const form=node('form','home-event-editor');if(docked){sheet.replaceChildren();form.dataset.docked='true';}form.setAttribute('role','dialog');form.setAttribute('aria-label','Event details');
  const field=(name:string,type:string,value:string,labelText:string)=>{const input=node('input');input.name=name;input.type=type;input.value=value;input.setAttribute('aria-label',labelText);return input;};
  const title=field('title','text',draft?.title??event.title,'Title');title.className='home-event-title';title.maxLength=200;
  const location=field('location','text',draft?.location??event.location,'Location');location.placeholder='Add location';location.maxLength=200;
@@ -271,6 +287,7 @@ function openEditor({sheet,anchor,event,state,save,remove,close}){
  sheet.append(form);
  // Beside the event when there is room, else over the middle of the page.
  const place=()=>{
+  if(docked)return;
   const s=sheet.getBoundingClientRect(),f=form.getBoundingClientRect(),a=anchor?.isConnected?anchor.getBoundingClientRect():null;
   let left=(s.width-f.width)/2,top=(s.height-f.height)/2;
   if(a&&a.width){left=a.right-s.left+8;if(left+f.width>s.width-4)left=a.left-s.left-f.width-8;if(left<4)left=(s.width-f.width)/2;top=clamp(a.top-s.top,4,Math.max(4,s.height-f.height-4));}

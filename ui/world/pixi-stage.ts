@@ -27,7 +27,7 @@ export function createAppletStage(host,onPick){
  const sceneToday=(scene:AppletScene,value)=>{const day=new Date(value?.now||Date.now());for(const region of scene.regions.filter(r=>r.role==='secondary')){const small=document.createElement('small'),strong=document.createElement('strong');small.className='scene-meta';small.textContent=day.toLocaleDateString(undefined,{weekday:'short',month:'short'});strong.className='scene-title';strong.textContent=String(day.getDate());region.element.replaceChildren(small,strong);}};
  function render(room,value,visible,focused=false,_showDevice=false){
   latestRender=[room,value,visible,focused,_showDevice];
-  if(owner!==room.moduleId){owner=room.moduleId;page=0;selected=null;homeState.mode='week';homeState.offset=0;homeState.editing=null;homeState.scroll=null;homeState.undo=null;}
+  if(owner!==room.moduleId){owner=room.moduleId;page=0;selected=null;homeState.mode='week';homeState.offset=0;homeState.editing=null;homeState.scroll=null;homeState.undo=null;homeState.selected=null;homeState.scrollX=null;}
   if(calendarShow&&room.key==='google-calendar'){const today=new Date(value?.now||Date.now());today.setHours(12,0,0,0);homeState.mode='day';homeState.offset=Math.round((+new Date(calendarShow+'T12:00:00')-+today)/86400000);homeState.editing=null;homeState.scroll=null;calendarShow=null;}
   allItems=(value?.items||[]).filter(i=>!['done','dismissed'].includes(i.status));
   hidden(mailNav,!(focused&&selected&&room.key==='gmail'));hidden(focus,!(focused&&selected)||room.key==='gmail');data(focus,'applet',room.key||'');
@@ -53,7 +53,10 @@ export function createAppletStage(host,onPick){
    if(room.key==='gmail')shownItems=renderMailOpen(scene.primary.element,items,value,pick,scene.regions);
    else if(room.key==='meetings'){scene.primary.element.replaceChildren();shownItems=renderMeetingsOpen(scene.primary.element,room,items,value,pick);}
    else if(!HOME_RECORDS.includes(room.key))shownItems=renderSceneList(scene.primary.element,room,items,value,pick,room.key==='weather'?item=>weatherGlyph(item.weatherCode):undefined);
-   else{if(room.key!=='apple-reminders')scene.primary.element.replaceChildren();shownItems=renderHomeOpen(scene.primary.element,room,items,value,homeState,pick,()=>{signature='';render(room,value,true);},scene.regions);if(calendar)sceneToday(scene,value);}
+   else{const active=document.activeElement as HTMLElement|null,calendarFocus=calendar&&active&&scene.element.contains(active)?{id:active.dataset.itemId,label:active.getAttribute('aria-label'),mode:active.closest('.home-calendar-modes')?active.textContent:null}:null;
+    if(room.key!=='apple-reminders')scene.primary.element.replaceChildren();shownItems=renderHomeOpen(scene.primary.element,room,items,value,homeState,pick,()=>{signature='';render(room,value,true);},scene.regions);if(calendar&&scene.primary.element.dataset.calendarDistributed!=='true')sceneToday(scene,value);
+    if(calendarFocus&&document.activeElement===document.body){const restored=[...scene.element.querySelectorAll<HTMLElement>('button,input')].find(e=>calendarFocus.id?e.dataset.itemId===calendarFocus.id:calendarFocus.label?e.getAttribute('aria-label')===calendarFocus.label:calendarFocus.mode&&e.closest('.home-calendar-modes')&&e.textContent===calendarFocus.mode);restored?.focus({preventScroll:true});}
+   }
    scene.layout();return;}
   panel.replaceChildren();panel.dataset.installation=String(local);panel.dataset.work=String(cards);
   panel.classList.remove('home-open','meetings-open');

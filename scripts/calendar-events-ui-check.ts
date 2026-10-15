@@ -8,7 +8,7 @@ import {bundleScript} from './browser-test.ts';
 const result=await bundleScript({entryPoints:['ui/applets/home-open.ts'],globalName:'Home'});
 const browser=await chromium.launch(process.platform==='win32'?{channel:'msedge'}:{});
 try{
- const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const page=await browser.newPage({viewport:{width:1500,height:844},reducedMotion:'reduce'});const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.setContent('<main id="notionWorld" class="native-console" style="position:fixed;inset:0;background:#879a82"><section class="pixi-applet-stage home-open" data-installation="true" data-animated-device="true" style="position:absolute;inset:10% 35% 8% 4%"></section></main>');
  for(const file of ['dist/WorldletWeb/worldlet-ui.css','ui/shell/pixi-world.css'])await page.addStyleTag({content:await readFile(file,'utf8')});await page.addScriptTag({content:result});
  await page.evaluate(()=>{const w=window as any;w.now=new Date(2026,8,28,10,20).getTime();w.state={mode:'week',offset:0};w.events=[];w.picks=[];
@@ -22,7 +22,8 @@ try{
  assert.equal(await page.locator('.home-calendar-day').count(),7);
  assert.equal(await page.locator('.home-calendar-gutter').count(),1,'Week is a time grid with an hour gutter');
  const lanes=await page.locator('.home-calendar-event').evaluateAll(els=>els.map(e=>Math.round(e.getBoundingClientRect().width)));
- assert.ok(lanes.length===2&&lanes.every(w=>w<60),'Overlapping events share the day side by side: '+lanes);
+ const dayWidth=await page.locator('.home-calendar-day').first().evaluate(e=>e.getBoundingClientRect().width);
+ assert.ok(lanes.length===2&&lanes.every(w=>w<=dayWidth/2+1),'Overlapping events share the day side by side: '+lanes);
  assert.equal(await page.locator('.home-calendar-allday .home-leaf').count(),1,'All-day events sit above the hours');
 
  // Drag on empty time: Wednesday 1:00–2:30 PM, then name it.

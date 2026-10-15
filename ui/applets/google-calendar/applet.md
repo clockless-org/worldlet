@@ -53,3 +53,9 @@ never imply additional authorization or background work.
 The registered garden calendar has a clean paper surface, red binding and brass rings. [open.css](open.css) styles the existing live day/week/month grid on that surface. The week keeps all seven days; the small separate hanging page displays today's date. Existing local-event creation, editing, move/resize, repeat, delete and undo behavior stays in [grid.ts](grid.ts); imported events remain read-only.
 
 Preview: build the native UI, run `node scripts/core-paper-preview.ts`, serve the repository root and open `/output/core-paper-applets/?applet=google-calendar`. All preview events are fictional.
+
+## Measured book pages
+
+A calendar scene may provide `heading`, `toolbar`, `details` and `status` secondary regions. The shared calendar then places live navigation on the heading and toolbar, retains seven days in a horizontally scrollable week, and shows the selected event on the details page. Selection previews; **Edit local event** opens the existing editor on that page, while **Original** opens a synced source without writing it. Day and Month remain available, and scenes without these regions keep the single-sheet view.
+
+Projected paper uses the browser's actual layout plane for pointer coordinates. Dragging preserves the continuous grab offset before applying the 15-minute snap, so a one-hour movement stays one hour under perspective. Book grids use 50 layout pixels per hour; the existing single sheet keeps 40. The same size drives both visual rules and gesture calculations. `scripts/calendar-plane-check.ts` checks projected create/move/resize, source routing, date navigation and mode changes at 1500 × 844.
