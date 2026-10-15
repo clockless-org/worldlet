@@ -1,4 +1,5 @@
 import {AGENT_ID_PATTERN,type AgentAuditEntry,type AgentIdentity,type Grant} from '../../contracts/agent-identity.ts';
+import {SERVICE_ACTIONS,SERVICE_PROVIDERS} from '../../contracts/services.ts';
 import {grantedActions,worldActions,type WorldAction} from '../tools/index.ts';
 import {turnGuardedWrite,turnWriteAdmission} from './turn-trust.ts';
 import {HERMES_CHANNEL_LINK_TOOL,HERMES_CHANNEL_READ_ONLY,HERMES_CHANNEL_TOOLS,hermesChannelTrust} from './hermes-server.ts';
@@ -141,6 +142,31 @@ export function channelDefaultGrants(agentId:string,grantedAt:string,actions:Wor
   {id:agentId+'-channel-read',agentId,targets:targets(HERMES_CHANNEL_TOOLS),access:'read',duration:'standing',grantedAt},
   {id:agentId+'-channel-link',agentId,targets:targets([HERMES_CHANNEL_LINK_TOOL]),access:'write',duration:'standing',grantedAt},
  ];
+}
+/** A Worldlet Service's read targets (contracts/services.ts SERVICE_ACTIONS: `github/list`, `github/read`…): all that
+ * "Can read <Service>" in Settings › Agent › Access grants. Empty for anything that is not a Service. */
+export function serviceReadTargets(provider:string):string[] {
+ if(typeof provider!=='string'||!SERVICE_PROVIDERS.includes(provider))return [];
+ return Object.keys(SERVICE_ACTIONS[provider]).map(operation=>provider+'/'+operation);
+}
+/** The one Grant ID "Can read <Service>" gives an Agent, so turning it off and on again replaces the same Grant. */
+export const serviceGrantId=(agentId:string,provider:string)=>agentId+'-service-'+provider;
+/** The standing read Grant for one Service, or null when `provider` is not a Service or the Agent ID is not one. Hosts
+ * build it from the Service's name only: a page never supplies targets. Never part of the default Grants. */
+export function serviceReadGrant(agentId:string,provider:string,grantedAt:string):Grant|null {
+ const targets=serviceReadTargets(provider);
+ if(!targets.length||typeof agentId!=='string'||!AGENT_ID_PATTERN.test(agentId))return null;
+ return {id:serviceGrantId(agentId,provider),agentId,targets,access:'read',duration:'standing',grantedAt};
+}
+/** Whether this Agent's "Can read <Service>" Grant is active. */
+export function serviceGranted(agentId:string,grants:readonly Grant[],provider:string,now:string):boolean {
+ const id=serviceGrantId(agentId,provider);
+ return serviceReadTargets(provider).length>0&&grants.some(grant=>grant.id===id&&grant.agentId===agentId&&grantActive(grant,now));
+}
+/** The audit entry for the person turning "Can read <Service>" on (`grant`) or off (`ungrant`) in Settings. */
+export function serviceGrantAuditEntry(agentId:string,provider:string,granted:boolean,at:string):AgentAuditEntry {
+ return {at,agentId,target:provider,action:granted?'grant':'ungrant',decision:'allowed',grantId:serviceGrantId(agentId,provider),
+  reason:granted?'The person let this Agent read this Service in Settings.':'The person stopped this Agent reading this Service in Settings.'};
 }
 /** While a Fox turn holds the standing server, its Agent's calls go to that turn (world-tool-bridge.ts standingTurn), as
  * they did before Grants: a call the turn's own stream announced is Fox's and runs under the turn's trust; any other

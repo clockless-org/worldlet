@@ -509,6 +509,27 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
      assert.deepEqual(channel.map(([name,,agent])=>[name,agent]),[['query_world_items','codex']]);
      assert.ok(!JSON.parse(JSON.stringify(await ask('describe_world_tools',{}))).targets.includes('content'),'and it lists only its own targets');
      assert.deepEqual(toTurn,[],'nothing went to Fox\'s turn');
+     // "Can read GitHub" (Settings › Agent › Access): only that Service's read targets, taken from its name; the next
+     // call sees it (no restart) and every change is audited.
+     channel.length=0;
+     const github={target:'github',action:'list',arguments:'{}'};
+     assert.equal((await ask('call_world_tool',github)).error,STANDING_OUTSIDE_TURN,'no Service without a Grant');
+     for(const name of ['*/*','gmail','github/*','__proto__'])assert.equal(access.grantService('codex',name),false,'not a Service: '+name);
+     assert.equal(access.grantService('nobody','github'),false,'an unknown Agent');
+     assert.equal(access.grantService('codex','github'),true);
+     assert.deepEqual(access.grants('codex').filter(g=>!g.revokedAt&&g.targets.some(t=>/^(github|posthog|cloudflare)\//.test(t))).map(g=>[g.id,g.targets,g.access,g.duration]),
+      [['codex-service-github',['github/list','github/read','github/search'],'read','standing']],'exactly GitHub\'s reads');
+     await ask('call_world_tool',github);
+     assert.equal((await ask('call_world_tool',{target:'posthog',action:'query',arguments:'{"query":"select 1"}'})).error,STANDING_OUTSIDE_TURN,'another Service stays refused');
+     assert.deepEqual(channel.map(([name,args,agent])=>[name,args.provider,args.operation,agent]),[['read_service','github','list','codex']],'granted: its next call runs');
+     assert.ok(JSON.parse(JSON.stringify(await ask('describe_world_tools',{}))).targets.includes('github'));
+     assert.equal(access.ungrantService('codex','github'),true);
+     channel.length=0;
+     assert.equal((await ask('call_world_tool',github)).error,STANDING_OUTSIDE_TURN,'taken back: refused again');
+     assert.deepEqual(channel,[]);
+     assert.equal(access.ungrantService('codex','github'),true,'taking back twice changes nothing');
+     assert.deepEqual(audit.filter(e=>e.agentId==='codex'&&['grant','ungrant'].includes(e.action)).map(e=>[e.target,e.action,e.grantId]),[['github','grant','codex-service-github'],['github','ungrant','codex-service-github']],'each change audited once');
+     assert.deepEqual(audit.filter(e=>e.agentId==='codex'&&e.target==='github'&&e.action==='list').map(e=>e.decision),['denied','allowed','denied'],'and each call');
     }finally{release();}
    }
    // Revoked: its token and endpoint files go and its calls are refused.
@@ -517,6 +538,7 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
    assert.equal(access.identify(token),null);assert.equal(secrets.has('agent-token:hermes'),false);
    assert.ok(!fs.existsSync(path.join(profile,standingEndpointFile('hermes')))&&!fs.existsSync(path.join(profile,STANDING_LEGACY_ENDPOINT_FILE)),'its endpoint files go');
    assert.ok(access.identity('hermes')?.revokedAt);
+   assert.equal(access.grantService('hermes','github'),false,'a revoked Agent gets no Service');
    const refused=await mcp('tools/call',{name:'call_world_tool',arguments:{target:'items',action:'query',arguments:'{}'}});
    assert.equal(refused.isError,true);
    standing.server(profile);assert.equal(fs.existsSync(path.join(profile,standingEndpointFile('hermes'))),false,'a revoked Agent stays revoked across runs');
