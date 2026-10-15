@@ -19,6 +19,8 @@ export const MCP_ENDPOINTS:Readonly<Record<string,string>>=Object.freeze({notion
 const TITLES:Readonly<Record<string,string>>=Object.freeze({notion:'Notion',github:'GitHub',linear:'Linear',paypal:'PayPal',todoist:'Todoist',supabase:'Supabase'});
 const GATES:Readonly<Record<string,McpGate>>=Object.freeze({github:GITHUB_GATE,notion:NOTION_GATE,todoist:TODOIST_GATE,linear:LINEAR_GATE,paypal:PAYPAL_GATE,supabase:SUPABASE_GATE});
 export const MCP_PROVIDERS=Object.freeze(Object.keys(MCP_ENDPOINTS));
+/** What the person reads when a pasted token is refused (401). */
+const TOKEN_REFUSED:Readonly<Record<string,string>>=Object.freeze({github:'GitHub did not accept this token. Check that it has not expired and has read access to Issues, Pull requests and Metadata, then paste it again.'});
 
 export interface McpSourceOptions {accounts:McpAccounts;openExternal(url:string):Promise<void>;
  /** Where Notion's reviewed writes keep their drafts (notion_writes.py's `worldlet-notion-reviews`). */
@@ -58,25 +60,29 @@ export class McpSource {
    throw error;
   }finally{clearTimeout(timer);void session.close();}
  }
- /** host.py `mcp` test: the server answers and has the connector's tools. */
- async test(provider:string):Promise<Row> {
-  const session=this.session(provider,null) as ReturnType<McpAccounts['session']>;
+ /** host.py `mcp` test: the server answers and has the connector's tools. `connection`: one not kept yet (a pasted
+  * token being checked); a token the server refuses says so plainly. */
+ async test(provider:string,connection?:McpConnection):Promise<Row> {
+  const session=connection?this.accounts.session(connection,TITLES[provider]??provider):this.session(provider,null) as ReturnType<McpAccounts['session']>;
   try{
    const tools=enabledMcpTools(provider,await session.tools(),MCP_POLICY[provider]?.tools??null);
    return {ok:true,tools,status:'connected'};
   }catch(error){
-   if(error instanceof McpUnauthorized)throw new WorldletError('This connection needs authorization before use.');
+   if(error instanceof McpUnauthorized)throw new WorldletError(connection?TOKEN_REFUSED[provider]??'The service did not accept this token. Check it and paste it again.':'This connection needs authorization before use.');
    throw error;
   }finally{void session.close();}
  }
- /** Connects through Worldlet (host.py `mcp` configure): the official endpoint, a token or OAuth, then the test. */
+ /** Connects through Worldlet (host.py `mcp` configure): the official endpoint, a token or OAuth, then the test. A
+  * token is tested before it is kept (McpAccounts.connect `verify`), so one the server refuses replaces nothing. */
  async connect(provider:string,url:string,token:string,cancelled:()=>boolean,opened:(url:string)=>void):Promise<Row> {
   const endpoint=url||MCP_ENDPOINTS[provider]||'';
   mcpConfiguration(provider,endpoint);
+  let tested:Row|null=null;
   await this.accounts.connect(provider,endpoint,token,async address=>{
    try{await this.openExternal(address);}catch{throw new WorldletError('Could not open your browser. Try again.');}
    opened(address);
-  },cancelled);
+  },cancelled,async connection=>{tested=await this.test(provider,connection);});
+  if(tested)return tested;
   try{return await this.test(provider);}
   catch(error){this.accounts.disconnect(provider);throw error;}
  }
