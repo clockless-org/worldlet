@@ -19,6 +19,11 @@ assert.deepEqual(ask(state,t0+PROACTIVE.minGapSeconds),{due:true});
 // A shown line no longer waits for an answer (owner 2026-10-13 「companion说的再勤一点」): the gap alone spaces lines;
 // answered in time, the next one keeps the normal gap.
 assert(PROACTIVE.minGapSeconds<=5*60&&PROACTIVE.perDay>=30,'Fox speaks every few minutes, dozens of times a day');
+// Owner 2026-10-15 「companion说话频率再高一些」: about twice the 2026-10-13 pace.
+assert(PROACTIVE.minGapSeconds<=2*60&&PROACTIVE.checkinSeconds<=3*60&&PROACTIVE.perDay>=80&&PROACTIVE.settleSeconds.world<=10&&PROACTIVE.settleSeconds.applet<=60,'Fox checks in every few minutes');
+assert(PROACTIVE.browse.againSeconds<=40&&PROACTIVE.browse.gapSeconds<=30&&PROACTIVE.wrapup.minStaySeconds<=60,'Applets get a look every 40 seconds');
+assert(PROACTIVE.minGapSeconds>60&&PROACTIVE.minGapSeconds<PROACTIVE.checkinSeconds,'a check in still waits longer than the gap');
+assert.equal(PROACTIVE.quietSeconds,12*3600,'"be quiet" still holds 12 hours');
 proactiveSpoke(state,{now:t0+PROACTIVE.minGapSeconds,day,place:'Games',line:'Nice run.'});
 assert.deepEqual(ask(state,t0+PROACTIVE.minGapSeconds+60,'Mail'),{due:false,reason:'gap'});
 assert.equal(proactiveHeard(state,{now:t0+PROACTIVE.minGapSeconds+120,text:'haha thanks'}),false);
@@ -46,7 +51,7 @@ assert.deepEqual(ask(state,t0+PROACTIVE.checkinSeconds,'World','checkin'),{due:f
 const checkinTask=proactiveTask({moment:'checkin',place:'World',local:'Mon 15:10',minutes:12,recent:[],lastWords:''});
 for(const part of ['have not said anything for a while','presence','rates 4 or more','PASS','read only'])assert(checkinTask.includes(part),part);
 const proactivePage=fs.readFileSync('ui/companion/fox-proactive.ts','utf8');
-assert.match(proactivePage,/if\(\(now-checkedAt\)\/1000>=60\)\{checkedAt=now;void ask\('checkin',key\);\}/);
+assert.match(proactivePage,/if\(\(now-checkedAt\)\/1000>=30\)\{checkedAt=now;void ask\('checkin',key\);\}/);
 // Fox's own last line no longer holds the next one; a question, notice or card still does.
 assert.match(fs.readFileSync('ui/companion/native-chat.ts','utf8'),/!!guideShown&&!spokeFirstLine\(guideShown\)\|\|guideHere\(guide\)&&!spokeFirstLine\(guide\)/);
 
@@ -151,7 +156,7 @@ assert.deepEqual(wrapAsk(t0),{due:true},'a wrap up when they come back');
 proactiveAsked(state,{now:t0,day,moment:'wrapup'});
 proactiveSpoke(state,{now:t0,day,place:'World',line:'Three takeaways from that piece: …',moment:'wrapup'});
 assert.equal(state.wrapped,1);assert.equal(state.spoken,0,'a wrap up keeps its own count');
-assert.deepEqual(wrapAsk(t0+60),{due:false,reason:'gap'});
+assert.deepEqual(wrapAsk(t0+PROACTIVE.wrapup.gapSeconds-1),{due:false,reason:'gap'});
 assert.deepEqual(ask(state,t0+60,'World','settled'),{due:false,reason:'gap'},'no settled line right after the wrap up');
 assert.deepEqual(wrapAsk(t0+PROACTIVE.wrapup.gapSeconds),{due:true});
 state.wrapped=PROACTIVE.wrapup.perDay;
