@@ -76,18 +76,18 @@
 /* A registered frame and Fox use the same theme geometry, rather than reserving a second fixed third.
    Narrow windows retain the shell's stacked layout. The image and native foreground keep one scale. */
 @media(min-width:801px){
- #notionWorld.native-console[data-applet-frame][data-applet-scene]{--reader-companion-lane:calc(100% - var(--applet-scene-companion-left))}
- #notionWorld.native-console[data-applet-frame][data-applet-scene] .notion-hud{
+ #notionWorld.native-console[data-applet-frame][data-applet-scene]:not([data-applet-companion-bar=true]){--reader-companion-lane:calc(100% - var(--applet-scene-companion-left))}
+ #notionWorld.native-console[data-applet-frame][data-applet-scene]:not([data-applet-companion-bar=true]) .notion-hud{
   left:calc(var(--applet-scene-companion-left) + var(--applet-scene-companion-width) / 2);
   width:calc(var(--applet-scene-companion-width) - 8px);transform:translateX(-50%);
  }
  /* The Applet shelf (ui/hud/applet-shelf.ts) spans Fox's column, centered over Fox. */
- #notionWorld.native-console[data-applet-frame][data-applet-scene]>.applet-shelf{left:var(--applet-scene-companion-left);width:var(--applet-scene-companion-width)}
- #notionWorld.native-console.fox-first-console[data-applet-frame][data-applet-scene] .companion-dialogue{
+ #notionWorld.native-console[data-applet-frame][data-applet-scene]:not([data-applet-companion-bar=true])>.applet-shelf{left:var(--applet-scene-companion-left);width:var(--applet-scene-companion-width)}
+ #notionWorld.native-console.fox-first-console[data-applet-frame][data-applet-scene]:not([data-applet-companion-bar=true]) .companion-dialogue{
   width:min(460px,calc(var(--applet-scene-companion-width) - 24px));
   max-width:calc(var(--applet-scene-companion-width) - 24px);min-width:0;
  }
- #notionWorld.native-console.fox-first-console[data-applet-frame][data-applet-scene] .companion-action-bar{min-width:0}
+ #notionWorld.native-console.fox-first-console[data-applet-frame][data-applet-scene]:not([data-applet-companion-bar=true]) .companion-action-bar{min-width:0}
 }
 /* In the smaller companion lane, stack the icon over the label instead of truncating it. */
 @media(min-width:801px) and (max-width:1400px){
@@ -237,3 +237,13 @@
 
 .applet-scene .game-region .sudoku-legend span{font:inherit;color:inherit}
 .applet-scene .game-region .sudoku-legend-entry:before{background:#2869bd}
+
+/* A bottom composer is not a side column. Keep navigation outside the live page and its native rim. */
+@media(min-width:801px){
+ #notionWorld.native-console[data-applet-frame][data-applet-companion-bar=true]>.applet-shelf{left:16px;width:max(280px,calc(var(--applet-scene-primary-left) - 32px))}
+ #notionWorld.native-console[data-applet-companion-bar=true] .companion-dock{position:static;inset:auto;height:0;min-height:0}
+ #notionWorld.native-console[data-applet-companion-bar=true] .notion-shortcuts{position:absolute;inset:0;width:100%;height:100%;min-height:0;max-width:none}
+ #notionWorld.native-console[data-applet-companion-bar=true] .fox-action-side{height:40px;min-height:0}
+ #notionWorld.native-console[data-applet-companion-bar=true] .world-actions{position:absolute;left:0;right:auto;top:-48px;bottom:auto;display:flex;justify-content:flex-start;width:100%;height:40px;gap:8px}
+ #notionWorld.native-console[data-applet-companion-bar=true] .world-actions .world-capsule{height:40px;min-height:40px;margin:0;padding:8px 12px}
+}
