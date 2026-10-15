@@ -57,6 +57,8 @@ export interface WorldItem {
  sources?: {provider?: string; id?: string; url?: string; quote?: string; local?: boolean}[];
  createdAt?: number | string;
  updatedAt?: number | string;
+ /** The Agent that saved it (contracts/agent-identity.ts). Host-stamped from the calling Agent's token; never taken from a model. */
+ agentId?: string;
  [key: string]: any;
 }
 

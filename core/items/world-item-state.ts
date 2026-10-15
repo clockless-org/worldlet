@@ -1,6 +1,7 @@
 import {characters} from '../companion/index.ts';
 
 import type {WorldItem as Item} from '../../contracts/world-item.ts';
+import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
 /** Pure state changes. Hosts own evidence authorization, identity and transactions. */
 export function updateWorldItem(item:Item,status:string,now:string,snoozedUntil?:string,by?:string):Item {
  if(!['open','read','done','dismissed'].includes(status))throw Error('Unknown item or status.');
@@ -20,9 +21,14 @@ export function reviewWorldItem(item:Item,assessment:string,reason:string,source
  return {...item,...(locked?{}:{status:assessment==='actionable'?'open':assessment==='resolved'?'done':'candidate',statusOrigin:'agent'}),
   assessment,attentionReason:reason,policyVersion:2,reviewEvidence:sources,reviewedAt:now,updatedAt:now};
 }
-export function prepareWorldItem(item:Item,previous:Item|undefined,id:string,identity:string,run:string,now:string,previousIdentity?:string):Item {
+/** `agentId` is the host's, from the calling Agent's token (contracts/agent-identity.ts); an item keeps the Agent that
+ * first saved it, and an `agentId` the model sent is dropped. */
+export function prepareWorldItem(item:Item,previous:Item|undefined,id:string,identity:string,run:string,now:string,previousIdentity?:string,agentId?:string):Item {
  const result:Item={...item,identity,id,status:previous?.status==='candidate'?'open':previous?.status??'open',policyVersion:2,
   statusOrigin:previous?.statusOrigin??'agent',createdAt:previous?.createdAt??now,observedAt:previous?previous.observedAt:now,updatedAt:now,runId:run};
+ delete result.agentId;
+ const by=typeof agentId==='string'&&AGENT_ID_PATTERN.test(agentId)?agentId:typeof previous?.agentId==='string'?previous.agentId:undefined;
+ if(by)result.agentId=by;
  delete result.snoozedUntil;if(previous?.snoozedUntil)result.snoozedUntil=previous.snoozedUntil;
  delete result.obligationIdentityAliases;
  // Receipt time is host-owned: projection reads it from the reader's facts, never from the model.
