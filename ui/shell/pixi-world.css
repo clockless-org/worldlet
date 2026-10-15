@@ -399,6 +399,11 @@ html:has(#setupArrivingDevices) .notion-pin[data-kind=region-add],
 #notionWorld .applet-shelf-new{right:16px;padding:0}
 #notionWorld .applet-shelf-new svg{width:20px;height:20px}
 #notionWorld .applet-shelf-more[hidden]{display:none}
+/* The shelf's + rides at the row's end while the toolbar shows (owner request 2026-10-15), a frosted black button like the rest
+   (resources/styles/builtin/controls.css). */
+#notionWorld .browser-toolbar>.applet-shelf-new{position:static;flex:none;display:inline-flex;align-items:center;justify-content:center;width:34px;min-width:34px;height:34px;min-height:34px;padding:0;border:1px solid var(--browser-glass-line);border-radius:17px;background:var(--browser-glass-fill);box-shadow:var(--browser-glass-shadow);color:#fff;-webkit-backdrop-filter:var(--browser-glass-blur);backdrop-filter:var(--browser-glass-blur)}
+#notionWorld .browser-toolbar>.applet-shelf-new:hover{background:var(--browser-glass-hover)}
+#notionWorld .browser-toolbar>.applet-shelf-new svg{width:18px;height:18px}
 #notionWorld .applet-shelf-extra{pointer-events:auto;position:absolute;left:8px;top:64px;max-width:calc(100% - 40px);display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px 30px;border-radius:16px;background:#261a0ecc;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);z-index:2}
 #notionWorld .applet-shelf-extra[hidden]{display:none}
 #notionWorld .applet-shelf-extra .applet-shelf-pick{position:relative;transform:none;--shelf-size:44px;width:72px}

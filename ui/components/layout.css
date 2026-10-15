@@ -315,7 +315,7 @@
    whole row over the same spot for as long as it is used. The page never moves for either. */
 :is(#notionWorld,.native-console)>.notion-content[data-template=browser]{--browser-pad:3px}
 :is(#notionWorld,.native-console)>.notion-content[data-template=browser]:has(>.browser-toolbar:not([hidden])){overflow:visible}
-:is(#notionWorld,.native-console)>.notion-content[data-template=browser]>.browser-toolbar{position:absolute;z-index:3;left:50%;top:calc(var(--browser-pad) - 36px);box-sizing:border-box;width:min(600px,calc(100% - 48px));max-width:none;display:flex;align-items:center;gap:4px;height:36px;margin:0;padding:0;border-radius:18px;background:transparent;box-shadow:none;transform:translateX(-50%)}
+:is(#notionWorld,.native-console)>.notion-content[data-template=browser]>.browser-toolbar{position:absolute;z-index:3;left:50%;top:calc(var(--browser-pad) - 36px);box-sizing:border-box;width:min(680px,calc(100% - 48px));max-width:none;display:flex;align-items:center;gap:4px;height:36px;margin:0;padding:0;border-radius:18px;background:transparent;box-shadow:none;transform:translateX(-50%)}
 /* Every control of the toolbar is its own frosted black button (owner request 2026-10-15: "网页上的URL bar都看不清了，换成
    磨砂黑色按钮"): dark glass with light ink reads over any page, frame or World behind it. */
 .browser-toolbar{--browser-glass-fill:#101010a6;--browser-glass-hover:#101010cc;--browser-glass-line:#ffffff2e;--browser-glass-blur:blur(18px) saturate(1.2);--browser-glass-shadow:inset 0 1px 0 #ffffff1a,0 2px 8px #0000004d}
