@@ -95,6 +95,8 @@ export interface AttentionEventMember extends AttentionTimes {
  snoozedUntil?:string;
  event?:{topic:string;subject:string};
  sources:{provider:string;id:string;remoteId?:string;quote?:string;url?:string}[];
+ /** The Agent that saved the item (contracts/agent-identity.ts), host-stamped; never taken from a model. */
+ agentId?:string;
 }
 /** What the user last decided about an event, keyed by its stable ID and source identities. */
 export interface AttentionEventRecord {

@@ -221,7 +221,7 @@ export function invoke(operation:string,input:string):string {
   if(operation==='worldItemMutation')return JSON.stringify({ok:true,value:worldItemMutation(value.item,value.status,value.now,value.snoozedUntil,value.readOnlyUpdate,value.by)});
   if(operation==='worldItemUpdate')return JSON.stringify({ok:true,value:updateWorldItem(value.item,value.status,value.now,value.snoozedUntil)});
   if(operation==='worldItemReview')return JSON.stringify({ok:true,value:reviewWorldItem(value.item,value.assessment,value.reason,value.sources,value.now)});
-  if(operation==='worldItemPrepare')return JSON.stringify({ok:true,value:prepareWorldItem(value.item,value.previous,value.id,value.identity,value.run,value.now,value.previousIdentity)});
+  if(operation==='worldItemPrepare')return JSON.stringify({ok:true,value:prepareWorldItem(value.item,value.previous,value.id,value.identity,value.run,value.now,value.previousIdentity,value.agentId)});
   if(operation==='worldItemNeedsReview')return JSON.stringify({ok:true,value:needsAttentionReview(value.item)});
   if(operation==='companionValidate'){validateCompanionArchive(value.archive);return JSON.stringify({ok:true,value:true});}
   if(operation==='companionValidID')return JSON.stringify({ok:true,value:validCompanionID(value.text)});
