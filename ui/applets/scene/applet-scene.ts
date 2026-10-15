@@ -76,7 +76,8 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
   const fit=fitThemeScene(source.registration,width,height);
   if(painted)place(plate,fit.image);
   // A distributed board has its filters and preview on separate sheets; its task column can be narrower.
-  const distributed=regions.some(r=>r.id==='navigation')&&regions.some(r=>r.id==='details');
+  const has=(id:string)=>regions.some(r=>r.id===id);
+  const distributed=has('navigation')&&has('details')||has('index')&&has('heading')&&has('status');
   const fitted=fit.regions.find(r=>r.role==='primary')!,compact=fitted.width<(distributed?280:SCENE_COMPACT_WIDTH);
   element.dataset.compact=String(compact);
   const sceneOrigin=layoutOrigin(element),shellOrigin=layoutOrigin(options.shell||element);

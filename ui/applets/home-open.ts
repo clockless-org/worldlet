@@ -16,7 +16,7 @@ export function calendarWindow(now:number,mode:HomeOpenState['mode'],offset:numb
 }
 export function renderHomeOpen(panel,room,items,value,state:HomeOpenState,pick,redraw,regions:readonly AppletSceneRegion[]=[]){
  if(room.key==='apple-reminders')return renderRemindersOpen(panel,items,value,state,pick,regions);
- if(room.key==='apple-notes')return renderNotesOpen(panel,items,value,state,pick);
+ if(room.key==='apple-notes')return renderNotesOpen(panel,items,value,state,pick,regions);
  const slots=room.key==='google-calendar'?calendarRegions(panel,regions):null;
  const calendar=room.key==='google-calendar',notes=room.key==='apple-notes';panel.classList.add('home-open');
  panel.dataset.homeKind=calendar?'calendar':notes?'notes':'reminders';panel.dataset.calendarMode=state.mode;

@@ -12,7 +12,7 @@ export function createAppletStage(host,onPick){
  // An Applet the active theme paints a scene for, its own or its family's (ui/applets/scene/scene-family.ts), draws
  // through the shared scene renderer: switching themes changes which pictures there are, never this code. Mail's scene
  // stays while a letter is read, so its reader sits on the same painted paper; the others' items open in the shared reader.
- const SCENE_READERS=new Set(['gmail']);let scene:AppletScene|null=null;
+ const SCENE_READERS=new Set(['gmail','apple-notes']);let scene:AppletScene|null=null;
  const homeState:HomeOpenState={mode:'week',offset:0};
  // Attention opens Calendar on the day of one of the person's events.
  let calendarShow:string|null=null;
@@ -37,7 +37,7 @@ export function createAppletStage(host,onPick){
   const sceneOpen=!!room.key&&!!appletSceneKey(room.key)&&(visible||focused&&SCENE_READERS.has(room.key));
   if(scene&&(!sceneOpen||scene.element.dataset.applet!==room.key)){scene.destroy();scene=null;delete panel.dataset.scene;delete panel.dataset.reading;}
   if(sceneOpen&&!scene){panel.replaceChildren();scene=mountAppletScene(panel,room.key,{shell:(host.closest('#notionWorld') as HTMLElement|null)||host});panel.dataset.scene=room.key;signature='';}
-  if(scene)data(panel,'reading',String(!visible));
+  if(scene){data(panel,'reading',String(!visible));scene.element.inert=!visible&&room.key==='apple-notes';}
   hidden(panel,!visible&&!sceneOpen);data(panel,'applet',room.key||'');data(panel,'animatedDevice',String(!!(globalThis as any).__WORLDLET_25D_ASSETS__?.motion?.[room.key]));if(!visible){signature='';return;}
   const cards=['github',...CODING_SESSIONS,...ORIGINAL_READERS,'meetings','voice-memos','messages'].includes(room.key);
   const local=cards||HOME_NATIVE.includes(room.key),calendar=room.key==='google-calendar';
@@ -54,7 +54,7 @@ export function createAppletStage(host,onPick){
    else if(room.key==='meetings'){scene.primary.element.replaceChildren();shownItems=renderMeetingsOpen(scene.primary.element,room,items,value,pick);}
    else if(!HOME_RECORDS.includes(room.key))shownItems=renderSceneList(scene.primary.element,room,items,value,pick,room.key==='weather'?item=>weatherGlyph(item.weatherCode):undefined);
    else{const active=document.activeElement as HTMLElement|null,calendarFocus=calendar&&active&&scene.element.contains(active)?{id:active.dataset.itemId,label:active.getAttribute('aria-label'),mode:active.closest('.home-calendar-modes')?active.textContent:null}:null;
-    if(room.key!=='apple-reminders')scene.primary.element.replaceChildren();shownItems=renderHomeOpen(scene.primary.element,room,items,value,homeState,pick,()=>{signature='';render(room,value,true);},scene.regions);if(calendar&&scene.primary.element.dataset.calendarDistributed!=='true')sceneToday(scene,value);
+    if(!['apple-reminders','apple-notes'].includes(room.key))scene.primary.element.replaceChildren();shownItems=renderHomeOpen(scene.primary.element,room,items,value,homeState,pick,()=>{signature='';render(room,value,true);},scene.regions);if(calendar&&scene.primary.element.dataset.calendarDistributed!=='true')sceneToday(scene,value);
     if(calendarFocus&&document.activeElement===document.body){const restored=[...scene.element.querySelectorAll<HTMLElement>('button,input')].find(e=>calendarFocus.id?e.dataset.itemId===calendarFocus.id:calendarFocus.label?e.getAttribute('aria-label')===calendarFocus.label:calendarFocus.mode&&e.closest('.home-calendar-modes')&&e.textContent===calendarFocus.mode);restored?.focus({preventScroll:true});}
    }
    scene.layout();return;}

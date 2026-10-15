@@ -37,3 +37,9 @@ A painted scene with a companion clearance at least 360 px wide, under 100 px hi
 A measured `quad` on a region maps its HTML to a convex paper plane through `scene-plane.ts`. The background and bounding region retain the same contain scale; CSS inverse-maps pointer coordinates. Compact fallback uses an ordinary rectangle. Shared Mail can bind `navigation`, `letters`, `heading`, `actions` and `status` secondary regions while its primary contains the selected original, with the same data and callbacks as its single-sheet view. Switching letters turns the outgoing HTML page, marks its controls inert, removes duplicate IDs and respects reduced motion.
 
 Calendar can bind `heading`, `toolbar`, `details` and `status` secondary regions. Its book layout retains seven accessible days with horizontal scrolling and a persistent event inspector; date modes, local writes and synced-original routing stay host-owned. `pointer-plane.ts` inverse-maps real browser geometry for drag input, including ancestor perspective and scrolling. A continuous event grab offset is snapped only after the pointer moves, avoiding an extra quarter-hour shift.
+
+Notes may use `heading`, `index` and `status` secondary regions around its primary
+reader. This distributed book uses the same 280 px reading threshold as a board
+with separate navigation/details; the normal single-sheet threshold remains
+420 px. The Applet still owns search, folders, original reading, clipboard and
+Fox preparation. The regions carry no executable theme behavior.

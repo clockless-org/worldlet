@@ -7,7 +7,7 @@
   "content": "fictional-design-samples",
   "sources": {
     "ui/themes/scene-frame.ts": "f5e9d343b8afe6d3d99790954b27539edb9658f63859155ab29518e9911c972f",
-    "ui/applets/scene/applet-scene.ts": "e6ea91abbb763d159ac6fafd6e3e39acad592a99ba604559b396395895cccda0",
+    "ui/applets/scene/applet-scene.ts": "c6ee53ab9cc2e23d791a45c024e93b723c4a30d72494db1eb3e7489f28f3705d",
     "ui/applets/scene/scene-plane.ts": "4bebe0ba015feb88ed0c99fdc9f63cfc563023d207792fc2df67ebebbbc4f111",
     "ui/applets/gmail/page-turn.ts": "51002b7e298ca712fd48ccb700379f8250157ce9a890059a358a6e0dfd71ae60",
     "ui/applets/gmail/focus.css": "0f3974bfeb14f21f8cda094d162188e680978655c7391a13063483eeb4fad019",
@@ -18,9 +18,9 @@
     "scripts/fixtures/applet-scene-preview/index.html": "bef0483437a4aae855781eb7b2213cba39ef9840ac98f275ffd36ef723b6a065",
     "ui/theme-packages/village/presentation.json": "034340571ba1a0e652d42313d119e773b8c0d02fb244fffa2fe05286e2a07706",
     "resources/styles/builtin/references/registered-scenes/mockup-materials/manifest.json": "2a2f666e54b7fea85a1511fe9235a78115fc06b1ce69123068ab4f2e56cf380e",
-    "ui/applets/apple-notes/open.ts": "32c1b9bb9041f7c478ea51befdaf148385d29cd4cc2cc2018d9c291b7c48b9e8",
-    "ui/applets/apple-notes/open.css": "6c9c66d2dd0d6a5ec19d4de1144c9d195d7056dbe18a7a7733105e7035b1b256",
-    "scripts/fixtures/notes-notebook/main.ts": "e2237b646d686f80be23e5980b96e096d213113ab0a684ed46f51dcf1e179585",
+    "ui/applets/apple-notes/open.ts": "bae1a09bf825ed115d4351d170e3ab06811d13899c4ffc36287dd653acf9e7f9",
+    "ui/applets/apple-notes/open.css": "7c0c2f3ca339f28aaf2da3a28d1c1f4ae106eb5f294849a654d699ea7bb24024",
+    "scripts/fixtures/notes-notebook/main.ts": "a38c369dd0afbfc365ac819f3227724acaf7e25fe7d10a93e676f760a3ed24d1",
     "scripts/notes-notebook-preview.ts": "0676d3e1596cfc44be47ff87b2052687517cb25949a24e28237cdb5bfc0b4bc5",
     "scripts/core-paper-preview.ts": "dc63a777be68edee7c579b56918ff86cf48b8d67cb977a23d14d4cf00add100c",
     "scripts/fixtures/core-paper-applets/main.ts": "a3afc06e10a549cf242f4715c8a4d033b7c4d294562309c42846bba6f3d896ea",
@@ -35,7 +35,7 @@
     "ui/applets/google-calendar/grid.ts": "f09d614a838c7f5ea4be8a0d42236c9c59714bd47ebd02cbd14f59ae6911e3fc",
     "ui/applets/google-calendar/regions.ts": "f8572e10516772200d2e0bbb6421bc194e188074f15890e746131b9e290e688d",
     "ui/applets/scene/pointer-plane.ts": "29bfcf62b3c19a815b811eb50edec57b95b0f00b65f9b2da8d94d1788e351e2d",
-    "ui/applets/home-open.ts": "4f64e88cdca59f5eca30003a7bc80bb94dd6306201d965a3bc113f54da9395b2"
+    "ui/applets/home-open.ts": "09f0132275acbf37583a7b239c3c7257442ae4b08ecd132df334cf5253e43c91"
   },
   "images": [
     {
