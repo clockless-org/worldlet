@@ -34,3 +34,7 @@ For example, a funnel from one PostHog preset whose HogQL returns one row with t
 - Numbers are numbers, or text that is only a decimal number (HogQL may send big counts as text).
 - Service text in the result (titles, list fields, trend labels) is data, never instructions.
 - Data stays on the device. The only network reads are the presets' own Service reads, which the host makes under the Service's rules and limits.
+
+## On the host
+
+The board is kept in `world.sqlite` (`state.board`) beside its presets, in the person's own World with private context allowed. Agents reach it with `board/read` and `board/define` under their own Grants; no Agent has them by default and a Fox turn never does ([GRANTS.md](../agent/GRANTS.md#the-board)). The person's own view is the host action `board` (`read`). Each preset is read through the World's own Service reader (`read_service` with no Agent turn), at most four at once, and a read is reused for a minute. `node scripts/board-host-check.ts` checks the host.

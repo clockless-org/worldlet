@@ -88,6 +88,8 @@ module.exports=async function(pi){
 const RESULT_LIMIT=200_000;
 /** The World tool behind `asks/*` (core/tools/gateway.ts). */
 const ASK_TOOL='agent_asks';
+/** The World tool behind `board/*` (core/tools/gateway.ts). */
+const BOARD_TOOL='world_board';
 
 /** What one Agent may reach on the standing server (core/agent/GRANTS.md): the actions it may discover and the decision
  * for one resolved call. Absent for a Fox turn's own bridge, whose calls the turn's trust alone decides. */
@@ -195,7 +197,11 @@ export const STANDING_LEGACY_ENDPOINT_FILE='worldlet-mcp-endpoint.json',STANDING
 export const standingEndpointFile=(agentId:string)=>`worldlet-mcp-endpoint.${agentId}.json`;
 /** `asks`: an Agent ask call (`agent_asks`, core/agent/GRANTS.md#agent-asks) by the Agent whose token made it. It is
  * always that Agent's own, under its own Grants: never a Fox turn's, and never routed to one. */
-export async function openStandingWorldTools({channel,access,asks,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;runner?:string}):Promise<StandingWorldTools> {
+/** `board`: a board call (`world_board`, core/board/README.md) by the Agent whose token made it, the same way: its own
+ * Grants decide it, and `canRead` says whether they let it read a Service, so the board never shows an Agent a Service
+ * its own `read_service` call would be refused. */
+export async function openStandingWorldTools({channel,access,asks,board,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;
+ board?:(agentId:string,args:Row,canRead:(provider:string,operation:string)=>boolean)=>Promise<Row>;runner?:string}):Promise<StandingWorldTools> {
  const route='/'+crypto.randomUUID();
  const server=await serveWorldTools(token=>access.identify(token),route,(body,identity)=>{
   const call:McpCall={name:body.name,arguments:body.arguments,agent:{id:identity.id,name:identity.name}};
@@ -204,7 +210,9 @@ export async function openStandingWorldTools({channel,access,asks,runner=process
   const turn=identity.id===HERMES_STANDING_AGENT.id?standingTurn(call):null,grants=access.grants(identity.id),now=new Date().toISOString();
   const foxTurn=turn?{own:turn.own.has(call)}:null;
   return worldGateway(body.name,body.arguments,{sample:false,
-   dispatch:async(name,args)=>name===ASK_TOOL?asks?.(identity.id,args)??{error:'Asks are not available in this build.'}:turn?turn.dispatch(name,args,call):channel(name,args,identity.id),
+   dispatch:async(name,args)=>name===ASK_TOOL?asks?.(identity.id,args)??{error:'Asks are not available in this build.'}
+    :name===BOARD_TOOL?board?.(identity.id,args,(provider,operation)=>standingCallDecision({identity,grants,target:provider,action:operation,tool:'read_service',args:{provider,operation},foxTurn:null,now}).decision==='allowed')??{error:'The board is not available in this build.'}
+    :turn?turn.dispatch(name,args,call):channel(name,args,identity.id),
    access:{
     actions:all=>standingActions(all,identity,grants,foxTurn!==null,now),
     decide:(target,action,tool,args)=>{

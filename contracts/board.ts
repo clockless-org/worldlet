@@ -78,3 +78,17 @@ export interface BoardTabView {id:string;title:string;blocks:BoardBlockView[]}
 export interface BoardView {title:string;tabs:BoardTabView[];
  /** When the reads were made (host clock). */
  resolvedAt:string}
+
+/** The World gateway targets (`board/<action>`), each its own Grant target. Only an Agent's own "Can see your board"
+ * and "Can set up your board" Grants name them; a Fox turn's Grant never does (core/agent/GRANTS.md#the-board). */
+export const BOARD_TARGET='board';
+export const BOARD_ACTIONS=Object.freeze({read:'board/read',define:'board/define'} as const);
+/** The board as the World keeps it (`state.board` in world.sqlite): its definition, a revision each define raises by
+ * one, and who last defined it (an Agent's host-stamped ID, or none for the person). */
+export interface BoardRecord {definition:BoardDefinition;revision:number;updatedAt:string;agentId?:string}
+/** `board/read`: the whole board, or one tab. */
+export interface BoardReadArgs {tab?:string}
+/** `board/define`: the whole new definition, any presets to save with it (contracts/service-presets.ts), and the
+ * revision it was read at (0 when there is no board yet); a stale revision is refused. */
+export interface BoardDefineArgs {definition:BoardDefinition;presets?:unknown[];expectedRevision:number}
+export const BOARD_DEFINE_PRESETS=20;
