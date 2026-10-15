@@ -67,8 +67,9 @@ preload; the main process re-checks the sending frame. Website scripts never rec
 host privileges and run in their own session partition.
 
 <a id="the-world-in-a-web-browser"></a>
-**The World in a web browser.** There is one UI: a host without a window serves the same World page to a browser on
-the same computer ([contracts/web-world.ts](../contracts/web-world.ts)). The page is the interface build, served
+**The World in a web browser.** There is one UI: the host serves the same World page to a browser on the same
+computer ([contracts/web-world.ts](../contracts/web-world.ts)), the Node host as its only page and the app beside its
+own window while it runs ([host/world-web.ts](../platform/electron/src/host/world-web.ts)). The page is the interface build, served
 read-only at `http://127.0.0.1:<port>/world/` by [local-relay.ts](../platform/electron/src/modules/phone/local-relay.ts)
 (files inside the build after resolving links, `resolveWorldFile`, and only the types the page loads). Its
 `worldletHost` is [web-host.ts](../platform/bridge/web-host.ts), which `resolveHost` picks only when the app gave the
@@ -86,6 +87,14 @@ page none; it talks to the host over one WebSocket at `/world/socket`, and the h
   another device (a pairing's status comes without its link), local data deletion, restore and the library backup, and
   the local tools that read other programs' files.
 - **One page at a time.** A newer page takes over and the older one says the World is open in another tab.
+- **Beside the app's window.** In the app, the window's World page and a browser's do not take the World from each
+  other (`createPagePair`). The window stays the World's page; a browser's page is an extra one, and the takeover
+  rule above holds among browser tabs only. Events and the World's snapshot reach both pages. Calls only a window
+  answers (its native views, menus, sound, voice, the desktop Companion) reach the window. A call about work a page
+  started (a Fox turn, an Applet task, a cloud stream, named by the `id` or `streamId` of its request or the `id` the
+  host answered) goes back to that page. Anything else goes to the window while its page is loaded, else to the
+  browser's (Run in background loads no window page). A browser tab coming and going is not the window's page
+  loading or reloading, so it never stops the window's sound, voice or Fox turn.
 
 **What a browser window cannot do.** Some of the app window's features have no browser equivalent. The socket's
 handshake names them (`WEB_PAGE_FEATURES`), and the page turns those `HostFeatures` off whatever the snapshot says

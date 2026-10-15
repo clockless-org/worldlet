@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {app} from 'electron';
 import type {Host,Row} from '../../host/types.ts';
-import {AGENT,ANALYTICS,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,ORDER,PHONE,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,WIDGETS,type AgentService,type RtcPageFactory,type DesktopCompanionService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
+import {AGENT,ANALYTICS,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,ORDER,PHONE,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,WIDGETS,WORLD_WEB,type WorldWebService,type AgentService,type RtcPageFactory,type DesktopCompanionService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
 import {WorldletError} from '../../files.ts';
 import {PHONE_LIMITS,hostAppletPlaces,threadPairs,readRemoteToHost,remoteHostInfo,phoneActionStatus,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,pairKeys,fromBase64url,sha256Hex,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../core/phone/index.ts';
 import {createPhoneRelay} from './relay.ts';
@@ -380,6 +380,14 @@ export function installPhone(host:Host){
     const status=await link.relay.start();link.schedule(QUICK);return status;
    }
    if(request.operation==='end')return await link.relay.end();
+   // The full World in a browser on this computer (host/world-web.ts): its link, opened in the person's default browser.
+   if(request.kind==='local'&&request.operation==='world'){
+    const world=host.optional<WorldWebService>(WORLD_WEB);
+    if(!world)throw new WorldletError('This Worldlet build cannot open the World in a browser.');
+    let link:string;try{link=await world.link();}catch{throw new WorldletError('Worldlet could not open a port on this computer for the browser.');}
+    try{await openInBrowser(link);}catch{throw new WorldletError('Could not open your browser. Open the link in world-link.txt in your Worldlet library instead.');}
+    return {state:'open',link};
+   }
    // A browser's link opens in the person's default browser, never inside the World.
    if(request.operation==='open'&&(request.kind==='web'||request.kind==='local')){
     const status=link.relay.status();if(!status.link)throw new WorldletError('Make a link first.');

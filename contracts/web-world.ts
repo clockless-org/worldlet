@@ -63,7 +63,7 @@ export const WORLD_ELSEWHERE_CODE=4001;
  * operations. The host checks this before the request reaches the router. */
 export const WEB_DENIED:Readonly<Record<string,true|readonly string[]>>=Object.freeze({
  // Pairing: the status is read, without its link (webReply).
- phonePair:Object.freeze(['start','end','open','background']),
+ phonePair:Object.freeze(['start','end','open','background','world']),
  // Local data deletion, restore and the whole-library backup.
  dataBackup:true,
  deleteSourceData:true,
