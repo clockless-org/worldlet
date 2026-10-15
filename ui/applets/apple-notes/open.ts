@@ -10,6 +10,8 @@ export interface NotesActions {
 }
 type NotebookState={query:string;folder:string;selected:string};
 const notebooks=new WeakMap<object,NotebookState>();
+/** Keep the notebook's selection in step with its explicit original reader. */
+export function selectNotebookItem(owner:object,id:string){const state=notebooks.get(owner);if(state)state.selected=id;}
 const folderOf=item=>String(item.record?.folder||item.record?.list||'Notes');
 const plain=value=>String(value||'').replace(/[#*_`>]/g,'').replace(/\s+/g,' ').trim();
 function dateOf(item){const value=item.record?.modifiedAt||item.record?.updatedAt;if(!value)return '';const date=new Date(/^\d{4}-\d{2}-\d{2}$/.test(String(value))?value+'T12:00:00':value);return Number.isNaN(+date)?'':date.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});}

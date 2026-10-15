@@ -43,4 +43,5 @@ record refresh; late reads cannot replace a different or detached notebook.
 The explicit original route keeps the painted notebook behind its shared text
 reader. Its existing reading body remains the scroll owner; previous/next source
 controls sit below the page. The index is inert during original reading so a
-preview action cannot change behind that route. Back restores the live notebook.
+preview action cannot change behind that route. Previous/next source navigation
+updates the index selection, and Back restores that same note in the live notebook.

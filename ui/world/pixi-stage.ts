@@ -1,4 +1,4 @@
-import {renderHomeOpen,type HomeOpenState} from '../applets/index.ts';
+import {renderHomeOpen,selectNotebookItem,type HomeOpenState} from '../applets/index.ts';
 import {HOME_NATIVE,HOME_RECORDS,CODING_SESSIONS,ORIGINAL_READERS} from '../../core/applets/index.ts';
 import {renderMailOpen,renderMeetingsOpen,renderSceneList,mountAppletScene,appletSceneKey,type AppletScene} from '../applets/index.ts';
 import {weatherGlyph} from './environment/weather-forecast.ts';
@@ -87,5 +87,5 @@ export function createAppletStage(host,onPick){
    if(calendar)footer.append(move('Previous',-1));footer.append(label);if(calendar)footer.append(move('Next',1));panel.append(footer);
   }
  }
- return {render,setMotion(_value:boolean){},setSelected(room,item){owner=room.moduleId;selected=item;},select(id){selected=allItems.find(i=>i.id===id)||null;return selected;},get metrics(){return panel.hidden?null:{items:shownItems.length,shown:true,preview:false,selected:selected?.id||null,scene:scene?.metrics||null};},destroy(){latestRender=null;resize.disconnect();window.removeEventListener('worldlet:calendar-show',showCalendar);scene?.destroy();panel.remove();focus.remove();mailNav.remove();}};
+ return {render,setMotion(_value:boolean){},setSelected(room,item){owner=room.moduleId;selected=item;if(room.key==='apple-notes'&&item){selectNotebookItem(homeState,item.id);for(const row of scene?.element.querySelectorAll<HTMLElement>('.notes-row')||[])row.setAttribute('aria-pressed',String(row.dataset.itemId===item.id));}},select(id){selected=allItems.find(i=>i.id===id)||null;return selected;},get metrics(){return panel.hidden?null:{items:shownItems.length,shown:true,preview:false,selected:selected?.id||null,scene:scene?.metrics||null};},destroy(){latestRender=null;resize.disconnect();window.removeEventListener('worldlet:calendar-show',showCalendar);scene?.destroy();panel.remove();focus.remove();mailNav.remove();}};
 }

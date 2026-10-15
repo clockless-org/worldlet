@@ -1,4 +1,4 @@
-import {renderNotesOpen} from '../../../ui/applets/apple-notes/open.ts';
+import {renderNotesOpen,selectNotebookItem} from '../../../ui/applets/apple-notes/open.ts';
 import {mountAppletScene,type AppletSceneSource} from '../../../ui/applets/scene/applet-scene.ts';
 import {marked} from 'marked';
 import DOMPurify from 'dompurify';
@@ -10,6 +10,6 @@ const source=structuredClone(presentation.appletScenes['apple-notes']) as unknow
 if(source.registration.webFrame)source.registration.webFrame.mask='/ui/theme-packages/village/'+source.registration.webFrame.mask;
 if((window as any).__NOTES_REGIONS__){source.registration.regions=[{id:'main',role:'primary',rect:[.5,.24,.25,.36],quad:[[0,.04],[.92,0],[1,.94],[.04,1]],material:'paper'},{id:'heading',role:'secondary',rect:[.22,.23,.2,.1],material:'paper'},{id:'index',role:'secondary',rect:[.22,.36,.2,.34],material:'paper'},{id:'status',role:'secondary',rect:[.5,.63,.25,.16],material:'paper'}];}
 const scene=mountAppletScene(document.querySelector('#viewport')!, 'apple-notes',{source});
-const owner={},fixture={items,opened:[],created:0,selected:[],acknowledged:[],pending:{},fail:false,mode:'inline',mount};
+const owner={},fixture={items,opened:[],created:0,selected:[],acknowledged:[],pending:{},fail:false,mode:'inline',mount,selectOriginal:(id:string)=>selectNotebookItem(owner,id)};
 function mount(records=items){return renderNotesOpen(scene.primary.element,records,{connected:true,notes:{read:item=>typeof item.record?.text==='string'?Promise.resolve({text:item.record.text,title:item.title}):fixture.fail?Promise.reject(Error('Cannot read note')):new Promise(resolve=>{fixture.pending[item.id]=resolve;}),renderBody:(text,title)=>{const article=document.createElement('article');article.className='notion-prose';article.innerHTML=DOMPurify.sanitize(marked.parse(text) as string);const first=article.firstElementChild;if(first?.tagName==='H1'&&first.textContent===title)first.remove();return article;},create:()=>fixture.created++,selected:(item,original,explicit)=>{fixture.selected.push(item.id);if(explicit)fixture.acknowledged.push(item.id);}}},owner,item=>fixture.opened.push(item.id),scene.regions);}
 Object.assign(window,{notesFixture:fixture});mount();
