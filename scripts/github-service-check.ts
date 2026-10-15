@@ -16,7 +16,7 @@ import {McpAccounts} from '../platform/electron/src/modules/sources/mcp-account.
 import {McpSource,McpSourceAccess,McpSourceConnections} from '../platform/electron/src/modules/sources/mcp-source.ts';
 import {GoogleAccount} from '../platform/electron/src/modules/sources/google-account.ts';
 import {GoogleSource,GoogleSourceAccess} from '../platform/electron/src/modules/sources/google-source.ts';
-import {APP_DEFINITIONS} from '../core/applets/index.ts';
+import {APP_DEFINITIONS,connectToken} from '../core/applets/index.ts';
 import {validateAttentionRegistrations} from '../core/attention/attention-center.ts';
 import {attentionFollowupReads,attentionReads} from '../core/attention/index.ts';
 import {validateAppletRuntimes} from '../core/applets/runtime.ts';
@@ -86,6 +86,22 @@ await withTempDir('worldlet-github-service-',async temp=>{
  assert.deepEqual(connected,[{provider:'github',target:'GitHub',transport:'hermes',connector:'mcp'}]);
  const grant=JSON.parse(values.get('mcp:github')!);
  assert.equal(grant.kind,'bearer');assert.equal(grant.url,'https://api.githubcopilot.com/mcp/');
+ assert.ok(!JSON.stringify(connected).includes(TOKEN),'the receipt carries no token');
+ // A pasted token GitHub refuses is checked before it is kept: it replaces nothing, says so plainly and repeats nothing.
+ const kept=values.get('mcp:github'),stages:unknown[]=[];
+ const refused=await links.connect({provider:'github',target:'',endpoint:'',token:'github_pat_REFUSEDREFUSEDREFUSED',home,onStage:(...stage)=>stages.push(stage),onConnected(){throw Error('a refused token connected');}}).then(()=>null,(error:Error)=>error);
+ assert.match(refused!.message,/^GitHub did not accept this token\. .*Issues, Pull requests and Metadata/);
+ assert.ok(!refused!.message.includes('REFUSED'),'the error does not repeat the token');
+ assert.equal(values.get('mcp:github'),kept,'the working token is kept');
+ assert.equal(connected.length,1);assert.deepEqual(stages,[],'a token opens no browser and sends no stage event');
+ // What the host's `connect` accepts as a token: only for a token source, required there, shaped like one.
+ assert.equal(connectToken('github','  github_pat_'+'A1'.repeat(20)+'  '),'github_pat_'+'A1'.repeat(20));
+ assert.equal(connectToken('notion',undefined),'');
+ for(const [provider,value,pattern] of [['github','',/read-only access to Issues, Pull requests and Metadata/],['github',undefined,/Paste a fine-grained token/],['github','secret value!',/does not look like a token/],['github','x'.repeat(256),/does not look like a token/],['notion','secretvaluesecretvalue1',/does not connect with a token/]] as const){
+  const error=(()=>{try{connectToken(provider,value);return null;}catch(error){return error as Error;}})();
+  assert.match(error!.message,pattern,String(value));
+  if(value)assert.ok(!error!.message.includes(value),'the error does not repeat what was pasted');
+ }
  const tested=await access.run({action:'sourceRefresh',provider:'github'},home);
  for(const tool of GITHUB_TOOLS)assert.ok(tested.tools.includes(tool),tool);
  for(const write of ['create_pull_request','merge_pull_request','add_issue_comment'])assert.ok(!tested.tools.includes(write),'not enabled: '+write);
@@ -227,4 +243,4 @@ assert.equal(worldActionOf(actions,'read_world_source',{provider:'github'}),null
 assert.deepEqual(defaults.flatMap(g=>g.targets.filter(t=>/github/.test(t))),['applet:github/runtime'],'the default Grants name only the GitHub Applet\'s saved World items, never a read of GitHub');
 assert.match(conversationGuidance({scope:'private',connectedSources:['github'],backgroundSources:['github']}),/github\/list.*never read with read_world_source/);
 
-console.log('PASS GitHub Service: token connect with read tools only, bounded list, read and search through read_service, other address, expired token and refused turn stop the read, Grant targets github/list|read|search enforced and in no default Grant, Attention reads the list only in the background collection and widens no Grant');
+console.log('PASS GitHub Service: token connect with read tools only, bounded list, read and search through read_service, other address, expired token and refused turn stop the read, Grant targets github/list|read|search enforced and in no default Grant, Attention reads the list only in the background collection and widens no Grant, a pasted token is checked before it is kept and a refused one replaces nothing');

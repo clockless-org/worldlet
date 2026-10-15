@@ -54,16 +54,20 @@ export class McpAccounts {
  session(connection:McpConnection,title:string):McpHttpClient {
   return new McpHttpClient({url:connection.url,title,fetch:this.fetch,authorization:force=>this.authorization(connection,force)});
  }
- /** Connects through Worldlet: a token when one is given, else OAuth in the browser (`open`), within five minutes. */
- async connect(name:string,url:string,token:string,open:(url:string)=>Promise<void>,cancelled:()=>boolean=()=>false):Promise<McpConnection> {
+ /** Connects through Worldlet: a token when one is given, else OAuth in the browser (`open`), within five minutes. A
+  * token is first checked by `verify` on a connection that is not kept yet: one it refuses is never saved, so a
+  * mistyped paste leaves the connection already kept as it was. */
+ async connect(name:string,url:string,token:string,open:(url:string)=>Promise<void>,cancelled:()=>boolean=()=>false,verify?:(connection:McpConnection)=>Promise<void>):Promise<McpConnection> {
   if(!NAME.test(name))throw new WorldletError('Invalid connection name.');
   const parsed=safeUrl(url);
   if(!parsed)throw new WorldletError('Use an HTTPS service endpoint.');
   const bearer=token.replace(/^\s*bearer\s+/i,'').trim();
   if(token.trim()&&(!bearer||bearer.toLowerCase()==='bearer'))throw new WorldletError('Bearer token is required');
   const grant:WorldGrant=bearer?{v:1,url:parsed,kind:'bearer',bearer}:await this.consent(parsed,open,cancelled);
+  const connection:McpConnection={source:'world',name,url:parsed,grant};
+  if(bearer&&verify)await verify(connection);
   this.vault.set(vaultId(name),JSON.stringify(grant));
-  return {source:'world',name,url:parsed,grant};
+  return connection;
  }
  /** Forgets the World's own connection. An Agent's own stays with that Agent: it is removed there, by its own command. */
  disconnect(name:string){if(NAME.test(name))this.vault.delete(vaultId(name));}
@@ -77,7 +81,8 @@ export class McpAccounts {
   * to send or nothing to refresh with. */
  private async authorization(connection:McpConnection,force:boolean):Promise<string|null> {
   if(connection.source==='world'){
-   const grant=this.worldGrant(connection.name)??connection.grant;
+   // A token is fixed for its connection (one being checked is not in the vault yet); OAuth reads the newest refresh.
+   const grant=connection.grant.kind==='bearer'?connection.grant:this.worldGrant(connection.name)??connection.grant;
    if(grant.kind==='bearer')return force?null:'Bearer '+grant.bearer;
    if(!force&&grant.access_token&&(!grant.expires_at||grant.expires_at>this.now()+60_000))return 'Bearer '+grant.access_token;
    if(!grant.refresh_token||!grant.token_endpoint||!grant.client_id)return null;
