@@ -1,5 +1,5 @@
 import type {HostFeatures,HostRequest,HostTransport} from '../../contracts/platform.ts';
-import {WORLD_ELSEWHERE_CODE,WORLD_PROTOCOL,WORLD_SOCKET_PATH,WORLD_WEB_PATH,worldLinkToken,worldTokenProtocol,type WorldHostFrame} from '../../contracts/web-world.ts';
+import {WORLD_ELSEWHERE_CODE,WORLD_PROTOCOL,WORLD_TOKEN,WORLD_SOCKET_PATH,WORLD_WEB_PATH,worldLinkToken,worldTokenProtocol,type WorldHostFrame} from '../../contracts/web-world.ts';
 // The World page in a web browser on this computer (contracts/web-world.ts): `worldletHost` over the socket the host
 // serves beside the page, instead of the app's IPC. Requests go as `{q,body}` and come back as `{a,ok,value|error}`;
 // the host calls page globals with `{c,name,args}` (answered `{r,value}`) and sends events as `{v,detail,doc?}`. The
@@ -14,17 +14,17 @@ type Pending={resolve:(value:unknown)=>void;reject:(error:Error)=>void};
 /** `features`: the HostFeatures the handshake turned off for this page (platform/bridge/features.ts pageFeatures). */
 type WebHost=HostTransport&{readonly platform:HostTransport['platform'];features:Readonly<Partial<Record<keyof HostFeatures,boolean>>>};
 
-/** The token from the link's fragment, which is then taken out of the address (the World uses the fragment for its
- * places), or the one this tab kept for a reload. */
-function takeToken(scope:any):string {
- const fromLink=worldLinkToken(String(scope.location.hash||''));
+/** What a link's fragment carries (`read` returns it, or ''), kept in this tab under `key` for a reload and taken out of
+ * the address (the World uses the fragment for its places); else what this tab kept, when `kept` accepts it. */
+export function takeFragment(scope:any,key:string,read:(hash:string)=>string,kept:(value:string)=>boolean):string {
+ const fromLink=read(String(scope.location.hash||''));
  let storage:Storage|null=null;try{storage=scope.sessionStorage;}catch{}
  if(fromLink){
-  try{storage?.setItem(TOKEN_KEY,fromLink);}catch{}
+  try{storage?.setItem(key,fromLink);}catch{}
   try{scope.history.replaceState(scope.history.state,'',scope.location.pathname+scope.location.search);}catch{}
   return fromLink;
  }
- try{return storage?.getItem(TOKEN_KEY)||'';}catch{return '';}
+ try{const value=storage?.getItem(key)||'';return kept(value)?value:'';}catch{return '';}
 }
 /** Says on the page why it holds no World (a notice the World's own errors use too). */
 export function notice(scope:any,text:string){
@@ -95,7 +95,7 @@ export function webHost(scope:any):HostTransport|undefined {
  if(scope.worldletWebHost)return scope.worldletWebHost;
  const location=scope.location;
  if(!location||!/^https?:$/.test(location.protocol)||location.pathname!==WORLD_WEB_PATH&&location.pathname!==WORLD_WEB_PATH+'index.html'||typeof scope.WebSocket!=='function')return undefined;
- const token=takeToken(scope);
+ const token=takeFragment(scope,TOKEN_KEY,worldLinkToken,value=>WORLD_TOKEN.test(value));
  if(!token)return undefined;
  const socket:WebSocket=new scope.WebSocket(`${location.protocol==='https:'?'wss:':'ws:'}//${location.host}${WORLD_SOCKET_PATH}`,[WORLD_PROTOCOL,worldTokenProtocol(token)]);
  const frames=createFrameHost(scope,frame=>{if(socket.readyState!==1)return false;socket.send(JSON.stringify(frame));return true;});

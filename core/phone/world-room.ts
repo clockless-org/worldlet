@@ -13,10 +13,24 @@ import {ROOM_LINK_MODE} from './room.ts';
 // - `{w}` a piece of one socket frame, either way (place `world:<host>.<page>:<to>:<seq>`): `{t,more}`. Pieces are
 //   numbered from 0 in each direction and must arrive in order, so the room cannot replay, reorder, drop silently or
 //   move a piece to another session; a frame larger than one piece (snapshots and art arrive as data URLs) goes in
-//   several, each well under the room's message size.
+//   several, each well under the room's message size however its text encodes.
 export const WORLD_ROOM_FRAME={hello:'wh',join:'wj',piece:'w'} as const;
-/** Characters of a frame per sealed piece: a sealed box is about 4/3 of it, well under the room's 300,000. */
+/** Characters of a frame per sealed piece, at most. */
 export const WORLD_ROOM_PIECE=100_000;
+/** UTF-8 bytes of a piece's sealed JSON, at most: its box is about 4/3 of that, well under the room's 300,000
+ * characters, whatever the text (Chinese takes 3 bytes a character, a quote 2 once escaped). */
+export const WORLD_ROOM_PIECE_BYTES=150_000;
+const utf8=new TextEncoder();
+/** The next piece of `text` from `start`: WORLD_ROOM_PIECE characters, fewer where they encode to more than
+ * WORLD_ROOM_PIECE_BYTES. */
+function nextPiece(text:string,start:number):string{
+ let length=WORLD_ROOM_PIECE;
+ for(;;){
+  const piece=text.slice(start,start+length),bytes=utf8.encode(JSON.stringify(piece)).length;
+  if(bytes<=WORLD_ROOM_PIECE_BYTES)return piece;
+  length=Math.max(1,Math.floor(length*WORLD_ROOM_PIECE_BYTES/bytes*0.95));
+ }
+}
 /** The largest frame either side puts together (the local socket's limit too). */
 export const WORLD_ROOM_FRAME_LIMIT=32*1024*1024;
 /** Where the World bundle lives on the relay: one folder per version, so a page always matches its computer. */
@@ -79,10 +93,11 @@ export function worldRoomSession(keys:PairKeys,host:string,page:string,as:'deskt
  return {
   async seal(text:string):Promise<string[]>{
    const out:string[]=[];
-   for(let i=0;i<text.length||i===0;i+=WORLD_ROOM_PIECE){
-    const t=text.slice(i,i+WORLD_ROOM_PIECE),more=i+WORLD_ROOM_PIECE<text.length;
-    out.push(JSON.stringify({[WORLD_ROOM_FRAME.piece]:await sealBox(keys,piecePlace(host,page,to,sent++),{t,more})}));
-   }
+   let i=0;
+   do{
+    const t=nextPiece(text,i);i+=t.length;
+    out.push(JSON.stringify({[WORLD_ROOM_FRAME.piece]:await sealBox(keys,piecePlace(host,page,to,sent++),{t,more:i<text.length})}));
+   }while(i<text.length);
    return out;
   },
   async open(box:string):Promise<string|null>{

@@ -1,7 +1,7 @@
 import type {HostTransport} from '../../contracts/platform.ts';
 import type {WorldHostFrame} from '../../contracts/web-world.ts';
 import {isWorldRoomPage,openHello,pairKeys,readWorldRoomFrame,readWorldRoomLink,roomEntry,sealJoin,worldRoomNonce,worldRoomSession,type PairKeys,type WorldRoomSession} from '../../core/phone/index.ts';
-import {createFrameHost,notice} from './web-host.ts';
+import {createFrameHost,notice,takeFragment} from './web-host.ts';
 // The World page on another device (core/phone/README.md#the-world-on-another-device, core/phone/world-room.ts): the
 // same World bundle, served as static files that hold no data (served at worldlet.ai/world/<version>/), joins this
 // computer in the pairing room from its link's fragment and speaks the frames a World page in a browser on that computer
@@ -15,25 +15,14 @@ const NOTICE={
  refused:'This link has ended. Open Worldlet on your computer and copy a new World link.',
 };
 
-/** The link's fragment, then taken out of the address (the World uses the fragment for its places), or the one this tab
- * kept for a reload. */
-function takeLink(scope:any):string {
- const hash=String(scope.location.hash||'');
- let storage:Storage|null=null;try{storage=scope.sessionStorage;}catch{}
- if(isWorldRoomPage(scope.location.pathname,hash)){
-  try{storage?.setItem(LINK_KEY,hash);}catch{}
-  try{scope.history.replaceState(scope.history.state,'',scope.location.pathname+scope.location.search);}catch{}
-  return hash;
- }
- try{const kept=storage?.getItem(LINK_KEY)||'';return isWorldRoomPage(scope.location.pathname,kept)?kept:'';}catch{return '';}
-}
-
 /** The room transport for a World page opened from a `world` link, or undefined anywhere else. One per page. */
 export function roomHost(scope:any):HostTransport|undefined {
  if(scope.worldletWebHost)return scope.worldletWebHost;
  const location=scope.location;
  if(!location||!/^https?:$/.test(location.protocol)||typeof scope.WebSocket!=='function'||!scope.crypto?.subtle)return undefined;
- const fragment=takeLink(scope);
+ // The link's fragment, kept in this tab for a reload (takeFragment).
+ const isRoomPage=(hash:string)=>isWorldRoomPage(location.pathname,hash);
+ const fragment=takeFragment(scope,LINK_KEY,hash=>isRoomPage(hash)?hash:'',isRoomPage);
  if(!fragment)return undefined;
  const link=readWorldRoomLink(fragment);
  let socket:WebSocket|null=null,keys:PairKeys|null=null,session:WorldRoomSession|null=null,joined=false,computer=false,away=false;
