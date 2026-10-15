@@ -9,4 +9,5 @@ import {createGarden} from './garden.ts';
 export {bestScore,gameLoop,type Game,type GameHost} from './core.ts';
 
 /** The Games area's boards by Applet key; each runs offline with no account. */
-export const GAME_BOARDS:Record<string,(host:GameHost)=>Game>={'game-2048':create2048,snake:createSnake,minesweeper:createMinesweeper,sudoku:createSudoku,garden:host=>createGarden(host)};
+export const GAME_BOARDS:Record<string,(host:GameHost)=>Game>={'game-2048':create2048,snake:createSnake,minesweeper:host=>createMinesweeper(host,'compact'),sudoku:createSudoku,garden:host=>createGarden(host)};
+export {gameSymbol} from './symbols.ts';

@@ -41,6 +41,7 @@ let frames:((now:number)=>void)[]=[];
 g.requestAnimationFrame=(fn:(now:number)=>void)=>{frames.push(fn);return frames.length;};
 g.cancelAnimationFrame=()=>{frames=[];};
 const doc=new FakeEl('document') as any;doc.hidden=false;doc.documentElement=new FakeEl('html');doc.documentElement.style.removeProperty=()=>{};
+doc.createTextNode=(text:string)=>({textContent:text});
 doc.createElement=(tag:string)=>{const e=new FakeEl(tag) as any;if(tag==='canvas')e.getContext=()=>ctx;return e;};
 g.document=doc;
 const win=new FakeEl('window');g.window=Object.assign(win,{setTimeout:g.setTimeout,clearTimeout:g.clearTimeout,dispatchEvent(){}});
@@ -79,6 +80,7 @@ const win=new FakeEl('window');g.window=Object.assign(win,{setTimeout:g.setTimeo
  assert.equal(b.dataset.state,'flag');
  board.fire('click',{target:b});
  assert.equal(b.dataset.state,'flag','the click that ends a long press is still swallowed');
+ game.dispose?.();assert.equal(doc.count('visibilitychange'),0,'leaving Minesweeper removes its clock listener');
 }
 
 // 3. Snake: filling the whole bed ends the game with no apple drawn on the snake.

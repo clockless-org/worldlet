@@ -29,7 +29,7 @@
 
 
 
-.mines-board{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));grid-template-rows:repeat(var(--cols),minmax(0,1fr));gap:3px;padding:8px;width:min(100%,380px);aspect-ratio:1;box-sizing:border-box;background:#8f9f80;container-type:inline-size}
+.mines-board{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));grid-template-rows:repeat(var(--rows,var(--cols)),minmax(0,1fr));gap:3px;padding:8px;width:min(100%,380px);aspect-ratio:1;box-sizing:border-box;background:#8f9f80;container-type:inline-size}
 .mines-cell{display:grid;place-items:center;padding:0;min-height:0;min-width:0;border:0;border-radius:6px;background:linear-gradient(#b6c5a4,#a7b796);box-shadow:0 -2px 0 #00000018 inset;color:#203b30;font:700 clamp(12px,4.4cqi,20px)/1 var(--ui-font-ui);cursor:pointer}
 .mines-cell:hover{filter:brightness(1.05)}
 .mines-cell[data-state=open]{background:#e8dfc9;box-shadow:none;cursor:default}
@@ -86,3 +86,15 @@
 .game-directions button[data-direction=up] svg{transform:rotate(90deg)}
 .game-directions button[data-direction=down] svg{transform:rotate(-90deg)}
 .game-directions svg{width:24px;height:24px}
+
+.game-symbol{display:inline-flex;align-items:center;justify-content:center;flex:none;width:1em;height:1em;vertical-align:middle}
+.game-symbol svg{width:100%;height:100%;fill:currentColor}
+.game-title>.game-symbol{margin-right:.3em}
+.game-settings{margin-top:5px;padding:2px 6px;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer}
+.game-settings option{background:var(--control-fill,#f4f0e5);color:var(--control-ink,#203b30)}
+.game-modes{display:flex;gap:12px;justify-content:center}
+.game-modes button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:6px 20px;border:1px solid var(--control-line,#87957a);border-radius:12px;background:var(--control-fill,#f4f0e5);color:var(--control-ink,#203b30);font:inherit;cursor:pointer}
+.game-modes button[aria-pressed=true]{box-shadow:inset 0 0 0 2px var(--ui-focus,#91b17d)}
+.mines-cell:focus-visible,.game-settings:focus-visible,.game-modes button:focus-visible{outline:2px solid var(--ui-focus,#91b17d);outline-offset:2px}
+.game-panel[data-game=minesweeper] .game-footer{flex-direction:column;gap:6px}
+.game-help{font-size:12px}
