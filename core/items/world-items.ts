@@ -1,3 +1,4 @@
+import {AGENT_ASK_PROVIDER} from '../../contracts/agent-asks.ts';
 // A date alone does not turn an invitation into a commitment.
 export function attentionKind(item){
  if(item.kind!=='event')return item.kind;
@@ -24,7 +25,7 @@ export function projectWorldItems(world,items=[]){
   const text=[item.context,...refs.map(r=>r.quote)].filter(Boolean).join('\n\n');
   world.pages.push({id,title:item.title,parent:world.roots[0],children:[],paths:[id+'.md'],path:id+'.md',kind:'page',knowledge:true,
    text,markdown:text,sourceId:ref.local?ref.id:'world-item:'+item.id,sourceProvider:item.provider,sourceURL:ref.url||'',revision:item.updatedAt||item.id,sourceRevision:item.updatedAt||item.id,
-   worldItemContentReady:ready,worldItemSources:refs,worldItemWebsites:Array.isArray(item.websiteURLs)?item.websiteURLs:[],worldItemId:item.id,worldItemStatus:item.status,worldItemKind:kind,worldItemSnoozedUntil:item.snoozedUntil,worldItemSignal:signal,...(item.noteId?{noteId:item.noteId}:{}),activities:active?[signal]:[],events:active&&kind==='event'?[{...signal,id:item.id}]:[]});
+   worldItemContentReady:ready,worldItemSources:refs,worldItemWebsites:Array.isArray(item.websiteURLs)?item.websiteURLs:[],worldItemId:item.id,worldItemStatus:item.status,worldItemKind:kind,worldItemSnoozedUntil:item.snoozedUntil,worldItemSignal:signal,...(item.noteId?{noteId:item.noteId}:{}),...(item.provider===AGENT_ASK_PROVIDER&&typeof item.askId==='string'?{worldItemAsk:{id:item.askId,agent:String(item.agentName||item.agentId||''),choices:Array.isArray(item.askChoices)?item.askChoices.filter(c=>typeof c==='string').slice(0,4):[],status:String(item.askStatus||''),...(typeof item.askChoice==='string'?{choice:item.askChoice}:{})}}:{}),activities:active?[signal]:[],events:active&&kind==='event'?[{...signal,id:item.id}]:[]});
  }
  for(const page of world.pages)refreshItemPage(page);
  return world;

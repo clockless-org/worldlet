@@ -172,8 +172,9 @@ const ITEM_STATUS:Record<AgentAskStatus,'open'|'done'|'dismissed'>={open:'open',
 export function askAttentionItem(ask:AgentAsk,agentName:string):WorldItem {
  let name=ask.agentId;try{name=text(agentName,80)||ask.agentId;}catch{}
  const kind=ask.choices.length?'task':'update';
- const context=[...(ask.body||ask.title)].slice(0,1200).join('');
- return {id:askItemId(ask.id),provider:AGENT_ASK_PROVIDER,kind,status:ITEM_STATUS[ask.status],title:ask.title,context,
+ const context=[...(ask.body||ask.title)].slice(0,1200).join(''),reason=[...(name+(ask.kind==='input'?' left work for Agents':' asks you'))].slice(0,56).join('');
+ // Written by the host, not a model: its content is final as it stands (attentionContentVersion 1), and the card shows it.
+ return {id:askItemId(ask.id),provider:AGENT_ASK_PROVIDER,kind,status:ITEM_STATUS[ask.status],title:ask.title,context,reason,summary:context,attentionContentVersion:1,
   ...kind==='task'?{attentionReason:[...(name+' asks you to choose.')].slice(0,600).join('')}:{},
   sources:[{provider:AGENT_ASK_PROVIDER,id:ask.id,quote:[...ask.title].slice(0,1000).join(''),...ask.link?{url:ask.link}:{}}],
   agentId:ask.agentId,agentName:name,askId:ask.id,askKind:ask.kind,askRevision:ask.revision,askStatus:ask.status,askChoices:[...ask.choices],

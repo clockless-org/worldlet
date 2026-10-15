@@ -112,11 +112,14 @@ export function mountAttentionPreview({root,onClose,onOriginal,onLink}){
    syncFooter();
   },
   /** A pending review of this task, or null; a choice disables the line until the host answers. */
-  setReview(value:{text:string;choices:{key:string;label:string;run:()=>Promise<unknown>}[]}|null){
-   review.replaceChildren();review.hidden=!value;if(!value)return;
+  setReview(value:{text:string;note?:boolean;choices:{key:string;label:string;run:(note?:string)=>Promise<unknown>}[]}|null){
+   review.replaceChildren();review.hidden=!value;review.classList.toggle('is-ask',!!value?.note);if(!value)return;
+   // An Agent's ask takes an optional note with its choice.
+   const note=value.note?make('input','attention-preview-review-note') as HTMLInputElement:null;
+   if(note){note.type='text';note.maxLength=2000;note.placeholder='Add a note (optional)';note.setAttribute('aria-label','Note');}
    const buttons=value.choices.map(choice=>{const b=make('button','attention-preview-review-choice',choice.label) as HTMLButtonElement;b.type='button';b.dataset.reviewChoice=choice.key;
-    b.onclick=async()=>{buttons.forEach(x=>x.disabled=true);try{await choice.run();}finally{buttons.forEach(x=>x.disabled=false);}};return b;});
-   review.setAttribute('aria-label',value.text);review.append(make('span','attention-preview-review-text',value.text),...buttons);
+    b.onclick=async()=>{buttons.forEach(x=>x.disabled=true);try{await choice.run(note?.value.trim()||undefined);}finally{buttons.forEach(x=>x.disabled=false);}};return b;});
+   review.setAttribute('aria-label',value.text);review.append(make('span','attention-preview-review-text',value.text),...note?[note]:[],...buttons);
   },
   /** A reply Fox prepared for this item, waiting in the Journal, or null. */
   setDraft(value:{text:string;label:string;run:()=>void}|null){
