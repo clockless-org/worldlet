@@ -39,8 +39,13 @@ export interface Host {
  /** Called when the World page reloads or the app quits. */
  onPageReload(listener:()=>void):void;
  onQuit(listener:()=>void|Promise<void>):void;
- /** Called once the World page finished loading. */
+ /** Called once the app's World page finished loading (in the Node host, a browser's page, its only one): window work
+  * goes here. */
  onPageLoaded(listener:()=>void):void;
+ /** Called when any World page comes: the app's window loading, or a browser's page connecting (host/web-page.ts).
+  * What a page needs pushed to it once it is there, beyond the World's snapshot, goes here, so a browser's page gets
+  * what the window gets on load. */
+ onPageConnected(listener:()=>void):void;
  /** Called once per run when the host starts its own work: the World page's first load, or at once when the app runs in
   * background with no page (core/phone/README.md#web). What runs without the World (Attention reading, routines, the
   * phone and browser links) starts here, not on the page. */

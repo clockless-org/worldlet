@@ -27,6 +27,19 @@ export function worldLinkToken(hash:string):string {
  return WORLD_TOKEN.test(value)?value:'';
 }
 
+/** The World page's Content-Security-Policy in the app's window (worldlet://app): the meta tag the interface build
+ * writes into index.html (scripts/build-native-ui.ts). */
+export const WORLD_PAGE_CSP="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; font-src 'self'; img-src 'self' data: blob: https://i.ytimg.com https://yt3.ggpht.com https://yt3.googleusercontent.com; connect-src 'self' worldlet://app; worker-src blob:; media-src 'self' data:; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'";
+/** That meta tag in the built index.html, which the host takes out when it serves the page over HTTP. */
+export const WORLD_PAGE_CSP_META=/<meta http-equiv="Content-Security-Policy" content="[^"]*">/i;
+/** The same page served to a web browser (`origin`: the page's own, http or https): sent as a header in place of the
+ * meta tag (a meta policy cannot be loosened, only added to). The page talks only to its own origin and its socket
+ * there; YouTube is hidden in a browser, so its pictures are not allowed either; no other site may frame it. */
+export function worldWebCsp(origin:string):string {
+ const socket=origin.replace(/^http/,'ws');
+ return `default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self' ${socket}${WORLD_SOCKET_PATH}; worker-src blob:; media-src 'self' data:; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`;
+}
+
 /** Frames on the socket, all JSON text.
  * Host → page: `h` the handshake, `a` the answer to a request, `c` a call of a page global, `v` an event (`doc`: on
  * document), `x` the page was closed by the host (`elsewhere`: a newer page took over).
@@ -68,6 +81,9 @@ export const WEB_DENIED:Readonly<Record<string,true|readonly string[]>>=Object.f
  dataBackup:true,
  deleteSourceData:true,
  clearWorldContent:true,
+ // The page's own web capture (session replay) runs in the app's window only: a browser's page loads no PostHog
+ // client, so it sends nothing to /ingest and the host serves no /world/ingest/ route.
+ analyticsConfig:true,
  // Local tools: other programs' sessions and stores on this computer.
  codexSession:true,
  codexTask:true,
@@ -78,14 +94,36 @@ export const WEB_DENIED:Readonly<Record<string,true|readonly string[]>>=Object.f
  messages:true,
 });
 export const WEB_DENIED_MESSAGE='This needs the Worldlet app on this computer.';
-/** Why a browser's World page may not make this request, or '' when it may. */
+/** The host's actions behind each HostFeature a browser's World page lacks (WEB_PAGE_FEATURES): the page hides their
+ * controls and Fox's tools answer why, and the host also refuses them from that page, so a page that asks anyway is
+ * told the same (WEB_PAGE_UNAVAILABLE). `true` refuses the action; `{except}` refuses all its operations but those,
+ * which read and drive nothing on this computer's screen. */
+export const WEB_PAGE_ACTIONS:Readonly<Partial<Record<keyof HostFeatures,Readonly<Record<string,true|{readonly except:readonly string[]}>>>>>=Object.freeze({
+ // The built-in browser's native views and what drives them; the list of sites it visited stays readable.
+ websitePages:Object.freeze({browserShow:true,browserLayout:true,browserHide:true,browserPip:true,browserOutcomeAction:true,taskPanelPage:true,
+  browserCommand:Object.freeze({except:Object.freeze(['visitedSites'])})}),
+ youtube:Object.freeze({youtube:true,youtubePlayer:true}),
+ worldAudio:Object.freeze({worldAudio:true,backgroundMusic:true,cancelAudioRequest:true}),
+ localMusic:Object.freeze({localMusic:true}),
+ // Speech: the microphone and Fox's spoken replies through this computer's speakers.
+ voice:Object.freeze({speechStart:true,speechKeep:true,speechTalk:true,speechStop:true,speechCancel:true,microphones:true,speakReply:true}),
+ desktopCompanion:Object.freeze({desktopCompanionState:true,desktopCompanionSize:true,desktopCompanionDrag:true,desktopCompanionHide:true,desktopCompanionPointer:true,companionMenu:true}),
+});
+/** Why a browser's World page may not make this request, or '' when it may: WEB_DENIED, then WEB_PAGE_ACTIONS. */
 export function webDenied(body:unknown):string {
  if(!body||typeof body!=='object')return '';
  const {action,operation}=body as {action?:unknown;operation?:unknown};
- if(typeof action!=='string'||!Object.hasOwn(WEB_DENIED,action))return '';
- const rule=WEB_DENIED[action];
- if(rule===true)return WEB_DENIED_MESSAGE;
- return typeof operation==='string'&&rule.includes(operation)?WEB_DENIED_MESSAGE:'';
+ if(typeof action!=='string')return '';
+ if(Object.hasOwn(WEB_DENIED,action)){
+  const rule=WEB_DENIED[action];
+  if(rule===true||typeof operation==='string'&&rule.includes(operation))return WEB_DENIED_MESSAGE;
+ }
+ for(const [feature,actions] of Object.entries(WEB_PAGE_ACTIONS) as [keyof HostFeatures,Record<string,true|{except:readonly string[]}>][]){
+  if(!Object.hasOwn(actions,action))continue;
+  const rule=actions[action];
+  if(rule===true||!(typeof operation==='string'&&rule.except.includes(operation)))return WEB_PAGE_UNAVAILABLE[feature]||WEB_DENIED_MESSAGE;
+ }
+ return '';
 }
 /** A reply as a browser's World page gets it: a pairing's link (its secret) stays on the host. */
 export function webReply(body:Record<string,unknown>,value:unknown):unknown {

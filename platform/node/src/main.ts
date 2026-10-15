@@ -57,7 +57,7 @@ const log=(line:string)=>process.stdout.write(`worldlet: ${line}\n`);
 const diagnostics=createDiagnostics(profile.root);
 const preferences=Preferences.at(profile.root,()=>({}));
 const services=new Map<string,unknown>();
-const startedListeners:(()=>void)[]=[],quitListeners:(()=>void|Promise<void>)[]=[],loadedListeners:(()=>void)[]=[],reloadListeners:(()=>void)[]=[];
+const startedListeners:(()=>void)[]=[],quitListeners:(()=>void|Promise<void>)[]=[],loadedListeners:(()=>void)[]=[],connectedListeners:(()=>void)[]=[],reloadListeners:(()=>void)[]=[];
 const router=new HostRouter(()=>host);
 const each=(listeners:(()=>void)[],operation:string)=>{for(const listener of listeners)try{listener();}catch(error){diagnostics.record(error,operation);}};
 // As in the Electron host, only Fox, connection, content and onboarding requests keep a diagnostic when they fail.
@@ -67,7 +67,7 @@ let sent='';
 const web=createWebPage({
  platform:platformName(),
  dispatch:body=>router.dispatch(body,null,'web'),
- loaded:()=>{sent='';each(loadedListeners,'pageLoaded');},
+ loaded:()=>{sent='';each(loadedListeners,'pageLoaded');each(connectedListeners,'pageConnected');},
  gone:()=>each(reloadListeners,'pageReload'),
  failed:(body,error)=>{if((error as Error)?.name!=='AbortError'&&PERSISTED_REQUEST_FAILURES.includes(body.action as string))diagnostics.record(error,String(body.action),typeof body.id==='string'?body.id:'');},
 });
@@ -95,6 +95,7 @@ const host:Host={
  // A browser's World page connects and goes away (host/web-page.ts).
  onPageReload:listener=>{reloadListeners.push(listener);},
  onPageLoaded:listener=>{loadedListeners.push(listener);},
+ onPageConnected:listener=>{connectedListeners.push(listener);},
  onQuit:listener=>{quitListeners.push(listener);},
  onStarted:listener=>{startedListeners.push(listener);}
 };

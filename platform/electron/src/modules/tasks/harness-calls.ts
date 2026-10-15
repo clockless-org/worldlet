@@ -130,7 +130,8 @@ export function installHarnessCalls(host:Host){
   },
  });
  host.optional<AgentService>(AGENT)?.onChanged?.(reason=>{if(reason==='agent-changed')subscribe();});
- // A reloaded page picks up the calls going on now.
- host.onPageLoaded(()=>{if(!stop)subscribe();else{observe();if(mine())for(const call of calls.values())show(call);}});
+ host.onPageLoaded(()=>{if(!stop)subscribe();else observe();});
+ // A reloaded page, or a browser's page connecting, picks up the calls going on now.
+ host.onPageConnected(()=>{if(stop&&mine())for(const call of calls.values())show(call);});
  host.onQuit(()=>{stop?.();stop=null;if(observeTimer)clearTimeout(observeTimer);});
 }

@@ -85,7 +85,13 @@ page none; it talks to the host over one WebSocket at `/world/socket`, and the h
   writes the link only to an owner-only file, never to stdout.
 - **Less than the app.** Before the router, the host refuses `WEB_DENIED`: the pairing secrets and pairing or unpairing
   another device (a pairing's status comes without its link), local data deletion, restore and the library backup, and
-  the local tools that read other programs' files.
+  the local tools that read other programs' files. The page also gets no web capture (`analyticsConfig`), so it loads
+  no PostHog client and sends nothing to `/ingest`; the host serves no ingest route for it.
+- **Its own policy.** The World document is served with the web variant of the page's Content-Security-Policy as a
+  header (`worldWebCsp`), and the app window's meta tag (`WORLD_PAGE_CSP`, which the build writes and the window keeps
+  unchanged) is taken out of it, since a meta policy can only add to a header's. `connect-src` allows only the page's
+  own origin and its socket (`ws://<host>/world/socket`); YouTube's pictures are not allowed, and no other site may
+  frame the page.
 - **One page at a time.** A newer page takes over and the older one says the World is open in another tab.
 - **Beside the app's window.** In the app, the window's World page and a browser's do not take the World from each
   other (`createPagePair`). The window stays the World's page; a browser's page is an extra one, and the takeover
@@ -94,7 +100,8 @@ page none; it talks to the host over one WebSocket at `/world/socket`, and the h
   started (a Fox turn, an Applet task, a cloud stream, named by the `id` or `streamId` of its request or the `id` the
   host answered) goes back to that page. Anything else goes to the window while its page is loaded, else to the
   browser's (Run in background loads no window page). A browser tab coming and going is not the window's page
-  loading or reloading, so it never stops the window's sound, voice or Fox turn.
+  loading or reloading, so it never stops the window's sound, voice or Fox turn. It does get what any page gets
+  pushed when it comes (`onPageConnected`, beside the window's own `onPageLoaded`): the calls going on now, for one.
 
 **What a browser window cannot do.** Some of the app window's features have no browser equivalent. The socket's
 handshake names them (`WEB_PAGE_FEATURES`), and the page turns those `HostFeatures` off whatever the snapshot says
@@ -109,9 +116,12 @@ leaves them out, unlike the host services, which fail closed: every app window h
 - **Fox's tools** that need one of these (the built-in browser, YouTube, the World's sound, music players) answer
   that it is not available in a browser window ([page-features.ts](../core/tools/page-features.ts)) instead of failing
   on their own.
+- **The host refuses them too.** Before the router, a browser's page is refused the actions behind each of these
+  features (`WEB_PAGE_ACTIONS`: the native website views and what drives them, YouTube, the World's sound, music
+  players, speech and the desktop Companion), with the same reason Fox's tools give, so a page that asks anyway
+  reaches nothing on this computer's screen. The list of sites the built-in browser visited stays readable.
 
-The page's own Content-Security-Policy is unchanged: `connect-src 'self'` already admits the WebSocket to the same
-origin in Chromium. Opening the World from another device is a later step.
+Opening the World from another device is a later step.
 
 CDP controls a selected target; it is not a renderer, authorization bypass or general
 component API. Agent-operated World navigation uses versioned semantic actions through

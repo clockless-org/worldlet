@@ -213,12 +213,12 @@ await withTempDir('worldlet-harness-calls-',async home=>{
 // The World: an Applet's Call becomes a brief to confirm, only Call dials, and every call in progress streams to the page.
 {
  const actions:Record<string,(request:any)=>Promise<any>>={},events:any[]=[],placedCalls:any[]=[];
- let onCall:((c:any)=>void)|null=null,loaded:(()=>void)|null=null,ready:any={ready:true},sample=false;
+ let onCall:((c:any)=>void)|null=null,loaded:(()=>void)|null=null,connected:(()=>void)|null=null,ready:any={ready:true},sample=false;
  const fake={subscribe:(fn:any)=>{onCall=fn;return ()=>{};},placing:()=>ready,place:async(request:any)=>{placedCalls.push(request);return {id:'openclaw:w2'};},hangUp:async(id:string)=>{placedCalls.push({hangUp:id});}};
  let agentCalls:any=fake;
  const host={store:{writable:true,sampleEnabled:()=>sample,state:{cloudConsent:false},onChange:()=>{},ledger:()=>({}),worldItems:()=>[]},page:{event:(name:string,detail:any)=>events.push([name,detail])},
   optional:(name:string)=>name==='agent'?{harnessCalls:()=>agentCalls,harness:{id:agentCalls?'openclaw':'hermes'},status:async()=>({name:'Nova'}),home:()=>'',onChanged:()=>{}}:undefined,
-  register:(found:any)=>Object.assign(actions,found),onPageLoaded:(fn:any)=>{loaded=fn;},onQuit:()=>{},diagnostics:{record:()=>{}}};
+  register:(found:any)=>Object.assign(actions,found),onPageLoaded:(fn:any)=>{loaded=fn;},onPageConnected:(fn:any)=>{connected=fn;},onQuit:()=>{},diagnostics:{record:()=>{}}};
  installHarnessCalls(host as any);
  loaded!();
  assert.deepEqual(await actions.harnessCall({operation:'status'}),{ready:true});
@@ -232,6 +232,9 @@ await withTempDir('worldlet-harness-calls-',async home=>{
  const w2={id:'openclaw:w2',direction:'outbound',peer:'+15552223333',startedAt:Date.now(),outcome:'in-progress',live:'talking',transcript:[{speaker:'peer',text:'Hello?',at:Date.now()}]};
  onCall!(w2);
  assert.deepEqual(events.at(-1),['worldlet:harness-call',{call:w2,who:'Anna Lee',from:'Messages',placed:true}],'live, without asking the model first');
+ // A page that comes later (the window reloading, or a browser's page connecting) gets the call going on now.
+ events.length=0;connected!();
+ assert.deepEqual(events.slice(),[['worldlet:harness-call',{call:w2,who:'Anna Lee',from:'Messages',placed:true}]],'a page connecting gets the live call');
  await actions.harnessCall({operation:'hangUp',id:'openclaw:w2'});
  assert.deepEqual(placedCalls.at(-1),{hangUp:'openclaw:w2'});
  onCall!({...w2,id:'openclaw:other',startedAt:Date.now()-5*3_600_000});

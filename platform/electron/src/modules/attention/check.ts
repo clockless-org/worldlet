@@ -37,7 +37,7 @@ function environment(){
   provide:(name,service)=>{services.set(name,service);return service;},
   use:name=>{if(!services.has(name))throw Error('Missing host service '+name);return services.get(name) as any;},
   optional:name=>services.get(name) as any,
-  onPageReload:()=>{},onQuit:listener=>{quit.push(listener);},onPageLoaded:()=>{},onStarted:()=>{},
+  onPageReload:()=>{},onQuit:listener=>{quit.push(listener);},onPageLoaded:()=>{},onPageConnected:()=>{},onStarted:()=>{},
   diagnostics:{record:(error,operation)=>{errors.push(`${operation}: ${errorMessage(error)}`);},log:()=>{}}
  };
  installAttention(host);

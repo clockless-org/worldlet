@@ -114,7 +114,7 @@ async function start(){
  keepProcessOutput(profile.root);
  const preferences=Preferences.at(profile.root,()=>macDefaults(macDomain(profile)));
  const services=new Map<string,unknown>();
- const reloadListeners:(()=>void)[]=[],quitListeners:(()=>void|Promise<void>)[]=[],loadedListeners:(()=>void)[]=[],startedListeners:(()=>void)[]=[];
+ const reloadListeners:(()=>void)[]=[],quitListeners:(()=>void|Promise<void>)[]=[],loadedListeners:(()=>void)[]=[],connectedListeners:(()=>void)[]=[],startedListeners:(()=>void)[]=[];
  let world:WorldWindow|null=null;
  const router=new HostRouter(()=>host);
  const implemented=(feature:keyof HostFeatures)=>{
@@ -135,8 +135,9 @@ async function start(){
  const web=createWebPage({
   platform:platformName(),
   dispatch:async body=>{pages.note('web',body);const value=await router.dispatch(body,null,'web');pages.note('web',body,value);return value;},
-  // A browser's page coming and going is not the window's page loading or reloading: it gets the World as it is.
-  loaded:()=>{sent='';sendState();},
+  // A browser's page coming and going is not the window's page loading or reloading: it gets the World as it is, and
+  // what a page gets pushed when it comes (onPageConnected).
+  loaded:()=>{sent='';sendState();for(const listener of connectedListeners)try{listener();}catch(error){diagnostics.record(error,'pageConnected');}},
   gone:()=>{},
   failed,
  });
@@ -153,6 +154,7 @@ async function start(){
   onPageReload:listener=>{reloadListeners.push(listener);},
   onQuit:listener=>{quitListeners.push(listener);},
   onPageLoaded:listener=>{loadedListeners.push(listener);},
+  onPageConnected:listener=>{connectedListeners.push(listener);},
   onStarted:listener=>{startedListeners.push(listener);}
  };
  let started=false;
@@ -209,7 +211,7 @@ async function start(){
  startBackgroundLaunch(profile);
  world=new WorldWindow(profile,preload,{
   openURL:url=>{const browser=host.optional<{openExternalRequest(url:string):void}>('browser');if(browser)browser.openExternalRequest(url);else void openInBrowser(url);},
-  loaded:()=>{sent='';startServices();for(const listener of loadedListeners)try{listener();}catch(error){diagnostics.record(error,'pageLoaded');}},
+  loaded:()=>{sent='';startServices();for(const listener of loadedListeners)try{listener();}catch(error){diagnostics.record(error,'pageLoaded');}for(const listener of connectedListeners)try{listener();}catch(error){diagnostics.record(error,'pageConnected');}},
   navigating:()=>{for(const listener of reloadListeners)try{listener();}catch(error){diagnostics.record(error,'pageReload');}},
   closing:()=>host.optional<{shouldKeepOpen():boolean}>('desktopCompanion')?.shouldKeepOpen()??false,
   activated:active=>page.event(active?'worldlet:app-active':'worldlet:app-inactive'),

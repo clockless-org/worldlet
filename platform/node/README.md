@@ -66,8 +66,9 @@ the World is open elsewhere. When the host stops, the page says so and reloads o
 
 The token is 32 random bytes, kept in the vault (`world-web-token`), so a restart keeps the link. The log says only
 that the World is ready and where its link is. The server answers only this computer by name, the socket needs the
-page's own origin and the token, and a browser's page cannot ask for what `WEB_DENIED` lists
-([trust](../../docs/UI-CORE-PLATFORM.md#the-world-in-a-web-browser)). To reach it from another computer, forward the
+page's own origin and the token, a browser's page cannot ask for what `WEB_DENIED` lists or what its window cannot
+do (`WEB_PAGE_ACTIONS`), and the page is served under the web variant of its Content-Security-Policy, which reaches
+only its own origin and socket ([trust](../../docs/UI-CORE-PLATFORM.md#the-world-in-a-web-browser)). To reach it from another computer, forward the
 same port number over SSH (for 47630, `ssh -L 47630:127.0.0.1:47630 <computer>`) and open the link there; opening the
 World from another device without that is a later step.
 
