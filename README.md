@@ -69,7 +69,9 @@ curl -fsSL https://worldlet.ai/install.sh | sh -s -- --agent openclaw
 & ([scriptblock]::Create((irm https://worldlet.ai/install.ps1))) -Agent hermes
 ```
 
-Prefer a regular installer? [Download from worldlet.ai](https://worldlet.ai/download/) or take one from [GitHub Releases](https://github.com/clockless-org/worldlet/releases). An Agent can install Worldlet for you with the [`worldlet` skill](harness/skills/worldlet/SKILL.md). Details: [one-line installers](platform/install/README.md).
+Prefer a regular installer? [Download from worldlet.ai](https://worldlet.ai/download/) or take one from [GitHub Releases](https://github.com/clockless-org/worldlet/releases). **Linux or no screen**: the same `install.sh` command installs the [headless Worldlet service](platform/install/README.md#linux) and prints your World's link and a QR code to open it from a phone or another computer.
+
+**Let your Agent do it**: tell it 「Install Worldlet: follow https://worldlet.ai/agent.md」. [agent.md](platform/install/agent.md) has any Agent run the installer with its own name, register Worldlet in itself and reply with the link and QR code; the [`worldlet` skill](harness/skills/worldlet/SKILL.md) says the same. Details: [one-line installers](platform/install/README.md).
 
 No account is needed. If you have no Agent yet, setup installs the standard [Hermes Agent](core/agent/PORTABILITY.md#stock-hermes-agent-for-people-with-no-agent) the official way, to its usual location; one you already have is used as it is.
 

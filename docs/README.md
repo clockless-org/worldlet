@@ -54,7 +54,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **279 Markdown documents** and **745 supporting documentation files**.
+Indexed: **280 Markdown documents** and **745 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -63,7 +63,7 @@ Indexed: **279 Markdown documents** and **745 supporting documentation files**.
 | Applet runtime descriptions | 119 |
 | UI and Applet authoring references | 30 |
 | Resource and artwork records | 74 |
-| Module and service documentation | 34 |
+| Module and service documentation | 35 |
 | Website documentation and articles | 0 |
 | Documentation diagrams, previews and evidence | 745 |
 
@@ -337,7 +337,7 @@ Indexed: **279 Markdown documents** and **745 supporting documentation files**.
 
 </details>
 
-<details><summary>Module and service documentation (34)</summary>
+<details><summary>Module and service documentation (35)</summary>
 
 - [android/README.md](../android/README.md)
 - [contracts/COMPONENTS.md](../contracts/COMPONENTS.md)
@@ -369,6 +369,7 @@ Indexed: **279 Markdown documents** and **745 supporting documentation files**.
 - [platform/electron/DISTRIBUTION.md](../platform/electron/DISTRIBUTION.md)
 - [platform/electron/README.md](../platform/electron/README.md)
 - [platform/install/README.md](../platform/install/README.md)
+- [platform/install/agent.md](../platform/install/agent.md)
 - [platform/local-tools/README.md](../platform/local-tools/README.md)
 - [platform/node/README.md](../platform/node/README.md)
 - [platform/web-engine/README.md](../platform/web-engine/README.md)

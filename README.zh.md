@@ -69,7 +69,9 @@ curl -fsSL https://worldlet.ai/install.sh | sh -s -- --agent openclaw
 & ([scriptblock]::Create((irm https://worldlet.ai/install.ps1))) -Agent hermes
 ```
 
-想用普通安装包？到 [worldlet.ai 下载](https://worldlet.ai/download/)，或者从 [GitHub Releases](https://github.com/clockless-org/worldlet/releases) 取。你的 Agent 也可以用 [`worldlet` 技能](harness/skills/worldlet/SKILL.md)替你安装。细节见[一行安装脚本](platform/install/README.md)。
+想用普通安装包？到 [worldlet.ai 下载](https://worldlet.ai/download/)，或者从 [GitHub Releases](https://github.com/clockless-org/worldlet/releases) 取。**Linux 或没有屏幕的电脑**：同一条 `install.sh` 命令会安装[无界面的 Worldlet 服务](platform/install/README.md#linux)，并打印你的 World 链接和二维码，用手机或另一台电脑打开。
+
+**交给你的 Agent**：对它说「Install Worldlet: follow https://worldlet.ai/agent.md」。[agent.md](platform/install/agent.md) 让任何 Agent 用自己的名字运行安装脚本、把 Worldlet 注册进自己，然后回复链接和二维码；[`worldlet` 技能](harness/skills/worldlet/SKILL.md)说的是同样的步骤。细节见[一行安装脚本](platform/install/README.md)。
 
 不需要账号。还没有 Agent 的话，设置时会用官方方式把标准的 [Hermes Agent](core/agent/PORTABILITY.md#stock-hermes-agent-for-people-with-no-agent) 装到它默认的位置；已经有的就直接用。
 

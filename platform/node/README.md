@@ -10,8 +10,8 @@ Each Agent that reaches the standing server gets its own token, endpoint file, G
 app ([Agent identity, Grants and audit](../../core/agent/GRANTS.md#the-standing-mcp-server)); the token hashes go into
 this host's own vault.
 
-This is the headless service without its installer or package yet: the host, the `worldlet` command line that talks
-to it, and the fixed MCP home Agents register.
+This is the headless service: the host, the `worldlet` command line that talks to it, the fixed MCP home Agents
+register, and its [Linux package](#package), which the [one-line installer](../install/README.md#linux) installs.
 
 ## What it runs
 
@@ -19,6 +19,7 @@ to it, and the fixed MCP home Agents register.
 | --- | --- |
 | `src/cli.ts` | The program: `worldlet.cjs <command>` is the [command line](#the-worldlet-command); anything else runs `main.ts` |
 | `src/control.ts` | The control socket (owner-only, in the library) and the command line's side of it |
+| `src/qr.ts` | The browser link's QR code drawn in a terminal (`worldlet link --qr`), white on black so it scans on any terminal |
 | `src/mcp-home.ts` | The [fixed MCP home](#one-fixed-mcp-home) and `register`: each Agent's own command, and the Worldlet skill in its skills folder |
 | `src/main.ts` | Entry: profile, store, router, the World page in a browser as its page bridge, the vault, the modules below; starts their work at once, serves the World, writes the browser link and the World link and stops on SIGTERM, or on a `worldlet:stop` message from a parent's IPC channel (Windows) |
 | `src/electron-shim.ts` | Stands in for `electron` (aliased at build time): process facts answer, window constructors throw, and dialogs, the clipboard, shell opens and notifications fail with "Needs the desktop app" |
@@ -78,7 +79,7 @@ nothing of it. With no host running it says so and exits with code 3.
 | Command | What it does |
 | --- | --- |
 | `status` | The version and library, Fox's Agent, whether the person finished setup, the browser link's state (never the link) and the Agents registered from the MCP home |
-| `link` | Prints the browser link (`world/link`'s, the one in `room-link.txt`); anyone who has it reaches this World, so it is for the person alone |
+| `link [--qr]` | Prints the browser link (`world/link`'s, the one in `room-link.txt`), with `--qr` also its QR code; anyone who has it reaches this World, so it is for the person alone |
 | `setup --agent <id>` | Chooses the Agent Fox talks through with setup's own `agentHarness` `select` (it proves the Agent answers first; Codex alone is no Agent for Fox), then registers Claude Code or Codex as below |
 | `register --agent <id>` | Registers the `worldlet` MCP server and skill in `claude-code` or `codex`. Hermes Agent gets its entry in its own profile once it is Fox's Agent ([World tools on Hermes](../../core/agent/PORTABILITY.md#world-tools-on-hermes)) |
 
@@ -107,7 +108,20 @@ The skill is [harness/skills/worldlet/SKILL.md](../../harness/skills/worldlet/SK
 | `npm run build:node-host` | Bundle the host to `dist/node/worldlet.cjs` (`--out <dir>` for another folder) |
 | `node dist/node/worldlet.cjs` | Run it; SIGTERM or Ctrl-C stops it. On Windows, where SIGTERM ends a process at once, a parent that started it with an IPC channel sends `{type:'worldlet:stop'}` for a clean stop |
 | `node dist/node/worldlet.cjs --host-contract-check` | Print the actions, services and capabilities it implements, on a temporary library |
-| `node dist/node/worldlet.cjs status` | The [command line](#the-worldlet-command): `status`, `link`, `setup --agent <id>`, `register --agent <id>` |
-| `npm run test:node-host` | Shim and vault storage checks, then build, contract check, boot, restart and stop; the command line against fake `claude` and `codex` commands (socket and endpoint files owner-only, the link never in the log); then the World in headless Chromium (SwiftShader WebGL) on a library with one item, and the server's refusals (`-- --screenshot <file>` keeps a picture) |
+| `node dist/node/worldlet.cjs status` | The [command line](#the-worldlet-command): `status`, `link [--qr]`, `setup --agent <id>`, `register --agent <id>` |
+| `npm run package:linux` | The [Linux package](#package) in `dist/ci/linux` (`-- --arch x64` for one architecture, `-- --reuse-web` to keep the interface build already there) |
+| `npm run test:node-host` | Shim and vault storage checks, then build, contract check, boot, restart and stop; the command line against fake `claude` and `codex` commands (socket and endpoint files owner-only, the link never in the log); `link --qr` read back as the link's QR code; then the World in headless Chromium (SwiftShader WebGL) on a library with one item, and the server's refusals (`-- --screenshot <file>` keeps a picture) |
 
 Node 22.19 or later.
+
+## Package
+
+`scripts/package-node-host.ts` (`npm run package:linux`) builds `worldlet-server-<label>-linux-x64.tar.gz` and
+`-linux-arm64.tar.gz`. Each holds `worldlet.cjs`, the interface build it serves (`WorldletWeb`, with
+`applet-runtime.json`, `attention-applets.json` and `applets/`), Node 22.22.1 for that architecture in `node/` (from
+nodejs.org, checked against the hashes pinned in the script), the `bin/worldlet` command (that Node running
+`worldlet.cjs`) and `SHA256SUMS` of every file. Beside them it writes each tarball's `.sha256`, the record
+`worldlet-server-<label>-linux.json` (Build, version and each tarball's size and SHA-256) and `release.json`. Release
+machine 02 builds them with the Mac package of the same commit, and `node scripts/ci-release.mjs publish --platform
+linux` puts them on the Build's release and writes the channel's Linux feed (`linux-dev.json`, `linux-alpha.json`,
+`linux.json` on Beta); a promotion moves them with Mac ([releasing](../../docs/RELEASING.md)).

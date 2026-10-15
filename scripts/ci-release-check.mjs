@@ -4,7 +4,7 @@ import {createHash,generateKeyPairSync,sign} from 'node:crypto';
 import {mkdtempSync,readFileSync,rmSync,writeFileSync} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {BUILD_OFFSET,channelKeys,devTests,fetchBuild,githubStore,labelOf,feedBuild,liveChannel,macFeed,macItem,publish,releaseIdentity,releaseManifest,verifyMacItem,windowsManifest} from './ci-release.mjs';
+import {BUILD_OFFSET,channelKeys,devTests,fetchBuild,githubStore,labelOf,feedBuild,linuxName,linuxRecordName,liveChannel,macFeed,macItem,publish,releaseIdentity,releaseManifest,verifyMacItem,windowsManifest} from './ci-release.mjs';
 
 // Build = offset + commit position; the label is the commit's Pacific day.
 const id=releaseIdentity(12,'2026-10-09T05:30:00Z');
@@ -24,8 +24,8 @@ assert(readFileSync(new URL('./build-info.ts',import.meta.url),'utf8').includes(
 assert.equal(liveChannel('dev',{live:['dev']}),true);
 assert.equal(liveChannel('beta',{live:['dev']}),false);
 assert.throws(()=>liveChannel('nightly',{live:[]}));
-assert.deepEqual(channelKeys('alpha',true),{feedTag:'channel-alpha',prefix:'alpha/',mac:['appcast-alpha.xml'],windows:'windows-alpha.json',history:false});
-assert.deepEqual(channelKeys('beta',true),{feedTag:'channel-beta',prefix:'',mac:['appcast.xml','appcast-intel.xml'],windows:'windows-preview.json',history:true});
+assert.deepEqual(channelKeys('alpha',true),{feedTag:'channel-alpha',prefix:'alpha/',mac:['appcast-alpha.xml'],windows:'windows-alpha.json',linux:'linux-alpha.json',history:false});
+assert.deepEqual(channelKeys('beta',true),{feedTag:'channel-beta',prefix:'',mac:['appcast.xml','appcast-intel.xml'],windows:'windows-preview.json',linux:'linux.json',history:true});
 assert.equal(channelKeys('beta',false).feedTag,'staging-beta');
 assert.equal(labelOf('2026.105.4001'),'2026.0105.4001');
 const committed=JSON.parse(readFileSync(new URL('../platform/electron/distribution/Channels.json',import.meta.url),'utf8'));
@@ -108,6 +108,32 @@ assert.deepEqual(superseded.writes,[]);
  rmSync(wdir,{recursive:true,force:true});
 }
 
+// Linux: the headless service's tarballs (scripts/package-node-host.ts) checked against their record, uploaded with their
+// checksums and records, then the Linux feed install.sh reads.
+{
+ const ldir=mkdtempSync(path.join(os.tmpdir(),'ci-release-linux-'));
+ writeFileSync(path.join(ldir,'release.json'),JSON.stringify(releaseManifest(id,'c'.repeat(40))));
+ const digest=f=>createHash('sha256').update(readFileSync(f)).digest('hex'),files={};
+ for(const arch of ['x64','arm64']){
+  const name=linuxName(id.label,arch),file=path.join(ldir,name);writeFileSync(file,'tarball '+arch);writeFileSync(file+'.sha256','x');
+  files[arch]={name,size:readFileSync(file).length,sha256:digest(file)};
+ }
+ const record=path.join(ldir,linuxRecordName(id.label));
+ writeFileSync(record,JSON.stringify({formatVersion:1,version:id.version,build:id.build,files}));
+ const beta=store();const result=await publish({channel:'beta',platform:'linux',dir:ldir,live:true,store:beta});
+ assert.equal(result.build,4012);
+ const x64=linuxName(id.label,'x64'),arm=linuxName(id.label,'arm64'),r=linuxRecordName(id.label);
+ assert.deepEqual(beta.writes.slice(2),[`v2026.1008.4012/${x64}`,`v2026.1008.4012/${x64}.sha256`,`v2026.1008.4012/${arm}`,`v2026.1008.4012/${arm}.sha256`,`v2026.1008.4012/${r}`,`v2026.1008.4012/${r}.release.json`,'channel-beta/linux.json','promote v2026.1008.4012'],'tarballs and records first, the feed last');
+ const feed=JSON.parse(beta.assets['channel-beta/linux.json']);
+ assert.equal(feed.build,4012);
+ assert.equal(feed.files.x64.url,'/downloads/'+x64,'install.sh downloads it from the website');
+ assert.equal(feed.files.arm64.sha256,files.arm64.sha256);
+ assert.match((await publish({channel:'alpha',platform:'linux',dir:ldir,live:true,store:store({'channel-alpha/linux-alpha.json':'{"build":4013}'})})).skipped,/4013/,'a newer Build is never replaced');
+ writeFileSync(path.join(ldir,x64),'other bytes');
+ await assert.rejects(publish({channel:'dev',platform:'linux',dir:ldir,live:true,store:store()}),/differs from its record/);
+ rmSync(ldir,{recursive:true,force:true});
+}
+
 // Promotion takes a Build from its release, laid out as publish reads it; the release machines leave no workflow artifact.
 {
  const name=path.basename(dmg),exe='Worldlet-2026.1008.4012-4012-windows-x64-unsigned.exe';
@@ -126,6 +152,11 @@ assert.deepEqual(superseded.writes,[]);
  assert.equal(withStore.got.length,10,'the Store MSIX and its record when they built');
  await assert.rejects(fetchBuild({build:4012,dir:fdir,store:fake(all.filter(n=>!n.endsWith('.appcast.xml')))}),/appcast\.xml/,'a Build published without its records is refused');
  await assert.rejects(fetchBuild({build:4013,dir:fdir,store:fake(all)}),/No release for Build 4013/);
+ const record=linuxRecordName('2026.1008.4012'),tarballs=['x64','arm64'].flatMap(arch=>[linuxName('2026.1008.4012',arch),linuxName('2026.1008.4012',arch)+'.sha256']);
+ const linux=fake([...all,record,record+'.release.json',...tarballs]);
+ assert.deepEqual(Object.keys(await fetchBuild({build:4012,dir:fdir,store:linux,platforms:['linux']})),['tag','linux']);
+ assert(linux.got.includes(`v2026.1008.4012/${record}.release.json > ${path.join('linux','release.json')}`)&&linux.got.length===6,'Linux: its record, identity and both tarballs with their checksums');
+ await assert.rejects(fetchBuild({build:4012,dir:fdir,store:fake(all),platforms:['linux']}),/linux/,'a Build with no Linux service has nothing to fetch for Linux');
  const macOnly=fake(all.filter(n=>!n.includes('windows')));
  assert.deepEqual(Object.keys(await fetchBuild({build:4012,dir:fdir,store:macOnly,platforms:['mac']})),['tag','mac'],'one platform needs only its own files');
  rmSync(fdir,{recursive:true,force:true});
@@ -176,4 +207,5 @@ for(const job of jobs){
 assert(/if: github\.repository == 'clockless-org\/worldlet' && github\.ref == 'refs\/heads\/main'/.test(workflow),'only clockless-org/worldlet main releases');
 assert(/worldlet\/\$CHANNEL-\$platform/.test(workflow)&&/for platform in \$PLATFORMS; do\n            sha=/.test(workflow),'a promotion requires the platform\'s release machine to have passed the channel\'s tests on that platform\'s own commit');
 assert(/options: \[both, mac, windows\]/.test(workflow)&&/PLATFORMS: \$\{\{ inputs\.platform == 'both' && 'mac windows' \|\| inputs\.platform \}\}/.test(workflow),'each platform is promoted on its own (owner decision 2026-10-10)');
+assert(/--platform linux --dir dist\/ci\/linux/.test(workflow)&&/if: inputs\.platform != 'windows'/.test(workflow),'the Linux service moves with Mac, which its release machine builds it beside');
 console.log('ci-release checks passed');
