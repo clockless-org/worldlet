@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites} from '../core/agent/grants.ts';
+import {askGrant,askGrantAuditEntry,askGrantTargets,askGranted,AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites} from '../core/agent/grants.ts';
 import {HERMES_CHANNEL_READ_ONLY,hermesChannelToolAllowed} from '../core/agent/hermes-server.ts';
 import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
 import {turnWriteAdmission,writeDecision} from '../core/agent/turn-trust.ts';
@@ -125,7 +125,7 @@ assert.equal(worldCallWrites('start_applet_task'),true);assert.equal(worldCallWr
 // describe_world_tools: only granted targets outside a turn; everything while a Fox turn holds the server; none revoked.
 const listed=new Set(standingActions(actions,hermes,defaults,false,now).map(a=>a.target));
 assert.ok(listed.has('items')&&listed.has('world')&&!listed.has('content'));
-assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.length);
+assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.filter(a=>a.target!=='asks').length,'everything but asks, which only the Agent\'s own Grants name');
 assert.deepEqual(standingActions(actions,{...hermes,revokedAt:earlier},defaults,true,now),[]);
 // A resolved call maps back to its target and action (channelToolReply checks Grants by them).
 assert.deepEqual(worldActionOf(actions,'query_world_items',{}),{target:'items',action:'query'});
@@ -163,4 +163,32 @@ assert.equal(serviceGranted('codex',[githubGrant],'posthog',now),false);assert.e
 assert.deepEqual(serviceGrantAuditEntry('codex','github',true,now),{at:now,agentId:'codex',target:'github',action:'grant',decision:'allowed',grantId:'codex-service-github',reason:'The person let this Agent read this Service in Settings.'});
 assert.equal(serviceGrantAuditEntry('codex','github',false,now).action,'ungrant');
 
-console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server, per-Service read Grants.');
+// "Can ask you" and "Can take work": exactly asks/post+read and asks/claim+resolve, never default, never given by a Fox
+// turn. An ask is not a guarded write: a granted call runs outside a turn, as a draft for review does.
+assert.deepEqual(askGrantTargets('ask'),['asks/post','asks/read']);assert.deepEqual(askGrantTargets('work'),['asks/claim','asks/resolve']);
+for(const name of ['*','asks','all','__proto__',''])assert.deepEqual(askGrantTargets(name),[],'not an ask Grant: '+name);
+assert.equal(askGrant('codex','*/*',now),null);assert.equal(askGrant('Not An Id','ask',now),null);
+const askingGrant=askGrant('codex','ask',now)!,workGrant=askGrant('codex','work',now)!;
+assert.deepEqual(askingGrant,{id:'codex-asks-ask',agentId:'codex',targets:['asks/post','asks/read'],access:'read',duration:'standing',grantedAt:now});
+assert.ok(!channelDefaultGrants('codex',earlier,actions).some(g=>g.targets.some(t=>t.startsWith('asks/'))),'no asks in the default Grants');
+const askCall=(grants:Grant[],action:string,args:Record<string,unknown>,foxTurn:{own:boolean}|null=null,identity=codex)=>{
+ const resolved=resolveAction(actions,'asks',action,args);
+ assert.equal(resolved.name,'agent_asks');assert.equal(worldCallWrites(resolved.name,resolved.args),false,'an ask is not a guarded write');
+ return standingCallDecision({identity,grants,target:'asks',action,tool:resolved.name,args:resolved.args,foxTurn,now});
+};
+assert.equal(askCall(codexDefaults,'post',{title:'Which?'}).decision,'denied','ungranted: refused');
+assert.deepEqual(askCall([...codexDefaults,askingGrant],'post',{title:'Which?'}),{decision:'allowed',grantId:'codex-asks-ask'});
+assert.equal(askCall([...codexDefaults,askingGrant],'read',{}).decision,'allowed');
+assert.equal(askCall([...codexDefaults,askingGrant],'claim',{}).decision,'denied','asking is not taking work');
+assert.equal(askCall([...codexDefaults,workGrant],'resolve',{id:'ask-00000001',note:'x',expectedRevision:1}).decision,'allowed');
+assert.equal(askCall([...codexDefaults,workGrant],'post',{title:'x'}).decision,'denied');
+assert.equal(askCall([...codexDefaults,{...askingGrant,revokedAt:earlier}],'post',{title:'x'}).decision,'denied','taken back: refused');
+assert.equal(askCall([...codexDefaults,{...askingGrant,agentId:'hermes'}],'post',{title:'x'}).decision,'denied','another Agent\'s Grant does not count');
+assert.equal(askCall(defaults,'post',{title:'x'},{own:true},hermes).decision,'denied','a Fox turn never grants asks');
+assert.equal(askCall([...defaults,askGrant('hermes','ask',now)!],'post',{title:'x'},{own:false},hermes).decision,'allowed','its own Grant does, in a turn too');
+assert.ok(!standingActions(actions,hermes,defaults,true,now).some(a=>a.target==='asks'),'not listed in a Fox turn without a Grant');
+assert.deepEqual(standingActions(actions,codex,[...codexDefaults,askingGrant],false,now).filter(a=>a.target==='asks').map(a=>a.action),['post','read']);
+assert.equal(askGranted('codex',[askingGrant],'ask',now),true);assert.equal(askGranted('codex',[askingGrant],'work',now),false);assert.equal(askGranted('hermes',[askingGrant],'ask',now),false);
+assert.deepEqual(askGrantAuditEntry('codex','work',true,now),{at:now,agentId:'codex',target:'asks',action:'grant-work',decision:'allowed',grantId:'codex-asks-work',reason:'The person let this Agent take work in Settings.'});
+
+console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server, per-Service read Grants, ask Grants.');

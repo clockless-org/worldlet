@@ -86,6 +86,8 @@ module.exports=async function(pi){
 `;
 
 const RESULT_LIMIT=200_000;
+/** The World tool behind `asks/*` (core/tools/gateway.ts). */
+const ASK_TOOL='agent_asks';
 
 /** What one Agent may reach on the standing server (core/agent/GRANTS.md): the actions it may discover and the decision
  * for one resolved call. Absent for a Fox turn's own bridge, whose calls the turn's trust alone decides. */
@@ -191,7 +193,9 @@ export const HERMES_STANDING_AGENT:StandingAgent={id:'hermes',name:'Hermes Agent
  * `hermes mcp add` saves the new entry and its gateway restarts, so during that run it holds the same Agent's token. */
 export const STANDING_LEGACY_ENDPOINT_FILE='worldlet-mcp-endpoint.json',STANDING_TOOLS_FILE='worldlet-mcp-tools.json';
 export const standingEndpointFile=(agentId:string)=>`worldlet-mcp-endpoint.${agentId}.json`;
-export async function openStandingWorldTools({channel,access,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;runner?:string}):Promise<StandingWorldTools> {
+/** `asks`: an Agent ask call (`agent_asks`, core/agent/GRANTS.md#agent-asks) by the Agent whose token made it. It is
+ * always that Agent's own, under its own Grants: never a Fox turn's, and never routed to one. */
+export async function openStandingWorldTools({channel,access,asks,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;runner?:string}):Promise<StandingWorldTools> {
  const route='/'+crypto.randomUUID();
  const server=await serveWorldTools(token=>access.identify(token),route,(body,identity)=>{
   const call:McpCall={name:body.name,arguments:body.arguments,agent:{id:identity.id,name:identity.name}};
@@ -200,7 +204,7 @@ export async function openStandingWorldTools({channel,access,runner=process.exec
   const turn=identity.id===HERMES_STANDING_AGENT.id?standingTurn(call):null,grants=access.grants(identity.id),now=new Date().toISOString();
   const foxTurn=turn?{own:turn.own.has(call)}:null;
   return worldGateway(body.name,body.arguments,{sample:false,
-   dispatch:(name,args)=>turn?turn.dispatch(name,args,call):channel(name,args,identity.id),
+   dispatch:async(name,args)=>name===ASK_TOOL?asks?.(identity.id,args)??{error:'Asks are not available in this build.'}:turn?turn.dispatch(name,args,call):channel(name,args,identity.id),
    access:{
     actions:all=>standingActions(all,identity,grants,foxTurn!==null,now),
     decide:(target,action,tool,args)=>{

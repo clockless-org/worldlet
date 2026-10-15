@@ -1,5 +1,6 @@
 import {AGENT_ID_PATTERN,type AgentAuditEntry,type AgentIdentity,type Grant} from '../../contracts/agent-identity.ts';
 import {SERVICE_ACTIONS,SERVICE_PROVIDERS} from '../../contracts/services.ts';
+import {AGENT_ASK_ACTIONS,AGENT_ASK_TARGET} from '../../contracts/agent-asks.ts';
 import {grantedActions,worldActions,type WorldAction} from '../tools/index.ts';
 import {turnGuardedWrite,turnWriteAdmission} from './turn-trust.ts';
 import {HERMES_CHANNEL_LINK_TOOL,HERMES_CHANNEL_READ_ONLY,HERMES_CHANNEL_TOOLS,hermesChannelTrust} from './hermes-server.ts';
@@ -168,6 +169,32 @@ export function serviceGrantAuditEntry(agentId:string,provider:string,granted:bo
  return {at,agentId,target:provider,action:granted?'grant':'ungrant',decision:'allowed',grantId:serviceGrantId(agentId,provider),
   reason:granted?'The person let this Agent read this Service in Settings.':'The person stopped this Agent reading this Service in Settings.'};
 }
+/** "Can ask you" (`ask`: post and read its own asks) and "Can take work" (`work`: claim and resolve input asks) in
+ * Settings › Agent › Access (contracts/agent-asks.ts). Never part of the default Grants, and never given by a Fox turn. */
+export type AskGrantKind='ask'|'work';
+export const ASK_GRANT_KINDS:readonly AskGrantKind[]=Object.freeze(['ask','work']);
+export function askGrantTargets(kind:string):string[] {
+ return kind==='ask'?[AGENT_ASK_ACTIONS.post,AGENT_ASK_ACTIONS.read]:kind==='work'?[AGENT_ASK_ACTIONS.claim,AGENT_ASK_ACTIONS.resolve]:[];
+}
+export const askGrantId=(agentId:string,kind:string)=>agentId+'-asks-'+kind;
+/** The standing Grant for one of the two, or null for anything else. Hosts build it from the kind only. Access is
+ * `read`: an ask only shows something to the person, as a draft for review does, and is not a guarded write. */
+export function askGrant(agentId:string,kind:string,grantedAt:string):Grant|null {
+ const targets=askGrantTargets(kind);
+ if(!targets.length||typeof agentId!=='string'||!AGENT_ID_PATTERN.test(agentId))return null;
+ return {id:askGrantId(agentId,kind),agentId,targets,access:'read',duration:'standing',grantedAt};
+}
+export function askGranted(agentId:string,grants:readonly Grant[],kind:string,now:string):boolean {
+ const id=askGrantId(agentId,kind);
+ return askGrantTargets(kind).length>0&&grants.some(grant=>grant.id===id&&grant.agentId===agentId&&grantActive(grant,now));
+}
+/** The audit entry for the person turning "Can ask you" or "Can take work" on or off in Settings. */
+export function askGrantAuditEntry(agentId:string,kind:string,granted:boolean,at:string):AgentAuditEntry {
+ const what=kind==='work'?'take work':'ask';
+ return {at,agentId,target:AGENT_ASK_TARGET,action:(granted?'grant-':'ungrant-')+kind,decision:'allowed',grantId:askGrantId(agentId,kind),
+  reason:granted?`The person let this Agent ${what} in Settings.`:`The person stopped this Agent being able to ${what} in Settings.`};
+}
+
 /** While a Fox turn holds the standing server, its Agent's calls go to that turn (world-tool-bridge.ts standingTurn), as
  * they did before Grants: a call the turn's own stream announced is Fox's and runs under the turn's trust; any other
  * write waits for the person on the approval card. */
@@ -187,7 +214,8 @@ export const STANDING_OUTSIDE_TURN='This came from outside a conversation with F
  * (HERMES_CHANNEL_READ_ONLY for Hermes Agent, STANDING_OUTSIDE_TURN for another). */
 export function standingCallDecision(call:StandingCall):GrantDecision {
  const {identity,target,action,tool,args,foxTurn,now}=call,writes=worldCallWrites(tool,args);
- if(foxTurn){
+ // Asks are the calling Agent's own: only its own Grants decide them, never a Fox turn's.
+ if(foxTurn&&target!==AGENT_ASK_TARGET){
   const grants=identity?[...call.grants,foxTurnGrant(identity.id,foxTurn.own,now)]:[];
   return grantDecision({identity,grants,target,action,writes,now});
  }
@@ -200,7 +228,7 @@ export function standingCallDecision(call:StandingCall):GrantDecision {
  * server) name. */
 export function standingActions(actions:WorldAction[],identity:AgentIdentity|null|undefined,grants:readonly Grant[],foxTurn:boolean,now:string):WorldAction[] {
  if(!identity||agentRevoked(identity,now))return [];
- const all=foxTurn?[...grants,foxTurnGrant(identity.id,false,now)]:grants;
- const active=all.filter(grant=>grant.agentId===identity.id&&grantActive(grant,now));
- return grantedActions(actions,(target,action)=>active.some(grant=>grant.targets.some(pattern=>grantPatternMatches(pattern,target,action))));
+ const own=grants.filter(grant=>grant.agentId===identity.id&&grantActive(grant,now));
+ const active=foxTurn?[...own,foxTurnGrant(identity.id,false,now)]:own;
+ return grantedActions(actions,(target,action)=>(target===AGENT_ASK_TARGET?own:active).some(grant=>grant.targets.some(pattern=>grantPatternMatches(pattern,target,action))));
 }
