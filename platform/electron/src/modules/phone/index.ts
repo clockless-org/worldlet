@@ -5,11 +5,12 @@ import {app} from 'electron';
 import type {Host,Row} from '../../host/types.ts';
 import {AGENT,ANALYTICS,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,ORDER,PHONE,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,WIDGETS,WORLD_ROOM_PAGE,WORLD_WEB,type WorldRoomPageService,type WorldWebService,type AgentService,type RtcPageFactory,type DesktopCompanionService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
 import {WorldletError} from '../../files.ts';
-import {PHONE_LIMITS,hostAppletPlaces,threadPairs,readRemoteToHost,remoteHostInfo,phoneActionStatus,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,pairKeys,fromBase64url,sha256Hex,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../core/phone/index.ts';
+import {withWorldLink,PHONE_LIMITS,hostAppletPlaces,threadPairs,readRemoteToHost,remoteHostInfo,phoneActionStatus,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,pairKeys,fromBase64url,sha256Hex,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../core/phone/index.ts';
 import {createPhoneRelay} from './relay.ts';
 import {createLocalRelay,serveLocalRelay,type LocalServer} from './local-relay.ts';
 import {createRoomLink} from './room-link.ts';
 import {createWorldRoomLink} from './world-room-link.ts';
+import type {PhoneStatus} from './relay.ts';
 import {createRtcHost} from './rtc-host.ts';
 import {createRemoteAgentHost} from './remote-host.ts';
 import {phoneWebRecording} from './web.ts';
@@ -235,6 +236,17 @@ export function installPhone(host:Host){
   deliver:message=>remoteHost.receive(message),
   onChange:status=>{if(status.state!=='paired')remoteHost.stop();host.page.event('worldlet:agent-pair-status',status);},
  });
+ // The full World on another device (core/phone/README.md#the-world-on-another-device): a `world` pairing of its own,
+ // met in the pairing room. Each page that joins is the host's remote World page (WORLD_ROOM_PAGE), with only what
+ // ROOM_ALLOWED lets through; a host without one closes it.
+ const worldRoom=createWorldRoomLink({
+  vault,name:computerName,version,relay:process.env.WORLDLET_PAIR_RELAY||undefined,
+  accept:socket=>{const pages=host.optional<WorldRoomPageService>(WORLD_ROOM_PAGE);if(pages)pages.accept(socket);else socket.close(1011,'No World here');},
+  onChange:status=>host.page.event('worldlet:world-pair-status',status),
+ });
+ // The browser link carries the World's pairing too (core/phone withWorldLink), so it opens the full World on a device
+ // that can draw it and the Center on one that cannot.
+ const webStatus=(status:PhoneStatus):PhoneStatus=>status.link?{...status,link:withWorldLink(status.link,worldRoom.status().link)}:status;
  // A web browser on another device (core/phone/README.md#web): the page at `<relay>/open/` meets this computer in the
  // pairing room (room-link.ts), which stores nothing, and gets the same Center, conversation and live turn as a phone,
  // over a direct line when the two can reach each other.
@@ -251,7 +263,7 @@ export function installPhone(host:Host){
    webPaired=status.state==='paired';
    // Running in background is for this link: once it ends, closing the World leaves Fox on the desktop again.
    if(status.state==='none'&&local.status().state==='none'&&host.preferences.bool(RUN_IN_BACKGROUND))host.preferences.set(RUN_IN_BACKGROUND,false);
-   host.page.event('worldlet:web-pair-status',status);
+   host.page.event('worldlet:web-pair-status',webStatus(status));
   },
  });
  // A browser link from before the room kept its boxes on the relay: it is ended there once, which deletes them.
@@ -295,14 +307,6 @@ export function installPhone(host:Host){
   const {origin}=await serveLocal();
   if(!local.status().link?.startsWith(origin+'/'))await local.end();
  }).catch(error=>host.diagnostics.record(error,'localBrowser'));
- // The full World on another device (core/phone/README.md#the-world-on-another-device): a `world` pairing of its own,
- // met in the pairing room. Each page that joins is the host's remote World page (WORLD_ROOM_PAGE), with only what
- // ROOM_ALLOWED lets through; a host without one closes it.
- const worldRoom=createWorldRoomLink({
-  vault,name:computerName,version,relay:process.env.WORLDLET_PAIR_RELAY||undefined,
-  accept:socket=>{const pages=host.optional<WorldRoomPageService>(WORLD_ROOM_PAGE);if(pages)pages.accept(socket);else socket.close(1011,'No World here');},
-  onChange:status=>host.page.event('worldlet:world-pair-status',status),
- });
  const localOpen=()=>{const seen=local.status().seenAt;return !!seen&&Date.now()-seen<ACTIVE;};
  const localListening=()=>{const seen=local.status().seenAt;return !!seen&&Date.now()-seen<WEB_LISTENING;};
  const webOpen=()=>{const seen=browser.status().seenAt;return !!seen&&Date.now()-seen<ACTIVE;};
@@ -376,7 +380,7 @@ export function installPhone(host:Host){
   notify,
   live:async value=>{if(value.done===true)finished(value);return publishLive(value);},
   // Kept when there is one, so a browser that opened it stays paired; a new one is checked quickly like Copy link's.
-  worldLink:async()=>{const status=await browser.ensure();links[2].schedule(QUICK);return status;},
+  worldLink:async()=>{await worldRoom.ensure();const status=await browser.ensure();links[2].schedule(QUICK);links[4].schedule(QUICK);return webStatus(status);},
   localServer:serveLocal,
   worldRoomLink:async()=>{const status=await worldRoom.ensure();links[4].schedule(QUICK);return status;},
  });
@@ -386,12 +390,15 @@ export function installPhone(host:Host){
   // the room; otherwise the phone's.
   phonePair:async request=>{
    const link=links[request.kind==='agent'?1:request.kind==='web'?2:request.kind==='local'?3:request.kind==='world'?4:0];
-   if(request.operation==='status')return link.relay.status();
+   // The browser link for another device carries the World's: it is made, shown and ended with it.
+   const shown=(status:PhoneStatus)=>request.kind==='web'?webStatus(status):status;
+   if(request.operation==='status')return shown(link.relay.status());
    if(request.operation==='start'){
     if(request.kind==='local')try{await serveLocal();}catch{throw new WorldletError('Worldlet could not open a port on this computer for the browser. Copy the link instead.');}
-    const status=await link.relay.start();link.schedule(QUICK);return status;
+    if(request.kind==='web'){await worldRoom.start();links[4].schedule(QUICK);}
+    const status=await link.relay.start();link.schedule(QUICK);return shown(status);
    }
-   if(request.operation==='end')return await link.relay.end();
+   if(request.operation==='end'){if(request.kind==='web')await worldRoom.end();return await link.relay.end();}
    // The full World in a browser on this computer (host/world-web.ts): its link, opened in the person's default browser.
    if(request.kind==='local'&&request.operation==='world'){
     const world=host.optional<WorldWebService>(WORLD_WEB);
@@ -402,7 +409,7 @@ export function installPhone(host:Host){
    }
    // A browser's link opens in the person's default browser, never inside the World.
    if(request.operation==='open'&&(request.kind==='web'||request.kind==='local')){
-    const status=link.relay.status();if(!status.link)throw new WorldletError('Make a link first.');
+    const status=shown(link.relay.status());if(!status.link)throw new WorldletError('Make a link first.');
     try{await openInBrowser(status.link);}catch{throw new WorldletError('Could not open your browser. Copy the link instead.');}
     return status;
    }
@@ -414,7 +421,7 @@ export function installPhone(host:Host){
     if(!companion)throw new WorldletError('Running in background is not available here.');
     host.preferences.set(RUN_IN_BACKGROUND,true);
     if(!companion.background())throw new WorldletError('Finish setting up Worldlet first.');
-    return link.relay.status();
+    return shown(link.relay.status());
    }
    throw new WorldletError('Unknown pairing request.');
   },

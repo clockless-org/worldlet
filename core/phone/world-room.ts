@@ -97,3 +97,33 @@ export function worldRoomSession(keys:PairKeys,host:string,page:string,as:'deskt
  };
 }
 export type WorldRoomSession=ReturnType<typeof worldRoomSession>;
+
+// The browser link (`kind: 'web'`, the Center and Fox at /open/) also carries the World's pairing when there is one
+// (`w`, its secret, and `wv`, the bundle's version), so one link opens the full World on a device that can draw it and
+// the Center on one that cannot (README.md#the-world-on-another-device).
+/** The browser link with the World's pairing added, from the `world` link; the browser link alone without one. */
+export function withWorldLink(webLink:string,worldLink?:string|null):string {
+ if(!worldLink)return webLink;
+ let url:URL;try{url=new URL(worldLink);}catch{return webLink;}
+ const version=/^\/world\/([^/]+)\/$/.exec(url.pathname)?.[1],secret=new URLSearchParams(url.hash.slice(1)).get('s');
+ if(!version||!secret)return webLink;
+ return `${webLink}&${new URLSearchParams({w:secret,wv:decodeURIComponent(version)})}`;
+}
+/** The full World's link a browser link carries (on the origin that served the page), or ''. */
+export function worldLinkFromWeb(webLink:string,origin:string):string {
+ const fragment=webLink.slice(webLink.indexOf('#')+1),q=new URLSearchParams(fragment),secret=q.get('w')||'',version=q.get('wv')||'';
+ if(!/^[A-Za-z0-9_-]{43}$/.test(secret)||!/^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$/.test(version))return '';
+ return worldRoomLink({base:origin+worldBundlePath(version),secret:fromBase64url(secret),name:q.get('n')||''});
+}
+/** What a page can tell about its device. */
+export type WorldDevice={webgl:boolean,memory?:number,cores?:number,width:number,height:number,touch?:boolean,saveData?:boolean};
+/** Whether this device can draw the full World well: WebGL, a screen that is not a phone's, and the memory and cores
+ * of a computer or tablet where the browser says (Chrome does; Safari and Firefox do not). A phone gets the Center and
+ * Fox, as in the phone apps. */
+export function canRenderWorld(device:WorldDevice):boolean {
+ if(!device.webgl||device.saveData)return false;
+ if(Math.min(device.width,device.height)<600)return false;
+ if(device.memory!==undefined&&device.memory<4)return false;
+ if(device.cores!==undefined&&device.cores<4)return false;
+ return true;
+}

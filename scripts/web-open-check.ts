@@ -339,7 +339,7 @@ await server.close();await rm(out,{recursive:true,force:true});
  assert.match(phone,/fetch:async\(input,init\)=>\{await adopted;return localRelay\.fetch/,'a kept pairing is handed back before the computer reads the relay');
  assert.match(phone,/const browser=createRoomLink\(\{/,'another device\'s browser meets the computer in the room');
  // The Agent's `world/link` is answered on the host before the World page is asked, through the room link.
- assert.match(phone,/worldLink:async\(\)=>\{const status=await browser\.ensure\(\);/,'world/link keeps or makes the room link');
+ assert.match(phone,/worldLink:async\(\)=>\{await worldRoom\.ensure\(\);const status=await browser\.ensure\(\);.*return webStatus\(status\);\}/,'world/link keeps or makes the room link, carrying the World\'s');
  const served=fox.indexOf("if(name==='share_world_link'){"),paged=fox.indexOf("if(!page.ready())return tool?NEEDS_WORLD:null;");
  assert.ok(served>0&&paged>served,'world/link is answered without the page');
  assert.equal(resolveAction(worldActions(),'world','link',{}).name,'share_world_link');

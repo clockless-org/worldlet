@@ -24,7 +24,7 @@ import {createWorldRoomLink,WORLD_ROOM_VAULT} from '../platform/electron/src/mod
 import {createWebPage} from '../platform/electron/src/host/web-page.ts';
 import {createPagePair,NO_PAGE} from '../platform/electron/src/host/world-web.ts';
 import {ROOM_ALLOWED,ROOM_DENIED_MESSAGE,WEB_DENIED_MESSAGE,WEB_PAGE_FEATURES,WEB_PAGE_UNAVAILABLE,roomDenied} from '../contracts/web-world.ts';
-import {newPairSecret,openHello,pairKeys,readWorldRoomFrame,readWorldRoomLink,roomEntry,sealJoin,worldBundlePath,worldRoomLink,worldRoomNonce,worldRoomSession,WORLD_ROOM_PIECE,ROOM_PROTOCOL,isWorldRoomPage} from '../core/phone/index.ts';
+import {canRenderWorld,withWorldLink,worldLinkFromWeb,newPairSecret,openHello,pairKeys,readWorldRoomFrame,readWorldRoomLink,roomEntry,sealJoin,worldBundlePath,worldRoomLink,worldRoomNonce,worldRoomSession,WORLD_ROOM_PIECE,ROOM_PROTOCOL,isWorldRoomPage} from '../core/phone/index.ts';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 /** The room's own limit on one message (worker/room.ts in the operations repository). */
@@ -68,6 +68,19 @@ const within=<T>(promise:Promise<T>,what:string,ms=10_000)=>Promise.race([promis
  assert.equal(roomDenied({action:'dataBackup'}),WEB_DENIED_MESSAGE,'WEB_DENIED holds first');
  assert.equal(roomDenied({action:'browserShow'}),WEB_PAGE_UNAVAILABLE.websitePages,'and what a browser window cannot do');
  for(const action of Object.keys(ROOM_ALLOWED))assert.equal(roomDenied({action,operation:'get'}),'',action);
+ // One browser link for both: the full World where the device can draw it, the Center where it cannot.
+ const web='https://worldlet.ai/open/#v=1&s='+'B'.repeat(43)+'&n=Studio+Mac&m=room',both=withWorldLink(web,link);
+ assert.equal(withWorldLink(web,null),web,'without a World pairing, the browser link as before');
+ assert.match(both,/&m=room&w=[A-Za-z0-9_-]{43}&wv=2026\.1015\.1$/);
+ assert.equal(worldLinkFromWeb(both,'https://worldlet.ai'),link,'the World link comes back from it, on the page\'s origin');
+ assert.equal(worldLinkFromWeb(web,'https://worldlet.ai'),'');
+ assert.equal(worldLinkFromWeb(both.replace('wv=2026.1015.1','wv=..'),'https://worldlet.ai'),'','no other path');
+ const computer={webgl:true,memory:8,cores:8,width:1440,height:900};
+ assert.equal(canRenderWorld(computer),true);
+ assert.equal(canRenderWorld({...computer,width:390,height:844}),false,'a phone gets the Center');
+ assert.equal(canRenderWorld({...computer,webgl:false}),false,'no WebGL, no World');
+ assert.equal(canRenderWorld({...computer,memory:2}),false,'nor with little memory');
+ assert.equal(canRenderWorld({webgl:true,width:1024,height:768}),true,'a browser that does not say its memory');
  console.log('PASS world room link and frames: the World bundle\'s address with the pairing in the fragment; sealed pieces under the room\'s limit, whole again on the other side, replay, reordering and another session refused; ROOM_ALLOWED with WEB_DENIED and WEB_PAGE_ACTIONS before it');
 }
 
@@ -154,7 +167,8 @@ await withTempDir('wl-room-',async temp=>{
  let roomMessages=0;
  const server=http.createServer((req,res)=>void (async()=>{
   const url=new URL(req.url||'/','http://relay');
-  const match=/^\/world\/[^/]+(\/.*)$/.exec(url.pathname);
+  // The Center's page at /open/, and the World bundle of any version at /world/<version>/.
+  const match=/^\/world\/[^/]+(\/.*)$/.exec(url.pathname)??(url.pathname.startsWith('/open/')?[url.pathname,url.pathname.endsWith('/')?url.pathname+'index.html':url.pathname]:null);
   const file=match&&await resolveWorldFile(realRoot,match[1]);
   if(!file||!TYPES[path.extname(file).toLowerCase()]){res.writeHead(404).end();return;}
   res.writeHead(200,{'Content-Type':TYPES[path.extname(file).toLowerCase()]});fs.createReadStream(file).pipe(res);
@@ -191,6 +205,9 @@ await withTempDir('wl-room-',async temp=>{
   assert.match(out,/World link for another device ready in .*world-room-link\.txt/,'the host makes the World link for another device: '+out.slice(-600));
   const file=path.join(library,'world-room-link.txt'),link=fs.readFileSync(file,'utf8').trim();
   if(process.platform!=='win32')assert.equal(fs.statSync(file).mode&0o777,0o600,'owner-only');
+  const roomLink=fs.readFileSync(path.join(library,'room-link.txt'),'utf8').trim();
+  assert.ok(roomLink.startsWith(relay+'/open/#'),'the browser link: the Center\'s page');
+  assert.equal(worldLinkFromWeb(roomLink,relay),fs.readFileSync(file,'utf8').trim(),'and it carries the World\'s pairing');
   assert.ok(link.startsWith(relay+'/world/')&&readWorldRoomLink(link).secret.length===32,'the World bundle on the relay, the pairing in the fragment');
   assert.ok(!out.includes(link.slice(link.indexOf('#')+1)),'the log never holds the link');
   assert.ok(!fs.readFileSync(path.join(library,'vault.json'),'utf8').includes(new URLSearchParams(link.slice(link.indexOf('#')+1)).get('s')!),'the vault holds the pairing sealed');
@@ -198,7 +215,9 @@ await withTempDir('wl-room-',async temp=>{
   try{
    const context=await browser.newContext({viewport:{width:1280,height:800}});
    const page=await context.newPage(),errors=pageErrors(page);
-   await page.goto(link);
+   // The browser link the person gets (room-link.txt, `world/link`): on a computer it opens the full World.
+   await page.goto(roomLink);
+   await page.waitForURL(url=>/^\/world\/[^/]+\/$/.test(new URL(url).pathname),{timeout:30_000});
    await waitForWorld(page);
    await page.waitForFunction(()=>(document.querySelector('#notionWorld') as HTMLElement&{sceneMetrics?:{renderer?:string}})?.sceneMetrics?.renderer==='pixi-webgl',undefined,{timeout:120_000});
    await page.getByText(title).first().waitFor({timeout:60_000});
@@ -218,10 +237,17 @@ await withTempDir('wl-room-',async temp=>{
    await page.waitForFunction(()=>document.documentElement.dataset.worldClosed==='true',undefined,{timeout:30_000});
    assert.match(await page.locator('#nativeNotice').textContent()||'',/open in another browser tab or device/);
    await second.getByText(title).first().waitFor({timeout:60_000});
+   // A phone opens the same link and keeps the Center and Fox: what the World page hands it arrives there.
+   const phone=await browser.newContext({viewport:{width:390,height:844},screen:{width:390,height:844},isMobile:true,hasTouch:true});
+   const small=await phone.newPage();
+   await small.goto(roomLink);
+   await small.getByText(title).first().waitFor({timeout:60_000});
+   assert.equal(new URL(small.url()).pathname,'/open/','a phone stays on the Center\'s page');
+   assert.equal(await small.getByRole('button',{name:'Open the full World'}).count(),1,'and can still choose the full World');
   }finally{await browser.close();}
   assert.ok(roomMessages>10,'the World went through the room');
   assert.deepEqual(oversized,[],'every room message under the room\'s limit');
-  console.log(`PASS world room end to end: the Node host writes the World link for another device; the built World bundle, served as static files beside a room stand-in, joins from the fragment and renders the World (pixi-webgl) with its item; ROOM_ALLOWED, WEB_DENIED and WEB_PAGE_ACTIONS refused in the host; one device at a time; ${roomMessages} room messages, none over the room's limit`);
+  console.log(`PASS world room end to end: the Node host writes the World link for another device and the browser link carries it; that link opens the full World on a computer and keeps the Center on a phone; the built World bundle, served as static files beside a room stand-in, joins from the fragment and renders the World (pixi-webgl) with its item; ROOM_ALLOWED, WEB_DENIED and WEB_PAGE_ACTIONS refused in the host; one device at a time; ${roomMessages} room messages, none over the room's limit`);
  }finally{
   if(process.platform==='win32')child.send({type:'worldlet:stop'});else child.kill('SIGTERM');
   const code=await Promise.race([exited,new Promise<'hung'>(resolve=>setTimeout(()=>resolve('hung'),20_000))]);

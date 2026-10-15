@@ -122,8 +122,10 @@ export function createWorldRoomLink(options:WorldRoomLinkOptions){
   await connect();changed();
   return status();
  }
- /** The link there is, or a new one: an existing link is kept, so a page that opened it stays paired. */
- async function ensure(){return saved?status():await start();}
+ /** The link there is, or a new one: an existing link is kept, so a page that opened it stays paired. Callers at the
+  * same moment get the same new link. */
+ let starting:Promise<PhoneStatus>|null=null;
+ async function ensure(){return saved?status():await (starting??=start().finally(()=>{starting=null;}));}
  /** Keeps the room open. Pages ask for what they show, so nothing is waited for. */
  async function poll(){
   if(!saved)return false;

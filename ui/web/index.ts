@@ -1,4 +1,4 @@
-import {createWebClient,createRoomWebClient,isRoomLink,WebPairingEnded,type WebClient,type WebMessage,type WebView,type PhoneAttentionItem,type PhoneTask,type RoomSocketFactory} from '../../core/phone/index.ts';
+import {canRenderWorld,createWebClient,createRoomWebClient,isRoomLink,worldLinkFromWeb,WebPairingEnded,type WorldDevice,type WebClient,type WebMessage,type WebView,type PhoneAttentionItem,type PhoneTask,type RoomSocketFactory} from '../../core/phone/index.ts';
 
 // Worldlet in a web browser (core/phone/README.md#web): the page the relay serves at /open/ pairs with the computer
 // like the phone apps, from the link the computer's Mobile page makes, and shows what the phones show: what needs
@@ -7,11 +7,18 @@ import {createWebClient,createRoomWebClient,isRoomLink,WebPairingEnded,type WebC
 // does. The link stays in this browser's storage (never sent anywhere: it is the URL fragment), so a reload or a
 // bookmark of /open/ keeps working until the computer turns the link off.
 export const WEB_LINK_KEY='worldlet-web-link';
+/** The person chose the Center here over the full World (`1`). */
+export const WEB_SIMPLE_KEY='worldlet-web-simple';
 type Tab='now'|'working'|'today'|'fox';
 const TABS:[Tab,string][]=[['now','Needs you'],['working','Working'],['today','Today'],['fox','Fox']];
 const GROUPS:Record<string,string>={event:'Coming up',needsAction:'Worth doing',unseen:'Worth knowing'};
 export type WebOpenOptions={fetch:typeof fetch,storage:Pick<Storage,'getItem'|'setItem'|'removeItem'>,location:{hash:string,origin:string},
- replaceURL:(url:string)=>void,version:string,userAgent:string,wait?:number,retry?:number,WebSocket?:RoomSocketFactory};
+ replaceURL:(url:string)=>void,version:string,userAgent:string,wait?:number,retry?:number,WebSocket?:RoomSocketFactory,
+ /** What this device can draw, and how to go to the full World (core/phone/world-room.ts): a link that carries the
+  * World's pairing opens it on a device that can draw it, and keeps the Center here on one that cannot. */
+ device?:WorldDevice,openWorld?:(url:string)=>void,
+ /** `/open/?simple`: the person wants the Center here, not the full World; kept for this browser. */
+ simple?:boolean};
 
 /** "Chrome on Mac": what the computer's Mobile page calls this browser. */
 export function browserName(userAgent:string){
@@ -25,6 +32,11 @@ export function mountWebOpen(root:HTMLElement,options:WebOpenOptions){
  // A fresh link arrives in the fragment; it is kept and taken out of the address bar at once.
  if(/(^#|&)s=/.test(options.location.hash)){options.storage.setItem(WEB_LINK_KEY,options.location.hash.slice(1));options.replaceURL('/open/');}
  const saved=options.storage.getItem(WEB_LINK_KEY);
+ if(options.simple)try{options.storage.setItem(WEB_SIMPLE_KEY,'1');}catch{}
+ // The full World, where the link carries it and this device can draw it, unless the person chose the Center here.
+ const world=saved&&isRoomLink(saved)?worldLinkFromWeb(saved,options.location.origin):'';
+ const openWorld=()=>{try{options.storage.removeItem(WEB_SIMPLE_KEY);}catch{}options.openWorld?.(world);};
+ if(world&&options.openWorld&&options.device&&canRenderWorld(options.device)&&options.storage.getItem(WEB_SIMPLE_KEY)!=='1'){openWorld();return {stop(){},get view(){return {} as WebView;}};}
  let client:WebClient|null=null,view:WebView={},tab:Tab='now',notice='',ended=false,stopped=false,draft='';
  const pending=new Set<string>();
  try{if(saved){
@@ -116,6 +128,7 @@ export function mountWebOpen(root:HTMLElement,options:WebOpenOptions){
  function render(){
   const header=el('header','web-header');
   header.append(el('h1','','Worldlet'),el('p','web-computer',client?(view.desktop?.name||client.computer||'Your computer'):''));
+  if(world&&options.openWorld&&client&&!ended)header.append(button('Open the full World',openWorld));
   if(!client||ended){
    const page=el('section','web-page web-start');
    page.append(el('h2','',ended?'This link is off':'Open Worldlet here'),

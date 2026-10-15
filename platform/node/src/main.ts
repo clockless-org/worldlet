@@ -162,9 +162,8 @@ log(`started ${app.getVersion()} with the library at ${profile.root}`);
 /** The browser link (core/phone/README.md#web), made once and kept: a phone or any browser opens it to reach this
  * computer. Room only here: browsers' direct lines need WebRTC, which this host does not have yet. */
 async function roomLink(){
- const ask=(operation:string)=>router.dispatch({action:'phonePair',kind:'web',operation}) as Promise<{state:string;link?:string;error?:string}>;
- let status=await ask('status');
- if(status.state==='none')status=await ask('start');
+ // The one there is, or a new one, carrying the full World's pairing too (PhoneService.worldLink, as `world/link`).
+ const status=await host.use<PhoneService>(PHONE).worldLink!() as {state:string;link?:string;error?:string};
  if(!status.link)throw Error('No browser link was made.');
  const file=path.join(profile.root,ROOM_LINK_FILE);
  writeAtomic(file,status.link+'\n',0o600);
