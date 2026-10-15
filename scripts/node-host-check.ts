@@ -156,6 +156,9 @@ await withTempDir('wl-',async temp=>{
  if(process.platform!=='win32'){
   const home=path.join(temp,'home'),fake=path.join(temp,'fake'),argvLog=path.join(temp,'argv.log'),mcp=path.join(temp,'worldlet-home','mcp');
   fs.mkdirSync(home);fs.mkdirSync(fake);
+  // As install.sh lays it out: Agents are registered with current/node/bin/node, which outlives this build's own folder.
+  const node=path.join(temp,'worldlet-home','current','node','bin','node');
+  fs.mkdirSync(path.dirname(node),{recursive:true});fs.symlinkSync(process.execPath,node);
   for(const name of ['claude','codex'])fs.writeFileSync(path.join(fake,name),`#!/bin/sh\nprintf '%s\\n' "${name} $*" >> '${argvLog}'\n[ "$2" = remove ] && exit 1\nexit 0\n`,{mode:0o755});
   const cliEnv:NodeJS.ProcessEnv={...env,HOME:home,WORLDLET_HOME:path.join(temp,'worldlet-home'),PATH:fake+path.delimiter+process.env.PATH};
   delete cliEnv.CLAUDE_CONFIG_DIR;delete cliEnv.CODEX_HOME;
@@ -212,7 +215,7 @@ await withTempDir('wl-',async temp=>{
     assert.match(registered.stdout,/MCP server "worldlet" is registered/);
    }
    const endpoint=(agent:string)=>path.join(mcp,`worldlet-mcp-endpoint.${agent}.json`),shim=path.join(mcp,'worldlet-mcp-standing.cjs'),tools=path.join(mcp,'worldlet-mcp-tools.json');
-   const added=(agent:string)=>`--env ELECTRON_RUN_AS_NODE=1 --env WORLDLET_MCP_ENDPOINT_FILE=${endpoint(agent)} --env WORLDLET_MCP_TOOLS_FILE=${tools} -- ${process.execPath} ${shim}`;
+   const added=(agent:string)=>`--env ELECTRON_RUN_AS_NODE=1 --env WORLDLET_MCP_ENDPOINT_FILE=${endpoint(agent)} --env WORLDLET_MCP_TOOLS_FILE=${tools} -- ${node} ${shim}`;
    assert.deepEqual(fs.readFileSync(argvLog,'utf8').trim().split('\n'),[
     'claude mcp remove --scope user worldlet',`claude mcp add --scope user worldlet ${added('claude-code')}`,
     'codex mcp remove worldlet',`codex mcp add worldlet ${added('codex')}`],'each Agent registers the fixed home with its own command');
