@@ -7,7 +7,7 @@ import {digest,WorldletError} from '../../files.ts';
 import {referenceDate} from '../../store/world-store.ts';
 import {APPLE_PROVIDERS,connectApple} from './apple.ts';
 import {nativeFirst} from './content.ts';
-import {GOOGLE_SIGN_IN,SOURCE_PROVIDERS,WORLD_APPS,connectToken} from '../../../../../core/applets/index.ts';
+import {GOOGLE_SIGN_IN,SOURCE_PROVIDERS,WORLD_APPS,connectSettings,connectToken} from '../../../../../core/applets/index.ts';
 import {isMigrationSource} from '../../../../../core/agent/index.ts';
 import {agentIntegrationPlans} from '../agent-runtime/agent-integrations.ts';
 import {IMPORT_REGIONS} from './context.ts';
@@ -17,7 +17,8 @@ import {backgroundLaunch} from '../../background-launch.ts';
 // Account connections (Mac AgentSources, WorldView `connect`, ConnectionView.requestConnection)
 // and local files/folders (Mac Store.importFiles, Windows FolderImport/TextFileImport).
 // Linear and PayPal had a native token sheet on the Mac; here they use the Agent's own MCP authorization like Notion,
-// because the World page owns all connection UI. GitHub connects with a token pasted in that page (TOKEN_PROVIDERS).
+// because the World page owns all connection UI. GitHub and PostHog connect with a token pasted in that page
+// (TOKEN_PROVIDERS), PostHog with its address and project beside it.
 const DIRECT=['google',...SOURCE_PROVIDERS];
 const TEXT_EXTENSIONS=['md','txt','json','csv'];
 
@@ -63,14 +64,14 @@ export function createConnections(ctx:SourcesContext){
 
  /** `token`: what the person pasted for a source that connects only with one (TOKEN_PROVIDERS). It goes to the
   * connection owner, which checks it with one read before keeping it in the vault; it is never logged, kept in the
-  * World's state, put in an event or returned. */
- async function connectAgentSource(provider:string,region:string|undefined,mock:boolean,token=''){
+  * World's state, put in an event or returned. `settings`: what such a source also needs (PostHog's address and project). */
+ async function connectAgentSource(provider:string,region:string|undefined,mock:boolean,token='',settings:Record<string,string>={}){
   if(!store.writable||store.busy)throw new WorldletError('Wait for the current task to finish.');
   let connected=false,checking=false;
   store.busy=true;store.error=null;store.status=mock?'Connecting the mock Google account…':token?'Checking the token…':'Complete authorization in your browser.';
   try{
    if(mock&&(host.profile.channel!=='dev'||provider!=='google'))throw new WorldletError('Mock Google is available only in development builds.');
-   await ctx.sourceConnections().connect({provider,target:'',endpoint:'',token,home:ctx.home(),mock,
+   await ctx.sourceConnections().connect({provider,target:'',endpoint:'',token,...token?{settings}:{},home:ctx.home(),mock,
     // Sign-in stages reach the page as they happen (contracts/platform.ts GOOGLE_SIGN_IN_EVENT).
     onStage:(stage,url)=>host.page.event('worldlet:google-sign-in',url?{stage,url}:stage),
     onConnected:receipt=>acceptAgentConnection({id:typeof (receipt as Row).id==='string'?(receipt as Row).id:`${ctx.accountsId()}-${receipt.provider}`,provider:receipt.provider,target:receipt.target,status:'connected',connector:receipt.connector},region)});
@@ -229,10 +230,11 @@ export function createConnections(ctx:SourcesContext){
    const region=ctx.requireRegion(body.region);
    const local=process.platform==='darwin'&&APPLE_PROVIDERS.includes(provider);
    const direct=!local&&DIRECT.includes(provider);
-   let token:string;try{token=connectToken(provider,body.token);}catch(error){throw new WorldletError((error as Error).message);}
+   let token:string,settings:Record<string,string>;
+   try{token=connectToken(provider,body.token);settings=connectSettings(provider,body.settings);}catch(error){throw new WorldletError((error as Error).message);}
    let checking=false;
    if(local)await connectApple(ctx,provider,region);
-   else if(direct)checking=await connectAgentSource(provider,region,body.mock===true&&host.profile.channel==='dev',token);
+   else if(direct)checking=await connectAgentSource(provider,region,body.mock===true&&host.profile.channel==='dev',token,settings);
    else if(APPLE_PROVIDERS.includes(provider))throw new WorldletError('This local app is available only on macOS.');
    else if(provider==='folder'){if(store.busy)throw new WorldletError('Please wait for the current task to finish.');return connectFolder(region);}
    else throw new WorldletError('Unsupported source.');

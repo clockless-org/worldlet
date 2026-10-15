@@ -45,6 +45,7 @@ import {GoogleAccount} from '../sources/google-account.ts';
 import {GoogleSource,GoogleSourceAccess,GoogleSourceConnections} from '../sources/google-source.ts';
 import {McpAccounts} from '../sources/mcp-account.ts';
 import {McpSource,McpSourceAccess,McpSourceConnections} from '../sources/mcp-source.ts';
+import {ServiceSource,ServiceSourceAccess,ServiceSourceConnections} from '../sources/service-source.ts';
 import {DoorDash,DoorDashSourceAccess} from '../sources/doordash.ts';
 
 /** Which providers `install` is signed in to, as the Agent itself says (null: it does not say): Hermes Agent lists them
@@ -87,9 +88,9 @@ export function selectAdapter(context:RuntimeContext,configuration=process.env.W
 /** The World's own Google connection (owner decision 2026-10-09: a connection made through Worldlet is kept by the
  * Platform): Gmail, Calendar and Drive work the same whichever Agent Fox uses. Fox's Hermes profile's earlier grant is adopted. */
 /** The World's account connections: Google, and the MCP connectors (Notion, Todoist, Linear, PayPal, Supabase,
- * GitHub), each used from the Agent's own profile when it already has it, else kept by the World; and DoorDash's
- * official CLI. */
-export interface WorldSources {google:GoogleSource;mcp:McpSource;doordash:DoorDash}
+ * GitHub), each used from the Agent's own profile when it already has it, else kept by the World; the Services read
+ * over their own API with a key the World keeps (PostHog); and DoorDash's official CLI. */
+export interface WorldSources {google:GoogleSource;mcp:McpSource;services:ServiceSource;doordash:DoorDash}
 export function worldSources(context:RuntimeContext,vault:VaultService,accountsHome:()=>string):WorldSources {
  const own=()=>path.join(context.root,'agent','private','hermes');
  const homes=()=>[...new Set([accountsHome(),own()])];
@@ -98,7 +99,7 @@ export function worldSources(context:RuntimeContext,vault:VaultService,accountsH
  const account=new GoogleAccount({folder:path.join(context.root,'accounts','google'),vault,clientFile:()=>bundledResource(context.profile,'googleClient'),adoptFrom:homes});
  const google=new GoogleSource({account,development:context.development,openExternal,ownProfile:own,legacyHomes:homes,notion:{connected:()=>mcp.connected('notion'),read:body=>mcp.read('notion',body)},github:{read:body=>mcp.read('github',body)}});
  const doordash=new DoorDash({folder:path.join(context.root,'accounts','doordash'),legacyHomes:homes});
- return {google,mcp,doordash};
+ return {google,mcp,services:new ServiceSource({vault}),doordash};
 }
 
 export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>Adapter),listeners:((reason:AgentChange)=>void)[],sources:((accountsHome:()=>string)=>WorldSources)|null=null):AgentService {
@@ -128,8 +129,8 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
   accountsHome:()=>journal(accountsHome(),true),
   // Every source the World reads runs in the Platform; anything else is the Agent's own (a person's own Harness
   // reads none).
-  makeSourceAccess:()=>world?new GoogleSourceAccess(world.google,()=>new McpSourceAccess(world.mcp,()=>new DoorDashSourceAccess(world.doordash,()=>current().makeSourceAccess()))):current().makeSourceAccess(),
-  makeSourceConnections:()=>world?new GoogleSourceConnections(world.google,()=>new McpSourceConnections(world.mcp,()=>current().makeSourceConnections(),()=>'hermes'),()=>'hermes'):current().makeSourceConnections(),
+  makeSourceAccess:()=>world?new GoogleSourceAccess(world.google,()=>new ServiceSourceAccess(world.services,()=>new McpSourceAccess(world.mcp,()=>new DoorDashSourceAccess(world.doordash,()=>current().makeSourceAccess())))):current().makeSourceAccess(),
+  makeSourceConnections:()=>world?new GoogleSourceConnections(world.google,()=>new ServiceSourceConnections(world.services,()=>new McpSourceConnections(world.mcp,()=>current().makeSourceConnections(),()=>'hermes'),()=>'hermes'),()=>'hermes'):current().makeSourceConnections(),
   googleAccount:()=>worldGoogle?.account??null,
   makeRoutines:()=>current().makeRoutines(),
   get harness(){return current().harness??null;},

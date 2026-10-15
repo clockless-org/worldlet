@@ -2,7 +2,7 @@ import {listWorldTools,publicWorldToolNames,WORLD_TOOL_VERSION} from './catalog.
 import {worldModules} from './modules.ts';
 import {APP_DEFINITIONS} from '../applets/index.ts';
 import {CALENDAR_REQUIRED} from './calendar.ts';
-import {SERVICE_PROVIDERS} from '../../contracts/services.ts';
+import {SERVICE_ACTIONS,SERVICE_PROVIDERS} from '../../contracts/services.ts';
 // Every Applet with a source-reader or calendar attention registration is readable through the gateway, except a
 // Worldlet Service's: its own Attention reads are the World's, and an Agent reads it only through read_service.
 const READABLE_SOURCES=APP_DEFINITIONS.flatMap(app=>app.attention&&app.attention.reader!=='observation'&&!SERVICE_PROVIDERS.includes(app.attention.provider)?[app.attention.provider]:[]);
@@ -78,10 +78,11 @@ function buildWorldActions(sample:boolean):WorldAction[]{
   if(read)read.description='Read one practice email by the ID a gmail/search result returned.';
  }
  add('google-drive','read','read_connected_google',{service:'google-drive'});
- // Worldlet Services (contracts/services.ts): each read is its own Grant target, github/list, github/read, github/search.
- for(const operation of ['list','read','search']){
-  const read=add('github',operation,'read_service',{provider:'github',operation});
-  if(read)read.parameters.required=operation==='read'?['id']:operation==='search'?['query']:[];
+ // Worldlet Services (contracts/services.ts): each read is its own Grant target (github/list, posthog/query…), with
+ // the arguments that operation requires.
+ for(const [provider,operations] of Object.entries(SERVICE_ACTIONS))for(const [operation,required] of Object.entries(operations)){
+  const read=add(provider,operation,'read_service',{provider,operation});
+  if(read)read.parameters.required=[...required??[]];
  }
  // The person's own events (core/tools/calendar.ts); each operation names what it needs.
  operations('calendar','manage_calendar');

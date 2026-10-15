@@ -20,7 +20,7 @@ export * from './website-matching.ts';
 export {homeWritePlan} from './home-actions.ts';
 
 export {curatedSourceRead,curatedConnection,CURATED_READERS} from './curated-source.ts';
-export {SOURCE_PROVIDERS,GOOGLE_SIGN_IN,GOOGLE_SIGN_IN_SERVICES,TOKEN_PROVIDERS,connectToken} from './sources.ts';
+export {SOURCE_PROVIDERS,GOOGLE_SIGN_IN,GOOGLE_SIGN_IN_SERVICES,TOKEN_PROVIDERS,connectToken,connectSettings,type TokenField} from './sources.ts';
 export {HOME_NATIVE,HOME_RECORDS,CODING_SESSIONS,MONEY_READERS,ORIGINAL_READERS} from './groups.ts';
 
 export {todoistWriteReview,todoistWriteResult} from './todoist-actions.ts';

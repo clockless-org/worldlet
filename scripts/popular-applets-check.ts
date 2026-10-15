@@ -5,6 +5,7 @@ import {appLogoSource} from '../ui/applets/visuals.ts';
 import {placementPages,resolvePlacements} from '../ui/world/slot-placement.ts';
 import {appletStyle} from '../ui/components/style.ts';
 import {existsSync} from 'node:fs';
+import {SERVICE_PROVIDERS} from '../contracts/services.ts';
 assert.equal(POPULAR_APPS.length,56);
 assert.equal(new Set(APP_DEFINITIONS.map(a=>a.key)).size,APP_DEFINITIONS.length);
 assert.equal(APP_DEFINITIONS.length,118);
@@ -12,7 +13,8 @@ for(const app of POPULAR_APPS){
  assert.equal(APP_DEFINITIONS.find(a=>a.key===app.key)?.id,app.id);
  assert.equal(new URL(app.fullView.url).protocol,'https:');
  assert.equal(app.fullView.kind,'web');
- assert.equal(app.connection.provider,null);
+ // A website that is also a Worldlet Service (PostHog) connects with a pasted key; the rest connect nothing.
+ assert.equal(app.connection.provider,SERVICE_PROVIDERS.includes(app.key)?app.key:null);
  assert.equal(app.attention,undefined);
  assert.equal(app.installByDefault,false);
  assert.ok(appLogoSource(app)?.startsWith('data:image/'),app.key+' has locally bundled publisher identity');

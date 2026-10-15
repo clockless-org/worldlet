@@ -245,6 +245,8 @@
 .fox-model-catalog li{display:block;width:100%;margin:0;padding:0;}
 .fox-model-catalog button{display:block;width:auto;max-width:100%;margin:0;padding:6px 0;text-align:left;white-space:normal;}
 .native-console[data-fox-guide=true] .native-conversation{max-height:none;}
+.world-onboarding .onboarding-token-setting{display:block;margin:10px 0 0;color:var(--ui-ink);}
+.world-onboarding .onboarding-token-setting small{margin-top:0;}
 .world-onboarding .onboarding-error{color:var(--ui-error);margin:12px 0 0;}
 .world-onboarding .onboarding-error:empty{display:none;}
 

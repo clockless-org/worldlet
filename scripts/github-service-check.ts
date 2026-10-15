@@ -146,9 +146,13 @@ await withTempDir('worldlet-github-service-',async temp=>{
  const last=await read({provider:'github',operation:'search',query:'is:issue flaky',cursor:String(GITHUB_LIMITS.searchPages)});
  assert.equal(last.cursor,undefined,'no page past the limit');
  for(const cursor of ['0',String(GITHUB_LIMITS.searchPages+1),'abc'])await assert.rejects(read({provider:'github',operation:'search',query:'x',cursor}),/Invalid GitHub search cursor/);
- await assert.rejects(read({provider:'github',operation:'search',query:'q'.repeat(257)}),/Invalid arguments for read_service/);
+ await assert.rejects(read({provider:'github',operation:'search',query:'q'.repeat(257)}),/query of up to 256 characters/);
+ await assert.rejects(read({provider:'github',operation:'search',query:'q'.repeat(4001)}),/Invalid arguments for read_service/);
  await assert.rejects(read({provider:'github',operation:'search'}),/query of up to/);
- await assert.rejects(read({provider:'posthog',operation:'list'}),/Invalid arguments for read_service/);
+ await assert.rejects(read({provider:'gitlab',operation:'list'}),/Invalid arguments for read_service/);
+ // PostHog is a Service too, read over its own API (service-source.ts), never over GitHub's MCP connection; GitHub has no query.
+ await assert.rejects(read({provider:'posthog',operation:'query',query:'SELECT 1'}),/Unsupported Service/);
+ await assert.rejects(read({provider:'github',operation:'query',query:'SELECT 1'}),/no query read/);
  await assert.rejects(read({provider:'github',operation:'merge',id:'example-org/app#1'}),/Invalid arguments for read_service/);
  // Only the reader's read tools were ever called.
  assert.ok(calls.every(c=>!c.name||GITHUB_TOOLS.includes(c.name)));
@@ -213,7 +217,7 @@ assert.deepEqual(actions.find(a=>a.target==='github'&&a.action==='search')!.para
 const now='2026-10-15T12:00:00.000Z';
 const agent:AgentIdentity={id:'claude-code',name:'Claude Code',harness:'claude-code',kind:'local',createdAt:now};
 const defaults=channelDefaultGrants(agent.id,now,actions);
-const serviceTargets=actions.filter(a=>a.tool==='read_service').map(a=>a.target+'/'+a.action);
+const serviceTargets=actions.filter(a=>a.tool==='read_service'&&a.defaults.provider==='github').map(a=>a.target+'/'+a.action);
 assert.deepEqual(serviceTargets,['github/list','github/read','github/search','applet:github/list','applet:github/read','applet:github/search']);
 assert.ok(defaults.every(g=>g.targets.every(t=>!serviceTargets.includes(t))),'read_service is in no default Grant');
 assert.equal(hermesChannelToolAllowed({name:'read_service'}),false);

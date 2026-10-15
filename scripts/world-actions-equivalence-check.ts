@@ -7,7 +7,7 @@ import {listWorldTools,publicWorldToolNames} from '../core/tools/catalog.ts';
 import {worldModules} from '../core/tools/modules.ts';
 import {APP_DEFINITIONS} from '../core/applets/index.ts';
 import {CALENDAR_REQUIRED} from '../core/tools/calendar.ts';
-import {SERVICE_PROVIDERS} from '../contracts/services.ts';
+import {SERVICE_ACTIONS,SERVICE_PROVIDERS} from '../contracts/services.ts';
 import {worldActions,describeActions,resolveAction,type WorldAction} from '../core/tools/gateway.ts';
 
 const READABLE_SOURCES=APP_DEFINITIONS.flatMap(app=>app.attention&&app.attention.reader!=='observation'&&!SERVICE_PROVIDERS.includes(app.attention.provider)?[app.attention.provider]:[]);
@@ -51,9 +51,9 @@ function oldWorldActions({sample=false}={}):WorldAction[]{
   actions[actions.length-1].description='Read one practice email by the ID a gmail/search result returned.';
  }
  add('google-drive','read','read_connected_google',{service:'google-drive'});
- if(definitions.some(t=>t.name==='read_service'))for(const operation of ['list','read','search']){
-  add('github',operation,'read_service',{provider:'github',operation});
-  actions[actions.length-1].parameters.required=operation==='read'?['id']:operation==='search'?['query']:[];
+ if(definitions.some(t=>t.name==='read_service'))for(const [provider,operations] of Object.entries(SERVICE_ACTIONS))for(const [operation,required] of Object.entries(operations)){
+  add(provider,operation,'read_service',{provider,operation});
+  actions[actions.length-1].parameters.required=[...required??[]];
  }
  operations('calendar','manage_calendar');
  for(const action of actions.filter(a=>a.tool==='manage_calendar'))action.parameters.required=CALENDAR_REQUIRED[action.action];
