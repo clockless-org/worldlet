@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import {DatabaseSync} from 'node:sqlite';
+import {openAgentDatabase,type AgentDatabase} from './agent-database.ts';
 import {agentServerConnections,commandLine,commandReason,dotenvNames,harnessService,hermesConnectionCommand,hermesConnections,hermesConversationTitle,hermesMcpPrefixes,openClawConnectionCommand,openClawConnections,openClawMcpPrefixes,withLastUse,type ConnectionUse,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import type {HarnessConnection,HarnessConnectionChange,HarnessConnections} from '../../../../../contracts/harness-services.ts';
 import {WorldletError} from '../../files.ts';
@@ -42,9 +42,9 @@ function hermesUses(root:string):ConnectionUse[] {
 function readHermesUses(root:string):ConnectionUse[] {
  const file=path.join(root,'state.db');
  if(!fs.existsSync(file)||!inside(file,root))return [];
- let db:DatabaseSync|null=null;
+ let db:AgentDatabase|null=null;
  try{
-  db=new DatabaseSync(file,{readOnly:true,timeout:2000} as any);db.exec('PRAGMA trusted_schema=OFF');
+  db=openAgentDatabase(file);db.exec('PRAGMA trusted_schema=OFF');
   const has=(table:string)=>new Set((db!.prepare(`PRAGMA table_info(${table})`).all() as any[]).map(row=>row.name));
   const messages=has('messages'),sessions=has('sessions'),named=['title','display_name'].filter(name=>sessions.has(name));
   const about=db.prepare(`SELECT source${named.map(name=>','+name).join('')} FROM sessions WHERE id=?`);
