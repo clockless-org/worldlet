@@ -31,5 +31,15 @@ try{
  assert.equal(await page.evaluate(()=>(window as any).selected),'record-19','last record is clickable after scrolling');
  await page.locator('[data-item-id=record-0]').focus();await page.keyboard.press('Enter');
  assert.equal(await page.evaluate(()=>(window as any).selected),'record-0','keyboard navigation reaches the first record');
+ const handoff=await page.evaluate(()=>{
+  const w=window as any,host=document.getElementById('host')!;w.scene.destroy();
+  const source=(material,rect)=>({registration:{imageSize:[1500,844],sha256:'0'.repeat(64),regions:[{id:'main',role:'primary',rect,material}],companion:[.75,.6,.2,.3]}});
+  const old=w.Scene.mountAppletScene(host,'same-applet',{shell:host,source:source('paper',[.05,.1,.5,.65])});
+  const next=w.Scene.mountAppletScene(host,'same-applet',{shell:host,source:source('screen',[.1,.1,.6,.7])});
+  const before={font:host.style.getPropertyValue('--scene-body-font'),ink:host.style.getPropertyValue('--scene-ink'),width:host.style.getPropertyValue('--applet-scene-primary-width')};
+  old.layout();old.destroy();const after={font:host.style.getPropertyValue('--scene-body-font'),ink:host.style.getPropertyValue('--scene-ink'),width:host.style.getPropertyValue('--applet-scene-primary-width')};
+  const key=host.dataset.appletScene;next.destroy();return {before,after,key,cleared:!host.dataset.appletScene&&!host.style.getPropertyValue('--scene-body-font')};
+ });
+ assert.ok(handoff.before.font);assert.deepEqual(handoff.after,handoff.before,'retiring same-key scenes cannot erase or overwrite their replacement');assert.equal(handoff.key,'same-applet');assert.equal(handoff.cleared,true);
  assert.deepEqual(errors,[]);console.log('Scene lists: natural row height, source scope and scrolling pass at 1500 × 844.');
 }finally{await browser.close();}

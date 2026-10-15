@@ -27,6 +27,8 @@ export const PLAIN_SCENE:AppletSceneSource={registration:{imageSize:[1600,1000],
 /** Below this painted width the primary region would shrink text past reading: the host lays a readable sheet over the
  * painting instead, where the shell's readers already go on a narrow window (the contract allows it). */
 export const SCENE_COMPACT_WIDTH=420;
+// Stage and reader scenes may briefly share a shell during a handoff, including the same Applet key.
+const shellOwners=new WeakMap<HTMLElement,symbol>();
 const VARIABLES:Record<string,string>={ink:'--scene-ink',muted:'--scene-muted',line:'--scene-line',accent:'--scene-accent',accentInk:'--scene-accent-ink',control:'--scene-control',controlInk:'--scene-control-ink',fill:'--scene-fill',bodyFont:'--scene-body-font',displayFont:'--scene-display-font',focus:'--scene-focus'};
 /** A region's material as the CSS variables applet-scene.css and the Applets' own styles read. */
 export function sceneMaterialStyle(material:ThemeSceneMaterialName):Record<string,string>{
@@ -63,6 +65,7 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
  });
  host.append(element);
  const foreground=painted?mountSceneFrame(options.shell||element,source.background!,source.registration):null;
+ const owner=Symbol(key);if(options.shell)shellOwners.set(options.shell,owner);
  const primaryRegion=regions.find(r=>r.role==='primary')!,shellStyle=options.shell?sceneMaterialStyle(primaryRegion.material):{};
  for(const [name,value] of Object.entries(shellStyle))options.shell!.style.setProperty(name,value);
  let last:AppletScene['metrics']={key,painted,primary:null,companion:null};
@@ -80,7 +83,7 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
   for(const [index,region] of regions.entries()){region.element.hidden=compact&&region.role!=='primary';place(region.element,region.role==='primary'?primary:fit.regions[index]);}
   const round=(r:{x:number;y:number;width:number;height:number})=>({x:Math.round(r.x),y:Math.round(r.y),width:Math.round(r.width),height:Math.round(r.height)});
   last={key,painted,compact,primary:round(primary),companion:round(fit.companion)};
-  const shell=options.shell;if(!shell)return;
+  const shell=options.shell;if(!shell||shellOwners.get(shell)!==owner)return;
   if(compact){if(shell.dataset.appletScene===key)delete shell.dataset.appletScene;delete shell.dataset.appletFrame;return;}
   for(const [name,r] of [['primary',primary],['companion',fit.companion]] as const){
    shell.style.setProperty(`--applet-scene-${name}-left`,offset.x+r.x+'px');shell.style.setProperty(`--applet-scene-${name}-top`,offset.y+r.y+'px');
@@ -102,7 +105,8 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
     profile:{top:samples(profile.top),right:samples(profile.right),bottom:samples(profile.bottom),left:samples(profile.left)}};
   },
   destroy(){
-   resize.disconnect();foreground?.destroy();element.remove();const shell=options.shell;if(!shell||shell.dataset.appletScene!==key)return;
+   resize.disconnect();foreground?.destroy();element.remove();const shell=options.shell;if(!shell||shellOwners.get(shell)!==owner)return;
+   shellOwners.delete(shell);
    delete shell.dataset.appletScene;delete shell.dataset.appletFrame;for(const name of Object.keys(shellStyle))shell.style.removeProperty(name);
    for(const part of ['primary','companion'])for(const side of ['left','top','width','height'])shell.style.removeProperty(`--applet-scene-${part}-${side}`);
   }};
