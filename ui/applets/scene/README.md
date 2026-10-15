@@ -66,3 +66,11 @@ shows saved messages, file changes and command records. Reads are separate from
 selection for execution: only Continue work opens the existing reader, and only
 a later explicit message resumes work. The scene stays behind that reader;
 returning retains the selected session. Ordinary scenes keep their single list.
+
+
+A Mail scene can register a transparent delivery clip outside all live regions.
+`mail-delivery.ts` owns only media playback and disposal. `createMailArrival`
+retains source-evidence deduplication; `createModuleScene` forwards an accepted
+arrival to the active Applet stage before its World fallback. Navigation,
+reader focus, host coverage, inactivity and motion preferences stop the clip.
+The clip never autoplays on entry or supplies mail contents.

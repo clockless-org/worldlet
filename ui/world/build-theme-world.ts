@@ -108,7 +108,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
   marks,back:()=>{if(!disposed&&view.level!=='overview')onPick({action:'back'});},
   openArea:id=>{if(!disposed&&state().areas.some(a=>a.id===id))onPick({action:'region-more',id});}};
  const theme=activeBuildTheme(),worldContext={...context,asset:(path:string)=>themeAssetURL(theme.id,path)},map=theme.package.presentation.worldMap, mount=map?renderWorldMap(worldContext,map):renderVillageWorld(worldContext);
- function refresh(){if(disposed)return;mount.update(state());world.hidden=view.level==='applet'&&!mount.behindApplet;
+ function refresh(){if(disposed)return;const current=state();mount.update(current);stage.setMotion(motion&&!current.paused&&!current.interaction.locked&&!current.interaction.covered);world.hidden=view.level==='applet'&&!mount.behindApplet;
   const room=rooms.find(r=>r.moduleId===view.id||r.id===view.id);
   // The host's Applet stage: its reader stays put while the item's detail or the website is open.
   const shell=shellInteraction(host),open=view.level==='applet'&&!!room&&stages.has(room.moduleId);
@@ -158,7 +158,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
   setHoveredApplet(id){interaction.hoveredApplet=id==null?null:rooms.find(r=>r.id===id||r.moduleId===id)?.moduleId||id;refresh();},setHoveredArea(id){interaction.hoveredArea=id;refresh();},
   // Arrivals play when the Applets are unlocked (setUnlockedApplets); preparing only places them.
   prepareArrival(ids){arriving=[...ids||[]];refresh();},
-  deliverMail(){const played=mount.event({type:'mail.received',ids:[]});return typeof played==='boolean'?played:true;},
+  deliverMail(){const current=state();if(current.paused||!current.motion||current.interaction.locked||current.interaction.covered)return false;if(stage.deliverMail())return true;const played=mount.event({type:'mail.received',ids:[]});return typeof played==='boolean'?played:true;},
   picture(){return mount.picture?.()||null;},
   get metrics(){
    const m=mount.metrics?.() as any||{};return {...m,theme:theme.id,presentation:{...m.presentation,stage:stage.metrics},levelZoom:levelZoom.metrics};},

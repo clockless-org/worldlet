@@ -7,7 +7,7 @@
   "content": "fictional-design-samples",
   "sources": {
     "ui/themes/scene-frame.ts": "f5e9d343b8afe6d3d99790954b27539edb9658f63859155ab29518e9911c972f",
-    "ui/applets/scene/applet-scene.ts": "50b79fd8830629030b25c23299210f6f7c43407810958ae4f62fb77286e1e759",
+    "ui/applets/scene/applet-scene.ts": "395f5743eb06702ed4aaa1ac151f37982370d9ddca711b0cebaa5ac664b3390d",
     "ui/applets/scene/scene-plane.ts": "4bebe0ba015feb88ed0c99fdc9f63cfc563023d207792fc2df67ebebbbc4f111",
     "ui/applets/gmail/page-turn.ts": "51002b7e298ca712fd48ccb700379f8250157ce9a890059a358a6e0dfd71ae60",
     "ui/applets/gmail/focus.css": "0f3974bfeb14f21f8cda094d162188e680978655c7391a13063483eeb4fad019",

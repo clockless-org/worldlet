@@ -40,7 +40,7 @@ const sceneRegistration=(r:ThemeSceneRegistration):ThemeSceneRegistration=>({...
 /** A registered background for a specific Applet; reusable theme presets are returned separately. */
 export function themeAppletScene(key:string){
  const scene=active.package.presentation.appletScenes?.[key];
- return scene?{...scene,background:themeAssetURL(active.id,scene.background),registration:sceneRegistration(scene.registration),...scene.sprites?{sprites:Object.fromEntries(Object.entries(scene.sprites).map(([role,sprite])=>[role,{...sprite,image:themeAssetURL(active.id,sprite.image)}]))}:{}}:undefined;
+ return scene?{...scene,...scene.mailDelivery?{mailDelivery:{...scene.mailDelivery,video:themeAssetURL(active.id,scene.mailDelivery.video)}}:{},background:themeAssetURL(active.id,scene.background),registration:sceneRegistration(scene.registration),...scene.sprites?{sprites:Object.fromEntries(Object.entries(scene.sprites).map(([role,sprite])=>[role,{...sprite,image:themeAssetURL(active.id,sprite.image)}]))}:{}}:undefined;
 }
 /** How Applet content looks on one scene material (presentation.json `sceneMaterials`), every role filled: a role the
  * theme leaves out comes from its tokens. The shared Applet scene renderer (ui/applets/scene) is its one reader. */

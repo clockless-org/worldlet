@@ -22,7 +22,7 @@ export function createAppletStage(host,onPick){
  const data=(element:HTMLElement,key:string,value:string)=>{if(element.dataset[key]!==value)element.dataset[key]=value;};
  let latestRender:Parameters<typeof render>|null=null;
  const resize=new ResizeObserver(()=>{scene?.layout();if(latestRender)render(...latestRender);});resize.observe(panel);
- let signature='',focusSignature='',shownItems=[],allItems=[],selected=null,page=0,owner='';
+ let motion=true;let signature='',focusSignature='',shownItems=[],allItems=[],selected=null,page=0,owner='';
  // The theme's small secondary regions (Calendar's wall date) show today's date.
  const sceneToday=(scene:AppletScene,value)=>{const day=new Date(value?.now||Date.now());for(const region of scene.regions.filter(r=>r.role==='secondary')){const small=document.createElement('small'),strong=document.createElement('strong');small.className='scene-meta';small.textContent=day.toLocaleDateString(undefined,{weekday:'short',month:'short'});strong.className='scene-title';strong.textContent=String(day.getDate());region.element.replaceChildren(small,strong);}};
  function render(room,value,visible,focused=false,_showDevice=false){
@@ -37,6 +37,7 @@ export function createAppletStage(host,onPick){
   const sceneOpen=!!room.key&&!!appletSceneKey(room.key)&&(visible||focused&&(SCENE_READERS.has(room.key)||CODING_SESSIONS.includes(room.key)&&!!scene?.regions.some(r=>r.id==='sessions')));
   if(scene&&(!sceneOpen||scene.element.dataset.applet!==room.key)){scene.destroy();scene=null;delete panel.dataset.scene;delete panel.dataset.reading;}
   if(sceneOpen&&!scene){panel.replaceChildren();scene=mountAppletScene(panel,room.key,{shell:(host.closest('#notionWorld') as HTMLElement|null)||host});panel.dataset.scene=room.key;signature='';}
+  scene?.setMotion(motion&&visible);
   if(scene){data(panel,'reading',String(!visible));scene.element.inert=!visible&&(room.key==='apple-notes'||CODING_SESSIONS.includes(room.key));}
   hidden(panel,!visible&&!sceneOpen);data(panel,'applet',room.key||'');data(panel,'animatedDevice',String(!!(globalThis as any).__WORLDLET_25D_ASSETS__?.motion?.[room.key]));if(!visible){signature='';return;}
   const cards=['github',...CODING_SESSIONS,...ORIGINAL_READERS,'meetings','voice-memos','messages'].includes(room.key);
@@ -89,5 +90,5 @@ export function createAppletStage(host,onPick){
    if(calendar)footer.append(move('Previous',-1));footer.append(label);if(calendar)footer.append(move('Next',1));panel.append(footer);
   }
  }
- return {render,setMotion(_value:boolean){},setSelected(room,item){owner=room.moduleId;selected=item;if(scene&&CODING_SESSIONS.includes(room.key)&&item)selectWorkSession(scene.primary.element,item.id);if(room.key==='apple-notes'&&item){selectNotebookItem(homeState,item.id);for(const row of scene?.element.querySelectorAll<HTMLElement>('.notes-row')||[])row.setAttribute('aria-pressed',String(row.dataset.itemId===item.id));}},select(id){selected=allItems.find(i=>i.id===id)||null;return selected;},get metrics(){return panel.hidden?null:{items:shownItems.length,shown:true,preview:false,selected:selected?.id||null,scene:scene?.metrics||null};},destroy(){latestRender=null;resize.disconnect();window.removeEventListener('worldlet:calendar-show',showCalendar);scene?.destroy();panel.remove();focus.remove();mailNav.remove();}};
+ return {render,setMotion(value:boolean){motion=value;scene?.setMotion(value&&!panel.hidden&&panel.dataset.reading==='false');},deliverMail(){return panel.dataset.applet==='gmail'&&!panel.hidden&&panel.dataset.reading==='false'&&(scene?.deliverMail()||false);},setSelected(room,item){owner=room.moduleId;selected=item;if(scene&&CODING_SESSIONS.includes(room.key)&&item)selectWorkSession(scene.primary.element,item.id);if(room.key==='apple-notes'&&item){selectNotebookItem(homeState,item.id);for(const row of scene?.element.querySelectorAll<HTMLElement>('.notes-row')||[])row.setAttribute('aria-pressed',String(row.dataset.itemId===item.id));}},select(id){selected=allItems.find(i=>i.id===id)||null;return selected;},get metrics(){return panel.hidden?null:{items:shownItems.length,shown:true,preview:false,selected:selected?.id||null,scene:scene?.metrics||null};},destroy(){latestRender=null;resize.disconnect();window.removeEventListener('worldlet:calendar-show',showCalendar);scene?.destroy();panel.remove();focus.remove();mailNav.remove();}};
 }

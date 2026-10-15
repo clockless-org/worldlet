@@ -201,3 +201,20 @@ and `vault-toolbar` regions. The primary region reads Markdown using the existin
 read-only vault adapter. Search and folder expansion remain within the index;
 local links resolve only against its listed notes. Missing or ambiguous links
 remain unresolved. Without these regions the ordinary list and reader remain.
+
+
+### Mail arrival clips
+
+A registered `gmail` scene may declare `mailDelivery: {video, bounds, duration}`.
+`video` names a package-local transparent, silent WebM; `bounds` is a normalized
+rectangle on the registered painting; `duration` is greater than zero and at most
+20 seconds. Its whole rectangle must clear every live content region and the
+companion clearance. The host fits it with the same transform as the painting.
+
+Only the existing deduplicated new-mail event plays the clip. Opening Mail,
+reading history and repeated updates never replay it. Playback is decorative,
+muted and pointer-transparent; it never creates a letter or changes a record.
+Leaving the scene, opening its reader, disabling motion, reduced motion, a hidden
+window or app inactivity stops it. A later active state does not resume an old
+receipt. Missing or undecodable clips leave Mail usable. Packages without this
+optional field keep their existing arrival behavior.

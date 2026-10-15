@@ -64,9 +64,12 @@ export interface ThemeSceneMaterial {
 }
 /** A measured crop of a static material image, in normalized source coordinates. */
 export interface ThemeSceneSprite {image:string;source:readonly [number,number,number,number]}
+/** A transparent, silent decorative clip played only for a host mail-arrival event. */
+export interface ThemeSceneDelivery {video:string;bounds:readonly [number,number,number,number];duration:number}
 /** A background tied to one Applet key. Its live records and controls are supplied by the host. */
 export interface ThemeAppletScene {
  background:string;registration:ThemeSceneRegistration;
+ mailDelivery?:ThemeSceneDelivery;
  /** Crops of painted game materials. The host owns cells, values, input and motion. */
  sprites?:Partial<Record<'empty-cell'|'tile'|'food',ThemeSceneSprite>>;
 }
@@ -175,8 +178,14 @@ export function parseThemePresentation(value:unknown):ThemePresentation {
  if(p.appletScenes!==undefined){
   need(object(p.appletScenes),'applet scenes');
   for(const [key,scene] of Object.entries(p.appletScenes)){
-   need(id(key)&&object(scene)&&Object.keys(scene).every(k=>['background','registration','sprites'].includes(k))&&picture(scene.background),'applet scene');
+   need(id(key)&&object(scene)&&Object.keys(scene).every(k=>['background','registration','sprites','mailDelivery'].includes(k))&&picture(scene.background),'applet scene');
    registration(scene.registration);
+   if(scene.mailDelivery!==undefined){
+    const d=scene.mailDelivery;
+    need(key==='gmail'&&object(d)&&Object.keys(d).every(k=>['video','bounds','duration'].includes(k))&&/\.webm$/.test(themeAssetPath(d.video))&&rect(d.bounds)&&Number.isFinite(d.duration)&&d.duration>0&&d.duration<=20,'scene mail delivery');
+    const [x,y,w,h]=d.bounds;
+    need([...scene.registration.regions.map(r=>r.rect),scene.registration.companion].every(([a,b,c,e])=>x+w<=a||a+c<=x||y+h<=b||b+e<=y),'scene delivery clears live regions and companion');
+   }
    if(scene.sprites!==undefined)need(object(scene.sprites)&&Object.entries(scene.sprites).every(([role,sprite])=>['empty-cell','tile','food'].includes(role)&&object(sprite)&&Object.keys(sprite).every(k=>['image','source'].includes(k))&&picture(sprite.image)&&rect(sprite.source)),'scene sprites');
   }
  }

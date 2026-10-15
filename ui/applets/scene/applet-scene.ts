@@ -1,3 +1,4 @@
+import {mountMailDelivery} from './mail-delivery.ts';
 import {scenePlaneTransform} from './scene-plane.ts';
 import {fitThemeScene,mountSceneFrame,themeAppletScene,themeSceneMaterial,type ThemeSceneRegistration,type ThemeAppletScene,type ThemeSceneMaterialName} from '../../themes/index.ts';
 import type {BrowserPaperEdge,SurfaceRect} from '../../../contracts/browser-surface.ts';
@@ -10,7 +11,7 @@ import {appletSceneKey} from './scene-family.ts';
  * new theme changes how Mail looks without a change to Mail. See README.md beside this file.
  */
 export interface AppletSceneRegion {id:string;role:'primary'|'secondary';material:ThemeSceneMaterialName;element:HTMLElement}
-export interface AppletSceneSource {background?:string;registration:ThemeSceneRegistration;sprites?:ThemeAppletScene['sprites']}
+export interface AppletSceneSource {background?:string;registration:ThemeSceneRegistration;sprites?:ThemeAppletScene['sprites'];mailDelivery?:ThemeAppletScene['mailDelivery']}
 export interface AppletScene {
  element:HTMLElement;
  sprites?:ThemeAppletScene['sprites'];
@@ -20,6 +21,8 @@ export interface AppletScene {
  /** False when the theme has no painting for this Applet and the renderer drew its plain paper instead. */
  painted:boolean;
  layout():void;
+ setMotion(active:boolean):void;
+ deliverMail():boolean;
  paperEdge(rect:SurfaceRect):BrowserPaperEdge|undefined;
  destroy():void;
  readonly metrics:{key:string;painted:boolean;compact?:boolean;primary:{x:number;y:number;width:number;height:number}|null;companion:{x:number;y:number;width:number;height:number}|null};
@@ -59,6 +62,7 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
  const margin=document.createElement('div');margin.className='applet-scene-margin';
  const plate=document.createElement('img');plate.className='applet-scene-plate';plate.alt='';plate.draggable=false;plate.decoding='async';
  if(painted){plate.src=source.background!;margin.style.backgroundImage='url("'+encodeURI(source.background!)+'")';element.append(margin,plate);}
+ const delivery=source.mailDelivery?mountMailDelivery(element,source.mailDelivery):null;let motion=true;
  const regions:AppletSceneRegion[]=source.registration.regions.map(r=>{
   const region=document.createElement('section');region.className='applet-scene-region';
   Object.assign(region.dataset,{region:r.id,role:r.role,material:r.material});
@@ -80,7 +84,7 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
   const has=(id:string)=>regions.some(r=>r.id===id);
   const distributed=has('navigation')&&has('details')||has('index')&&has('heading')&&has('status');
   const fitted=fit.regions.find(r=>r.role==='primary')!,compact=fitted.width<(distributed?280:SCENE_COMPACT_WIDTH);
-  element.dataset.compact=String(compact);
+  element.dataset.compact=String(compact);delivery?.layout(fit.image);delivery?.enable(motion&&!compact);
   const sceneOrigin=layoutOrigin(element),shellOrigin=layoutOrigin(options.shell||element);
   const offset={x:sceneOrigin.x-shellOrigin.x,y:sceneOrigin.y-shellOrigin.y};
   foreground?.layout({...fit.image,x:fit.image.x+offset.x,y:fit.image.y+offset.y},!compact);
@@ -105,7 +109,8 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
  }
  const resize=new ResizeObserver(layout);resize.observe(element);layout();
  return {element,regions,primary:primaryRegion,painted,layout,sprites:source.sprites,
-  get metrics(){return last;},
+  setMotion(active){motion=active;delivery?.enable(active&&!last.compact);},deliverMail(){return delivery?.play()||false;},
+  get metrics(){return {...last,...delivery?{delivery:delivery.metrics}:{}};},
   paperEdge(rect){
    const profile=source.registration.webEdge||(source.registration.webFrame?{top:[0,0],right:[0,0],bottom:[0,0],left:[0,0]}:undefined);
    if(!painted||last.compact||!profile||!source.background||rect.width<=0||rect.height<=0)return;
@@ -116,7 +121,7 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
     profile:{top:samples(profile.top),right:samples(profile.right),bottom:samples(profile.bottom),left:samples(profile.left)}};
   },
   destroy(){
-   resize.disconnect();foreground?.destroy();element.remove();const shell=options.shell;if(!shell||shellOwners.get(shell)!==owner)return;
+   resize.disconnect();delivery?.destroy();foreground?.destroy();element.remove();const shell=options.shell;if(!shell||shellOwners.get(shell)!==owner)return;
    shellOwners.delete(shell);shell.style.removeProperty('--applet-scene-primary-transform');shell.style.removeProperty('--applet-scene-content-left');
    delete shell.dataset.appletScene;delete shell.dataset.appletFrame;delete shell.dataset.appletCompanionBar;delete shell.dataset.appletNavigationInline;delete shell.dataset.appletPlane;for(const name of Object.keys(shellStyle))shell.style.removeProperty(name);
    for(const part of ['primary','companion'])for(const side of ['left','top','width','height'])shell.style.removeProperty(`--applet-scene-${part}-${side}`);

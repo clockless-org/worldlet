@@ -101,10 +101,17 @@ export interface ThemeSceneSprite {
     image: string;
     source: readonly [number, number, number, number];
 }
+/** A transparent, silent decorative clip played only for a host mail-arrival event. */
+export interface ThemeSceneDelivery {
+    video: string;
+    bounds: readonly [number, number, number, number];
+    duration: number;
+}
 /** A background tied to one Applet key. Its live records and controls are supplied by the host. */
 export interface ThemeAppletScene {
     background: string;
     registration: ThemeSceneRegistration;
+    mailDelivery?: ThemeSceneDelivery;
     /** Crops of painted game materials. The host owns cells, values, input and motion. */
     sprites?: Partial<Record<'empty-cell' | 'tile' | 'food', ThemeSceneSprite>>;
 }
