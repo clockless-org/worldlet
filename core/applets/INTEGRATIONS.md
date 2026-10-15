@@ -330,6 +330,38 @@ UI tests use fictional sessions to cover selection, continuation, streamed repli
 Interface: [OpenAI Codex App Server](https://developers.openai.com/codex/app-server/). Code: `platform/electron/src/modules/applet-tools/coding.ts`, `platform/local-tools/codex_sessions.py`, `ui/applets/codex/codex-applet.ts`.
 
 <a id="health-travel-money-applets"></a>
+## Worldlet Services read over their own API
+
+Some Services have no official MCP server that fits the World's account pipeline (PostHog, Cloudflare). Those are read over the service's own HTTPS API with a key the person pastes, in the Platform (`modules/sources/service-source.ts`), by a pure Core reader (`core/accounts/services/`); the shapes and each Service's operations are in [`contracts/services.ts`](../../contracts/services.ts) (`SERVICE_ACTIONS`). An Agent reads them through `read_service` like GitHub ([above](#github-service)), under the same turn and Grant rules.
+
+- **The connection is the World's own.** The key and the settings the person gave are kept in the vault as `service:<name>`, nowhere else. The host's `connect` takes the key (`connectToken`) and the settings (`connectSettings`, `TOKEN_PROVIDERS` in `core/applets/sources.ts`), checks the settings, then checks the key with one read on a connection not yet kept, so a refused paste replaces nothing. The key is never logged, put in the World's state, an event or the execution journal, returned to a page or given to an Agent. Disconnect forgets it.
+- **Requests.** Each goes only to the one address of that connection, with the key as a Bearer header. A redirect is refused, not followed; each request stops after the Service's time limit and the answer after its size limit. A kept address that no longer passes the checks is not used.
+- **Errors.** A refused key (401) while connecting says the key was not accepted and what access it needs; later it says to connect again. 403, 404 and 429 have their own plain messages; for a 400 the service's own short reason is added (for a HogQL error, the field it could not resolve).
+
+<a id="posthog-service"></a>
+### PostHog
+
+PostHog's [remote MCP server](https://posthog.com/docs/model-context-protocol) serves only PostHog Cloud and picks its project itself, so a self-hosted PostHog and a chosen project are read over [PostHog's API](https://posthog.com/docs/api) instead (`core/accounts/services/posthog.ts`).
+
+- **Connection.** Work's setup offers Connect PostHog beside Connect GitHub (the PostHog Thing still opens PostHog's website). It asks for the PostHog address (US Cloud `https://us.posthog.com` by default, EU Cloud `https://eu.posthog.com`, or a self-hosted PostHog's own HTTPS address; an ingestion address means its Cloud), the project ID (the number after `/project/`) and a [personal API key](https://posthog.com/docs/api#private-endpoint-authentication) in a password field, with read access to Project, Query, Insight, Dashboard, Feature flag and Annotation. A project API key (`phc_`, which only sends events) is refused with a plain message. The check is one read of the project (`GET /api/projects/<id>/`). After connecting, the guide says nothing is read in the background.
+- **Reads.** `query`: one HogQL `SELECT` (or `WITH … SELECT`), up to 4,000 characters, sent to `POST /api/projects/<id>/query/`. Anything else is refused before it is sent: another statement, a second statement, comments, a `LIMIT` above 200 or `LIMIT ALL`, an unclosed string. At most 200 rows come back, 30 columns each, cells cut to 300 characters and about 60,000 characters in all; the scope says when rows were left out. `read`: one page of 20 of `insights`, `dashboards`, `feature-flags` or `annotations` (`id` names which), optionally filtered by a name (`query`, up to 100 characters), paged by `cursor` up to five pages. Records keep only what describes the item (name, description, tags, active and rollout for a flag, date and scope for an annotation) with its link in PostHog, never who made it. Requests stop after 30 seconds and 2 MB.
+- **Grants.** `posthog/query` and `posthog/read`, neither in an Agent's default Grants: query results can be people's own events and properties. Fox's own turns read it like the other account services; a read makes the turn untrusted.
+- No Attention reader and no background polling: PostHog is read only when asked. Nothing is written to PostHog.
+
+Verification: `node scripts/posthog-service-check.ts` (a fixture PostHog API: key and settings checked before the key is kept, a refused paste that replaces nothing, refused non-SELECT queries, the row and size caps, a redirect and a bad kept address refused, refused turn, expired key, Grant targets, the key in no event, journal entry, receipt or message) and `node scripts/posthog-token-ui-check.ts` (the connection fields).
+
+<a id="cloudflare-service"></a>
+### Cloudflare (read only)
+
+Cloudflare's own [MCP servers](https://github.com/cloudflare/mcp-server-cloudflare) sign in with OAuth and offer far more than reads (its GraphQL server takes any query), so the World reads a small fixed set of reports from Cloudflare's [GraphQL Analytics API](https://developers.cloudflare.com/analytics/graphql-api/) instead (`core/accounts/services/cloudflare.ts`). Every request goes to `https://api.cloudflare.com`.
+
+- **Connection.** Work's setup offers Connect Cloudflare. It asks for the account ID (32 hexadecimal characters, from the dashboard's address) and an [API token](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/) in a password field, with Account Analytics Read, plus Zone Read and Zone Analytics Read to see zones. The Global API Key (37 hexadecimal characters) is refused with a plain message. The check is one GraphQL read of the account's Workers over the last hour; a token that cannot see that account is not kept.
+- **Reads.** Only `read`, and `id` picks one of the fixed reports; an Agent never sends a query. `workers`: invocations, errors, error rate, subrequests and CPU time (median and 99th percentile) per Worker, the 20 busiest. `zones`: the account's active zones (up to 20, listed with `GET /client/v4/zones`), each with its requests, cached requests and share, threats and bytes. Both cover the last 24 whole hours. Each record links to that Worker or zone in the dashboard. Requests stop after 30 seconds and 1 MB.
+- **Grants.** `cloudflare/read`, not in an Agent's default Grants. Fox's own turns read it like the other account services; a read makes the turn untrusted.
+- No Attention reader, no background polling and no writes.
+
+Verification: `node scripts/cloudflare-service-check.ts` (a fixture Cloudflare API: token and account checked before the token is kept, a refused paste that replaces nothing, the two reports and their bounds, nothing but them, refused turn, expired token, Grant target, the token in no event, journal entry, receipt, result or message).
+
 ## Health, Travel and Money Applets
 
 ### Implemented routes

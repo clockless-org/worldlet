@@ -1,4 +1,3 @@
-import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {WorldletError,ensureDirectory,writeAtomic} from '../../files.ts';
@@ -9,9 +8,9 @@ import type {AgentEventHandler,AgentRuntime,AgentSourceConnections} from '../../
 import type {Row} from '../../host/types.ts';
 import type {McpAccounts,McpConnection} from './mcp-account.ts';
 import {McpUnauthorized} from './mcp-client.ts';
-import {validateWorldTool} from './google-source.ts';
 import {ExecutionJournal} from '../agent-runtime/journal.ts';
 import {SERVICE_PROVIDERS} from '../../../../../contracts/services.ts';
+import {admitServiceRead} from './service-source.ts';
 
 /** The official endpoint each connector signs in to when none is given (hermes.ts SOURCE_ENDPOINTS). */
 export const MCP_ENDPOINTS:Readonly<Record<string,string>>=Object.freeze({notion:'https://mcp.notion.com/mcp',github:'https://api.githubcopilot.com/mcp/',linear:'https://mcp.linear.app/mcp',
@@ -19,6 +18,8 @@ export const MCP_ENDPOINTS:Readonly<Record<string,string>>=Object.freeze({notion
 const TITLES:Readonly<Record<string,string>>=Object.freeze({notion:'Notion',github:'GitHub',linear:'Linear',paypal:'PayPal',todoist:'Todoist',supabase:'Supabase'});
 const GATES:Readonly<Record<string,McpGate>>=Object.freeze({github:GITHUB_GATE,notion:NOTION_GATE,todoist:TODOIST_GATE,linear:LINEAR_GATE,paypal:PAYPAL_GATE,supabase:SUPABASE_GATE});
 export const MCP_PROVIDERS=Object.freeze(Object.keys(MCP_ENDPOINTS));
+/** The Worldlet Services read over MCP (GitHub); PostHog and Cloudflare are read over their own APIs (service-source.ts). */
+const MCP_SERVICES=Object.freeze(SERVICE_PROVIDERS.filter(provider=>MCP_PROVIDERS.includes(provider)));
 /** What the person reads when a pasted token is refused (401). */
 const TOKEN_REFUSED:Readonly<Record<string,string>>=Object.freeze({github:'GitHub did not accept this token. Check that it has not expired and has read access to Issues, Pull requests and Metadata, then paste it again.'});
 
@@ -149,16 +150,11 @@ export class McpSourceAccess implements AgentRuntime {
   }
   return this.source.read(request.provider,request.body);
  }
- /** `read_service`: validated, admitted by the turn (whose Grants name `<provider>/<operation>`, core/agent/GRANTS.md;
-  * the read makes the turn untrusted), then one bounded read with no model. */
+ /** `read_service` for a Service read over MCP: validated, admitted by the turn (admitServiceRead), then one bounded
+  * read with no model. */
  private async service(args:Row,onEvent:AgentEventHandler|undefined):Promise<Row> {
-  validateWorldTool('read_service',args);
-  const provider=String(args.provider),operation=String(args.operation);
-  if(!SERVICE_PROVIDERS.includes(provider))throw new WorldletError('Unsupported Service.');
-  const reply=await onEvent?.({type:'tool',id:'world-'+crypto.randomUUID(),name:'_world_authorize',args:{name:'read_service',provider,operation}});
-  const permission=reply&&typeof reply==='object'?reply as Row:{error:'World service permission required.'};
-  if(permission.error||permission.ok!==true)throw new WorldletError(String(permission.error||'World service permission required.'));
-  return this.source.read(provider,{operation,...typeof args.id==='string'?{id:args.id}:{},...typeof args.query==='string'?{query:args.query}:{},...typeof args.cursor==='string'?{cursor:args.cursor}:{}});
+  const {provider,body}=await admitServiceRead(args,MCP_SERVICES,onEvent);
+  return this.source.read(provider,body);
  }
 }
 

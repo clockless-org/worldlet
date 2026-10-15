@@ -1,12 +1,13 @@
 # Cloudflare
 
-Use Cloudflare in your world. Sign in on its website; automatic account sync is not connected.
+Use Cloudflare on its dashboard, and connect it as a read-only Worldlet Service so Fox and the Agents you allow can read its analytics.
 
 ## Runtime
 
 - Stable identity: `app-cloudflare`; provider: `cloudflare`.
 - Executable configuration: [runtime.json](runtime.json). This Markdown describes the contract; it is not executable code.
-- Mode: **website**.
+- Mode: **on-demand**. Opening the Thing shows Cloudflare's dashboard. Connecting takes an API token with Account Analytics Read (and Zone Read and Zone Analytics Read for zones) and the account ID; Worldlet checks them with one read before keeping the token in this computer's vault.
+- Reads: `read_service` with provider `cloudflare` and operation `read`, only when asked: `workers` (invocations, errors and CPU time per Worker) or `zones` (requests, cache and threats per zone), each over the last 24 hours. Nothing is read in the background, and nothing is changed in Cloudflare. See [Cloudflare as a Worldlet Service](../../../core/applets/INTEGRATIONS.md#cloudflare-service).
 
 ## Status
 
