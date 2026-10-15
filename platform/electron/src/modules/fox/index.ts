@@ -66,7 +66,7 @@ const readDailyRoutinesChange=(value:Row)=>Object.fromEntries(DAILY_ROUTINE_PREF
 const STREAM_EVENTS=['delta','response_start','progress','steered','status'];
 /** World services that run without a model on the accounts in this computer's Platform.
  */
-const ACCOUNT_SERVICES=['read_connected_google','read_world_source','prepare_email','use_doordash'];
+const ACCOUNT_SERVICES=['read_connected_google','read_world_source','read_service','prepare_email','use_doordash'];
 /** Applet tasks running at once, across Applets; one per Applet. */
 const MAX_APPLET_TASKS=3;
 /** An Applet task's coarse length for analytics: tasks take minutes, so the turn buckets are too short. */
@@ -477,7 +477,11 @@ export function installFox(host:Host){
  async function channelToolReply(name:string,args:Row,agentId?:string):Promise<Row> {
   const id='channel-'+crypto.randomUUID().toUpperCase(),scope={sample:false,setup:false};
   trusts.set(id,hermesChannelTrust({name}));
-  const handle=turnEvents(id,scope,{active:()=>true,allowActions:false,reads:hermesChannelToolAllowed,record:false});
+  // A service the calling Agent's own Grants admitted below (read_service, which no default Grant names) asks the turn
+  // to authorize it too: that one authorization runs, as the default channel reads' do.
+  let granted='';
+  const reads=(event:Row)=>hermesChannelToolAllowed(event)||!!granted&&event.name==='_world_authorize'&&(event.args as Row|undefined)?.name===granted;
+  const handle=turnEvents(id,scope,{active:()=>true,allowActions:false,reads,record:false});
   try{
    if(store.sampleEnabled()||!store.writable||store.state.cloudConsent!==true||onboardingUnfinished(store.state.onboarding))return {error:'Worldlet is not ready for this yet: the person has not finished setting up their own World.'};
    const access=agent()?.agentAccess?.()??null;
@@ -486,6 +490,7 @@ export function installFox(host:Host){
     const at=worldActionOf(worldActions(),name,args),identity=agentId?access.identity(agentId):null;
     const decision=at?standingCallDecision({identity,grants:identity?access.grants(identity.id):[],target:at.target,action:at.action,tool:name,args,foxTurn:null,now:new Date().toISOString()}):null;
     if(decision?.decision!=='allowed')return {error:decision?.reason||HERMES_CHANNEL_READ_ONLY};
+    granted=name;
    }
    const event={type:'tool',id:'world-1',name,args},served=await trustedServiceReply(event,id,scope)??await accountServiceReply(event,id,scope,handle);
    return served??{error:'This World tool works only in a conversation with Fox in Worldlet.'};

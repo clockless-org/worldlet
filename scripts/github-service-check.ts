@@ -1,0 +1,181 @@
+// GitHub as a Worldlet Service (contracts/services.ts, core/accounts/mcp/github.ts, `read_service`): against a fixture
+// of GitHub's remote MCP server, a pasted token connects and is kept in the vault with only read tools enabled; list,
+// read and search come back bounded and call only the reader's read tools; another server address, an expired token
+// and a refused turn stop the read; and the Grant targets github/list, github/read and github/search are each enforced,
+// with none of them in an Agent's default Grants.
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
+import {GITHUB_LIMITS,GITHUB_TOOLS,readGithub} from '../core/accounts/index.ts';
+import {channelDefaultGrants,standingActions,standingCallDecision} from '../core/agent/grants.ts';
+import {hermesChannelToolAllowed} from '../core/agent/hermes-server.ts';
+import {turnTrustObserve} from '../core/agent/turn-trust.ts';
+import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
+import {McpAccounts} from '../platform/electron/src/modules/sources/mcp-account.ts';
+import {McpSource,McpSourceAccess,McpSourceConnections} from '../platform/electron/src/modules/sources/mcp-source.ts';
+import {withTempDir} from './test-temp.ts';
+
+const TOKEN='fixture-token';
+const issue=(repo:string,number:number,extra:Record<string,unknown>={})=>({number,title:`Change ${number}`,state:'open',html_url:`https://github.com/${repo}/${extra.pull_request?'pull':'issues'}/${number}`,
+ repository_url:`https://api.github.com/repos/${repo}`,user:{login:'alex'},labels:[{name:'bug'}],updated_at:`2026-10-${String(10+number%15).padStart(2,'0')}T09:00:00Z`,comments:0,...extra});
+const pull=(repo:string,number:number,extra:Record<string,unknown>={})=>issue(repo,number,{pull_request:{url:'x'},...extra});
+
+await withTempDir('worldlet-github-service-',async temp=>{
+ const values=new Map<string,string>();
+ const vault={get:(id:string)=>values.get(id)??null,set:(id:string,value:string)=>{values.set(id,value);},delete:(id:string)=>{values.delete(id);},deleteAll:()=>values.clear()};
+ const home=path.join(temp,'hermes');fs.mkdirSync(home,{recursive:true});
+ const calls:{url:string;name?:string;args?:any}[]=[];
+ let accepted=TOKEN;
+ const text=(value:unknown)=>({content:[{type:'text',text:JSON.stringify(value)}]});
+ const long='x'.repeat(5000);
+ const answers:Record<string,(args:any)=>unknown>={
+  search_pull_requests:({query,perPage,page})=>{
+   // More than asked for, so the reader's own cap shows.
+   if(query.includes('author:@me'))return text({total_count:25,items:Array.from({length:25},(_,i)=>pull('example-org/app',i+1))});
+   if(query.includes('review-requested:@me'))return text({total_count:2,items:[pull('example-org/app',3),pull('example-org/site',7,{user:{login:'sam'}})]});
+   return text({total_count:100,items:Array.from({length:perPage},(_,i)=>pull('example-org/app',100+(page-1)*perPage+i))});
+  },
+  search_issues:({query,perPage,page})=>{
+   if(query.includes('assignee:@me'))return text({total_count:1,items:[issue('example-org/app',40,{title:'T'.repeat(400),assignees:[{login:'alex'}]})]});
+   return text({total_count:100,items:Array.from({length:perPage},(_,i)=>issue('example-org/app',300+(page-1)*perPage+i))});
+  },
+  issue_read:({method,owner,repo,issue_number,page,perPage})=>{
+   if(method==='get')return text(issue(`${owner}/${repo}`,issue_number,{body:long,comments:45}));
+   if(method==='get_comments'){
+    assert.equal(page,3,'the newest comments: the last page');assert.equal(perPage,GITHUB_LIMITS.comments);
+    return text(Array.from({length:5},(_,i)=>({user:{login:'sam'},created_at:'2026-10-14T10:00:00Z',body:i===4?'y'.repeat(1500):`Comment ${41+i}`})));
+   }
+   return {isError:true,content:[]};
+  },
+ };
+ const fakeFetch=async(input:any,init:any={})=>{
+  const url=String(input),auth=String(init.headers?.authorization??'');
+  if(auth!=='Bearer '+accepted)return new Response('',{status:401});
+  const message=JSON.parse(init.body);
+  calls.push({url,name:message.params?.name,args:message.params?.arguments});
+  const reply=(result:unknown)=>new Response(JSON.stringify({jsonrpc:'2.0',id:message.id,result}),{headers:{'content-type':'application/json','mcp-session-id':'s'}});
+  if(message.method==='initialize')return reply({protocolVersion:'2025-06-18',capabilities:{}});
+  if(message.method==='notifications/initialized')return new Response('',{status:202});
+  if(message.method==='tools/list')return reply({tools:[...Object.keys(answers),'get_me','create_pull_request','merge_pull_request','add_issue_comment'].map(name=>({name}))});
+  return reply(answers[message.params.name]?.(message.params.arguments)??{isError:true,content:[]});
+ };
+ const accounts=new McpAccounts({vault,agentHomes:()=>[home],fetch:fakeFetch as any});
+ const mcp=new McpSource({accounts,openExternal:async()=>{},reviews:path.join(temp,'reviews')});
+ const access=new McpSourceAccess(mcp,()=>({run:async()=>({ok:true}),steer:async()=>false,cancel(){}}));
+ const authorized:any[]=[];
+ const turn=async(event:any):Promise<Record<string,unknown>>=>{authorized.push(event.args);return {ok:true};};
+ const read=(args:Record<string,unknown>,events=turn)=>access.run({action:'sourceTool',name:'read_service',args},home,events);
+
+ // Not connected: the read says to connect, before any request.
+ await assert.rejects(read({provider:'github',operation:'list'}),/Connect GitHub first/);
+ assert.equal(calls.length,0);
+
+ // A pasted token connects at GitHub's official address and is the World's own, in the vault; only read tools count.
+ const links=new McpSourceConnections(mcp,()=>{throw Error('GitHub is an MCP connector here');},()=>'hermes');
+ const connected:any[]=[];
+ await links.connect({provider:'github',target:'',endpoint:'',token:'Bearer '+TOKEN,home,onStage(){},onConnected:c=>connected.push(c)});
+ assert.deepEqual(connected,[{provider:'github',target:'GitHub',transport:'hermes',connector:'mcp'}]);
+ const grant=JSON.parse(values.get('mcp:github')!);
+ assert.equal(grant.kind,'bearer');assert.equal(grant.url,'https://api.githubcopilot.com/mcp/');
+ const tested=await access.run({action:'sourceRefresh',provider:'github'},home);
+ for(const tool of GITHUB_TOOLS)assert.ok(tested.tools.includes(tool),tool);
+ for(const write of ['create_pull_request','merge_pull_request','add_issue_comment'])assert.ok(!tested.tools.includes(write),'not enabled: '+write);
+
+ // list: the three searches, each capped, one record per Issue or pull request, newest first.
+ calls.length=0;
+ const list=await read({provider:'github',operation:'list'});
+ assert.deepEqual(authorized.at(-1),{name:'read_service',provider:'github',operation:'list'});
+ assert.deepEqual(calls.filter(c=>c.name).map(c=>c.name),['search_pull_requests','search_pull_requests','search_issues']);
+ assert.ok(calls.filter(c=>c.name).every(c=>c.url==='https://api.githubcopilot.com/mcp/'&&c.args.perPage===GITHUB_LIMITS.listPerQuery));
+ assert.equal(list.provider,'github');assert.equal(list.operation,'list');assert.equal(list.cursor,undefined);
+ assert.equal(list.records.length,GITHUB_LIMITS.listPerQuery+2,'ten of yours, one more review, one Issue');
+ const twice=list.records.find((r:any)=>r.id==='example-org/app#3');
+ assert.equal(twice.fields.reason,'Your pull request; Review requested');
+ const site=list.records.find((r:any)=>r.id==='example-org/site#7');
+ assert.deepEqual(site.fields,{kind:'pull request',repository:'example-org/site',number:7,reason:'Review requested',state:'open',author:'sam',labels:'bug',comments:0});
+ assert.equal(site.url,'https://github.com/example-org/site/pull/7');
+ const assigned=list.records.find((r:any)=>r.id==='example-org/app#40');
+ assert.equal([...assigned.title].length,GITHUB_LIMITS.title);assert.equal(assigned.fields.kind,'issue');assert.equal(assigned.fields.assignees,'alex');
+ assert.deepEqual(list.records.map((r:any)=>r.updatedAt),[...list.records.map((r:any)=>r.updatedAt)].sort().reverse());
+ await assert.rejects(read({provider:'github',operation:'list',cursor:'2'}),/takes no ID, query or cursor/);
+
+ // read: one Issue, its text and the newest comments, cut.
+ calls.length=0;
+ const one=await read({provider:'github',operation:'read',id:'example-org/app#40'});
+ assert.deepEqual(calls.filter(c=>c.name).map(c=>[c.name,c.args.method]),[['issue_read','get'],['issue_read','get_comments']]);
+ const record=one.records[0];
+ assert.equal(record.id,'example-org/app#40');assert.equal(record.url,'https://github.com/example-org/app/issues/40');
+ assert.equal([...record.text].length,GITHUB_LIMITS.text);
+ assert.equal(record.comments.length,5);assert.equal(record.comments[0].text,'Comment 41');assert.equal([...record.comments[4].text].length,GITHUB_LIMITS.comment);
+ for(const id of ['example-org/app','app#40','../x#1','example-org/..#1','a.b/app#1','example-org/app#0','example-org/app#1 OR 1'])await assert.rejects(read({provider:'github',operation:'read',id}),/Invalid GitHub record ID/,id);
+
+ // search: both kinds unless the query names one, paged by cursor up to a limit.
+ calls.length=0;
+ const found=await read({provider:'github',operation:'search',query:'flaky test'});
+ assert.deepEqual(calls.filter(c=>c.name).map(c=>c.name),['search_issues','search_pull_requests']);
+ assert.equal(found.records.length,GITHUB_LIMITS.searchPage);assert.equal(found.cursor,'2');
+ calls.length=0;
+ const next=await read({provider:'github',operation:'search',query:'is:pr flaky',cursor:found.cursor});
+ assert.deepEqual(calls.filter(c=>c.name).map(c=>[c.name,c.args.page,c.args.perPage]),[['search_pull_requests',2,GITHUB_LIMITS.searchPage]]);
+ assert.equal(next.cursor,'3');
+ const last=await read({provider:'github',operation:'search',query:'is:issue flaky',cursor:String(GITHUB_LIMITS.searchPages)});
+ assert.equal(last.cursor,undefined,'no page past the limit');
+ for(const cursor of ['0',String(GITHUB_LIMITS.searchPages+1),'abc'])await assert.rejects(read({provider:'github',operation:'search',query:'x',cursor}),/Invalid GitHub search cursor/);
+ await assert.rejects(read({provider:'github',operation:'search',query:'q'.repeat(257)}),/Invalid arguments for read_service/);
+ await assert.rejects(read({provider:'github',operation:'search'}),/query of up to/);
+ await assert.rejects(read({provider:'posthog',operation:'list'}),/Invalid arguments for read_service/);
+ await assert.rejects(read({provider:'github',operation:'merge',id:'example-org/app#1'}),/Invalid arguments for read_service/);
+ // Only the reader's read tools were ever called.
+ assert.ok(calls.every(c=>!c.name||GITHUB_TOOLS.includes(c.name)));
+
+ // A turn that does not authorize the read stops it before GitHub is asked.
+ calls.length=0;
+ await assert.rejects(read({provider:'github',operation:'list'},async()=>({error:'Allow private context first.'})),/Allow private context first/);
+ assert.equal(calls.length,0);
+ // An expired or revoked token says to reconnect.
+ accepted='rotated';
+ await assert.rejects(read({provider:'github',operation:'list'}),/GitHub is disconnected or its token has expired/);
+ accepted=TOKEN;
+ // An Agent's own GitHub connection at another address is refused.
+ vault.delete('mcp:github');
+ fs.writeFileSync(path.join(home,'config.yaml'),'mcp_servers:\n  github:\n    url: https://elsewhere.example.com/mcp\n    enabled: true\n    headers:\n      Authorization: Bearer ${GITHUB_TOKEN}\n');
+ fs.writeFileSync(path.join(home,'.env'),'GITHUB_TOKEN='+TOKEN+'\n');
+ calls.length=0;
+ await assert.rejects(read({provider:'github',operation:'list'}),/official MCP server/);
+ assert.equal(calls.length,0);
+ // The same Agent connection at the official address is read as it is.
+ fs.writeFileSync(path.join(home,'config.yaml'),fs.readFileSync(path.join(home,'config.yaml'),'utf8').replace('https://elsewhere.example.com/mcp','https://api.githubcopilot.com/mcp/'));
+ assert.equal((await read({provider:'github',operation:'list'})).records.length,GITHUB_LIMITS.listPerQuery+2);
+});
+
+// The reader alone: a different record than asked for is refused.
+await assert.rejects(readGithub({callTool:async()=>({content:[{type:'text',text:JSON.stringify(issue('example-org/app',41))}]}),listTools:async()=>({tools:[]})},{provider:'github',operation:'read',id:'example-org/app#40'}),/different record/);
+
+// Grants: github/list, github/read and github/search are the targets; none is in the default Grants.
+const actions=worldActions();
+for(const operation of ['list','read','search'])assert.deepEqual(worldActionOf(actions,'read_service',{provider:'github',operation}),{target:'github',action:operation});
+const resolved=resolveAction(actions,'github','read',{id:'example-org/app#40'});
+assert.deepEqual(resolved.args,{id:'example-org/app#40',provider:'github',operation:'read'});
+assert.throws(()=>resolveAction(actions,'github','list',{provider:'other'}),/routing field provider/);
+assert.deepEqual(actions.find(a=>a.target==='github'&&a.action==='search')!.parameters.required,['query']);
+const now='2026-10-15T12:00:00.000Z';
+const agent:AgentIdentity={id:'claude-code',name:'Claude Code',harness:'claude-code',kind:'local',createdAt:now};
+const defaults=channelDefaultGrants(agent.id,now,actions);
+const serviceTargets=actions.filter(a=>a.tool==='read_service').map(a=>a.target+'/'+a.action);
+assert.deepEqual(serviceTargets,['github/list','github/read','github/search','applet:github/list','applet:github/read','applet:github/search']);
+assert.ok(defaults.every(g=>g.targets.every(t=>!serviceTargets.includes(t))),'read_service is in no default Grant');
+assert.equal(hermesChannelToolAllowed({name:'read_service'}),false);
+const decide=(grants:Grant[],operation:string)=>standingCallDecision({identity:agent,grants,target:'github',action:operation,tool:'read_service',args:{provider:'github',operation},foxTurn:null,now}).decision;
+assert.equal(decide(defaults,'list'),'denied');
+const listOnly:Grant={id:'g1',agentId:agent.id,targets:['github/list'],access:'read',duration:'standing',grantedAt:now};
+assert.equal(decide([...defaults,listOnly],'list'),'allowed');
+assert.equal(decide([...defaults,listOnly],'read'),'denied');
+assert.equal(decide([...defaults,listOnly],'search'),'denied');
+const all:Grant={...listOnly,id:'g2',targets:['github/*']};
+for(const operation of ['list','read','search'])assert.equal(decide([all],operation),'allowed');
+assert.deepEqual(standingActions(actions,agent,[listOnly],false,now).map(a=>a.target+'/'+a.action),['github/list']);
+// Reading a Service makes the turn untrusted, so its writes are refused afterwards.
+assert.equal(turnTrustObserve({},{type:'tool',name:'_world_authorize',args:{name:'read_service'}}).untrusted,true);
+
+console.log('PASS GitHub Service: token connect with read tools only, bounded list, read and search through read_service, other address, expired token and refused turn stop the read, Grant targets github/list|read|search enforced and in no default Grant');

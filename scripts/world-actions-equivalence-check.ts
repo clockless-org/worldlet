@@ -50,6 +50,10 @@ function oldWorldActions({sample=false}={}):WorldAction[]{
   actions[actions.length-1].description='Read one practice email by the ID a gmail/search result returned.';
  }
  add('google-drive','read','read_connected_google',{service:'google-drive'});
+ if(definitions.some(t=>t.name==='read_service'))for(const operation of ['list','read','search']){
+  add('github',operation,'read_service',{provider:'github',operation});
+  actions[actions.length-1].parameters.required=operation==='read'?['id']:operation==='search'?['query']:[];
+ }
  operations('calendar','manage_calendar');
  for(const action of actions.filter(a=>a.tool==='manage_calendar'))action.parameters.required=CALENDAR_REQUIRED[action.action];
  operations('weather','manage_weather_location');
