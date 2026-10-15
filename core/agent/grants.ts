@@ -1,4 +1,7 @@
 import {AGENT_ID_PATTERN,type AgentAuditEntry,type AgentIdentity,type Grant} from '../../contracts/agent-identity.ts';
+import {grantedActions,worldActions,type WorldAction} from '../tools/index.ts';
+import {turnGuardedWrite,turnWriteAdmission} from './turn-trust.ts';
+import {HERMES_CHANNEL_LINK_TOOL,HERMES_CHANNEL_READ_ONLY,HERMES_CHANNEL_TOOLS,hermesChannelTrust} from './hermes-server.ts';
 
 /** Per-Agent Grants (core/agent/GRANTS.md). Pure: hosts supply the identity, its Grants, the turn's own admission and
  * the clock, and record the result as an audit entry. The turn rule (turn-trust.ts) always comes first: a Grant never
@@ -108,4 +111,57 @@ export function readGrant(value:unknown):Grant|null {
  if(instant(v.expiresAt))grant.expiresAt=v.expiresAt as string;
  if(instant(v.revokedAt))grant.revokedAt=v.revokedAt as string;
  return grant;
+}
+
+// The standing `worldlet` MCP server (platform world-tool-bridge.ts): each Agent reaches it with its own token, and every
+// call is decided here before it runs.
+
+/** Whether a resolved World tool call writes, for a Grant's access: the turn rule's guarded writes, and handing work to
+ * an Applet task (it then writes on its own runtime). */
+export function worldCallWrites(tool:string,args:Record<string,unknown>={}):boolean {
+ return turnGuardedWrite({type:'tool',name:tool,args})!==null||tool==='start_applet_task';
+}
+
+/** An Agent's default Grants: what a call outside any Fox turn could do before Grants existed (core/agent/hermes-server.ts
+ * HERMES_CHANNEL_TOOLS: reads and a draft for the person's review, as a standing read Grant; and the World's browser link,
+ * as a standing write Grant). Hosts write them again each run so new Applet sources are covered; a revoked one stays
+ * revoked. */
+export function channelDefaultGrants(agentId:string,grantedAt:string,actions:WorldAction[]=worldActions()):Grant[] {
+ const targets=(tools:readonly string[])=>[...new Set(actions.filter(a=>tools.includes(a.tool)).map(a=>a.target+'/'+a.action))];
+ return [
+  {id:agentId+'-channel-read',agentId,targets:targets(HERMES_CHANNEL_TOOLS),access:'read',duration:'standing',grantedAt},
+  {id:agentId+'-channel-link',agentId,targets:targets([HERMES_CHANNEL_LINK_TOOL]),access:'write',duration:'standing',grantedAt},
+ ];
+}
+/** While a Fox turn holds the standing server, its Agent's calls go to that turn (world-tool-bridge.ts standingTurn), as
+ * they did before Grants: a call the turn's own stream announced is Fox's and runs under the turn's trust; any other
+ * write waits for the person on the approval card. */
+export function foxTurnGrant(agentId:string,own:boolean,grantedAt:string):Grant {
+ return {id:own?'fox-turn':'fox-turn-other',agentId,targets:['*/*'],access:'write',duration:own?'standing':'once',grantedAt};
+}
+
+export type StandingCall={identity:AgentIdentity|null|undefined;grants:readonly Grant[];target:string;action:string;tool:string;args:Record<string,unknown>;
+ /** The Fox turn the call goes to, and whether that turn announced it; null: a call of its own outside any Fox turn. */
+ foxTurn:{own:boolean}|null;now:string};
+/** One standing-server call's decision. Inside a Fox turn the turn's trust applies when it runs. Outside any turn the
+ * call is a turn of its own (hermesChannelTrust: untrusted, except the browser link); with nobody to ask, an `asked`
+ * write is refused, and every refusal but a revoked Agent's says what a channel may do (HERMES_CHANNEL_READ_ONLY). */
+export function standingCallDecision(call:StandingCall):GrantDecision {
+ const {identity,target,action,tool,args,foxTurn,now}=call,writes=worldCallWrites(tool,args);
+ if(foxTurn){
+  const grants=identity?[...call.grants,foxTurnGrant(identity.id,foxTurn.own,now)]:[];
+  return grantDecision({identity,grants,target,action,writes,now});
+ }
+ const turn=turnWriteAdmission(hermesChannelTrust({name:tool}),{type:'tool',name:tool,args});
+ const result=grantDecision({identity,grants:call.grants,target,action,writes,turn,now});
+ if(result.decision==='allowed'||result.reason===GRANT_REASONS.revoked||result.reason===GRANT_REASONS.unknown)return result;
+ return {decision:'denied',...result.grantId?{grantId:result.grantId}:{},reason:HERMES_CHANNEL_READ_ONLY};
+}
+/** The actions `describe_world_tools` lists for this Agent: those its Grants (with the Fox turn's, when one holds the
+ * server) name. */
+export function standingActions(actions:WorldAction[],identity:AgentIdentity|null|undefined,grants:readonly Grant[],foxTurn:boolean,now:string):WorldAction[] {
+ if(!identity||agentRevoked(identity,now))return [];
+ const all=foxTurn?[...grants,foxTurnGrant(identity.id,false,now)]:grants;
+ const active=all.filter(grant=>grant.agentId===identity.id&&grantActive(grant,now));
+ return grantedActions(actions,(target,action)=>active.some(grant=>grant.targets.some(pattern=>grantPatternMatches(pattern,target,action))));
 }

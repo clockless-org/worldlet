@@ -6,6 +6,10 @@ standing `worldlet` MCP server for Hermes Agent and the [browser link](../../cor
 in the desktop app, and a phone or any web browser reaches this computer through the pairing room. The World itself,
 the same 3D World page the app shows, opens in a web browser on this computer.
 
+Each Agent that reaches the standing server gets its own token, endpoint file, Grants and audit here as in the desktop
+app ([Agent identity, Grants and audit](../../core/agent/GRANTS.md#the-standing-mcp-server)); the token hashes go into
+this host's own vault.
+
 This is the first step of the headless service. There is no command line, installer or package yet.
 
 ## What it runs

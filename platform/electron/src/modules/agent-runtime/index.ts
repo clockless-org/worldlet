@@ -4,13 +4,14 @@ import os from 'node:os';
 import {app,shell} from 'electron';
 import {openInBrowser} from '../../system-browser.ts';
 import {WorldletError} from '../../files.ts';
-import {AGENT,ANALYTICS,ONGOING,VAULT,type AgentService,type AnalyticsService,type OngoingService,type VaultService} from '../../host/services.ts';
+import {AGENT,ANALYTICS,ONGOING,VAULT,type AgentAccess,type AgentService,type AnalyticsService,type OngoingService,type VaultService} from '../../host/services.ts';
 import type {Host} from '../../host/types.ts';
 import {installationRoot,type Profile} from '../../profile.ts';
 import {ExecutionJournal} from './journal.ts';
 import {attachedHermes,bindHermes,discoverOtherHermes,unbindHermes} from './hermes-files.ts';
 import {keepHermesResident} from './hermes-service.ts';
 import {openStandingWorldTools,type StandingWorldTools} from './world-tool-bridge.ts';
+import {createAgentAccess} from './agent-access.ts';
 import {moveFoxProfile} from './fox-move.ts';
 import {HERMES_WINDOW_DONE,endHermesInstall,hermesInstallWindow,hermesSessionModels,hermesStarts,installHermes,workingHermesAgent,installedHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
 import {UPDATED,backgroundSignIn,claudeCodeSignedIn,openSignIn} from './provider-sign-in.ts';
@@ -164,6 +165,7 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
   harnessSkills:()=>current().harnessSkills?.()??null,
   channelSend:source=>harnessSend(source),
   onChannelTool:handler=>{channelTool=handler;},
+  agentAccess:()=>agentAccess,
   voice:()=>{const id=current().harness?.id;if(!id)return null;if(voice?.id!==id)voice={id,service:harnessVoice(id)};return voice.service;},
   agents:()=>current().agents?.()??null,
   models:()=>current().models?.()??null,
@@ -246,7 +248,9 @@ export function residentHermes(context:RuntimeContext,adapter:Adapter):Promise<v
  const home=discoverOtherHermes(context.root);
  if(!home)return null;
  const install=adapter.install,environment=currentEnvironment();
- return (standing??=openStandingWorldTools({channel:(name,args)=>channelTool?channelTool(name,args):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})})).then(tools=>
+ if(!agentAccess)return null;
+ const access=agentAccess;
+ return (standing??=openStandingWorldTools({access,channel:(name,args,agent)=>channelTool?channelTool(name,args,agent):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})})).then(tools=>
   keepHermesResident(home,(args,stdin)=>runHarnessCommand(install,environment,args,{timeout:120_000,...stdin!==undefined?{stdin}:{}}),{worldTools:home=>tools.server(home)})).then(
   reason=>{if(reason)context.failure(new WorldletError(`Hermes Agent is not kept running for Fox: ${reason}`),'hermesResident');},
   error=>context.failure(error,'hermesResident'));
@@ -254,7 +258,9 @@ export function residentHermes(context:RuntimeContext,adapter:Adapter):Promise<v
 /** World tools on Hermes (owner decision 2026-10-08 19:15Z): the standing endpoint its registered `worldlet` server relays
  * to, one per app run, and where a call outside any Fox turn goes (Fox's module: `AgentService.onChannelTool`). */
 let standing:Promise<StandingWorldTools>|null=null;
-let channelTool:((name:string,args:Row)=>Promise<Row>)|null=null;
+let channelTool:((name:string,args:Row,agent?:string)=>Promise<Row>)|null=null;
+/** Each Agent's identity, Grants and audit (agent-access.ts), made when the runtime is installed. */
+let agentAccess:AgentAccess|null=null;
 
 /** Setup's local Agent choice (`agentHarness`): `detect` lists Harnesses installed here by ID and
  * title, never paths; `select` proves the chosen one answers before Fox switches to it, so a
@@ -507,6 +513,7 @@ export function installAgentRuntime(host:Host){
   // Unpaired on the other computer: Fox has no Agent until one is chosen.
   onEnded:()=>{if(adapter instanceof RemoteHarnessAdapter)void switchTo(noAgent()).catch(error=>host.diagnostics.record(error,'agentRuntime'));}});
  const vault=host.use<VaultService>(VAULT);
+ agentAccess=createAgentAccess({root:context.root,vault,ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()?host.store.ledger():null;}catch{return null;}}});
  let adapter=selectAdapter(context,undefined,remote,vault);
  // Once the runtime is ready and Fox's profile exists (after its first turn), and again whenever Fox changes Agent.
  listeners.push(()=>{void residentHermes(context,adapter);});

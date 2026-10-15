@@ -2,6 +2,7 @@ import type {NativeImage} from 'electron';
 import type {Row} from './types.ts';
 import type {HarnessApprovals,HarnessCalls,HarnessEvents,HarnessSend,HarnessSkills,HarnessTools,HarnessVoice} from '../../../../contracts/harness-services.ts';
 import type {PhonePushRequest} from '../../../../core/phone/index.ts';
+import type {AgentAuditEntry,AgentIdentity,Grant} from '../../../../contracts/agent-identity.ts';
 // Cross-module service contracts inside the Electron host. A module provides one with
 // `host.provide(NAME, impl)` and others reach it with `host.use(NAME)` / `host.optional(NAME)`.
 // Modules never import each other's implementation files.
@@ -82,8 +83,11 @@ export interface AgentService {
   * declares none or is not installed here: a reply the person approved goes into that Agent's channel thread. */
  channelSend?(source:string):HarnessSend|null;
  /** Where a World tool call that reaches Worldlet outside any Fox turn goes (World tools on Hermes: another Hermes channel,
-  * owner decision 2026-10-08 19:15Z); Fox's module answers it as a turn of its own. */
- onChannelTool?(handler:(name:string,args:Row)=>Promise<Row>):void;
+  * owner decision 2026-10-08 19:15Z); Fox's module answers it as a turn of its own. `agent` is the Agent whose token made
+  * the call (core/agent/GRANTS.md). */
+ onChannelTool?(handler:(name:string,args:Row,agent?:string)=>Promise<Row>):void;
+ /** Each Agent's identity, Grants and audit (core/agent/GRANTS.md); null where the host keeps none. */
+ agentAccess?():AgentAccess|null;
  /** Fox's Harness's own text-to-speech (`voice`), null when it declares none or is not installed here: spoken replies
   * then use a system voice. */
  voice?():HarnessVoice|null;
@@ -372,6 +376,25 @@ export interface AnalyticsService {
 export const ANALYTICS='analytics';
 
 // Credentials (src/vault.ts, always present) -----------------------------------------------------
+/** Per-Agent identity, Grants and audit (core/agent/GRANTS.md), kept by the Agent runtime: identities and Grants with
+ * Fox's setup choices (`agent_settings`), token hashes in the vault, audit entries in the World's ledger. */
+export interface AgentAccess {
+ /** The Agent's identity, made on first use; its default Grants are written again each run. A revoked one stays revoked. */
+ ensure(agent:{id:string;name:string;harness:string;kind:'local'|'remote'}):AgentIdentity;
+ /** A new token for this run; only its hash is kept (in the vault). Null for a revoked Agent. */
+ issueToken(agentId:string):string|null;
+ /** The Agent a token belongs to; null for an unknown token or a revoked Agent. */
+ identify(token:string):AgentIdentity|null;
+ identity(agentId:string):AgentIdentity|null;
+ grants(agentId:string):Grant[];
+ /** Records one decision (and the Agent's last use). */
+ audit(entry:AgentAuditEntry):void;
+ /** Every Agent, newest use first, with its Grants and newest audit entries. */
+ list(auditLimit?:number):{identity:AgentIdentity;grants:Grant[];audit:AgentAuditEntry[]}[];
+ /** Stamps revokedAt, removes its token and tells listeners (its endpoint files go). */
+ revoke(agentId:string):void;
+ onRevoke(listener:(agentId:string)=>void):void;
+}
 export interface VaultService {
  get(id:string):string|null;
  set(id:string,secret:string):void;
