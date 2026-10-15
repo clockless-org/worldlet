@@ -130,6 +130,14 @@ Fox 是你用文字或语音对话的伙伴。它通过你的 Agent 干活，把
 - **[另一台电脑上的 Agent](core/agent/PORTABILITY.md#an-agent-on-another-computer)**：和一直开着、跑着你 Agent 的那台电脑配对，在这个 World 里和它对话。
 - **[本地优先](docs/WORLD-STORAGE.md)**：你的记录留在你电脑上的 `world.sqlite` 里。
 
+## 在另一台设备上打开你的 World
+
+在笔记本或平板的网页浏览器里打开你完整的 World，不只是 Attention Center 和 Fox。在你的电脑上打开 Fox 旁边的设置，选 **Phone**，在 **In a browser** 下选 **Copy link**，再到另一台设备上打开这个链接。能画出 World 的设备会打开完整的 World；手机打开的是 Attention Center 和 Fox。**Open the World** 会在这台电脑的浏览器里打开同一个 World。
+
+- 只有你的电脑开着、Worldlet 在上面运行时才能用：World、你的记录和 Fox 都留在你的电脑上，浏览器只是显示它们。**Run in background** 让 Worldlet 不开窗口也继续运行。
+- 页面来自 worldlet.ai，每个 Worldlet 版本一份，不含你的任何数据。你的电脑和浏览器之间的通信端到端加密，经过一个只转发、什么都不存的中继。
+- 链接请别外传：拿到链接的人能看到你的 World 并在里面操作。**Turn off** 会让它失效。设置、连接和配对只能在你的电脑上改。[工作原理](core/phone/README.md#the-world-on-another-device)
+
 ## 隐私
 
 没有 Worldlet 账号，你的记录都在你自己的电脑上。官方构建会上报基础使用统计（设置、连接和核心操作的结果，绝不包括消息内容、连接的内容或浏览记录），可以在 设置 › 通用 › 使用统计 里关掉，详见[统计说明](core/diagnostics/ANALYTICS.md)。你自己构建的版本不上报任何东西，除非你配置了自己的 PostHog 项目。

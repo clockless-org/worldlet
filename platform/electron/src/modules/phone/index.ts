@@ -407,16 +407,19 @@ export function installPhone(host:Host){
     try{await openInBrowser(link);}catch{throw new WorldletError('Could not open your browser. Open the link in world-link.txt in your Worldlet library instead.');}
     return {state:'open',link};
    }
-   // A browser's link opens in the person's default browser, never inside the World.
-   if(request.operation==='open'&&(request.kind==='web'||request.kind==='local')){
+   // A browser's link opens in the person's default browser, never inside the World. The World's link for another
+   // device (`kind: 'world'`) is kept when there is one, so a device that opened it stays paired.
+   if(request.operation==='open'&&(request.kind==='web'||request.kind==='local'||request.kind==='world')){
+    if(request.kind==='world'){await worldRoom.ensure();links[4].schedule(QUICK);}
     const status=shown(link.relay.status());if(!status.link)throw new WorldletError('Make a link first.');
     try{await openInBrowser(status.link);}catch{throw new WorldletError('Could not open your browser. Copy the link instead.');}
     return status;
    }
    // Run in background: every window steps aside now, and closing the World or a login launch leaves none
-   // (modules/shell/companion.ts RUN_IN_BACKGROUND) until the link ends.
-   if(request.operation==='background'&&(request.kind==='web'||request.kind==='local')){
-    if(!browser.paired&&!local.paired)throw new WorldletError('Open the link in a browser first.');
+   // (modules/shell/companion.ts RUN_IN_BACKGROUND) until the link ends. The World on another device counts: on a
+   // computer the browser link goes straight on to it, so the Center's own pairing may never complete.
+   if(request.operation==='background'&&(request.kind==='web'||request.kind==='local'||request.kind==='world')){
+    if(!browser.paired&&!local.paired&&!worldRoom.paired)throw new WorldletError('Open the link in a browser first.');
     const companion=host.optional<DesktopCompanionService>(DESKTOP_COMPANION);
     if(!companion)throw new WorldletError('Running in background is not available here.');
     host.preferences.set(RUN_IN_BACKGROUND,true);

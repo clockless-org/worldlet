@@ -13,11 +13,11 @@ export function hostCapabilities(implemented:(feature:keyof HostFeatures)=>boole
   browserTaskPictureInPicture:scaledPages,
   leadingWindowControls:mac,googleSignInStages:true,
   // The app's World window; the host's World page in a web browser hears these turned off (contracts/web-world.ts).
-  websitePages:true,youtube:true,worldAudio:true,voice:true,desktopCompanion:true
+  websitePages:true,youtube:true,worldAudio:true,voice:true,desktopCompanion:true,madePages:true
  };
  for(const key of Object.keys(features) as (keyof HostFeatures)[])if(features[key])features[key]=implemented(key);
  return {version:1,features,...budget?{browserBudget:budget}:{}};
 }
 /** The host action or service that implements each optional feature; a feature with none is always there. */
 export const FEATURE_OWNERS:Partial<Record<keyof HostFeatures,string>>={nativeAppletLaunch:'openInstalledApplet',nativeCalendar:'appleSources',appleNotes:'appleSources',appleReminders:'appleSources',voiceMemos:'voiceMemos',messages:'messages',localMusic:'localMusic',folderManagement:'folderConnection',backgroundSourceChecks:'sourceChecks',browserBookmarks:'browserBookmarks',installedAppDetection:'installedApplets',browserFoxOverlay:'browserShow',browserPictureInPicture:'browserPip',browserTaskPictureInPicture:'browserLayout',curatedSourceRead:'curatedSourceContent',localDataDeletion:'deleteSourceData',googleSignInStages:'connect',
- websitePages:'browserShow',youtube:'youtube',worldAudio:'worldAudio',voice:'speechStart',desktopCompanion:'desktopCompanionState'};
+ websitePages:'browserShow',youtube:'youtube',worldAudio:'worldAudio',voice:'speechStart',desktopCompanion:'desktopCompanionState',madePages:'widgetPlayer'};

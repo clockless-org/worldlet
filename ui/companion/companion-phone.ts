@@ -7,7 +7,8 @@ import qrcode from 'qrcode-generator';
 // (a laptop rarely scans), so it shows as text to copy. Last, any web browser can open the same Center and Fox
 // (core/phone/README.md#web): a browser on this computer opens a link this app serves itself (`phonePair` with `kind:
 // 'local'`, `worldlet:local-pair-status`), and another device's browser a link to copy (`kind: 'web'`,
-// `worldlet:web-pair-status`).
+// `worldlet:web-pair-status`). That link carries the full World's own pairing (`kind: 'world'`,
+// `worldlet:world-pair-status`, core/phone/README.md#the-world-on-another-device), which a computer's browser goes on to.
 type Status={state:'none'|'waiting'|'paired',link?:string,phone?:{name:string,version:string}|null,seenAt?:number|null,push?:{platform:string}|null,error?:string};
 export function pairingQR(link:string){
  const qr=qrcode(0,'M');qr.addData(link,'Byte');qr.make();
@@ -22,7 +23,7 @@ const seen=(at?:number|null)=>{
 export function createCompanionPhone({call}:{call:(action:string,body?:any)=>Promise<any>}){
  const el=(tag:string,cls='',text='')=>Object.assign(document.createElement(tag),{className:cls,textContent:text});
  const element=el('section','companion-info-section companion-phone-page');element.dataset.section='Mobile';
- let status:Status|null=null,agent:Status|null=null,web:Status|null=null,local:Status|null=null,busy=false,error='',copied=false,agentCopied=false,webCopied=false;
+ let status:Status|null=null,agent:Status|null=null,web:Status|null=null,local:Status|null=null,world:Status|null=null,busy=false,error='',copied=false,agentCopied=false,webCopied=false;
  const button=(label:string,run:()=>Promise<unknown>|void,primary=false)=>{
   const b=el('button','companion-info-action'+(primary?' primary':''),label) as HTMLButtonElement;b.type='button';b.disabled=busy;
   b.onclick=async()=>{if(busy)return;busy=true;error='';render();try{await run();}catch(e){error=(e as Error).message||'Please try again.';}finally{busy=false;render();}};
@@ -32,6 +33,7 @@ export function createCompanionPhone({call}:{call:(action:string,body?:any)=>Pro
  const pairAgent=async(operation:'start'|'end'|'status')=>{agent=await call('phonePair',{operation,kind:'agent'});agentCopied=false;};
  const pairWeb=async(operation:'start'|'end'|'status'|'background')=>{web=await call('phonePair',{operation,kind:'web'});if(operation!=='background')webCopied=false;};
  const pairLocal=async(operation:'start'|'end'|'status'|'open'|'background')=>{local=await call('phonePair',{operation,kind:'local'});};
+ const pairWorld=async(operation:'status'|'open'|'background')=>{world=await call('phonePair',{operation,kind:'world'});};
  function browsers(){
   const box=el('div','companion-phone-browser'),on=(p:Status|null)=>p?.state==='waiting'||p?.state==='paired';
   const opened=(p:Status|null)=>p?.state==='paired'?(p.phone?.name?`Opened in ${p.phone.name}`:'Opened in a browser')+' · '+seen(p.seenAt):'';
@@ -46,12 +48,16 @@ export function createCompanionPhone({call}:{call:(action:string,body?:any)=>Pro
   // Another device: a link to copy (still through the relay; core/phone/README.md#web).
   box.append(el('p','companion-phone-place','On another device'));
   if(web.state==='paired')box.append(el('p','',opened(web)));
-  box.append(button(webCopied?'Link copied':'Copy link',async()=>{if(!on(web))await pairWeb('start');if(web?.link){await navigator.clipboard.writeText(web.link);webCopied=true;}}));
-  if(on(local)||on(web)){
-   box.append(button(local.state==='paired'||web.state==='paired'?'Turn off':'Cancel',async()=>{if(on(local))await pairLocal('end');if(on(web))await pairWeb('end');}));
+  // The full World on another device: the same link goes on to it where the device can draw it; this opens it here.
+  if(world?.state==='paired')box.append(el('p','companion-phone-world','The full World opened on another device · '+seen(world.seenAt)));
+  box.append(button(webCopied?'Link copied':'Copy link',async()=>{if(!on(web))await pairWeb('start');if(web?.link){await navigator.clipboard.writeText(web.link);webCopied=true;}}),
+   button('Open the World',async()=>{await pairWorld('open');}));
+  const paired=local.state==='paired'||web.state==='paired'||world?.state==='paired';
+  if(on(local)||on(web)||on(world)){
+   box.append(button(paired?'Turn off':'Cancel',async()=>{if(on(local))await pairLocal('end');if(on(web)||on(world))await pairWeb('end');}));
    // Run in background: no window stays on screen, not even Fox, and the links keep working (modules/phone).
-   if(local.state==='paired'||web.state==='paired')box.append(el('p','','Use Worldlet only from the browser: close every window and keep it running. Click Worldlet in the Dock or the notification area to bring the World back.'),
-    button('Run in background',()=>local?.state==='paired'?pairLocal('background'):pairWeb('background')));
+   if(paired)box.append(el('p','','Use Worldlet only from the browser: close every window and keep it running. Click Worldlet in the Dock or the notification area to bring the World back.'),
+    button('Run in background',()=>local?.state==='paired'?pairLocal('background'):web?.state==='paired'?pairWeb('background'):pairWorld('background')));
   }
   return box;
  }
@@ -94,8 +100,9 @@ export function createCompanionPhone({call}:{call:(action:string,body?:any)=>Pro
  window.addEventListener('worldlet:agent-pair-status',e=>{agent=(e as CustomEvent).detail;render();});
  window.addEventListener('worldlet:web-pair-status',e=>{web=(e as CustomEvent).detail;render();});
  window.addEventListener('worldlet:local-pair-status',e=>{local=(e as CustomEvent).detail;render();});
+ window.addEventListener('worldlet:world-pair-status',e=>{world=(e as CustomEvent).detail;render();});
  render();
  return {element,
   /** The panel opened: read the current pairing. */
-  async refresh(){try{await pair('status');await pairAgent('status');await pairWeb('status');await pairLocal('status');}catch(e){error=(e as Error).message;}render();}};
+  async refresh(){try{await pair('status');await pairAgent('status');await pairWeb('status');await pairLocal('status');await pairWorld('status');}catch(e){error=(e as Error).message;}render();}};
 }

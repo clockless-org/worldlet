@@ -130,6 +130,14 @@ Mail, Calendar, Notes, GitHub, Notion, Linear and the other Applets that connect
 - **[Your Agent on another computer](core/agent/PORTABILITY.md#an-agent-on-another-computer)**: pair with the always-on machine where your Agent runs, and talk to it from this World.
 - **[Local first](docs/WORLD-STORAGE.md)**: your records stay in `world.sqlite` on your computer.
 
+## Your World on another device
+
+Open your whole World, not only the Attention Center and Fox, in a web browser on a laptop or tablet. On your computer, open Settings beside Fox, choose **Phone** and, under **In a browser**, **Copy link**, then open the link on the other device. A device that can draw the World gets the full World; a phone gets the Attention Center and Fox. **Open the World** opens the same World in a browser here.
+
+- It works while your computer is on and Worldlet runs there: the World, your records and Fox all stay on your computer, and the browser only shows them. **Run in background** keeps Worldlet running with no window open.
+- The page comes from worldlet.ai, one copy per Worldlet version, and holds none of your data. What your computer and the browser say to each other is end-to-end encrypted and passes through a relay that only forwards it and stores nothing.
+- Keep the link private: anyone who has it can see and act in your World. **Turn off** ends it. Settings, connections and pairing stay on your computer. [How it works](core/phone/README.md#the-world-on-another-device)
+
 ## Privacy
 
 There is no Worldlet account, and your records stay on your computer. Official builds report basic usage analytics (setup, connection and core-operation outcomes, never message content, connected content or browsing history), and you can turn them off in Settings › General › Usage counts; see [analytics](core/diagnostics/ANALYTICS.md). Builds you make yourself report nothing unless you configure a PostHog project.
