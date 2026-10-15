@@ -7,9 +7,10 @@ import {listWorldTools,publicWorldToolNames} from '../core/tools/catalog.ts';
 import {worldModules} from '../core/tools/modules.ts';
 import {APP_DEFINITIONS} from '../core/applets/index.ts';
 import {CALENDAR_REQUIRED} from '../core/tools/calendar.ts';
+import {SERVICE_PROVIDERS} from '../contracts/services.ts';
 import {worldActions,describeActions,resolveAction,type WorldAction} from '../core/tools/gateway.ts';
 
-const READABLE_SOURCES=APP_DEFINITIONS.flatMap(app=>app.attention&&app.attention.reader!=='observation'?[app.attention.provider]:[]);
+const READABLE_SOURCES=APP_DEFINITIONS.flatMap(app=>app.attention&&app.attention.reader!=='observation'&&!SERVICE_PROVIDERS.includes(app.attention.provider)?[app.attention.provider]:[]);
 // The earlier worldActions, verbatim.
 function oldWorldActions({sample=false}={}):WorldAction[]{
  const definitions=listWorldTools({sample}),actions:WorldAction[]=[];

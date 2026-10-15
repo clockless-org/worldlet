@@ -9,7 +9,7 @@ import {updateWorldItem} from '../core/items/world-item-state.ts';
 import type {AttentionRegistration,AttentionFact,AttentionBudget} from '../contracts/attention.ts';
 const now=Date.parse('2026-09-24T12:00:00Z')/1000;
 const registration=(provider:string):AttentionRegistration=>({version:1,provider,reader:'source-reader',intervalMinutes:30,freshnessMinutes:120});
-assert.equal(validateAttentionRegistrations(APP_DEFINITIONS.flatMap(a=>a.attention?[a.attention]:[])).length,7);
+assert.equal(validateAttentionRegistrations(APP_DEFINITIONS.flatMap(a=>a.attention?[a.attention]:[])).length,8);
 assert.throws(()=>validateAttentionRegistrations([registration('gmail'),registration('gmail')]));
 // Weather drift keeps the prior text (same revision, no model pass); a new condition or a 3° move publishes.
 const sunny=weatherObservationText('Sunny',18.4);
