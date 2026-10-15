@@ -118,13 +118,20 @@ function buildWorldActions(sample:boolean):WorldAction[]{
  if(new Set(actions.map(a=>a.target+'/'+a.action)).size!==actions.length)throw Error('Duplicate World target/action.');
  return actions;
 }
-/** Every target and its action names on one line, for a Harness's instructions: the model calls an action it already
+/** Every target and its actions on one line, for a Harness's instructions: the model calls an action it already
  * knows instead of listing targets and actions first, each listing another model round of several seconds (owner
- * 2026-10-12: Fox slow; one reply spent 6 of its 9 model calls discovering companion/recall). Applet aliases
- * (`applet:<key>`) are left out: they repeat their base target's actions. */
+ * 2026-10-12: Fox slow; one reply spent 6 of its 9 model calls discovering companion/recall). Each action carries
+ * its required argument names, `snapshot()` taking none: on 4416 Fox still described browser/read and
+ * browser/snapshot before calling them, two rounds (~8 s) for actions that take "{}" (owner 2026-10-14: the conversation is still slow).
+ * Applet aliases (`applet:<key>`) are left out: they repeat their base target's actions. */
 export function worldToolIndex({sample=false}={}){
+ const actions=worldActions({sample}).filter(a=>!a.target.startsWith('applet:'));
+ const required=(a:WorldAction):string[]=>Array.isArray(a.parameters?.required)?a.parameters.required:[];
+ // Operation families (music, youtube, doordash…) share one schema whose `required` is empty for every action, so
+ // their real needs are unknown here: those keep bare names and are described when needed.
+ const known=new Set(actions.filter(a=>!Object.keys(a.defaults).length||required(a).length).map(a=>a.target));
  const byTarget=new Map<string,string[]>();
- for(const a of worldActions({sample}))if(!a.target.startsWith('applet:'))byTarget.set(a.target,[...byTarget.get(a.target)||[],a.action]);
+ for(const a of actions)byTarget.set(a.target,[...byTarget.get(a.target)||[],known.has(a.target)||!Object.keys(a.parameters?.properties||{}).length?`${a.action}(${required(a).join(',')})`:a.action]);
  return [...byTarget].map(([target,actions])=>target+': '+actions.join(', ')).join('; ');
 }
 export function describeActions(actions:WorldAction[],target='',action=''){
