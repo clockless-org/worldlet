@@ -174,8 +174,9 @@ export const ROOM_ALLOWED:Readonly<Record<string,true|readonly string[]>>=Object
  channelReply:true,foxPreferences:true,foxTiming:true,modelStatus:true,modelHealth:true,modelSource:true,taskPanel:true,foxProactive:true,foxProactiveShown:true,
  companionArchive:true,companionProfile:true,conversationRecall:true,appletTaskStart:true,appletTaskCancel:true,appletTasks:true,harnessApproval:true,
  // The Attention Center: mail reviews, its pictures, ongoing work, the calendar, checks and calls.
- // An Agent's ask is answered on its Attention card like any other item (worldItemStatus); its only operation is `answer`, checked against the stored ask.
- agentAsk:true,emailAction:true,attentionImage:true,mailAvatar:true,ongoing:true,calendarEvents:true,runtimeTaskControl:true,worldSourceCheck:true,harnessCall:true,
+ // An Agent's ask is answered on its Attention card like any other item (worldItemStatus), with `answer`, checked against the
+ // stored ask. Not `approveDrafts`: approving an ask's GitHub drafts writes to GitHub, so only this computer's pages may.
+ agentAsk:Object.freeze(['answer']),emailAction:true,attentionImage:true,mailAvatar:true,ongoing:true,calendarEvents:true,runtimeTaskControl:true,worldSourceCheck:true,harnessCall:true,
  // Artifacts: the Journal's cards, moment Applets and made games (not the native views that show them on this screen).
  artifacts:true,artifactPageBrief:true,artifactPageSave:true,artifactPages:Object.freeze(['get']),widgets:true,widgetStart:true,widgetSave:true,widgetSource:true,
  madeGames:true,madeGameSource:true,gameFactoryStart:true,gameFactorySave:true,

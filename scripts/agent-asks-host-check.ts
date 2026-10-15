@@ -59,12 +59,12 @@ await withTempDir('worldlet-asks-',async dir=>{
   assert.equal((await hermes('read')).error,HERMES_CHANNEL_READ_ONLY);
 
   // The person answers on the card: the Agent's next read has it, the item settles, and it is audited.
-  assert.throws(()=>asks.answer({operation:'answer',id,outcome:'answered',choice:'Medium'}),/own choices/);
-  assert.deepEqual(asks.answer({action:'agentAsk',operation:'answer',id,outcome:'answered',choice:'Large',note:'Go big.'}),{ok:true,status:'answered'});
+  await assert.rejects(()=>asks.answer({operation:'answer',id,outcome:'answered',choice:'Medium'}),/own choices/);
+  assert.deepEqual(await asks.answer({action:'agentAsk',operation:'answer',id,outcome:'answered',choice:'Large',note:'Go big.'}),{ok:true,status:'answered'});
   const [answered]=(await codex('read',{status:'answered'})).asks;
   assert.deepEqual([answered.status,answered.answer.choice,answered.answer.note,answered.revision],['answered','Large','Go big.',2]);
   assert.deepEqual([ledger.value('items',askItemId(id))!.status,ledger.value('items',askItemId(id))!.askChoice],['done','Large']);
-  assert.throws(()=>asks.answer({operation:'answer',id,outcome:'done'}),/already settled/);
+  await assert.rejects(()=>asks.answer({operation:'answer',id,outcome:'done'}),/already settled/);
 
   // Done through the ordinary item status (a phone or a browser): the ask follows on the next call.
   const second=(await codex('post',{title:'Read the summary'})).ask;

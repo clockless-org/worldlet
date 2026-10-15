@@ -368,6 +368,12 @@ export function mountNotionWorld(data: World, native: any) {
   $('notionWorldTitle').textContent='A place for all your notes.';
   $('notionWorldMeta').textContent=`${data.coverage.pages}  pages · ${data.coverage.rows}  database records · Stored locally`;
   function notify(text: string){$('notionStatus').hidden=true;voice?.setStatus(text);}
+  /** What became of an ask's GitHub drafts once the person approved it, in one line. */
+  function askDraftsOutcome(drafts:{status:string;reason?:string}[]){
+    const written=drafts.filter(d=>d.status==='written').length,not=drafts.filter(d=>d.status!=='written');
+    if(!not.length)return written===1?'Written on GitHub.':`All ${written} written on GitHub.`;
+    return `${written} written on GitHub; ${not.length} not written. ${not[0].reason||''}`.trim();
+  }
   function dialog(title: string,{kind='detail'}: {kind?: string}={}){$('notionDialog').dataset.kind=kind;delete $('notionDialog').dataset.template;const body=$('notionDialogBody');body.classList.remove('ui-gallery','ui-large');delete body.dataset.theme;body.style.removeProperty('--ui-text-body');body.style.removeProperty('--ui-text-label');body.replaceChildren(Object.assign(element('h2','',title),{id:'notionDialogTitle'}));if(native){if(!$('notionDialog').open)$('notionDialog').show();}else $('notionDialog').showModal();return body}
   let worldPointerStart:{x:number,y:number,panelOpen:boolean,handled?:boolean,typing:''|'world'|'page'}|null=null;
   // Typing is read when the press starts, before the browser moves focus off the field. A website
@@ -906,6 +912,8 @@ export function mountNotionWorld(data: World, native: any) {
   const attentionRowOrder=()=>[...root.querySelectorAll('.world-matter[data-world-item-id]')].map(row=>(row as HTMLElement).dataset.worldItemId);
   async function settleAttention(item,status,snoozedUntil,{advance=false,by,surface='computer',ask,hosted=false}:{advance?:boolean,by?:'fox',surface?:'computer'|'phone',ask?:{outcome:'answered'|'done'|'skipped',choice?:string,note?:string},hosted?:boolean}={}){
     const order=attentionRowOrder(),previewing=attentionPage?.worldItemId===item.worldItemId;
+    // What to say once the card has moved on (an ask's GitHub drafts), returned to the caller.
+    let said='';
     // A settled item's website pages become the websites' own places again.
     if(status!=='open')for(const [page,bound] of siteThreads)if(bound.key==='attention:'+item.worldItemId)siteThreads.delete(page);
     // A grouped row is one user outcome. Persist every represented member so a
@@ -916,7 +924,13 @@ export function mountNotionWorld(data: World, native: any) {
       // An Agent's ask (core/agent/GRANTS.md#agent-asks) is answered on the host, which settles its item with it.
       // A GitHub draft the host already approved or dismissed (core/agent/GRANTS.md#github-drafts): its item is settled.
       else if(hosted){}
-      else if(ask){const askId=itemPage(id)?.worldItemAsk?.id;const result=askId&&native?.agentAsk?await native.agentAsk(askId,ask.outcome,ask.choice,ask.note):null;if(!result?.ok){nativeHUD?.sync();throw Error(result?.error||'Could not answer this.');}}
+      else if(ask){
+        // Approve on an ask that carries GitHub drafts approves them on the host first (core/agent/GRANTS.md#github-drafts).
+        const asked=itemPage(id)?.worldItemAsk,askId=asked?.id,drafts=!!asked?.drafts&&ask.outcome==='answered'&&ask.choice==='Approve';
+        const result=askId&&native?.agentAsk?await native.agentAsk(askId,ask.outcome,ask.choice,ask.note,drafts):null;
+        if(!result?.ok){nativeHUD?.sync();throw Error(result?.error||'Could not answer this.');}
+        if(drafts&&Array.isArray(result.drafts))said=askDraftsOutcome(result.drafts);
+      }
       else {const result=await native.itemStatus(id,status,snoozedUntil,by);if(!result?.ok){nativeHUD?.sync();throw Error(result?.error||'Could not save this item.');}}
       for(const page of pages.values())if(page.worldItemId===id)settleItemPage(page,status,snoozedUntil);
     }
@@ -925,12 +939,13 @@ export function mountNotionWorld(data: World, native: any) {
     if(['done','read'].includes(status)&&by!=='fox'&&!data.sample)reportProductEvent('attention_approved',{approval_surface:surface,item_kind:String(itemPage(item.worldItemId)?.worldItemKind||'')});
     // Listeners (e.g. the first-win moment) may keep the view here instead of advancing.
     const proceed=root.dispatchEvent(new CustomEvent('worldlet:attention-settled',{cancelable:true,detail:{id:item.worldItemId,status}}));
-    if(!previewing)return;
-    if(!proceed){closeAttentionPreview();return;}
+    if(!previewing)return said;
+    if(!proceed){closeAttentionPreview();return said;}
     // Clearing an item from its card moves straight to the next one still in the Center.
     const index=order.indexOf(item.worldItemId),remaining=new Set(attentionRowOrder());remaining.delete(item.worldItemId);
     const next=advance?[...order.slice(index+1),...order.slice(0,Math.max(0,index))].find(id=>remaining.has(id)):null;
     if(!next||!previewAttention({worldItemId:next},true))closeAttentionPreview();
+    return said;
   }
   function attentionActions(item){
     const id=item.worldItemId,kind=item.worldItemKind;
@@ -1157,9 +1172,9 @@ export function mountNotionWorld(data: World, native: any) {
    // An Agent's ask: Done or Dismiss settle the ask itself, and its choices wait on one line with an optional note.
    const asked=page.worldItemAsk&&['open','claimed'].includes(page.worldItemAsk.status)&&!data.sample&&native?.agentAsk?page.worldItemAsk:null;
    if(asked){
-    const answer=(outcome,choice?,note?)=>settleAttention(page,outcome==='skipped'?'dismissed':'done',null,{advance:true,ask:{outcome,...choice?{choice}:{},...note?{note}:{}}});
+    const answer=(outcome,choice?,note?)=>settleAttention(page,outcome==='skipped'?'dismissed':'done',null,{advance:true,ask:{outcome,...choice?{choice}:{},...note?{note}:{}}}).then(said=>{if(said)notify(said);});
     attentionPreview.setActions([{key:'done',label:'Done',primary:true,run:()=>answer('done').catch(e=>notify(e.message))},{key:'dismiss',label:'Dismiss',run:()=>answer('skipped').catch(e=>notify(e.message))}]);
-    attentionPreview.setReview({text:(asked.agent||'An Agent')+' asks',note:true,choices:asked.choices.length?asked.choices.map((choice,index)=>({key:'choice-'+index,label:choice,run:(note?:string)=>answer('answered',choice,note).catch(e=>notify(e.message))}))
+    attentionPreview.setReview({text:(asked.agent||'An Agent')+' asks'+(asked.drafts?` · Approve writes ${asked.drafts===1?'its GitHub draft':`its ${asked.drafts} GitHub drafts`}`:''),note:true,choices:asked.choices.length?asked.choices.map((choice,index)=>({key:'choice-'+index,label:choice,run:(note?:string)=>answer('answered',choice,note).catch(e=>notify(e.message))}))
      :[{key:'reply',label:'Reply',run:(note?:string)=>note?answer('answered',undefined,note).catch(e=>notify(e.message)):Promise.resolve(notify('Write a note first.'))}]});
     showDraftLine(page);voice?.setAttentionActions?.([]);
     return;

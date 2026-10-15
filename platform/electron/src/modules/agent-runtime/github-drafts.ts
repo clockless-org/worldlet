@@ -32,6 +32,9 @@ export interface GithubDrafts {
  approve(id:unknown):Promise<Row>;
  /** The person chose Dismiss (`githubDraft` `dismiss`): nothing is written. */
  dismiss(id:unknown):Row;
+ /** What became of these drafts, for the asks that carry them (agent-asks.ts): each found draft's Agent, status, result
+  * link and why it was not written. */
+ summaries(ids:readonly string[]):{id:string;agentId:string;status:string;resultUrl?:string;reason?:string}[];
  /** The GitHub App as GitHub's write identity (`githubApp`): whether one is connected, connecting one (checked with
   * GitHub before it is kept) and disconnecting it. None of them returns the App's settings. */
  app:{status():Row;connect(input:unknown):Promise<Row>;disconnect():Row};
@@ -180,6 +183,13 @@ export function createGithubDrafts({ledger,vault,name,changed,fetch=globalThis.f
    const next=settleGithubDraft(draft,'dismissed',at);
    save(db!,next,'user');audit(db!,next,'dismiss','allowed','The person dismissed this draft; nothing was written.',at);changed();
    return {ok:true,status:'dismissed'};
+  },
+  summaries(ids){
+   const db=ledger();
+   if(!db)return [];
+   const drafts=settle(db,load(db),now());
+   return ids.flatMap(id=>{const draft=drafts.find(item=>item.id===id);
+    return draft?[{id,agentId:draft.agentId,status:draft.status,...draft.resultUrl?{resultUrl:draft.resultUrl}:{},...draft.reason?{reason:draft.reason}:{}}]:[];});
   },
   app:{
    status(){return {connected:readStoredGithubApp(vault.get(GITHUB_APP_VAULT_KEY))!==null};},

@@ -7,6 +7,9 @@ import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/agent-access.ts';
 import {GITHUB_APP_VAULT_KEY,GITHUB_DRAFT_MESSAGES,createGithubDrafts,type GithubFetch} from '../platform/electron/src/modules/agent-runtime/github-drafts.ts';
 import {openStandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
+import {createAgentAsks} from '../platform/electron/src/modules/agent-runtime/agent-asks.ts';
+import {ASK_REASONS,askItemId} from '../core/agent/asks.ts';
+import {roomDenied} from '../contracts/web-world.ts';
 import {STANDING_OUTSIDE_TURN} from '../core/agent/grants.ts';
 import {GITHUB_DRAFT_REASONS,GITHUB_DRAFT_STALE,githubDraftItemId} from '../core/agent/github-drafts.ts';
 
@@ -80,7 +83,8 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
  };
  let changes=0;
  const drafts=createGithubDrafts({ledger:()=>ledger,vault,name:agentId=>access.identity(agentId)?.name??agentId,changed:()=>{changes+=1;},fetch:github,now,clock:()=>clock});
- const standing=await openStandingWorldTools({access,drafts:(agentId,args)=>drafts.call(agentId,args),channel:async()=>({error:'not here'})});
+ const asks=createAgentAsks({ledger:()=>ledger,name:agentId=>access.identity(agentId)?.name??agentId,changed:()=>{},drafts:()=>drafts,now});
+ const standing=await openStandingWorldTools({access,drafts:(agentId,args)=>drafts.call(agentId,args),asks:(agentId,args)=>asks.call(agentId,args),channel:async()=>({error:'not here'})});
  const said:string[]=[];
  const keep=<T>(value:T):T=>{said.push(JSON.stringify(value));return value;};
  const refused=async(run:()=>Promise<unknown>|unknown)=>{try{await run();}catch(error){return keep((error as Error).message);}assert.fail('expected a refusal');};
@@ -89,7 +93,8 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
    const home=path.join(dir,id);fs.mkdirSync(home);
    const {url,token}=JSON.parse(fs.readFileSync(standing.server(home,{id,name,harness:id,kind:'local'}).env.WORLDLET_MCP_ENDPOINT_FILE,'utf8'));
    return async(action:string,args:object={})=>{
-    const response=await fetch(url,{method:'POST',headers:{authorization:'Bearer '+token},body:JSON.stringify({method:'call',name:'call_world_tool',arguments:{target:'github-drafts',action,arguments:JSON.stringify(args)}})});
+    const [target,verb]=action.includes('/')?action.split('/'):['github-drafts',action];
+    const response=await fetch(url,{method:'POST',headers:{authorization:'Bearer '+token},body:JSON.stringify({method:'call',name:'call_world_tool',arguments:{target,action:verb,arguments:JSON.stringify(args)}})});
     if(response.status!==200)return {status:response.status};
     return keep(JSON.parse((await response.json()).text));
    };
@@ -212,6 +217,47 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
   assert.deepEqual(audit,[['grant','allowed'],['approve','denied'],['approve','denied'],['approve','denied'],['approve','allowed'],['approve','allowed'],['approve','allowed'],['approve','allowed'],['dismiss','allowed'],['dismiss','allowed'],['approve','denied']]);
   assert.ok(changes>0);
 
+  // An ask that carries drafts (b5): it offers Approve; only the Agent's own pending drafts; Approve sent as a plain
+  // answer (what a page on another device may send) is refused; approveDrafts runs each as on its own card, a changed
+  // target refused; any other answer leaves them unrun; the Agent reads what became of them through asks/read.
+  assert.ok(access.grantAsks('codex','ask')&&access.grantAsks('claude-code','ask'));
+  issues.set('example/app#17',{number:17,title:'Release notes',state:'open',updated_at:'2026-10-15T10:00:00Z',html_url:'https://github.com/example/app/issues/17'});
+  const fresh=await codex('create',{write:'issue.comment',target:'example/app#17',body:'Release notes are ready.'});
+  const changing=await codex('create',{write:'labels.add',target:'example/app#12',labels:['released']});
+  assert.equal((await codex('asks/post',{title:'Ship these?',draftIds:[fresh.draft.id,third.draft.id]})).error,ASK_REASONS.drafts,'a written draft cannot be carried');
+  assert.equal((await claude('asks/post',{title:'Ship these?',draftIds:[fresh.draft.id]})).error,ASK_REASONS.drafts,'nor another Agent\'s');
+  assert.equal((await codex('asks/post',{title:'Ship these?',choices:['Yes','No'],draftIds:[fresh.draft.id]})).error,ASK_REASONS.approve);
+  const carrying=await codex('asks/post',{title:'Ship these?',draftIds:[fresh.draft.id,changing.draft.id]});
+  assert.deepEqual([carrying.ask.choices,carrying.ask.draftIds],[['Approve','Not now'],[fresh.draft.id,changing.draft.id]]);
+  assert.deepEqual(ledger.value('items',askItemId(carrying.ask.id))!.askDraftIds,[fresh.draft.id,changing.draft.id]);
+  const declined=await codex('asks/post',{title:'Also this?',draftIds:[changing.draft.id]});
+  const writesBefore=writes();
+  assert.equal(await refused(()=>asks.answer({operation:'answer',id:carrying.ask.id,outcome:'answered',choice:'Approve'})),ASK_REASONS.local);
+  assert.equal(roomDenied({action:'agentAsk',operation:'approveDrafts'})!=='',true,'a page on another device cannot approve drafts');
+  assert.equal(roomDenied({action:'agentAsk',operation:'answer'}),'','it still answers asks');
+  assert.equal(writes(),writesBefore);
+  // Any other answer: the drafts stay unrun.
+  assert.deepEqual(await asks.answer({operation:'answer',id:declined.ask.id,outcome:'answered',choice:'Not now'}),{ok:true,status:'answered'});
+  assert.equal(writes(),writesBefore);
+  assert.deepEqual((await codex('asks/read',{ids:[declined.ask.id]})).asks[0].drafts,[{id:changing.draft.id,status:'pending'}]);
+  // Approve: one written, one whose target changed refused; the ask answered; the Agent reads both results.
+  issues.get('example/app#12').updated_at='2026-10-15T14:00:00Z';
+  const approved=await asks.answer({operation:'approveDrafts',id:carrying.ask.id,outcome:'answered',choice:'Approve'});
+  assert.deepEqual(approved,{ok:true,status:'answered',drafts:[{id:fresh.draft.id,status:'written',resultUrl:'https://github.com/example/app/issues/17#issuecomment-902'},{id:changing.draft.id,status:'stale',reason:GITHUB_DRAFT_STALE.updated}]});
+  assert.equal(writes(),writesBefore+1);
+  const told=(await codex('asks/read',{ids:[carrying.ask.id]})).asks[0];
+  assert.deepEqual([told.status,told.answer.choice,told.drafts],['answered','Approve',approved.drafts]);
+  assert.equal((await claude('asks/read')).asks.length,0,'another Agent sees none of it');
+  assert.equal(await refused(()=>asks.answer({operation:'approveDrafts',id:carrying.ask.id,outcome:'answered',choice:'Approve'})),ASK_REASONS.settled,'an ask is approved once');
+  assert.equal(writes(),writesBefore+1);
+  // GitHub not answering leaves the ask open, so Approve can be chosen again.
+  const later=await codex('create',{write:'issue.comment',target:'example/app#17',body:'One more thing.'});
+  const waiting=await codex('asks/post',{title:'And this?',draftIds:[later.draft.id]});
+  const down=createGithubDrafts({ledger:()=>ledger,vault,name:()=>'Codex',changed:()=>{},fetch:async()=>{throw new Error('offline');},now,clock:()=>clock});
+  const offline=createAgentAsks({ledger:()=>ledger,name:()=>'Codex',changed:()=>{},drafts:()=>down,now});
+  assert.equal(await refused(()=>offline.answer({operation:'approveDrafts',id:waiting.ask.id,outcome:'answered',choice:'Approve'})),GITHUB_DRAFT_MESSAGES.unreachable);
+  assert.deepEqual([(await codex('asks/read',{ids:[waiting.ask.id]})).asks[0].status,(await codex('read',{ids:[later.draft.id]})).drafts[0].status],['open','pending']);
+
   // Disconnecting forgets the App; drafting then says so again.
   drafts.app.disconnect();
   assert.equal(vault.get(GITHUB_APP_VAULT_KEY),null);
@@ -227,4 +273,4 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
   assert.deepEqual(logged.filter(line=>!line.includes('ExperimentalWarning')),[],'nothing is logged');
  }finally{standing.close();ledger.close();Object.assign(console,original);}
 });
-console.log('PASS GitHub drafts on the host: own Grant only, drafted against the target as read, Approve re-reads and refuses a changed, closed or deleted target, writes once as the GitHub App and keeps the link, Dismiss and a phone settle write nothing, every Approve and Dismiss audited, and the App key and tokens appear nowhere');
+console.log('PASS GitHub drafts on the host: own Grant only, drafted against the target as read, Approve re-reads and refuses a changed, closed or deleted target, writes once as the GitHub App and keeps the link, Dismiss and a phone settle write nothing, every Approve and Dismiss audited, an ask carrying drafts runs them only on this computer’s Approve and the Agent reads the results, and the App key and tokens appear nowhere');

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {AGENT_ASK_LIMITS,AGENT_ASK_PROVIDER,type AgentAsk} from '../contracts/agent-asks.ts';
-import {ASK_REASONS,answerAsk,askAttentionItem,askClaimable,askItemId,claimAsks,postAsk,readAskPost,readAsks,readStoredAsk,resolveAsk} from '../core/agent/asks.ts';
+import {ASK_REASONS,askApprovesDrafts,answerAsk,askAttentionItem,askClaimable,askItemId,claimAsks,postAsk,readAskPost,readAsks,readStoredAsk,resolveAsk} from '../core/agent/asks.ts';
 import {validateWorldItem} from '../core/items/world-item-validation.ts';
 
 // Agent asks (contracts/agent-asks.ts, core/agent/asks.ts): validation, the open cap, claims and their lease, resolve
@@ -119,4 +119,22 @@ assert.equal(askAttentionItem({...posted,status:'skipped'},'x').status,'dismisse
 assert.equal(askAttentionItem(claimed,'x').status,'open');
 assert.equal(askAttentionItem(posted,'bad\u0007name').agentName,'claude-code','a name that is not clean falls back to the ID');
 
-console.log('PASS Agent asks: validation, open cap, claims and leases, resolve, answers and Attention items.');
+// An ask that carries GitHub drafts: up to 10 draft IDs, a question (not work), always offering Approve; its Approve answer
+// is what approves them, and the IDs travel with the ask and its Attention item.
+{
+ const at='2026-10-15T12:00:00.000Z',ids=['d0000001','d0000002'];
+ const carrying=postAsk([],'codex',{title:'Ship these?',draftIds:ids},'ask-d0000001',at);
+ assert.deepEqual([carrying.choices,carrying.draftIds],[['Approve','Not now'],ids]);
+ assert.deepEqual(postAsk([],'codex',{title:'Ship?',choices:['Approve','Later'],draftIds:ids},'ask-d0000002',at).choices,['Approve','Later']);
+ assert.throws(()=>readAskPost({title:'Ship?',choices:['Yes'],draftIds:ids}),{message:ASK_REASONS.approve});
+ assert.throws(()=>readAskPost({title:'Ship?',kind:'input',draftIds:ids}),{message:ASK_REASONS.invalid},'work left for Agents carries no drafts');
+ assert.throws(()=>readAskPost({title:'Ship?',draftIds:['NOT AN ID']}),{message:ASK_REASONS.invalid});
+ assert.throws(()=>readAskPost({title:'Ship?',draftIds:Array.from({length:11},(_,i)=>'d000000'+String(i).padStart(2,'0'))}),{message:ASK_REASONS.invalid});
+ assert.equal(askApprovesDrafts(carrying,{outcome:'answered',choice:'Approve'}),true);
+ assert.equal(askApprovesDrafts(carrying,{outcome:'answered',choice:'Not now'}),false);
+ assert.equal(askApprovesDrafts(carrying,{outcome:'done'}),false);
+ assert.equal(askApprovesDrafts(postAsk([],'codex',{title:'Plain',choices:['Approve']},'ask-d0000003',at),{outcome:'answered',choice:'Approve'}),false,'no drafts, nothing to approve');
+ assert.deepEqual(readStoredAsk(JSON.parse(JSON.stringify(carrying)))!.draftIds,ids);
+ assert.deepEqual(askAttentionItem(carrying,'Codex').askDraftIds,ids);
+}
+console.log('PASS Agent asks: validation, open cap, claims and leases, resolve, answers, Attention items and asks carrying GitHub drafts.');
