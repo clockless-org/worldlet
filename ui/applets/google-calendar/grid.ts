@@ -148,7 +148,8 @@ export function renderCalendar({sheet,nav,body,items,value,state,days,itemButton
    const {from,to}=span(range),lane=lanes.get(item.id)||{lane:0,lanes:1},button=ownButton(item);
    button.classList.add('home-calendar-event');button.style.top=from/60*HOUR+'px';button.style.height=Math.max((to-from)/60*HOUR,HOUR/4)+'px';
    button.style.left=`calc(${lane.lane/lane.lanes*100}% + 1px)`;button.style.width=`calc(${100/lane.lanes}% - 3px)`;
-   if(to-from<45)button.dataset.short='true';
+   // Two lines need 44 layout pixels on a measured book, including its paper-card padding.
+   if(details?(to-from)/60*HOUR<44:to-from<45)button.dataset.short='true';
    if(item.local){const grip=node('span','home-calendar-resize');grip.setAttribute('aria-hidden','true');button.append(grip);}
    hours.append(button);
   }

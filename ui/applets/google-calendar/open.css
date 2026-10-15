@@ -45,10 +45,10 @@
 #notionWorld .calendar-region .home-calendar-gutter .home-calendar-hours{background:none}
 #notionWorld .calendar-region .home-calendar-dayhead{background:var(--scene-control);border:0;border-bottom:1px solid var(--scene-line);border-radius:0;padding:6px 2px;box-shadow:none}
 #notionWorld .calendar-region .home-calendar-dayhead>time :is(span,b){display:inline;font:600 20px/1.2 var(--scene-display-font);text-transform:none}
-#notionWorld .calendar-region .home-calendar-event .home-leaf-text{flex-direction:column;gap:2px}
-#notionWorld .calendar-region .home-calendar-event .home-leaf-text strong{font:600 16px/1.1 var(--scene-display-font)}
-#notionWorld .calendar-region .home-calendar-event .home-leaf-text small{font:italic 14px/1.2 var(--scene-display-font)}
-#notionWorld .calendar-region .home-calendar-event{border-left:5px solid var(--scene-accent);background:color-mix(in srgb,var(--scene-accent) 16%,var(--scene-control));padding:5px;box-shadow:none}
+#notionWorld .calendar-region .home-calendar-event .home-leaf-text{flex:1;min-width:0;flex-direction:column;gap:2px}
+#notionWorld .calendar-region .home-calendar-event .home-leaf-text strong{display:block;flex:none;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font:600 16px/1.1 var(--scene-display-font)}
+#notionWorld .calendar-region .home-calendar-event .home-leaf-text small{flex:none;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font:italic 13px/1.2 var(--scene-display-font)}
+#notionWorld .applet-scene .calendar-region[data-home-kind=calendar] .home-calendar-event{padding:3px 5px;border:1px solid var(--scene-line);border-left:4px solid var(--scene-accent);background:color-mix(in srgb,var(--scene-accent) 16%,var(--scene-control));box-shadow:inset 0 1px 0 #fff5;align-items:flex-start;gap:3px}
 #notionWorld .calendar-region .home-calendar-event[aria-pressed=true]{outline:1px solid var(--scene-accent);outline-offset:-1px}
 #notionWorld .calendar-region .calendar-detail-title{font:600 29px/1.2 var(--scene-display-font);margin:0 0 18px;overflow-wrap:anywhere;border-left:5px solid var(--scene-accent);padding-left:12px}
 #notionWorld .calendar-region .calendar-detail-row{display:flex;align-items:start;gap:12px;margin:0 0 10px;font:16px/1.3 var(--scene-display-font)}
@@ -65,3 +65,8 @@
 #notionWorld .applet-scene .calendar-region .home-open-header h2{font:600 25px/1.2 var(--scene-display-font)}
 #notionWorld .calendar-region .calendar-detail-content{flex:1;min-height:0;overflow:auto;scrollbar-width:thin}
 #notionWorld .calendar-region .calendar-detail-action{flex:none}
+
+/* Timed cards keep readable lines inside their true duration; the details page holds the full text. */
+#notionWorld .applet-scene .calendar-region[data-home-kind=calendar] .home-calendar-event[data-short=true]{padding:0 4px;border-top:0;border-bottom:0}
+#notionWorld .calendar-region .home-calendar-event[data-short=true] .home-leaf-text strong{font-size:12px;line-height:1}
+#notionWorld .calendar-region .home-calendar-event[data-short=true] .home-leaf-text small{display:none}

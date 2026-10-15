@@ -31,8 +31,8 @@
     "ui/applets/apple-reminders/regions.ts": "ac654c89060ebb3b19bf4909577150eb8ee8e6ce96efed0f9a6e3cf2dc45a861",
     "ui/applets/apple-reminders/view-state.ts": "791c31d8d99ea252882dc41dca25698bf78133d7e01e16c236003fdfdf8790a7",
     "ui/applets/apple-reminders/open.css": "544b849abb02c930dacbf1005607600e408959da20893ece76d3c395d531b173",
-    "ui/applets/google-calendar/open.css": "cfe9cc55c2ce8b5e4814db22659ae854a596e7300b93b1f8f6d99a6e17aa7e24",
-    "ui/applets/google-calendar/grid.ts": "f09d614a838c7f5ea4be8a0d42236c9c59714bd47ebd02cbd14f59ae6911e3fc",
+    "ui/applets/google-calendar/open.css": "3112e297de1c4800acfb1f3247e8956d9a7830d03c1b204625b0d9b93dedcb81",
+    "ui/applets/google-calendar/grid.ts": "c08e206bcbd7e45831d1282d13b6fbc312b2fd4f2031fe224558d0d3988ecc94",
     "ui/applets/google-calendar/regions.ts": "f8572e10516772200d2e0bbb6421bc194e188074f15890e746131b9e290e688d",
     "ui/applets/scene/pointer-plane.ts": "29bfcf62b3c19a815b811eb50edec57b95b0f00b65f9b2da8d94d1788e351e2d",
     "ui/applets/home-open.ts": "09f0132275acbf37583a7b239c3c7257442ae4b08ecd132df334cf5253e43c91"
