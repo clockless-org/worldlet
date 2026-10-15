@@ -3,8 +3,9 @@
 // as its Service's reader would check it before anything is sent (a HogQL SELECT only, a GitHub search of up to 256
 // characters, one of Cloudflare's fixed reports), so a preset that saves is one that may run. Every refusal throws an
 // Error whose message the person or the Agent is shown.
-import {SERVICE_ACTIONS,SERVICE_PROVIDERS,SERVICE_TITLES,type ServiceOperation,type ServiceRead} from '../../../contracts/services.ts';
-import {SERVICE_PRESET_LIMITS,type ServicePreset,type ServicePresetRead,type ServicePresetSave} from '../../../contracts/service-presets.ts';
+import {SERVICE_ACTIONS,SERVICE_TITLES,type ServiceOperation,type ServiceRead} from '../../../contracts/services.ts';
+import {SERVICE_PRESET_LIMITS,SERVICE_PRESET_PROVIDERS,type ServicePreset,type ServicePresetRead,type ServicePresetSave} from '../../../contracts/service-presets.ts';
+import {notionPageId} from '../mcp/notion.ts';
 import {looksSecret} from '../../agent/index.ts';
 import {hogqlSelect,POSTHOG_LIMITS,POSTHOG_LISTS} from './posthog.ts';
 import {CLOUDFLARE_READS} from './cloudflare.ts';
@@ -14,7 +15,7 @@ export const PRESET_REASONS=Object.freeze({
  invalid:'This preset is not valid.',
  id:`Name the preset's ID with lowercase letters, digits and -, at most ${SERVICE_PRESET_LIMITS.id}.`,
  name:`Give the preset a name of up to ${SERVICE_PRESET_LIMITS.name} characters on one line.`,
- service:`A preset reads one Worldlet Service: ${SERVICE_PROVIDERS.join(', ')}.`,
+ service:`A preset reads one Worldlet Service: ${SERVICE_PRESET_PROVIDERS.join(', ')}.`,
  secret:'Presets may not hold passwords, tokens or keys: the Service\'s key stays in its connection.',
  control:'Presets may not hold control characters.',
  full:`This World already keeps ${SERVICE_PRESET_LIMITS.presets} presets. Delete one first.`,
@@ -49,17 +50,17 @@ function checked<T>(work:()=>T):T {
 /** The read a preset makes, checked as the Service's reader checks it: one of the Service's operations, with exactly the
  * arguments it takes. A query may run over several lines (HogQL); nothing may look like a credential. */
 export function readServicePresetRead(provider:unknown,input:unknown):ServicePresetRead {
- if(typeof provider!=='string'||!SERVICE_PROVIDERS.includes(provider))return fail(PRESET_REASONS.service);
+ if(typeof provider!=='string'||!SERVICE_PRESET_PROVIDERS.includes(provider))return fail(PRESET_REASONS.service);
  const value=record(input);only(value,['operation','id','query']);
- const operations=SERVICE_ACTIONS[provider];
+ const operations=provider==='notion'?{read:['id']}:SERVICE_ACTIONS[provider],title=SERVICE_TITLES[provider]??'Notion';
  const operation=value.operation;
- if(typeof operation!=='string'||!Object.hasOwn(operations,operation))return fail(`${SERVICE_TITLES[provider]} presets read with ${Object.keys(operations).join(' or ')}.`);
+ if(typeof operation!=='string'||!Object.hasOwn(operations,operation))return fail(`${title} presets read with ${Object.keys(operations).join(' or ')}.`);
  for(const key of ['id','query'])if(!absent(value[key])&&(typeof value[key]!=='string'||/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f‪-‮⁦-⁩]/.test(value[key] as string)))fail(PRESET_REASONS.control);
  for(const key of ['id','query'])if(typeof value[key]==='string'&&looksSecret(value[key] as string))fail(PRESET_REASONS.secret);
  const read:ServicePresetRead={operation:operation as ServiceOperation};
  const id=absent(value.id)?'':String(value.id).trim(),query=absent(value.query)?'':String(value.query).trim();
  const takes=(ids:boolean,queries:boolean)=>{
-  if(id&&!ids||query&&!queries)fail(`${SERVICE_TITLES[provider]}'s ${operation} takes ${[ids&&'an id',queries&&'a query'].filter(Boolean).join(' and ')||'nothing else'}.`);
+  if(id&&!ids||query&&!queries)fail(`${title}'s ${operation} takes ${[ids&&'an id',queries&&'a query'].filter(Boolean).join(' and ')||'nothing else'}.`);
  };
  if(provider==='github'){
   if(operation==='list')takes(false,false);
@@ -81,6 +82,8 @@ export function readServicePresetRead(provider:unknown,input:unknown):ServicePre
   takes(true,false);
   if(!CLOUDFLARE_READS.includes(id))fail(`Read one of Cloudflare's reports: ${CLOUDFLARE_READS.join(' or ')}.`);
   read.id=id;
+ }else if(provider==='notion'){
+  takes(true,false);read.id=checked(()=>notionPageId(id));
  }else{
   // A Service added to SERVICE_ACTIONS without rules here is refused until it has them.
   fail(PRESET_REASONS.service);

@@ -1,9 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import {WorldletError,ensureDirectory,writeAtomic} from '../../files.ts';
+import {WorldletError,ensureDirectory,writeAtomic,digest} from '../../files.ts';
 import {curatedSourceRead} from '../../../../../core/applets/index.ts';
 import {GITHUB_GATE,LINEAR_GATE,NOTION_GATE,PAYPAL_GATE,SUPABASE_GATE,TODOIST_GATE,MCP_POLICY,enabledMcpTools,mcpConfiguration,notion,readGithub,readLinear,readPaypal,readSupabase,todoist,todoistTimeoutSeconds,
- type McpGate,type McpSession,type NotionReviewStore} from '../../../../../core/accounts/index.ts';
+ collectNotionPage,type McpGate,type McpSession,type NotionReviewStore} from '../../../../../core/accounts/index.ts';
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
 import type {McpAccounts,McpConnection} from './mcp-account.ts';
@@ -34,6 +34,21 @@ export class McpSource {
  private readonly reviews:string;
  constructor(options:McpSourceOptions){this.accounts=options.accounts;this.openExternal=options.openExternal;this.reviews=options.reviews;}
  connected(provider:string){return MCP_PROVIDERS.includes(provider)&&this.accounts.connection(provider)!==null;}
+ /** Collection is owned by the World. A different Agent, its token files or a pasted token are not substitutes. */
+ private worldNotion(){
+  const connection=this.accounts.worldConnection('notion');
+  return connection?.url===MCP_ENDPOINTS.notion&&connection.grant.kind==='oauth'?connection:null;
+ }
+ worldNotionBinding():string|null {
+  const connection=this.worldNotion();
+  return connection?digest(JSON.stringify([connection.url,connection.grant.client_id,connection.grant.generation??'legacy'])):null;
+ }
+ async collectNotionPage(id:string){
+  const connection=this.worldNotion();
+  if(!connection)throw new WorldletError('Connect Notion to this World with OAuth before collecting pages.');
+  const session=this.accounts.session(connection,'Notion');
+  try{return await collectNotionPage(session,id);}finally{void session.close();}
+ }
  /** mcp_session.connected_session: configured and signed in, at an address the connector accepts. */
  private session(provider:string,gate:McpGate|null):McpSession&{close():Promise<void>} {
   const connection=this.accounts.connection(provider);

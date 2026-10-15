@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {BOARD_LIMITS,type BoardDefinition} from '../contracts/board.ts';
 import type {ServiceRecords} from '../contracts/services.ts';
 import {saveServicePreset} from '../core/accounts/index.ts';
-import {BOARD_REASONS,boardNumber,boardPresetIds,readBoardDefinition,resolveBoard,type BoardRead} from '../core/board/index.ts';
+import {BOARD_REASONS,defineBoard,boardNumber,boardPresetIds,readBoardDefinition,resolveBoard,type BoardRead} from '../core/board/index.ts';
 
 // The board (contracts/board.ts, core/board/board.ts): a definition of tabs and blocks that name Service presets,
 // checked; and the resolver that turns it and the presets' reads into what each block shows, with a plain error for
@@ -58,6 +58,13 @@ refused(()=>readBoardDefinition({tabs:Array.from({length:9},(_,i)=>({id:'t'+i,ti
 refused(()=>readBoardDefinition({tabs:[{id:'a',title:'A',blocks:Array.from({length:17},(_,i)=>({id:'b'+i,title:'B',kind:'number',preset:'p'}))}]}),BOARD_REASONS.size);
 refused(()=>readBoardDefinition({tabs:[{id:'a',title:'A',blocks:Array.from({length:16},(_,i)=>({id:'b'+i,title:'B',kind:'number',preset:'p'+i}))},{id:'c',title:'C',blocks:Array.from({length:5},(_,i)=>({id:'c'+i,title:'C',kind:'number',preset:'q'+i}))}]}),BOARD_REASONS.size);
 refused(()=>readBoardDefinition({...definition,owner:'alex'}),BOARD_REASONS.invalid);
+
+// Collection-only presets cannot enter the live Service board, including unused inline saves.
+const notion={id:'notes',name:'Notes',provider:'notion',read:{operation:'read',id:'11111111-1111-4111-8111-111111111111'}};
+const collected=saveServicePreset(presets,notion,now).presets;
+refused(()=>defineBoard(null,presets,{definition,expectedRevision:0,presets:[notion]},null,now),BOARD_REASONS.collection);
+refused(()=>defineBoard(null,collected,{definition:block({preset:'notes'}),expectedRevision:0},null,now),BOARD_REASONS.collection);
+assert.equal(defineBoard(null,collected,{definition,expectedRevision:0},null,now).board.revision,1,'unrelated collection presets do not block normal boards');
 
 // Numbers from a read: numbers, or text that is only a decimal number.
 assert.deepEqual([boardNumber(3),boardNumber('42'),boardNumber(' -1.5 '),boardNumber('1e3'),boardNumber(''),boardNumber(NaN),boardNumber(true)],[3,42,-1.5,null,null,null,null]);

@@ -8,7 +8,7 @@ import {BOARD_READ_REUSE_MS,createWorldBoard} from '../platform/electron/src/mod
 import {openStandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
 import {STANDING_OUTSIDE_TURN} from '../core/agent/grants.ts';
 import {BOARD_REASONS} from '../core/board/index.ts';
-import {PRESET_REASONS} from '../core/accounts/index.ts';
+import {PRESET_REASONS,saveServicePreset} from '../core/accounts/index.ts';
 import type {ServiceRead} from '../contracts/services.ts';
 
 // The board on the host (core/board/README.md, core/agent/GRANTS.md#the-board), the same modules the Electron and Node
@@ -125,6 +125,14 @@ await withTempDir('worldlet-board-',async dir=>{
   assert.ok(!JSON.stringify(other.view).includes('Fix the build')&&!JSON.stringify(other.view).includes('token has expired'),'no cached record text or provider failure details for a different Agent');
   assert.equal(asked.length,countBeforeRevocation,'a different Agent cannot reuse the person’s cache without Service grants');
   assert.ok(access.ungrantBoard('hermes','read'));
+
+  // A preset replaced after defining the board cannot make the board attempt a collection-only live read.
+  const replacement=saveServicePreset([],{id:'funnel',name:'Notes',provider:'notion',read:{operation:'read',id:'11111111-1111-4111-8111-111111111111'}},now()).preset;
+  ledger.saveServicePreset(replacement);
+  const beforeCollection=asked.length;
+  const collectionOwner=await board.view({tab:'growth'}),collectionAgent=await claude('read',{tab:'growth'});
+  for(const answer of [collectionOwner,collectionAgent])assert.ok(answer.view.tabs[0].blocks.every((block:any)=>block.error===BOARD_REASONS.collection));
+  assert.equal(asked.length,beforeCollection,'collection-only presets never reach the live Service reader');
 
   // Hermes Agent with no Grant is refused; taking a Grant back refuses the next call; revoking refuses everything.
   assert.equal((await hermes('read')).error.length>0,true);

@@ -38,6 +38,10 @@ export function installSources(host:Host){
  const sync=createServiceSync({
   ledger:()=>{try{return store.writable&&!store.sampleEnabled()&&store.state.cloudConsent===true?store.ledger():null;}catch{return null;}},
   authorize:preset=>{
+   if(preset.provider==='notion'){
+    const own=ctx.agent().worldNotionBinding?.();
+    return own?{binding:own,version:String(store.attentionEpoch)}:null;
+   }
    const connection=ctx.agentConnection(preset.provider);
    if(!connection)return null;
    const binding=digest(JSON.stringify([connection.id,connection.provider,connection.transport,connection.target,connection.syncGrant??null]));
@@ -85,6 +89,7 @@ export function installSources(host:Host){
 
  const organizeSources=(body:Row)=>{host.optional<SpeechService>(SPEECH)?.cancelCapture();return organizer.organizeSources(body);};
  const service:SourcesService={
+  readNotionContext:request=>sync.notionContext(request),
   itemOriginal:id=>itemOriginal(ctx,id),
   receiveAppletEvent,describeApplet,finishAppletTurn,
   clearMailReviews:()=>reviews.clearMail(),

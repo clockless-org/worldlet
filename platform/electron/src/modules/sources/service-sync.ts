@@ -1,9 +1,9 @@
 import crypto from 'node:crypto';
-import {configureServiceSync,finishServiceSyncPage,readStoredServicePreset,servicePresetRead,serviceSyncFailure,serviceSyncPage,serviceSyncReadKey,serviceSyncStart,SERVICE_SYNC_LIMITS} from '../../../../../core/accounts/index.ts';
+import {configureServiceSync,finishServiceSyncPage,readStoredServicePreset,readNotionContext,servicePresetRead,serviceSyncFailure,serviceSyncPage,serviceSyncReadKey,serviceSyncStart,SERVICE_SYNC_LIMITS} from '../../../../../core/accounts/index.ts';
 import {dueSourceCheck,nextSourceWake} from '../../../../../core/tasks/index.ts';
 import type {ServicePreset} from '../../../../../contracts/service-presets.ts';
 import type {ServiceRead} from '../../../../../contracts/services.ts';
-import {SERVICE_SYNC_BUCKETS,type ServiceSyncCheckpoint,type ServiceSyncJob} from '../../../../../contracts/service-sync.ts';
+import {SERVICE_SYNC_BUCKETS,type ServiceSyncCheckpoint,type ServiceSyncJob,type ServiceSyncSnapshot} from '../../../../../contracts/service-sync.ts';
 import type {WorldLedger} from '../../store/ledger.ts';
 import type {Row} from '../../host/types.ts';
 
@@ -119,5 +119,13 @@ export function createServiceSync({ledger,authorize,read,changed=()=>{},now=()=>
   let seconds=60;try{const store=ledger();if(store)seconds=nextSourceWake(jobs(store).map(job=>job.check),now());}catch{}
   timer=setTimeout(()=>void wake(),seconds*1000);timer.unref?.();
  }
- return {handle,tick,start(){if(timer)return;stopped=false;timer=setTimeout(()=>void wake(),0);timer.unref?.();},stop(){stopped=true;clearTimeout(timer);timer=undefined;for(const controller of active.values())controller.abort();}};
+ function notionContext(request:Row):Row {
+  const store=db();
+  const snapshots=jobs(store).filter(job=>job.provider==='notion'&&current(store,job)).flatMap(job=>{
+   const snapshot=store.value(SNAPSHOTS,job.id) as ServiceSyncSnapshot|null;
+   return snapshot?[snapshot]:[];
+  });
+  return readNotionContext(snapshots,request);
+ }
+ return {handle,tick,notionContext,start(){if(timer)return;stopped=false;timer=setTimeout(()=>void wake(),0);timer.unref?.();},stop(){stopped=true;clearTimeout(timer);timer=undefined;for(const controller of active.values())controller.abort();}};
 }

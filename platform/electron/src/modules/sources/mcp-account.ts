@@ -22,6 +22,7 @@ export interface McpAccountOptions {
 /** A World connection in the vault. `expires_at` in ms. */
 interface WorldGrant {
  v:1;url:string;kind:'oauth'|'bearer';
+ generation?:string;
  bearer?:string;access_token?:string;refresh_token?:string;expires_at?:number;scope?:string;
  client_id?:string;client_secret?:string;token_endpoint?:string;resource?:string;
 }
@@ -42,13 +43,19 @@ export class McpAccounts {
  /** The World's own connection first, else the first Agent profile with this server enabled and signed in. */
  connection(name:string):McpConnection|null {
   if(!NAME.test(name))return null;
-  const grant=this.worldGrant(name);
-  if(grant)return {source:'world',name,url:grant.url,grant};
+  const own=this.worldConnection(name);
+  if(own)return own;
   for(const home of this.agentHomes()){
    const entry=agentEntry(home,name);
    if(entry&&(signedIn(home,name)||bearerHeader(home,entry)))return {source:'agent',name,url:String(entry.url),home,entry};
   }
   return null;
+ }
+ /** Owner collection must never discover or borrow an Agent's provider grant. */
+ worldConnection(name:string):Extract<McpConnection,{source:'world'}>|null {
+  if(!NAME.test(name))return null;
+  const grant=this.worldGrant(name);
+  return grant?{source:'world',name,url:grant.url,grant}:null;
  }
  /** Tools are limited to `include` (the connector's read tools); a server at another address is refused. */
  session(connection:McpConnection,title:string):McpHttpClient {
@@ -63,7 +70,7 @@ export class McpAccounts {
   if(!parsed)throw new WorldletError('Use an HTTPS service endpoint.');
   const bearer=token.replace(/^\s*bearer\s+/i,'').trim();
   if(token.trim()&&(!bearer||bearer.toLowerCase()==='bearer'))throw new WorldletError('Bearer token is required');
-  const grant:WorldGrant=bearer?{v:1,url:parsed,kind:'bearer',bearer}:await this.consent(parsed,open,cancelled);
+  const grant:WorldGrant={...(bearer?{v:1 as const,url:parsed,kind:'bearer' as const,bearer}:await this.consent(parsed,open,cancelled)),generation:crypto.randomUUID()};
   const connection:McpConnection={source:'world',name,url:parsed,grant};
   if(bearer&&verify)await verify(connection);
   this.vault.set(vaultId(name),JSON.stringify(grant));
@@ -82,11 +89,16 @@ export class McpAccounts {
  private async authorization(connection:McpConnection,force:boolean):Promise<string|null> {
   if(connection.source==='world'){
    // A token is fixed for its connection (one being checked is not in the vault yet); OAuth reads the newest refresh.
-   const grant=connection.grant.kind==='bearer'?connection.grant:this.worldGrant(connection.name)??connection.grant;
+   const same=(grant:WorldGrant|null)=>!!grant&&grant.url===connection.grant.url&&grant.client_id===connection.grant.client_id&&grant.generation===connection.grant.generation;
+   const current=this.worldGrant(connection.name);
+   if(connection.grant.kind==='oauth'&&!same(current))throw new McpUnauthorized('');
+   const grant=connection.grant.kind==='bearer'?connection.grant:current!;
    if(grant.kind==='bearer')return force?null:'Bearer '+grant.bearer;
    if(!force&&grant.access_token&&(!grant.expires_at||grant.expires_at>this.now()+60_000))return 'Bearer '+grant.access_token;
    if(!grant.refresh_token||!grant.token_endpoint||!grant.client_id)return null;
    const fresh=await this.refresh(grant.token_endpoint,grant.client_id,grant.client_secret,grant.refresh_token,grant.resource);
+   // Disconnect/reconnect while a refresh is in flight must not restore the former grant.
+   if(!same(this.worldGrant(connection.name)))throw new McpUnauthorized('');
    const next:WorldGrant={...grant,access_token:fresh.access_token,refresh_token:fresh.refresh_token??grant.refresh_token,expires_at:fresh.expires_in?this.now()+fresh.expires_in*1000:undefined,...fresh.scope?{scope:fresh.scope}:{}};
    this.vault.set(vaultId(connection.name),JSON.stringify(next));
    return 'Bearer '+next.access_token;

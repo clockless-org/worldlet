@@ -5,6 +5,10 @@
  * address and project, Cloudflare's account). Anything that looks like a password, token or key is refused, never kept.
  * Hosts own the clock and storage; Core decides (core/accounts/services/presets.ts). */
 import type {ServiceOperation} from './services.ts';
+import {SERVICE_PROVIDERS} from './services.ts';
+
+/** Owner collection presets include Notion pages. This does not add a live Agent Service tool or Grant. */
+export const SERVICE_PRESET_PROVIDERS:readonly string[]=Object.freeze([...SERVICE_PROVIDERS,'notion']);
 
 /** What to read: one operation of the Service's (SERVICE_ACTIONS) with the `id` or `query` it takes. Never a cursor:
  * a preset always reads the first page. */
@@ -15,7 +19,7 @@ export interface ServicePreset {
  id:string;
  /** What the person calls it ("Weekly signups"). */
  name:string;
- /** A Worldlet Service (SERVICE_PROVIDERS). */
+ /** A provider in SERVICE_PRESET_PROVIDERS; Notion is collected by the World, not read live by an Agent. */
  provider:string;
  read:ServicePresetRead;
  /** One optional line on what it is for. */

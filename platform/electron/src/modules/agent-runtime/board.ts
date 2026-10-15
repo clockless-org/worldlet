@@ -1,8 +1,8 @@
-import {boardPresetIds,defineBoard,readBoardReadArgs,readStoredBoard,resolveBoard,type BoardRead} from '../../../../../core/board/index.ts';
+import {BOARD_REASONS,boardPresetIds,defineBoard,readBoardReadArgs,readStoredBoard,resolveBoard,type BoardRead} from '../../../../../core/board/index.ts';
 import {servicePresetRead} from '../../../../../core/accounts/index.ts';
 import type {BoardRecord} from '../../../../../contracts/board.ts';
 import type {ServicePreset} from '../../../../../contracts/service-presets.ts';
-import type {ServiceRead,ServiceRecords} from '../../../../../contracts/services.ts';
+import {SERVICE_PROVIDERS,type ServiceRead,type ServiceRecords} from '../../../../../contracts/services.ts';
 import {loadServicePresets,storeServicePresets,type PresetLedger} from '../sources/service-presets.ts';
 import type {Row} from './types.ts';
 
@@ -35,6 +35,7 @@ export function createWorldBoard({ledger,read,now=()=>new Date().toISOString(),c
  async function reads(presets:readonly ServicePreset[],ids:readonly string[],canRead:(provider:string,operation:string)=>boolean):Promise<Record<string,BoardRead>> {
   const out:Record<string,BoardRead>={},queue=ids.flatMap(id=>{const preset=presets.find(item=>item.id===id);return preset?[preset]:[];});
   async function one(preset:ServicePreset){
+   if(!SERVICE_PROVIDERS.includes(preset.provider)){out[preset.id]={error:BOARD_REASONS.collection};return;}
    if(!canRead(preset.provider,preset.read.operation)){out[preset.id]={error:'This Agent may not read this Service. The person can allow it in Settings › Agent › Access.'};return;}
    const request=servicePresetRead(preset),key=JSON.stringify(request),hit=reused.get(key);
    if(hit&&clock()-hit.at<BOARD_READ_REUSE_MS){out[preset.id]={records:hit.records};return;}
