@@ -9,7 +9,7 @@ import {presentMailRead as presentLiveMail} from '../sources/records.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {AGENT,ANALYTICS,AUDIO,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,SOURCES,SPEECH,WORLD_TOOLS,
  type AgentRoutines,type AgentRuntime,type AgentScope,type AgentService,type AnalyticsService,type AudioService,type BrowserService,
- ONGOING,PHONE,type PhoneService,type OngoingService,type CompanionService,type DesktopCompanionService,type FoxService,type SourcesService,type SpeechService,type WorldToolsService} from '../../host/services.ts';
+ ONGOING,PHONE,WORLD_WEB,type PhoneService,type WorldWebService,type OngoingService,type CompanionService,type DesktopCompanionService,type FoxService,type SourcesService,type SpeechService,type WorldToolsService} from '../../host/services.ts';
 import {createCompanion,decode,type Scope} from './companion.ts';
 import {resetToFirstLaunch} from './reset.ts';
 import {readLocalAgentMemory,summarizeLocalAgent} from '../agent-runtime/local-memory.ts';
@@ -256,7 +256,9 @@ export function installFox(host:Host){
    if(scope.sample||scope.setup||store.sampleEnabled()||!store.writable||onboardingUnfinished(store.state.onboarding))return {error:'The browser link opens the person\'s own World: they need to finish setting up Worldlet first.'};
    const phone=host.optional<PhoneService>(PHONE);
    if(!phone?.worldLink)throw new WorldletError('This Worldlet build cannot make a browser link.');
-   return worldLinkReply(await phone.worldLink());
+   // The full World on this computer too, when this host serves it (host/world-web.ts); the room link stays the answer.
+   const local=await host.optional<WorldWebService>(WORLD_WEB)?.link().catch(()=>'')??'';
+   return worldLinkReply(await phone.worldLink(),local);
   }
   if(!hosted.includes(name)&&name!=='_world_authorize'&&name!=='update_applet_state'&&!WORLD_TOOL_NAMES.includes(name))return null;
   if(scope.sample||scope.setup||store.sampleEnabled()||!store.writable||store.state.cloudConsent!==true)throw new WorldletError('Allow private context in your personal world first.');

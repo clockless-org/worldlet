@@ -402,3 +402,11 @@ export interface VaultService {
  deleteAll():void;
 }
 export const VAULT='vault';
+
+// The World in a web browser on this computer (host/world-web.ts) ----------------------------------------------------
+export interface WorldWebService {
+ /** The full World's link on this computer (`http://127.0.0.1:<port>/world/#t=<token>`), serving the World first when it
+  * is not yet. The token is the secret: the link goes only to the person (a file of theirs, their browser, `world/link`). */
+ link():Promise<string>;
+}
+export const WORLD_WEB='worldWeb';

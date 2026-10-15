@@ -11,6 +11,8 @@ import {Preferences,MAC_IMPORT_KEYS} from './preferences.ts';
 import {WorldStore} from './store/world-store.ts';
 import {HostRouter} from './host/router.ts';
 import {createPageBridge} from './host/page.ts';
+import {createWebPage} from './host/web-page.ts';
+import {createPagePair,serveWorldWeb} from './host/world-web.ts';
 import {createDiagnostics,keepProcessOutput} from './host/diagnostics.ts';
 import {endStrayChildren,hideAllWindows,installQuitTask,relaunchAfterQuit,startPendingRelaunch,wantsQuit,withDeadline} from './host/quit.ts';
 import {FEATURE_OWNERS,hostCapabilities} from './capabilities.ts';
@@ -27,7 +29,7 @@ import {modules} from './modules/index.ts';
 import {runCheck} from './checks/index.ts';
 import {ensureDirectory,errorMessage} from './files.ts';
 import {createVault} from './vault.ts';
-import {ANALYTICS,DESKTOP_COMPANION,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,type AnalyticsService,type DesktopCompanionService,type RtcPageFactory} from './host/services.ts';
+import {ANALYTICS,DESKTOP_COMPANION,PHONE,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,WORLD_WEB,type AnalyticsService,type DesktopCompanionService,type PhoneService,type RtcPageFactory,type VaultService,type WorldWebService} from './host/services.ts';
 import {openRtcWindow} from './modules/phone/rtc-window.ts';
 import type {Host} from './host/types.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
@@ -123,7 +125,23 @@ async function start(){
  void refreshMemory(null);
  const store=new WorldStore(profile.root,preferences,{appName:profile.title,platform:platformName(),capabilities:()=>hostCapabilities(implemented,{scaledPages:websiteEngine(profile)==='cef',budget:browserBudget(readMemory())}),mockGoogleAvailable:profile.channel==='dev'});
  store.historyFailure=(error,kind)=>diagnostics.record(error,'worldHistory:'+(kind||'unknown'));
- const page=createPageBridge(()=>world?.view.webContents??null,line=>diagnostics.log(line));
+ // The World page in the app's window, and a browser's beside it on this computer (host/world-web.ts createPagePair):
+ // the window stays the World's page; a browser's page is an extra one, the newest browser tab taking over an older one.
+ const failed=(body:any,error:any)=>{
+  // As on the Mac host, only Fox, connection, content and onboarding requests persist a
+  // diagnostic; other request errors (a city lookup, a location timeout) are the page's to show.
+  if(error?.name!=='AbortError'&&PERSISTED_REQUEST_FAILURES.includes(body?.action))diagnostics.record(error,body.action,typeof body.id==='string'?body.id:'');
+ };
+ const web=createWebPage({
+  platform:platformName(),
+  dispatch:async body=>{pages.note('web',body);const value=await router.dispatch(body,null,'web');pages.note('web',body,value);return value;},
+  // A browser's page coming and going is not the window's page loading or reloading: it gets the World as it is.
+  loaded:()=>{sent='';sendState();},
+  gone:()=>{},
+  failed,
+ });
+ const pages=createPagePair(createPageBridge(()=>world?.view.webContents??null,line=>diagnostics.log(line)),web.page);
+ const page=pages.page;
  const host:Host={
   profile,preferences,store,page,diagnostics,
   window:()=>world?.window??null,
@@ -153,6 +171,17 @@ async function start(){
   app.exit(0);return;
  }
 
+ // The World in a browser on this computer, served beside the window while the app runs (contracts/web-world.ts): the
+ // same page on 127.0.0.1 at /world/, its link in the library's owner-only world-link.txt (host/world-web.ts).
+ let worldWeb:Promise<string>|null=null;
+ const serveWorld=()=>worldWeb??=(async()=>{
+  const server=await host.use<PhoneService>(PHONE).localServer!();
+  return serveWorldWeb({root:profile.root,webRoot:profile.webRoot,vault:host.use<VaultService>(VAULT),server,accept:socket=>web.connect(socket)}).link;
+ })().catch(error=>{worldWeb=null;throw error;});
+ host.provide<WorldWebService>(WORLD_WEB,{link:serveWorld});
+ host.onStarted(()=>void serveWorld().catch(error=>diagnostics.record(error,'worldWeb')));
+ host.onQuit(()=>web.close());
+
  // The page ignores a payload whose revisions it already holds, so skip building one.
  let sent='';
  const sendState=()=>{
@@ -168,13 +197,8 @@ async function start(){
   // Only the trusted main World document may call the host; subframes and websites cannot.
   const frame=event.senderFrame;
   if(!world||event.sender!==world.view.webContents||!frame||frame.parent||!trustedWorldURL(frame.url))return {ok:false,error:'This page cannot use Worldlet.'};
-  try{return {ok:true,value:await router.dispatch(body,event.sender)};}
-  catch(error){
-   // As on the Mac host, only Fox, connection, content and onboarding requests persist a
-   // diagnostic; other request errors (a city lookup, a location timeout) are the page's to show.
-   if(error?.name!=='AbortError'&&PERSISTED_REQUEST_FAILURES.includes(body?.action))diagnostics.record(error,body.action,typeof body.id==='string'?body.id:'');
-   return {ok:false,error:errorMessage(error)};
-  }
+  try{pages.note('native',body);const value=await router.dispatch(body,event.sender);pages.note('native',body,value);return {ok:true,value};}
+  catch(error){failed(body,error);return {ok:false,error:errorMessage(error)};}
  });
 
  const preload=path.join(__dirname,'world-preload.cjs');

@@ -41,11 +41,15 @@ export const isRoomLink=(link:string)=>new URLSearchParams(link.slice(link.index
 /** What the Agent's `world/link` answers (core/tools controls.ts `share_world_link`): the room link for another device's
  * browser, from the pairing's status, and what to do with it. Anyone who has the link can see and act in the World, so
  * the Agent is told to send it to the person alone. */
-export function worldLinkReply(status:{state?:unknown,link?:unknown}):{ok:true,link:string,opened:boolean,message:string}|{error:string}{
+export function worldLinkReply(status:{state?:unknown,link?:unknown},local=''):{ok:true,link:string,opened:boolean,message:string,localLink?:string}|{error:string}{
  const link=typeof status?.link==='string'&&isRoomLink(status.link)?status.link:'';
  if(!link)return {error:'Worldlet could not make the browser link. Ask the person to use Copy link on the Mobile page in Worldlet.'};
- return {ok:true,link,opened:status.state==='paired',message:'Send the person this link, to them alone, with one line: it opens their World in any web browser, on any device, while this computer is on and Worldlet is running. Anyone who has it can see and act in their World, so never post it where others can read it. They can turn it off on the Mobile page in Worldlet.'};
+ const here=isLocalWorldLink(local)?local:'';
+ return {ok:true,link,opened:status.state==='paired',message:'Send the person this link, to them alone, with one line: it opens their World in any web browser, on any device, while this computer is on and Worldlet is running. Anyone who has it can see and act in their World, so never post it where others can read it. They can turn it off on the Mobile page in Worldlet.'+
+  (here?' localLink opens the full 3D World in a browser on this computer only (it does not work from another device); give it instead when they are at this computer.':''),...here?{localLink:here}:{}};
 }
+/** The full World's link on this computer (contracts/web-world.ts worldLink): 127.0.0.1 or localhost, /world/, a token. */
+export const isLocalWorldLink=(link:string)=>/^http:\/\/(127\.0\.0\.1|localhost):\d+\/world\/#t=[A-Za-z0-9_-]{43}$/.test(link);
 
 const SLOTS=['attention','conversation','live','desktop'] as const;
 const OFFLINE='Your computer is not reachable.';

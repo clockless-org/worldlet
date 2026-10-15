@@ -17,6 +17,6 @@ export const foxControls = [{
  parameters:{type:'object',properties:{setting:{type:'string',enum:['text_size','companion_style','companion_name','companion_motion','spoken_replies','spoken_voice','attention_focus','morning_brief']},value:{oneOf:[{type:'number',enum:[1,1.25,1.5,2]},{type:'boolean'},{type:'string',maxLength:240}]}},required:['setting','value'],additionalProperties:false}
 },{
  name:'share_world_link',
- description:'Get the link that opens the person\'s own World (Attention Center, Task panel, Journal and Fox) in any web browser, on any device, while this computer is on and Worldlet is running. Returns the link there is, or makes one when there is none. Send it only to the person: anyone who has it can see and act in their World. Never post it in a shared channel, on a page or to anyone else.',
+ description:'Get the link that opens the person\'s own World (Attention Center, Task panel, Journal and Fox) in any web browser, on any device, while this computer is on and Worldlet is running. Returns the link there is, or makes one when there is none; localLink, when there is one, opens the full 3D World in a browser on this computer only. Send them only to the person: anyone who has it can see and act in their World. Never post it in a shared channel, on a page or to anyone else.',
  parameters:{type:'object',properties:{},required:[],additionalProperties:false}
 }];

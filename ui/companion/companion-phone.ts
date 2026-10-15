@@ -41,6 +41,8 @@ export function createCompanionPhone({call}:{call:(action:string,body?:any)=>Pro
   box.append(el('p','companion-phone-place','On this computer'));
   if(local.state==='paired')box.append(el('p','',opened(local)));
   box.append(button('Open in browser',async()=>{if(!on(local))await pairLocal('start');await pairLocal('open');},true));
+  // The full 3D World, the same page as this window, served beside it (host/world-web.ts).
+  box.append(button('Open the World in browser',()=>call('phonePair',{kind:'local',operation:'world'})));
   // Another device: a link to copy (still through the relay; core/phone/README.md#web).
   box.append(el('p','companion-phone-place','On another device'));
   if(web.state==='paired')box.append(el('p','',opened(web)));

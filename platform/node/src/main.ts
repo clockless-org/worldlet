@@ -4,7 +4,6 @@
 // Hermes and the browser link through the pairing room. The World page itself opens in a web browser on this computer:
 // the host serves it on 127.0.0.1 and reaches it over its socket (host/web-page.ts). `electron` is this folder's shim
 // (electron-shim.ts), aliased by scripts/build-node-host.ts.
-import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {app,useProfileRoot} from './electron-shim.ts';
@@ -19,9 +18,9 @@ import {FEATURE_OWNERS,hostCapabilities} from '../../electron/src/capabilities.t
 import {ensureDirectory,errorMessage,writeAtomic} from '../../electron/src/files.ts';
 import {createVault} from '../../electron/src/vault.ts';
 import {createWebPage} from '../../electron/src/host/web-page.ts';
-import {AGENT,PHONE,VAULT,type AgentService,type PhoneService,type VaultService} from '../../electron/src/host/services.ts';
+import {serveWorldWeb,WORLD_LINK_FILE} from '../../electron/src/host/world-web.ts';
+import {AGENT,PHONE,VAULT,WORLD_WEB,type AgentService,type PhoneService,type VaultService,type WorldWebService} from '../../electron/src/host/services.ts';
 import type {Host,PageBridge} from '../../electron/src/host/types.ts';
-import {WORLD_TOKEN,worldLink} from '../../../contracts/web-world.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
 import {isWorldToolsRegistrar} from '../../../core/agent/index.ts';
 import {onboardingUnfinished} from '../../../core/onboarding/index.ts';
@@ -44,9 +43,7 @@ export const NODE_MODULES:((host:Host)=>void)[]=[installWorld,installFox,install
 /** Where the browser link is written for the person: owner-only, in the library (`worldlet link` prints it too). */
 export const ROOM_LINK_FILE='room-link.txt';
 /** The World's link on this computer (`http://127.0.0.1:<port>/world/#t=<token>`), owner-only beside it. */
-export const WORLD_LINK_FILE='world-link.txt';
-/** The World's token for a browser on this computer, kept in the vault so the link survives a restart. */
-const WORLD_TOKEN_VAULT='world-web-token';
+export {WORLD_LINK_FILE};
 
 // The program's own folder holds WorldletWeb (an installed copy); a checkout's build sits in dist/node beside dist/WorldletWeb.
 const here=__dirname,resources=fs.existsSync(path.join(here,'WorldletWeb'))?here:path.dirname(here);
@@ -173,16 +170,14 @@ roomLink().catch(error=>{diagnostics.record(error,'roomLink');log('room link fai
 /** The World on this computer (contracts/web-world.ts): the full World page, served on 127.0.0.1 beside the browser
  * link's own page, for a browser here that opens the link. The link carries a token kept in the vault; it goes only
  * into its owner-only file, never to stdout. */
-async function serveWorld(){
- const vault=host.use<VaultService>(VAULT);
- let token=vault.get(WORLD_TOKEN_VAULT)??'';
- if(!WORLD_TOKEN.test(token)){token=crypto.randomBytes(32).toString('base64url');vault.set(WORLD_TOKEN_VAULT,token);}
+let world:Promise<string>|null=null;
+const serveWorld=()=>world??=(async()=>{
  const server=await host.use<PhoneService>(PHONE).localServer!();
- server.serveWorld({webRoot:profile.webRoot,token,accept:socket=>web.connect(socket)});
- const file=path.join(profile.root,WORLD_LINK_FILE);
- writeAtomic(file,worldLink(server.origin,token)+'\n',0o600);
- log(`World ready at ${server.origin}/world/ (its link is in ${file})`);
-}
+ const served=serveWorldWeb({root:profile.root,webRoot:profile.webRoot,vault:host.use<VaultService>(VAULT),server,accept:socket=>web.connect(socket)});
+ log(`World ready at ${served.origin}/world/ (its link is in ${served.file})`);
+ return served.link;
+})().catch(error=>{world=null;throw error;});
+host.provide<WorldWebService>(WORLD_WEB,{link:serveWorld});
 serveWorld().catch(error=>{diagnostics.record(error,'worldWeb');log('World page failed: '+errorMessage(error));});
 
 /** The `worldlet` command line (control.ts): answers go only to the asker, never to this host's log. */
