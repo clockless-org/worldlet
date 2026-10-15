@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,worldCallWrites} from '../core/agent/grants.ts';
+import {AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites} from '../core/agent/grants.ts';
 import {HERMES_CHANNEL_READ_ONLY,hermesChannelToolAllowed} from '../core/agent/hermes-server.ts';
 import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
 import {turnWriteAdmission,writeDecision} from '../core/agent/turn-trust.ts';
@@ -21,6 +21,12 @@ assert.equal(grantPatternMatches('applet:*/launch','applet:mail','launch'),true)
 assert.equal(grantPatternMatches('*/*','world','link'),true);
 assert.equal(grantPatternMatches('items','items','query'),false,'a pattern names target/action');
 assert.equal(grantPatternMatches('items/qu.ry','items','query'),false,'only * is special');
+assert.equal(grantPatternMatches('a*b*c/*','aXbYc','go'),true);assert.equal(grantPatternMatches('a*b*c/*','aXcYb','go'),false,'fixed parts in order');
+assert.equal(grantPatternMatches('ab*ba/x','aba','x'),false,'the parts may not overlap');assert.equal(grantPatternMatches('*/*/*','a','b'),false);
+assert.equal(grantPatternMatches('items/(q)?','items','(q)?'),true,'brackets and ? are plain characters');
+// A pattern of many `*` (a stored one may be 120 characters) against a long target answers at once: no backtracking.
+const slow=Date.now();for(let i=0;i<200;i++)grantPatternMatches('a*'.repeat(59)+'/z','a'.repeat(5000),'y');
+assert.ok(Date.now()-slow<1000,'no catastrophic backtracking');
 
 // No Grant: denied. A read Grant covers reads only. A write Grant covers both.
 assert.deepEqual(decide([],'items','query',false),{decision:'denied',reason:GRANT_REASONS.none});
@@ -107,6 +113,9 @@ for(const a of actions){
 }
 assert.deepEqual(standing('items','update',{id:'a',status:'done'}),{decision:'denied',reason:HERMES_CHANNEL_READ_ONLY},'a write no Grant allows says what a channel may do');
 assert.equal(standing('world','link').decision,'allowed','the browser link from a channel');
+const codex:AgentIdentity={id:'codex',name:'Codex',harness:'codex',kind:'local',createdAt:earlier};
+assert.deepEqual(standingCallDecision({identity:codex,grants:channelDefaultGrants('codex',earlier,actions),target:'items',action:'update',tool:'update_world_item',args:{id:'a',status:'done'},foxTurn:null,now}),
+ {decision:'denied',reason:STANDING_OUTSIDE_TURN},'another Agent is not told it came through a Hermes channel');
 assert.equal(standing('items','query',{},null,{...hermes,revokedAt:earlier}).reason,GRANT_REASONS.revoked);
 // In a Fox turn the turn takes its Agent's calls: reads run, its own writes run, another write asks the person.
 assert.equal(standing('content','read',{id:'x'},{own:false}).decision,'allowed');

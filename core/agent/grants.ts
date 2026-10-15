@@ -35,11 +35,20 @@ export const GRANT_REASONS=Object.freeze({
  turn:'The turn rule refused this write.',
 });
 
-const escape=(part:string)=>part.replace(/[.+?^${}()|[\]\\]/g,'\\$&');
-/** Whether one `target/action` pattern covers this call. `*` matches any run of characters, including `/`. */
+/** Whether one `target/action` pattern covers this call. `*` matches any run of characters, including `/`. Matched
+ * without a regular expression: each fixed part in turn, leftmost first, so a pattern of many `*` cannot backtrack. */
 export function grantPatternMatches(pattern:string,target:string,action:string):boolean {
  if(typeof pattern!=='string'||!pattern.includes('/'))return false;
- return new RegExp('^'+pattern.split('*').map(escape).join('.*')+'$').test(target+'/'+action);
+ const text=target+'/'+action,parts=pattern.split('*'),first=parts[0],last=parts[parts.length-1];
+ if(parts.length===1)return text===pattern;
+ if(text.length<first.length+last.length||!text.startsWith(first)||!text.endsWith(last))return false;
+ let at=first.length;const end=text.length-last.length;
+ for(const part of parts.slice(1,-1)){
+  const found=text.indexOf(part,at);
+  if(found<0||found+part.length>end)return false;
+  at=found+part.length;
+ }
+ return true;
 }
 const before=(at:string|undefined,now:string)=>typeof at==='string'&&Number.isFinite(Date.parse(at))&&Date.parse(at)<=Date.parse(now);
 /** A Grant counts until it is revoked or its expiry passes. */
@@ -143,9 +152,13 @@ export function foxTurnGrant(agentId:string,own:boolean,grantedAt:string):Grant 
 export type StandingCall={identity:AgentIdentity|null|undefined;grants:readonly Grant[];target:string;action:string;tool:string;args:Record<string,unknown>;
  /** The Fox turn the call goes to, and whether that turn announced it; null: a call of its own outside any Fox turn. */
  foxTurn:{own:boolean}|null;now:string};
+/** What a refused call outside any Fox turn is told, by an Agent other than Hermes Agent (Claude Code or Codex,
+ * registered by the Node host): the same as HERMES_CHANNEL_READ_ONLY, without naming a Hermes channel. */
+export const STANDING_OUTSIDE_TURN='This came from outside a conversation with Fox in Worldlet: only reading, preparing a draft for the person to review in Worldlet and getting the World\'s browser link run here. Anything that changes the World needs the person\'s confirmation: ask them to do it with Fox in Worldlet.';
 /** One standing-server call's decision. Inside a Fox turn the turn's trust applies when it runs. Outside any turn the
  * call is a turn of its own (hermesChannelTrust: untrusted, except the browser link); with nobody to ask, an `asked`
- * write is refused, and every refusal but a revoked Agent's says what a channel may do (HERMES_CHANNEL_READ_ONLY). */
+ * write is refused, and every refusal but a revoked or unknown Agent's says what such a call may do
+ * (HERMES_CHANNEL_READ_ONLY for Hermes Agent, STANDING_OUTSIDE_TURN for another). */
 export function standingCallDecision(call:StandingCall):GrantDecision {
  const {identity,target,action,tool,args,foxTurn,now}=call,writes=worldCallWrites(tool,args);
  if(foxTurn){
@@ -155,7 +168,7 @@ export function standingCallDecision(call:StandingCall):GrantDecision {
  const turn=turnWriteAdmission(hermesChannelTrust({name:tool}),{type:'tool',name:tool,args});
  const result=grantDecision({identity,grants:call.grants,target,action,writes,turn,now});
  if(result.decision==='allowed'||result.reason===GRANT_REASONS.revoked||result.reason===GRANT_REASONS.unknown)return result;
- return {decision:'denied',...result.grantId?{grantId:result.grantId}:{},reason:HERMES_CHANNEL_READ_ONLY};
+ return {decision:'denied',...result.grantId?{grantId:result.grantId}:{},reason:identity?.harness==='hermes'?HERMES_CHANNEL_READ_ONLY:STANDING_OUTSIDE_TURN};
 }
 /** The actions `describe_world_tools` lists for this Agent: those its Grants (with the Fox turn's, when one holds the
  * server) name. */
