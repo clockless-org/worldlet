@@ -1,9 +1,9 @@
-import {connectionLive,getApp} from '../../core/applets/index.ts';
+import {connectionLive,getApp,TOKEN_PROVIDERS} from '../../core/applets/index.ts';
 import {showAgentConnections} from './agent-connections.ts';
 import {agentEl as el} from './agent-change.ts';
 
 // Disconnect exists for these; Google's three share one sign-in.
-const DISCONNECTABLE=['gmail','google-calendar','notion','apple-notes','apple-reminders','todoist','google-drive'];
+const DISCONNECTABLE=['gmail','google-calendar','notion','apple-notes','apple-reminders','todoist','google-drive','github'];
 const GOOGLE=['gmail','google-calendar','google-drive'];
 
 /** Settings › Agent › Connections (it was a section of its own, Accounts, until the Agent page took it
@@ -21,7 +21,8 @@ export async function showWorldletAccounts(target:HTMLElement,call:(action:strin
    const app=getApp(c.provider),google=c.transport!=='native'&&GOOGLE.includes(c.provider);
    const row=el('div','companion-settings-row'),text=el('div');row.dataset.account=c.provider;
    text.append(el('strong','',app?.title||c.provider),el('span','',c.label||'Connected'));row.append(text);
-   row.append(action('Reconnect',async()=>{said.textContent='Opening sign-in…';try{await call('connect',{provider:c.provider});said.textContent='';}catch(e){said.textContent=(e as Error).message||'Could not reconnect.';}}));
+   // A token source is reconnected by pasting a new token where it connects (its Thing's connection), not from here.
+   if(!Object.hasOwn(TOKEN_PROVIDERS,c.provider))row.append(action('Reconnect',async()=>{said.textContent='Opening sign-in…';try{await call('connect',{provider:c.provider});said.textContent='';}catch(e){said.textContent=(e as Error).message||'Could not reconnect.';}}));
    if(DISCONNECTABLE.includes(c.provider))row.append(action(google?'Disconnect Google':'Disconnect',async()=>{try{await call('disconnectSource',{provider:c.provider});await draw();}catch(e){said.textContent=(e as Error).message||'Could not disconnect.';}}));
    rows.append(row);
   }

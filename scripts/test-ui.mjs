@@ -68,7 +68,7 @@ export const parallelChecks=available([
  'scripts/snapshot-refresh-check.ts','scripts/empty-area-drop-check.ts','scripts/desktop-companion-root-check.ts',
  'scripts/windows-update-ui-check.ts','scripts/home-readers-check.ts','scripts/local-deletion-check.ts','scripts/agent-ui-boundary-check.ts',
  'scripts/applet-stage-idle-check.ts','scripts/ui-material-check.ts','scripts/activity-browser-check.ts','scripts/web-record-check.ts','scripts/saved-logins-check.ts','scripts/browser-applet-check.ts','scripts/page-focus-ui-check.ts',
- 'scripts/windows-folder-ui-check.ts','scripts/windows-notion-ui-check.ts','scripts/onboarding-reservation-check.ts','scripts/home-review-check.ts',
+ 'scripts/windows-folder-ui-check.ts','scripts/windows-notion-ui-check.ts','scripts/github-token-ui-check.ts','scripts/onboarding-reservation-check.ts','scripts/home-review-check.ts',
  'scripts/attention-time-ui-check.ts','scripts/artifact-fit-check.ts',
  'scripts/world-projection-worker-check.ts','scripts/codex-stream-check.ts',
  'scripts/recorded-speech-lifecycle-check.ts','scripts/home-actions-check.ts','scripts/streaming-speech-lifecycle-check.ts','scripts/world-plate-registration-check.ts',
