@@ -104,6 +104,9 @@ lists the Agents registered here. Each registers with its own command (`core/age
 - Claude Code: `claude mcp add --scope user worldlet --env WORLDLET_MCP_ENDPOINT_FILE=… --env WORLDLET_MCP_TOOLS_FILE=… -- <node> ~/.worldlet/mcp/worldlet-mcp-standing.cjs`, after `claude mcp remove --scope user worldlet`; the skill goes to `~/.claude/skills/worldlet/SKILL.md` (under `CLAUDE_CONFIG_DIR` when set).
 - Codex: `codex mcp add worldlet --env … -- <node> …`, after `codex mcp remove worldlet`; the skill goes to `~/.codex/skills/worldlet/SKILL.md` (under `CODEX_HOME` when set).
 
+`<node>` is `~/.worldlet/current/node/bin/node` when that is the Node running the host (an install by install.sh), so
+the registration keeps working after an update removes the build it came from; otherwise it is the host's own Node.
+
 The skill is [harness/skills/worldlet/SKILL.md](../../harness/skills/worldlet/SKILL.md), built into the program.
 
 ## Build, run and check
