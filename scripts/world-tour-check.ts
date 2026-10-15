@@ -150,10 +150,10 @@ try{
    assert.notEqual(fox.border,target.border,'Fox\'s ring is not the target\'s halo: '+JSON.stringify({fox,target}));}
   // Clicking the boxed Applet does not open it while the step only tells.
   await page.mouse.click(applet.x+applet.width/2,applet.y+applet.height/2);
-  // 4. The tasks and Routines beside Fox.
+  // 4. The tasks and Scheduled tasks beside Fox.
   await waitStep(page,'dock');
   assert.equal(await depth(page),'overview','the boxed Applet does not open');
-  assert.match(await dialogue.innerText(),/Beside me is what I’m doing for you.*Routines/s);
+  assert.match(await dialogue.innerText(),/Beside me is what I’m doing for you.*Scheduled/s);
   await page.getByRole('button',{name:'Continue',exact:true}).click();
   // 5. Back to Fox: its settings and the phone, first the app, then the pairing code. It waits for a choice.
   await waitStep(page,'fox');
