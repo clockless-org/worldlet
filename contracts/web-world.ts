@@ -180,6 +180,8 @@ export const ROOM_ALLOWED:Readonly<Record<string,true|readonly string[]>>=Object
  // Artifacts: the Journal's cards, moment Applets and made games (not the native views that show them on this screen).
  artifacts:true,artifactPageBrief:true,artifactPageSave:true,artifactPages:Object.freeze(['get']),widgets:true,widgetStart:true,widgetSave:true,widgetSource:true,
  madeGames:true,madeGameSource:true,gameFactoryStart:true,gameFactorySave:true,
+ // The person's board through the existing World reader. Changes to definitions, presets and Agent grants stay on the host.
+ board:Object.freeze(['read']),
  // Applets: what each shows from the person's connected accounts.
  appContent:true,notionContent:true,obsidianContent:true,paypalContent:true,curatedSourceContent:true,doorDash:true,appletArt:true,siteApplets:true,
  weatherLoad:true,weatherSave:true,weatherRequest:true,weatherLocate:true,

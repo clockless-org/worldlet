@@ -41,6 +41,12 @@ Differences from the desktop app:
 - **Its own vault.** The secrets are as safe as `vault.key` (the computer account and disk encryption), not tied to a
   keychain. A vault the Electron host wrote with `safeStorage` is not readable here, nor this one there.
 
+## Read-only board access
+
+An already paired World page can request `{action:"board",operation:"read"}` (optionally `tab`) through the existing room. The same Agent runtime module as the desktop host reads `world.sqlite`, resolves saved Service presets and returns block values or errors. There is no separate database or server-only resolver. The room permits no changes to board definitions, presets or Agent access; Agent MCP calls still require their own token and grants. This is a host contract; a board display is not yet provided.
+
+Provider authentication remains necessary, including Google OAuth for Gmail. Reads reuse connections authorized on this host; running on the same machine does not grant access to an external provider. The Node and Electron vault formats differ, so copying a desktop vault is not a supported server migration.
+
 ## Library
 
 The release library, the same place the Electron host uses on Linux: `$XDG_DATA_HOME/Worldlet`, by default
