@@ -34,8 +34,10 @@ export const GUARDED_WRITE_TOOLS=['update_world_item','archive_world_items','con
  * may narrow them further but never replaces this check. Handing work to an Applet task
  * (`start_applet_task`) is not on this list (owner decision 2026-10-08): the task inherits
  * the starting turn's untrusted state (turnTrustInherit) and runs under the person's own
- * words, so it can do only what this turn still could. */
-export const TURN_GUARDED_WRITES=['create_content','patch_content','delete_content','restore_content','undo_content','set_worldlet_preference','use_doordash'] as const;
+ * words, so it can do only what this turn still could. The World's browser link
+ * (`share_world_link`) opens the whole World to whoever holds it, so after untrusted
+ * content a turn cannot hand it out either. */
+export const TURN_GUARDED_WRITES=['create_content','patch_content','delete_content','restore_content','undo_content','set_worldlet_preference','use_doordash','share_world_link'] as const;
 /** Only the speaking style persists into later turns' prompts; other preferences are display settings. */
 const PREFERENCE_WRITES=['companion_style','morning_brief'];
 /** DoorDash operations that change the user's cart. Search, list and checkout links are reads. */

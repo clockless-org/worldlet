@@ -36,8 +36,10 @@ The release library, the same place the Electron host uses on Linux: `$XDG_DATA_
 `WorldletWeb` beside its program file (in a checkout, `dist/WorldletWeb` beside `dist/node`) and refuses to start
 without it.
 
-On start it makes the browser link once (a restart keeps it), writes it to `room-link.txt` in the library (owner-only)
-and logs it. The link is the pairing secret: anyone who has it reaches this computer's Fox and Attention Center.
+On start it makes the browser link once (a restart keeps it) and writes it to `room-link.txt` in the library
+(owner-only). The log says only that the link is ready and where that file is: the link is the pairing secret, and
+anyone who has it reaches this computer's Fox and Attention Center, so it never goes to stdout or a service's journal.
+In a turn with Fox, the Agent can also get it with `world/link` (see [Web](../../core/phone/README.md#web)).
 
 ## Build, run and check
 

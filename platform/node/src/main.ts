@@ -46,7 +46,7 @@ ensureDirectory(profile.root);
 const log=(line:string)=>process.stdout.write(`worldlet: ${line}\n`);
 
 /** No World page here: calls answer nothing and events go nowhere, except that the browser link's state is logged
- * when it changes (the state alone; the link is logged once, when it is written). */
+ * when it changes (the state alone; the link itself only goes into its owner-only file). */
 let linkState='';
 const noPage:PageBridge={call:async()=>undefined,documentEvent(){},ready:()=>false,
  event(name,detail){
@@ -124,7 +124,9 @@ async function roomLink(){
  let status=await ask('status');
  if(status.state==='none')status=await ask('start');
  if(!status.link)throw Error('No browser link was made.');
- writeAtomic(path.join(profile.root,ROOM_LINK_FILE),status.link+'\n',0o600);
- log(`room link: ${status.link}`);
+ const file=path.join(profile.root,ROOM_LINK_FILE);
+ writeAtomic(file,status.link+'\n',0o600);
+ // The link carries its secret: it goes only into the owner-only file, never to stdout (a service's journal).
+ log(`room link ready in ${file}`);
 }
 roomLink().catch(error=>{diagnostics.record(error,'roomLink');log('room link failed: '+errorMessage(error));});

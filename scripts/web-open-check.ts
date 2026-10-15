@@ -17,7 +17,8 @@ import {createRoomLink} from '../platform/electron/src/modules/phone/room-link.t
 import {createRtcHost,type RtcPage} from '../platform/electron/src/modules/phone/rtc-host.ts';
 import {RTC_PAGE_SCRIPT} from '../platform/electron/src/modules/phone/rtc-page.ts';
 import {memoryRoom} from './memory-room.ts';
-import {createWebClient,createRoomWebClient,isRoomLink,readWebPairLink,WebPairingEnded,pairKeys,fromBase64url,sha256Hex,type PhoneMessage} from '../core/phone/index.ts';
+import {createWebClient,createRoomWebClient,isRoomLink,readWebPairLink,WebPairingEnded,pairKeys,fromBase64url,sha256Hex,worldLinkReply,type PhoneMessage} from '../core/phone/index.ts';
+import {resolveAction,worldActions} from '../core/tools/index.ts';
 import {buildWebOpen} from './build-web-open.ts';
 
 // The relay this computer serves itself (local-relay.ts), on a free port, with the page built as the app ships it.
@@ -203,12 +204,24 @@ const until=async(client:{poll(wait?:number):Promise<any>},ok:(view:any)=>boolea
  // A side without the right token is refused; a frame sealed with another key is dropped.
  const stranger=createRoomWebClient({link:'#v=1&s='+'A'.repeat(43)+'&m=room',relay:'https://worldlet.ai',name:'x',version:'web',WebSocket:RoomSocket as any});
  await assert.rejects(stranger.poll(),/not reachable/,'a pairing nobody made has no computer');
+ // The Agent's `world/link` (core/tools share_world_link) keeps the link a browser already opened.
+ assert.equal((await mac.ensure()).link,made,'an existing link is kept');
+ const reply=worldLinkReply(mac.status());
+ assert.ok('ok' in reply&&reply.link===made&&reply.opened===true);
+ assert.match(String((reply as {message:string}).message),/to them alone.*any web browser.*while this computer is on/);
+ assert.ok('error' in worldLinkReply({state:'none'}),'no link, no success');
+ assert.ok('error' in worldLinkReply({state:'waiting',link:'#v=1&s=x'}),'only a room link goes out');
  // Turning the link off reaches every browser in the room.
  await mac.end();
  const ends=async(client:{poll(wait?:number):Promise<unknown>})=>{for(let i=0;i<30;i++)try{await client.poll(1);}catch(e){if(e instanceof WebPairingEnded)return true;}return false;};
  assert(await ends(tab)&&await ends(second),'every browser in the room hears the link is off');
  assert.equal(vault.has('web-room-pairing'),false);
- console.log('PASS another device meets the computer in the room: link, pairing, everything at once, changes, Done and chat once, away and back, turning off.');
+ // With no link, `world/link` makes one and then keeps it.
+ const fresh=await mac.ensure();
+ assert.equal(fresh.state,'waiting');assert.ok(isRoomLink(fresh.link!)&&fresh.link!==made,'a new link when there was none');
+ assert.equal((await mac.ensure()).link,fresh.link,'and keeps it');
+ await mac.end();
+ console.log('PASS another device meets the computer in the room: link, pairing, everything at once, changes, Done and chat once, away and back, turning off, world/link.');
 }
 
 // The page itself on another device: the built page at worldlet.ai/open with its WebSocket bridged to the memory room,
@@ -325,6 +338,11 @@ await server.close();await rm(out,{recursive:true,force:true});
  assert.match(phone,/if\(request\.kind==='local'\)try\{await serveLocal\(\);\}/,'its server starts before its link is made');
  assert.match(phone,/fetch:async\(input,init\)=>\{await adopted;return localRelay\.fetch/,'a kept pairing is handed back before the computer reads the relay');
  assert.match(phone,/const browser=createRoomLink\(\{/,'another device\'s browser meets the computer in the room');
+ // The Agent's `world/link` is answered on the host before the World page is asked, through the room link.
+ assert.match(phone,/worldLink:async\(\)=>\{const status=await browser\.ensure\(\);/,'world/link keeps or makes the room link');
+ const served=fox.indexOf("if(name==='share_world_link'){"),paged=fox.indexOf("if(!page.ready())return tool?NEEDS_WORLD:null;");
+ assert.ok(served>0&&paged>served,'world/link is answered without the page');
+ assert.equal(resolveAction(worldActions(),'world','link',{}).name,'share_world_link');
  assert.match(phone,/if\(vault\.get\('web-pairing'\)\)void createPhoneRelay\([\s\S]{0,300}\.end\(\)/,'a browser link from before the room is ended on the relay once');
  console.log('PASS a line said in a browser or on the phone reaches Fox without the World page.');
 }

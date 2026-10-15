@@ -48,7 +48,7 @@ function buildWorldActions(sample:boolean):WorldAction[]{
  };
  for(const [target,action,tool] of [
   ['artifact','show','show_artifact'],['artifact','list','list_artifacts'],['artifact','open','open_artifact'],['artifact','brief','read_artifact_brief'],['artifact','page','save_artifact_page'],['world','inspect','inspect_world'],['world','open','visit_context'],['world','navigate','move_view'],['world','act','perform_action'],
-  ['world','lighting','set_scene_lighting'],['world','weather','set_scene_weather'],['applets','open','open_applet'],['applets','delegate','start_applet_task'],
+  ['world','lighting','set_scene_lighting'],['world','weather','set_scene_weather'],['world','link','share_world_link'],['applets','open','open_applet'],['applets','delegate','start_applet_task'],
   ['content','search','find_content'],['content','open','open_content'],['content','read','read_content_page'],
   ['content','create','create_content'],['content','update','patch_content'],['content','delete','delete_content'],
   ['content','trash','list_deleted'],['content','restore','restore_content'],['content','undo','undo_content'],
