@@ -1,20 +1,25 @@
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {WorldletError,ensureDirectory,writeAtomic} from '../../files.ts';
 import {curatedSourceRead} from '../../../../../core/applets/index.ts';
-import {LINEAR_GATE,NOTION_GATE,PAYPAL_GATE,SUPABASE_GATE,TODOIST_GATE,MCP_POLICY,enabledMcpTools,mcpConfiguration,notion,readLinear,readPaypal,readSupabase,todoist,todoistTimeoutSeconds,
+import {GITHUB_GATE,LINEAR_GATE,NOTION_GATE,PAYPAL_GATE,SUPABASE_GATE,TODOIST_GATE,MCP_POLICY,enabledMcpTools,mcpConfiguration,notion,readGithub,readLinear,readPaypal,readSupabase,todoist,todoistTimeoutSeconds,
  type McpGate,type McpSession,type NotionReviewStore} from '../../../../../core/accounts/index.ts';
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
 import type {McpAccounts,McpConnection} from './mcp-account.ts';
 import {McpUnauthorized} from './mcp-client.ts';
+import {validateWorldTool} from './google-source.ts';
+import {ExecutionJournal} from '../agent-runtime/journal.ts';
 
 /** The official endpoint each connector signs in to when none is given (hermes.ts SOURCE_ENDPOINTS). */
 export const MCP_ENDPOINTS:Readonly<Record<string,string>>=Object.freeze({notion:'https://mcp.notion.com/mcp',github:'https://api.githubcopilot.com/mcp/',linear:'https://mcp.linear.app/mcp',
  paypal:'https://mcp.paypal.com/http',todoist:'https://ai.todoist.net/mcp',supabase:'https://mcp.supabase.com/mcp?read_only=true&features=account'});
 const TITLES:Readonly<Record<string,string>>=Object.freeze({notion:'Notion',github:'GitHub',linear:'Linear',paypal:'PayPal',todoist:'Todoist',supabase:'Supabase'});
-const GATES:Readonly<Record<string,McpGate>>=Object.freeze({notion:NOTION_GATE,todoist:TODOIST_GATE,linear:LINEAR_GATE,paypal:PAYPAL_GATE,supabase:SUPABASE_GATE});
+const GATES:Readonly<Record<string,McpGate>>=Object.freeze({github:GITHUB_GATE,notion:NOTION_GATE,todoist:TODOIST_GATE,linear:LINEAR_GATE,paypal:PAYPAL_GATE,supabase:SUPABASE_GATE});
 export const MCP_PROVIDERS=Object.freeze(Object.keys(MCP_ENDPOINTS));
+/** The Worldlet Services `read_service` reads (contracts/services.ts), each through its MCP connection. */
+export const SERVICE_PROVIDERS:readonly string[]=Object.freeze(['github']);
 
 export interface McpSourceOptions {accounts:McpAccounts;openExternal(url:string):Promise<void>;
  /** Where Notion's reviewed writes keep their drafts (notion_writes.py's `worldlet-notion-reviews`). */
@@ -45,6 +50,7 @@ export class McpSource {
    const work=provider==='notion'?notion(session,body,folderStore(this.reviews))
     :provider==='todoist'?todoist(session,body)
     :provider==='linear'?readLinear(session,body)
+    :provider==='github'?readGithub(session,body)
     :provider==='paypal'?readPaypal(session,body)
     :readSupabase(session,body);
    return await Promise.race([work,new Promise<never>((_,reject)=>{timer=setTimeout(()=>reject(new WorldletError(`${TITLES[provider]} took too long to answer. Try again.`)),timeout*1000);})]) as Row;
@@ -128,6 +134,7 @@ export class McpSourceAccess implements AgentRuntime {
  cancel(){this.delegate?.cancel();}
  async steer(){return false;}
  async run(body:Row,home:string,onEvent?:AgentEventHandler):Promise<Row> {
+  if(body.action==='sourceTool'&&body.name==='read_service')return ExecutionJournal.run(body,home,onEvent,observed=>this.service(body.args&&typeof body.args==='object'?body.args as Row:{},observed));
   const request=mcpRequest(body);
   if(!request)return this.other().run(body,home,onEvent);
   if(request.kind==='test'){
@@ -136,6 +143,17 @@ export class McpSourceAccess implements AgentRuntime {
    return result;
   }
   return this.source.read(request.provider,request.body);
+ }
+ /** `read_service`: validated, admitted by the turn (whose Grants name `<provider>/<operation>`, core/agent/GRANTS.md;
+  * the read makes the turn untrusted), then one bounded read with no model. */
+ private async service(args:Row,onEvent:AgentEventHandler|undefined):Promise<Row> {
+  validateWorldTool('read_service',args);
+  const provider=String(args.provider),operation=String(args.operation);
+  if(!SERVICE_PROVIDERS.includes(provider))throw new WorldletError('Unsupported Service.');
+  const reply=await onEvent?.({type:'tool',id:'world-'+crypto.randomUUID(),name:'_world_authorize',args:{name:'read_service',provider,operation}});
+  const permission=reply&&typeof reply==='object'?reply as Row:{error:'World service permission required.'};
+  if(permission.error||permission.ok!==true)throw new WorldletError(String(permission.error||'World service permission required.'));
+  return this.source.read(provider,{operation,...typeof args.id==='string'?{id:args.id}:{},...typeof args.query==='string'?{query:args.query}:{},...typeof args.cursor==='string'?{cursor:args.cursor}:{}});
  }
 }
 

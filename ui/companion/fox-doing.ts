@@ -23,6 +23,7 @@ const DOING = {
  restore_content:'Putting it back',
  undo_content:'Undoing that',
  read_world_source:'Reading your account',
+ read_service:'Reading your account',
  query_world_items:'Checking what is waiting',
  upsert_world_items:'Saving what matters',
  review_world_item:'Taking another look',

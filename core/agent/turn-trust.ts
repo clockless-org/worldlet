@@ -44,10 +44,11 @@ const PREFERENCE_WRITES=['companion_style','morning_brief'];
 const DOORDASH_WRITES=['cart_add','cart_remove'];
 /** Routine operations that schedule unattended work (#404). Pause, remove, list and result always run. */
 const ROUTINE_WRITES=['create','update','resume'];
-/** World services whose results carry untrusted source text into the turn. Past conversations
+/** World services whose results carry untrusted source text into the turn (a Worldlet Service's records, `read_service`,
+ * are other people's titles, descriptions and comments). Past conversations
  * (`read_companion_archive`) include lines brought from other Agents and channels: other
  * people's Telegram, Slack and email messages and coding sessions, so they are untrusted too. */
-const UNTRUSTED_SERVICES=['read_world_source','read_connected_google','use_doordash','use_youtube','use_stripe_crm','meeting_decisions','read_companion_archive'];
+const UNTRUSTED_SERVICES=['read_world_source','read_service','read_connected_google','use_doordash','use_youtube','use_stripe_crm','meeting_decisions','read_companion_archive'];
 /** Host tools that return source text. `query_world_items` is excluded: it returns
  * Worldlet's own saved items and is how a direct request finds item IDs. */
 const UNTRUSTED_TOOLS=['read_content','read_content_page','open_content','read_world_history','meeting_decisions','read_companion_archive'];

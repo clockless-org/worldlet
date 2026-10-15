@@ -76,6 +76,11 @@ function buildWorldActions(sample:boolean):WorldAction[]{
   if(read)read.description='Read one practice email by the ID a gmail/search result returned.';
  }
  add('google-drive','read','read_connected_google',{service:'google-drive'});
+ // Worldlet Services (contracts/services.ts): each read is its own Grant target, github/list, github/read, github/search.
+ for(const operation of ['list','read','search']){
+  const read=add('github',operation,'read_service',{provider:'github',operation});
+  if(read)read.parameters.required=operation==='read'?['id']:operation==='search'?['query']:[];
+ }
  // The person's own events (core/tools/calendar.ts); each operation names what it needs.
  operations('calendar','manage_calendar');
  for(const action of actions.filter(a=>a.tool==='manage_calendar'))action.parameters.required=CALENDAR_REQUIRED[action.action];
