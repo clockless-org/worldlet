@@ -78,3 +78,11 @@
 .garden-seed:disabled{opacity:.5;cursor:default}
 @keyframes garden-sway{50%{transform:rotate(3deg)}}
 @media(prefers-reduced-motion:reduce){.garden-plot[data-stage=ripe] svg{animation:none}}
+
+/* Games on measured scenes: data and controls remain HTML; pictures only supply material. */
+.game-metrics{display:none}
+.game-directions{display:flex;justify-content:center;gap:14px}
+.game-directions button{display:grid;place-items:center;width:46px;height:40px;padding:0}
+.game-directions button[data-direction=up] svg{transform:rotate(90deg)}
+.game-directions button[data-direction=down] svg{transform:rotate(-90deg)}
+.game-directions svg{width:24px;height:24px}

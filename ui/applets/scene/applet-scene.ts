@@ -1,5 +1,5 @@
 import {scenePlaneTransform} from './scene-plane.ts';
-import {fitThemeScene,mountSceneFrame,themeAppletScene,themeSceneMaterial,type ThemeSceneRegistration,type ThemeSceneMaterialName} from '../../themes/index.ts';
+import {fitThemeScene,mountSceneFrame,themeAppletScene,themeSceneMaterial,type ThemeSceneRegistration,type ThemeAppletScene,type ThemeSceneMaterialName} from '../../themes/index.ts';
 import type {BrowserPaperEdge,SurfaceRect} from '../../../contracts/browser-surface.ts';
 import {appletSceneKey} from './scene-family.ts';
 /**
@@ -10,9 +10,10 @@ import {appletSceneKey} from './scene-family.ts';
  * new theme changes how Mail looks without a change to Mail. See README.md beside this file.
  */
 export interface AppletSceneRegion {id:string;role:'primary'|'secondary';material:ThemeSceneMaterialName;element:HTMLElement}
-export interface AppletSceneSource {background?:string;registration:ThemeSceneRegistration}
+export interface AppletSceneSource {background?:string;registration:ThemeSceneRegistration;sprites?:ThemeAppletScene['sprites']}
 export interface AppletScene {
  element:HTMLElement;
+ sprites?:ThemeAppletScene['sprites'];
  /** The region the Applet's main content goes in. */
  primary:AppletSceneRegion;
  regions:readonly AppletSceneRegion[];
@@ -100,7 +101,7 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
   if(source.registration.webFrame)shell.dataset.appletFrame=key;else delete shell.dataset.appletFrame;
  }
  const resize=new ResizeObserver(layout);resize.observe(element);layout();
- return {element,regions,primary:primaryRegion,painted,layout,
+ return {element,regions,primary:primaryRegion,painted,layout,sprites:source.sprites,
   get metrics(){return last;},
   paperEdge(rect){
    const profile=source.registration.webEdge||(source.registration.webFrame?{top:[0,0],right:[0,0],bottom:[0,0],left:[0,0]}:undefined);

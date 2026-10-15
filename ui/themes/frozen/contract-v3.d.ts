@@ -96,10 +96,17 @@ export interface ThemeSceneMaterial {
     bodyFont?: string;
     displayFont?: string;
 }
+/** A measured crop of a static material image, in normalized source coordinates. */
+export interface ThemeSceneSprite {
+    image: string;
+    source: readonly [number, number, number, number];
+}
 /** A background tied to one Applet key. Its live records and controls are supplied by the host. */
 export interface ThemeAppletScene {
     background: string;
     registration: ThemeSceneRegistration;
+    /** Crops of painted game materials. The host owns cells, values, input and motion. */
+    sprites?: Partial<Record<'empty-cell' | 'tile', ThemeSceneSprite>>;
 }
 /** A reusable picture pair for a custom Applet, not a provider registration or a page layout. */
 export interface ThemeAppletPreset {

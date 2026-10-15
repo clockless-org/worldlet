@@ -43,3 +43,12 @@ reader. This distributed book uses the same 280 px reading threshold as a board
 with separate navigation/details; the normal single-sheet threshold remains
 420 px. The Applet still owns search, folders, original reading, clipboard and
 Fox preparation. The regions carry no executable theme behavior.
+
+
+Games can distribute their live panel across `heading`, primary board and
+`controls` regions. `createGamePanel.setScene` moves the existing controls, keeps
+the current board state and restores the ordinary panel when those regions are
+unavailable. Its layout observer disconnects on navigation. The shell applies
+the primary projection to HTML only; native web views retain rectangular bounds.
+Optional `empty-cell` and `tile` sprite crops supply artwork, while `GameHost.metrics`
+supplies live score values and the game's directional callbacks own movement.

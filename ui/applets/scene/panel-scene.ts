@@ -16,5 +16,5 @@ export function createPanelScene(content:HTMLElement){
   scene=mountAppletScene(host,key,{shell:world});scene.primary.element.setAttribute('aria-hidden','true');
   shown=key;world.dataset.panelScene=key;
  }
- return {sync,paperEdge:(rect:SurfaceRect)=>scene?.paperEdge(rect),destroy:()=>sync('')};
+ return {sync,get scene(){return scene;},paperEdge:(rect:SurfaceRect)=>scene?.paperEdge(rect),destroy:()=>sync('')};
 }

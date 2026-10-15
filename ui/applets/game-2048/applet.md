@@ -15,3 +15,11 @@ A game in the Games area. The board is our own code ([ui/games/game-2048.ts](../
 Use the [shared runtime status and lifecycle contract](../../../docs/APPLET-RUNTIME.md#status-and-presentation).
 No Applet-specific status override. The mode and capability declarations above
 never imply additional authorization or background work.
+
+
+Arrow keys, WASD, pointer swipes and the four visible direction buttons operate
+the same board. New game clears the score and tiles while retaining the best.
+A measured scene may place the title, live score/best and reset in `heading`,
+and directions, instructions and win/game-over feedback in `controls`. The
+HTML board follows its primary quadrilateral and optional painted tile crops;
+the theme never owns the game rules. Reduced motion suppresses cell animations.

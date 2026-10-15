@@ -64,6 +64,12 @@ try{
  const registration:ThemeSceneRegistration={imageSize:[16,16],sha256:createHash('sha256').update(plate).digest('hex'),regions:[{id:'main',role:'primary',rect:[.05,.1,.55,.8],material:'paper'},{id:'date',role:'secondary',rect:[.7,.1,.2,.2],material:'paper'}],companion:[.7,.5,.25,.45]};
  const registered=(r:unknown)=>({...presentation,appletScenes:{gmail:{background:'assets/plate.svg',registration:r}}});
  assert.doesNotThrow(()=>parseThemePresentation(registered(registration)));
+ const withSprites=(sprites:unknown)=>({...presentation,appletScenes:{'game-2048':{background:'assets/plate.svg',registration,sprites}}});
+ assert.doesNotThrow(()=>parseThemePresentation(withSprites({'empty-cell':{image:'assets/plate.svg',source:[0,.1,.8,.7]},tile:{image:'assets/plate.svg',source:[0,0,1,1]}})));
+ for(const sprites of [{run:'code.js'},{tile:{image:'https://example.com/tile.png',source:[0,0,1,1]}},{tile:{image:'assets/plate.svg',source:[0,0,0,1]}},{tile:{image:'assets/plate.svg',source:[.5,0,1,1]}},{tile:{image:'assets/plate.svg',source:[0,0,1,1],onclick:'run()'}}])assert.throws(()=>parseThemePresentation(withSprites(sprites)),/Invalid build theme/);
+ await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(withSprites({tile:{image:'assets/missing-tile.png',source:[0,0,1,1]}})));await assert.rejects(validateBuildTheme(source),/Missing declared asset/);
+ await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(presentation));
+
  const projected={...registration,regions:[{...registration.regions[0],quad:[[0,0],[.9,.02],[1,1],[.1,.98]]},registration.regions[1]]};
  assert.doesNotThrow(()=>parseThemePresentation(registered(projected)));
  for(const quad of [[[0,0],[1,1],[1,0],[0,1]],[[0,0],[0,1],[1,1],[1,0]],[[0,0],[1,0],[.2,.2],[0,1]],[[0,0],[2,0],[1,1],[0,1]],[[0,0],[1,0],[1,1]]])assert.throws(()=>parseThemePresentation(registered({...projected,regions:[{...registration.regions[0],quad}]})),/quadrilateral/);

@@ -1,16 +1,35 @@
-import {node,actionButton} from '../../components/index.ts';
+import {node,actionButton,uiIcon} from '../../components/index.ts';
 import {bestScore,type Game,type GameHost} from '../../games/index.ts';
+import type {AppletScene} from '../scene/applet-scene.ts';
 
-/** Native games float over the Village: a small heading, the board and separate actions. */
+/** One live game. A measured heading/control pair can surround its board without replacing its input or state. */
 export function createGamePanel({key,title,create}:{key:string;title:string;create:(host:GameHost)=>Game}){
- const element=node('section','game-panel'),header=node('header','game-header'),heading=node('h2','game-title',title),meta=node('p','ui-caption'),body=node('div','game-body'),footer=node('footer','game-footer');
- header.append(heading,meta);element.append(header,body,footer);element.dataset.game=key;
- const surface={element,header,meta,body,footer};
- const host:GameHost={status:text=>{surface.meta.textContent=text;},best:bestScore(key)};
- const game=create(host),focus=()=>(game.focusTarget||game.element).focus({preventScroll:true});
- surface.body.append(game.element);
- surface.footer.append(node('span','ui-caption',game.hint),actionButton({label:game.resetLabel||'New game',run:()=>{game.restart();focus();}}));
- // The board takes keys only while it has focus, so a closed game leaves no listener behind.
+ const element=node('section','game-panel'),header=node('header','game-header'),heading=node('h2','game-title',title),meta=node('p','ui-caption'),metrics=node('div','game-metrics'),body=node('div','game-body'),footer=node('footer','game-footer');
+ meta.setAttribute('role','status');header.append(heading,metrics,meta);element.append(header,body,footer);element.dataset.game=key;
+ const hint=node('span','game-hint ui-caption');let defaultHint='',notice='';
+ const host:GameHost={status:text=>{meta.textContent=text;},best:bestScore(key),metrics:(values,message)=>{notice=message||'';hint.textContent=notice||defaultHint;metrics.replaceChildren();for(const {label,value} of values){const metric=node('div','game-metric');metric.dataset.metric=label.toLowerCase();metric.append(node('span','',label),node('strong','',String(value)));metrics.append(metric);}}};
+ const game=create(host),focus=()=>(game.focusTarget||game.element).focus({preventScroll:true});body.append(game.element);defaultHint=game.hint;hint.textContent=notice||defaultHint;
+ const reset=actionButton({label:game.resetLabel||'New game',run:()=>{game.restart();focus();}});reset.classList.add('game-reset');
+ const directions=node('nav','game-directions');directions.setAttribute('aria-label','Move tiles');
+ for(const {direction,run} of game.directions||[]){const b=actionButton({label:'Move '+direction,run:()=>{run();focus();}});b.dataset.direction=direction;b.innerHTML=uiIcon(direction==='right'?'forward':'back');directions.append(b);}
+ if(game.directions?.length)footer.append(directions);footer.append(hint,reset);
+ let current:AppletScene|null=null,observer:ResizeObserver|null=null;
+ function layout(){
+  const headingRegion=current?.regions.find(r=>r.id==='heading'),controls=current?.regions.find(r=>r.id==='controls');
+  const distributed=!!headingRegion&&!!controls&&!current?.metrics.compact;element.dataset.distributed=String(distributed);
+  for(const r of current?.regions||[])r.element.classList.toggle('game-region',distributed&&['heading','controls'].includes(r.id));
+  if(distributed){headingRegion!.element.append(header);header.append(reset);controls!.element.append(footer);}
+  else{element.prepend(header);element.append(footer);footer.append(reset);}
+ }
+ function setScene(scene:AppletScene|null){
+  if(current===scene)return;observer?.disconnect();current=scene;
+  for(const role of ['empty-cell','tile'] as const){const sprite=scene?.sprites?.[role];for(const prop of ['image','size','position'])element.style.removeProperty('--game-'+role+'-'+prop);if(!sprite)continue;
+   const [x,y,w,h]=sprite.source;element.style.setProperty('--game-'+role+'-image','url("'+encodeURI(sprite.image)+'")');element.style.setProperty('--game-'+role+'-size',`${100/w}% ${100/h}%`);element.style.setProperty('--game-'+role+'-position',`${w===1?0:100*x/(1-w)}% ${h===1?0:100*y/(1-h)}%`);
+  }
+  element.dataset.sprites=String(!!scene?.sprites?.['empty-cell']&&!!scene?.sprites?.tile);layout();
+  if(scene){observer=new ResizeObserver(layout);observer.observe(scene.element);}
+ }
+ // The board takes keys only while focused; no document-level game listeners survive navigation.
  queueMicrotask(focus);
- return {element:surface.element};
+ return {element,setScene,dispose(){observer?.disconnect();observer=null;}};
 }

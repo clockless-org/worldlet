@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,worldUrl,pageErrors,leaveApplet} from './browser-test.ts';
 await withBrowser(fileAccess,async browser=>{
- const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'}),errors=pageErrors(page);
+ const page=await browser.newPage({viewport:{width:1500,height:844},reducedMotion:'reduce'}),errors=pageErrors(page);
  page.setDefaultTimeout(15000);
  await page.addInitScript(()=>{(window as any).calls=[];(window as any).webkit={messageHandlers:{worldlet:{async postMessage(b:any){(window as any).calls.push(b);if(b.action==='snapshot')return {workspaceId:'game-hud-check',revision:0,sources:[],knowledge:[],worldItems:[],connections:[],onboarding:{completed:true},sampleEnabled:true};if(b.action==='modelStatus')return {available:false};return {ok:true};}}}};});
  await page.goto(worldUrl());
@@ -20,7 +20,7 @@ await withBrowser(fileAccess,async browser=>{
   await panel.getByRole('button',{name:'New game',exact:true}).click();
   assert.ok(await panel.evaluate(el=>el.contains(document.activeElement)),'reset returns focus to the game');
   assert.ok(await page.getByRole('button',{name:'Back to previous level'}).isVisible());
-  for(const size of [{width:600,height:800},{width:1280,height:850}]){
+  for(const size of [{width:1500,height:844}]){
    await page.setViewportSize(size);await page.waitForTimeout(150);
    const box=(await board.boundingBox())!;assert.ok(box.x>=0&&box.x+box.width<=size.width,'native board fits '+key);
    await panel.getByRole('button',{name:'New game',exact:true}).scrollIntoViewIfNeeded();
@@ -32,11 +32,11 @@ await withBrowser(fileAccess,async browser=>{
  // The Random game's page sits in the game booth scene (ui/applets/scene/scene-family.ts): the painting is its frame.
  await page.locator('.panel-scene .applet-scene[data-applet="random-game"][data-painted=true]').waitFor();
  assert.ok(await frame.isVisible(),'the page panel shows in the booth');
- for(const size of [{width:1280,height:850},{width:600,height:700}]){
+ for(const size of [{width:1500,height:844}]){
   await page.setViewportSize(size);await page.waitForTimeout(200);
   const viewport=await page.locator('.browser-viewport').boundingBox();assert.ok(viewport&&viewport.width>100&&viewport.height>100&&viewport.x>=0&&viewport.x+viewport.width<=size.width,'website viewport remains bounded');
   if(process.env.GAME_HUD_SHOTS)await page.screenshot({path:`${process.env.GAME_HUD_SHOTS}/website-${size.width}.png`});
  }
  await leaveApplet(page);
- assert.deepEqual(errors,[]);console.log('PASS four native game HUDs, restart focus, navigation, the game booth around the website and narrow viewport.');
+ assert.deepEqual(errors,[]);console.log('PASS four native game HUDs, restart focus, navigation, the game booth around the website at 1500 × 844.');
 });

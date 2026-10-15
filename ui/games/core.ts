@@ -1,8 +1,8 @@
 // The part of a game that needs no panel: what it sees of its host, best scores and the
 // frame loop. The app's game panel and the served games at worldlet.ai/games share it.
 /** What a game sees of its panel: a status line, a remembered best and a way to start over. */
-export type GameHost={status:(text:string)=>void;best:{get:()=>number;set:(value:number)=>void}};
-export type Game={element:HTMLElement;restart:()=>void;hint:string;resetLabel?:string;focusTarget?:HTMLElement};
+export type GameHost={status:(text:string)=>void;metrics?:(values:readonly {label:string;value:number}[],notice?:string)=>void;best:{get:()=>number;set:(value:number)=>void}};
+export type Game={element:HTMLElement;restart:()=>void;hint:string;resetLabel?:string;focusTarget?:HTMLElement;directions?:readonly {direction:'up'|'left'|'down'|'right';run:()=>void}[]};
 
 /** Best scores are a per-viewer convenience; storage can be missing or blocked. */
 export function bestScore(key:string){

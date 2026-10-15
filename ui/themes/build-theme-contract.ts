@@ -62,8 +62,14 @@ export interface ThemeSceneMaterial {
  fill?:string;
  bodyFont?:string;displayFont?:string;
 }
+/** A measured crop of a static material image, in normalized source coordinates. */
+export interface ThemeSceneSprite {image:string;source:readonly [number,number,number,number]}
 /** A background tied to one Applet key. Its live records and controls are supplied by the host. */
-export interface ThemeAppletScene {background:string;registration:ThemeSceneRegistration}
+export interface ThemeAppletScene {
+ background:string;registration:ThemeSceneRegistration;
+ /** Crops of painted game materials. The host owns cells, values, input and motion. */
+ sprites?:Partial<Record<'empty-cell'|'tile',ThemeSceneSprite>>;
+}
 /** A reusable picture pair for a custom Applet, not a provider registration or a page layout. */
 export interface ThemeAppletPreset {
  id:string;title:string;description:string;category:string;
@@ -142,8 +148,8 @@ export function parseThemePresentation(value:unknown):ThemePresentation {
  }
  if(p.sound!==undefined)need(object(p.sound)&&object(p.sound.events)&&Object.entries(p.sound.events).every(([event,file])=>(THEME_SOUND_EVENTS as readonly string[]).includes(event)&&/\.(mp3|ogg|m4a|wav)$/.test(themeAssetPath(file))),'sound events');
  if(p.icons!==undefined)need(object(p.icons)&&Object.entries(p.icons).every(([key,file])=>id(key)&&picture(file)),'applet icons');
+ const rect=(v:unknown)=>Array.isArray(v)&&v.length===4&&v.every(Number.isFinite)&&v[0]>=0&&v[1]>=0&&v[2]>0&&v[3]>0&&v[0]+v[2]<=1&&v[1]+v[3]<=1;
  const registration=(r:ThemeSceneRegistration)=>{
-  const rect=(v:unknown)=>Array.isArray(v)&&v.length===4&&v.every(Number.isFinite)&&v[0]>=0&&v[1]>=0&&v[2]>0&&v[3]>0&&v[0]+v[2]<=1&&v[1]+v[3]<=1;
   need(object(r)&&Object.keys(r).every(k=>['imageSize','sha256','regions','companion','webEdge','webFrame'].includes(k)),'scene registration fields');
   need(Array.isArray(r.imageSize)&&r.imageSize.length===2&&r.imageSize.every(n=>Number.isInteger(n)&&n>0),'scene image size');
   need(typeof r.sha256==='string'&&/^[a-f0-9]{64}$/.test(r.sha256),'scene image hash');
@@ -169,8 +175,9 @@ export function parseThemePresentation(value:unknown):ThemePresentation {
  if(p.appletScenes!==undefined){
   need(object(p.appletScenes),'applet scenes');
   for(const [key,scene] of Object.entries(p.appletScenes)){
-   need(id(key)&&object(scene)&&Object.keys(scene).every(k=>['background','registration'].includes(k))&&picture(scene.background),'applet scene');
+   need(id(key)&&object(scene)&&Object.keys(scene).every(k=>['background','registration','sprites'].includes(k))&&picture(scene.background),'applet scene');
    registration(scene.registration);
+   if(scene.sprites!==undefined)need(object(scene.sprites)&&Object.entries(scene.sprites).every(([role,sprite])=>['empty-cell','tile'].includes(role)&&object(sprite)&&Object.keys(sprite).every(k=>['image','source'].includes(k))&&picture(sprite.image)&&rect(sprite.source)),'scene sprites');
   }
  }
  if(p.sceneMaterials!==undefined){

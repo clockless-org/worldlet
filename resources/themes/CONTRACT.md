@@ -160,3 +160,17 @@ The old data-only `ThemePack` (`ui/themes/theme-pack.ts`) only describes the Vil
 ### Weather condition pictures
 
 `presentation.weatherIcons` optionally maps WMO condition codes (decimal keys such as `3` or `61`) to package-local PNG, WebP or SVG pictures. The shared Weather panel uses these for both current conditions and forecast days. Missing conditions, or an image that fails to load, keep the shared weather artwork. These pictures never supply forecast values or change condition labels. The supported keys are `THEME_WEATHER_CODES` in the contract.
+
+
+### Painted game materials
+
+An Applet scene may declare `sprites`, with optional `empty-cell` and `tile` roles.
+Each is a package-local `image` and a normalized `[x, y, width, height]` `source`
+rectangle. The importer rejects unknown roles, invalid crops, remote paths and
+missing files. The host crops these pictures with CSS; values, scoring, input
+and motion remain in the shared game. Existing packages can omit sprites.
+
+A game scene with visible secondary `heading` and `controls` regions places its
+live title, metrics and reset above the primary board, and directional controls
+and instructions below it. A convex `quad` on the primary region projects the
+HTML board. Without both regions, the ordinary game panel remains available.
