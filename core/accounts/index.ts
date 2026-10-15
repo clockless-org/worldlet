@@ -26,3 +26,5 @@ export {POSTHOG_GATE,POSTHOG_HOSTS,POSTHOG_LIMITS,POSTHOG_LISTS,checkPosthog,hog
 export {CLOUDFLARE_API,CLOUDFLARE_GATE,CLOUDFLARE_LIMITS,CLOUDFLARE_READS,checkCloudflare,cloudflareAccount,cloudflareSettings,readCloudflare,type CloudflareSettings} from './services/cloudflare.ts';
 // DoorDash's official CLI: which operations and arguments, and what reaches Fox; the Platform runs it.
 export {DOORDASH_CLI_VERSION,DOORDASH_MUTATIONS,doordashArgs,cleanDoordash,validDoordashCheckout,doordashOutcome,type DoordashRun} from './doordash.ts';
+// Service presets: named, saved reads of a Worldlet Service (a HogQL query, a GitHub search) that a board block names.
+export {PRESET_REASONS,SERVICE_PRESET_ID,readServicePresetRead,readServicePresetSave,readStoredServicePreset,removeServicePreset,saveServicePreset,servicePresetRead} from './services/presets.ts';

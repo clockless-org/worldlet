@@ -12,6 +12,7 @@ import {createOrganizer} from './organize.ts';
 import {createOnboarding} from './onboarding.ts';
 import {createLocal} from './local.ts';
 import {createMessages} from './messages.ts';
+import {createServicePresets} from './service-presets.ts';
 import {mailAvatar,clearMailAvatars} from './mail-avatar.ts';
 import {attentionImage,clearAttentionImages} from './attention-image.ts';
 import type {SourcesService,SpeechService} from '../../host/services.ts';
@@ -30,6 +31,8 @@ export function installSources(host:Host){
  const onboarding=createOnboarding(ctx);
  const local=createLocal(ctx,()=>reviews.clearMail());
  const messages=createMessages(ctx);
+ // Service presets live in the person's own World only (never the practice World), like its other records.
+ const presets=createServicePresets({ledger:()=>{try{return store.writable&&!store.sampleEnabled()?store.ledger():null;}catch{return null;}}});
 
  // Applet activity: a projection of Agent events, not another source or memory database.
  const touched=()=>{store.activityRevision+=1;store.notify();};
@@ -103,7 +106,10 @@ export function installSources(host:Host){
   clearWorldContent:()=>{clearMailAvatars();clearAttentionImages();return local.clearWorldContent();},
   mailAvatar:body=>mailAvatar(body,store.sampleEnabled()),
   attentionImage:body=>attentionImage(body,store.sampleEnabled()),
-  messages:body=>messages.handle(body)
+  messages:body=>messages.handle(body),
+  // Named, saved Service reads (core/applets/INTEGRATIONS.md#service-presets). Not in ROOM_ALLOWED: a World page on
+  // another device does not change them.
+  servicePresets:body=>presets.handle(body)
  });
  // After Restart Worldlet for Full Disk Access, open Messages again; its list retries with the new permission.
  host.onPageLoaded(()=>{if(messages.retryAfterRestart())void host.worldView()?.webContents.executeJavaScript("location.hash='object=app-messages'").catch(()=>{});});
