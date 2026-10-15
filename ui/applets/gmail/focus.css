@@ -67,4 +67,5 @@
 #notionWorld[data-applet-plane=true] #notionContent[data-applet=gmail] .mail-paper{padding:0 8px 0 0}
 #notionWorld[data-applet-plane=true] #notionContent[data-applet=gmail] .mail-sender-name{font:400 13px/1.4 var(--scene-body-font)}
 #notionWorld[data-applet-plane=true] #notionContent[data-applet=gmail] .mail-date{font:400 10px/1.4 var(--scene-body-font);align-self:start}
+#notionWorld[data-applet-plane=true] .mail-reader-switch{transform:none;height:32px}
 #notionWorld[data-applet-plane=true] .mail-reader-switch button{width:32px;height:32px;line-height:32px;min-height:32px;border-radius:4px;background:var(--scene-control);color:var(--scene-ink)}

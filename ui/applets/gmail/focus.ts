@@ -89,7 +89,7 @@ export function renderMailFocus(value:MailValue,renderBody:(text:string,page:any
  root.append(paper);
  // The desk owns its own scroll area and navigation; only the full reader aligns the shell switcher.
  if(options.embedded)return root;
- const align=()=>{const switcher=root.closest('#notionWorld')?.querySelector<HTMLElement>('.mail-reader-switch');const parent=switcher?.parentElement;if(!parent)return;const h=root.getBoundingClientRect(),p=parent.getBoundingClientRect();switcher.style.left=h.right-p.left-116+'px';switcher.style.right='auto';switcher.style.width='96px';switcher.style.top=h.top-p.top+16+'px';};
+ const align=()=>{const switcher=root.closest('#notionWorld')?.querySelector<HTMLElement>('.mail-reader-switch');const parent=switcher?.parentElement;if(!parent)return;const projected=!!root.closest('[data-applet-plane=true]'),h=(projected?root.querySelector('.ui-applet-header')||root:root).getBoundingClientRect(),p=parent.getBoundingClientRect();switcher.style.left=h.right-p.left-(projected?74:116)+'px';switcher.style.right='auto';switcher.style.width=(projected?68:96)+'px';switcher.style.top=h.top-p.top+(projected?0:16)+'px';};
  const resize=new ResizeObserver(align);resize.observe(root);
  const cleanup=new MutationObserver(()=>{if(!root.isConnected){resize.disconnect();cleanup.disconnect();}});
  requestAnimationFrame(()=>{if(root.isConnected){cleanup.observe(root.closest('#notionContent')||root.parentNode!,{childList:true,subtree:true});align();}else resize.disconnect();});
