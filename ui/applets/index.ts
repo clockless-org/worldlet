@@ -27,9 +27,11 @@ export {renderTranscript,transcriptBar} from './meetings/transcript.ts';
 export {curatedOriginal,renderCuratedTable} from './_shared/curated-source-applet.ts';
 export {loadMoney,readMoneyItem} from './_shared/money-applets.ts';
 export {quietSourceReader} from './_shared/quiet-source-reader.ts';
-export {WORK_APPLETS,renderWorkDetail,sampleWork,sampleWorkDetail,workError,workItems} from './_shared/work-applets.ts';
+export {WORK_APPLETS,codexWorkDetail,renderWorkDetail,sampleWork,sampleWorkDetail,workError,workItems} from './_shared/work-applets.ts';
 export {selectNotebookItem} from './apple-notes/open.ts';
 export {searchNotes} from './apple-notes/note-search.ts';
 export {createClaudeSession} from './claude-code/claude-session.ts';
 export {createCodexApplet} from './codex/codex-applet.ts';
 export {createVoiceMemoReader} from './voice-memos/voice-memos.ts';
+
+export {renderWorkSession,selectWorkSession} from './_shared/work-session.ts';

@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {bundleScript,withBrowser,pageErrors} from './browser-test.ts';
+import {codexWorkDetail} from '../ui/applets/_shared/work-applets.ts';
+const detail=codexWorkDetail({turns:[{items:[{type:'userMessage',content:[{type:'text',text:'Review a change.'}]},{type:'fileChange',changes:[{path:'view.ts',diff:'- old\n+ new'}]},{type:'commandExecution',command:'npm test',status:'completed',aggregatedOutput:'Passed'}]}],nextCursor:'older'});
+assert.deepEqual(detail.messages,[{role:'user',text:'Review a change.'}]);assert.equal(detail.changes[0].path,'view.ts');assert.equal(detail.commands[0].output,'Passed');assert.equal(detail.nextOffset,'older');
+assert.equal(codexWorkDetail({turns:[{error:{message:'Saved turn failed'},items:[]}]}).messages[0].text,'Saved turn failed');
+const script=await bundleScript({stdin:{contents:"export {mountAppletScene,renderWorkSession} from './ui/applets/index.ts';",resolveDir:process.cwd(),loader:'ts'},globalName:'SessionScene'});
+const css=(await Promise.all(['ui/applets/scene/applet-scene.css','ui/applets/_shared/work-session.css'].map(p=>readFile(p,'utf8')))).join('\n');
+await withBrowser(async browser=>{
+ const page=await browser.newPage({viewport:{width:1500,height:844}}),errors=pageErrors(page);await page.setContent('<title>Session scene fixture</title><style>'+css+'body{margin:0}#notionWorld{position:fixed;inset:0}</style><main id="notionWorld"></main>');await page.addScriptTag({content:script});
+ await page.evaluate(()=>{
+  const w=window as any;w.reads=[];w.picks=[];w.pending={};const items=[{id:'one',title:'Review navigation',when:'Completed',context:'Example'},{id:'two',title:'Repair calendar',when:'Saved',context:'Example'}];w.items=items;
+  const source={registration:{imageSize:[1500,844],sha256:'0'.repeat(64),regions:[{id:'main',role:'primary',rect:[.4,.1,.45,.65],material:'screen'},{id:'sessions',role:'secondary',rect:[.1,.1,.25,.55],material:'screen'},{id:'session-actions',role:'secondary',rect:[.4,.78,.45,.06],material:'screen'}],companion:[.4,.9,.35,.06]}};
+  w.scene=w.SessionScene.mountAppletScene(document.querySelector('#notionWorld'),'codex',{source});
+  w.value={sample:false,renderMarkdown:(text)=>Object.assign(document.createElement('p'),{textContent:text}),readSession:item=>{w.reads.push(item.id);return new Promise((resolve,reject)=>w.pending[item.id]={resolve,reject});}};
+  w.draw=()=>w.SessionScene.renderWorkSession(w.scene.primary.element,{key:'codex',title:'Codex'},items,w.value,item=>w.picks.push(item.id),w.scene.regions);w.draw();
+ });
+ await page.getByRole('button',{name:'Repair calendar Saved · Example'}).click();
+ await page.evaluate(()=>{const w=window as any;w.pending.two.resolve({messages:[{role:'assistant',text:'Current saved record'}],changes:[{path:'calendar.ts',diff:'+ updated'}]});});
+ await page.getByText('Current saved record',{exact:true}).waitFor();await page.evaluate(()=>(window as any).pending.one.resolve({messages:[{role:'assistant',text:'Stale saved record'}]}));
+ assert.equal(await page.getByText('Stale saved record',{exact:true}).count(),0,'a slower previous read cannot replace the selected session');
+ assert.equal(await page.locator('.work-session-title').evaluate(e=>getComputedStyle(e).fontSize),'28px');assert.equal(await page.locator('.work-session-region[data-region=sessions]').evaluate(e=>getComputedStyle(e).alignItems),'stretch');
+ assert.equal(await page.locator('.work-session-row[aria-pressed=true]').getAttribute('data-item-id'),'two');
+ await page.getByLabel('Find Codex session',{exact:true}).fill('navigation');assert.equal(await page.locator('.work-session-row').count(),1);assert.equal(await page.getByText('Current saved record',{exact:true}).count(),1,'filtering does not start or replace the current session');
+ await page.getByLabel('Find Codex session',{exact:true}).fill('');await page.getByText('calendar.ts',{exact:true}).click();assert.equal(await page.locator('.work-session-change').getAttribute('open'),null);
+ assert.deepEqual(await page.evaluate(()=>(window as any).picks),[],'reading and searching never continue a session');await page.getByRole('button',{name:'Continue work',exact:true}).click();assert.deepEqual(await page.evaluate(()=>(window as any).picks),['two']);
+ await page.getByRole('button',{name:'Review navigation Completed · Example'}).click();await page.evaluate(()=>(window as any).pending.one.reject(Error('Saved history unavailable')));await page.getByText('Saved history unavailable',{exact:true}).waitFor();assert.equal(await page.getByRole('button',{name:'Continue work',exact:true}).isDisabled(),true);
+ await page.getByRole('button',{name:'Retry',exact:true}).click();await page.evaluate(()=>(window as any).pending.one.resolve({messages:[{role:'user',text:'Recovered record'}]}));await page.getByText('Recovered record',{exact:true}).waitFor();
+ const geometry=await page.locator('.work-session-region').evaluateAll(es=>es.map(e=>({region:e.getAttribute('data-region'),box:e.getBoundingClientRect().toJSON(),overflow:e.scrollHeight>e.clientHeight})));assert.ok(geometry.every(r=>r.box.x>=0&&r.box.y>=0&&r.box.right<=1500&&r.box.bottom<=844));
+ await page.evaluate(()=>{const w=window as any;const before=w.reads.length;w.fallback=w.SessionScene.renderWorkSession(document.createElement('div'),{key:'codex'},w.items,w.value,()=>{},[]);w.fallbackReads=w.reads.length-before;});assert.equal(await page.evaluate(()=>(window as any).fallback),null);assert.equal(await page.evaluate(()=>(window as any).fallbackReads),0);
+ await page.evaluate(()=>{const w=window as any;w.draw();w.scene.destroy();w.pending.one.resolve({messages:[{role:'user',text:'Detached read'}]});});assert.equal(await page.getByText('Detached read',{exact:true}).count(),0);assert.deepEqual(errors,[]);
+ console.log('PASS session scenes: read-only selection, stale reads, search, changes, explicit continuation, retry, fallback and detached completion at 1500 × 844');
+});

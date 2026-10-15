@@ -1,6 +1,6 @@
 import {renderHomeOpen,selectNotebookItem,type HomeOpenState} from '../applets/index.ts';
 import {HOME_NATIVE,HOME_RECORDS,CODING_SESSIONS,ORIGINAL_READERS} from '../../core/applets/index.ts';
-import {renderMailOpen,renderMeetingsOpen,renderSceneList,mountAppletScene,appletSceneKey,type AppletScene} from '../applets/index.ts';
+import {renderMailOpen,renderMeetingsOpen,renderSceneList,renderWorkSession,selectWorkSession,mountAppletScene,appletSceneKey,type AppletScene} from '../applets/index.ts';
 import {weatherGlyph} from './environment/weather-forecast.ts';
 import {attentionIcon} from '../attention/index.ts';
 import {calendarDay} from './applet-content.ts';
@@ -34,10 +34,10 @@ export function createAppletStage(host,onPick){
   const f=JSON.stringify([room.key,selected,allItems.map(i=>i.id)]);if(f!==focusSignature){focusSignature=f;focus.replaceChildren();mailNav.replaceChildren();if(selected){const label=document.createElement('small');label.textContent=selected.curated?'Fox summary':'Selected item';const title=document.createElement('strong');title.textContent=selected.title;const context=document.createElement('p');context.textContent=[selected.when,selected.context].filter(Boolean).join(' · ');focus.append(label,title,context);
    const at=allItems.findIndex(i=>i.id===selected.id),nav=document.createElement('nav');nav.className='pixi-focus-switch';nav.setAttribute('aria-label','Browse selected items');
    for(const [text,step] of [['Previous item',-1],['Next item',1]] as const){const b=document.createElement('button');b.type='button';b.textContent=step<0?'‹':'›';b.setAttribute('aria-label',text);b.disabled=at<0||at+step<0||at+step>=allItems.length;b.hidden=b.disabled;b.onclick=e=>{e.stopPropagation();const next=allItems[at+step];if(next){selected=next;onPick({action:'applet-item',id:next.id});}};if(room.key==='gmail'){b.textContent=step<0?'◀':'▶';b.setAttribute('aria-label',step<0?'Previous email':'Next email');mailNav.append(b);}else nav.append(b);}if(room.key!=='gmail')focus.append(nav);}}
-  const sceneOpen=!!room.key&&!!appletSceneKey(room.key)&&(visible||focused&&SCENE_READERS.has(room.key));
+  const sceneOpen=!!room.key&&!!appletSceneKey(room.key)&&(visible||focused&&(SCENE_READERS.has(room.key)||CODING_SESSIONS.includes(room.key)&&!!scene?.regions.some(r=>r.id==='sessions')));
   if(scene&&(!sceneOpen||scene.element.dataset.applet!==room.key)){scene.destroy();scene=null;delete panel.dataset.scene;delete panel.dataset.reading;}
   if(sceneOpen&&!scene){panel.replaceChildren();scene=mountAppletScene(panel,room.key,{shell:(host.closest('#notionWorld') as HTMLElement|null)||host});panel.dataset.scene=room.key;signature='';}
-  if(scene){data(panel,'reading',String(!visible));scene.element.inert=!visible&&room.key==='apple-notes';}
+  if(scene){data(panel,'reading',String(!visible));scene.element.inert=!visible&&(room.key==='apple-notes'||CODING_SESSIONS.includes(room.key));}
   hidden(panel,!visible&&!sceneOpen);data(panel,'applet',room.key||'');data(panel,'animatedDevice',String(!!(globalThis as any).__WORLDLET_25D_ASSETS__?.motion?.[room.key]));if(!visible){signature='';return;}
   const cards=['github',...CODING_SESSIONS,...ORIGINAL_READERS,'meetings','voice-memos','messages'].includes(room.key);
   const local=cards||HOME_NATIVE.includes(room.key),calendar=room.key==='google-calendar';
@@ -52,6 +52,7 @@ export function createAppletStage(host,onPick){
   if(scene){const pick=item=>{selected=item;onPick({action:'applet-item',id:item.id});};
    if(room.key==='gmail')shownItems=renderMailOpen(scene.primary.element,items,value,pick,scene.regions);
    else if(room.key==='meetings'){scene.primary.element.replaceChildren();shownItems=renderMeetingsOpen(scene.primary.element,room,items,value,pick);}
+   else if(CODING_SESSIONS.includes(room.key))shownItems=renderWorkSession(scene.primary.element,room,items,value,pick,scene.regions)||renderSceneList(scene.primary.element,room,items,value,pick);
    else if(!HOME_RECORDS.includes(room.key))shownItems=renderSceneList(scene.primary.element,room,items,value,pick,room.key==='weather'?item=>weatherGlyph(item.weatherCode):undefined);
    else{const active=document.activeElement as HTMLElement|null,calendarFocus=calendar&&active&&scene.element.contains(active)?{id:active.dataset.itemId,label:active.getAttribute('aria-label'),mode:active.closest('.home-calendar-modes')?active.textContent:null}:null;
     if(!['apple-reminders','apple-notes'].includes(room.key))scene.primary.element.replaceChildren();shownItems=renderHomeOpen(scene.primary.element,room,items,value,homeState,pick,()=>{signature='';render(room,value,true);},scene.regions);if(calendar&&scene.primary.element.dataset.calendarDistributed!=='true')sceneToday(scene,value);
@@ -87,5 +88,5 @@ export function createAppletStage(host,onPick){
    if(calendar)footer.append(move('Previous',-1));footer.append(label);if(calendar)footer.append(move('Next',1));panel.append(footer);
   }
  }
- return {render,setMotion(_value:boolean){},setSelected(room,item){owner=room.moduleId;selected=item;if(room.key==='apple-notes'&&item){selectNotebookItem(homeState,item.id);for(const row of scene?.element.querySelectorAll<HTMLElement>('.notes-row')||[])row.setAttribute('aria-pressed',String(row.dataset.itemId===item.id));}},select(id){selected=allItems.find(i=>i.id===id)||null;return selected;},get metrics(){return panel.hidden?null:{items:shownItems.length,shown:true,preview:false,selected:selected?.id||null,scene:scene?.metrics||null};},destroy(){latestRender=null;resize.disconnect();window.removeEventListener('worldlet:calendar-show',showCalendar);scene?.destroy();panel.remove();focus.remove();mailNav.remove();}};
+ return {render,setMotion(_value:boolean){},setSelected(room,item){owner=room.moduleId;selected=item;if(scene&&CODING_SESSIONS.includes(room.key)&&item)selectWorkSession(scene.primary.element,item.id);if(room.key==='apple-notes'&&item){selectNotebookItem(homeState,item.id);for(const row of scene?.element.querySelectorAll<HTMLElement>('.notes-row')||[])row.setAttribute('aria-pressed',String(row.dataset.itemId===item.id));}},select(id){selected=allItems.find(i=>i.id===id)||null;return selected;},get metrics(){return panel.hidden?null:{items:shownItems.length,shown:true,preview:false,selected:selected?.id||null,scene:scene?.metrics||null};},destroy(){latestRender=null;resize.disconnect();window.removeEventListener('worldlet:calendar-show',showCalendar);scene?.destroy();panel.remove();focus.remove();mailNav.remove();}};
 }

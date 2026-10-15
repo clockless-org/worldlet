@@ -47,7 +47,7 @@ import {createWeatherPanel,sampleWeatherForecast} from '../applets/index.ts';
 import {createGameApplet} from '../applets/index.ts';
 import {foxSessions,ongoingLine,ongoingThemes,ongoingThemeRequest,isOngoingThemeId,type OngoingThing} from '../../core/tasks/index.ts';
 import {loadMoney,readMoneyItem} from '../applets/index.ts';
-import {WORK_APPLETS,workItems,workError,renderWorkDetail,sampleWork,sampleWorkDetail} from '../applets/index.ts';
+import {WORK_APPLETS,codexWorkDetail,workItems,workError,renderWorkDetail,sampleWork,sampleWorkDetail} from '../applets/index.ts';
 import {attentionIcon} from '../attention/index.ts';
 import {coreAppletItems} from '../world/index.ts';
 import {localCalendarItems} from '../applets/index.ts';
@@ -1639,7 +1639,11 @@ export function mountNotionWorld(data: World, native: any) {
   window.addEventListener('pagehide',()=>clearInterval(workPoll),{once:true});
   function publishWork(r,value){
     const items=workItems(r.key,value),error=workError(r.key,value);scene?.setAppActivity?.(r.moduleId,{sessions:items.map(i=>i.session).filter(Boolean),usage:value.usage});
-    scene?.setAppStage?.(r.moduleId,{items,connected:true,error,scope:value.scope||'',loadMore:value.nextOffset!=null?()=>loadWork(r,value.nextOffset):value.cursor?()=>codexApplet?.refresh(true):null});
+    scene?.setAppStage?.(r.moduleId,{items,connected:true,error,scope:value.scope||'',loadMore:value.nextOffset!=null?()=>loadWork(r,value.nextOffset):value.cursor?()=>codexApplet?.refresh(true):null,sample:!!data.sample,renderMarkdown,refresh:()=>r.key==='codex'&&!data.sample?ensureCodexApplet().refresh():!data.sample?loadWork(r):undefined,readSession:async(item,offset=0)=>{
+     if(data.sample)return sampleWorkDetail(item);
+     if(r.key==='codex')return codexWorkDetail(await native.codexSession({operation:'read',threadId:item.session.sessionId,...offset?{cursor:offset}:{}}));
+     return native.developmentSessions('claude',{operation:'read',id:item.session.sessionId,offset});
+    }});
   }
   async function loadWork(r,offset=0){
     try{const value=await native.developmentSessions(r.key==='claude-code'?'claude':r.key,{offset});

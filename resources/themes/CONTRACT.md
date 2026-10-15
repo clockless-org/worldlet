@@ -174,3 +174,15 @@ A game scene with visible secondary `heading` and `controls` regions places its
 live title, metrics and reset above the primary board, and directional controls
 and instructions below it. A convex `quad` on the primary region projects the
 HTML board. Without both regions, the ordinary game panel remains available.
+
+
+### Saved session regions
+
+A coding Applet scene may add secondary `sessions` and `session-actions` regions.
+The host puts its searchable local-session index in `sessions`, the saved-message
+and file-change preview in the primary region, and explicit continuation in
+`session-actions`. Selecting or filtering previews only reads history; continuing
+opens the existing session reader, and execution still requires a separate Fox
+message. Errors offer retry, stale reads cannot replace a later selection, and
+missing regions retain the ordinary session list. These are measured static
+regions, not theme-provided code or account records.

@@ -94,6 +94,7 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
    shell.style.setProperty(`--applet-scene-${name}-left`,offset.x+r.x+'px');shell.style.setProperty(`--applet-scene-${name}-top`,offset.y+r.y+'px');
    shell.style.setProperty(`--applet-scene-${name}-width`,r.width+'px');shell.style.setProperty(`--applet-scene-${name}-height`,r.height+'px');
   }
+  shell.style.setProperty('--applet-scene-content-left',offset.x+Math.min(...fit.regions.map(r=>r.x))+'px');
   shell.style.setProperty('--applet-scene-primary-transform',primaryRegion.element.style.transform);
   shell.dataset.appletScene=key;if(fitted.quad)shell.dataset.appletPlane='true';else delete shell.dataset.appletPlane;
   // A short clearance below the paper carries a compact composer, not a full-height side lane.
@@ -116,7 +117,7 @@ export function mountAppletScene(host:HTMLElement,key:string,options:{source?:Ap
   },
   destroy(){
    resize.disconnect();foreground?.destroy();element.remove();const shell=options.shell;if(!shell||shellOwners.get(shell)!==owner)return;
-   shellOwners.delete(shell);shell.style.removeProperty('--applet-scene-primary-transform');
+   shellOwners.delete(shell);shell.style.removeProperty('--applet-scene-primary-transform');shell.style.removeProperty('--applet-scene-content-left');
    delete shell.dataset.appletScene;delete shell.dataset.appletFrame;delete shell.dataset.appletCompanionBar;delete shell.dataset.appletNavigationInline;delete shell.dataset.appletPlane;for(const name of Object.keys(shellStyle))shell.style.removeProperty(name);
    for(const part of ['primary','companion'])for(const side of ['left','top','width','height'])shell.style.removeProperty(`--applet-scene-${part}-${side}`);
   }};

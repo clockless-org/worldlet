@@ -58,3 +58,11 @@ Games may expose named `parts` for a subtitle, keypad, tools or legend. The shar
 For a framed page with a short bottom composer, the shelf uses the space left of the page instead of treating the composer as a side column. World navigation sits directly above the bottom composer, clear of the native page and foreground. Ordinary side-column frames keep their existing geometry.
 
 When the measured page leaves less than one navigation row above the bottom composer, navigation sits to its left instead. The host derives this from the registered rectangles and clears it on scene disposal.
+
+
+Coding scenes with `sessions` and `session-actions` secondary regions use the
+shared session preview (`ui/applets/_shared/work-session.ts`). The primary region
+shows saved messages, file changes and command records. Reads are separate from
+selection for execution: only Continue work opens the existing reader, and only
+a later explicit message resumes work. The scene stays behind that reader;
+returning retains the selected session. Ordinary scenes keep their single list.
