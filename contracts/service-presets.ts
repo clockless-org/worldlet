@@ -1,0 +1,35 @@
+/** Service presets (core/applets/INTEGRATIONS.md#service-presets): a named, saved read of one Worldlet Service, such as
+ * a PostHog HogQL query or a GitHub search over a set of repositories, kept in the person's own World so a board block
+ * (or anything else) names the preset instead of repeating the read. A preset holds only what to read: the Service's
+ * key stays in the vault (`mcp:github`, `service:<name>`) and the Service's connection keeps its own settings (PostHog's
+ * address and project, Cloudflare's account). Anything that looks like a password, token or key is refused, never kept.
+ * Hosts own the clock and storage; Core decides (core/accounts/services/presets.ts). */
+import type {ServiceOperation} from './services.ts';
+
+/** What to read: one operation of the Service's (SERVICE_ACTIONS) with the `id` or `query` it takes. Never a cursor:
+ * a preset always reads the first page. */
+export interface ServicePresetRead {operation:ServiceOperation;id?:string;query?:string}
+
+export interface ServicePreset {
+ /** Chosen by whoever saves it, so a board names it readably: lowercase letters, digits and `-`, at most 48. */
+ id:string;
+ /** What the person calls it ("Weekly signups"). */
+ name:string;
+ /** A Worldlet Service (SERVICE_PROVIDERS). */
+ provider:string;
+ read:ServicePresetRead;
+ /** One optional line on what it is for. */
+ note?:string;
+ /** ISO instants, host clock. `createdAt` stays when a preset is saved again under its ID. */
+ createdAt:string;
+ updatedAt:string;
+}
+
+export const SERVICE_PRESET_LIMITS=Object.freeze({
+ /** Presets one World keeps. */
+ presets:100,
+ id:48,name:80,note:300,
+});
+
+/** A preset as saved (`servicePresets` `save`): the host stamps the times. */
+export interface ServicePresetSave {id:string;name:string;provider:string;read:ServicePresetRead;note?:string}
