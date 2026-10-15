@@ -45,7 +45,7 @@ export function worldLinkReply(status:{state?:unknown,link?:unknown},local=''):{
  const link=typeof status?.link==='string'&&isRoomLink(status.link)?status.link:'';
  if(!link)return {error:'Worldlet could not make the browser link. Ask the person to use Copy link on the Mobile page in Worldlet.'};
  const here=isLocalWorldLink(local)?local:'';
- return {ok:true,link,opened:status.state==='paired',message:'Send the person this link, to them alone, with one line: it opens their World in any web browser, on any device, while this computer is on and Worldlet is running. Anyone who has it can see and act in their World, so never post it where others can read it. They can turn it off on the Mobile page in Worldlet.'+
+ return {ok:true,link,opened:status.state==='paired',message:'Send the person this link, to them alone, with one line: it opens their World in any web browser, on any device, while this computer is on and Worldlet is running: the full World where the device can draw it, the Attention Center and Fox on a phone or a weaker device. Anyone who has it can see and act in their World, so never post it where others can read it. They can turn it off on the Mobile page in Worldlet.'+
   (here?' localLink opens the full 3D World in a browser on this computer only (it does not work from another device); give it instead when they are at this computer.':''),...here?{localLink:here}:{}};
 }
 /** The full World's link on this computer (contracts/web-world.ts worldLink): 127.0.0.1 or localhost, /world/, a token. */

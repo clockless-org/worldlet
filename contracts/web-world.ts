@@ -143,6 +143,8 @@ export const ROOM_ALLOWED:Readonly<Record<string,true|readonly string[]>>=Object
  // The World: its snapshot, layout and presentation, its items and their history, the practice world, setup's steps.
  snapshot:true,saveOverlay:true,saveSampleUI:true,setTextScale:true,setSampleEnabled:true,worldActivity:true,uiCommand:true,worldHistory:true,worldLog:true,
  worldItemRead:true,worldItemStatus:true,taskReviewAction:true,original:true,worldWriteUndo:true,saveWorld:true,onboarding:true,usageEvent:true,reportException:true,
+ // The Center and Fox's live turn the World page hands the paired phone and browsers, sealed, as the window does.
+ phonePublish:true,
  // Fox: turns, their cloud stream, the conversation, the Task panel, Applet tasks and the Agent's permission prompts.
  agentChat:true,hermesChat:true,agentCancel:true,hermesCancel:true,agentSteer:true,hermesSteer:true,agentWarm:true,cloudRequest:true,cloudCancel:true,
  channelReply:true,foxPreferences:true,foxTiming:true,modelStatus:true,modelHealth:true,modelSource:true,taskPanel:true,foxProactive:true,foxProactiveShown:true,
