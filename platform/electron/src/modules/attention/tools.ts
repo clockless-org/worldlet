@@ -1,3 +1,4 @@
+import {AGENT_ASK_PROVIDER} from '../../../../../contracts/agent-asks.ts';
 import {core} from '../../core.ts';
 import {attentionImageURL} from '../../../../../core/attention/index.ts';
 import {WorldletError} from '../../files.ts';
@@ -71,7 +72,10 @@ export async function worldTool(center:AttentionCenter,name:string,args:Row,turn
  if(monitorProvider!==undefined&&!center.enabledCheck(monitorProvider))throw new WorldletError('This source check is paused.');
  if(name==='query_world_items'){
   const provider=monitorProvider??(typeof args.provider==='string'?args.provider:undefined);
-  const result=core('worldItemsQuery',{items:db.records('items'),checks:db.records('checks'),provider});
+  // A call outside any Fox turn (an Agent on the standing server) reads its own asks with asks/read only, never other
+  // Agents' asks through their Attention items (provider `agents`, core/agent/GRANTS.md#agent-asks).
+  const items=db.records('items').filter(item=>!(turn.startsWith('channel-')&&item.provider===AGENT_ASK_PROVIDER));
+  const result=core('worldItemsQuery',{items,checks:db.records('checks'),provider});
   if(!isRow(result))throw new WorldletError('Invalid item query result.');
   result.operations=core('runtimeOperationReport',{rows:db.records('runtime-operations'),owner:provider});
   result.workflows=core('browserWorkflowReport',{receipts:db.records('browser-actions'),items:db.records('items'),owner:provider});

@@ -77,6 +77,21 @@ export class WorldLedger {
    try{const value=JSON.parse(row.body);return value&&typeof value==='object'&&!Array.isArray(value)?[value]:[];}catch{return [];}
   });
  }
+ // Agent asks (core/agent/asks.ts, core/agent/GRANTS.md#agent-asks) ---------------------------------------
+ /** Every Agent ask's current value (`state.agent-asks`). */
+ agentAsks():Row[]{return this.records('agent-asks');}
+ /** One ask and its Attention item, saved together. The item is the host's own (provider `agents`): its status is the
+  * ask's, set by the person (`user`) or by an Agent's claim or resolve (`agent`), and its Agent the ask's. */
+ saveAgentAsk(ask:Row,item:Row,origin:'user'|'agent'){
+  this.transaction(()=>{
+   core('worldItemValidate',{item,dates:{start:null,end:null}});
+   const previous=this.value('items',item.id);
+   const prepared=core<Row>('worldItemPrepare',{item,previous:previous??{},id:item.id,identity:WorldLedger.identity(item),run:'agent-asks',now:iso(),
+    previousIdentity:previous?WorldLedger.identity(previous):'',agentId:ask.agentId});
+   prepared.status=item.status;prepared.statusOrigin=origin;
+   this.put('agent-asks',ask.id,ask);this.put('items',item.id,prepared);
+  });
+ }
  /** Identified history append; Core owns identity, so a retried (kind,key,id) adds no second row. */
  append(body:Row,key=''){
   if(!this.db||typeof body.kind!=='string'||typeof body.at!=='number')throw new WorldletError('Cannot save history event.');
