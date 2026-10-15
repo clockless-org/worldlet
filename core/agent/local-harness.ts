@@ -134,6 +134,8 @@ export interface WorldToolServer {command:string;args:string[];env:Record<string
 export const worldToolSecretInEnv=(env:Record<string,string>)=>Object.keys(env).some(key=>/TOKEN|SECRET|PASSWORD|API_?KEY/i.test(key)&&!/_FILE$/i.test(key));
 export const WORLD_TOOL_SERVER='worldlet';
 export const WORLD_GATEWAY_TOOLS=['describe_world_tools','call_world_tool'];
+/** How long a Codex turn waits for Worldlet's MCP server to start (a busy Mac starts it in seconds, not tens). */
+export const CODEX_WORLD_TOOLS_STARTUP_SECONDS=30;
 // TOML basic strings accept JSON string escapes.
 const toml=(value:string)=>JSON.stringify(value);
 
@@ -180,9 +182,14 @@ export function localHarnessInvocation(id:LocalHarnessId,turn:{system:string;pro
   // `codex exec` has no one to answer an approval prompt and cancels a tool call that would ask
   // ("user cancelled MCP tool call", openai/codex#16685, #24135); Worldlet's gateway already
   // decides permissions, so its two tools are pre-approved (codex#16632's per-tool approval_mode).
+  // Codex does not wait for an MCP server by itself: one not ready when the first model request goes out is left out of
+  // the turn, and the model answers that the tools "aren't available here" (Mac Alpha 4450/4459: an Applet analysis
+  // under load saved nothing, #602). `required` makes the turn wait for Worldlet's server, up to `startup_timeout_sec`,
+  // and fail plainly if it never starts (codexWorldToolsFailed).
   case 'codex':return {args:['exec','--json','--skip-git-repo-check','--sandbox','read-only',...model?['--model',model]:[],
    ...server?['-c',`mcp_servers.${WORLD_TOOL_SERVER}.command=${toml(server.command)}`,'-c',`mcp_servers.${WORLD_TOOL_SERVER}.args=[${server.args.map(toml).join(',')}]`,
     '-c',`mcp_servers.${WORLD_TOOL_SERVER}.env={${Object.entries(server.env).map(([key,value])=>`${key}=${toml(value)}`).join(',')}}`,'-c',`mcp_servers.${WORLD_TOOL_SERVER}.tool_timeout_sec=600`,
+    '-c',`mcp_servers.${WORLD_TOOL_SERVER}.required=true`,'-c',`mcp_servers.${WORLD_TOOL_SERVER}.startup_timeout_sec=${CODEX_WORLD_TOOLS_STARTUP_SECONDS}`,
     ...WORLD_GATEWAY_TOOLS.flatMap(name=>['-c',`mcp_servers.${WORLD_TOOL_SERVER}.tools.${name}.approval_mode="approve"`])]:[],
    '-'],stdin:combined};
   // `hermes acp` is the one interface that takes an MCP server for a single session (`session/new` `mcpServers`)
@@ -243,6 +250,12 @@ export function codexProblem(text:string):string|null {
  if(/usage limit|insufficient_quota|quota|rate.?limit|\b429\b/i.test(text))return 'Codex has reached its usage limit. Try again later, or switch its model in Settings › Agent.';
  if(/not (?:logged|signed) in|\b401\b|unauthori[sz]ed|refresh token|token (?:has )?expired|codex login/i.test(text))return 'Codex is not signed in. Open Terminal, run codex login, then try again.';
  return null;
+}
+/** Codex's own line when the required World tool server did not start ("required MCP servers failed to initialize:
+ * worldlet: timed out handshaking …"): one plain line naming why, never its stack trace. Null when the text is not that. */
+export function codexWorldToolsFailed(text:string):string|null {
+ const reason=/required MCP servers failed to initialize:\s*([^\n]*)/.exec(text)?.[1]?.replace(/\s*\(code -?\d+\)\s*$/,'').trim();
+ return reason===undefined?null:`Codex could not start Worldlet’s tools${reason?': '+clip(reason,200):''}. Try again.`;
 }
 /** The provider turned the request away because the model is busy for everyone (Codex: "Selected model is at capacity.
  * Please try a different model."; Anthropic: overloaded, 529; OpenAI's 503 Service Unavailable once Codex's own
@@ -386,7 +399,7 @@ export function finishLocalHarness(id:LocalHarnessId,state:LocalHarnessStream,ex
  const detail=exit.stderr.trim().split('\n').filter(Boolean).pop()??'';
  if(id==='openclaw'){const missing=openClawMissingKey(exit.stderr);if(missing)return {error:missing};}
  if(id==='claude-code'){const expired=claudeCodeSignInExpired(exit.stderr+'\n'+(state.final??state.text));if(expired)return {error:expired};}
- if(id==='codex'){const problem=codexProblem(exit.stderr);if(problem)return {error:problem};}
+ if(id==='codex'){const problem=codexWorldToolsFailed(exit.stderr)??codexProblem(exit.stderr);if(problem)return {error:problem};}
  if(detail)return {error:`${title} could not answer: ${clip(detail,300)}`};
  // Nothing says why: name what happened rather than guess a sign-in.
  if(exit.code===0)return {error:`${title} finished without an answer. Try again.`};

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,claudeCodeSignInExpired,codexProblem,modelAtCapacity,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
+import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,claudeCodeSignInExpired,codexProblem,codexWorldToolsFailed,modelAtCapacity,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
  type LocalHarnessId} from '../core/agent/index.ts';
 import {spawn} from 'node:child_process';
 import {openWorldToolBridge} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
@@ -75,6 +75,9 @@ const codexTools=localHarnessInvocation('codex',turn,server).args;
 assert.ok(codexTools.includes('mcp_servers.worldlet.command="C:\\\\Program Files\\\\Worldlet\\\\Worldlet.exe"'),'TOML-escaped Windows path');
 assert.ok(codexTools.includes('mcp_servers.worldlet.env={ELECTRON_RUN_AS_NODE="1",WORLDLET_MCP_TOKEN_FILE="t"}'));
 assert.ok(codexTools.includes('mcp_servers.worldlet.tools.call_world_tool.approval_mode="approve"'),'codex exec cannot answer an approval prompt, so World tools are pre-approved');
+// Codex leaves out a server not ready when it first asks the model, and the turn runs without World tools (Mac Alpha
+// 4450/4459, #602): Worldlet's is required, so the turn waits for it, and a server that never starts fails plainly.
+assert.ok(codexTools.includes('mcp_servers.worldlet.required=true')&&codexTools.includes('mcp_servers.worldlet.startup_timeout_sec=30'),'Codex waits for World tools');
 assert.equal(codexTools.at(-1),'-');
 assert.deepEqual(localHarnessInvocation('openclaw',turn).args,['agent','exec','--json','--message-file','-']);
 // OpenClaw: a configuration for this turn that includes the person's own and adds Worldlet's server; their workspace as its own.
@@ -186,6 +189,11 @@ assert.equal(codexProblem('stream error: unexpected status 401 Unauthorized'),'C
 assert.deepEqual(read('codex',[{type:'turn.failed',error:{message:'You\'ve hit your usage limit. Try again in 2 hours.'}}],1).outcome,{error:'Codex has reached its usage limit. Try again later, or switch its model in Settings › Agent.'});
 assert.deepEqual(read('codex',[],1,'Error: Not logged in. Run codex login.').outcome,{error:codexProblem('not logged in')});
 assert.equal(codexProblem('stream disconnected before completion'),null);
+// A required World tool server that never started: Codex's own reason, not the last line of its stack trace.
+const handshake='2026-10-15T18:06:06.483153Z ERROR codex_core::session: Failed to create session: required MCP servers failed to initialize: worldlet: timed out handshaking with MCP server after 29.99s\nError: thread/start: thread/start failed: error creating thread: Fatal error: Failed to initialize session: required MCP servers failed to initialize: worldlet: timed out handshaking with MCP server after 29.99s (code -32603)\n\nStack backtrace:\n   0: <unknown>\n';
+assert.equal(codexWorldToolsFailed(handshake),'Codex could not start Worldlet’s tools: worldlet: timed out handshaking with MCP server after 29.99s. Try again.');
+assert.deepEqual(read('codex',[],1,handshake).outcome,{error:codexWorldToolsFailed(handshake)},'not the last line of its stack trace');
+assert.equal(codexWorldToolsFailed('Error: Not logged in. Run codex login.'),null);
 // A model busy for everyone is told apart from the person's own limits: the turn is worth another try (#416).
 assert.equal(modelAtCapacity('Selected model is at capacity. Please try a different model.'),true);
 assert.equal(modelAtCapacity('Claude Code could not answer: API Error: 529 {"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}'),true);
