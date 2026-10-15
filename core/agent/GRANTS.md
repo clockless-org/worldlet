@@ -46,3 +46,7 @@ The `worldlet` MCP server registered in an Agent's profile (World tools on Herme
 - **Upgrading.** A Hermes Agent registered before per-Agent tokens names the profile's single `worldlet-mcp-endpoint.json`. On the first run after the upgrade, Hermes Agent becomes the `hermes` identity with the default Grants, and that file holds the same token for that run. Its registered entry is outdated, so `hermes mcp add` saves the new file's path and its gateway restarts. The old file goes on quit.
 
 `node scripts/harness-sessions-check.ts` checks the token, the files, migration, default Grants, discovery, audit and revoke against a fixture Hermes Agent.
+
+## Settings › Agent › Access
+
+The Access part of Settings › Agent ([`ui/companion/agent-access.ts`](../../ui/companion/agent-access.ts), host action `agentAccess` in `agent-runtime/index.ts`) lists each Agent, the one used most recently first. For each it shows where it runs, its last use (or when it was revoked), its active Grants in plain words, and its five newest audit entries. Revoke asks once more in the page and then calls `agentAccess` `revoke`. That stamps `revokedAt`, deletes the Agent's token hash and removes its endpoint files. The page names places in the World and what was allowed. It never shows tokens, endpoints or MCP. `node scripts/your-agent-ui-check.ts` checks the list and Revoke.

@@ -261,6 +261,8 @@ let standing:Promise<StandingWorldTools>|null=null;
 let channelTool:((name:string,args:Row,agent?:string)=>Promise<Row>)|null=null;
 /** Each Agent's identity, Grants and audit (agent-access.ts), made when the runtime is installed. */
 let agentAccess:AgentAccess|null=null;
+/** How many of each Agent's newest audit entries Settings shows. */
+const AGENT_ACCESS_AUDIT=20;
 
 /** Setup's local Agent choice (`agentHarness`): `detect` lists Harnesses installed here by ID and
  * title, never paths; `select` proves the chosen one answers before Fox switches to it, so a
@@ -544,6 +546,17 @@ export function installAgentRuntime(host:Host){
  // forward); first-run setup reads it once (`requested`) and decides (core connectRequestPlan).
  let requested=connectArgument(process.argv);
  app.on('second-instance',(_event,argv)=>{const id=connectArgument(argv);if(!id)return;requested=id;host.page.event('worldlet:connect-agent');});
+ /** Settings › Agent › Access (core/agent/GRANTS.md): each Agent with its last use, Grants and newest audit entries
+  * (`list`), or one revoked (`revoke`: its token and endpoint files go, revokedAt is stamped). */
+ host.register({agentAccess:async request=>{
+  const access=agentAccess!;
+  if(request.operation==='revoke'){
+   const id=typeof request.id==='string'?request.id:'';
+   if(!access.identity(id))throw new WorldletError('That Agent is not known here.');
+   access.revoke(id);return {ok:true};
+  }
+  return {agents:access.list(AGENT_ACCESS_AUDIT).map(({identity,grants,audit})=>({...identity,grants,audit}))};
+ }});
  host.register({agentHarness:localHarnessActions(context,switchTo,noAgent,remote,vault,()=>{const id=requested;requested=null;return id;},event=>host.page.event('worldlet:hermes-setup',event),
   async id=>{if(adapter instanceof LocalHarnessAdapter&&adapter.install.id===id)await adapter.whileStopped(async()=>{});},event=>{host.page.event('worldlet:agent-check',event);
    // The things it said the person handles most become Applets: its own conversations' (modules/tasks), and a catalog
