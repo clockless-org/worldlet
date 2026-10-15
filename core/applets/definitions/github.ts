@@ -1,5 +1,6 @@
 // App-owned identity, visual recipe and connection declaration. No credentials or user data.
 export default {
+ attention:{version:1,provider:'github',reader:'source-reader',intervalMinutes:15,freshnessMinutes:1440} as const,
   fullView:{kind:'web',url:'https://github.com/',platform:'web'},
   "id": "app-github",
   "key": "github",

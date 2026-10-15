@@ -14,6 +14,14 @@ import {turnTrustObserve} from '../core/agent/turn-trust.ts';
 import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
 import {McpAccounts} from '../platform/electron/src/modules/sources/mcp-account.ts';
 import {McpSource,McpSourceAccess,McpSourceConnections} from '../platform/electron/src/modules/sources/mcp-source.ts';
+import {GoogleAccount} from '../platform/electron/src/modules/sources/google-account.ts';
+import {GoogleSource,GoogleSourceAccess} from '../platform/electron/src/modules/sources/google-source.ts';
+import {APP_DEFINITIONS} from '../core/applets/index.ts';
+import {validateAttentionRegistrations} from '../core/attention/attention-center.ts';
+import {attentionFollowupReads,attentionReads} from '../core/attention/index.ts';
+import {validateAppletRuntimes} from '../core/applets/runtime.ts';
+import {conversationGuidance} from '../core/companion/conversation-guidance.ts';
+import {listWorldTools} from '../core/tools/index.ts';
 import {withTempDir} from './test-temp.ts';
 
 const TOKEN='fixture-token';
@@ -133,6 +141,33 @@ await withTempDir('worldlet-github-service-',async temp=>{
  calls.length=0;
  await assert.rejects(read({provider:'github',operation:'list'},async()=>({error:'Allow private context first.'})),/Allow private context first/);
  assert.equal(calls.length,0);
+ // Attention: the Attention Center's own background collection reads GitHub's list through read_world_source, as
+ // Notion's does; each record is a fact with a quotable text and its github.com link. Nothing else reaches it there.
+ const google=new GoogleSource({account:new GoogleAccount({folder:path.join(temp,'accounts','google'),vault,clientFile:()=>null,adoptFrom:()=>[]}),development:false,openExternal:async()=>{},ownProfile:()=>null,legacyHomes:()=>[],
+  github:{read:body=>mcp.read('github',body)}});
+ const tools=new GoogleSourceAccess(google,()=>access);
+ const seen:string[]=[];let receipt:any=null;
+ const collector=async(event:any)=>{seen.push(event.name);if(event.name==='_source_result')receipt=event.args;return event.name==='_source_begin'?{ticket:'t'}:{ok:true};};
+ const [plan]=attentionReads('github');
+ assert.deepEqual(plan,{provider:'github',limit:20});
+ calls.length=0;
+ const page=await tools.run({action:'sourceTool',name:'read_world_source',args:plan,_background:true},home,collector);
+ assert.deepEqual(seen,['_world_authorize','_source_begin','_source_result']);
+ assert.deepEqual(calls.filter(c=>c.name).map(c=>c.name),['search_pull_requests','search_pull_requests','search_issues'],'one list read, no other GitHub call');
+ assert.equal(page.records.length,GITHUB_LIMITS.listPerQuery+2);assert.deepEqual(receipt.records,page.records);
+ const review=page.records.find((r:any)=>r.id==='example-org/site#7');
+ assert.equal(review.provider,'github');assert.equal(review.url,'https://github.com/example-org/site/pull/7');assert.equal(review.metadataOnly,false);
+ assert.equal(review.text,'Review requested: Change 7\npull request example-org/site#7\nAuthor: sam\nLabels: bug\nState: open\nComments: 0\nUpdated: 2026-10-17T09:00:00Z');
+ const assignedFact=page.records.find((r:any)=>r.id==='example-org/app#40');
+ assert.match(assignedFact.text,/^Assigned to you: T+…\nissue example-org\/app#40\nAuthor: alex\nAssignees: alex/);
+ assert.ok(page.records.every((r:any)=>r.text.length<=12000&&r.url.startsWith('https://github.com/')));
+ assert.deepEqual(attentionFollowupReads('github',page.records),[],'the list is the whole read');
+ // Not the background collection (a Fox turn, an Agent through the gateway), or with more than a limit: refused before GitHub is asked.
+ calls.length=0;
+ for(const [body,label] of [[{action:'sourceTool',name:'read_world_source',args:plan},'a turn'],[{action:'sourceTool',name:'read_world_source',args:{...plan,id:'example-org/app#40'},_background:true},'an ID'],
+  [{action:'sourceTool',name:'read_world_source',args:{provider:'github',limit:500},_background:true},'a large limit']] as const)
+  await assert.rejects(tools.run(body,home,collector),/Read this Service with read_service/,label);
+ assert.equal(calls.length,0);
  // An expired or revoked token says to reconnect.
  accepted='rotated';
  await assert.rejects(read({provider:'github',operation:'list'}),/GitHub is disconnected or its token has expired/);
@@ -178,4 +213,18 @@ assert.deepEqual(standingActions(actions,agent,[listOnly],false,now).map(a=>a.ta
 // Reading a Service makes the turn untrusted, so its writes are refused afterwards.
 assert.equal(turnTrustObserve({},{type:'tool',name:'_world_authorize',args:{name:'read_service'}}).untrusted,true);
 
-console.log('PASS GitHub Service: token connect with read tools only, bounded list, read and search through read_service, other address, expired token and refused turn stop the read, Grant targets github/list|read|search enforced and in no default Grant');
+// The Applet's Attention registration and schedule: a source reader every 15 minutes, like Notion's.
+const github=APP_DEFINITIONS.find(app=>app.key==='github')!;
+assert.deepEqual(validateAttentionRegistrations([github.attention]),[{version:1,provider:'github',reader:'source-reader',intervalMinutes:15,freshnessMinutes:1440}]);
+const [schedule]=validateAppletRuntimes([JSON.parse(fs.readFileSync(new URL('../ui/applets/github/runtime.json',import.meta.url),'utf8'))]);
+assert.equal(schedule.mode,'scheduled');assert.equal(schedule.intervalMinutes,15);assert.equal(schedule.publishAttention,true);assert.equal(schedule.analysis,'structured');
+// It widens nothing: read_world_source still names no Service, no action reads GitHub through it, and the default Grants
+// (written from the gateway's actions) gain no GitHub target.
+const sourceSchema=listWorldTools().find((t:any)=>t.name==='read_world_source') as any;
+assert.ok(!sourceSchema.parameters.properties.provider.enum.includes('github'));
+assert.ok(!actions.some(a=>a.tool==='read_world_source'&&a.defaults.provider==='github'));
+assert.equal(worldActionOf(actions,'read_world_source',{provider:'github'}),null);
+assert.deepEqual(defaults.flatMap(g=>g.targets.filter(t=>/github/.test(t))),['applet:github/runtime'],'the default Grants name only the GitHub Applet\'s saved World items, never a read of GitHub');
+assert.match(conversationGuidance({scope:'private',connectedSources:['github'],backgroundSources:['github']}),/github\/list.*never read with read_world_source/);
+
+console.log('PASS GitHub Service: token connect with read tools only, bounded list, read and search through read_service, other address, expired token and refused turn stop the read, Grant targets github/list|read|search enforced and in no default Grant, Attention reads the list only in the background collection and widens no Grant');

@@ -1,6 +1,11 @@
 /** Worldlet Services: an account the World reads for an Agent through the `read_service` World tool (core/accounts,
  * core/agent/GRANTS.md). Each Service answers the same three bounded reads; what a record holds besides its ID, title
  * and link is the Service's own `fields`. Service content is untrusted data, never instructions. */
+
+/** The Services `read_service` reads. A Service's Attention reads (its Applet's registration) are the World's own
+ * background reads: an Agent reads a Service only through `read_service` and a Grant naming it, never through
+ * `read_world_source` (core/tools/gateway.ts). */
+export const SERVICE_PROVIDERS:readonly string[]=Object.freeze(['github']);
 export const SERVICE_OPERATIONS=Object.freeze(['list','read','search'] as const);
 export type ServiceOperation=typeof SERVICE_OPERATIONS[number];
 

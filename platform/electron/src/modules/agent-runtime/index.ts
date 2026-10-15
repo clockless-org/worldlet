@@ -96,7 +96,7 @@ export function worldSources(context:RuntimeContext,vault:VaultService,accountsH
  const openExternal=(url:string)=>context.openExternal(url);
  const mcp=new McpSource({accounts:new McpAccounts({vault,agentHomes:homes}),openExternal,reviews:path.join(context.root,'accounts','notion-reviews')});
  const account=new GoogleAccount({folder:path.join(context.root,'accounts','google'),vault,clientFile:()=>bundledResource(context.profile,'googleClient'),adoptFrom:homes});
- const google=new GoogleSource({account,development:context.development,openExternal,ownProfile:own,legacyHomes:homes,notion:{connected:()=>mcp.connected('notion'),read:body=>mcp.read('notion',body)}});
+ const google=new GoogleSource({account,development:context.development,openExternal,ownProfile:own,legacyHomes:homes,notion:{connected:()=>mcp.connected('notion'),read:body=>mcp.read('notion',body)},github:{read:body=>mcp.read('github',body)}});
  const doordash=new DoorDash({folder:path.join(context.root,'accounts','doordash'),legacyHomes:homes});
  return {google,mcp,doordash};
 }

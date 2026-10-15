@@ -32,6 +32,7 @@ export function conversationGuidance(input:{scope:string;localOriginals?:boolean
  if(input.localOriginals===true)lines.push('Local source originals can be read with content/read using source- followed by the source ID. Preserve the returned provider and sourceId as evidence identifiers.');
  if(sources.length)lines.push('This host can read connected sources for attention evidence: '+sources.join(', ')+'. A supported capability does not mean an account is connected or permission has been granted. Use the tool result to determine actual availability.');
  if(sources.includes('notion'))lines.push('Use notion/read to discover pages, then fetch exact page IDs before citing original content.');
+ if(sources.includes('github'))lines.push('Read GitHub with github/list, then github/read an exact owner/repo#123 before citing it; GitHub is never read with read_world_source.');
  if(sources.includes('gmail'))lines.push('Fetch exact Gmail thread IDs before saving findings; discovery and metadata are not evidence.');
  if(sources.includes('google-calendar'))lines.push('Calendar reads can request the next 30 days or one exact event ID.');
  if(sources.length)lines.push('At most six connected reads are allowed per turn across providers.');

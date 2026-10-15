@@ -49,6 +49,15 @@ export function normalize(provider:string,result:any){
    text=typeof original==='string'?original:'';
    metadata={metadataOnly:typeof original!=='string',partial:truthy(got(data,'partial'))||chars(text)>TEXT};
   }
+  if(provider==='github'){
+   // A Service record (contracts/services.ts): why it waits for the person, what it is and when it last changed, as
+   // plain lines a finding can quote. Its link is the record's own GitHub page.
+   const fields=got(data,'fields',{}),field=(key:string)=>{const value=got(fields,key);return typeof value==='string'||typeof value==='number'?String(value):'';};
+   text=[field('reason')?field('reason')+': '+pyStr(title):pyStr(title),[field('kind'),identifier].filter(Boolean).join(' '),
+    ...[['Author','author'],['Assignees','assignees'],['Labels','labels'],['State','state'],['Comments','comments']].filter(([,key])=>field(key)).map(([label,key])=>label+': '+field(key)),
+    ...(got(fields,'draft')===true?['Draft']:[]),...(typeof got(data,'updatedAt')==='string'?['Updated: '+data.updatedAt]:[])].join('\n');
+   url=typeof url==='string'&&url.startsWith('https://github.com/')?url:'';
+  }
   if(provider==='gmail'){
    let messages:any[]=got(got(data,'thread',{}),'messages',[data]);
    // The user's own workflow: a thread with any message in the inbox is kept there; one whose observed messages

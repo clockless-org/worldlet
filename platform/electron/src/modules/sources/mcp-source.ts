@@ -11,6 +11,7 @@ import type {McpAccounts,McpConnection} from './mcp-account.ts';
 import {McpUnauthorized} from './mcp-client.ts';
 import {validateWorldTool} from './google-source.ts';
 import {ExecutionJournal} from '../agent-runtime/journal.ts';
+import {SERVICE_PROVIDERS} from '../../../../../contracts/services.ts';
 
 /** The official endpoint each connector signs in to when none is given (hermes.ts SOURCE_ENDPOINTS). */
 export const MCP_ENDPOINTS:Readonly<Record<string,string>>=Object.freeze({notion:'https://mcp.notion.com/mcp',github:'https://api.githubcopilot.com/mcp/',linear:'https://mcp.linear.app/mcp',
@@ -18,8 +19,6 @@ export const MCP_ENDPOINTS:Readonly<Record<string,string>>=Object.freeze({notion
 const TITLES:Readonly<Record<string,string>>=Object.freeze({notion:'Notion',github:'GitHub',linear:'Linear',paypal:'PayPal',todoist:'Todoist',supabase:'Supabase'});
 const GATES:Readonly<Record<string,McpGate>>=Object.freeze({github:GITHUB_GATE,notion:NOTION_GATE,todoist:TODOIST_GATE,linear:LINEAR_GATE,paypal:PAYPAL_GATE,supabase:SUPABASE_GATE});
 export const MCP_PROVIDERS=Object.freeze(Object.keys(MCP_ENDPOINTS));
-/** The Worldlet Services `read_service` reads (contracts/services.ts), each through its MCP connection. */
-export const SERVICE_PROVIDERS:readonly string[]=Object.freeze(['github']);
 
 export interface McpSourceOptions {accounts:McpAccounts;openExternal(url:string):Promise<void>;
  /** Where Notion's reviewed writes keep their drafts (notion_writes.py's `worldlet-notion-reviews`). */
