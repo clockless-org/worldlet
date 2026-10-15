@@ -7,7 +7,7 @@ import {AGENT,ANALYTICS,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,ORDER,PHONE,RTC_
 import {WorldletError} from '../../files.ts';
 import {PHONE_LIMITS,hostAppletPlaces,threadPairs,readRemoteToHost,remoteHostInfo,phoneActionStatus,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,pairKeys,fromBase64url,sha256Hex,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../core/phone/index.ts';
 import {createPhoneRelay} from './relay.ts';
-import {createLocalRelay,serveLocalRelay} from './local-relay.ts';
+import {createLocalRelay,serveLocalRelay,type LocalServer} from './local-relay.ts';
 import {createRoomLink} from './room-link.ts';
 import {createRtcHost} from './rtc-host.ts';
 import {createRemoteAgentHost} from './remote-host.ts';
@@ -262,7 +262,7 @@ export function installPhone(host:Host){
  // with the first link and with a launch that kept one, on the port the last one used, so the browser's saved link and
  // bookmark keep working; a link made for another port is ended, since that browser storage is gone with its origin.
  const localRelay=createLocalRelay();
- let served:Promise<{origin:string}>|null=null,localOrigin='';
+ let served:Promise<LocalServer>|null=null,localOrigin='';
  const serveLocal=()=>served??=(async()=>{
   const last=host.preferences.number(LOCAL_PORT,0);
   const server=await serveLocalRelay({relay:localRelay,pageRoot:path.join(host.profile.webRoot,'open'),ports:[...new Set([last,...LOCAL_PORTS])].filter(port=>port>0)});
@@ -367,6 +367,7 @@ export function installPhone(host:Host){
   live:async value=>{if(value.done===true)finished(value);return publishLive(value);},
   // Kept when there is one, so a browser that opened it stays paired; a new one is checked quickly like Copy link's.
   worldLink:async()=>{const status=await browser.ensure();links[2].schedule(QUICK);return status;},
+  localServer:serveLocal,
  });
  host.register({
   // `kind: 'agent'` is the pairing with another Worldlet, `kind: 'web'` a browser's through the relay (another device),

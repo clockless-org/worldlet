@@ -245,6 +245,9 @@ export interface PhoneService {
  /** The browser link to this World for another device (core/phone/README.md#web, `kind: 'web'`): the one there is, or a
   * new one when there is none. The Agent's `world/link` hands it to the person; it needs no World page. */
  worldLink?():Promise<Row>;
+ /** This computer's own server on 127.0.0.1 (modules/phone/local-relay.ts), started on first use on the port it used
+  * last: a browser link on this computer, and the World page a host without a window serves there (platform/node). */
+ localServer?():Promise<import('../modules/phone/local-relay.ts').LocalServer>;
 }
 export const PHONE='phone';
 /** Opens the page that runs browsers' direct lines (modules/phone/rtc-host.ts): a hidden window in the Electron host

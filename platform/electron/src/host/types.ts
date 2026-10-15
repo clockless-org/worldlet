@@ -5,7 +5,11 @@ import type {WorldStore} from '../store/world-store.ts';
 import type {HostRequest} from '../../../../contracts/platform.ts';
 
 export type Row=Record<string,any>;
-export interface RequestContext {requestId:string;sender:WebContents}
+/** How a request reached the router: the app's World page over IPC, a World page in a web browser over its socket
+ * (host/web-page.ts), or the host itself. */
+export type RequestTransport='ipc'|'web'|'host';
+/** `sender`: the app's World page, for a request that came over IPC only. */
+export interface RequestContext {requestId:string;transport:RequestTransport;sender?:WebContents}
 export type ActionHandler=(request:HostRequest&Row,context:RequestContext)=>unknown|Promise<unknown>;
 
 /** Host → trusted World page. Mirrors the earlier native hosts' page globals and events. */

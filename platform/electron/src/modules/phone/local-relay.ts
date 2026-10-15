@@ -1,6 +1,11 @@
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
+import type {Duplex} from 'node:stream';
+import {resolveWorldFile} from '../../world/world-file.ts';
+import {acceptWebSocket,refuseUpgrade,type TextSocket} from './web-socket.ts';
+import {WORLD_PROTOCOL,WORLD_SOCKET_PATH,WORLD_TOKEN,worldTokenFrom} from '../../../../../contracts/web-world.ts';
 
 // Worldlet in a browser on this computer, served by this computer (owner decision 2026-10-13: "我们不要存，用户应该从他
 // 安装worldlet的设备直接serve"; core/phone/README.md#web). The app answers on 127.0.0.1 with the browser page (ui/web,
@@ -86,16 +91,31 @@ export function createLocalRelay({now=()=>Date.now()}:{now?:()=>number}={}){
 export type LocalRelay=ReturnType<typeof createLocalRelay>;
 
 const TYPES:Record<string,string>={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8'};
+/** What the World page loads from the interface build; anything else there (the local tools' Python) is not served. */
+const WORLD_TYPES:Record<string,string>={...TYPES,'.json':'application/json','.png':'image/png','.webp':'image/webp','.jpg':'image/jpeg','.jpeg':'image/jpeg',
+ '.gif':'image/gif','.svg':'image/svg+xml','.woff2':'font/woff2','.woff':'font/woff','.ttf':'font/ttf','.otf':'font/otf','.m4a':'audio/mp4','.mp3':'audio/mpeg',
+ '.ogg':'audio/ogg','.wav':'audio/wav','.mp4':'video/mp4','.webm':'video/webm','.wasm':'application/wasm','.riv':'application/octet-stream','.md':'text/markdown; charset=utf-8',
+ '.txt':'text/plain; charset=utf-8'};
+/** The World served to a browser on this computer (contracts/web-world.ts): the interface build at /world/ and its
+ * socket at /world/socket, which needs the World's token. */
+export interface WorldRoute {webRoot:string;token:string;accept(socket:TextSocket):void}
+/** Constant-time comparison of two tokens of any length. */
+export function sameToken(given:string,expected:string){
+ const a=crypto.createHash('sha256').update(given).digest(),b=crypto.createHash('sha256').update(expected).digest();
+ return crypto.timingSafeEqual(a,b)&&given.length===expected.length;
+}
 /** Serves the page from `pageRoot` at `/open/` and the relay at `/api/pair` on 127.0.0.1, on the first free port from
- * `ports`. Only requests addressed to this computer by name are answered (`Host` must be 127.0.0.1 or localhost on that
- * port), so a website cannot reach it through a name it points at 127.0.0.1, and no answer allows another origin to
- * read it. */
+ * `ports`, and the World once `serveWorld` gives it a route. Only requests addressed to this computer by name are
+ * answered (`Host` must be 127.0.0.1 or localhost on that port), so a website cannot reach it through a name it points at
+ * 127.0.0.1, and no answer allows another origin to read it. The World's socket also needs the page's own origin and
+ * the World's token. */
 export async function serveLocalRelay({relay,pageRoot,ports}:{relay:LocalRelay,pageRoot:string,ports:number[]}){
- let port=0;
+ let port=0,world:WorldRoute|null=null,worldRoot:{from:string,root:string}|null=null;
  const server=http.createServer((req,res)=>void answer(req,res).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();}));
+ const named=(host:string)=>host===`127.0.0.1:${port}`||host===`localhost:${port}`;
  async function answer(req:http.IncomingMessage,res:http.ServerResponse){
   const host=String(req.headers.host||'');
-  if(host!==`127.0.0.1:${port}`&&host!==`localhost:${port}`){res.writeHead(421).end();return;}
+  if(!named(host)){res.writeHead(421).end();return;}
   const url=new URL(req.url||'/',`http://${host}`);
   if(url.pathname.startsWith('/api/pair')){
    const chunks:Buffer[]=[];let size=0;
@@ -106,6 +126,7 @@ export async function serveLocalRelay({relay,pageRoot,ports}:{relay:LocalRelay,p
    res.writeHead(response.status,Object.fromEntries(response.headers));res.end(Buffer.from(await response.arrayBuffer()));
    return;
   }
+  if(world&&(url.pathname==='/world'||url.pathname.startsWith('/world/')))return answerWorld(world,url,req,res);
   if(url.pathname==='/'||url.pathname==='/open'){res.writeHead(302,{Location:'/open/'}).end();return;}
   const file=url.pathname==='/open/'?'index.html':url.pathname.startsWith('/open/')?url.pathname.slice(6):'';
   if(!file||!/^[a-z0-9.-]+$/i.test(file)||!TYPES[path.extname(file)]){res.writeHead(404).end();return;}
@@ -114,6 +135,35 @@ export async function serveLocalRelay({relay,pageRoot,ports}:{relay:LocalRelay,p
    'Content-Security-Policy':"default-src 'self'; img-src 'self' data:; frame-ancestors 'none'"});
   res.end(data);
  }
+ // The interface build, read-only: GET and HEAD, files inside it after resolving links, types the page loads. The page
+ // keeps its own Content-Security-Policy (a meta tag); the answer adds that no other site may frame it.
+ async function answerWorld(route:WorldRoute,url:URL,req:http.IncomingMessage,res:http.ServerResponse){
+  if(req.method!=='GET'&&req.method!=='HEAD'){res.writeHead(405,{Allow:'GET, HEAD'}).end();return;}
+  if(url.pathname==='/world'){res.writeHead(302,{Location:'/world/'}).end();return;}
+  if(worldRoot?.from!==route.webRoot){try{worldRoot={from:route.webRoot,root:await fs.promises.realpath(route.webRoot)};}catch{res.writeHead(404).end();return;}}
+  const file=await resolveWorldFile(worldRoot.root,url.pathname.slice('/world'.length));
+  const type=file&&WORLD_TYPES[path.extname(file).toLowerCase()];
+  if(!file||!type){res.writeHead(404).end();return;}
+  const stat=await fs.promises.stat(file);
+  res.writeHead(200,{'Content-Type':type,'Content-Length':stat.size,'Cache-Control':'no-cache','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer',
+   'Cross-Origin-Resource-Policy':'same-origin',...(type.startsWith('text/html')?{'Content-Security-Policy':"frame-ancestors 'none'"}:{})});
+  if(req.method==='HEAD'){res.end();return;}
+  fs.createReadStream(file).on('error',()=>res.destroy()).pipe(res);
+ }
+ // The World's socket: this computer by name, the page's own origin, and the token as a subprotocol.
+ server.on('upgrade',(req:http.IncomingMessage,socket:Duplex,head:Buffer)=>{
+  socket.on('error',()=>socket.destroy());
+  const host=String(req.headers.host||'');
+  if(!named(host))return refuseUpgrade(socket,421,'Misdirected Request');
+  const url=new URL(req.url||'/',`http://${host}`);
+  if(!world||url.pathname!==WORLD_SOCKET_PATH)return refuseUpgrade(socket,404,'Not Found');
+  const origin=String(req.headers.origin||'');
+  if(origin!==`http://127.0.0.1:${port}`&&origin!==`http://localhost:${port}`)return refuseUpgrade(socket,403,'Forbidden');
+  const token=worldTokenFrom(String(req.headers['sec-websocket-protocol']||''));
+  if(!token||!sameToken(token,world.token))return refuseUpgrade(socket,401,'Unauthorized');
+  const page=acceptWebSocket(req,socket,head,WORLD_PROTOCOL);
+  if(page)world.accept(page);
+ });
  for(const candidate of ports){
   const ok=await new Promise<boolean>(resolve=>{
    const failed=()=>{server.off('listening',listening);resolve(false);},listening=()=>{server.off('error',failed);resolve(true);};
@@ -122,5 +172,9 @@ export async function serveLocalRelay({relay,pageRoot,ports}:{relay:LocalRelay,p
   if(ok){port=(server.address() as {port:number}).port;break;}
  }
  if(!port)throw new Error('No free port on this computer for Worldlet in a browser.');
- return {origin:`http://127.0.0.1:${port}`,port,close:()=>new Promise<void>(resolve=>server.close(()=>resolve()))};
+ return {origin:`http://127.0.0.1:${port}`,port,
+  /** Serves the World at /world/ from now on; its token must be 32 random bytes (contracts/web-world.ts). */
+  serveWorld(route:WorldRoute){if(!WORLD_TOKEN.test(route.token))throw new Error('The World needs a 32-byte token.');world=route;},
+  close:()=>new Promise<void>(resolve=>server.close(()=>resolve()))};
 }
+export type LocalServer=Awaited<ReturnType<typeof serveLocalRelay>>;
