@@ -32,3 +32,17 @@ Each decision becomes one `AgentAuditEntry` (`at`, `agentId`, `target`, `action`
 ## Who saved what
 
 World items, artifacts and the Attention items built from them carry an optional `agentId`: the Agent that saved them. Hosts stamp it from the token that made the call (`prepareWorldItem` and `mergeArtifact` take it as an argument). A model never sets it: an `agentId` in what a model sends is dropped, and a saved record keeps the Agent that first saved it.
+
+## The standing MCP server
+
+The `worldlet` MCP server registered in an Agent's profile (World tools on Hermes, [PORTABILITY.md](PORTABILITY.md#world-tools-on-hermes)) is where Grants are enforced, on the Electron host and the [Node host](../../platform/node/README.md) alike (`agent-runtime/world-tool-bridge.ts`, `agent-runtime/agent-access.ts`):
+
+- **Its own token and endpoint file.** Each run, each Agent gets a new token, written with the endpoint to `worldlet-mcp-endpoint.<agentId>.json` in its profile (owner-only, removed on quit). Only the token's SHA-256 hash is kept, in the vault (`agent-token:<agentId>`); a call is identified by its token, and an unknown token is answered as if Worldlet were closed. Identities and Grants are kept with Fox's setup choices (`agent_settings`, `agent-access`), so they follow the World and its backups.
+- **Default Grants.** An Agent's default Grants are what a call outside any Fox turn could do before Grants existed (`HERMES_CHANNEL_TOOLS` in [`hermes-server.ts`](hermes-server.ts)): a standing `read` Grant for reads and a draft for the person's review, and a standing `write` Grant for `world/link`. They are written again each run so new Applet sources are covered (`channelDefaultGrants`).
+- **Calls.** Outside any Fox turn, a call is a turn of its own that starts untrusted (except the browser link), so the turn rule refuses its writes first. Any refusal but a revoked Agent's says what a channel may do (`HERMES_CHANNEL_READ_ONLY`). `channelToolReply` (Fox's module) checks the same Grants again before it runs anything. While a Fox turn holds the server, that Agent's calls go to the turn as before (`foxTurnGrant`): reads run, a write the turn's own stream announced runs, and any other write goes to the approval card, which names the Agent (`asked`) (`standingCallDecision`).
+- **Discovery.** `describe_world_tools` lists only the targets the Agent's Grants name (`standingActions`).
+- **Audit.** Every call's decision is appended to the ledger as `agent.audit`, keyed by the Agent, and only its newest `AGENT_AUDIT_KEEP` entries stay. Last use is stamped on the identity at most once a minute.
+- **Revoke.** Revoking an Agent stamps `revokedAt` on it and its Grants, deletes its token hash and removes its endpoint files, so its registered server answers that Worldlet is not open. It stays revoked across runs.
+- **Upgrading.** A Hermes Agent registered before per-Agent tokens names the profile's single `worldlet-mcp-endpoint.json`. On the first run after the upgrade, Hermes Agent becomes the `hermes` identity with the default Grants, and that file holds the same token for that run. Its registered entry is outdated, so `hermes mcp add` saves the new file's path and its gateway restarts. The old file goes on quit.
+
+`node scripts/harness-sessions-check.ts` checks the token, the files, migration, default Grants, discovery, audit and revoke against a fixture Hermes Agent.

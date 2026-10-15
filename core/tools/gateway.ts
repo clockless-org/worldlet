@@ -135,6 +135,18 @@ export function describeActions(actions:WorldAction[],target='',action=''){
  const found=matches.find(a=>a.action===action);
  return found?{target,action,description:found.description,parameters:found.parameters,requiresPrivateContext:!found.public}:{error:'Unknown action for this target.'};
 }
+/** The actions one Agent may reach (core/agent/GRANTS.md): `covers` is its Grants' answer for a target and action.
+ * `describe_world_tools` lists only these, so an Agent never discovers a target no Grant names. */
+export function grantedActions(actions:WorldAction[],covers:(target:string,action:string)=>boolean):WorldAction[]{
+ return actions.filter(a=>covers(a.target,a.action));
+}
+/** The target and action a resolved call came from: the first action of that tool whose fixed routing fields match the
+ * arguments, a base target before its Applet alias. Null when no action resolves to it (a Hermes-internal event). */
+export function worldActionOf(actions:WorldAction[],tool:string,args:Record<string,unknown>={}):{target:string;action:string}|null{
+ const matches=actions.filter(a=>a.tool===tool&&Object.keys(a.defaults).every(key=>args?.[key]===a.defaults[key]));
+ const found=matches.find(a=>!a.target.startsWith('applet:'))??matches[0];
+ return found?{target:found.target,action:found.action}:null;
+}
 export function resolveAction(actions:WorldAction[],target,action,args){
  const found=actions.find(a=>a.target===target&&a.action===action);
  if(!found)throw Error('Unknown target or action. Discover capabilities first.');

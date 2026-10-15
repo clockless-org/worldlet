@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant} from '../core/agent/grants.ts';
+import {AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,worldCallWrites} from '../core/agent/grants.ts';
+import {HERMES_CHANNEL_READ_ONLY,hermesChannelToolAllowed} from '../core/agent/hermes-server.ts';
+import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
 import {turnWriteAdmission,writeDecision} from '../core/agent/turn-trust.ts';
 import {prepareWorldItem} from '../core/items/world-item-state.ts';
 import {mergeArtifact,readArtifact} from '../core/artifacts/artifacts.ts';
@@ -89,4 +91,37 @@ assert.equal(mergeArtifact(undefined,answer,2).agentId,undefined,'a model-suppli
 assert.equal(mergeArtifact(undefined,answer,2,'hermes').agentId,'hermes');
 assert.equal(mergeArtifact({...answer,agentId:'pi'},answer,2).agentId,'pi');
 
-console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId.');
+// The standing MCP server: today's channel allowlist is each Agent's default Grants, so behaviour stays the same.
+const actions=worldActions(),defaults=channelDefaultGrants('hermes',earlier,actions);
+assert.deepEqual(defaults.map(g=>[g.id,g.access,g.duration]),[['hermes-channel-read','read','standing'],['hermes-channel-link','write','standing']]);
+assert.deepEqual(defaults[1].targets,['world/link']);
+const standing=(target:string,action:string,args:Record<string,unknown>={},foxTurn:{own:boolean}|null=null,identity:AgentIdentity=hermes)=>{
+ const resolved=resolveAction(actions,target,action,args);
+ return standingCallDecision({identity,grants:defaults,target,action,tool:resolved.name,args:resolved.args,foxTurn,now});
+};
+// Every gateway action decides as hermesChannelToolAllowed did, outside a Fox turn.
+for(const a of actions){
+ const args={...a.defaults};
+ const before=hermesChannelToolAllowed({name:a.tool,args})&&(a.tool==='share_world_link'||!worldCallWrites(a.tool,args));
+ assert.equal(standing(a.target,a.action).decision==='allowed',before,a.target+'/'+a.action);
+}
+assert.deepEqual(standing('items','update',{id:'a',status:'done'}),{decision:'denied',reason:HERMES_CHANNEL_READ_ONLY},'a write no Grant allows says what a channel may do');
+assert.equal(standing('world','link').decision,'allowed','the browser link from a channel');
+assert.equal(standing('items','query',{},null,{...hermes,revokedAt:earlier}).reason,GRANT_REASONS.revoked);
+// In a Fox turn the turn takes its Agent's calls: reads run, its own writes run, another write asks the person.
+assert.equal(standing('content','read',{id:'x'},{own:false}).decision,'allowed');
+assert.equal(standing('items','update',{id:'a',status:'done'},{own:true}).decision,'allowed');
+assert.equal(standing('items','update',{id:'a',status:'done'},{own:false}).decision,'asked');
+assert.equal(worldCallWrites('start_applet_task'),true);assert.equal(worldCallWrites('query_world_items'),false);
+// describe_world_tools: only granted targets outside a turn; everything while a Fox turn holds the server; none revoked.
+const listed=new Set(standingActions(actions,hermes,defaults,false,now).map(a=>a.target));
+assert.ok(listed.has('items')&&listed.has('world')&&!listed.has('content'));
+assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.length);
+assert.deepEqual(standingActions(actions,{...hermes,revokedAt:earlier},defaults,true,now),[]);
+// A resolved call maps back to its target and action (channelToolReply checks Grants by them).
+assert.deepEqual(worldActionOf(actions,'query_world_items',{}),{target:'items',action:'query'});
+assert.deepEqual(worldActionOf(actions,'share_world_link',{}),{target:'world',action:'link'});
+assert.deepEqual(worldActionOf(actions,'read_world_source',{provider:'gmail'}),{target:'gmail',action:'read'});
+assert.equal(worldActionOf(actions,'_source_begin',{}),null);
+
+console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server.');

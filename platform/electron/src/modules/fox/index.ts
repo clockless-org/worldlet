@@ -28,8 +28,9 @@ import {createHarnessConnections} from './harness-connections.ts';
 import {createHarnessControls} from './harness-controls.ts';
 import {WORLD_APPS,MOMENT_MAKER} from '../../../../../core/applets/index.ts';
 import {diagnosticError} from '../../../../../core/diagnostics/index.ts';
-import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,hermesChannelTrust,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,reduceAgentResponse,routineScheduleResult,worldSinceNote,type MigrationSource} from '../../../../../core/agent/index.ts';
+import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,hermesChannelTrust,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,reduceAgentResponse,routineScheduleResult,standingCallDecision,worldSinceNote,type MigrationSource} from '../../../../../core/agent/index.ts';
 import {worldLogKeeps} from '../../../../../core/activity/index.ts';
+import {worldActionOf,worldActions} from '../../../../../core/tools/index.ts';
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
 import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../core/artifacts/index.ts';
 import {phoneApprovalPush,phoneFoxPush,phoneLive,worldLinkReply} from '../../../../../core/phone/index.ts';
@@ -468,14 +469,22 @@ export function installFox(host:Host){
   * refuses guarded writes, and it runs only reads and a draft for the person's review (core hermesChannelToolAllowed;
   * a prepared email waits as a card, sent only from its review). The one exception is the World's browser link
   * (`share_world_link`, owner decision 2026-10-15): its turn starts trusted (core hermesChannelTrust), so it runs.
-  * Anything else is refused with the reason; the World page runs no tools for it, since nobody there asked. */
- async function channelToolReply(name:string,args:Row):Promise<Row> {
+  * Anything else is refused with the reason; the World page runs no tools for it, since nobody there asked. What a
+  * channel may do is the calling Agent's Grants (core/agent/GRANTS.md; its default Grants are the list above), decided
+  * on the standing server and again here. */
+ async function channelToolReply(name:string,args:Row,agentId?:string):Promise<Row> {
   const id='channel-'+crypto.randomUUID().toUpperCase(),scope={sample:false,setup:false};
   trusts.set(id,hermesChannelTrust({name}));
   const handle=turnEvents(id,scope,{active:()=>true,allowActions:false,reads:hermesChannelToolAllowed,record:false});
   try{
    if(store.sampleEnabled()||!store.writable||store.state.cloudConsent!==true||onboardingUnfinished(store.state.onboarding))return {error:'Worldlet is not ready for this yet: the person has not finished setting up their own World.'};
-   if(!hermesChannelToolAllowed({name,args}))return {error:HERMES_CHANNEL_READ_ONLY};
+   const access=agent()?.agentAccess?.()??null;
+   if(!access&&!hermesChannelToolAllowed({name,args}))return {error:HERMES_CHANNEL_READ_ONLY};
+   if(access){
+    const at=worldActionOf(worldActions(),name,args),identity=agentId?access.identity(agentId):null;
+    const decision=at?standingCallDecision({identity,grants:identity?access.grants(identity.id):[],target:at.target,action:at.action,tool:name,args,foxTurn:null,now:new Date().toISOString()}):null;
+    if(decision?.decision!=='allowed')return {error:decision?.reason||HERMES_CHANNEL_READ_ONLY};
+   }
    const event={type:'tool',id:'world-1',name,args},served=await trustedServiceReply(event,id,scope)??await accountServiceReply(event,id,scope,handle);
    return served??{error:'This World tool works only in a conversation with Fox in Worldlet.'};
   }catch(error){

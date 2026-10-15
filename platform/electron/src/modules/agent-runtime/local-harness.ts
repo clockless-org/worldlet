@@ -581,7 +581,8 @@ export class LocalHarnessRuntime implements AgentRuntime {
   * hermesStandingWriteApproval): Allow once runs it as the turn's tool (null), Deny, a timeout or the turn ending
   * refuses it. With no one to ask (background work, setup) it is refused like a call from another channel. */
  private async confirmWrite(name:string,args:Row,call:McpCall,own:HermesOwnCalls,emit:(event:Row)=>Promise<unknown>,hold:<T>(work:Promise<T>)=>Promise<T>,asks:boolean,thread:unknown,agent:string|null):Promise<Row|null> {
-  const ask=hermesStandingWriteApproval(name,args,this.install.title);
+  // The card names the Agent whose token made the call (core/agent/GRANTS.md).
+  const ask=hermesStandingWriteApproval(name,args,call.agent?.name||this.install.title);
   if(!ask||await own.take(call))return null;
   if(!asks||!this.approvals)return {error:HERMES_CHANNEL_READ_ONLY};
   const {id,answered}=this.approvals.ask();this.asking.push(id);

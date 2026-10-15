@@ -64,6 +64,19 @@ export class WorldLedger {
   if(!this.db||!kind||kind.length>64)return false;
   try{this.run('INSERT INTO entries(at,kind,key,body) VALUES(?,?,?,?)',at,kind,key,stableJSON(body));return true;}catch{return false;}
  }
+ /** One Agent's audit entry (`agent.audit`, core/agent/GRANTS.md), keyed by its Agent; only its newest `keep` stay. */
+ recordAgentAudit(entry:Row,keep:number):boolean {
+  const agent=typeof entry.agentId==='string'?entry.agentId:'';
+  if(!agent||!this.record('agent.audit',agent,entry))return false;
+  try{this.run("DELETE FROM entries WHERE kind='agent.audit' AND key=? AND seq NOT IN (SELECT seq FROM entries WHERE kind='agent.audit' AND key=? ORDER BY seq DESC LIMIT ?)",agent,agent,Math.max(1,keep));}catch{}
+  return true;
+ }
+ /** One Agent's newest audit entries, newest first. */
+ agentAudit(agent:string,limit=50):Row[] {
+  return this.all("SELECT body FROM entries WHERE kind='agent.audit' AND key=? ORDER BY seq DESC LIMIT ?",agent,Math.max(1,Math.min(500,limit))).flatMap(row=>{
+   try{const value=JSON.parse(row.body);return value&&typeof value==='object'&&!Array.isArray(value)?[value]:[];}catch{return [];}
+  });
+ }
  /** Identified history append; Core owns identity, so a retried (kind,key,id) adds no second row. */
  append(body:Row,key=''){
   if(!this.db||typeof body.kind!=='string'||typeof body.at!=='number')throw new WorldletError('Cannot save history event.');
