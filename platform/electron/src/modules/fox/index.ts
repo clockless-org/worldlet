@@ -28,7 +28,7 @@ import {createHarnessConnections} from './harness-connections.ts';
 import {createHarnessControls} from './harness-controls.ts';
 import {WORLD_APPS,MOMENT_MAKER} from '../../../../../core/applets/index.ts';
 import {diagnosticError} from '../../../../../core/diagnostics/index.ts';
-import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,reduceAgentResponse,routineScheduleResult,worldSinceNote,type MigrationSource} from '../../../../../core/agent/index.ts';
+import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,hermesChannelTrust,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,reduceAgentResponse,routineScheduleResult,worldSinceNote,type MigrationSource} from '../../../../../core/agent/index.ts';
 import {worldLogKeeps} from '../../../../../core/activity/index.ts';
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
 import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../core/artifacts/index.ts';
@@ -466,11 +466,12 @@ export function installFox(host:Host){
  /** A World tool call from another Hermes channel, outside any Fox turn (World tools on Hermes, owner decision 2026-10-08
   * 19:15Z: Telegram, the phone, a Hermes cron run): a turn of its own in the private World that starts untrusted, so Core
   * refuses guarded writes, and it runs only reads and a draft for the person's review (core hermesChannelToolAllowed;
-  * a prepared email waits as a card, sent only from its review). Anything else is refused with the reason; the World
-  * page runs no tools for it, since nobody there asked. */
+  * a prepared email waits as a card, sent only from its review). The one exception is the World's browser link
+  * (`share_world_link`, owner decision 2026-10-15): its turn starts trusted (core hermesChannelTrust), so it runs.
+  * Anything else is refused with the reason; the World page runs no tools for it, since nobody there asked. */
  async function channelToolReply(name:string,args:Row):Promise<Row> {
   const id='channel-'+crypto.randomUUID().toUpperCase(),scope={sample:false,setup:false};
-  trusts.set(id,{untrusted:true,sources:['hermes_channel']});
+  trusts.set(id,hermesChannelTrust({name}));
   const handle=turnEvents(id,scope,{active:()=>true,allowActions:false,reads:hermesChannelToolAllowed,record:false});
   try{
    if(store.sampleEnabled()||!store.writable||store.state.cloudConsent!==true||onboardingUnfinished(store.state.onboarding))return {error:'Worldlet is not ready for this yet: the person has not finished setting up their own World.'};
