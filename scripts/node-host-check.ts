@@ -73,9 +73,10 @@ await withTempDir('worldlet-node-host-',async temp=>{
  assert.ok(!fs.existsSync(path.join(os.tmpdir(),'worldlet-contract-'+contract.pid)),'its temporary library is removed');
  console.log(`PASS node host contract: ${report.actions.length} actions, services ${report.services.join(',')}`);
 
- // Boots, writes the browser link, stops on SIGTERM.
- const boot=async()=>{
-  const child=spawn(process.execPath,[host],{cwd:temp,env,stdio:['ignore','pipe','pipe']});
+ // Boots, writes the browser link and stops cleanly: on SIGTERM (POSIX), or on the stop message over its IPC channel,
+ // which is how it is stopped on Windows, where SIGTERM ends a process at once without running its handler.
+ const boot=async(stop:'signal'|'message')=>{
+  const child=spawn(process.execPath,[host],{cwd:temp,env,stdio:['ignore','pipe','pipe',...stop==='message'?['ipc' as const]:[]]});
   let out='',err='';
   child.stdout.on('data',chunk=>{out+=chunk;});child.stderr.on('data',chunk=>{err+=chunk;});
   const exited=new Promise<number|null>(resolve=>child.on('exit',code=>resolve(code)));
@@ -86,14 +87,15 @@ await withTempDir('worldlet-node-host-',async temp=>{
   assert.match(out,/worldlet: World ready at http:\/\/127\.0\.0\.1:\d+\/world\/ \(its link is in .*world-link\.txt\)/,'says where the World link is: '+err.slice(-400));
   assert.ok(!/#t=/.test(out),'never prints the World link, which carries its token');
   assert.ok(!/https:\/\/relay\.example\.com\/open\/#/.test(out),'never prints the link, which carries its secret');
-  child.kill('SIGTERM');
+  if(stop==='signal')child.kill('SIGTERM');else child.send({type:'worldlet:stop'});
   const code=await Promise.race([exited,new Promise<'hung'>(resolve=>setTimeout(()=>resolve('hung'),20_000))]);
   if(code==='hung')child.kill('SIGKILL');
-  assert.equal(code,0,'stops cleanly on SIGTERM: '+err.slice(-400));
+  assert.equal(code,0,(stop==='signal'?'stops cleanly on SIGTERM: ':'stops cleanly on the stop message: ')+err.slice(-400));
   assert.match(out,/worldlet: stopped/);
   return out;
  };
- const first=await boot();
+ // POSIX proves both stops; Windows has only the message (its SIGTERM is TerminateProcess).
+ const first=await boot(process.platform==='win32'?'message':'signal');
  const file=path.join(library,'room-link.txt'),link=fs.readFileSync(file,'utf8').trim();
  assert.match(link,/^https:\/\/relay\.example\.com\/open\/#/,'the file holds the link');
  assert.ok(!first.includes(link.slice(link.indexOf('#')+1)),'and stdout does not');
@@ -106,10 +108,10 @@ await withTempDir('worldlet-node-host-',async temp=>{
  assert.match(world,/^http:\/\/127\.0\.0\.1:\d+\/world\/#t=[A-Za-z0-9_-]{43}$/,'the World link: this computer, a 32-byte token in the fragment');
  if(process.platform!=='win32')assert.equal(mode(worldFile),0o600,'the World link is owner-only');
  assert.ok(!fs.readFileSync(path.join(library,'vault.json'),'utf8').includes(worldLinkToken(new URL(world).hash)),'the vault holds the token sealed');
- await boot();
+ await boot('message');
  assert.equal(fs.readFileSync(file,'utf8').trim(),link,'a restart keeps the same link');
  assert.equal(fs.readFileSync(worldFile,'utf8').trim(),world,'and the same World link');
- console.log('PASS node host: boots with no window, writes the browser link and the World link, keeps them across a restart and stops on SIGTERM');
+ console.log('PASS node host: boots with no window, writes the browser link and the World link, keeps them across a restart and stops cleanly on SIGTERM (POSIX) and on the stop message over IPC (every platform, the only clean stop on Windows)');
 
  // The World in a browser on this computer, on a library that finished setup and holds one item.
  const seeded=path.join(temp,'seeded'),title='Renew the library card';

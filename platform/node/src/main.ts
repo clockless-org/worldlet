@@ -135,12 +135,18 @@ function shutdown(code:number){
   await withDeadline(endStrayChildren(process.platform,[]),5000);
   log('stopped');
   process.exitCode=code;
+  // A parent's IPC channel would otherwise keep the process running.
+  process.disconnect?.();
   // Timers and sockets the modules keep must not hold the process once quit work is done.
   setTimeout(()=>process.exit(code),200).unref();
  })();
 }
 process.on('SIGTERM',()=>shutdown(0));
 process.on('SIGINT',()=>shutdown(0));
+/** The stop that works everywhere: on Windows a SIGTERM ends a process at once, with no handler run, so a parent that
+ * started this host with an IPC channel (a service wrapper, the check) sends this message instead. */
+const STOP_MESSAGE='worldlet:stop';
+process.on('message',message=>{if(message&&typeof message==='object'&&(message as {type?:unknown}).type===STOP_MESSAGE)shutdown(0);});
 app.on('quit-requested',()=>shutdown(0));
 
 each(startedListeners,'hostStarted');
