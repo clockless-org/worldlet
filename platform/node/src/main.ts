@@ -194,9 +194,11 @@ serveWorld().catch(error=>{diagnostics.record(error,'worldWeb');log('World page 
 
 /** The `worldlet` command line (control.ts): answers go only to the asker, never to this host's log. */
 const setupDone=()=>store.state.cloudConsent===true&&!onboardingUnfinished(store.state.onboarding);
-const NOT_SET_UP='The person has not finished setup yet: World tools answer only after they open the World (its link is in '+WORLD_LINK_FILE+' in the library) and finish setup there.';
+const NOT_SET_UP='The person has not finished setup yet: World tools answer only after they open the World (worldlet link --local prints its link) and finish setup there.';
 async function answer(request:ControlRequest):Promise<ControlReply> {
  if(request.command==='link'){
+  // Only the owner-only control socket returns this existing local window link; no new token or pairing.
+  if(request.local)return {lines:[await serveWorld()]};
   const status=await host.use<PhoneService>(PHONE).worldLink?.() as {link?:string}|undefined;
   if(!status?.link)throw Error('No browser link was made.');
   return {lines:[status.link]};

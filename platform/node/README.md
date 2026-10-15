@@ -91,12 +91,23 @@ answers on its control socket says so and exits with code 1.
 | Command | What it does |
 | --- | --- |
 | `status` | The version and library, Fox's Agent, whether the person finished setup, the browser link's state (never the link) and the Agents registered from the MCP home |
+| `link --local` | Prints the existing local World link (`world-link.txt`) for setup, Service connections and Agent access; use a browser on this computer or forward the same port over SSH |
 | `link [--qr]` | Prints the browser link (`world/link`'s, the one in `room-link.txt`), with `--qr` also its QR code; anyone who has it reaches this World, so it is for the person alone |
 | `setup --agent <id>` | Chooses the Agent Fox talks through with setup's own `agentHarness` `select` (it proves the Agent answers first; Codex alone is no Agent for Fox), then registers Claude Code or Codex as below |
 | `register --agent <id>` | Registers the `worldlet` MCP server and skill in `claude-code` or `codex`. Hermes Agent gets its entry in its own profile once it is Fox's Agent ([World tools on Hermes](../../core/agent/PORTABILITY.md#world-tools-on-hermes)) |
 
 Neither command gives consent or finishes onboarding: World tools on the standing server keep answering that the person
 has not finished setting up until they do so in the World, as in the desktop app.
+
+## First setup on your own server
+
+The owner is the OS account running the service. On that computer, run `worldlet status`, then `worldlet link --local` and open the returned link in a browser. The command reads the running host through its owner-only control socket and returns the existing local-window token; it does not create a new pairing, grant consent or finish setup. Use the same `WORLDLET_PROFILE_ROOT` as the service when a custom library was chosen.
+
+On a server without a browser, run those commands over your existing SSH connection. Forward the port printed in the link, with the same port on both sides (for example `ssh -N -L 47630:127.0.0.1:47630 <server>`), then open the link on your own computer. Keep the `127.0.0.1` address and token fragment; do not replace it with the server's public address or bind Worldlet to a public interface. If the port is occupied locally, resolve that before opening the link: the existing Host and Origin checks expect the same port.
+
+Finish setup and choose the Services and Agent grants in that local window. `setup --agent` selects/registers an Agent but does not approve access to your data. `link` without `--local` continues to return the paired remote window, where connection settings and Agent grant changes are intentionally unavailable. Both links are private bearer capabilities, not links to share with other Agents; Agents use their own MCP tokens and grants. `--local` prints its secret only to the command's stdout, never the service log, so run it in your private terminal rather than a shared job log.
+
+The library holds the World and vault; the install directory holds replaceable program files. Keep one host responsible for a library. A desktop vault cannot simply be copied to this Node host. This local-window path needs no hosted World or functioning room relay; using a paired remote window still depends on the configured relay and its World bundle.
 
 ## One fixed MCP home
 
