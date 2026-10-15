@@ -111,6 +111,21 @@ await withTempDir('worldlet-board-',async dir=>{
   assert.equal(person.view.tabs[0].blocks[0].status,'ok');
   assert.ok(!('untrustedContent' in person));
 
+  // The person's read warmed the shared cache. An Agent still needs its own Service grant on every call,
+  // including immediately after revocation; a board grant does not admit cached records or provider errors.
+  const countBeforeRevocation=asked.length;
+  assert.ok(access.ungrantService('claude-code','posthog'));
+  const revoked=await claude('read',{tab:'growth'});
+  assert.ok(revoked.view.tabs[0].blocks.every((block:any)=>block.status==='error'&&!('number' in block)&&!('funnel' in block)));
+  assert.match(revoked.view.tabs[0].blocks[0].error,/may not read this Service/);
+  assert.equal(asked.length,countBeforeRevocation,'revoked Service is neither read nor taken from cache');
+  assert.ok(access.grantBoard('hermes','read'));
+  const other=await hermes('read');
+  assert.ok(other.view.tabs.flatMap((tab:any)=>tab.blocks).every((block:any)=>block.status==='error'&&/may not read this Service/.test(block.error)));
+  assert.ok(!JSON.stringify(other.view).includes('Fix the build')&&!JSON.stringify(other.view).includes('token has expired'),'no cached record text or provider failure details for a different Agent');
+  assert.equal(asked.length,countBeforeRevocation,'a different Agent cannot reuse the person’s cache without Service grants');
+  assert.ok(access.ungrantBoard('hermes','read'));
+
   // Hermes Agent with no Grant is refused; taking a Grant back refuses the next call; revoking refuses everything.
   assert.equal((await hermes('read')).error.length>0,true);
   assert.ok(access.ungrantBoard('claude-code','read'));
