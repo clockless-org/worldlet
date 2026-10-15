@@ -158,7 +158,7 @@ python3 -m http.server 8787 --bind 127.0.0.1
 
 Open `/output/applet-scene-preview/`. Select a scene or click a gallery image to inspect its HTML composition. Toggle **Background only** to compare the blank plate and **Registration guides** to inspect the usable region. Calendar week navigation, Mail selection/reply drafts, editable Notes, and adding/completing Reminders or shopping items work locally for review. Other application controls are explicitly illustrative. The narrow view is a scaled artwork review, not a production mobile interface.
 
-Export all 40 pictures with `node scripts/applet-scene-mockups.ts`; verify saved pictures with `node scripts/applet-scene-mockups.ts --check`. The exporter verifies image loads and primary-region overflow before writing its manifest.
+Export all 40 pictures with `node scripts/applet-scene-mockups.ts`; verify saved pictures with `node scripts/applet-scene-mockups.ts --check`. The exporter verifies image loads and primary-region overflow before writing its manifest. Pass `--viewport=1500x844` to capture that desktop size; the manifest records the chosen viewport and the checker verifies each image against it. The default remains 1672 × 941.
 
 ## Core scenes
 
