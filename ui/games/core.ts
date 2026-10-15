@@ -1,9 +1,9 @@
 // The part of a game that needs no panel: what it sees of its host, best scores and the
 // frame loop. The app's game panel and the served games at worldlet.ai/games share it.
 /** What a game sees of its panel: a status line, a remembered best and a way to start over. */
-export type GameSymbol='mine'|'flag'|'clock'|'restart'|'pause'|'play'|'arrow-up'|'arrow-down'|'arrow-left'|'arrow-right';
+export type GameSymbol='mine'|'flag'|'clock'|'restart'|'pause'|'play'|'arrow-up'|'arrow-down'|'arrow-left'|'arrow-right'|'erase'|'pencil'|'stopwatch';
 export type GameHost={status:(text:string)=>void;metrics?:(values:readonly {label:string;value:number|string;icon?:GameSymbol}[],notice?:string)=>void;best:{get:()=>number;set:(value:number)=>void;scope?:(key:string)=>{get:()=>number;set:(value:number)=>void}}};
-export type Game={element:HTMLElement;restart:()=>void;hint:string;resetLabel?:string;focusTarget?:HTMLElement;titleIcon?:GameSymbol;settings?:HTMLElement;controls?:HTMLElement;actions?:HTMLElement;dispose?:()=>void;directions?:readonly {direction:'up'|'left'|'down'|'right';icon?:GameSymbol;run:()=>void}[]};
+export type Game={element:HTMLElement;restart:()=>void;hint:string;resetLabel?:string;focusTarget?:HTMLElement;titleIcon?:GameSymbol;settings?:HTMLElement;controls?:HTMLElement;actions?:HTMLElement;parts?:Record<string,HTMLElement>;dispose?:()=>void;directions?:readonly {direction:'up'|'left'|'down'|'right';icon?:GameSymbol;run:()=>void}[]};
 
 /** Best scores are a per-viewer convenience; storage can be missing or blocked. */
 export function bestScore(key:string):GameHost['best']{

@@ -5,3 +5,4 @@ export {BATTLE_REVIEW,GAME_REVIEW_APPLET,battleWatch,battleUserId,battleSite,obs
 export type {BattleWatch,WatchedBattle,FinishedBattle,BattleResult} from './battle-review.ts';
 export {MINE_FIELDS,newMineState,mineNeighbours,nearbyMines,elapsedMineSeconds,actOnMine,type MineFieldKey,type MineField,type MineState} from './minesweeper.ts';
 export {SNAKE_STEP_MS,newSnakeState,steerSnake,pauseSnake,stepSnake,type SnakeState,type SnakeField,type SnakePoint} from './snake.ts';
+export {makeSudoku,newSudokuState,editSudoku,sudokuPeers,sudokuRemaining,sudokuConflict,elapsedSudokuSeconds,countSudokuSolutions,solveSudokuPuzzle,type SudokuPuzzle,type SudokuState,type SudokuAction} from './sudoku.ts';

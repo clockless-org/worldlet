@@ -1,70 +1,32 @@
-import {clock,type GameHost} from './core.ts';
-
-const peers=(i:number)=>{const r=Math.floor(i/9),c=i%9,br=r-r%3,bc=c-c%3,out=new Set<number>();for(let k=0;k<9;k++){out.add(r*9+k);out.add(k*9+c);out.add((br+Math.floor(k/3))*9+bc+k%3);}out.delete(i);return [...out];};
-const PEERS=Array.from({length:81},(_,i)=>peers(i));
-const shuffled=()=>{const a=[1,2,3,4,5,6,7,8,9];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
-
-/** Counts solutions up to `limit`; a puzzle is kept only while it has exactly one. */
-function solve(grid:number[],limit:number,random=false):number{
- let best=-1,options:number[]=[];
- for(let i=0;i<81;i++){
-  if(grid[i])continue;
-  let used=0;for(const p of PEERS[i])used|=1<<grid[p];const free=(random?shuffled():[1,2,3,4,5,6,7,8,9]).filter(v=>!(used&1<<v));
-  if(best<0||free.length<options.length){best=i;options=free;if(!free.length)return 0;}
- }
- if(best<0)return 1;
- let found=0;
- for(const v of options){grid[best]=v;found+=solve(grid,limit-found,random);if(found>=limit){if(!random)grid[best]=0;return found;}}
- grid[best]=0;return found;
-}
-export function makeSudoku(clues=36){
- const solution=Array(81).fill(0);solve(solution,1,true);
- const puzzle=[...solution];let filled=81;
- for(const i of Array.from({length:81},(_,i)=>i).sort(()=>Math.random()-.5)){
-  if(filled<=clues)break;
-  const v=puzzle[i];puzzle[i]=0;
-  if(solve([...puzzle],2)!==1)puzzle[i]=v;else filled--;
- }
- return {puzzle,solution};
-}
-
-/** Sudoku with a fresh puzzle each game. Event driven: nothing runs between entries. */
-export function createSudoku(host:GameHost){
- const element=document.createElement('div');element.className='sudoku-game';
- const board=document.createElement('div');board.className='game-board sudoku-board';board.tabIndex=0;
- board.setAttribute('role','grid');board.setAttribute('aria-label','Sudoku. Choose a square, then type or tap a number.');
- const pad=document.createElement('div');pad.className='sudoku-pad';
- element.append(board,pad);
+import {newSudokuState,editSudoku,sudokuPeers,sudokuRemaining,sudokuConflict,elapsedSudokuSeconds,type SudokuPuzzle,type SudokuAction} from '../../core/games/index.ts';
+import {clock,gameLoop,type GameHost,type Game,type GameSymbol} from './core.ts';
+import {gameSymbol} from './symbols.ts';
+export {makeSudoku} from '../../core/games/index.ts';
+/** Shared controls and clock. Rules, notes and undo history live in Core. */
+export function createSudoku(host:GameHost,initial?:SudokuPuzzle):Game{
+ const element=document.createElement('div');element.className='sudoku-game';const board=document.createElement('div');board.className='game-board sudoku-board';board.tabIndex=0;board.setAttribute('role','group');
+ const pad=document.createElement('div');pad.className='sudoku-pad';pad.setAttribute('aria-label','Enter a number');const tools=document.createElement('nav');tools.className='sudoku-tools';tools.setAttribute('aria-label','Sudoku tools');
+ const legend=document.createElement('div');legend.className='sudoku-legend';for(const [label,kind] of [['Clues','clue'],['Your entries','entry']]){const item=document.createElement('span');item.className='sudoku-legend-'+kind;item.textContent=label;legend.append(item);}
+ const subtitle=document.createElement('span');subtitle.className='game-subtitle';subtitle.textContent='Easy';element.append(board,pad,tools,legend);
+ let state=newSudokuState(initial),disposed=false,lastSecond=-1;
  const cells:HTMLButtonElement[]=[];
- for(let i=0;i<81;i++){const b=document.createElement('button');b.type='button';b.tabIndex=-1;b.className='sudoku-cell';b.dataset.index=String(i);b.dataset.row=String(Math.floor(i/9));b.dataset.col=String(i%9);board.append(b);cells.push(b);}
- for(const v of [1,2,3,4,5,6,7,8,9,0]){const b=document.createElement('button');b.type='button';b.className='sudoku-key';b.textContent=v?String(v):'Erase';b.dataset.value=String(v);pad.append(b);}
- let puzzle:number[]=[],solution:number[]=[],entry:number[]=[],selected=40,done=false,started=0;
- function draw(){
-  const value=entry[selected],related=new Set(PEERS[selected]);
-  cells.forEach((b,i)=>{
-   const v=puzzle[i]||entry[i],wrong=!puzzle[i]&&!!entry[i]&&PEERS[i].some(p=>(puzzle[p]||entry[p])===entry[i]);
-   b.textContent=v?String(v):'';b.dataset.given=String(!!puzzle[i]);b.classList.toggle('is-selected',i===selected);
-   b.classList.toggle('is-related',related.has(i));b.classList.toggle('is-same',!!v&&v===(puzzle[selected]||value)&&i!==selected);
-   b.classList.toggle('is-wrong',wrong);b.setAttribute('aria-label',`Row ${Math.floor(i/9)+1}, column ${i%9+1}, ${v||'empty'}`);
-  });
-  const left=entry.reduce((n,v,i)=>n+(!puzzle[i]&&!v?1:0),0),best=host.best.get();
-  host.status(done?`Solved in ${clock(Math.round((Date.now()-started)/1000))} · Best ${clock(best)}`:`${left} squares to fill`+(best?` · Best ${clock(best)}`:''));
-  element.dataset.state=done?'solved':'playing';
+ for(let i=0;i<81;i++){const button=document.createElement('button');button.type='button';button.tabIndex=-1;button.className='sudoku-cell';button.dataset.index=String(i);button.dataset.row=String(Math.floor(i/9));button.dataset.col=String(i%9);board.append(button);cells.push(button);}
+ for(let value=1;value<=9;value++){const button=document.createElement('button');button.type='button';button.className='sudoku-key';button.textContent=String(value);button.dataset.value=String(value);pad.append(button);}
+ const tool=(label:string,icon:GameSymbol,action:()=>void)=>{const button=document.createElement('button');button.type='button';button.append(gameSymbol(icon),document.createTextNode(label));button.addEventListener('click',()=>{action();board.focus({preventScroll:true});});tools.append(button);return button;};
+ const erase=tool('Erase','erase',()=>act({type:'put',value:0,now:Date.now()})),notes=tool('Notes','pencil',()=>act({type:'notes'})),undo=tool('Undo','restart',()=>act({type:'undo'}));
+ function publish(){const seconds=elapsedSudokuSeconds(state,Date.now());lastSecond=seconds;const notice=state.status==='solved'?'Solved! Start a new game.':state.notesMode?'Notes on · Tap a number to pencil it in.':'Fill each row, column and box with 1–9.';host.status(state.status==='solved'?`Solved in ${clock(seconds)} · Best ${clock(host.best.get())}`:`${sudokuRemaining(state)} squares to fill · ${clock(seconds)}`);host.metrics?.([{label:'Time',value:clock(seconds).padStart(5,'0'),icon:'stopwatch'}],notice);}
+ const loop=gameLoop(board,()=>{if(disposed||state.status!=='playing')return false;if(elapsedSudokuSeconds(state,Date.now())!==lastSecond)publish();return true;});
+ function act(action:SudokuAction){if(disposed)return;const previous=state;state=editSudoku(state,action);if(state===previous)return;if(previous.status!=='solved'&&state.status==='solved'){const seconds=Math.max(1,elapsedSudokuSeconds(state,Date.now())),best=host.best.get();if(!best||seconds<best)host.best.set(seconds);}draw();if(state.status==='playing')loop.start();else loop.stop();}
+ function draw(){const selected=state.selected,value=state.puzzle[selected]||state.entry[selected],related=new Set(sudokuPeers(selected));
+  cells.forEach((button,index)=>{const number=state.puzzle[index]||state.entry[index],marks=Array.from({length:9},(_,n)=>n+1).filter(n=>state.notes[index]&(1<<n)),wrong=sudokuConflict(state,index);button.textContent=number?String(number):'';
+   if(!number&&marks.length){const pencil=document.createElement('span');pencil.className='sudoku-pencil';for(let n=1;n<=9;n++){const mark=document.createElement('span');mark.textContent=marks.includes(n)?String(n):'';pencil.append(mark);}button.append(pencil);}
+   button.dataset.value=String(number);button.dataset.given=String(!!state.puzzle[index]);button.dataset.notes=marks.join(',');button.classList.toggle('is-selected',index===selected);button.classList.toggle('is-related',related.has(index));button.classList.toggle('is-same',!!number&&number===value&&index!==selected);button.classList.toggle('is-wrong',wrong);button.setAttribute('aria-pressed',String(index===selected));button.setAttribute('aria-label',`Row ${Math.floor(index/9)+1}, column ${index%9+1}, ${number||'empty'}${marks.length?', notes '+marks.join(', '):''}${wrong?', conflict':''}${state.puzzle[index]?', clue':''}`);
+  });board.setAttribute('aria-label','Sudoku. Type a number, N for notes, Delete to erase. Selected '+cells[selected].getAttribute('aria-label'));element.dataset.state=state.status;notes.setAttribute('aria-pressed',String(state.notesMode));notes.disabled=state.status==='solved';undo.disabled=!state.history.length;erase.disabled=state.status==='solved'||!!state.puzzle[selected]||!state.entry[selected]&&!state.notes[selected];publish();
  }
- function put(v:number){
-  if(done||puzzle[selected])return;entry[selected]=v;
-  if(puzzle.every((p,i)=>(p||entry[i])===solution[i])){done=true;const secs=Math.round((Date.now()-started)/1000),best=host.best.get();if(!best||secs<best)host.best.set(secs);}
-  draw();
- }
- function restart(){const next=makeSudoku();puzzle=next.puzzle;solution=next.solution;entry=Array(81).fill(0);selected=puzzle.findIndex(v=>!v);done=false;started=Date.now();draw();}
- board.addEventListener('click',e=>{const b=(e.target as Element).closest<HTMLButtonElement>('.sudoku-cell');if(!b)return;selected=Number(b.dataset.index);board.focus({preventScroll:true});draw();});
- pad.addEventListener('click',e=>{const b=(e.target as Element).closest<HTMLButtonElement>('.sudoku-key');if(!b)return;put(Number(b.dataset.value));board.focus({preventScroll:true});});
- board.addEventListener('keydown',e=>{
-  const move={ArrowLeft:-1,ArrowRight:1,ArrowUp:-9,ArrowDown:9}[e.key];
-  if(move){e.preventDefault();const r=Math.floor(selected/9),c=selected%9;if((move===-1&&c)||(move===1&&c<8)||(move===-9&&r)||(move===9&&r<8))selected+=move;draw();return;}
-  if(/^[1-9]$/.test(e.key)){e.preventDefault();put(Number(e.key));return;}
-  if(['Backspace','Delete','0'].includes(e.key)){e.preventDefault();put(0);}
- });
- restart();
- return {element,focusTarget:board,restart,hint:'Pick a square, then type or tap a number.'};
+ function restart(){if(disposed)return;loop.stop();state=newSudokuState();draw();}
+ board.addEventListener('click',event=>{const button=(event.target as Element).closest<HTMLButtonElement>('.sudoku-cell');if(button){act({type:'select',index:Number(button.dataset.index)});board.focus({preventScroll:true});}});
+ pad.addEventListener('click',event=>{const button=(event.target as Element).closest<HTMLButtonElement>('.sudoku-key');if(button){act({type:'put',value:Number(button.dataset.value),now:Date.now()});board.focus({preventScroll:true});}});
+ board.addEventListener('keydown',event=>{if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='z'){event.preventDefault();act({type:'undo'});return;}if(event.key.toLowerCase()==='n'){event.preventDefault();act({type:'notes'});return;}const move={ArrowLeft:-1,ArrowRight:1,ArrowUp:-9,ArrowDown:9}[event.key];if(move){event.preventDefault();const r=Math.floor(state.selected/9),c=state.selected%9;if(move===-1&&c||move===1&&c<8||move===-9&&r||move===9&&r<8)act({type:'select',index:state.selected+move});return;}if(/^[1-9]$/.test(event.key)){event.preventDefault();act({type:'put',value:Number(event.key),now:Date.now()});}else if(['Backspace','Delete','0'].includes(event.key)){event.preventDefault();act({type:'put',value:0,now:Date.now()});}});
+ const visibility=()=>{if(document.hidden)loop.stop();else if(state.status==='playing')loop.start();};document.addEventListener('visibilitychange',visibility);draw();
+ return {element,focusTarget:board,restart,settings:subtitle,parts:{subtitle,keypad:pad,tools,legend},hint:'Fill each row, column and box with 1–9.',dispose(){disposed=true;loop.stop();document.removeEventListener('visibilitychange',visibility);}};
 }

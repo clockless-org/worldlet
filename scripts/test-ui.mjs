@@ -21,7 +21,7 @@ const available=files=>existsSync(path.join(root,'gatehouse'))?files:files.filte
 // keep their state in a private temp HERMES_HOME or CLAUDE_CONFIG_DIR. Longest first, so the pool's
 // lanes finish together.
 export const parallelChecks=available([
- 'scripts/game-scene-check.ts','scripts/minesweeper-scene-check.ts','scripts/snake-scene-check.ts','scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts',
+ 'scripts/game-scene-check.ts','scripts/minesweeper-scene-check.ts','scripts/snake-scene-check.ts','scripts/sudoku-scene-check.ts','scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts',
  // The slowest first (Mac RC 2026.1005.2887 times), so no lane is left running one alone at the end. The Attention Center's browser checks moved here from npm test (test:attention), where they ran one by one.
  'scripts/attention-no-refill-check.ts','scripts/attention-actions-check.ts',
  'scripts/applet-focus-check.ts','gatehouse/board-browser-check.mjs','scripts/startup-setup-check.ts','scripts/world-tour-check.ts',
@@ -119,7 +119,7 @@ export const coreChecks=[
 // The RC in the two hours before each release slot runs the whole suite, and a release ships only a commit that passed
 // it (scripts/machine-candidate.mjs rcMode, scripts/release-verified.mjs).
 export const quickChecks=available([
- 'scripts/game-scene-check.ts','scripts/minesweeper-scene-check.ts','scripts/snake-scene-check.ts','scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts',
+ 'scripts/game-scene-check.ts','scripts/minesweeper-scene-check.ts','scripts/snake-scene-check.ts','scripts/sudoku-scene-check.ts','scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts',
  'scripts/startup-check.ts','scripts/startup-setup-check.ts','scripts/world-scene-check.ts','scripts/sample-world-check.ts',
  'scripts/world-tour-check.ts','scripts/feature-audit-check.ts','scripts/core-applet-content-check.ts','scripts/applet-focus-check.ts',
  'scripts/applet-first-entry-check.ts','scripts/library-applet-check.ts','scripts/work-applet-check.ts','scripts/immersive-background-check.ts',
@@ -133,7 +133,7 @@ export const quickChecks=available([
 // the quick checks that finish in seconds on a GitHub Linux runner. Those that draw the World took 2 to 8 minutes there
 // on software WebGL, four at a time, and timed out clicking it (PR #125's first run), so they stay in Alpha.
 export const prChecks=quickChecks.filter(c=>[
- 'scripts/game-scene-check.ts','scripts/minesweeper-scene-check.ts','scripts/snake-scene-check.ts','scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts',
+ 'scripts/game-scene-check.ts','scripts/minesweeper-scene-check.ts','scripts/snake-scene-check.ts','scripts/sudoku-scene-check.ts','scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts',
  'scripts/startup-check.ts','scripts/applet-first-entry-check.ts','scripts/onboarding-first-value-check.ts',
  'scripts/browser-applet-check.ts','scripts/mail-open-check.ts','scripts/applet-scene-check.ts','scripts/scene-list-layout-check.ts','scripts/reminders-regions-check.ts','scripts/mail-regions-check.ts','scripts/calendar-plane-check.ts','scripts/world-map-check.ts','scripts/theme-fonts-check.ts','scripts/web-record-check.ts',
  'scripts/core-applet-content-check.ts','scripts/attention-brief-markdown-check.ts','scripts/sample-persona-check.ts',

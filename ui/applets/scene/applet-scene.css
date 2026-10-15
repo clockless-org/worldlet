@@ -205,3 +205,35 @@
 /* Host action buttons otherwise reserve an 18 px flex basis for all descendant icons. */
 .applet-scene .game-region .game-symbol svg{flex:0 0 100%}
 #notionWorld[data-panel-scene]>.notion-content[data-template=game]:has(.game-panel[data-distributed=true])::after{display:none}
+/* A paper puzzle distributes its keypad and tools onto the facing page. */
+.applet-scene .game-region[data-material=paper] .game-title{font:500 clamp(32px,22cqi,54px)/1.1 var(--scene-display-font)!important;color:var(--scene-ink);text-shadow:none;letter-spacing:-.02em}
+.applet-scene .game-region[data-material=paper][data-region=subtitle]{display:grid;place-items:center}
+.applet-scene .game-region .game-subtitle{margin:0;font:400 19px/1 var(--scene-display-font)}
+.applet-scene .game-region[data-material=paper] .game-metric.has-icon{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:10px;color:var(--scene-ink);text-shadow:none}
+.applet-scene .game-region[data-material=paper] .game-metric.has-icon strong{font:400 25px/1.1 var(--scene-display-font)}
+.applet-scene .game-region[data-material=paper] .game-metric .game-symbol{width:25px;height:25px}
+.applet-scene .game-region[data-region=restart] .game-reset{width:100%;height:100%;padding:0;min-height:0;border:0;border-image:none;border-radius:8px;background:transparent;box-shadow:none;color:#f8eac6;font:400 23px/1 var(--scene-display-font);text-shadow:0 1px 2px #000}
+.applet-scene .game-region[data-region=restart] .game-reset>span{font:inherit}
+.applet-scene .game-region .sudoku-pad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:7px 10px;width:100%;height:100%}
+.applet-scene .game-region .sudoku-key{width:100%;height:100%;min-height:0;border:0;border-radius:5px;background:none;box-shadow:none;color:var(--scene-ink);font:400 30px/1 var(--scene-display-font)}
+.applet-scene .game-region .sudoku-key:hover{background:color-mix(in srgb,var(--scene-accent) 12%,transparent)}
+.applet-scene .game-region .sudoku-tools{display:grid;grid-template-columns:1fr 1fr 1.12fr;gap:12px;width:100%;height:100%}
+.applet-scene .game-region .sudoku-tools button{width:100%;height:100%;min-height:0;padding:0;gap:9px;border:0;border-radius:4px;background:transparent;box-shadow:none;color:var(--scene-ink);font:400 18px/1 var(--scene-display-font)}
+.applet-scene .game-region .sudoku-tools .game-symbol{width:22px;height:22px}
+.applet-scene .game-region .sudoku-tools button[aria-pressed=true]{background:#819da344;box-shadow:inset 0 0 0 2px #4d6c76}
+.applet-scene .game-region .sudoku-legend{width:100%;height:100%;align-items:center;gap:38px;font:400 16px/1.2 var(--scene-display-font);color:var(--scene-ink)}
+.applet-scene .game-region[data-material=paper] .game-footer>.game-hint{font:400 17px/1.15 var(--scene-display-font);color:var(--scene-ink);text-shadow:none}
+#notionWorld[data-panel-scene]>.notion-content[data-template=game] .game-panel[data-distributed=true] .sudoku-game{width:100%;height:100%;max-width:none;gap:0}
+#notionWorld[data-panel-scene]>.notion-content[data-template=game] .game-panel[data-distributed=true] .sudoku-board{width:100%;height:100%;max-width:none;max-height:none;aspect-ratio:auto;padding:0;gap:0;border:2px solid var(--scene-ink);border-radius:0;background:transparent;box-shadow:none}
+.game-panel[data-distributed=true] .sudoku-cell{margin:0!important;padding:0;min-width:0;min-height:0;border:0;border-right:1px solid color-mix(in srgb,var(--scene-ink) 45%,transparent);border-bottom:1px solid color-mix(in srgb,var(--scene-ink) 45%,transparent);border-radius:0;background:transparent;color:#2869bd;box-shadow:none;font:400 clamp(20px,7cqi,33px)/1 var(--scene-display-font);text-shadow:0 1px #efd9a860}
+.game-panel[data-distributed=true] .sudoku-cell[data-given=true]{color:var(--scene-ink);background:transparent;font-weight:600}
+.game-panel[data-distributed=true] .sudoku-cell[data-col="2"],.game-panel[data-distributed=true] .sudoku-cell[data-col="5"]{border-right:2px solid var(--scene-ink)}
+.game-panel[data-distributed=true] .sudoku-cell[data-row="2"],.game-panel[data-distributed=true] .sudoku-cell[data-row="5"]{border-bottom:2px solid var(--scene-ink)}
+.game-panel[data-distributed=true] .sudoku-cell[data-col="8"]{border-right:0}.game-panel[data-distributed=true] .sudoku-cell[data-row="8"]{border-bottom:0}
+.game-panel[data-distributed=true] .sudoku-cell.is-related{background:#b7cbd50d}.game-panel[data-distributed=true] .sudoku-cell.is-same{background:#b7cbd52b}
+.game-panel[data-distributed=true] .sudoku-cell.is-selected{background:#94b9dc66;box-shadow:inset 0 0 0 1px #2c6cac99}
+.game-panel[data-distributed=true] .sudoku-cell.is-wrong{color:#a82d24}
+.game-panel[data-distributed=true] .sudoku-pencil{font:400 clamp(8px,2.6cqi,13px)/1 var(--scene-body-font);color:#2869bd}
+
+.applet-scene .game-region .sudoku-legend span{font:inherit;color:inherit}
+.applet-scene .game-region .sudoku-legend-entry:before{background:#2869bd}

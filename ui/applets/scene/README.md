@@ -52,3 +52,5 @@ unavailable. Its layout observer disconnects on navigation. The shell applies
 the primary projection to HTML only; native web views retain rectangular bounds.
 Optional `empty-cell` and `tile` sprite crops supply artwork, while `GameHost.metrics`
 supplies live score values and the game's directional callbacks own movement.
+
+Games may expose named `parts` for a subtitle, keypad, tools or legend. The shared panel moves those existing nodes to matching regions, sends reset to an optional `restart` region, and restores each part to its original parent on fallback. Rules and input handlers stay in the game. Disposal removes moved controls and stops the game clock.

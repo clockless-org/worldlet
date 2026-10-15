@@ -59,3 +59,7 @@ Checks: `node scripts/game-review-check.ts` (in `test:core`, so PR CI) records b
 ## Built-in Snake
 
 `snake.ts` owns movement, the bounded turn queue, safe food placement, growth, collision, pause and full-board wins. The shared Applet uses a wide 16 × 12 field with a seven-piece initial body and a visible first apple. Direct board callers retain the classic 18 × 18 field and three-piece start. Best records are scoped by field. UI supplies frame timing and randomness, paints either ordinary canvas or static-material HTML from the same state, and stops on blur, hidden documents and disposal. `node scripts/snake-check.ts` checks the decisions; the full-bed regression also plays the classic field to completion.
+
+## Shared Sudoku
+
+`sudoku.ts` owns unique-puzzle generation, solving, conflict detection, immutable clues, pencil marks, peer-note pruning and a 200-edit undo history. The UI supplies time; the first meaningful edit starts the clock and solving freezes it. Selection and empty erasure do not start a game. Undo restores both entries and notes and can reopen a solved game. `node scripts/sudoku-check.ts` checks those decisions without a DOM.
