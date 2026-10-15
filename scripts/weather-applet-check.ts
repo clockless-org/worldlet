@@ -16,8 +16,15 @@ await withBrowser(fileAccess,async browser=>{
  },{weather,place,raw});
  const url=worldUrl();
  async function readerClear(){
+  const material=await page.evaluate(()=>{
+   const root=document.documentElement,fonts=root.dataset.themeFonts,skins=root.dataset.themeSkin,style=root.style.cssText;
+   root.dataset.themeFonts='display';root.dataset.themeSkin='card';root.style.setProperty('--theme-font-display','monospace');root.style.setProperty('--theme-skin-card-width','8px');
+   const panel=getComputedStyle(document.querySelector('.weather-panel')!),heading=getComputedStyle(document.querySelector('.weather-panel .ui-title')!);const result={panelFont:panel.fontFamily,titleFont:heading.fontFamily,border:panel.borderTopWidth};
+   if(fonts===undefined)delete root.dataset.themeFonts;else root.dataset.themeFonts=fonts;if(skins===undefined)delete root.dataset.themeSkin;else root.dataset.themeSkin=skins;root.style.cssText=style;return result;
+  });assert.equal(material.titleFont,material.panelFont,'the measured board retains its material font under shared display typography');assert.equal(material.border,'0px','shared card skins do not insert another rim inside the measured board');
   const reader=await page.locator('.weather-panel').boundingBox();
   const detail=await page.locator('.weather-selected-day').boundingBox(),footer=await page.locator('.weather-panel .ui-applet-footer').boundingBox();assert(detail&&footer&&detail.y+detail.height<=footer.y+1,'Selected forecast details remain visible above footer');
+  const factRows=await page.locator('.weather-selected-day .ui-facts>div').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));assert.ok(factRows.every(r=>r.bottom<=footer.y+1),'all forecast fact rows clear the footer');for(let i=1;i<factRows.length;i++)assert.ok(factRows[i].top-factRows[i-1].bottom>=3,'forecast facts have visible line spacing');
   assert(await page.locator('.weather-temperature').evaluate(e=>parseFloat(getComputedStyle(e).fontSize)>48),'Current temperature keeps its visual hierarchy');
   const viewport=page.viewportSize();assert(reader.x>=0&&reader.y>=0&&reader.x+reader.width<=viewport.width&&reader.y+reader.height<=viewport.height,'Weather fits its painted scene');assert.equal(await page.locator('#notionWorld').getAttribute('data-panel-scene'),'weather');
   for(const selector of ['.companion-dialogue','.companion-avatar','.world-actions .world-capsule','.applet-bar-side button','.companion-text-entry']){
@@ -56,6 +63,8 @@ await withBrowser(fileAccess,async browser=>{
  await page.evaluate(()=>window.worldletExecute('set_scene_lighting',{lighting:'night'}));await page.waitForTimeout(2600);await page.screenshot({path:'/tmp/weather-village-night.png'});
  await readerClear();
  await page.locator('.weather-forecast-row').last().focus();await page.keyboard.press('Enter');assert.equal(await page.locator('.weather-forecast-row').last().getAttribute('aria-pressed'),'true');
+ for(const index of [0,6]){const card=page.locator('.weather-forecast-row').nth(index);await card.focus();await page.keyboard.press('Enter');const focus=await card.evaluate(e=>{const r=e.getBoundingClientRect(),clip=e.closest('.ui-applet-body')!.getBoundingClientRect(),c=getComputedStyle(e),outset=Math.max(0,parseFloat(c.outlineWidth)+parseFloat(c.outlineOffset));return {left:r.left-outset,right:r.right+outset,clipLeft:clip.left,clipRight:clip.right,visible:e.matches(':focus-visible')};});assert.ok(focus.visible&&focus.left>=focus.clipLeft-1&&focus.right<=focus.clipRight+1,'first and last forecast focus rings stay inside the scrolling surface');}
+
  await page.evaluate(()=>(window as any).offline=true);await page.getByRole('button',{name:'Refresh',exact:true}).click();await page.getByRole('alert').filter({hasText:'Offline'}).waitFor();
  await page.locator('#notionBack').click();
  await page.waitForFunction(()=>document.querySelector('#notionWorld')?.getAttribute('data-depth')!=='object');
