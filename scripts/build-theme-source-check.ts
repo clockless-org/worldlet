@@ -40,6 +40,9 @@ try{
  assert.doesNotThrow(()=>parseThemePresentation({...presentation,icons:{gmail:'assets/gmail.png'}}));
  assert.throws(()=>parseThemePresentation({...presentation,icons:{Gmail:'assets/gmail.png'}}),/applet icons/);
  assert.throws(()=>parseThemePresentation({...presentation,icons:{gmail:'assets/gmail.txt'}}),/applet icons/);
+ // Forecast artwork uses WMO codes and local images; omitted conditions keep shared artwork.
+ assert.doesNotThrow(()=>parseThemePresentation({...presentation,weatherIcons:{'3':'assets/cloud.png','61':'assets/rain.webp'}}));
+ for(const weatherIcons of [{'03':'assets/cloud.png'},{sun:'assets/cloud.png'},{'3':'assets/weather.html'},{'3':'https://example.com/cloud.png'}])assert.throws(()=>parseThemePresentation({...presentation,weatherIcons}),/Invalid build theme/);
  // Presets are optional reusable art, with stable unique ids and package-local images, never page code or layout.
  const preset={id:'reading',title:'Reading',description:'A place for books',category:'Learning',icon:'assets/plate.svg',background:'assets/plate.svg'};
  assert.doesNotThrow(()=>parseThemePresentation({...presentation,appletPresets:[]}));

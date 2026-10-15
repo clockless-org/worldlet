@@ -32,6 +32,10 @@ export function themeAppletIcon(key:string):string|undefined{
  const art=(globalThis as any).__WORLDLET_25D_ASSETS__?.devices?.[key],src=typeof art==='string'?art:art?.src;
  return typeof src==='string'&&src?src:undefined;
 }
+/** Condition pictures never supply forecast values or change weather classification. */
+export function themeWeatherIcon(code:number|null):string|undefined{
+ const file=active.package.presentation.weatherIcons?.[String(code)];return file?themeAssetURL(active.id,file):undefined;
+}
 const sceneRegistration=(r:ThemeSceneRegistration):ThemeSceneRegistration=>({...r,...r.webFrame?{webFrame:{...r.webFrame,mask:themeAssetURL(active.id,r.webFrame.mask)}}:{}});
 /** A registered background for a specific Applet; reusable theme presets are returned separately. */
 export function themeAppletScene(key:string){

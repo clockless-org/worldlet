@@ -71,6 +71,14 @@ await withBrowser(fileAccess,async browser=>{
   if(appStarted&&Date.now()-appStarted>5000)console.log('slow: '+previousApp+' '+((Date.now()-appStarted)/1000).toFixed(1)+'s');appStarted=Date.now();previousApp=app.key;
   const shows=await page.evaluate(()=>calls.filter(c=>c.action==='browserShow').length);
   await page.evaluate(id=>location.hash='object='+id,app.id);
+  if(app.key==='weather'){
+   await page.locator('.weather-panel[data-layout=board]').waitFor();
+   assert.equal(await page.locator('.weather-forecast-row').count(),7);
+   assert.match(await page.locator('.weather-panel').innerText(),/Demo weather · Not a live forecast/);
+   await page.locator('.weather-forecast-row').nth(2).click();assert.match(await page.locator('.weather-selected-day').innerText(),/80%/);
+   assert.equal(await page.evaluate(()=>calls.filter(c=>c.action==='browserShow').length),shows,'Weather opens the shared board, no website');
+   continue;
+  }
   if(app.fullView.kind==='scene'){
    // This Applet's own stage, once its records have rendered: on a slow host the previous Applet's
    // stage, or this one's first empty frame, can still be up for a moment.

@@ -148,3 +148,7 @@ An additive, optional change passes; refresh the snapshot in the same PR with `n
 Contract v2 let a package ship code (`renderWorld`, `renderApplet`) and a stylesheet. It was retired on 2026-10-10 when themes became static; no package uses it.
 
 The old data-only `ThemePack` (`ui/themes/theme-pack.ts`) only describes the Village's source art and companion; it is not a theme API.
+
+### Weather condition pictures
+
+`presentation.weatherIcons` optionally maps WMO condition codes (decimal keys such as `3` or `61`) to package-local PNG, WebP or SVG pictures. The shared Weather panel uses these for both current conditions and forecast days. Missing conditions, or an image that fails to load, keep the shared weather artwork. These pictures never supply forecast values or change condition labels. The supported keys are `THEME_WEATHER_CODES` in the contract.
