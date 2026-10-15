@@ -1,3 +1,5 @@
+import {activeBuildTheme} from '../themes/index.ts';
+import {mountMapAttention} from './map-attention.ts';
 import {mountDevBuildUpdate,commitAge} from './dev-build-update.ts';
 import {hostFeatures} from '../../platform/bridge/features.ts';
 import {refreshItemPage} from '../../core/items/index.ts';
@@ -88,6 +90,7 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
  const sound=root.querySelector('.notion-top .world-audio');if(sound)today.append(sound);
  todayOpen.onclick=()=>{if(root.dataset.tourLock==='true'||root.dataset.tourSpotlight==='true')return;const now=new Date(),day=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');window.dispatchEvent(new CustomEvent('worldlet:journal-open',{detail:{day}}));};
  if(today.childElementCount)tracker.prepend(today);
+ const mapAttention=activeBuildTheme().package.presentation.worldMap?mountMapAttention(root,tracker,today,()=>{collapseLater();matterSignature='';renderMatters(snapshot());}):null;
  // The tasks either side of Fox: what the person's Agent is doing now on its left, the Routines it runs next on its
  // right, one card each (owner request 2026-10-11).
  mountTaskPanel(root,{openApplet:id=>visitObject(id)});
@@ -420,7 +423,7 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
  // short: what does not fit is dropped from the end, where the least pressing rows are.
  function showClear(){const line=el('p','world-task-clear world-task-all-clear','All clear for now.');line.setAttribute('role','status');trackerMore.append(line);trackerMore.hidden=false;}
  function fitPanel(){
-  if(!expanded)fitAttentionPanel(trackerList);
+  if(!expanded&&!mapAttention)fitAttentionPanel(trackerList);
  }
  function renderTasks(){const s=snapshot();for(const p of s.pages.values())refreshItemPage(p);if(s.data.matterCatalog){renderMatters(s);return;}const inspect=root.querySelector('#notionDialog').open||!root.querySelector('#notionContent').hidden,items=trackedTasks().filter(a=>!inspect||a.pageId===s.current||a.pageIds?.includes(s.current)||a.placeId===s.currentSpace);tracked=items;const events=upcomingEvents(s).filter(a=>!inspect||a.pageId===s.current||a.placeId===s.currentSpace);tracker.hidden=false;
   trackerList.replaceChildren();

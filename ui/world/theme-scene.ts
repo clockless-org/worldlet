@@ -9,8 +9,13 @@ export const THEME_SCENE=themeScene(ACTIVE_THEME.pack.id);
 /** The painted map an Area opens onto: the theme's `assets/art.json` `areas`, by the Area's id (`home`, `work`, ...),
  * day or night. Null when the theme paints none for that Area; a new map drops in by adding its file to the index. */
 export function themeAreaMap(area:string,night:boolean):string|null{
+ const registered=activeBuildTheme().package.presentation.worldMap?.areas[area]?.map;
+ if(registered)return themeAssetURL(activeBuildTheme().id,registered);
  let art:{areas?:Record<string,{day:string;night?:string}>};
  try{art=themeData('assets/art.json');}catch{return null;}
  const pair=art?.areas?.[area],file=pair&&(night&&pair.night||pair.day);
  return file?themeAssetURL(activeBuildTheme().id,file):null;
 }
+
+/** A presentation can name the same stable host area without changing catalog membership or permissions. */
+export function themeAreaTitle(area:string,fallback:string):string{return activeBuildTheme().package.presentation.worldMap?.areas[area]?.title||fallback;}

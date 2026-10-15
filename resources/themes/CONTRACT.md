@@ -9,7 +9,7 @@ flowchart LR
   T[theme.json and presentation.json] --> R[Host registry]
   A[assets: pictures, sounds, fonts] --> R
   J[Other JSON: art index, lamp positions] --> R
-  R --> W[Host World renderer ui/world/village]
+  R --> W[Host World renderer: Village or measured map]
   R --> H[Host HUD, sounds and Applet pictures]
 ```
 
@@ -57,6 +57,12 @@ The host reads `themeAppletPresets()` from `ui/themes/index.ts`. It returns the 
 
 The Village bundles 16 pairs under `assets/applet-presets/`, declared in `presentation.json`. The [source catalog](../styles/builtin/presets/personal-scenes/README.md) contains the full visual gallery and research. An Applet creation picker is not connected yet. For example, host code can read `themeAppletPresets().find(p => p.id === 'meal-planner')` and use its image URLs.
 
+### Measured World maps
+
+Optional `worldMap` in `presentation.json` supplies one background, its encoded `imageSize` and `sha256`, and an `areas` record keyed by existing host area IDs. Each entry has a normalized `anchor: [x,y]`, optional display `title` and `description`, and optional local `map` artwork for the area view. Import validates the World image bytes and dimensions. It never registers Applets, capabilities or navigation actions.
+
+The shared `ui/world/world-map.ts` renderer applies one contain transform and publishes area anchors to the host's accessible buttons. Area views retain the real catalog and navigation. The shared HUD offers real Attention categories in a collapsible rail so entrances remain clear; Escape closes the rail and restores focus. Packages without `worldMap` keep the Village renderer. Selecting an imported package remains a private build-time choice; importing alone does not change the public default. Village-specific fallback data is explicitly read from the bundled Village package, independently of selected presentation data.
+
 ### Registered backgrounds and live HTML
 
 `themeAppletScene(appletKey)` returns an optional Applet-bound background with its published URL and `registration`. Reusable `appletPresets` can also carry `registration`. An Applet's icon still comes from `icons` using the same key; a generic preset carries its own icon. No registration means the existing host presentation continues.
@@ -68,7 +74,7 @@ The Village bundles 16 pairs under `assets/applet-presets/`, declared in `presen
 | `regions` | Nonoverlapping painted blank surfaces. Each has a unique `id`, `role` (`primary` or `secondary`), normalized `rect: [x,y,width,height]`, and `material` (`paper`, `board`, `screen`). Exactly one primary is required. |
 | `webFrame` (optional) | Extracted alpha asset (`mask`) and normalized `source` / `target` bounds. The host takes its alpha only, sampling colours from the original scene. A click-through foreground covers the website seam with the complete painted frame. |
 | `webEdge` (optional) | Clockwise `top`, `right`, `bottom`, `left` sample arrays (2–64 values per side, 0–3 source pixels). Original background pixels overlap the outer edge of a live website; the host scales them down with the scene and caps enlargement. No input capture or website styling. |
-| `companion` | A separate normalized rectangle describing quiet painted clearance. This does not position or style Fox. |
+| `companion` | A separate normalized rectangle describing quiet painted clearance. The shared host chooses the companion layout from this clearance; it grants no theme control over Fox behavior or artwork. |
 
 Coordinates start at the image's upper-left and stay within 0–1. They are measured from the finished picture, not guessed from a generation prompt. `fitThemeScene(registration, width, height)` applies one centered, uniform contain transform to the painting, every region and companion clearance. Do not crop the background independently. The host chooses its responsive presentation and may switch to a normal readable page on narrow viewports instead of shrinking interactive text.
 
@@ -80,7 +86,7 @@ Desktop Applet artwork and layout should target these usable dimensions (design 
 | Usable content width | About 70% of the Applet viewport width |
 | Remaining right-hand space | Place Fox and its conversation here, aligned with the scene; avoid an unused gap between the Applet and companion |
 
-Measure the live HTML or website area after navigation, padding and decorative frame insets, not the outer painted board. Keep the main content on the left. Arrange frames and props around this area rather than reducing it; preserve irregular paper edges as foreground detail without covering usable controls. Check the complete composition with the actual companion and reply visible. These are approximate desktop targets; retain readable responsive fallbacks on narrow windows. Existing scenes may need revision to meet them.
+Measure the live HTML or website area after navigation, padding and decorative frame insets, not the outer painted board. Keep the main content on the left. Arrange frames and props around this area rather than reducing it; preserve irregular paper edges as foreground detail without covering usable controls. For an existing scene with a short clearance below its paper, the host can use a compact composer strip: Fox remains clickable, local introductory copy appears on input focus, and real replies, notices and actions remain visible. Check the complete composition with the actual companion and reply visible. These are approximate desktop targets; retain readable responsive fallbacks on narrow windows. Existing scenes may need revision to meet them.
 
 Keep dates, messages, task state and controls out of the bitmap. The host supplies real HTML and trusted data inside those surfaces. A Calendar can have a main event surface and a separate small date surface. Regions grant no capabilities, execute no code and bind no provider data themselves. Embedded external websites still require the host's browser surface and cannot acquire this appearance from artwork alone.
 

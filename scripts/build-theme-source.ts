@@ -35,6 +35,10 @@ export async function validateBuildTheme(source:string){
    inspect(JSON.parse(bytes.toString()));
   }
  }
+ if(presentation.worldMap){
+  const w=presentation.worldMap,bytes=await fs.readFile(path.join(source,w.background));
+  if(bytes.length){const meta=await sharp(bytes).metadata();if(hashes[w.background]!==w.sha256||meta.width!==w.imageSize[0]||meta.height!==w.imageSize[1])throw Error('World map registration is stale: '+w.background);}
+ }
  // A measured surface must describe these exact encoded bytes. Empty media are CI checkout stand-ins.
  for(const scene of [...Object.values(presentation.appletScenes??{}),...(presentation.appletPresets??[])]){
   if(!scene.registration)continue;

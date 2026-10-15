@@ -111,6 +111,18 @@ export interface ThemeAppletPreset {
     background: string;
     registration?: ThemeSceneRegistration;
 }
+/** A measured overview with live, host-owned area entrances. Keys are stable host area IDs. */
+export interface ThemeWorldMap {
+    background: string;
+    imageSize: readonly [number, number];
+    sha256: string;
+    areas: Readonly<Record<string, {
+        anchor: readonly [number, number];
+        title?: string;
+        description?: string;
+        map?: string;
+    }>>;
+}
 /** WMO forecast condition codes for optional static illustrations. */
 export declare const THEME_WEATHER_CODES: readonly [0, 1, 2, 3, 45, 48, 51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 71, 73, 75, 77, 80, 81, 82, 85, 86, 95, 96, 99];
 /** The theme's type and colours. */
@@ -128,6 +140,8 @@ export interface ThemeTokens {
 }
 export interface ThemePresentation {
     tokens: ThemeTokens;
+    /** Optional painted overview and area backgrounds. No executable renderer is supplied by the theme. */
+    worldMap?: ThemeWorldMap;
     /** Optional condition illustrations by WMO code; omitted codes keep the shared weather artwork. */
     weatherIcons?: Readonly<Record<string, string>>;
     /** Bundled faces. Family defaults to the filename without its extension; use it in the token/material font stacks. */

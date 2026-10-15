@@ -1,5 +1,6 @@
 import {themeAppletIcon,activeBuildTheme,themeAssetURL} from '../themes/index.ts';
 import type {WorldState,WorldMark,WorldApplet,WorldLampState} from './world-renderer.ts';
+import {renderWorldMap} from './world-map.ts';
 import {renderVillageWorld} from './village/village-world.ts';
 import {createAppletStage} from './pixi-stage.ts';
 import {createAppletImageLamps} from './applet-image-lamps.ts';
@@ -22,7 +23,9 @@ function appletIcon(room):string|undefined {
  * zoom between the World and an Applet. */
 export function createModuleScene(host,rooms,onPick,onProject,pages,options):any {
  const shellRoot=(host.closest('.notion-world')||host) as HTMLElement;
- const world=document.createElement('div');world.className='ui-theme-world-scene';world.dataset.renderer='village';Object.assign(world.style,{position:'absolute',inset:'0'});
+ const world=document.createElement('div');world.className='ui-theme-world-scene';world.dataset.renderer=activeBuildTheme().package.presentation.worldMap?'map':'village';shellRoot.dataset.worldRenderer=world.dataset.renderer;Object.assign(world.style,{position:'absolute',inset:'0'});
+ const mapTokens=activeBuildTheme().package.presentation.tokens;
+ for(const key of ['ink','paper','accent','bodyFont'] as const)shellRoot.style.setProperty('--world-map-'+key,mapTokens[key]);
  host.prepend(world);
  const stage=createAppletStage(host,onPick),stages=new Map(),activities=new Map<string,any>();
  const imageLamps=createAppletImageLamps(shellRoot,(globalThis as any).__WORLDLET_25D_ASSETS__),lampLabels=new Map<string,ReturnType<typeof createLampLabel>>();
@@ -72,7 +75,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
    const key=m.kind==='applet'?'space:'+room.id:m.kind==='slot'?'region-slot:'+m.slot:kind[m.kind]+':'+regionId(m.id);
    const point:any={id:room?room.id:m.id,title:m.kind==='area-add'||m.kind==='slot'?'+':room?.title||area?.title||m.id,action:action[m.kind],kind:kind[m.kind],level:m.kind==='applet'?'room':'building',x:m.x,y:m.y,visible:m.visible,hovered:!!m.hovered};
    if(m.kind==='slot'){point.slot=m.slot;point.description='Place applet in slot '+((m.slot||0)+1);}
-   if(m.kind==='area'){point.caption='';point.description='Enter '+(area?.title||m.id);}
+   if(m.kind==='area'){point.caption=m.caption||'';point.description='Enter '+(area?.title||m.id);}
    if(m.kind==='area-add')point.description='Add applets to '+(area?.title||m.id);
    if(room){const lampState=signalOf(room)?.state||'off',status=appletStatus(room,connections)||{};
     Object.assign(point,{labelVisible:!!m.label,running:lampState==='processing',lampState,lampX:m.lamp?.x||0,lampY:m.lamp?.y||0,attentionX:m.attention?.x||0,attentionOffset:-(m.attention?.y||0),
@@ -104,7 +107,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
  },moveApplet:(id,area,slot)=>{if(rooms.some(r=>r.moduleId===id)&&state().areas.some(a=>a.id==='building-'+area))options.onMoveApplet?.(id,area,slot);},menu:(id,x,y)=>{if(state().applets.some(a=>a.id===id&&a.visible))options.onAppletMenu?.(id,x,y);},
   marks,back:()=>{if(!disposed&&view.level!=='overview')onPick({action:'back'});},
   openArea:id=>{if(!disposed&&state().areas.some(a=>a.id===id))onPick({action:'region-more',id});}};
- const theme=activeBuildTheme(),mount=renderVillageWorld({...context,asset:path=>themeAssetURL(theme.id,path)});
+ const theme=activeBuildTheme(),worldContext={...context,asset:(path:string)=>themeAssetURL(theme.id,path)},map=theme.package.presentation.worldMap, mount=map?renderWorldMap(worldContext,map):renderVillageWorld(worldContext);
  function refresh(){if(disposed)return;mount.update(state());world.hidden=view.level==='applet'&&!mount.behindApplet;
   const room=rooms.find(r=>r.moduleId===view.id||r.id===view.id);
   // The host's Applet stage: its reader stays put while the item's detail or the website is open.
@@ -116,7 +119,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
  // The shell's own state changes without a scene call; follow it, and redraw only when it changed.
  let shellKey=JSON.stringify(shellInteraction(host))+paused(),checking=false;
  const follow=()=>{if(checking||disposed)return;checking=true;requestAnimationFrame(()=>{checking=false;const next=JSON.stringify(shellInteraction(host))+paused();if(next!==shellKey){shellKey=next;refresh();}});};
- const observer=new MutationObserver(follow);observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:['hidden','open','data-onboarding-locked','data-detail-open','data-attention-preview','data-template']});
+ const observer=new MutationObserver(follow);observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:['hidden','open','data-onboarding-locked','data-detail-open','data-attention-preview','data-map-attention','data-template']});
  document.addEventListener('visibilitychange',follow);window.addEventListener('worldlet:desktop-companion',follow);
  // The World says when it is drawn (WorldMount.ready); the shell's loading page waits for it.
  queueMicrotask(()=>{if(!disposed){refresh();
@@ -159,6 +162,6 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
   picture(){return mount.picture?.()||null;},
   get metrics(){
    const m=mount.metrics?.() as any||{};return {...m,theme:theme.id,presentation:{...m.presentation,stage:stage.metrics},levelZoom:levelZoom.metrics};},
-  destroy(){if(disposed)return;disposed=true;observer.disconnect();document.removeEventListener('visibilitychange',follow);window.removeEventListener('worldlet:desktop-companion',follow);mount.dispose();stage.destroy();imageLamps.destroy();for(const label of lampLabels.values())label.destroy();levelZoom.dispose();world.remove();}
+  destroy(){if(disposed)return;disposed=true;observer.disconnect();document.removeEventListener('visibilitychange',follow);window.removeEventListener('worldlet:desktop-companion',follow);mount.dispose();stage.destroy();imageLamps.destroy();for(const label of lampLabels.values())label.destroy();levelZoom.dispose();world.remove();delete shellRoot.dataset.worldRenderer;for(const key of ['ink','paper','accent','bodyFont'])shellRoot.style.removeProperty('--world-map-'+key);}
  };
 }

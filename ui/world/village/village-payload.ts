@@ -1,4 +1,4 @@
-import {themeData} from '../../themes/index.ts';
+import {villageThemeData} from '../../themes/index.ts';
 /** The theme's index of its Village art (`assets/art.json`, written by scripts/village-art.ts). */
 interface VillageArt {
  world:{day:string;night:string};landmarks:Record<string,{day:string;night:string}>;
@@ -15,7 +15,7 @@ export interface VillagePayload {
 }
 let current:VillagePayload|null=null;
 export function publishVillageArt(asset:(path:string)=>string):VillagePayload{
- const art=themeData<VillageArt>('assets/art.json'),url=(file:string)=>asset('assets/'+file),each=<T,R>(map:Record<string,T>,f:(v:T)=>R)=>Object.fromEntries(Object.entries(map).map(([k,v])=>[k,f(v)]));
+ const art=villageThemeData<VillageArt>('assets/art.json'),url=(file:string)=>asset('assets/'+file),each=<T,R>(map:Record<string,T>,f:(v:T)=>R)=>Object.fromEntries(Object.entries(map).map(([k,v])=>[k,f(v)]));
  current={surroundings:url(art.world.day),night:url(art.world.night),hiresDay:'',hiresNight:'',
   landmarks:each(art.landmarks,l=>url(l.day)),landmarkNights:each(art.landmarks,l=>url(l.night)),
   devices:each(art.devices,d=>url(d.src)),deviceBoxes:each(art.devices,d=>[...d.box]),logos:each(art.logos,url),
@@ -26,4 +26,4 @@ type VillageArtFocus=Record<string,{image:string;framing?:string;subjectLeft?:nu
 /** The art published for the World now showing. */
 export function villagePayload():VillagePayload{if(!current)throw Error('Village art is not published');return current;}
 /** Where each device's lamp sits (the theme package's lamps.json, which the host's lamps read too). */
-export const villageLamps=themeData<{applets:Record<string,{center:[number,number];radius:[number,number]}>}>('lamps.json').applets;
+export const villageLamps=villageThemeData<{applets:Record<string,{center:[number,number];radius:[number,number]}>}>('lamps.json').applets;

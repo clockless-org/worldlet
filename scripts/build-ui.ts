@@ -8,7 +8,7 @@ import {BUILTIN_STYLE} from '../ui/components/style.ts';
 // Each feature keeps its own styles: Fox's panel and the Journal sit in the states layer; the Attention card,
 // Fox's conversation card and the artifact card (built on the Attention card's parts) load last, in this order.
 export const STATE_STYLES=['ui/companion/companion-panel.css','ui/artifacts/journal.css'];
-export const CARD_STYLES=['ui/attention/attention-preview.css','ui/companion/companion-dialogue.css','ui/companion/fox-proactive.css','ui/artifacts/artifact-card.css','ui/applets/apple-notes/open.css','ui/applets/gmail/open.css','ui/applets/apple-reminders/open.css','ui/applets/google-calendar/open.css','ui/applets/weather/board.css'];
+export const CARD_STYLES=['ui/attention/attention-preview.css','ui/companion/companion-dialogue.css','ui/companion/fox-proactive.css','ui/artifacts/artifact-card.css','ui/applets/apple-notes/open.css','ui/applets/gmail/open.css','ui/applets/apple-reminders/open.css','ui/applets/google-calendar/open.css','ui/applets/weather/board.css','ui/world/world-map.css'];
 export async function buildUI(root,output){
  // The bundled theme package's assets (theme-assets/<id>/).
  await buildThemeSource(root,output);

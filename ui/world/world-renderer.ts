@@ -48,6 +48,8 @@ export interface WorldState {
  * attention mark the host draws there. CSS pixels relative to the World's host element. */
 export interface WorldMark {
  kind:'applet'|'area'|'area-add'|'slot';id:string;x:number;y:number;visible:boolean;
+ /** Optional authored place description; the host renders it as the entrance caption. */
+ caption?:string;
  /** Slot marks: the place's index in its area, as moveApplet takes it. */
  slot?:number;
  /** Applet marks: show the name beside the Applet. */

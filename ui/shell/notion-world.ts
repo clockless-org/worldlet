@@ -26,7 +26,7 @@ import {artifactFollowUpSent,artifactFollowUpRequest,type ArtifactFollowUpDraft,
 import {timingBucket} from '../../core/diagnostics/index.ts';
 import {applyRegionLayout,lastUse,readRegionLayout,parseRegionLayout,moveRegionApplet,pinRegionApplet,pinnedPlace,recordAppletUse,regionId,recentlyUsedFirst,storedRegionLayout} from '../world/index.ts';
 import {resolvePlacements,lampLabels,lampNeeds} from '../world/index.ts';
-import {WORLD_LAYOUT,THEME_SCENE,themeAreaMap} from '../world/index.ts';
+import {WORLD_LAYOUT,THEME_SCENE,themeAreaMap,themeAreaTitle} from '../world/index.ts';
 import {createLocationWriter} from './navigation-history.ts';
 import {renderMailFocus} from '../applets/index.ts';
 import {renderTranscript,transcriptBar} from '../applets/index.ts';
@@ -105,7 +105,7 @@ export function mountNotionWorld(data: World, native: any) {
   if(top.length===1&&top[0].children.length)top=top[0].children.map(id=>pages.get(id));
   const sections: any[]=data.spaces?.length?data.spaces.map(s=>({...s,virtual:true,kind:'space',parent:null,paths:[],text:'',markdown:''})):top.map(p=>({...p,theme:themes(p.title)}));
   const areas=data.areas||[];
-  const buildings=data.buildings||[],composites=data.viewObjects||[];
+  const buildings:(NonNullable<typeof data.buildings>[number]&{visualTheme?:string})[]=(data.buildings||[]).map(b=>({...b,title:themeAreaTitle(regionId(b.id),b.title)})),composites=data.viewObjects||[];
   const buildingFor=id=>buildings.find(b=>b.id===id||b.rooms.includes(id));
   const objectsFor=room=>roomObjects(room,pages,composites);
   const objectFor=id=>{id=data.navigationAliases?.[id]||id;return sections.flatMap(objectsFor).find(o=>o.id===id||o.roomId===id||o.pageIds.includes(id));};
@@ -453,7 +453,7 @@ export function mountNotionWorld(data: World, native: any) {
   }
   function refreshRegions(){
    for(const room of sections){const id=regionId(regionLayout.assignments[room.moduleId]||room.region||room.buildingId||'home');room.region=id;room.buildingId='building-'+id;}
-   for(const b of buildings){const id=regionId(b.id);b.title=regionLayout.names[id]||WORLD_LAYOUT.regions[id]?.title||b.title;b.visualTheme=regionLayout.themes[id]||id;b.rooms=sections.filter(r=>r.buildingId===b.id).map(r=>r.id);}
+   for(const b of buildings){const id=regionId(b.id);b.title=regionLayout.names[id]||themeAreaTitle(id,WORLD_LAYOUT.regions[id]?.title||b.title);b.visualTheme=regionLayout.themes[id]||id;b.rooms=sections.filter(r=>r.buildingId===b.id).map(r=>r.id);}
    scene?.refreshRegions();saveRegions();root.dispatchEvent(new CustomEvent('worldlet:applet-layout'));
   }
   function moveApplet(id,region,index?){
@@ -2275,7 +2275,7 @@ export function mountNotionWorld(data: World, native: any) {
     if(sourceIdentity(data,'gmail')!==sourceIdentity(next,'gmail')){mailIdentityRevision++;mailIdentityReads.clear();mailIdentities.clear();localStageRecords.delete('gmail');}
     const changedReaders=CURATED_READERS.filter(key=>sourceIdentity(data,key)!==sourceIdentity(next,key));
     for(const key of changedReaders)invalidateCurated(key,true);
-    observeMail(next);data=next;askForPictures();buildings.splice(0,buildings.length,...(data.buildings||[]));areas.splice(0,areas.length,...(data.areas||[]));composites.splice(0,composites.length,...(data.viewObjects||[]));const nextSections=data.spaces.map(s=>({...s,virtual:true,kind:'space',parent:null,paths:[],text:'',markdown:''}));
+    observeMail(next);data=next;askForPictures();buildings.splice(0,buildings.length,...(data.buildings||[]).map(b=>({...b,title:themeAreaTitle(regionId(b.id),b.title)})));areas.splice(0,areas.length,...(data.areas||[]));composites.splice(0,composites.length,...(data.viewObjects||[]));const nextSections=data.spaces.map(s=>({...s,virtual:true,kind:'space',parent:null,paths:[],text:'',markdown:''}));
     contentStore.replaceBase(data.pages,nextSections,true);memberOf.clear();for(const section of sections)for(const child of section.children)memberOf.set(child,section.id);
     byPath.clear();for(const p of pages.values())for(const path of p.paths||[])byPath.set(path,p.id);
     if(rebuild){$('notionPins').replaceChildren();for(const k of Object.keys(pins))delete pins[k];}loadSampleLayout();if(rebuild)buildScene();else{scene?.setConnections?.(data.moduleConnections||[]);scene?.setAppletLayout?.(data.hiddenApplets,data.appletPositions);scene?.setUnlockedApplets?.(data.unlockedApplets);scene?.refreshContent();}saveRegions();

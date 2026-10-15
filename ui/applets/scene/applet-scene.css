@@ -108,3 +108,13 @@
 #notionWorld[data-applet-frame][data-applet-scene][data-panel-scene]>.notion-content[data-template=browser] .browser-viewport{
  border-radius:0;box-shadow:none;background:transparent;
 }
+
+/* A measured strip below the Applet papers keeps the real composer clear of their content.
+   The host owns this layout; the theme only provides the quiet rectangle. */
+@media(min-width:801px){
+ #notionWorld.native-console[data-applet-companion-bar=true] .notion-hud{left:var(--applet-scene-companion-left);top:var(--applet-scene-companion-top);bottom:auto;width:var(--applet-scene-companion-width);height:var(--applet-scene-companion-height);min-height:0;transform:none}
+ #notionWorld.native-console[data-applet-companion-bar=true] .companion-pet{left:0;bottom:0;transform:scale(.4);transform-origin:bottom left}
+ #notionWorld.native-console[data-applet-companion-bar=true] .companion-text-entry{left:calc(50% + 28px);bottom:4px;max-width:calc(100% - 64px);width:calc(100% - 64px);--companion-bar-width:calc(var(--applet-scene-companion-width) - 64px);--companion-bar-open:calc(var(--applet-scene-companion-width) - 64px)}
+ #notionWorld.native-console[data-applet-companion-bar=true] .companion-dialogue{bottom:calc(var(--applet-scene-companion-height) + 12px);width:min(460px,calc(100vw - 48px));max-width:min(460px,calc(100vw - 48px))}
+ #notionWorld.native-console[data-applet-companion-bar=true]:not([data-entry-expanded=true]) .companion-dialogue[data-ambient=true]{display:none}
+}

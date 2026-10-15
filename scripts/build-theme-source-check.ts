@@ -55,6 +55,12 @@ try{
  await fs.writeFile(path.join(source,'assets/plate.svg'),'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"/>');
  // Image registrations describe multiple physical surfaces, not executable page layout.
  const plate=await fs.readFile(path.join(source,'assets/plate.svg'));
+ const worldMap={background:'assets/plate.svg',imageSize:[16,16],sha256:createHash('sha256').update(plate).digest('hex'),areas:{home:{anchor:[.5,.4],title:'Home',map:'assets/plate.svg'}}};
+ assert.doesNotThrow(()=>parseThemePresentation({...presentation,worldMap}));
+ for(const invalid of [{...worldMap,renderer:'custom.js'},{...worldMap,background:'https://example.com/map.png'},{...worldMap,areas:{home:{anchor:[1.2,.5]}}},{...worldMap,areas:{home:{anchor:[.2,.3],action:'send'}}},{...worldMap,imageSize:[0,16]},{...worldMap,sha256:'stale'}])assert.throws(()=>parseThemePresentation({...presentation,worldMap:invalid}),/Invalid build theme/);
+ await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify({...presentation,worldMap}));await validateBuildTheme(source);
+ await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify({...presentation,worldMap:{...worldMap,imageSize:[17,16]}}));await assert.rejects(validateBuildTheme(source),/World map registration is stale/);
+ await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(presentation));
  const registration:ThemeSceneRegistration={imageSize:[16,16],sha256:createHash('sha256').update(plate).digest('hex'),regions:[{id:'main',role:'primary',rect:[.05,.1,.55,.8],material:'paper'},{id:'date',role:'secondary',rect:[.7,.1,.2,.2],material:'paper'}],companion:[.7,.5,.25,.45]};
  const registered=(r:unknown)=>({...presentation,appletScenes:{gmail:{background:'assets/plate.svg',registration:r}}});
  assert.doesNotThrow(()=>parseThemePresentation(registered(registration)));

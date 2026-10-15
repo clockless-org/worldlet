@@ -483,6 +483,8 @@ export function createNativeChat(call){return function({button,input,status,exec
   // The card points at Fox, so it carries no name tag (owner Order 2026-10-08).
   topic.hidden=true;
   const text=guided?shownGuide.text:remembered?.text||(preview?context.detail:'');
+  // Only ambient context copy may fold into a scene's short composer strip. Replies, notices and actions stay visible.
+  panel.dataset.ambient=String(!guided&&(!remembered||String(remembered.id).startsWith('greeting:'))&&!busy&&!listening);
   // A guide that follows a reply (a question with options) is that reply's card, not a new one.
   const frontId=guided?guideEntry.get(shownGuide)||'':remembered?.entry||'';
   const front=frontId?cardsHere().find(e=>e.id===frontId)||null:null;
@@ -1065,7 +1067,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   if(held)finishSpeech();else focusInput();
  },true);
  window.addEventListener('keydown',e=>{
-  if(e.key==='Escape'&&(panelOpen()||dialog.open))return;
+  if(e.key==='Escape'&&(panelOpen()||dialog.open||root.dataset.mapAttention))return;
   // A tour on screen takes Esc first (tour-spotlight.ts ends a replay), even over a reply preview it covers.
   if(e.key==='Escape'&&root.dataset.tourSpotlight==='true')return;
   if(e.key==='Escape'&&expanded&&!active){e.preventDefault();e.stopImmediatePropagation();toggleThread(false);return;}

@@ -71,12 +71,19 @@ export interface ThemeAppletPreset {
  icon:string;background:string;
  registration?:ThemeSceneRegistration;
 }
+/** A measured overview with live, host-owned area entrances. Keys are stable host area IDs. */
+export interface ThemeWorldMap {
+ background:string;imageSize:readonly [number,number];sha256:string;
+ areas:Readonly<Record<string,{anchor:readonly [number,number];title?:string;description?:string;map?:string}>>;
+}
 /** WMO forecast condition codes for optional static illustrations. */
 export const THEME_WEATHER_CODES=[0,1,2,3,45,48,51,53,55,56,57,61,63,65,66,67,71,73,75,77,80,81,82,85,86,95,96,99] as const;
 /** The theme's type and colours. */
 export interface ThemeTokens {bodyFont:string;displayFont:string;bodySize:number;titleSize:number;ink:string;paper:string;accent:string;focus:string;radius:number;controlHeight:number}
 export interface ThemePresentation {
  tokens:ThemeTokens;
+ /** Optional painted overview and area backgrounds. No executable renderer is supplied by the theme. */
+ worldMap?:ThemeWorldMap;
  /** Optional condition illustrations by WMO code; omitted codes keep the shared weather artwork. */
  weatherIcons?:Readonly<Record<string,string>>;
  /** Bundled faces. Family defaults to the filename without its extension; use it in the token/material font stacks. */
@@ -115,12 +122,19 @@ export function parseBuildThemeManifest(value:unknown):BuildThemeManifest {
 export function parseThemePresentation(value:unknown):ThemePresentation {
  const p=value as ThemePresentation;
  need(p&&p.tokens,'presentation');
- need(Object.keys(p).every(key=>['tokens','fonts','weatherIcons','hud','sound','icons','artifact','appletPresets','appletScenes','sceneMaterials'].includes(key)),'presentation fields (the host lays out the World and Applet pages)');
+ need(Object.keys(p).every(key=>['tokens','fonts','worldMap','weatherIcons','hud','sound','icons','artifact','appletPresets','appletScenes','sceneMaterials'].includes(key)),'presentation fields (the host lays out the World and Applet pages)');
  const t=p.tokens;for(const k of ['bodyFont','displayFont','ink','paper','accent','focus'])need(text(t[k]),'token '+k);
  for(const k of ['bodySize','titleSize','radius','controlHeight'])need(Number.isFinite(t[k])&&t[k]>0,'token '+k);
  need(t.bodySize>=12&&t.controlHeight>=32,'readable type and controls');
  need(Array.isArray(p.fonts),'fonts');for(const f of p.fonts){themeAssetPath(f.file);themeAssetPath(f.license);need(f.family===undefined||(text(f.family)&&/^[a-zA-Z0-9 _.-]+$/.test(f.family)),'font family');}
  const object=(v:unknown)=>!!v&&typeof v==='object'&&!Array.isArray(v),picture=(v:unknown)=>/\.(png|webp|svg)$/.test(themeAssetPath(v));
+ if(p.worldMap!==undefined){
+  const w=p.worldMap,point=(v:unknown)=>Array.isArray(v)&&v.length===2&&v.every(n=>typeof n==='number'&&Number.isFinite(n)&&n>=0&&n<=1);
+  need(object(w)&&Object.keys(w).every(k=>['background','imageSize','sha256','areas'].includes(k))&&picture(w.background),'world map fields');
+  need(Array.isArray(w.imageSize)&&w.imageSize.length===2&&w.imageSize.every(n=>Number.isInteger(n)&&n>0),'world map dimensions');
+  need(typeof w.sha256==='string'&&/^[a-f0-9]{64}$/.test(w.sha256),'world map image hash');
+  need(object(w.areas)&&Object.keys(w.areas).length>0&&Object.entries(w.areas).every(([key,a])=>id(key)&&object(a)&&Object.keys(a).every(k=>['anchor','title','description','map'].includes(k))&&point(a.anchor)&&(a.title===undefined||text(a.title))&&(a.description===undefined||text(a.description))&&(a.map===undefined||picture(a.map))),'world map areas');
+ }
  if(p.weatherIcons!==undefined)need(object(p.weatherIcons)&&Object.entries(p.weatherIcons).every(([code,file])=>THEME_WEATHER_CODES.some(value=>String(value)===code)&&picture(file)),'weather icons');
  if(p.hud!==undefined){
   const h=p.hud;need(object(h),'hud');

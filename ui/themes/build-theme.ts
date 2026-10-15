@@ -80,6 +80,7 @@ function applyPresentation(theme:InstalledTheme){
  // The fallback stack paints immediately; the registered face takes over when its local file is ready.
  void prepareBuildThemeFonts(theme).catch(()=>{});
  // The theme's Artifact colours colour the host's card too (ui/artifacts/CARD-SYSTEM.md): one look in both modes.
+ if(g.document)g.document.documentElement.dataset.worldTheme=theme.id;
  const style=g.document?.documentElement?.style;
  if(style)for(const [role,hex] of Object.entries(p.artifact?.colors??{}))style.setProperty('--artifact-'+role,hex);
  if(!builtIn)return;
