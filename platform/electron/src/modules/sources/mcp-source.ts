@@ -18,7 +18,7 @@ export const MCP_ENDPOINTS:Readonly<Record<string,string>>=Object.freeze({notion
 const TITLES:Readonly<Record<string,string>>=Object.freeze({notion:'Notion',github:'GitHub',linear:'Linear',paypal:'PayPal',todoist:'Todoist',supabase:'Supabase'});
 const GATES:Readonly<Record<string,McpGate>>=Object.freeze({github:GITHUB_GATE,notion:NOTION_GATE,todoist:TODOIST_GATE,linear:LINEAR_GATE,paypal:PAYPAL_GATE,supabase:SUPABASE_GATE});
 export const MCP_PROVIDERS=Object.freeze(Object.keys(MCP_ENDPOINTS));
-/** The Worldlet Services read over MCP (GitHub); PostHog is read over its own API (service-source.ts). */
+/** The Worldlet Services read over MCP (GitHub); PostHog and Cloudflare are read over their own APIs (service-source.ts). */
 const MCP_SERVICES=Object.freeze(SERVICE_PROVIDERS.filter(provider=>MCP_PROVIDERS.includes(provider)));
 /** What the person reads when a pasted token is refused (401). */
 const TOKEN_REFUSED:Readonly<Record<string,string>>=Object.freeze({github:'GitHub did not accept this token. Check that it has not expired and has read access to Issues, Pull requests and Metadata, then paste it again.'});
