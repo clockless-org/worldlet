@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {askGrant,askGrantAuditEntry,askGrantTargets,askGranted,AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites} from '../core/agent/grants.ts';
+import {boardGrant,boardGrantAuditEntry,boardGrantTargets,boardGranted,askGrant,askGrantAuditEntry,askGrantTargets,askGranted,AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites} from '../core/agent/grants.ts';
 import {HERMES_CHANNEL_READ_ONLY,hermesChannelToolAllowed} from '../core/agent/hermes-server.ts';
 import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
 import {turnWriteAdmission,writeDecision} from '../core/agent/turn-trust.ts';
@@ -125,7 +125,7 @@ assert.equal(worldCallWrites('start_applet_task'),true);assert.equal(worldCallWr
 // describe_world_tools: only granted targets outside a turn; everything while a Fox turn holds the server; none revoked.
 const listed=new Set(standingActions(actions,hermes,defaults,false,now).map(a=>a.target));
 assert.ok(listed.has('items')&&listed.has('world')&&!listed.has('content'));
-assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.filter(a=>a.target!=='asks').length,'everything but asks, which only the Agent\'s own Grants name');
+assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.filter(a=>a.target!=='asks'&&a.target!=='board').length,'everything but asks and the board, which only the Agent\'s own Grants name');
 assert.deepEqual(standingActions(actions,{...hermes,revokedAt:earlier},defaults,true,now),[]);
 // A resolved call maps back to its target and action (channelToolReply checks Grants by them).
 assert.deepEqual(worldActionOf(actions,'query_world_items',{}),{target:'items',action:'query'});
@@ -191,4 +191,31 @@ assert.deepEqual(standingActions(actions,codex,[...codexDefaults,askingGrant],fa
 assert.equal(askGranted('codex',[askingGrant],'ask',now),true);assert.equal(askGranted('codex',[askingGrant],'work',now),false);assert.equal(askGranted('hermes',[askingGrant],'ask',now),false);
 assert.deepEqual(askGrantAuditEntry('codex','work',true,now),{at:now,agentId:'codex',target:'asks',action:'grant-work',decision:'allowed',grantId:'codex-asks-work',reason:'The person let this Agent take work in Settings.'});
 
-console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server, per-Service read Grants, ask Grants.');
+// "Can see your board" and "Can set up your board": exactly board/read and board/define, never default, never given by a
+// Fox turn, and not a guarded write.
+assert.deepEqual(boardGrantTargets('read'),['board/read']);assert.deepEqual(boardGrantTargets('define'),['board/define']);
+for(const name of ['*','board','all','__proto__','','ask'])assert.deepEqual(boardGrantTargets(name),[],'not a board Grant: '+name);
+assert.equal(boardGrant('codex','*/*',now),null);assert.equal(boardGrant('Not An Id','read',now),null);
+const seeGrant=boardGrant('codex','read',now)!,defineGrant=boardGrant('codex','define',now)!;
+assert.deepEqual(seeGrant,{id:'codex-board-read',agentId:'codex',targets:['board/read'],access:'read',duration:'standing',grantedAt:now});
+assert.ok(!channelDefaultGrants('codex',earlier,actions).some(g=>g.targets.some(t=>t.startsWith('board/'))),'no board in the default Grants');
+const boardCall=(grants:Grant[],action:string,args:Record<string,unknown>,foxTurn:{own:boolean}|null=null,identity=codex)=>{
+ const resolved=resolveAction(actions,'board',action,args);
+ assert.equal(resolved.name,'world_board');assert.equal(worldCallWrites(resolved.name,resolved.args),false,'the board is not a guarded write');
+ return standingCallDecision({identity,grants,target:'board',action,tool:resolved.name,args:resolved.args,foxTurn,now});
+};
+const definition={tabs:[{id:'a',title:'A',blocks:[]}]};
+assert.equal(boardCall(codexDefaults,'read',{}).decision,'denied','ungranted: refused');
+assert.deepEqual(boardCall([...codexDefaults,seeGrant],'read',{}),{decision:'allowed',grantId:'codex-board-read'});
+assert.equal(boardCall([...codexDefaults,seeGrant],'define',{definition,expectedRevision:0}).decision,'denied','seeing is not setting up');
+assert.deepEqual(boardCall([...codexDefaults,defineGrant],'define',{definition,expectedRevision:0}),{decision:'allowed',grantId:'codex-board-define'});
+assert.equal(boardCall([...codexDefaults,{...defineGrant,revokedAt:earlier}],'define',{definition,expectedRevision:0}).decision,'denied','taken back: refused');
+assert.equal(boardCall(defaults,'define',{definition,expectedRevision:0},{own:true},hermes).decision,'denied','a Fox turn never sets up the board');
+assert.equal(boardCall(defaults,'read',{},{own:true},hermes).decision,'denied','nor reads it');
+assert.equal(boardCall([...defaults,boardGrant('hermes','read',now)!],'read',{},{own:false},hermes).decision,'allowed','its own Grant does, in a turn too');
+assert.ok(!standingActions(actions,hermes,defaults,true,now).some(a=>a.target==='board'),'not listed in a Fox turn without a Grant');
+assert.deepEqual(standingActions(actions,codex,[...codexDefaults,defineGrant],false,now).filter(a=>a.target==='board').map(a=>a.action),['define']);
+assert.equal(boardGranted('codex',[seeGrant],'read',now),true);assert.equal(boardGranted('codex',[seeGrant],'define',now),false);assert.equal(boardGranted('hermes',[seeGrant],'read',now),false);
+assert.deepEqual(boardGrantAuditEntry('codex','define',true,now),{at:now,agentId:'codex',target:'board',action:'grant-define',decision:'allowed',grantId:'codex-board-define',reason:'The person let this Agent set up the board in Settings.'});
+
+console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server, per-Service read Grants, ask Grants, board Grants.');

@@ -1,7 +1,9 @@
-import {BOARD_BLOCK_KINDS,BOARD_LIMITS,type BoardBlock,type BoardBlockKind,type BoardBlockView,type BoardDefinition,type BoardFunnelStep,type BoardListItem,type BoardPoint,type BoardTab,type BoardView} from '../../contracts/board.ts';
+import {BOARD_BLOCK_KINDS,BOARD_DEFINE_PRESETS,BOARD_LIMITS,type BoardReadArgs,type BoardRecord,type BoardBlock,type BoardBlockKind,type BoardBlockView,type BoardDefinition,type BoardFunnelStep,type BoardListItem,type BoardPoint,type BoardTab,type BoardView} from '../../contracts/board.ts';
 import type {ServicePreset} from '../../contracts/service-presets.ts';
 import type {ServiceRecords} from '../../contracts/services.ts';
+import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
 import {looksSecret} from '../agent/index.ts';
+import {saveServicePreset} from '../accounts/index.ts';
 
 /** The board (contracts/board.ts, core/board/README.md). Pure: the host supplies the definition, the saved presets and
  * each preset's Service read (or why it could not be read), and shows what comes back. No model is involved: every
@@ -16,6 +18,9 @@ export const BOARD_REASONS=Object.freeze({
  field:`Name a field of up to ${BOARD_LIMITS.field} characters, as the read returns it.`,
  secret:'A board may not hold passwords, tokens or keys.',
  control:'A board may not hold control characters.',
+ stale:'The board changed since it was read. Read it again (board/read) and define it at that revision.',
+ tab:'This board has no such tab.',
+ presets:`Save at most ${BOARD_DEFINE_PRESETS} presets with one definition.`,
  size:`A board has at most ${BOARD_LIMITS.tabs} tabs, ${BOARD_LIMITS.blocksPerTab} blocks a tab, ${BOARD_LIMITS.blocks} blocks and ${BOARD_LIMITS.presets} presets in all.`,
 });
 
@@ -163,4 +168,40 @@ export function resolveBoard(definition:BoardDefinition,presets:readonly Service
   catch(error){return {...base,provider:preset.provider,scope:read.records.scope,status:'error',error:error instanceof Error&&error.message?error.message:'This block cannot be shown.'};}
  })}));
  return {title:definition.title,tabs,resolvedAt:now};
+}
+
+/** `board/read` arguments: nothing, or one tab's ID. */
+export function readBoardReadArgs(input:unknown,definition?:BoardDefinition):BoardReadArgs {
+ const value=record(input);only(value,['tab']);
+ if(value.tab===undefined)return {};
+ const tab=id(value.tab);
+ if(definition&&!definition.tabs.some(item=>item.id===tab))fail(BOARD_REASONS.tab);
+ return {tab};
+}
+
+/** `board/define`: the whole new definition at the revision it was read at (0 with no board yet), and any presets to
+ * save with it, each checked as the person's own would be. Returns the board to keep, its revision one higher and
+ * stamped with the defining Agent (`agentId`, from its token; null for the person), and every preset after the save.
+ * Refused, with nothing changed, when anything in it is not valid or the revision is stale. */
+export function defineBoard(current:BoardRecord|null,presets:readonly ServicePreset[],input:unknown,agentId:string|null,now:string):{board:BoardRecord;presets:ServicePreset[]} {
+ const value=record(input);only(value,['definition','presets','expectedRevision']);
+ if(!Number.isFinite(Date.parse(now))||agentId!==null&&!AGENT_ID_PATTERN.test(agentId))fail(BOARD_REASONS.invalid);
+ if(value.expectedRevision!==(current?.revision??0))fail(BOARD_REASONS.stale);
+ const definition=readBoardDefinition(value.definition);
+ let saved=[...presets];
+ if(value.presets!==undefined){
+  if(!Array.isArray(value.presets)||value.presets.length>BOARD_DEFINE_PRESETS)fail(BOARD_REASONS.presets);
+  for(const preset of value.presets as unknown[])saved=saveServicePreset(saved,preset,now).presets;
+ }
+ return {board:{definition,revision:(current?.revision??0)+1,updatedAt:now,...agentId?{agentId}:{}},presets:saved};
+}
+
+/** The stored board, checked again; null when there is none or it no longer passes. */
+export function readStoredBoard(value:unknown):BoardRecord|null {
+ const v=record(value);
+ if(!Number.isInteger(v.revision)||(v.revision as number)<1||typeof v.updatedAt!=='string'||!Number.isFinite(Date.parse(v.updatedAt)))return null;
+ try{
+  return {definition:readBoardDefinition(v.definition),revision:v.revision as number,updatedAt:v.updatedAt,
+   ...typeof v.agentId==='string'&&AGENT_ID_PATTERN.test(v.agentId)?{agentId:v.agentId}:{}};
+ }catch{return null;}
 }

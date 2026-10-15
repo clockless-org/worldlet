@@ -90,6 +90,10 @@ function buildWorldActions(sample:boolean):WorldAction[]{
  // Agent asks (core/agent/asks.ts): each its own Grant target, which only "Can ask you" and "Can take work" name.
  operations('asks','agent_asks');
  for(const action of actions.filter(a=>a.tool==='agent_asks'))action.parameters.required={post:['title'],read:[],claim:[],resolve:['id','note','expectedRevision']}[action.action]??[];
+ // The board (core/board/README.md): each its own Grant target, which only "Can see your board" and "Can set up your
+ // board" name.
+ operations('board','world_board');
+ for(const action of actions.filter(a=>a.tool==='world_board'))action.parameters.required=action.action==='define'?['definition','expectedRevision']:[];
  operations('weather','manage_weather_location');
  for(const action of actions.filter(a=>a.tool==='manage_weather_location'))action.parameters.required=action.action==='search'?['query']:action.action==='select'?['choice']:[];
  operations('music','control_background_music');operations('local-music','control_local_music');operations('youtube','use_youtube');operations('stripe','use_stripe_crm');

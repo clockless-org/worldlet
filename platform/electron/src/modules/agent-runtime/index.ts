@@ -13,6 +13,7 @@ import {keepHermesResident} from './hermes-service.ts';
 import {openStandingWorldTools,type StandingWorldTools} from './world-tool-bridge.ts';
 import {createAgentAccess} from './agent-access.ts';
 import {createAgentAsks,type AgentAsks} from './agent-asks.ts';
+import {createWorldBoard,type WorldBoard} from './board.ts';
 import {moveFoxProfile} from './fox-move.ts';
 import {HERMES_WINDOW_DONE,endHermesInstall,hermesInstallWindow,hermesSessionModels,hermesStarts,installHermes,workingHermesAgent,installedHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
 import {UPDATED,backgroundSignIn,claudeCodeSignedIn,openSignIn} from './provider-sign-in.ts';
@@ -26,7 +27,7 @@ import {harnessConnections} from './harness-connections.ts';
 import {harnessScheduleControls} from './harness-schedule-controls.ts';
 import {harnessSkills} from './harness-skills.ts';
 import {harnessMemory} from './harness-memory.ts';
-import {AGENT_VERSIONS,agentRevoked,serviceGranted,askGranted,ASK_GRANT_KINDS,type AskGrantKind,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
+import {AGENT_VERSIONS,agentRevoked,serviceGranted,askGranted,ASK_GRANT_KINDS,type AskGrantKind,boardGranted,BOARD_GRANT_KINDS,type BoardGrantKind,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {harnessTools} from './harness-services.ts';
 import {ongoingId} from '../../../../../core/tasks/index.ts';
 import {SERVICE_PROVIDERS,SERVICE_TITLES} from '../../../../../contracts/services.ts';
@@ -266,13 +267,16 @@ let standing:Promise<StandingWorldTools>|null=null;
  * the other Agents a host registers on it (platform/node control.ts). */
 export function standingWorldTools():Promise<StandingWorldTools>|null {
  if(!agentAccess)return null;
- return standing??=openStandingWorldTools({access:agentAccess,asks:(agentId,args)=>agentAsks?agentAsks.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},channel:(name,args,agent)=>channelTool?channelTool(name,args,agent):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})});
+ return standing??=openStandingWorldTools({access:agentAccess,asks:(agentId,args)=>agentAsks?agentAsks.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},
+  board:(agentId,args,canRead)=>worldBoard?worldBoard.call(agentId,args,canRead):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),channel:(name,args,agent)=>channelTool?channelTool(name,args,agent):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})});
 }
 let channelTool:((name:string,args:Row,agent?:string)=>Promise<Row>)|null=null;
 /** Each Agent's identity, Grants and audit (agent-access.ts), made when the runtime is installed. */
 let agentAccess:AgentAccess|null=null;
 /** Agent asks (agent-asks.ts), made with agentAccess. */
 let agentAsks:AgentAsks|null=null;
+/** The board (board.ts), made with the Agent service whose Service readers it reads through. */
+let worldBoard:WorldBoard|null=null;
 /** How many of each Agent's newest audit entries Settings shows. */
 const AGENT_ACCESS_AUDIT=20;
 
@@ -551,6 +555,16 @@ export function installAgentRuntime(host:Host){
  };
  const noAgent=()=>adapter instanceof NoAgentAdapter?adapter:new NoAgentAdapter(context);
  const service=createAgentService(context,()=>adapter,listeners,home=>worldSources(context,vault,home));
+ // The board (core/board/README.md): in the person's own World with private context allowed, as asks are. Each preset is
+ // read through the World's own Service readers, as the Attention Center reads a source: no Agent, no turn, no model.
+ worldBoard=createWorldBoard({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
+  read:request=>service.makeSourceAccess().run({action:'sourceTool',name:'read_service',args:{...request},_background:true},service.accountsHome(),
+   async event=>event.type==='tool'&&event.name==='_world_authorize'&&(event.args as Row|undefined)?.name==='read_service'?{ok:true}:{error:'The board only reads Services.'})});
+ /** The board as the person sees it (`read`, optionally one `tab`): every Service the World is connected to. */
+ host.register({board:async request=>{
+  if(request.operation!=='read')throw new WorldletError('Unknown board operation.');
+  try{return await worldBoard!.view(request);}catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not read the board.');}
+ }});
  // Reset Fox starts onboarding on its first page, where the local Agent is chosen again.
  service.forgetSetupChoice=async()=>{
   if(process.env.WORLDLET_AGENT_CONFIG!==undefined)return;
@@ -607,10 +621,22 @@ export function installAgentRuntime(host:Host){
    }else if(!access.ungrantAsks(id,kind))throw new WorldletError('Could not change that.');
    return {ok:true};
   }
+  if(request.operation==='grantBoard'||request.operation==='ungrantBoard'){
+   const id=typeof request.id==='string'?request.id:'',kind=typeof request.kind==='string'?request.kind:'';
+   const identity=access.identity(id);
+   if(!identity)throw new WorldletError('That Agent is not known here.');
+   if(!BOARD_GRANT_KINDS.includes(kind as BoardGrantKind))throw new WorldletError('That is not something an Agent can be allowed here.');
+   if(request.operation==='grantBoard'){
+    if(agentRevoked(identity,new Date().toISOString()))throw new WorldletError('This Agent was revoked.');
+    if(!access.grantBoard(id,kind))throw new WorldletError('Could not change that.');
+   }else if(!access.ungrantBoard(id,kind))throw new WorldletError('Could not change that.');
+   return {ok:true};
+  }
   const services=connectedServices(),now=new Date().toISOString();
   return {agents:access.list(AGENT_ACCESS_AUDIT).map(({identity,grants,audit})=>({...identity,grants,audit,
    services:agentRevoked(identity,now)?[]:services.map(provider=>({provider,title:SERVICE_TITLES[provider],granted:serviceGranted(identity.id,grants,provider,now)})),
-   asks:{ask:askGranted(identity.id,grants,'ask',now),work:askGranted(identity.id,grants,'work',now)}}))};
+   asks:{ask:askGranted(identity.id,grants,'ask',now),work:askGranted(identity.id,grants,'work',now)},
+   board:{read:boardGranted(identity.id,grants,'read',now),define:boardGranted(identity.id,grants,'define',now)}}))};
  }});
  host.register({agentHarness:localHarnessActions(context,switchTo,noAgent,remote,vault,()=>{const id=requested;requested=null;return id;},event=>host.page.event('worldlet:hermes-setup',event),
   async id=>{if(adapter instanceof LocalHarnessAdapter&&adapter.install.id===id)await adapter.whileStopped(async()=>{});},event=>{host.page.event('worldlet:agent-check',event);

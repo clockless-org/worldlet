@@ -405,6 +405,10 @@ export interface AgentAccess {
   * same way: a standing Grant naming only those targets (core askGrant), each change audited. */
  grantAsks(agentId:string,kind:string):boolean;
  ungrantAsks(agentId:string,kind:string):boolean;
+ /** "Can see your board" (`read`: board/read) and "Can set up your board" (`define`: board/define), the same way
+  * (core boardGrant), each change audited. */
+ grantBoard(agentId:string,kind:string):boolean;
+ ungrantBoard(agentId:string,kind:string):boolean;
  onRevoke(listener:(agentId:string)=>void):void;
 }
 export interface VaultService {
