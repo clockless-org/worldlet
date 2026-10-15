@@ -248,9 +248,9 @@ export function residentHermes(context:RuntimeContext,adapter:Adapter):Promise<v
  const home=discoverOtherHermes(context.root);
  if(!home)return null;
  const install=adapter.install,environment=currentEnvironment();
- if(!agentAccess)return null;
- const access=agentAccess;
- return (standing??=openStandingWorldTools({access,channel:(name,args,agent)=>channelTool?channelTool(name,args,agent):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})})).then(tools=>
+ const tools=standingWorldTools();
+ if(!tools)return null;
+ return tools.then(tools=>
   keepHermesResident(home,(args,stdin)=>runHarnessCommand(install,environment,args,{timeout:120_000,...stdin!==undefined?{stdin}:{}}),{worldTools:home=>tools.server(home)})).then(
   reason=>{if(reason)context.failure(new WorldletError(`Hermes Agent is not kept running for Fox: ${reason}`),'hermesResident');},
   error=>context.failure(error,'hermesResident'));
@@ -258,6 +258,12 @@ export function residentHermes(context:RuntimeContext,adapter:Adapter):Promise<v
 /** World tools on Hermes (owner decision 2026-10-08 19:15Z): the standing endpoint its registered `worldlet` server relays
  * to, one per app run, and where a call outside any Fox turn goes (Fox's module: `AgentService.onChannelTool`). */
 let standing:Promise<StandingWorldTools>|null=null;
+/** That endpoint, opened on first use (null before the runtime is installed): Hermes Agent's registered server, and
+ * the other Agents a host registers on it (platform/node control.ts). */
+export function standingWorldTools():Promise<StandingWorldTools>|null {
+ if(!agentAccess)return null;
+ return standing??=openStandingWorldTools({access:agentAccess,channel:(name,args,agent)=>channelTool?channelTool(name,args,agent):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})});
+}
 let channelTool:((name:string,args:Row,agent?:string)=>Promise<Row>)|null=null;
 /** Each Agent's identity, Grants and audit (agent-access.ts), made when the runtime is installed. */
 let agentAccess:AgentAccess|null=null;

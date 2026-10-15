@@ -10,12 +10,16 @@ Each Agent that reaches the standing server gets its own token, endpoint file, G
 app ([Agent identity, Grants and audit](../../core/agent/GRANTS.md#the-standing-mcp-server)); the token hashes go into
 this host's own vault.
 
-This is the first step of the headless service. There is no command line, installer or package yet.
+This is the headless service without its installer or package yet: the host, the `worldlet` command line that talks
+to it, and the fixed MCP home Agents register.
 
 ## What it runs
 
 | Path | Responsibility |
 | --- | --- |
+| `src/cli.ts` | The program: `worldlet.cjs <command>` is the [command line](#the-worldlet-command); anything else runs `main.ts` |
+| `src/control.ts` | The control socket (owner-only, in the library) and the command line's side of it |
+| `src/mcp-home.ts` | The [fixed MCP home](#one-fixed-mcp-home) and `register`: each Agent's own command, and the Worldlet skill in its skills folder |
 | `src/main.ts` | Entry: profile, store, router, the World page in a browser as its page bridge, the vault, the modules below; starts their work at once, serves the World, writes the browser link and the World link and stops on SIGTERM, or on a `worldlet:stop` message from a parent's IPC channel (Windows) |
 | `src/electron-shim.ts` | Stands in for `electron` (aliased at build time): process facts answer, window constructors throw, and dialogs, the clipboard, shell opens and notifications fail with "Needs the desktop app" |
 | `src/vault-storage.ts` | The vault's encryption without a keychain: AES-256-GCM with a random key in an owner-only `vault.key` beside `vault.json` |
@@ -65,6 +69,36 @@ page's own origin and the token, and a browser's page cannot ask for what `WEB_D
 same port number over SSH (for 47630, `ssh -L 47630:127.0.0.1:47630 <computer>`) and open the link there; opening the
 World from another device without that is a later step.
 
+## The `worldlet` command
+
+`node worldlet.cjs <command>` asks the running host over its control socket, `control.sock` in the library (owner-only,
+0600; a named pipe on Windows), and prints the answer. The answer goes only to the asker's stdout; the host logs
+nothing of it. With no host running it says so and exits with code 3.
+
+| Command | What it does |
+| --- | --- |
+| `status` | The version and library, Fox's Agent, whether the person finished setup, the browser link's state (never the link) and the Agents registered from the MCP home |
+| `link` | Prints the browser link (`world/link`'s, the one in `room-link.txt`); anyone who has it reaches this World, so it is for the person alone |
+| `setup --agent <id>` | Chooses the Agent Fox talks through with setup's own `agentHarness` `select` (it proves the Agent answers first; Codex alone is no Agent for Fox), then registers Claude Code or Codex as below |
+| `register --agent <id>` | Registers the `worldlet` MCP server and skill in `claude-code` or `codex`. Hermes Agent gets its entry in its own profile once it is Fox's Agent ([World tools on Hermes](../../core/agent/PORTABILITY.md#world-tools-on-hermes)) |
+
+Neither command gives consent or finishes onboarding: World tools on the standing server keep answering that the person
+has not finished setting up until they do so in the World, as in the desktop app.
+
+## One fixed MCP home
+
+`~/.worldlet/mcp` (`WORLDLET_HOME` names another place than `~/.worldlet`) holds the standing server's stdio shim
+(`worldlet-mcp-standing.cjs`), its tool list and one owner-only endpoint file per Agent
+(`worldlet-mcp-endpoint.<agentId>.json`, [per-Agent tokens](../../core/agent/GRANTS.md#the-standing-mcp-server)). The
+names never change, so an Agent registers once: each run the host writes this run's endpoint and the Agent's new token
+into the same file, and removes it when it stops, so a call then answers that Worldlet is not open. `registered.json`
+lists the Agents registered here. Each registers with its own command (`core/agent/harness-connections.ts`):
+
+- Claude Code: `claude mcp add --scope user worldlet --env WORLDLET_MCP_ENDPOINT_FILE=… --env WORLDLET_MCP_TOOLS_FILE=… -- <node> ~/.worldlet/mcp/worldlet-mcp-standing.cjs`, after `claude mcp remove --scope user worldlet`; the skill goes to `~/.claude/skills/worldlet/SKILL.md` (under `CLAUDE_CONFIG_DIR` when set).
+- Codex: `codex mcp add worldlet --env … -- <node> …`, after `codex mcp remove worldlet`; the skill goes to `~/.codex/skills/worldlet/SKILL.md` (under `CODEX_HOME` when set).
+
+The skill is [harness/skills/worldlet/SKILL.md](../../harness/skills/worldlet/SKILL.md), built into the program.
+
 ## Build, run and check
 
 | Command | Purpose |
@@ -73,6 +107,7 @@ World from another device without that is a later step.
 | `npm run build:node-host` | Bundle the host to `dist/node/worldlet.cjs` (`--out <dir>` for another folder) |
 | `node dist/node/worldlet.cjs` | Run it; SIGTERM or Ctrl-C stops it. On Windows, where SIGTERM ends a process at once, a parent that started it with an IPC channel sends `{type:'worldlet:stop'}` for a clean stop |
 | `node dist/node/worldlet.cjs --host-contract-check` | Print the actions, services and capabilities it implements, on a temporary library |
-| `npm run test:node-host` | Shim and vault storage checks, then build, contract check, boot, restart and stop; then the World in headless Chromium (SwiftShader WebGL) on a library with one item, and the server's refusals (`-- --screenshot <file>` keeps a picture) |
+| `node dist/node/worldlet.cjs status` | The [command line](#the-worldlet-command): `status`, `link`, `setup --agent <id>`, `register --agent <id>` |
+| `npm run test:node-host` | Shim and vault storage checks, then build, contract check, boot, restart and stop; the command line against fake `claude` and `codex` commands (socket and endpoint files owner-only, the link never in the log); then the World in headless Chromium (SwiftShader WebGL) on a library with one item, and the server's refusals (`-- --screenshot <file>` keeps a picture) |
 
 Node 22.19 or later.

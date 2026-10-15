@@ -3,10 +3,11 @@
 // through that Agent's own command after the person confirmed it. Shared rules only: reading Hermes Agent's
 // `mcp_servers` (config.yaml) and chat tokens (.env, names only) and OpenClaw's `openclaw mcp status --json` and
 // `openclaw channels list --json`, masking anything secret, matching a tool call in the Agent's history to its server,
-// and the exact arguments of each change. Running the commands and reading the history is the host's job
+// and the exact arguments of each change, and of registering Worldlet's own `worldlet` server in Claude Code and Codex. Running the commands and reading the history is the host's job
 // (agent-runtime/harness-connections.ts). Kept ES-compatible for JavaScriptCore and Jint.
 import type {HarnessConnection,HarnessConnectionAdd,HarnessConnectionChange,HarnessConnectionUse} from '../../contracts/harness-services.ts';
 import {standingRuleId} from './harness-approvals.ts';
+import {HERMES_WORLD_TOOLS,type HermesWorldToolsServer} from './hermes-server.ts';
 import {hermesConfigValues} from './harness-tools.ts';
 import {record,text} from './values.ts';
 
@@ -163,6 +164,27 @@ export function openClawConnectionCommand(change:HarnessConnectionChange,name?:s
  const add=change.add;
  return {args:'url' in add?['mcp','add',add.name,'--url',add.url,'--transport','streamable-http']:['mcp','add',add.name,'--command',add.command,...add.args.flatMap(arg=>['--arg',arg])],stdin:''};
 }
+// Worldlet's own `worldlet` server in Claude Code and Codex -------------------------------------------------------
+
+/** The Agents whose own command registers Worldlet's standing `worldlet` server from its fixed home (the Node host's
+ * `worldlet register`, platform/node/README.md): each command, run in order. An entry by that name is removed first
+ * (that command fails harmlessly when there is none), so a later registration replaces it rather than failing. */
+export const WORLD_TOOLS_REGISTRARS=['claude-code','codex'] as const;
+export type WorldToolsRegistrar=typeof WORLD_TOOLS_REGISTRARS[number];
+export const isWorldToolsRegistrar=(value:unknown):value is WorldToolsRegistrar=>(WORLD_TOOLS_REGISTRARS as readonly unknown[]).indexOf(value)>=0;
+const envPairs=(server:HermesWorldToolsServer)=>Object.keys(server.env).map(key=>key+'='+server.env[key]);
+/** Claude Code: `claude mcp remove --scope user worldlet`, then `claude mcp add --scope user worldlet --env K=V … --
+ * <command> <args…>` (user scope: every project on this computer). */
+export function claudeCodeWorldToolsCommands(server:HermesWorldToolsServer):{args:string[];optional?:true}[] {
+ return [{args:['mcp','remove','--scope','user',HERMES_WORLD_TOOLS],optional:true},
+  {args:['mcp','add','--scope','user',HERMES_WORLD_TOOLS,...envPairs(server).flatMap(pair=>['--env',pair]),'--',server.command,...server.args]}];
+}
+/** Codex: `codex mcp remove worldlet`, then `codex mcp add worldlet --env K=V … -- <command> <args…>`. */
+export function codexWorldToolsCommands(server:HermesWorldToolsServer):{args:string[];optional?:true}[] {
+ return [{args:['mcp','remove',HERMES_WORLD_TOOLS],optional:true},
+  {args:['mcp','add',HERMES_WORLD_TOOLS,...envPairs(server).flatMap(pair=>['--env',pair]),'--',server.command,...server.args]}];
+}
+export const worldToolsCommands=(harness:WorldToolsRegistrar,server:HermesWorldToolsServer)=>harness==='claude-code'?claudeCodeWorldToolsCommands(server):codexWorldToolsCommands(server);
 /** The last line a command printed that says why it failed (colour codes, check marks and a prompt it printed before
  * on the same line removed), masked. */
 export function commandReason(output:string):string {

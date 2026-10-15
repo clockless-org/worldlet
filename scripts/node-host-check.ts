@@ -3,7 +3,9 @@
 // its own vault storage, and stop cleanly. Its shim and vault storage are checked on their own first. Then the World
 // in a browser on this computer (contracts/web-world.ts): on a library with one item, the link it writes opens the real
 // World in headless Chromium (SwiftShader WebGL), and the server refuses another Host, another Origin, a missing token
-// and the actions a browser's page may not ask for. `--screenshot <file>` keeps a picture of that World.
+// and the actions a browser's page may not ask for. The `worldlet` command line (status, link, register) runs against
+// the host over its control socket, with fake `claude` and `codex` commands. `--screenshot <file>` keeps a picture of
+// that World.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -112,6 +114,90 @@ await withTempDir('worldlet-node-host-',async temp=>{
  assert.equal(fs.readFileSync(file,'utf8').trim(),link,'a restart keeps the same link');
  assert.equal(fs.readFileSync(worldFile,'utf8').trim(),world,'and the same World link');
  console.log('PASS node host: boots with no window, writes the browser link and the World link, keeps them across a restart and stops cleanly on SIGTERM (POSIX) and on the stop message over IPC (every platform, the only clean stop on Windows)');
+
+ // The `worldlet` command line over the control socket, and the fixed MCP home (control.ts, mcp-home.ts): fake
+ // `claude` and `codex` commands record how they were asked to register Worldlet's server. POSIX only (a unix socket
+ // and shell fixtures).
+ if(process.platform!=='win32'){
+  const home=path.join(temp,'home'),fake=path.join(temp,'fake'),argvLog=path.join(temp,'argv.log'),mcp=path.join(temp,'worldlet-home','mcp');
+  fs.mkdirSync(home);fs.mkdirSync(fake);
+  for(const name of ['claude','codex'])fs.writeFileSync(path.join(fake,name),`#!/bin/sh\nprintf '%s\\n' "${name} $*" >> '${argvLog}'\n[ "$2" = remove ] && exit 1\nexit 0\n`,{mode:0o755});
+  const cliEnv:NodeJS.ProcessEnv={...env,HOME:home,WORLDLET_HOME:path.join(temp,'worldlet-home'),PATH:fake+path.delimiter+process.env.PATH};
+  delete cliEnv.CLAUDE_CONFIG_DIR;delete cliEnv.CODEX_HOME;
+  const cli=(...args:string[])=>spawnSync(process.execPath,[host,...args],{cwd:temp,env:cliEnv,encoding:'utf8',timeout:120_000});
+  const socket=path.join(library,'control.sock'),link=fs.readFileSync(path.join(library,'room-link.txt'),'utf8').trim(),secret=link.slice(link.indexOf('#')+1);
+  const idle=cli('status');
+  assert.equal(idle.status,3,'no service: its own exit code');
+  assert.match(idle.stderr,/Worldlet is not running on this computer/);
+  const start=async()=>{
+   const child=spawn(process.execPath,[host],{cwd:temp,env:cliEnv,stdio:['ignore','pipe','pipe']});
+   let out='';child.stdout.on('data',chunk=>{out+=chunk;});child.stderr.on('data',chunk=>{out+=chunk;});
+   const exited=new Promise<number|null>(resolve=>child.on('exit',code=>resolve(code)));
+   const deadline=Date.now()+30_000;
+   while(!(/World ready at /.test(out)&&fs.existsSync(socket))&&child.exitCode===null&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,100));
+   assert.ok(fs.existsSync(socket),'the control socket is in the library: '+out.slice(-400));
+   return {output:()=>out,stop:async()=>{
+    child.kill('SIGTERM');
+    const code=await Promise.race([exited,new Promise<'hung'>(resolve=>setTimeout(()=>resolve('hung'),20_000))]);
+    if(code==='hung')child.kill('SIGKILL');
+    assert.equal(code,0,'stops cleanly: '+out.slice(-400));
+   }};
+  };
+  let running=await start();
+  try{
+   assert.equal(mode(socket),0o600,'the control socket is owner-only');
+   const status=cli('status');
+   assert.equal(status.status,0,status.stderr);
+   assert.match(status.stdout,/^Worldlet .* is running with the library at /);
+   assert.match(status.stdout,/Setup: The person has not finished setup yet/,'says setup is not done');
+   assert.match(status.stdout,/registered in no Agent yet/);
+   assert.ok(!status.stdout.includes(secret),'status never prints the link');
+   const printed=cli('link');
+   assert.equal(printed.status,0,printed.stderr);
+   assert.equal(printed.stdout.trim(),link,'link prints the browser link, the same one the library keeps');
+   assert.equal(cli('register').status,2,'register needs --agent');
+   const hermes=cli('register','--agent','hermes');
+   assert.equal(hermes.status,1);assert.match(hermes.stderr,/worldlet setup --agent hermes/);
+   assert.equal(fs.existsSync(argvLog),false,'nothing ran yet');
+   for(const agent of ['claude-code','codex']){
+    const registered=cli('register','--agent',agent);
+    assert.equal(registered.status,0,registered.stderr);
+    assert.match(registered.stdout,/MCP server "worldlet" is registered/);
+   }
+   const endpoint=(agent:string)=>path.join(mcp,`worldlet-mcp-endpoint.${agent}.json`),shim=path.join(mcp,'worldlet-mcp-standing.cjs'),tools=path.join(mcp,'worldlet-mcp-tools.json');
+   const added=(agent:string)=>`--env ELECTRON_RUN_AS_NODE=1 --env WORLDLET_MCP_ENDPOINT_FILE=${endpoint(agent)} --env WORLDLET_MCP_TOOLS_FILE=${tools} -- ${process.execPath} ${shim}`;
+   assert.deepEqual(fs.readFileSync(argvLog,'utf8').trim().split('\n'),[
+    'claude mcp remove --scope user worldlet',`claude mcp add --scope user worldlet ${added('claude-code')}`,
+    'codex mcp remove worldlet',`codex mcp add worldlet ${added('codex')}`],'each Agent registers the fixed home with its own command');
+   for(const agent of ['claude-code','codex'])assert.equal(mode(endpoint(agent)),0o600,'the endpoint file is owner-only');
+   const skill=fs.readFileSync(path.join(root,'harness/skills/worldlet/SKILL.md'),'utf8');
+   assert.equal(fs.readFileSync(path.join(home,'.claude/skills/worldlet/SKILL.md'),'utf8'),skill,'the skill is in Claude Code\'s skills folder');
+   assert.equal(fs.readFileSync(path.join(home,'.codex/skills/worldlet/SKILL.md'),'utf8'),skill,'and in Codex\'s');
+   assert.match(cli('status').stdout,/registered in claude-code, codex\./);
+   // The registered server, as Claude Code starts it: it lists the World tools, and a World tool answers that setup is not
+   // done (the channel guard is unchanged), so the link is not handed out through it.
+   const asked=spawnSync(process.execPath,[shim],{env:{...cliEnv,WORLDLET_MCP_ENDPOINT_FILE:endpoint('claude-code'),WORLDLET_MCP_TOOLS_FILE:tools},encoding:'utf8',timeout:30_000,
+    input:[{jsonrpc:'2.0',id:1,method:'initialize',params:{}},{jsonrpc:'2.0',id:2,method:'tools/list'},{jsonrpc:'2.0',id:3,method:'tools/call',params:{name:'call_world_tool',arguments:{target:'world',action:'link',arguments:'{}'}}}].map(m=>JSON.stringify(m)).join('\n')+'\n'});
+   const replies=asked.stdout.trim().split('\n').map(line=>JSON.parse(line));
+   assert.deepEqual(replies.find(r=>r.id===2).result.tools.map((t:{name:string})=>t.name),['describe_world_tools','call_world_tool']);
+   const call=replies.find(r=>r.id===3).result;
+   assert.ok(!call.content[0].text.includes(secret),'the MCP server does not hand out the link before setup');
+   assert.match(call.content[0].text,/not finished setting up|not ready/i,'World tools wait for setup: '+call.content[0].text);
+  }finally{await running.stop();}
+  assert.ok(!running.output().includes(secret),'the service log never holds the link');
+  assert.ok(!fs.existsSync(socket),'the socket goes when the service stops');
+  assert.ok(!fs.existsSync(path.join(mcp,'worldlet-mcp-endpoint.codex.json')),'and the endpoint files, so the server says Worldlet is not open');
+  // A restart writes the same files again, with no new registration.
+  const before=fs.readFileSync(argvLog,'utf8');
+  running=await start();
+  try{
+   const deadline=Date.now()+10_000;
+   while(!fs.existsSync(path.join(mcp,'worldlet-mcp-endpoint.codex.json'))&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,100));
+   for(const agent of ['claude-code','codex'])assert.equal(mode(path.join(mcp,`worldlet-mcp-endpoint.${agent}.json`)),0o600,'the same endpoint file again, owner-only');
+   assert.equal(fs.readFileSync(argvLog,'utf8'),before,'no Agent registers again');
+  }finally{await running.stop();}
+  console.log('PASS node host command line: status, link and register over an owner-only control socket; Claude Code and Codex register the fixed MCP home with their own commands and get the skill; endpoint files owner-only and the same across a restart; the link never in the service log');
+ }
 
  // The World in a browser on this computer, on a library that finished setup and holds one item.
  const seeded=path.join(temp,'seeded'),title='Renew the library card';

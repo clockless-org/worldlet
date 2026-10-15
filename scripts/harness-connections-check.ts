@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
-import {HARNESS_SERVICES,commandLine,commandReason,commandWords,connectionId,dotenvNames,harnessService,hermesConnectionCommand,hermesConnections,hermesMcpPrefixes,isConnectionId,maskSecrets,
+import {HARNESS_SERVICES,claudeCodeWorldToolsCommands,codexWorldToolsCommands,isWorldToolsRegistrar,commandLine,commandReason,commandWords,connectionId,dotenvNames,harnessService,hermesConnectionCommand,hermesConnections,hermesMcpPrefixes,isConnectionId,maskSecrets,
  openClawConnectionCommand,openClawConnections,openClawMcpPrefixes,readConnectionAdd,withLastUse} from '../core/agent/index.ts';
 import {harnessConnections,hermesConnectionsService,openClawConnectionsService} from '../platform/electron/src/modules/agent-runtime/harness-connections.ts';
 import type {HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
@@ -65,6 +65,13 @@ assert.deepEqual(hermesConnectionCommand({remove:'conn-0'},'m'),{args:['mcp','re
 assert.deepEqual(openClawConnectionCommand({add:{name:'m',command:'npx',args:['-y','pkg']}}).args,['mcp','add','m','--command','npx','--arg','-y','--arg','pkg']);
 assert.deepEqual(openClawConnectionCommand({add:{name:'d',url:'https://a'}}).args,['mcp','add','d','--url','https://a','--transport','streamable-http']);
 assert.deepEqual(openClawConnectionCommand({remove:'conn-0'},'d').args,['mcp','unset','d']);
+// Worldlet's own server in Claude Code and Codex, from the fixed MCP home: an older entry removed first (allowed to fail).
+const standing={command:'/usr/bin/node',args:['/home/alex/.worldlet/mcp/worldlet-mcp-standing.cjs'],env:{WORLDLET_MCP_ENDPOINT_FILE:'/home/alex/.worldlet/mcp/worldlet-mcp-endpoint.codex.json'}};
+assert.deepEqual(claudeCodeWorldToolsCommands(standing),[{args:['mcp','remove','--scope','user','worldlet'],optional:true},
+ {args:['mcp','add','--scope','user','worldlet','--env','WORLDLET_MCP_ENDPOINT_FILE=/home/alex/.worldlet/mcp/worldlet-mcp-endpoint.codex.json','--','/usr/bin/node','/home/alex/.worldlet/mcp/worldlet-mcp-standing.cjs']}]);
+assert.deepEqual(codexWorldToolsCommands(standing),[{args:['mcp','remove','worldlet'],optional:true},
+ {args:['mcp','add','worldlet','--env','WORLDLET_MCP_ENDPOINT_FILE=/home/alex/.worldlet/mcp/worldlet-mcp-endpoint.codex.json','--','/usr/bin/node','/home/alex/.worldlet/mcp/worldlet-mcp-standing.cjs']}]);
+assert.ok(isWorldToolsRegistrar('codex')&&isWorldToolsRegistrar('claude-code')&&!isWorldToolsRegistrar('hermes'),'Hermes Agent registers in its own profile');
 assert.equal(commandLine('hermes',['mcp','add','x','--args','a b']),'hermes mcp add x --args "a b"');
 assert.equal(commandReason('\u001b[32m  Connecting\u001b[0m\n  ✗ Failed to connect: 401 for token=abc\n  Fix the issue\n'),'Failed to connect: 401 for token=•••');
 
