@@ -334,7 +334,7 @@ await server.close();await rm(out,{recursive:true,force:true});
  assert.match(phone,/host\.onStarted\(\(\)=>\{for\(const link of links\)link\.schedule\(1000\);\}\);/,'the phone and browser links run without the page');
  assert.match(fox,/report,converse,answerApproval,taskPanel:taskPanelInput\}\)/,'FoxService offers converse, answerApproval and the Task panel');
  // The browser on this computer has a pairing and loop of its own, served here before its link is made.
- assert.match(phone,/\{relay:local,open:localOpen,listening:localListening,phone:true\}\]/,'the local browser link runs like the others');
+ assert.match(phone,/\{relay:local,open:localOpen,listening:localListening,phone:true\}[,\]]/,'the local browser link runs like the others');
  assert.match(phone,/if\(request\.kind==='local'\)try\{await serveLocal\(\);\}/,'its server starts before its link is made');
  assert.match(phone,/fetch:async\(input,init\)=>\{await adopted;return localRelay\.fetch/,'a kept pairing is handed back before the computer reads the relay');
  assert.match(phone,/const browser=createRoomLink\(\{/,'another device\'s browser meets the computer in the room');

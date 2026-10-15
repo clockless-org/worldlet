@@ -29,7 +29,8 @@ import {modules} from './modules/index.ts';
 import {runCheck} from './checks/index.ts';
 import {ensureDirectory,errorMessage} from './files.ts';
 import {createVault} from './vault.ts';
-import {ANALYTICS,DESKTOP_COMPANION,PHONE,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,WORLD_WEB,type AnalyticsService,type DesktopCompanionService,type PhoneService,type RtcPageFactory,type VaultService,type WorldWebService} from './host/services.ts';
+import {ANALYTICS,DESKTOP_COMPANION,PHONE,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,WORLD_ROOM_PAGE,WORLD_WEB,type AnalyticsService,type DesktopCompanionService,type PhoneService,type RtcPageFactory,type VaultService,type WorldRoomPageService,type WorldWebService} from './host/services.ts';
+import {roomDenied} from '../../../contracts/web-world.ts';
 import {openRtcWindow} from './modules/phone/rtc-window.ts';
 import type {Host} from './host/types.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
@@ -141,7 +142,17 @@ async function start(){
   gone:()=>{},
   failed,
  });
- const pages=createPagePair(createPageBridge(()=>world?.view.webContents??null,line=>diagnostics.log(line)),web.page);
+ // The World on another device, met through the pairing room (modules/phone/world-room-link.ts): a page beside the
+ // others, with only what ROOM_ALLOWED lets through (contracts/web-world.ts roomDenied).
+ const remote=createWebPage({
+  platform:platformName(),
+  denied:roomDenied,
+  dispatch:async body=>{pages.note('remote',body);const value=await router.dispatch(body,null,'web');pages.note('remote',body,value);return value;},
+  loaded:()=>{sent='';sendState();for(const listener of connectedListeners)try{listener();}catch(error){diagnostics.record(error,'pageConnected');}},
+  gone:()=>{},
+  failed,
+ });
+ const pages=createPagePair(createPageBridge(()=>world?.view.webContents??null,line=>diagnostics.log(line)),web.page,remote.page);
  const page=pages.page;
  const host:Host={
   profile,preferences,store,page,diagnostics,
@@ -165,6 +176,7 @@ async function start(){
  };
  host.provide(VAULT,createVault(profile.root,profile.channel==='release'?'app.worldlet.context':profile.worktree?'app.worldlet.context.dev.wt'+profile.worktree:'app.worldlet.context.dev'));
  host.provide<RtcPageFactory>(RTC_PAGE,openRtcWindow);
+ host.provide<WorldRoomPageService>(WORLD_ROOM_PAGE,{accept:socket=>remote.connect(socket)});
  for(const install of modules)install(host);
  // Contract check: report what this host implements, without opening a window.
  if(process.argv.includes('--host-contract-check')){
@@ -182,7 +194,7 @@ async function start(){
  })().catch(error=>{worldWeb=null;throw error;});
  host.provide<WorldWebService>(WORLD_WEB,{link:serveWorld});
  host.onStarted(()=>void serveWorld().catch(error=>diagnostics.record(error,'worldWeb')));
- host.onQuit(()=>web.close());
+ host.onQuit(()=>{web.close();remote.close();});
 
  // The page ignores a payload whose revisions it already holds, so skip building one.
  let sent='';

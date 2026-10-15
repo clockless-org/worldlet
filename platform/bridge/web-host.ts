@@ -26,40 +26,40 @@ function takeToken(scope:any):string {
  }
  try{return storage?.getItem(TOKEN_KEY)||'';}catch{return '';}
 }
-function notice(scope:any,text:string){
+/** Says on the page why it holds no World (a notice the World's own errors use too). */
+export function notice(scope:any,text:string){
  const node=scope.document?.getElementById('nativeNotice');
  if(node)node.textContent=text;
  scope.document?.documentElement?.setAttribute('data-world-closed','true');
 }
 
-/** The web transport for a World page served at /world/ with its token, or undefined anywhere else. One per page. */
-export function webHost(scope:any):HostTransport|undefined {
- if(scope.worldletWebHost)return scope.worldletWebHost;
- const location=scope.location;
- if(!location||!/^https?:$/.test(location.protocol)||location.pathname!==WORLD_WEB_PATH&&location.pathname!==WORLD_WEB_PATH+'index.html'||typeof scope.WebSocket!=='function')return undefined;
- const token=takeToken(scope);
- if(!token)return undefined;
- let platform:HostTransport['platform']|undefined,next=0,closed='';
+/** What the host's frames do on the page, whatever carries them: the local socket here, or the pairing room for a page
+ * on another device (room-host.ts). `send` carries a page frame; `receive` takes a host frame; `closed` ends every
+ * request still waiting. The handshake (`h`) resolves `ready`. */
+export function createFrameHost(scope:any,send:(frame:unknown)=>boolean){
+ let platform:HostTransport['platform']|undefined,next=0,elsewhere=false,ended='';
  const pending=new Map<number,Pending>();
- let opened:(socket:WebSocket)=>void,failed:(error:Error)=>void;
- const ready=new Promise<WebSocket>((resolve,reject)=>{opened=resolve;failed=reject;});
+ let opened:()=>void,failed:(error:Error)=>void;
+ const ready=new Promise<void>((resolve,reject)=>{opened=resolve;failed=reject;});
  ready.catch(()=>{});
- const socket:WebSocket=new scope.WebSocket(`${location.protocol==='https:'?'wss:':'ws:'}//${location.host}${WORLD_SOCKET_PATH}`,[WORLD_PROTOCOL,worldTokenProtocol(token)]);
- const sendFrame=(frame:unknown)=>{if(socket.readyState===1)socket.send(JSON.stringify(frame));};
- const fail=(text:string)=>{
-  const error=new Error(text);
-  failed(error);
-  for(const call of pending.values())call.reject(error);
-  pending.clear();
+ const host:WebHost={
+  version:1,
+  get platform(){return platform??'linux';},
+  features:{},
+  async request(request:HostRequest){
+   await ready;
+   if(ended)throw new Error(ended);
+   const id=++next;
+   return new Promise((resolve,reject)=>{pending.set(id,{resolve,reject});if(!send({q:id,body:request})){pending.delete(id);reject(new Error(NOTICE.stopped));}});
+  },
  };
- socket.onmessage=event=>{
-  let frame:WorldHostFrame;try{frame=JSON.parse(String(event.data));}catch{return;}
+ function receive(frame:WorldHostFrame){
   if('h' in frame){
    platform=frame.h.platform;
    // What this page's window cannot do (contracts/web-world.ts WEB_PAGE_FEATURES): only `false` flags are kept.
    const features=frame.h.features&&typeof frame.h.features==='object'?frame.h.features:{};
    host.features=Object.freeze(Object.fromEntries(Object.entries(features).filter(([,on])=>on===false)));
-   opened(socket);return;
+   opened();return;
   }
   if('a' in frame){
    const call=pending.get(frame.a);if(!call)return;
@@ -69,7 +69,7 @@ export function webHost(scope:any):HostTransport|undefined {
   }
   if('c' in frame){
    const id=frame.c,run=scope[frame.name];
-   void Promise.resolve().then(()=>typeof run==='function'?run(...frame.args):undefined).then(value=>sendFrame({r:id,value}),()=>sendFrame({r:id}));
+   void Promise.resolve().then(()=>typeof run==='function'?run(...frame.args):undefined).then(value=>send({r:id,value}),()=>send({r:id}));
    return;
   }
   if('v' in frame){
@@ -77,29 +77,42 @@ export function webHost(scope:any):HostTransport|undefined {
    target.dispatchEvent('detail' in frame?new scope.CustomEvent(frame.v,{detail:frame.detail}):new scope.Event(frame.v));
    return;
   }
-  if('x' in frame)closed='elsewhere';
+  if('x' in frame)elsewhere=true;
+ }
+ /** The carrier closed: requests still waiting fail with `text`, and so do later ones. */
+ function closed(text:string){
+  ended=text;
+  const error=new Error(text);
+  failed(error);
+  for(const call of pending.values())call.reject(error);
+  pending.clear();
+ }
+ return {host,receive,closed,get platform(){return platform;},get elsewhere(){return elsewhere;}};
+}
+
+/** The web transport for a World page served at /world/ with its token, or undefined anywhere else. One per page. */
+export function webHost(scope:any):HostTransport|undefined {
+ if(scope.worldletWebHost)return scope.worldletWebHost;
+ const location=scope.location;
+ if(!location||!/^https?:$/.test(location.protocol)||location.pathname!==WORLD_WEB_PATH&&location.pathname!==WORLD_WEB_PATH+'index.html'||typeof scope.WebSocket!=='function')return undefined;
+ const token=takeToken(scope);
+ if(!token)return undefined;
+ const socket:WebSocket=new scope.WebSocket(`${location.protocol==='https:'?'wss:':'ws:'}//${location.host}${WORLD_SOCKET_PATH}`,[WORLD_PROTOCOL,worldTokenProtocol(token)]);
+ const frames=createFrameHost(scope,frame=>{if(socket.readyState!==1)return false;socket.send(JSON.stringify(frame));return true;});
+ socket.onmessage=event=>{
+  let frame:WorldHostFrame;try{frame=JSON.parse(String(event.data));}catch{return;}
+  frames.receive(frame);
  };
  socket.onclose=event=>{
-  if(event.code===WORLD_ELSEWHERE_CODE)closed='elsewhere';
+  const elsewhere=event.code===WORLD_ELSEWHERE_CODE||frames.elsewhere;
   // Before the handshake the host refused the socket: a link whose token is no longer this computer's.
-  const reason=closed==='elsewhere'?NOTICE.elsewhere:platform?NOTICE.stopped:NOTICE.refused;
-  fail(reason);notice(scope,reason);
-  if(closed==='elsewhere'||!platform)return;
+  const reason=elsewhere?NOTICE.elsewhere:frames.platform?NOTICE.stopped:NOTICE.refused;
+  frames.closed(reason);notice(scope,reason);
+  if(elsewhere||!frames.platform)return;
   // The host stopped: the page reloads once it answers again, and starts over with it.
   const retry=()=>void scope.fetch(location.pathname,{method:'HEAD',cache:'no-store'}).then((response:Response)=>{if(response.ok)location.reload();else setTimeout(retry,2000);},()=>setTimeout(retry,2000));
   setTimeout(retry,2000);
  };
- const host:WebHost={
-  version:1,
-  get platform(){return platform??'linux';},
-  features:{},
-  async request(request:HostRequest){
-   const open=await ready;
-   if(open.readyState!==1)throw new Error(NOTICE.stopped);
-   const id=++next;
-   return new Promise((resolve,reject)=>{pending.set(id,{resolve,reject});open.send(JSON.stringify({q:id,body:request}));});
-  },
- };
- scope.worldletWebHost=host;
- return host;
+ scope.worldletWebHost=frames.host;
+ return frames.host;
 }

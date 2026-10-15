@@ -18,8 +18,9 @@ import {FEATURE_OWNERS,hostCapabilities} from '../../electron/src/capabilities.t
 import {ensureDirectory,errorMessage,writeAtomic} from '../../electron/src/files.ts';
 import {createVault} from '../../electron/src/vault.ts';
 import {createWebPage} from '../../electron/src/host/web-page.ts';
-import {serveWorldWeb,WORLD_LINK_FILE} from '../../electron/src/host/world-web.ts';
-import {AGENT,PHONE,VAULT,WORLD_WEB,type AgentService,type PhoneService,type VaultService,type WorldWebService} from '../../electron/src/host/services.ts';
+import {createPagePair,NO_PAGE,serveWorldWeb,WORLD_LINK_FILE} from '../../electron/src/host/world-web.ts';
+import {roomDenied} from '../../../contracts/web-world.ts';
+import {AGENT,PHONE,VAULT,WORLD_ROOM_PAGE,WORLD_WEB,type AgentService,type PhoneService,type VaultService,type WorldRoomPageService,type WorldWebService} from '../../electron/src/host/services.ts';
 import type {Host,PageBridge} from '../../electron/src/host/types.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
 import {isWorldToolsRegistrar} from '../../../core/agent/index.ts';
@@ -42,6 +43,8 @@ import {installCalendar} from '../../electron/src/modules/calendar/index.ts';
 export const NODE_MODULES:((host:Host)=>void)[]=[installWorld,installFox,installAttention,installAgentRuntime,installSources,installPhone,installOngoing,installArtifacts,installCalendar];
 /** Where the browser link is written for the person: owner-only, in the library (`worldlet link` prints it too). */
 export const ROOM_LINK_FILE='room-link.txt';
+/** The full World's link for another device, through the pairing room, owner-only beside it. */
+export const WORLD_ROOM_LINK_FILE='world-room-link.txt';
 /** The World's link on this computer (`http://127.0.0.1:<port>/world/#t=<token>`), owner-only beside it. */
 export {WORLD_LINK_FILE};
 
@@ -62,21 +65,22 @@ const router=new HostRouter(()=>host);
 const each=(listeners:(()=>void)[],operation:string)=>{for(const listener of listeners)try{listener();}catch(error){diagnostics.record(error,operation);}};
 // As in the Electron host, only Fox, connection, content and onboarding requests keep a diagnostic when they fail.
 const PERSISTED_REQUEST_FAILURES=['agentChat','hermesChat','connect','appContent','onboarding','foxPreferences','localAgent','localHermes'];
-/** The World page, when a browser on this computer has it open (one at a time); with none, calls answer nothing. */
+/** The World pages: a browser's on this computer (one at a time) and one on another device, met through the pairing
+ * room (one at a time, with only what ROOM_ALLOWED lets through: contracts/web-world.ts). With none, calls answer
+ * nothing. A page coming is the host's page load; the last page going is its reload. */
 let sent='';
-const web=createWebPage({
- platform:platformName(),
- dispatch:body=>router.dispatch(body,null,'web'),
- loaded:()=>{sent='';each(loadedListeners,'pageLoaded');each(connectedListeners,'pageConnected');},
- gone:()=>each(reloadListeners,'pageReload'),
- failed:(body,error)=>{if((error as Error)?.name!=='AbortError'&&PERSISTED_REQUEST_FAILURES.includes(body.action as string))diagnostics.record(error,String(body.action),typeof body.id==='string'?body.id:'');},
-});
+const failed=(body:Record<string,unknown>,error:unknown)=>{if((error as Error)?.name!=='AbortError'&&PERSISTED_REQUEST_FAILURES.includes(body.action as string))diagnostics.record(error,String(body.action),typeof body.id==='string'?body.id:'');};
+const loaded=()=>{sent='';each(loadedListeners,'pageLoaded');each(connectedListeners,'pageConnected');};
+const gone=()=>{if(!pages.page.ready())each(reloadListeners,'pageReload');};
+const web=createWebPage({platform:platformName(),dispatch:async body=>{pages.note('web',body);const value=await router.dispatch(body,null,'web');pages.note('web',body,value);return value;},loaded,gone,failed});
+const remote=createWebPage({platform:platformName(),denied:roomDenied,dispatch:async body=>{pages.note('remote',body);const value=await router.dispatch(body,null,'web');pages.note('remote',body,value);return value;},loaded,gone,failed});
+const pages=createPagePair(NO_PAGE,web.page,remote.page);
 /** The browser link's state is logged when it changes (the state alone; the link itself only goes into its owner-only
  * file). */
 let linkState='';
-const page:PageBridge={...web.page,
+const page:PageBridge={...pages.page,
  event(name,detail){
-  web.page.event(name,detail);
+  pages.page.event(name,detail);
   if(name!=='worldlet:web-pair-status'||!detail||typeof detail!=='object')return;
   const status=detail as {state?:string;error?:string},line=`${status.state}${status.error?' ('+status.error+')':''}`;
   if(line!==linkState){linkState=line;log('room link '+line);}
@@ -100,6 +104,7 @@ const host:Host={
  onStarted:listener=>{startedListeners.push(listener);}
 };
 host.provide(VAULT,createVault(profile.root,'app.worldlet.context',nodeVaultStorage(profile.root)));
+host.provide<WorldRoomPageService>(WORLD_ROOM_PAGE,{accept:socket=>remote.connect(socket)});
 for(const install of NODE_MODULES)install(host);
 
 const contractCheck=process.argv.includes('--host-contract-check');
@@ -130,7 +135,7 @@ function shutdown(code:number){
  if(quitting)return;
  quitting=true;
  void (async()=>{
-  web.close();
+  web.close();remote.close();
   await withDeadline(Promise.allSettled(quitListeners.map(listener=>Promise.resolve().then(listener))),4000);
   try{store.closeLedger();}catch(error){diagnostics.record(error,'quit');}
   // Nothing this host spawned outlives it: a Hermes worker or a tool still running is ended.
@@ -167,6 +172,17 @@ async function roomLink(){
  log(`room link ready in ${file}`);
 }
 roomLink().catch(error=>{diagnostics.record(error,'roomLink');log('room link failed: '+errorMessage(error));});
+
+/** The full World's link for another device (core/phone/world-room.ts, `kind: 'world'`), made once and kept, in its
+ * owner-only file beside the others: the World bundle opens it and meets this host in the pairing room. */
+async function worldRoomLink(){
+ const status=await host.use<PhoneService>(PHONE).worldRoomLink?.() as {link?:string}|undefined;
+ if(!status?.link)throw Error('No World link for another device was made.');
+ const file=path.join(profile.root,WORLD_ROOM_LINK_FILE);
+ writeAtomic(file,status.link+'\n',0o600);
+ log(`World link for another device ready in ${file}`);
+}
+worldRoomLink().catch(error=>{diagnostics.record(error,'worldRoomLink');log('World link for another device failed: '+errorMessage(error));});
 
 /** The World on this computer (contracts/web-world.ts): the full World page, served on 127.0.0.1 beside the browser
  * link's own page, for a browser here that opens the link. The link carries a token kept in the vault; it goes only

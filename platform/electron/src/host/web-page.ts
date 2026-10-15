@@ -21,6 +21,9 @@ export interface WebPageOptions {
  gone():void;
  /** A request that failed, for the host's diagnostics. */
  failed?(body:Record<string,unknown>,error:unknown):void;
+ /** Why this page may not make a request, or '': WEB_DENIED and WEB_PAGE_ACTIONS (webDenied) for a browser on this
+  * computer, ROOM_ALLOWED as well (roomDenied) for a page on another device. */
+ denied?(body:unknown):string;
 }
 
 export function createWebPage(options:WebPageOptions){
@@ -35,7 +38,7 @@ export function createWebPage(options:WebPageOptions){
   options.gone();
  };
  async function request(session:NonNullable<typeof current>,id:number,body:Record<string,unknown>){
-  const denied=webDenied(body);
+  const denied=(options.denied??webDenied)(body);
   if(denied)return send(session.socket,{a:id,ok:false,error:denied});
   try{
    const value=webReply(body,await options.dispatch(body));

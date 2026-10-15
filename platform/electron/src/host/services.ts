@@ -249,6 +249,8 @@ export interface PhoneService {
  /** The browser link to this World for another device (core/phone/README.md#web, `kind: 'web'`): the one there is, or a
   * new one when there is none. The Agent's `world/link` hands it to the person; it needs no World page. */
  worldLink?():Promise<Row>;
+ /** The full World's link for another device (`kind: 'world'`, core/phone/world-room.ts): the one there is, or a new one. */
+ worldRoomLink?():Promise<Row>;
  /** This computer's own server on 127.0.0.1 (modules/phone/local-relay.ts), started on first use on the port it used
   * last: a browser link on this computer, and the World page a host without a window serves there (platform/node). */
  localServer?():Promise<import('../modules/phone/local-relay.ts').LocalServer>;
@@ -410,3 +412,10 @@ export interface WorldWebService {
  link():Promise<string>;
 }
 export const WORLD_WEB='worldWeb';
+/** The World page on another device, met through the pairing room (modules/phone/world-room-link.ts): the host takes
+ * each page that joined as it takes a browser's World page here (host/web-page.ts), with only what ROOM_ALLOWED lets
+ * through (contracts/web-world.ts). */
+export interface WorldRoomPageService {
+ accept(socket:import('../modules/phone/web-socket.ts').TextSocket):void;
+}
+export const WORLD_ROOM_PAGE='worldRoomPage';
