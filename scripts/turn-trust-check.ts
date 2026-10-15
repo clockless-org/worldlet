@@ -64,6 +64,8 @@ for(const event of [
  {type:'tool',name:'use_doordash',args:{operation:'cart_add'}},
  {type:'tool',name:'_world_authorize',args:{name:'use_doordash',operation:'cart_remove'}},
  {type:'tool',name:'_world_authorize',args:{name:'use_doordash'}},
+ // The World's browser link (world/link) opens the whole World to whoever holds it.
+ {type:'tool',name:'share_world_link',args:{}},
 ]){
  assert.deepEqual(turnWriteAdmission(direct,event),{guarded:true,allowed:true},'a trusted turn is unchanged and takes no host notice');
  const refused=turnWriteAdmission(read,event);

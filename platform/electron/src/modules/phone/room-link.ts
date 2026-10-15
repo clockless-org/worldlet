@@ -131,6 +131,9 @@ export function createRoomLink(options:RoomLinkOptions){
   saved=null;keys=null;peers.clear();published.clear();pending.length=0;seenAt=null;save();changed();
   return status();
  }
+ /** The link as it is, or a new one when there is none: what the Agent hands the person (`world/link`). An existing
+  * link is kept, so a browser that already opened it stays paired. */
+ async function ensure(){return saved?status():await start();}
  /** Remember the newest value of a slot and send it to the browsers in the room when it changed. */
  async function publish(slot:'attention'|'conversation'|'live'|'widgets'|'desktop',value:unknown){
   latest.set(slot,value);
@@ -161,7 +164,7 @@ export function createRoomLink(options:RoomLinkOptions){
  let queue=Promise.resolve();
  async function everything(peer:string){if(await ensureKeys())for(const [slot,value] of latest)await sendTo(peer,await sealSlot(slot,value));}
  const notify=async():Promise<PhoneNotifyResult>=>({sent:false,reason:'no-device'});
- return {status,start,end,publish,notify,poll,get paired(){return !!saved?.paired;},get pairing(){return !!saved;},get open(){return peers.size>0;},
+ return {status,start,ensure,end,publish,notify,poll,get paired(){return !!saved?.paired;},get pairing(){return !!saved;},get open(){return peers.size>0;},
   /** How many browsers have a direct line open. */
   get direct(){return direct.size;}};
 }

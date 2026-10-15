@@ -365,6 +365,8 @@ export function installPhone(host:Host){
   idleSeconds:()=>{const last=Math.max(relay.status().seenAt||0,lastActive);return last?Math.max(0,(Date.now()-last)/1000):null;},
   notify,
   live:async value=>{if(value.done===true)finished(value);return publishLive(value);},
+  // Kept when there is one, so a browser that opened it stays paired; a new one is checked quickly like Copy link's.
+  worldLink:async()=>{const status=await browser.ensure();links[2].schedule(QUICK);return status;},
  });
  host.register({
   // `kind: 'agent'` is the pairing with another Worldlet, `kind: 'web'` a browser's through the relay (another device),

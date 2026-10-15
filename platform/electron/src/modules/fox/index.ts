@@ -32,7 +32,7 @@ import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD
 import {worldLogKeeps} from '../../../../../core/activity/index.ts';
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
 import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../core/artifacts/index.ts';
-import {phoneApprovalPush,phoneFoxPush,phoneLive} from '../../../../../core/phone/index.ts';
+import {phoneApprovalPush,phoneFoxPush,phoneLive,worldLinkReply} from '../../../../../core/phone/index.ts';
 import {placeKey,placeKind,proactiveAsked,proactiveDue,proactiveCard,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../../core/companion/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
@@ -249,6 +249,14 @@ export function installFox(host:Host){
   if(event.type!=='tool'||typeof event.name!=='string'||!event.args||typeof event.args!=='object'||Array.isArray(event.args))return null;
   const name=event.name,args=event.args as Row;
   const hosted=['prepare_home_change','prepare_notion_change','_email_review'];
+  // The World's browser link (`world/link`) runs here, on the host, so it works with no World page (a login launch,
+  // Run in background); the guarded-write rule has already admitted it under the turn's trust.
+  if(name==='share_world_link'){
+   if(scope.sample||scope.setup||store.sampleEnabled()||!store.writable||onboardingUnfinished(store.state.onboarding))return {error:'The browser link opens the person\'s own World: they need to finish setting up Worldlet first.'};
+   const phone=host.optional<PhoneService>(PHONE);
+   if(!phone?.worldLink)throw new WorldletError('This Worldlet build cannot make a browser link.');
+   return worldLinkReply(await phone.worldLink());
+  }
   if(!hosted.includes(name)&&name!=='_world_authorize'&&name!=='update_applet_state'&&!WORLD_TOOL_NAMES.includes(name))return null;
   if(scope.sample||scope.setup||store.sampleEnabled()||!store.writable||store.state.cloudConsent!==true)throw new WorldletError('Allow private context in your personal world first.');
   if(name==='_world_authorize')return {ok:true};

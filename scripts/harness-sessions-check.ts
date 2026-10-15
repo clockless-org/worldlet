@@ -95,11 +95,11 @@ assert.equal('model' in responsesBody({input:[],instructions:'',tools:null}),fal
  assert.equal(hermesWorldToolsRegistered(entry('/Apps/Worldlet','/h/worldlet-mcp-standing.cjs')),true);assert.equal(hermesWorldToolsRegistered(entry('npx','x')),false);
  // A call from another Hermes channel outside any Fox turn: reads and a draft for review only, fail closed.
  for(const name of ['query_world_items','read_world_history','read_world_source','prepare_email'])assert.equal(hermesChannelToolAllowed({name}),true,name);
- for(const name of ['update_world_item','archive_world_items','manage_routines','create_content','start_applet_task','open_applet','some_new_tool'])assert.equal(hermesChannelToolAllowed({name}),false,name);
+ for(const name of ['update_world_item','archive_world_items','manage_routines','create_content','start_applet_task','open_applet','some_new_tool','share_world_link'])assert.equal(hermesChannelToolAllowed({name}),false,name);
  assert.equal(hermesChannelToolAllowed({name:'_world_authorize',args:{name:'read_connected_google'}}),true);assert.equal(hermesChannelToolAllowed({name:'_world_authorize',args:{name:'use_doordash'}}),false);
  assert.match(HERMES_CHANNEL_READ_ONLY,/confirmation/);
  // Every guarded write through the standing server that is not Fox's own asks first (Allow once or Deny); reads and unguarded steps do not.
- for(const [name,args] of [['update_world_item',{id:'i'}],['archive_world_items',{ids:['i']}],['manage_routines',{action:'create'}],['create_content',{title:'t'}],['use_doordash',{operation:'cart_add'}],['start_applet_task',{}]] as const)
+ for(const [name,args] of [['update_world_item',{id:'i'}],['archive_world_items',{ids:['i']}],['manage_routines',{action:'create'}],['create_content',{title:'t'}],['use_doordash',{operation:'cart_add'}],['start_applet_task',{}],['share_world_link',{}]] as const)
   assert.deepEqual(hermesStandingWriteApproval(name,args)?.choices,['once','deny'],name);
  for(const [name,args] of [['query_world_items',{}],['open_applet',{id:'app-x'}],['manage_routines',{action:'pause'}],['use_doordash',{operation:'search'}],['prepare_email',{}]] as const)
   assert.equal(hermesStandingWriteApproval(name,args),null,name);

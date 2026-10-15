@@ -72,9 +72,10 @@ await withTempDir('worldlet-node-host-',async temp=>{
   child.stdout.on('data',chunk=>{out+=chunk;});child.stderr.on('data',chunk=>{err+=chunk;});
   const exited=new Promise<number|null>(resolve=>child.on('exit',code=>resolve(code)));
   const deadline=Date.now()+30_000;
-  while(!/room link: https:/.test(out)&&child.exitCode===null&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,100));
+  while(!/room link ready in /.test(out)&&child.exitCode===null&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,100));
   assert.match(out,/worldlet: started /,'starts: '+err.slice(-400));
-  assert.match(out,/worldlet: room link: https:\/\/relay\.example\.com\/open\/#/,'logs the link: '+err.slice(-400));
+  assert.match(out,/worldlet: room link ready in .*room-link\.txt/,'says where the link is: '+err.slice(-400));
+  assert.ok(!/https:\/\/relay\.example\.com\/open\/#/.test(out),'never prints the link, which carries its secret');
   child.kill('SIGTERM');
   const code=await Promise.race([exited,new Promise<'hung'>(resolve=>setTimeout(()=>resolve('hung'),20_000))]);
   if(code==='hung')child.kill('SIGKILL');
@@ -84,7 +85,8 @@ await withTempDir('worldlet-node-host-',async temp=>{
  };
  const first=await boot();
  const file=path.join(library,'room-link.txt'),link=fs.readFileSync(file,'utf8').trim();
- assert.ok(first.includes(link),'the file holds the logged link');
+ assert.match(link,/^https:\/\/relay\.example\.com\/open\/#/,'the file holds the link');
+ assert.ok(!first.includes(link.slice(link.indexOf('#')+1)),'and stdout does not');
  if(process.platform!=='win32'){
   assert.equal(mode(file),0o600,'the link is owner-only');
   assert.equal(mode(path.join(library,VAULT_KEY_FILE)),0o600,'the vault key is owner-only');
