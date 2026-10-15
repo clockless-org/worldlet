@@ -19,10 +19,14 @@ import {FEATURE_OWNERS,hostCapabilities} from '../../electron/src/capabilities.t
 import {ensureDirectory,errorMessage,writeAtomic} from '../../electron/src/files.ts';
 import {createVault} from '../../electron/src/vault.ts';
 import {createWebPage} from '../../electron/src/host/web-page.ts';
-import {PHONE,VAULT,type PhoneService,type VaultService} from '../../electron/src/host/services.ts';
+import {AGENT,PHONE,VAULT,type AgentService,type PhoneService,type VaultService} from '../../electron/src/host/services.ts';
 import type {Host,PageBridge} from '../../electron/src/host/types.ts';
 import {WORLD_TOKEN,worldLink} from '../../../contracts/web-world.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
+import {isWorldToolsRegistrar} from '../../../core/agent/index.ts';
+import {onboardingUnfinished} from '../../../core/onboarding/index.ts';
+import {controlSocketPath,serveControl,type ControlReply,type ControlRequest} from './control.ts';
+import {mcpHome,openMcpHome,registerAgent,registeredAgents} from './mcp-home.ts';
 import {installWorld} from '../../electron/src/modules/world.ts';
 import {installFox} from '../../electron/src/modules/fox/index.ts';
 import {installAttention} from '../../electron/src/modules/attention/index.ts';
@@ -37,7 +41,7 @@ import {installCalendar} from '../../electron/src/modules/calendar/index.ts';
  * The shell, browser, media, sound, voice, Applet tools, games, widgets, artifact pages, site Applets and Applet art
  * need a screen and stay out. */
 export const NODE_MODULES:((host:Host)=>void)[]=[installWorld,installFox,installAttention,installAgentRuntime,installSources,installPhone,installOngoing,installArtifacts,installCalendar];
-/** Where the browser link is written for the person (and, later, the `worldlet link` command): owner-only, in the library. */
+/** Where the browser link is written for the person: owner-only, in the library (`worldlet link` prints it too). */
 export const ROOM_LINK_FILE='room-link.txt';
 /** The World's link on this computer (`http://127.0.0.1:<port>/world/#t=<token>`), owner-only beside it. */
 export const WORLD_LINK_FILE='world-link.txt';
@@ -180,3 +184,34 @@ async function serveWorld(){
  log(`World ready at ${server.origin}/world/ (its link is in ${file})`);
 }
 serveWorld().catch(error=>{diagnostics.record(error,'worldWeb');log('World page failed: '+errorMessage(error));});
+
+/** The `worldlet` command line (control.ts): answers go only to the asker, never to this host's log. */
+const setupDone=()=>store.state.cloudConsent===true&&!onboardingUnfinished(store.state.onboarding);
+const NOT_SET_UP='The person has not finished setup yet: World tools answer only after they open the World (its link is in '+WORLD_LINK_FILE+' in the library) and finish setup there.';
+async function answer(request:ControlRequest):Promise<ControlReply> {
+ if(request.command==='link'){
+  const status=await host.use<PhoneService>(PHONE).worldLink?.() as {link?:string}|undefined;
+  if(!status?.link)throw Error('No browser link was made.');
+  return {lines:[status.link]};
+ }
+ if(request.command==='register')return {lines:await registerAgent(request.agent!)};
+ if(request.command==='setup'){
+  const id=request.agent!,lines:string[]=[];
+  // The same choice setup's first page makes in the World: it proves the Agent answers before Fox switches to it.
+  // Codex alone is no Agent for Fox; it gets World tools.
+  if(id!=='codex'){const chosen=await router.dispatch({action:'agentHarness',operation:'select',id}) as {title?:string};lines.push(`Fox talks through ${chosen.title??id}.`);}
+  if(isWorldToolsRegistrar(id))lines.push(...await registerAgent(id));
+  if(!setupDone())lines.push(NOT_SET_UP);
+  return {lines};
+ }
+ const agent=host.optional<AgentService>(AGENT),pair=await router.dispatch({action:'phonePair',kind:'web',operation:'status'}) as {state?:string};
+ const registered=registeredAgents();
+ return {lines:[
+  `Worldlet ${app.getVersion()} is running with the library at ${profile.root}.`,
+  `Agent: ${agent?.id??'none'}${agent&&!agent.available?' (not available)':''}.`,
+  setupDone()?'Setup: done.':'Setup: '+NOT_SET_UP,
+  `Browser link: ${pair?.state??'unknown'} (worldlet link prints it).`,
+  `MCP home: ${mcpHome()}, registered in ${registered.length?registered.join(', '):'no Agent yet'}.`]};
+}
+serveControl(controlSocketPath(profile.root),answer).then(server=>{quitListeners.push(()=>{server.close();});},error=>{diagnostics.record(error,'control');log('control socket failed: '+errorMessage(error));});
+openMcpHome().catch(error=>{diagnostics.record(error,'mcpHome');log('MCP home failed: '+errorMessage(error));});
