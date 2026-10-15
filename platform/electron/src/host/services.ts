@@ -401,6 +401,10 @@ export interface AgentAccess {
   * name that is not a Service; the Agent's next call sees the change. */
  grantService(agentId:string,provider:string):boolean;
  ungrantService(agentId:string,provider:string):boolean;
+ /** "Can ask you" (`ask`: asks/post and asks/read) and "Can take work" (`work`: asks/claim and asks/resolve), the
+  * same way: a standing Grant naming only those targets (core askGrant), each change audited. */
+ grantAsks(agentId:string,kind:string):boolean;
+ ungrantAsks(agentId:string,kind:string):boolean;
  onRevoke(listener:(agentId:string)=>void):void;
 }
 export interface VaultService {
