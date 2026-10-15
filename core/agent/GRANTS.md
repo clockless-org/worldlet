@@ -59,3 +59,15 @@ Under an Agent that is not revoked, each connected Worldlet Service has a **Can 
 - **Who may call it.** These are operations of the same `agentAccess` action as Revoke, so the same pages reach them. A World page on another device does not (`agentAccess` is not in `ROOM_ALLOWED`), and no World tool does.
 
 `node scripts/your-agent-ui-check.ts` checks the list, the Service checkboxes and Revoke. `node scripts/agent-grants-check.ts` and `node scripts/harness-sessions-check.ts` check the targets, refused names, the audit, and a granted Agent's `read_service` call running on the standing server while an ungranted one is refused.
+
+## Agent asks
+
+An Agent can ask the person something, or leave work for an Agent to take, as an `AgentAsk` ([`contracts/agent-asks.ts`](../../contracts/agent-asks.ts)). Core decides every change ([`asks.ts`](asks.ts)); `node scripts/agent-asks-check.ts` checks it.
+
+- **What an ask holds.** An ID the host makes, the posting Agent's `agentId` (stamped by the host from the caller's token; an `agentId` the model sends is dropped), a kind (`ask`, a question for the person, or `input`, work an Agent may take), a title (at most 200 characters, one line), a body (at most 4,000), up to 4 choices, one optional `https` link, tags, a status (`open`, `claimed`, `answered`, `done`, `skipped`) and a revision that each change raises by one. Control characters and anything that looks like a password, token or key are refused, never stored.
+- **Limits.** An Agent may have at most 20 asks open or claimed at once.
+- **Reading.** An Agent reads only its own asks: the ones it posted and the ones it claimed.
+- **Claiming.** Only `input` asks can be claimed, at most 10 per call. A claim holds for 60 minutes; after that, another Agent may claim the ask again.
+- **Resolving.** Only the Agent holding the claim resolves an ask, with a note and `https` links, naming the revision it read. A stale revision is refused.
+- **The person's answer.** One of the ask's own choices with an optional note, or Done, or Dismiss. An ask takes one answer.
+- **Attention.** Each ask is an Attention item from the host's own provider `agents`, written with no model: a task when it offers choices, otherwise an update. It carries the posting Agent's ID and name, so the card says which Agent asks.

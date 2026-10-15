@@ -62,9 +62,11 @@ await withTempDir('worldlet-node-control-',async dir=>{
  let deep=dir;while(Buffer.byteLength(path.join(deep,'control.sock'))<=CONTROL_SOCKET_LIMIT)deep=path.join(deep,'library-folder-with-a-long-name');
  fs.mkdirSync(deep,{recursive:true});
  const file=path.join(deep,'control.sock');
- assert.match(controlSocketTooLong(file),/library path is too long for a control socket/);
  assert.equal(controlSocketTooLong(file,4096),'');
+ // Windows names its control pipe, which has no such limit.
+ if(process.platform==='win32')assert.equal(controlSocketTooLong(file),'');
  if(process.platform!=='win32'){
+  assert.match(controlSocketTooLong(file),/library path is too long for a control socket/);
   await assert.rejects(serveControl(file,async()=>({lines:[]})),/library path is too long for a control socket/,'the host says why it has no control socket');
   assert.ok(!fs.existsSync(file),'and binds nothing');
   await assert.rejects(askControl(file,{command:'status'}),/library path is too long/,'the command line says the same');
