@@ -18,7 +18,7 @@ import {createLocalRelay,serveLocalRelay} from '../platform/electron/src/modules
 import {createWebPage} from '../platform/electron/src/host/web-page.ts';
 import {createPagePair,serveWorldWeb,WORLD_LINK_FILE,WORLD_TOKEN_VAULT} from '../platform/electron/src/host/world-web.ts';
 import type {PageBridge} from '../platform/electron/src/host/types.ts';
-import {WEB_DENIED_MESSAGE,WEB_PAGE_ACTIONS,WEB_PAGE_FEATURES,WEB_PAGE_UNAVAILABLE,WORLD_ELSEWHERE_CODE,WORLD_PAGE_CSP,WORLD_PROTOCOL,webDenied,worldLinkToken,worldTokenProtocol,worldWebCsp} from '../contracts/web-world.ts';
+import {WEB_DENIED_MESSAGE,WEB_PAGE_ACTIONS,WEB_PAGE_FEATURES,WEB_PAGE_UNAVAILABLE,WORLD_ELSEWHERE_CODE,WORLD_PAGE_CSP,WORLD_PROTOCOL,webDenied,webEventDetail,worldLinkToken,worldTokenProtocol,worldWebCsp} from '../contracts/web-world.ts';
 import {worldLinkReply} from '../core/phone/index.ts';
 
 const opened:Duplex[]=[];
@@ -161,6 +161,12 @@ await withTempDir('worldlet-world-web-',async root=>{
   pages.page.event('worldlet:job',{phase:'done'});
   assert.deepEqual((await within(first.next(frame=>frame.v==='worldlet:job'),'event')).detail,{phase:'done'});
   assert.ok(nativeEvents.includes('worldlet:job'),'events reach both pages');
+  // A pairing's status event reaches the browser's page without its link (the pairing's secret), as its reply does.
+  for(const name of ['worldlet:phone-status','worldlet:web-pair-status','worldlet:local-pair-status','worldlet:agent-pair-status','worldlet:world-pair-status']){
+   pages.page.event(name,{state:'waiting',link:'https://relay.example.com/open/#s=secret'});
+   assert.deepEqual((await within(first.next(frame=>frame.v===name),name)).detail,{state:'waiting'},name+' comes without its link');
+  }
+  assert.deepEqual(webEventDetail('worldlet:job',{link:'kept'}),{link:'kept'},'other events are unchanged');
   // Anything else goes to the window while it is loaded, else to the browser's page.
   assert.equal(await pages.page.call('worldletCodexEvent',{id:'x'}),'native');
   nativeReady=false;

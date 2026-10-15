@@ -141,13 +141,21 @@ export function webDenied(body:unknown):string {
  }
  return '';
 }
-/** A reply as a browser's World page gets it: a pairing's link (its secret) stays on the host. */
+/** A pairing status without its link (its secret), which stays on the host. */
+const withoutLink=(value:unknown)=>{
+ if(!value||typeof value!=='object'||Array.isArray(value)||!('link' in value))return value;
+ const {link:_link,...rest}=value as Record<string,unknown>;
+ return rest;
+};
+/** A reply as a browser's World page gets it: a pairing's link stays on the host. */
 export function webReply(body:Record<string,unknown>,value:unknown):unknown {
- if(body.action==='phonePair'&&value&&typeof value==='object'&&!Array.isArray(value)&&'link' in value){
-  const {link:_link,...rest}=value as Record<string,unknown>;
-  return rest;
- }
- return value;
+ return body.action==='phonePair'?withoutLink(value):value;
+}
+/** The events that report a pairing's status (`worldlet:phone-status`, `worldlet:<kind>-pair-status`), with its link. */
+const PAIRING_EVENT=/^worldlet:(phone-status|[a-z]+-pair-status)$/;
+/** An event's detail as a browser's World page gets it: a pairing status comes without its link, as webReply's does. */
+export function webEventDetail(name:string,detail:unknown):unknown {
+ return PAIRING_EVENT.test(name)?withoutLink(detail):detail;
 }
 
 /** What a World page on another device may ask for, met through the pairing room (core/phone/world-room.ts): the

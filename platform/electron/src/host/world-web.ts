@@ -13,8 +13,9 @@ export const WORLD_LINK_FILE='world-link.txt';
 /** The World's token for a browser on this computer, kept in the vault so the link survives a restart. */
 export const WORLD_TOKEN_VAULT='world-web-token';
 
+type TokenVault={get(id:string):string|null;set(id:string,secret:string):void};
 /** The token the vault keeps, made once (32 random bytes). */
-export function worldWebToken(vault:{get(id:string):string|null;set(id:string,secret:string):void}):string {
+export function worldWebToken(vault:TokenVault):string {
  let token=vault.get(WORLD_TOKEN_VAULT)??'';
  if(!WORLD_TOKEN.test(token)){token=crypto.randomBytes(32).toString('base64url');vault.set(WORLD_TOKEN_VAULT,token);}
  return token;
@@ -22,7 +23,7 @@ export function worldWebToken(vault:{get(id:string):string|null;set(id:string,se
 
 /** Serves the World at /world/ on this computer's own server (modules/phone/local-relay.ts) and writes its link to the
  * library's owner-only `world-link.txt`. The link carries the token: it goes only into that file, never to a log. */
-export function serveWorldWeb({root,webRoot,vault,server,accept}:{root:string;webRoot:string;vault:{get(id:string):string|null;set(id:string,secret:string):void};
+export function serveWorldWeb({root,webRoot,vault,server,accept}:{root:string;webRoot:string;vault:TokenVault;
  server:{origin:string;serveWorld(route:{webRoot:string;token:string;accept(socket:PageSocket):void}):void};accept(socket:PageSocket):void}){
  const token=worldWebToken(vault);
  server.serveWorld({webRoot,token,accept});
