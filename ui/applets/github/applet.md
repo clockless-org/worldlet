@@ -10,7 +10,7 @@ Opening this Applet loads its original website in Worldlet's isolated browser su
 
 - Stable identity: `app-github`; provider: `github`.
 - Executable configuration: [runtime.json](runtime.json). This Markdown describes the contract; it is not executable code.
-- Mode: **on-demand**.
+- Mode: **scheduled**: every 15 minutes, while Worldlet is open with private-context consent, the reviews requested of the person and the Issues assigned to them (with their own open pull requests) are read for Attention (core/applets/INTEGRATIONS.md#github-service).
 
 ## Status
 

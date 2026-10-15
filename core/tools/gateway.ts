@@ -2,8 +2,10 @@ import {listWorldTools,publicWorldToolNames,WORLD_TOOL_VERSION} from './catalog.
 import {worldModules} from './modules.ts';
 import {APP_DEFINITIONS} from '../applets/index.ts';
 import {CALENDAR_REQUIRED} from './calendar.ts';
-// Every Applet with a source-reader or calendar attention registration is readable through the gateway.
-const READABLE_SOURCES=APP_DEFINITIONS.flatMap(app=>app.attention&&app.attention.reader!=='observation'?[app.attention.provider]:[]);
+import {SERVICE_PROVIDERS} from '../../contracts/services.ts';
+// Every Applet with a source-reader or calendar attention registration is readable through the gateway, except a
+// Worldlet Service's: its own Attention reads are the World's, and an Agent reads it only through read_service.
+const READABLE_SOURCES=APP_DEFINITIONS.flatMap(app=>app.attention&&app.attention.reader!=='observation'&&!SERVICE_PROVIDERS.includes(app.attention.provider)?[app.attention.provider]:[]);
 
 export type WorldAction={target:string;action:string;tool:string;description:string;parameters:any;defaults:Record<string,unknown>;public:boolean};
 // Only the World knows implementation names. Models address a target + action.

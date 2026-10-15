@@ -1,13 +1,21 @@
 {
-  "version": 1,
+  "version": 2,
   "key": "github",
   "provider": "github",
-  "mode": "on-demand",
-  "reader": "existing-applet-adapter",
-  "intervalMinutes": 0,
-  "publishAttention": false,
-  "analysis": "none",
+  "mode": "scheduled",
+  "reader": "source-reader",
+  "publishAttention": true,
   "initialLimit": 20,
-  "pageSize": 20,
-  "windowDays": 0
+  "windowDays": 0,
+  "tasks": [
+    {
+      "key": "sync",
+      "handler": "source.read",
+      "pool": "source-io",
+      "trigger": "interval",
+      "intervalMinutes": 15,
+      "batchSize": 20,
+      "timeoutSeconds": 120
+    }
+  ]
 }

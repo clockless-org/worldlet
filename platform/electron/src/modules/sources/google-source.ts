@@ -10,6 +10,7 @@ import {GoogleRestError,MOCK_GOOGLE_EMAIL,discover,mockGoogle,normalizeSource as
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
 import {ExecutionJournal} from '../agent-runtime/journal.ts';
+import {SERVICE_PROVIDERS} from '../../../../../contracts/services.ts';
 import type {GoogleAccount,GoogleService} from './google-account.ts';
 
 const GOOGLE=['gmail','google-calendar','google-drive'];
@@ -56,7 +57,9 @@ export class GoogleSourceAccess implements AgentRuntime {
    // local records, which its permit carries.
    const ours=name==='read_connected_google'||name==='prepare_email'||name==='read_world_source';
    // Journaled as every Agent runtime's runs are: the tools it calls back (`_source_result` among them) are the turn's record.
-   return ours?ExecutionJournal.run(body,home,onEvent,observed=>this.google.tool(name,args,observed,()=>this.cancelled)):this.other().run(body,home,onEvent);
+   // Only the Attention Center's own collection (attention/center.ts readSource) says `_background`: it alone reads a
+   // Worldlet Service's Attention list here.
+   return ours?ExecutionJournal.run(body,home,onEvent,observed=>this.google.tool(name,args,observed,()=>this.cancelled,body._background===true)):this.other().run(body,home,onEvent);
   }
   const request=googleRequest(body);
   if(request&&(request.operation!=='read'||body.action!=='sourceRefresh'||this.google.authorized()))return ExecutionJournal.run(body,home,onEvent,()=>this.request(request));
@@ -144,7 +147,9 @@ export interface GoogleSourceOptions {account:GoogleAccount;development:boolean;
  /** Fox's own Hermes profile, whose Google files go when the World disconnects, and where earlier mail receipts were kept. */
  ownProfile:()=>string|null;legacyHomes:()=>string[];now?:()=>number;
  /** Notion, read for `read_world_source` through the MCP connection the World or the person's Agent has (mcp-source.ts). */
- notion?:{connected():boolean;read(body:Row):Promise<Row>}}
+ notion?:{connected():boolean;read(body:Row):Promise<Row>};
+ /** GitHub's Attention list (`readGithub` list), read only for the Attention Center's background collection (mcp-source.ts). */
+ github?:{read(body:Row):Promise<Row>}}
 /** Google's reads, mail drafts and sends for the World (host.py `_google` and `_google_reads`, world_service.py). */
 export class GoogleSource {
  readonly account:GoogleAccount;
@@ -198,9 +203,15 @@ export class GoogleSource {
 
  /** A World service tool (world_service.py `execute`): validated, authorized by the turn, then run with no model.
   * Its calls back into the World (`_world_authorize`, `_source_begin`, `_source_result`, `_email_review`) go through
-  * the turn that asked, under its trust. */
- async tool(name:string,args:Row,onEvent:AgentEventHandler|undefined,cancelled:()=>boolean):Promise<Row> {
-  validateWorldTool(name,args);
+  * the turn that asked, under its trust. A Worldlet Service (contracts/services.ts) is read here only for the Attention
+  * Center's own background collection (`background`), with nothing but its provider and a limit: it is not in
+  * read_world_source's schema, so no model and no Agent reaches it this way (they read it with read_service, under a
+  * Grant). */
+ async tool(name:string,args:Row,onEvent:AgentEventHandler|undefined,cancelled:()=>boolean,background=false):Promise<Row> {
+  const service=name==='read_world_source'&&SERVICE_PROVIDERS.includes(String(args.provider));
+  if(service){
+   if(!background||Object.keys(args).some(key=>!['provider','limit'].includes(key))||args.limit!==undefined&&!(Number.isInteger(args.limit)&&(args.limit as number)>=1&&(args.limit as number)<=50))throw new WorldletError('Read this Service with read_service.');
+  }else validateWorldTool(name,args);
   if(cancelled())throw new WorldletError('Task stopped.');
   const call=async(tool:string,values:Row)=>{
    const reply=await onEvent?.({type:'tool',id:'world-'+crypto.randomUUID(),name:tool,args:values});
@@ -227,12 +238,13 @@ export class GoogleSource {
  private async readSource(args:Row,cancelled:()=>boolean){
   if(cancelled())throw new WorldletError('Source read was cancelled.');
   const provider=String(args.provider);
-  if(!['gmail','google-calendar','notion'].includes(provider))throw new WorldletError('Unsupported backend source.');
+  if(!['gmail','google-calendar','notion','github'].includes(provider))throw new WorldletError('Unsupported backend source.');
   if(provider!=='gmail'&&(args.unreadOnly||(args.pageToken&&provider!=='google-calendar')||args.query||args.metadataOnly||args.discovery))throw new WorldletError('Unread filtering and paging are available for Gmail only.');
   let result:Row;
   try{
    const notion=this.options.notion;
    if(provider==='notion'){if(!notion)throw new WorldletError('Unsupported backend source.');result=await notion.read({operation:args.id?'fetch':'list',id:args.id??''});}
+   else if(provider==='github'){const github=this.options.github;if(!github)throw new WorldletError('Unsupported backend source.');result=await github.read({operation:'list'});}
    else result=await this.request({operation:'read',service:provider,threads:provider==='gmail',limit:args.limit??20,id:args.id??'',unreadOnly:args.unreadOnly??false,pageToken:args.pageToken??'',
     query:args.query??'',metadataOnly:args.metadataOnly??false,discovery:args.discovery??false,scanMessages:args.scanMessages??false,windowStart:args.windowStart,windowDays:args.windowDays??30});
   }catch(error){throw new WorldletError(sourceFailure([{type:'error',code:failureCode(error)}]));}
