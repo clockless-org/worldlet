@@ -1,4 +1,5 @@
 import {callHost} from '../../platform/bridge/host.ts';
+import {pageFeatures} from '../../platform/bridge/features.ts';
 import {isDesktopCompanion} from './world-surface.ts';
 import {companionStill} from '../themes/index.ts';
 /** World frames drawn so far (pixi-world.ts metrics), or null when no World with a frame count is shown. */
@@ -72,6 +73,8 @@ export function installDesktopCompanion(){
  document.addEventListener('transitionrun',event=>{if((event.target as Element)?.closest('.companion-controls'))resize();});
  const observer=new ResizeObserver(resize);observer.observe(document.body);window.addEventListener('resize',resize);
  const apply=(enabled:boolean)=>{
+  // A World page in a web browser has no desktop Companion window (contracts/web-world.ts): it stays the World.
+  if(enabled&&pageFeatures().desktopCompanion===false)return;
   if(enabled===isDesktopCompanion())return;
   if(enabled)capture();
   if(enabled)document.querySelectorAll<HTMLDialogElement>('dialog[open]').forEach(dialog=>dialog.close());

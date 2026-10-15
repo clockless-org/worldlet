@@ -1,9 +1,9 @@
-import type {HostRequest,HostTransport} from '../../contracts/platform.ts';
+import type {HostFeatures,HostRequest,HostTransport} from '../../contracts/platform.ts';
 import {WORLD_ELSEWHERE_CODE,WORLD_PROTOCOL,WORLD_SOCKET_PATH,WORLD_WEB_PATH,worldLinkToken,worldTokenProtocol,type WorldHostFrame} from '../../contracts/web-world.ts';
 // The World page in a web browser on this computer (contracts/web-world.ts): `worldletHost` over the socket the host
 // serves beside the page, instead of the app's IPC. Requests go as `{q,body}` and come back as `{a,ok,value|error}`;
 // the host calls page globals with `{c,name,args}` (answered `{r,value}`) and sends events as `{v,detail,doc?}`. The
-// platform comes from the handshake. host.ts picks this only when the app gave the page no `worldletHost`.
+// platform, and what the page's window cannot do, come from the handshake. host.ts picks this only when the app gave the page no `worldletHost`.
 const TOKEN_KEY='worldlet-world-token';
 const NOTICE={
  elsewhere:'This World is open in another browser tab. Close this one or reload it to bring the World back here.',
@@ -11,7 +11,8 @@ const NOTICE={
  refused:'This link has ended. Open the World link Worldlet wrote on this computer again.',
 };
 type Pending={resolve:(value:unknown)=>void;reject:(error:Error)=>void};
-type WebHost=HostTransport&{readonly platform:HostTransport['platform']};
+/** `features`: the HostFeatures the handshake turned off for this page (platform/bridge/features.ts pageFeatures). */
+type WebHost=HostTransport&{readonly platform:HostTransport['platform'];features:Readonly<Partial<Record<keyof HostFeatures,boolean>>>};
 
 /** The token from the link's fragment, which is then taken out of the address (the World uses the fragment for its
  * places), or the one this tab kept for a reload. */
@@ -53,7 +54,13 @@ export function webHost(scope:any):HostTransport|undefined {
  };
  socket.onmessage=event=>{
   let frame:WorldHostFrame;try{frame=JSON.parse(String(event.data));}catch{return;}
-  if('h' in frame){platform=frame.h.platform;opened(socket);return;}
+  if('h' in frame){
+   platform=frame.h.platform;
+   // What this page's window cannot do (contracts/web-world.ts WEB_PAGE_FEATURES): only `false` flags are kept.
+   const features=frame.h.features&&typeof frame.h.features==='object'?frame.h.features:{};
+   host.features=Object.freeze(Object.fromEntries(Object.entries(features).filter(([,on])=>on===false)));
+   opened(socket);return;
+  }
   if('a' in frame){
    const call=pending.get(frame.a);if(!call)return;
    pending.delete(frame.a);
@@ -85,6 +92,7 @@ export function webHost(scope:any):HostTransport|undefined {
  const host:WebHost={
   version:1,
   get platform(){return platform??'linux';},
+  features:{},
   async request(request:HostRequest){
    const open=await ready;
    if(open.readyState!==1)throw new Error(NOTICE.stopped);

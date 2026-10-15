@@ -52,6 +52,8 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  // takes the control over; only the turn's end or the quiet timeout end it.
  const FOX_RING=6,FOX_BAND=28,FOX_LABEL='Fox is working on this page';let foxControl=false,foxTimer=0,foxTurnStart:CSSNumberish|null=null;
  const hostGlow=()=>!!native?.browser?.foxOverlay?.();
+ /** Websites show here in a native page over the panel; a World page in a web browser opens them in a new tab. */
+ const pagesHere=()=>!!native?.browser&&native.browser.pages?.()!==false;
  // Fox's copy of the page (owner request 2026-10-09, core/browser/picture-in-picture.ts FOX_COPY): when Fox
  // starts working on the page in view, the host makes Fox a copy of it in the panel's top-right corner,
  // and the person keeps their own page. `copyPage` is the copy's own size while there is one; the
@@ -503,7 +505,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  // it and the panel takes the scene's primary region, so the native page follows the panel as before.
  const panelScene=createPanelScene(content);
  function syncScene(){
-  const wanted=opened&&!content.hidden&&content.dataset.template==='browser'&&!!native?.browser;
+  const wanted=opened&&!content.hidden&&content.dataset.template==='browser'&&pagesHere();
   panelScene.sync(wanted?(getApp(appletKey)?.fullView?.kind==='web'&&appletSceneKey(appletKey)?appletKey:'browser'):'');
  }
  function geometry(now?:unknown){
@@ -714,6 +716,17 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
    // A page opened outside any Applet ('web') keeps the panel's own title and close; Applets show theirs in the top bar.
    if(key!=='web')content.querySelector('.notion-reader-head')?.remove();
    if(!native?.browser){const p=document.createElement('p');p.textContent='Open the Mac app to browse '+title+' here. Browsing does not connect account sync.';const link=document.createElement('a');link.href=address||home;link.target='_blank';link.rel='noopener noreferrer';link.textContent=title+' ↗';content.append(p,link);return;}
+   // A World page in a web browser has no native page to put here (contracts/web-world.ts): the website opens in a new
+   // tab, at once when the person's own click opened it (a World refresh re-mounting the panel opens nothing).
+   if(!pagesHere()){
+    const where=address||home,p=document.createElement('p'),link=document.createElement('a');
+    p.className='browser-new-tab';p.textContent=title+' opens in a new tab in a browser window.';
+    link.className='browser-new-tab-link';link.href=where;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Open '+title+' ↗';
+    content.dataset.newTab='true';content.append(p,link);
+    if((navigator as Navigator&{userActivation?:{isActive:boolean}}).userActivation?.isActive)try{window.open(where,'_blank','noopener,noreferrer');}catch{}
+    return;
+   }
+   delete content.dataset.newTab;
    caption=document.createElement('p');caption.className='browser-caption';caption.setAttribute('role','status');caption.textContent='Loading '+title+'…';
    slot=document.createElement('div');slot.className='browser-viewport';slot.setAttribute('aria-label','Native '+title+' browser');markFoxControl();content.append(caption,...key==='browser'?[tabStrip]:[],...key!=='web'?[toolbar]:[],slot);renderTabs();resize.observe(slot);syncAppletOffer(destination||home);syncMakeOffer();geometry();
   },

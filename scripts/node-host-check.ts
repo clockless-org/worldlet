@@ -3,9 +3,9 @@
 // its own vault storage, and stop cleanly. Its shim and vault storage are checked on their own first. Then the World
 // in a browser on this computer (contracts/web-world.ts): on a library with one item, the link it writes opens the real
 // World in headless Chromium (SwiftShader WebGL), and the server refuses another Host, another Origin, a missing token
-// and the actions a browser's page may not ask for. The `worldlet` command line (status, link and its QR code, register) runs against
-// the host over its control socket, with fake `claude` and `codex` commands. `--screenshot <file>` keeps a picture of
-// that World.
+// and the actions a browser's page may not ask for; the page hears what its window cannot do and hides or replaces it.
+// The `worldlet` command line (status, link and its QR code, register) runs against the host over its control socket,
+// with fake `claude` and `codex` commands. `--screenshot <file>` keeps a picture of that World.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -17,7 +17,7 @@ import qrcode from 'qrcode-generator';
 import {withTempDir} from './test-temp.ts';
 import {launchTestBrowser,pageErrors,waitForWorld} from './browser-test.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {WEB_DENIED_MESSAGE,WORLD_PROTOCOL,worldLinkToken,worldTokenProtocol} from '../contracts/web-world.ts';
+import {WEB_DENIED_MESSAGE,WEB_PAGE_FEATURES,WORLD_PROTOCOL,worldLinkToken,worldTokenProtocol} from '../contracts/web-world.ts';
 import {nodeVaultStorage,VAULT_KEY_FILE} from '../platform/node/src/vault-storage.ts';
 import {app,BrowserWindow,BaseWindow,DESKTOP_ONLY,dialog,Notification,shell} from '../platform/node/src/electron-shim.ts';
 
@@ -216,7 +216,7 @@ await withTempDir('worldlet-node-host-',async temp=>{
  const ledger=new WorldLedger(seeded);
  ledger.saveConfiguration({version:1,workspaceId:'NODE-HOST-CHECK',revision:1,sources:[],knowledge:[],layout:null,codexPath:'',model:'',cloudConsent:true,lastJob:'',autoSync:false,
   connections:[{id:'c-gmail',provider:'gmail',label:'Gmail',syncStatus:'connected',connected:true}],
-  onboarding:{unlockedApplets:['app-gmail'],version:1,presets:['home'],completed:true,introStep:9}});
+  onboarding:{unlockedApplets:['app-gmail','app-browser','app-youtube'],version:1,presets:['home'],completed:true,introStep:9}});
  ledger.upsert([{kind:'task',provider:'gmail',status:'open',title,context:'Due Friday.',reason:'Due Friday.',summary:'The library wrote about the card.',attentionContentVersion:1,policyVersion:2,attentionReason:'due',
   sources:[{provider:'gmail',id:'library-mail',quote:'Your card expires Friday.'}],createdAt:1,updatedAt:2}],'node-host-check',true);
  ledger.close();
@@ -263,6 +263,27 @@ await withTempDir('worldlet-node-host-',async temp=>{
    assert.equal(await refused({action:'deleteSourceData',provider:'gmail'}),WEB_DENIED_MESSAGE,'local data deletion is refused');
    const status=await page.evaluate(()=>(window as any).worldletWebHost.request({action:'phonePair',kind:'web',operation:'status'}));
    assert.ok(status&&typeof status.state==='string'&&!('link' in status),'a pairing status comes without its link');
+   // What the page's window cannot do arrives in the handshake (web-page-features-check.ts): no YouTube in the World, no
+   // World sound, no microphone, no room for window buttons, and websites open in a new tab instead of a native view.
+   assert.deepEqual(await page.evaluate(()=>(window as any).worldletWebHost.features),{...WEB_PAGE_FEATURES},'the page hears what its window cannot do');
+   const layout=await page.evaluate(()=>{const has=(document.querySelector('#notionWorld') as any).appletLayout.has;return {browser:has('app-browser'),youtube:has('app-youtube')};});
+   assert.deepEqual(layout,{browser:true,youtube:false},'YouTube is left out of the World; the Browser stays');
+   assert.equal(await page.locator('.world-audio').count(),0,'no World sound control');
+   assert.equal(await page.locator('.companion-speech-button[hidden][data-voice=off]').count(),1,'no microphone beside Fox');
+   assert.equal(await page.locator('.companion-speech-button').first().isVisible(),false);
+   assert.equal(await page.evaluate(()=>document.documentElement.hasAttribute('data-leading-window-controls')),false,'no room kept for window buttons');
+   await page.evaluate(()=>{(window as any).shows=0;const request=(window as any).worldletWebHost.request;(window as any).worldletWebHost.request=(body:{action?:string})=>{if(body?.action==='browserShow')(window as any).shows++;return request(body);};location.hash='object=app-browser';});
+   const newTab=page.locator('.browser-new-tab-link');
+   await newTab.waitFor({timeout:30_000});
+   assert.equal(await newTab.getAttribute('target'),'_blank','the Browser offers its page in a new tab');
+   assert.equal(await newTab.getAttribute('href'),'https://www.google.com/');
+   await context.route('https://www.google.com/**',route=>route.fulfill({contentType:'text/html',body:'<title>Home</title>'}));
+   const [tab]=await Promise.all([context.waitForEvent('page'),newTab.click()]);
+   await tab.waitForLoadState();
+   assert.equal(tab.url(),'https://www.google.com/','and opens it there');
+   await tab.close();
+   assert.equal(await page.evaluate(()=>(window as any).shows),0,'no native page is asked for');
+   await page.evaluate(()=>{location.hash='';});
    if(screenshot){fs.mkdirSync(path.dirname(screenshot),{recursive:true});await page.screenshot({path:screenshot});}
    assert.deepEqual(errors,[],'no page errors');
    // One World page at a time: a second tab takes over and the first says where the World is.
@@ -273,7 +294,7 @@ await withTempDir('worldlet-node-host-',async temp=>{
    assert.match(await page.locator('#nativeNotice').textContent()||'',/open in another browser tab/);
    await second.getByText(title).first().waitFor({timeout:30_000});
   }finally{await browser.close();}
-  console.log('PASS node host World in a browser: the real World (pixi-webgl) with its item, one page at a time; another Host, Origin or token and denied actions are refused');
+  console.log('PASS node host World in a browser: the real World (pixi-webgl) with its item, one page at a time; another Host, Origin or token and denied actions are refused; the page hears what its window cannot do, leaves out YouTube, sound, the microphone and window buttons, and opens the Browser\'s page in a new tab');
  }finally{
   if(process.platform==='win32')child.send({type:'worldlet:stop'});else child.kill('SIGTERM');
   const code=await Promise.race([exited,new Promise<'hung'>(resolve=>setTimeout(()=>resolve('hung'),20_000))]);

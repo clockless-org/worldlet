@@ -44,7 +44,7 @@ import {harnessUsageLabel} from '../../core/agent/index.ts';
 
 /** A line Fox said on its own (fox-proactive.ts), as opposed to a reply, question or notice. */
 const spokeFirstLine=(value:any)=>String(value?.source||'').startsWith('proactive:');
-export function createNativeChat(call){return function({button,input,status,execute,chatRoute,steering=false,holdToSpeak=false,replyActions=false,resolveReplyLink,onReplyNavigate,greetingContext,recallStorage=null,onSpokenReply=null,talkVoice=null}){
+export function createNativeChat(call){return function({button,input,status,execute,chatRoute,steering=false,holdToSpeak=false,replyActions=false,resolveReplyLink,onReplyNavigate,greetingContext,recallStorage=null,onSpokenReply=null,talkVoice=null,voice=true}){
   const root=button.closest('.notion-world'),form=button.closest('form'),hud=form.parentElement;
  const make=(tag: string,cls?: string,text?: string): any=>Object.assign(document.createElement(tag),{className:cls,...(text?{textContent:text}:{})});
  // Live media queries, read where needed: `.matches` follows the system setting.
@@ -158,6 +158,8 @@ export function createNativeChat(call){return function({button,input,status,exec
  // a microphone and Send inside it. Clicking Fox does the same as clicking the bar.
  const entry=make('div','companion-text-entry'),inputState=make('span','companion-input-state');inputState.setAttribute('role','status');const waveform=make('span','companion-input-wave');waveform.setAttribute('aria-hidden','true');for(let i=0;i<WAVE_DOTS;i++)waveform.append(make('i',''));entry.append(form,inputState,waveform);hud.append(entry);
  const controls=make('div','companion-controls'),speechButton=make('button','companion-speech-button');controls.setAttribute('role','group');controls.setAttribute('aria-label','Companion controls');speechButton.type='button';speechButton.innerHTML=uiIcon('microphone');entry.prepend(controls);
+ // No microphone where the page has no voice (a World page in a web browser, contracts/web-world.ts).
+ if(!voice){speechButton.hidden=true;speechButton.dataset.voice='off';}
  // The bug and the microphone stand inside the bar's right end, in the World and on the desktop alike (owner request
  // 2026-10-11: "把那个报 bug 的按钮和语音的按钮都融到那个 input box 里面去").
  const voiceControls=make('div','companion-controls companion-voice-controls');voiceControls.setAttribute('role','group');voiceControls.setAttribute('aria-label','Voice');// While the microphone listens the bar works like Claude's (owner request 2026-10-12): ✕ at its left cancels, a dotted

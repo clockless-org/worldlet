@@ -2,6 +2,7 @@
 // served by the host on 127.0.0.1 at /world/ and talking to it over one WebSocket at /world/socket instead of the
 // app's IPC. Both sides use this file: the page's transport (platform/bridge/web-host.ts) and the host's
 // (platform/electron/src/host/web-page.ts, platform/electron/src/modules/phone/local-relay.ts).
+import type {HostFeatures} from './platform.ts';
 
 /** Where the host serves the World page and its socket. */
 export const WORLD_WEB_PATH='/world/';
@@ -31,12 +32,28 @@ export function worldLinkToken(hash:string):string {
  * document), `x` the page was closed by the host (`elsewhere`: a newer page took over).
  * Page → host: `q` a request (the body `worldletHost.request` takes), `r` the value a call returned. */
 export type WorldHostFrame=
- {h:{version:1;platform:'macos'|'windows'|'linux'}}|
+ {h:{version:1;platform:'macos'|'windows'|'linux';features?:Partial<Record<keyof HostFeatures,boolean>>}}|
  {a:number;ok:true;value?:unknown}|{a:number;ok:false;error:string}|
  {c:number;name:string;args:unknown[]}|
  {v:string;detail?:unknown;doc?:true}|
  {x:'elsewhere'};
 export type WorldPageFrame={q:number;body:Record<string,unknown>}|{r:number;value?:unknown};
+/** What a World page in a web browser cannot do, though the app's window can, sent in the handshake (`h.features`):
+ * the page turns these HostFeatures off whatever the snapshot says (platform/bridge/features.ts). Websites and the
+ * Browser open in a new tab instead of a native view; YouTube, the World's sound, music players, voice and the desktop
+ * Companion window are hidden; the corner leaves no room for window buttons the page does not have. */
+export const WEB_PAGE_FEATURES:Readonly<Partial<Record<keyof HostFeatures,false>>>=Object.freeze({
+ websitePages:false,youtube:false,worldAudio:false,localMusic:false,voice:false,desktopCompanion:false,leadingWindowControls:false,
+});
+/** What Fox's tools (and the page) answer when they need one of those. */
+export const WEB_PAGE_UNAVAILABLE:Readonly<Partial<Record<keyof HostFeatures,string>>>=Object.freeze({
+ websitePages:'Worldlet\'s built-in browser is not available in a browser window: websites open in a new tab there, where Fox cannot see or use them. Give the person the link, or use the Worldlet app on this computer.',
+ youtube:'YouTube is not available in a browser window. It needs the Worldlet app on this computer.',
+ worldAudio:'The World\'s sound is not available in a browser window. It needs the Worldlet app on this computer.',
+ localMusic:'Music players on this computer are not available in a browser window. They need the Worldlet app on this computer.',
+ voice:'Voice is not available in a browser window. Type to Fox instead, or use the Worldlet app on this computer.',
+ desktopCompanion:'Fox\'s desktop Companion is not available in a browser window. It needs the Worldlet app on this computer.',
+});
 /** The close code a page that was taken over receives. */
 export const WORLD_ELSEWHERE_CODE=4001;
 

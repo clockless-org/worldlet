@@ -1,16 +1,31 @@
-import type {HostFeatures} from '../../contracts/platform.ts';
+import {PAGE_FEATURES,type HostFeatures} from '../../contracts/platform.ts';
 import type {BrowserBudget} from '../../contracts/browser-surface.ts';
 import {readBrowserBudget} from '../../core/browser/index.ts';
 // Compatibility for snapshots from older hosts. New hosts may explicitly
 // advertise capabilities; UI depends on features rather than OS names.
 // Picture in picture needs a host that knows browserPip, so older hosts never offer it.
-export function hostFeatures(info:any):HostFeatures {
+// A World page in a web browser hears from its socket what its window cannot do (contracts/web-world.ts
+// WEB_PAGE_FEATURES); those flags are off whatever the host's snapshot says. The app's own page has none.
+export function hostFeatures(info:any,page:Partial<HostFeatures>=pageFeatures()):HostFeatures {
+ const features=snapshotFeatures(info);
+ for(const key of Object.keys(features) as (keyof HostFeatures)[])if(page[key]===false)(features as unknown as Record<string,boolean>)[key]=false;
+ return features;
+}
+/** The flags the page's own transport turns off: a World page in a web browser gets them in the socket's handshake
+ * (platform/bridge/web-host.ts). Empty for the app's page. */
+export function pageFeatures(scope:any=globalThis):Partial<HostFeatures> {
+ const features=scope?.worldletWebHost?.features;
+ return features&&typeof features==='object'?features:{};
+}
+function snapshotFeatures(info:any):HostFeatures {
  const windows=info?.platform==='windows';
- const legacy:HostFeatures={localDataDeletion:!windows,curatedSourceRead:false,nativeAppletLaunch:!windows,nativeCalendar:!windows,appleNotes:!windows,appleReminders:!windows,voiceMemos:!windows,messages:false,localMusic:false,folderManagement:windows,backgroundSourceChecks:!windows,cancellableOrganization:windows,deferredBackupRestore:windows,cancellableTransferReview:windows,browserBookmarks:!windows,installedAppDetection:!windows,browserFoxOverlay:!windows,browserPictureInPicture:false,browserTaskPictureInPicture:false,leadingWindowControls:!windows,googleSignInStages:false};
+ const legacy:HostFeatures={localDataDeletion:!windows,curatedSourceRead:false,nativeAppletLaunch:!windows,nativeCalendar:!windows,appleNotes:!windows,appleReminders:!windows,voiceMemos:!windows,messages:false,localMusic:false,folderManagement:windows,backgroundSourceChecks:!windows,cancellableOrganization:windows,deferredBackupRestore:windows,cancellableTransferReview:windows,browserBookmarks:!windows,installedAppDetection:!windows,browserFoxOverlay:!windows,browserPictureInPicture:false,browserTaskPictureInPicture:false,leadingWindowControls:!windows,googleSignInStages:false,...Object.fromEntries(PAGE_FEATURES.map(key=>[key,true]))};
  if(info?.hostCapabilities===undefined)return legacy;
  const value=info.hostCapabilities;
  if(value?.version!==1)throw Error('Unsupported Worldlet capability version. Update the app.');
- return Object.fromEntries(Object.keys(legacy).map(key=>[key,value.features?.[key]===true])) as unknown as HostFeatures;
+ // Host services fail closed when omitted; the page's window flags stay on unless a host says false.
+ const page=new Set<string>(PAGE_FEATURES);
+ return Object.fromEntries(Object.keys(legacy).map(key=>[key,page.has(key)?value.features?.[key]!==false:value.features?.[key]===true])) as unknown as HostFeatures;
 }
 /** The host's website page budget (#1176), or the earlier bound from a host that sends none. */
 export const hostBrowserBudget=(info:any):BrowserBudget=>readBrowserBudget(info?.hostCapabilities?.browserBudget);

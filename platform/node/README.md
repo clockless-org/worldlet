@@ -35,8 +35,9 @@ Differences from the desktop app:
 - **Room only.** Browsers' direct lines (WebRTC) run in a hidden Electron window in the desktop app; this host provides
   no `rtcPage` service, so every frame of a browser link goes through the pairing room.
 - **The World page is in a browser.** World tools that run only on the page (navigation, websites, widgets, Applets)
-  work while a browser has the World open, and otherwise answer that the World must be open. Things that need the
-  desktop app (websites inside the World, sound, voice) are not there yet.
+  work while a browser has the World open, and otherwise answer that the World must be open. What a browser window
+  cannot do is not offered there: websites and the Browser open in a new tab, and YouTube, the World's sound, voice and
+  the desktop Companion are hidden ([what a browser window cannot do](../../docs/UI-CORE-PLATFORM.md#the-world-in-a-web-browser)).
 - **Its own vault.** The secrets are as safe as `vault.key` (the computer account and disk encryption), not tied to a
   keychain. A vault the Electron host wrote with `safeStorage` is not readable here, nor this one there.
 

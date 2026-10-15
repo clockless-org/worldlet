@@ -3,7 +3,7 @@ import {createModelStatusReader} from '../../platform/bridge/model-status.ts';
 import {createAgentClient} from '../../platform/bridge/agent-client.ts';
 
 // Native Fox uses the selected Agent adapter; cloud HTTPS remains for voice transport.
-export function createNativeCompanion(call,{sample=false}={}){
+export function createNativeCompanion(call,{sample=false,voice=true}={}){
  const publishModelStatus=status=>window.dispatchEvent(new CustomEvent('worldlet:model-status',{detail:status}));
  const statusReader=createModelStatusReader(()=>call('modelStatus'),publishModelStatus);
  const modelStatus=()=>statusReader.get();
@@ -35,7 +35,7 @@ export function createNativeCompanion(call,{sample=false}={}){
   });
  }
  const agent=createAgentClient(call,{sample});
- return createCompanionAI(call,{sample,nativeCall:call,runAgent:agent,async modelOptions(){
+ return createCompanionAI(call,{sample,voice,nativeCall:call,runAgent:agent,async modelOptions(){
   const status=await modelStatus();
   if(!status.available)throw Error(status.reason||'Fox is unavailable right now.');
   return {provider:'agent',setup:!status.cloudAllowed};
