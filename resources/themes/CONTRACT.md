@@ -190,3 +190,12 @@ regions, not theme-provided code or account records.
 An optional secondary `session-heading` region moves the Applet title and local
 session caption above the columns. The index then starts with its Sessions label;
 search, selection and continuation keep the same host-owned behavior.
+
+### Markdown vault regions
+
+An Obsidian scene can place its folder index, linked-note list, title and vault
+connection controls in secondary `vault-index`, `vault-links`, `vault-heading`
+and `vault-toolbar` regions. The primary region reads Markdown using the existing
+read-only vault adapter. Search and folder expansion remain within the index;
+local links resolve only against its listed notes. Missing or ambiguous links
+remain unresolved. Without these regions the ordinary list and reader remain.

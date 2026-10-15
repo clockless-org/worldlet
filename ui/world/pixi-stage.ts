@@ -1,6 +1,6 @@
 import {renderHomeOpen,selectNotebookItem,type HomeOpenState} from '../applets/index.ts';
 import {HOME_NATIVE,HOME_RECORDS,CODING_SESSIONS,ORIGINAL_READERS} from '../../core/applets/index.ts';
-import {renderMailOpen,renderMeetingsOpen,renderSceneList,renderWorkSession,selectWorkSession,mountAppletScene,appletSceneKey,type AppletScene} from '../applets/index.ts';
+import {renderMailOpen,renderMeetingsOpen,renderSceneList,renderWorkSession,selectWorkSession,renderVaultScene,mountAppletScene,appletSceneKey,type AppletScene} from '../applets/index.ts';
 import {weatherGlyph} from './environment/weather-forecast.ts';
 import {attentionIcon} from '../attention/index.ts';
 import {calendarDay} from './applet-content.ts';
@@ -52,6 +52,7 @@ export function createAppletStage(host,onPick){
   if(scene){const pick=item=>{selected=item;onPick({action:'applet-item',id:item.id});};
    if(room.key==='gmail')shownItems=renderMailOpen(scene.primary.element,items,value,pick,scene.regions);
    else if(room.key==='meetings'){scene.primary.element.replaceChildren();shownItems=renderMeetingsOpen(scene.primary.element,room,items,value,pick);}
+   else if(room.key==='obsidian')shownItems=renderVaultScene(scene.primary.element,room,items,value,scene.regions)||renderSceneList(scene.primary.element,room,items,value,pick);
    else if(CODING_SESSIONS.includes(room.key))shownItems=renderWorkSession(scene.primary.element,room,items,value,pick,scene.regions)||renderSceneList(scene.primary.element,room,items,value,pick);
    else if(!HOME_RECORDS.includes(room.key))shownItems=renderSceneList(scene.primary.element,room,items,value,pick,room.key==='weather'?item=>weatherGlyph(item.weatherCode):undefined);
    else{const active=document.activeElement as HTMLElement|null,calendarFocus=calendar&&active&&scene.element.contains(active)?{id:active.dataset.itemId,label:active.getAttribute('aria-label'),mode:active.closest('.home-calendar-modes')?active.textContent:null}:null;

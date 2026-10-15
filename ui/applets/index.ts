@@ -35,3 +35,5 @@ export {createCodexApplet} from './codex/codex-applet.ts';
 export {createVoiceMemoReader} from './voice-memos/voice-memos.ts';
 
 export {renderWorkSession,selectWorkSession} from './_shared/work-session.ts';
+
+export {renderVaultScene} from './obsidian/open.ts';
