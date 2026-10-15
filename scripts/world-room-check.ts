@@ -15,6 +15,7 @@ import {execFileSync,spawn} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import type {Duplex} from 'node:stream';
 import {withTempDir} from './test-temp.ts';
+import {worldAnswers} from '../ui/web/index.ts';
 import {memoryRoom} from './memory-room.ts';
 import {launchTestBrowser,pageErrors,waitForWorld} from './browser-test.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
@@ -66,6 +67,16 @@ const within=<T>(promise:Promise<T>,what:string,ms=10_000)=>Promise.race([promis
  assert.match(policy,/frame-ancestors 'none'$/);
  assert.ok(!policy.includes("'self'")&&!/\*/.test(policy),'not the whole site, and no other site');
  assert.throws(()=>worldRoomCsp('https://worldlet.ai/open/'),/Not a World bundle folder/);
+ // The Center's page goes on to the World only where the relay answers for that version's bundle.
+ {
+  const asked:string[]=[];
+  const answer=(status:number,type='text/html; charset=utf-8')=>async(input:string,init?:RequestInit)=>{asked.push(`${init?.method} ${input}`);return new Response(null,{status,headers:{'Content-Type':type}});};
+  assert.equal(await worldAnswers(answer(200),link),true);
+  assert.deepEqual(asked,['HEAD /world/2026.1015.1/'],'a HEAD of the bundle\'s page on the same origin, without the pairing');
+  assert.equal(await worldAnswers(answer(404),link),false,'a version the relay does not keep: the Center stays');
+  assert.equal(await worldAnswers(answer(200,'text/plain'),link),false,'only the World page counts');
+  assert.equal(await worldAnswers(async()=>{throw new TypeError('offline');},link),false);
+ }
  for(const action of ['snapshot','agentChat','worldItemStatus','artifacts','appContent','calendarEvents','widgets'])assert.equal(roomDenied({action}),'',action+' is allowed');
  assert.equal(roomDenied({action:'artifactPages',operation:'get'}),'');
  // The native views that show what Fox made say why, as on a browser on that computer (WEB_PAGE_ACTIONS).
@@ -171,10 +182,11 @@ await withTempDir('wl-room-',async temp=>{
  // The relay stand-in: the World bundle as static files that hold no data at /world/<version>/, and the room at
  // /api/room/<name>, on one origin. Every room message is measured against the room's limit.
  const room=memoryRoom(),oversized:number[]=[],realRoot=fs.realpathSync(web),opened:Duplex[]=[];
- let roomMessages=0;
+ let roomMessages=0,bundleGone=false;
  const server=http.createServer((req,res)=>void (async()=>{
   const url=new URL(req.url||'/','http://relay');
   // The Center's page at /open/, and the World bundle of any version at /world/<version>/.
+  if(bundleGone&&url.pathname.startsWith('/world/')){res.writeHead(404,{'Content-Type':'text/html; charset=utf-8'}).end('Update Worldlet');return;}
   const match=/^\/world\/[^/]+(\/.*)$/.exec(url.pathname)??(url.pathname.startsWith('/open/')?[url.pathname,url.pathname.endsWith('/')?url.pathname+'index.html':url.pathname]:null);
   const file=match&&await resolveWorldFile(realRoot,match[1]);
   if(!file||!TYPES[path.extname(file).toLowerCase()]){res.writeHead(404).end();return;}
@@ -255,6 +267,13 @@ await withTempDir('wl-room-',async temp=>{
    await page.waitForFunction(()=>document.documentElement.dataset.worldClosed==='true',undefined,{timeout:30_000});
    assert.match(await page.locator('#nativeNotice').textContent()||'',/open in another browser tab or device/);
    await second.getByText(title).first().waitFor({timeout:60_000});
+   // A relay that does not keep this version's bundle: the computer's browser stays on the Center instead of a 404.
+   bundleGone=true;
+   const stale=await (await browser.newContext({viewport:{width:1280,height:800}})).newPage();
+   await stale.goto(roomLink);
+   await stale.getByText(title).first().waitFor({timeout:60_000});
+   assert.equal(new URL(stale.url()).pathname,'/open/','no bundle there: the Center, not a missing page');
+   bundleGone=false;
    // A phone opens the same link and keeps the Center and Fox: what the World page hands it arrives there.
    const phone=await browser.newContext({viewport:{width:390,height:844},screen:{width:390,height:844},isMobile:true,hasTouch:true});
    const small=await phone.newPage();
@@ -265,7 +284,7 @@ await withTempDir('wl-room-',async temp=>{
   }finally{await browser.close();}
   assert.ok(roomMessages>10,'the World went through the room');
   assert.deepEqual(oversized,[],'every room message under the room\'s limit');
-  console.log(`PASS world room end to end: the Node host writes the World link for another device and the browser link carries it; that link opens the full World on a computer and keeps the Center on a phone; the built World bundle, served as static files beside a room stand-in under the policy worldlet.ai sends (worldRoomCsp: nothing blocked it needs, nothing else on the origin reached), joins from the fragment and renders the World (pixi-webgl) with its item; ROOM_ALLOWED, WEB_DENIED and WEB_PAGE_ACTIONS refused in the host; one device at a time; ${roomMessages} room messages, none over the room's limit`);
+  console.log(`PASS world room end to end: the Node host writes the World link for another device and the browser link carries it; that link opens the full World on a computer where the relay serves its bundle (else the Center) and keeps the Center on a phone; the built World bundle, served as static files beside a room stand-in under the policy worldlet.ai sends (worldRoomCsp: nothing blocked it needs, nothing else on the origin reached), joins from the fragment and renders the World (pixi-webgl) with its item; ROOM_ALLOWED, WEB_DENIED and WEB_PAGE_ACTIONS refused in the host; one device at a time; ${roomMessages} room messages, none over the room's limit`);
  }finally{
   if(process.platform==='win32')child.send({type:'worldlet:stop'});else child.kill('SIGTERM');
   const code=await Promise.race([exited,new Promise<'hung'>(resolve=>setTimeout(()=>resolve('hung'),20_000))]);

@@ -27,6 +27,13 @@ export function browserName(userAgent:string){
  return system?`${browser} on ${system}`:browser;
 }
 
+/** Whether the relay serves the World bundle a World link names: a version it does not keep (or a relay with no
+ * bundle yet) answers otherwise, and the person stays on the Center instead of a page that is not there. */
+export async function worldAnswers(fetcher:(input:string,init?:RequestInit)=>Promise<Response>,url:string):Promise<boolean>{
+ try{const response=await fetcher(new URL(url).pathname,{method:'HEAD',cache:'no-store',redirect:'follow'});return response.ok&&/^text\/html\b/i.test(response.headers.get('content-type')||'');}
+ catch{return false;}
+}
+
 export function mountWebOpen(root:HTMLElement,options:WebOpenOptions){
  const el=<K extends keyof HTMLElementTagNameMap>(tag:K,cls='',text='')=>Object.assign(document.createElement(tag),{className:cls,textContent:text});
  // A fresh link arrives in the fragment; it is kept and taken out of the address bar at once.
