@@ -137,7 +137,7 @@ Source collection, analysis and Attention publication follow the shared [Applet 
 | Source | Authorization and reading | Bound |
 | --- | --- | --- |
 | Gmail / Calendar | Hermes Google Workspace skill, direct Google OAuth (PKCE, local loopback) with read-only scopes; token in the private profile's `google_token.json`. Drive is not part of the default grant | Gmail: 20 threads from the last 30 days, 8 newest messages each. Calendar: 50 events over 30 days |
-| Notion | Hermes MCP OAuth against the official remote MCP; explicitly allowed read tools | On demand; the user can ask Fox to save a note. No full import |
+| Notion | World-owned official MCP OAuth for opt-in selected-page collection; Agent source reads use persisted context under World authorization | Periodic selected-page snapshots; the Applet can browse live separately and reviewed writes remain separate. No full import |
 | GitHub | Hermes MCP configuration with a user-supplied restricted token; read tools only | On demand; untested end to end with a real token |
 | Apple Notes / Reminders | Mac read-only adapters (`modules/sources/apple.ts`, a bounded JavaScript-for-Automation helper) called through `read_world_source`; system permission is requested by an explicit connect | On demand; real TCC prompts not yet exercised |
 

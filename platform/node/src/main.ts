@@ -12,6 +12,7 @@ import {platformName,profileFrom} from '../../electron/src/profile.ts';
 import {Preferences} from '../../electron/src/preferences.ts';
 import {WorldStore} from '../../electron/src/store/world-store.ts';
 import {HostRouter} from '../../electron/src/host/router.ts';
+import {redactDiagnosticText} from '../../../core/diagnostics/index.ts';
 import {createDiagnostics} from '../../electron/src/host/diagnostics.ts';
 import {endStrayChildren,withDeadline} from '../../electron/src/host/quit.ts';
 import {FEATURE_OWNERS,hostCapabilities} from '../../electron/src/capabilities.ts';
@@ -55,7 +56,7 @@ const here=__dirname,resources=fs.existsSync(path.join(here,'WorldletWeb'))?here
 const profile=profileFrom({packaged:true,resourcesPath:resources,appPath:here,rootOverride:true});
 useProfileRoot(profile.root);
 ensureDirectory(profile.root);
-const log=(line:string)=>process.stdout.write(`worldlet: ${line}\n`);
+const log=(line:string)=>process.stdout.write(`worldlet: ${redactDiagnosticText(line)}\n`);
 
 const diagnostics=createDiagnostics(profile.root);
 const preferences=Preferences.at(profile.root,()=>({}));
@@ -194,9 +195,11 @@ serveWorld().catch(error=>{diagnostics.record(error,'worldWeb');log('World page 
 
 /** The `worldlet` command line (control.ts): answers go only to the asker, never to this host's log. */
 const setupDone=()=>store.state.cloudConsent===true&&!onboardingUnfinished(store.state.onboarding);
-const NOT_SET_UP='The person has not finished setup yet: World tools answer only after they open the World (its link is in '+WORLD_LINK_FILE+' in the library) and finish setup there.';
+const NOT_SET_UP='The person has not finished setup yet: World tools answer only after they open the World (worldlet link --local prints its link) and finish setup there.';
 async function answer(request:ControlRequest):Promise<ControlReply> {
  if(request.command==='link'){
+  // Only the owner-only control socket returns this existing local window link; no new token or pairing.
+  if(request.local)return {lines:[await serveWorld()]};
   const status=await host.use<PhoneService>(PHONE).worldLink?.() as {link?:string}|undefined;
   if(!status?.link)throw Error('No browser link was made.');
   return {lines:[status.link]};

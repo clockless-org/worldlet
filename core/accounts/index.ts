@@ -14,6 +14,7 @@ export {mcpPayload} from './mcp/payload.ts';
 export {jsonSchemaValid} from './mcp/json-schema.ts';
 export {READ_SHAPED,MCP_POLICY,fnmatchcase,mcpConfiguration,enabledMcpTools,type McpPolicy} from './mcp/policy.ts';
 export {NOTION_ENDPOINT,NOTION_GATE,NOTION_MAX_TEXT,notion,readNotion,notionPageId,notionPayload,notionPage,displayText as notionDisplayText,readableMentions as notionReadableMentions} from './mcp/notion.ts';
+export {collectNotionPage,readNotionContext} from './services/notion-context.ts';
 export {NOTION_WRITE_OPERATIONS,NOTION_REVIEW_FOLDER,handleNotionWrite,publicReview as notionPublicReview,notionFingerprint,type NotionReviewStore,type NotionWriteOptions} from './mcp/notion-writes.ts';
 export {TODOIST_ENDPOINT,TODOIST_TOOLS,TODOIST_GATE,todoistTimeoutSeconds,todoistTaskId,todoist,readTodoist,reviewedTodoist} from './mcp/todoist.ts';
 export {LINEAR_ENDPOINT,LINEAR_TOOLS,LINEAR_GATE,linearIssueId,linearListArguments,readLinear} from './mcp/linear.ts';
@@ -28,3 +29,7 @@ export {CLOUDFLARE_API,CLOUDFLARE_GATE,CLOUDFLARE_LIMITS,CLOUDFLARE_READS,checkC
 export {DOORDASH_CLI_VERSION,DOORDASH_MUTATIONS,doordashArgs,cleanDoordash,validDoordashCheckout,doordashOutcome,type DoordashRun} from './doordash.ts';
 // Service presets: named, saved reads of a Worldlet Service (a HogQL query, a GitHub search) that a board block names.
 export {PRESET_REASONS,SERVICE_PRESET_ID,readServicePresetRead,readServicePresetSave,readStoredServicePreset,removeServicePreset,saveServicePreset,servicePresetRead} from './services/presets.ts';
+
+export {SERVICE_SYNC_LIMITS,serviceSyncReadKey,configureServiceSync,serviceSyncStart,serviceSyncFailure,serviceSyncPage,finishServiceSyncPage} from './services/sync.ts';
+
+export {OAUTH_CALLBACK_SCRIPT,oauthCallbackPage,type OAuthCallbackStatus} from './oauth-callback.ts';

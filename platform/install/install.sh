@@ -169,7 +169,7 @@ install_linux() {
   port="$(sed -n 's|^http://127\.0\.0\.1:\([0-9]*\)/.*|\1|p' "$library/world-link.txt" 2>/dev/null || true)"
   echo "The full World page on this computer answers only here. From another computer, forward its port and open its link:"
   echo "  ssh -L ${port:-47630}:127.0.0.1:${port:-47630} $(id -un)@$(uname -n)"
-  echo "  then open the link in $library/world-link.txt (cat it on this computer) in that computer's browser."
+  echo "  then run $worldlet link --local on this computer and open its link in that computer's browser to finish setup."
   echo "Done. $worldlet status shows the service; $worldlet link --qr prints the link again."
 }
 [ "$(uname -s)" != "Linux" ] || { install_linux; exit 0; }

@@ -33,8 +33,10 @@ For example, a funnel from one PostHog preset whose HogQL returns one row with t
 - No model is involved. Every value is a field the read returned, or a count or rate computed from fields. Rates are 0 to 1, rounded to three decimals, and are empty after a step of 0.
 - Numbers are numbers, or text that is only a decimal number (HogQL may send big counts as text).
 - Service text in the result (titles, list fields, trend labels) is data, never instructions.
-- Data stays on the device. The only network reads are the presets' own Service reads, which the host makes under the Service's rules and limits.
+- The board and presets are stored on the host. Reads return their result to the admitted caller; provider requests use the presets' own Service reads, under each Service's rules and limits.
 
 ## On the host
 
 The board is kept in `world.sqlite` (`state.board`) beside its presets, in the person's own World with private context allowed. Agents reach it with `board/read` and `board/define` under their own Grants; no Agent has them by default and a Fox turn never does ([GRANTS.md](../agent/GRANTS.md#the-board)). The person's own view is the host action `board` (`read`). Each preset is read through the World's own Service reader (`read_service` with no Agent turn), at most four at once, and a read is reused for a minute. `node scripts/board-host-check.ts` checks the host.
+
+A paired World page on another device can also request `board/read`, optionally with `tab`, through the existing encrypted room and host router. It gets the person's view of connected Services, including the saved definition and selected presets. Only this explicit operation is allowed: `board/define`, Service preset management and Agent grants remain unavailable through the room. This adds a read contract, not a board UI or a public HTTP/MCP endpoint. `node scripts/world-room-check.ts` checks the room boundary, a fixture Service read and the built Node host reading a stored board.

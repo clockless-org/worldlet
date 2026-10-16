@@ -1,5 +1,5 @@
 import {core} from '../../core.ts';
-import {WorldletError} from '../../files.ts';
+import {digest,WorldletError} from '../../files.ts';
 import {canBuild} from '../../store/world-store.ts';
 import {SOURCES,SPEECH} from '../../host/services.ts';
 import {SourcesContext} from './context.ts';
@@ -13,6 +13,7 @@ import {createOnboarding} from './onboarding.ts';
 import {createLocal} from './local.ts';
 import {createMessages} from './messages.ts';
 import {createServicePresets} from './service-presets.ts';
+import {createServiceSync} from './service-sync.ts';
 import {mailAvatar,clearMailAvatars} from './mail-avatar.ts';
 import {attentionImage,clearAttentionImages} from './attention-image.ts';
 import type {SourcesService,SpeechService} from '../../host/services.ts';
@@ -33,6 +34,28 @@ export function installSources(host:Host){
  const messages=createMessages(ctx);
  // Service presets live in the person's own World only (never the practice World), like its other records.
  const presets=createServicePresets({ledger:()=>{try{return store.writable&&!store.sampleEnabled()?store.ledger():null;}catch{return null;}}});
+ // Collection uses the existing source readers directly; no model turn or registered Agent is needed.
+ const sync=createServiceSync({
+  ledger:()=>{try{return store.writable&&!store.sampleEnabled()&&store.state.cloudConsent===true?store.ledger():null;}catch{return null;}},
+  authorize:preset=>{
+   if(preset.provider==='notion'){
+    const own=ctx.agent().worldNotionBinding?.();
+    return own?{binding:own,version:String(store.attentionEpoch)}:null;
+   }
+   const connection=ctx.agentConnection(preset.provider);
+   if(!connection)return null;
+   const binding=digest(JSON.stringify([connection.id,connection.provider,connection.transport,connection.target,connection.syncGrant??null]));
+   return {binding,version:String(store.attentionEpoch)+':'+ctx.accountsId()};
+  },
+  read:async(request,signal)=>{
+   const collect=ctx.agent().collectServicePage;
+   if(!collect)throw new WorldletError('World Services are unavailable.');
+   return collect(request,signal);
+  },changed:()=>{store.activityRevision+=1;store.notify();}
+ });
+ host.onStarted(()=>sync.start());
+ host.onQuit(()=>sync.stop());
+
 
  // Applet activity: a projection of Agent events, not another source or memory database.
  const touched=()=>{store.activityRevision+=1;store.notify();};
@@ -66,6 +89,7 @@ export function installSources(host:Host){
 
  const organizeSources=(body:Row)=>{host.optional<SpeechService>(SPEECH)?.cancelCapture();return organizer.organizeSources(body);};
  const service:SourcesService={
+  readNotionContext:request=>sync.notionContext(request),
   itemOriginal:id=>itemOriginal(ctx,id),
   receiveAppletEvent,describeApplet,finishAppletTurn,
   clearMailReviews:()=>reviews.clearMail(),
@@ -109,7 +133,8 @@ export function installSources(host:Host){
   messages:body=>messages.handle(body),
   // Named, saved Service reads (core/applets/INTEGRATIONS.md#service-presets). Not in ROOM_ALLOWED: a World page on
   // another device does not change them.
-  servicePresets:body=>presets.handle(body)
+  servicePresets:body=>presets.handle(body),
+  serviceSync:body=>sync.handle(body)
  });
  // After Restart Worldlet for Full Disk Access, open Messages again; its list retries with the new permission.
  host.onPageLoaded(()=>{if(messages.retryAfterRestart())void host.worldView()?.webContents.executeJavaScript("location.hash='object=app-messages'").catch(()=>{});});

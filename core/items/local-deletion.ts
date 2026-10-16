@@ -8,7 +8,7 @@ export function localDeletionRequest(input:any) {
  const provider=input.action==='clearWorldContent'?null:input.provider;
  if(input.action!=='clearWorldContent'&&input.action!=='deleteSourceData')throw Error('Invalid deletion request.');
  if(provider!==null&&(typeof provider!=='string'||!provider.trim()||provider.length>100))throw Error('Name the source to delete.');
- return {provider,clearMailReviews:provider===null||provider==='gmail',buckets:['items','attention-backup','reviews','task-reviews','attention-budget','attention-context','applet-observations','applet-findings','applet-cursors','runtime-operations','runtime-deliveries'],title:provider?`Delete everything from ${provider}?`:'Delete everything Worldlet saved?',
+ return {provider,clearMailReviews:provider===null||provider==='gmail',buckets:['items','attention-backup','reviews','task-reviews','attention-budget','attention-context','applet-observations','applet-findings','applet-cursors','runtime-operations','runtime-deliveries','service-sync-jobs','service-sync-pages','service-sync-snapshots'],title:provider?`Delete everything from ${provider}?`:'Delete everything Worldlet saved?',
   detail:(provider?`This permanently deletes local items, imported copies and derived notes from ${provider}, including saved revisions. Items that also rest on another source keep that evidence. `:'This permanently deletes every local saved item, imported copy and derived note, including saved revisions. ')+"Connections, model setup, preferences, Fox memory, conversations and Fox's recorded activity (Settings › Help, which can quote what Fox read) are kept; Reset removes them. Nothing is deleted in external services. Connected sources can be read again. This cannot be undone.",button:provider?'Delete':'Delete everything saved'};
 }
 export function localDeletionSources({provider,sources=[],connections=[]}:any) {
@@ -47,6 +47,7 @@ export function localDeletionRecord({provider,item,bucket,key,record,gone=[]}:an
   return result;
  }
  if(bucket==='attention-context')return provider===null?null:{...record,facts:(record.facts||[]).filter(f=>f.provider!==provider)};
+ if(['service-sync-jobs','service-sync-pages','service-sync-snapshots'].includes(bucket))return provider===null||record.provider===provider?null:record;
  if(['applet-observations','applet-findings','applet-cursors'].includes(bucket))return provider===null||key===provider?null:record;
  if(bucket==='runtime-operations')return provider===null||record.ownerId===provider?null:record;
  if(bucket==='runtime-deliveries')return provider===null||record.provider===provider?null:record;

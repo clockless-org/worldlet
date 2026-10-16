@@ -1,4 +1,5 @@
 import {connectionLive,getApp,TOKEN_PROVIDERS} from '../../core/applets/index.ts';
+import {showServiceCollection} from './service-collection.ts';
 import {showAgentConnections} from './agent-connections.ts';
 import {agentEl as el} from './agent-change.ts';
 
@@ -32,6 +33,7 @@ export async function showWorldletAccounts(target:HTMLElement,call:(action:strin
  target.append(own,said);
  await draw();
  if(current())await showGithubApp(target,call,current);
+ if(current())await showServiceCollection(target,call,current);
  // The Agent's own tools and chat accounts, with Add and Remove through its own commands.
  if(current())await showAgentConnections(target,call,current);
 }

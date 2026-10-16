@@ -1,3 +1,4 @@
+import type {ServiceRead} from '../../../../contracts/services.ts';
 import type {NativeImage} from 'electron';
 import type {Row} from './types.ts';
 import type {HarnessApprovals,HarnessCalls,HarnessEvents,HarnessSend,HarnessSkills,HarnessTools,HarnessVoice} from '../../../../contracts/harness-services.ts';
@@ -50,6 +51,10 @@ export interface AgentService {
  readonly accountsId:string;
  accountsHome():string;
  makeSourceAccess():AgentRuntime;
+ /** Owner-enabled periodic reads, without model execution or conversational payload history. */
+ collectServicePage?(request:ServiceRead,signal:AbortSignal):Promise<Row>;
+ /** Opaque binding for the World's own Notion OAuth connection; never an Agent token or a provider call. */
+ worldNotionBinding?():string|null;
  makeSourceConnections():AgentSourceConnections;
  /** The World's own Google connection, when this build has one: the signed-in account for analytics and greetings. */
  googleAccount?():{authorized():boolean;profile():{email:string;user_id:string;name?:string}|null}|null;
@@ -161,6 +166,8 @@ export const WORLD_TOOLS='worldTools';
 
 // Sources and connections (modules/sources) -------------------------------------------------
 export interface SourcesService {
+ /** Persisted owner-collected Notion context. No live provider fallback. Caller keeps ordinary World Grants. */
+ readNotionContext?(request:Row):Row;
  /** `world-item:` original reads (Gmail thread, Notion page, local source). */
  itemOriginal(id:string):Promise<Row>;
  /** Applet live-activity events from a Harness turn. */

@@ -1,6 +1,6 @@
 import {BOARD_BLOCK_KINDS,BOARD_DEFINE_PRESETS,BOARD_LIMITS,type BoardReadArgs,type BoardRecord,type BoardBlock,type BoardBlockKind,type BoardBlockView,type BoardDefinition,type BoardFunnelStep,type BoardListItem,type BoardPoint,type BoardTab,type BoardView} from '../../contracts/board.ts';
 import type {ServicePreset} from '../../contracts/service-presets.ts';
-import type {ServiceRecords} from '../../contracts/services.ts';
+import {SERVICE_PROVIDERS,type ServiceRecords} from '../../contracts/services.ts';
 import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
 import {looksSecret} from '../agent/index.ts';
 import {saveServicePreset} from '../accounts/index.ts';
@@ -11,6 +11,7 @@ import {saveServicePreset} from '../accounts/index.ts';
 
 export const BOARD_REASONS=Object.freeze({
  invalid:'This board is not valid.',
+ collection:'This preset collects World context and is not supported on the board yet.',
  id:`Name each tab and block with lowercase letters, digits and -, at most ${BOARD_LIMITS.id}.`,
  duplicate:'Each tab and each block needs its own ID.',
  title:`Give it a title of up to ${BOARD_LIMITS.title} characters on one line.`,
@@ -191,8 +192,13 @@ export function defineBoard(current:BoardRecord|null,presets:readonly ServicePre
  let saved=[...presets];
  if(value.presets!==undefined){
   if(!Array.isArray(value.presets)||value.presets.length>BOARD_DEFINE_PRESETS)fail(BOARD_REASONS.presets);
-  for(const preset of value.presets as unknown[])saved=saveServicePreset(saved,preset,now).presets;
+  for(const input of value.presets as unknown[]){
+   const result=saveServicePreset(saved,input,now);
+   if(!SERVICE_PROVIDERS.includes(result.preset.provider))fail(BOARD_REASONS.collection);
+   saved=result.presets;
+  }
  }
+ if(saved.some(preset=>boardPresetIds(definition).includes(preset.id)&&!SERVICE_PROVIDERS.includes(preset.provider)))fail(BOARD_REASONS.collection);
  return {board:{definition,revision:(current?.revision??0)+1,updatedAt:now,...agentId?{agentId}:{}},presets:saved};
 }
 

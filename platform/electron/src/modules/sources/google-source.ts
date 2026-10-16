@@ -146,7 +146,7 @@ const failureCode=(error:unknown)=>error instanceof GoogleRestError?({400:'inval
 export interface GoogleSourceOptions {account:GoogleAccount;development:boolean;openExternal(url:string):Promise<void>;
  /** Fox's own Hermes profile, whose Google files go when the World disconnects, and where earlier mail receipts were kept. */
  ownProfile:()=>string|null;legacyHomes:()=>string[];now?:()=>number;
- /** Notion, read for `read_world_source` through the MCP connection the World or the person's Agent has (mcp-source.ts). */
+ /** Notion for `read_world_source`: the host supplies the World's saved context, with no live provider fallback. */
  notion?:{connected():boolean;read(body:Row):Promise<Row>};
  /** GitHub's Attention list (`readGithub` list), read only for the Attention Center's background collection (mcp-source.ts). */
  github?:{read(body:Row):Promise<Row>}}

@@ -6,3 +6,4 @@ export * from './native-crash.ts';
 export * from './device-class.ts';
 export * from './data-size.ts';
 export * from './graphics-mode.ts';
+export {redactDiagnosticText,diagnosticLineCapture} from './redaction.ts';

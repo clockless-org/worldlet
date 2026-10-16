@@ -5,6 +5,7 @@
 // is kept in the vault and refreshed there; the client opens a session, reads JSON and event-stream answers, retries
 // once after a 401 and reopens a forgotten session.
 import assert from 'node:assert/strict';
+import {assertOAuthCallback} from './oauth-callback-fixture.ts';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -97,9 +98,10 @@ if(process.platform!=='win32')assert.equal(fs.statSync(path.join(hermes,'mcp-tok
 
  // A connection made through Worldlet: discovery, registration on the loopback address, PKCE, resource indicator.
  let opened='';
+ const callbackChecks:Promise<void>[]=[];
  const browser=async(url:string)=>{
   opened=url;const query=new URL(url).searchParams;
-  setTimeout(async()=>{await fetch(query.get('redirect_uri')+'?'+new URLSearchParams({code:'code-1',state:query.get('state')!})).catch(()=>{});},10);
+  callbackChecks.push(new Promise(resolve=>setTimeout(resolve,10)).then(()=>fetch(query.get('redirect_uri')+'?'+new URLSearchParams({code:'code-1',state:query.get('state')!}))).then(assertOAuthCallback));
  };
  const made=await accounts.connect('todoist',MCP,'',browser);
  assert.equal(made.source,'world');
@@ -129,5 +131,6 @@ if(process.platform!=='win32')assert.equal(fs.statSync(path.join(hermes,'mcp-tok
  await assert.rejects(accounts.connect('x','http://mcp.example.com/mcp','',browser),/HTTPS/);
  await assert.rejects(accounts.connect('x','https://user:pw@mcp.example.com/mcp','',browser),/HTTPS/);
  await assert.rejects(accounts.connect('Bad Name',MCP,'',browser),/Invalid connection name/);
+ await Promise.all(callbackChecks);
 });
 console.log('PASS World MCP connections: an Agent\'s own (OAuth tokens or .env token, refreshed and written back as Hermes does), Worldlet\'s own (discovery, registration, loopback PKCE with resource indicator, vault refresh), JSON and event-stream answers, 401 retry, reopened sessions');

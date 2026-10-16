@@ -8,7 +8,7 @@ import {BOARD_READ_REUSE_MS,createWorldBoard} from '../platform/electron/src/mod
 import {openStandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
 import {STANDING_OUTSIDE_TURN} from '../core/agent/grants.ts';
 import {BOARD_REASONS} from '../core/board/index.ts';
-import {PRESET_REASONS} from '../core/accounts/index.ts';
+import {PRESET_REASONS,saveServicePreset} from '../core/accounts/index.ts';
 import type {ServiceRead} from '../contracts/services.ts';
 
 // The board on the host (core/board/README.md, core/agent/GRANTS.md#the-board), the same modules the Electron and Node
@@ -110,6 +110,29 @@ await withTempDir('worldlet-board-',async dir=>{
   assert.deepEqual([errors.status,errors.provider,errors.error],['error','cloudflare','Cloudflare is disconnected or its token has expired. Connect Cloudflare again with a new API token.']);
   assert.equal(person.view.tabs[0].blocks[0].status,'ok');
   assert.ok(!('untrustedContent' in person));
+
+  // The person's read warmed the shared cache. An Agent still needs its own Service grant on every call,
+  // including immediately after revocation; a board grant does not admit cached records or provider errors.
+  const countBeforeRevocation=asked.length;
+  assert.ok(access.ungrantService('claude-code','posthog'));
+  const revoked=await claude('read',{tab:'growth'});
+  assert.ok(revoked.view.tabs[0].blocks.every((block:any)=>block.status==='error'&&!('number' in block)&&!('funnel' in block)));
+  assert.match(revoked.view.tabs[0].blocks[0].error,/may not read this Service/);
+  assert.equal(asked.length,countBeforeRevocation,'revoked Service is neither read nor taken from cache');
+  assert.ok(access.grantBoard('hermes','read'));
+  const other=await hermes('read');
+  assert.ok(other.view.tabs.flatMap((tab:any)=>tab.blocks).every((block:any)=>block.status==='error'&&/may not read this Service/.test(block.error)));
+  assert.ok(!JSON.stringify(other.view).includes('Fix the build')&&!JSON.stringify(other.view).includes('token has expired'),'no cached record text or provider failure details for a different Agent');
+  assert.equal(asked.length,countBeforeRevocation,'a different Agent cannot reuse the person’s cache without Service grants');
+  assert.ok(access.ungrantBoard('hermes','read'));
+
+  // A preset replaced after defining the board cannot make the board attempt a collection-only live read.
+  const replacement=saveServicePreset([],{id:'funnel',name:'Notes',provider:'notion',read:{operation:'read',id:'11111111-1111-4111-8111-111111111111'}},now()).preset;
+  ledger.saveServicePreset(replacement);
+  const beforeCollection=asked.length;
+  const collectionOwner=await board.view({tab:'growth'}),collectionAgent=await claude('read',{tab:'growth'});
+  for(const answer of [collectionOwner,collectionAgent])assert.ok(answer.view.tabs[0].blocks.every((block:any)=>block.error===BOARD_REASONS.collection));
+  assert.equal(asked.length,beforeCollection,'collection-only presets never reach the live Service reader');
 
   // Hermes Agent with no Grant is refused; taking a Grant back refuses the next call; revoking refuses everything.
   assert.equal((await hermes('read')).error.length>0,true);

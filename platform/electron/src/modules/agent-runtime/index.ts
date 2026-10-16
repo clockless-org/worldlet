@@ -1,10 +1,11 @@
+import {collectServicePage} from '../sources/service-collection.ts';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import {app,shell} from 'electron';
 import {openInBrowser} from '../../system-browser.ts';
 import {WorldletError} from '../../files.ts';
-import {AGENT,ANALYTICS,ONGOING,VAULT,type AgentAccess,type AgentService,type AnalyticsService,type OngoingService,type VaultService} from '../../host/services.ts';
+import {AGENT,ANALYTICS,ONGOING,SOURCES,VAULT,type AgentAccess,type AgentService,type AnalyticsService,type OngoingService,type SourcesService,type VaultService} from '../../host/services.ts';
 import type {Host} from '../../host/types.ts';
 import {installationRoot,type Profile} from '../../profile.ts';
 import {ExecutionJournal} from './journal.ts';
@@ -96,13 +97,16 @@ export function selectAdapter(context:RuntimeContext,configuration=process.env.W
  * GitHub), each used from the Agent's own profile when it already has it, else kept by the World; the Services read
  * over their own API with a key the World keeps (PostHog); and DoorDash's official CLI. */
 export interface WorldSources {google:GoogleSource;mcp:McpSource;services:ServiceSource;doordash:DoorDash}
-export function worldSources(context:RuntimeContext,vault:VaultService,accountsHome:()=>string):WorldSources {
+export function worldSources(context:RuntimeContext,vault:VaultService,accountsHome:()=>string,savedNotion?:(request:Row)=>Row):WorldSources {
  const own=()=>path.join(context.root,'agent','private','hermes');
  const homes=()=>[...new Set([accountsHome(),own()])];
  const openExternal=(url:string)=>context.openExternal(url);
  const mcp=new McpSource({accounts:new McpAccounts({vault,agentHomes:homes}),openExternal,reviews:path.join(context.root,'accounts','notion-reviews')});
  const account=new GoogleAccount({folder:path.join(context.root,'accounts','google'),vault,clientFile:()=>bundledResource(context.profile,'googleClient'),adoptFrom:homes});
- const google=new GoogleSource({account,development:context.development,openExternal,ownProfile:own,legacyHomes:homes,notion:{connected:()=>mcp.connected('notion'),read:body=>mcp.read('notion',body)},github:{read:body=>mcp.read('github',body)}});
+ const google=new GoogleSource({account,development:context.development,openExternal,ownProfile:own,legacyHomes:homes,notion:{connected:()=>!!savedNotion,read:async body=>{
+  if(!savedNotion)throw new WorldletError('Saved Notion context is unavailable.');
+  return savedNotion(body);
+ }},github:{read:body=>mcp.read('github',body)}});
  const doordash=new DoorDash({folder:path.join(context.root,'accounts','doordash'),legacyHomes:homes});
  return {google,mcp,services:new ServiceSource({vault}),doordash};
 }
@@ -135,6 +139,8 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
   // Every source the World reads runs in the Platform; anything else is the Agent's own (a person's own Harness
   // reads none).
   makeSourceAccess:()=>world?new GoogleSourceAccess(world.google,()=>new ServiceSourceAccess(world.services,()=>new McpSourceAccess(world.mcp,()=>new DoorDashSourceAccess(world.doordash,()=>current().makeSourceAccess())))):current().makeSourceAccess(),
+  collectServicePage:async(request,signal)=>{if(!world)throw new WorldletError('World Services are unavailable.');return collectServicePage(world,request,signal);},
+  worldNotionBinding:()=>world?.mcp.worldNotionBinding()??null,
   makeSourceConnections:()=>world?new GoogleSourceConnections(world.google,()=>new ServiceSourceConnections(world.services,()=>new McpSourceConnections(world.mcp,()=>current().makeSourceConnections(),()=>'hermes'),()=>'hermes'),()=>'hermes'):current().makeSourceConnections(),
   googleAccount:()=>worldGoogle?.account??null,
   makeRoutines:()=>current().makeRoutines(),
@@ -583,7 +589,11 @@ export function installAgentRuntime(host:Host){
   context.changed('agent-changed');
  };
  const noAgent=()=>adapter instanceof NoAgentAdapter?adapter:new NoAgentAdapter(context);
- const service=createAgentService(context,()=>adapter,listeners,home=>worldSources(context,vault,home));
+ const service=createAgentService(context,()=>adapter,listeners,home=>worldSources(context,vault,home,request=>{
+  const sources=host.optional<SourcesService>(SOURCES);
+  if(!sources?.readNotionContext)throw new WorldletError('Saved Notion context is unavailable.');
+  return sources.readNotionContext(request);
+ }));
  // The board (core/board/README.md): in the person's own World with private context allowed, as asks are. Each preset is
  // read through the World's own Service readers, as the Attention Center reads a source: no Agent, no turn, no model.
  worldBoard=createWorldBoard({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
