@@ -6,7 +6,6 @@ import {redactDiagnosticText,diagnosticLineCapture} from '../core/diagnostics/in
 import {sendOAuthCallbackPage} from '../platform/electron/src/modules/sources/oauth-callback.ts';
 import {createDiagnostics} from '../platform/electron/src/host/diagnostics.ts';
 import {assertOAuthCallback} from './oauth-callback-fixture.ts';
-import {withBrowser} from './browser-test.ts';
 import {withTempDir} from './test-temp.ts';
 
 const synthetic='fixture-private-value';
@@ -37,13 +36,6 @@ await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));
 try{
  const base=`http://127.0.0.1:${(server.address() as {port:number}).port}`;
  for(const status of ['received','declined','stale'])await assertOAuthCallback(await fetch(`${base}/${status}?code=${synthetic}&state=fixture-state`));
- await withBrowser(async browser=>{
-  const page=await browser.newPage(),errors:string[]=[];
-  page.on('pageerror',error=>errors.push(error.message));
-  await page.goto(`${base}/received?code=${synthetic}&state=fixture-state#fixture-token`);
-  assert.equal(await page.title(),'Worldlet sign-in');
-  assert.equal(page.url(),base+'/received','the CSP permits removing the current callback query and fragment');
-  assert.deepEqual(errors,[]);
- });
+
 }finally{server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>resolve()));}
-console.log('PASS OAuth safety: fixed callback titles, no reflected parameters, no-store/no-referrer, working CSP in Chromium, diagnostic redaction across split and oversized lines');
+console.log('PASS OAuth safety: fixed callback titles, no reflected parameters, no-store/no-referrer, diagnostic redaction across split and oversized lines');

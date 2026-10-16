@@ -263,3 +263,6 @@
 .companion-feedback-panel .companion-feedback{margin:0;min-height:0;padding-top:0}
 .companion-feedback-panel .companion-info-close{position:absolute;right:10px;top:8px;width:32px;height:32px;border:0;background:none;font-size:24px;color:#78694f;cursor:pointer}
 @media(max-width:600px){.native-console .companion-feedback-panel{inset:auto 16px 16px 16px;width:auto}}
+
+.companion-settings-service-collection .companion-settings-row{flex-wrap:wrap}
+.companion-settings-service-collection .companion-settings-row>div{flex:1 1 240px}
