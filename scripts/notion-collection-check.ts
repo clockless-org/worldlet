@@ -23,13 +23,13 @@ for(const read of [{operation:'list'},{operation:'read',id:PAGE,cursor:'next'},{
 await withTempDir('worldlet-notion-collection-',async dir=>{
  const values=new Map<string,string>(),vault={get:(id:string)=>values.get(id)??null,set:(id:string,value:string)=>{values.set(id,value);},delete:(id:string)=>{values.delete(id);},deleteAll:()=>values.clear()};
  let now=Date.now(),issued=0,providerCalls=0,agentHomes=0,kind='page',markdown='Saved **context**.',offline=false;
- let refreshGate:(()=>Promise<void>)|null=null;
+ let refreshGate:(()=>Promise<void>)|null=null,metadataIssuer=ORIGIN;
  const registrations:any[]=[],exchanges:any[]=[],fetches:string[]=[],opened:string[]=[];
  const json=(value:unknown,status=200)=>new Response(JSON.stringify(value),{status,headers:{'content-type':'application/json'}});
  const fetchMock:typeof fetch=async(input,init:RequestInit={})=>{
   const url=String(input);
   if(url===ORIGIN+'/.well-known/oauth-protected-resource/mcp')return json({resource:MCP,authorization_servers:[ORIGIN],scopes_supported:['default']});
-  if(url===ORIGIN+'/.well-known/oauth-authorization-server')return json({issuer:ORIGIN,authorization_endpoint:ORIGIN+'/authorize',token_endpoint:ORIGIN+'/token',registration_endpoint:ORIGIN+'/register',code_challenge_methods_supported:['S256']});
+  if(url===ORIGIN+'/.well-known/oauth-authorization-server')return json({issuer:metadataIssuer,authorization_endpoint:ORIGIN+'/authorize',token_endpoint:ORIGIN+'/token',registration_endpoint:ORIGIN+'/register',code_challenge_methods_supported:['S256']});
   if(url===ORIGIN+'/register'){registrations.push(JSON.parse(String(init.body)));return json({client_id:'synthetic-worldlet-client'});}
   if(url===ORIGIN+'/token'){
    const form=Object.fromEntries(new URLSearchParams(String(init.body)));exchanges.push(form);
@@ -97,6 +97,20 @@ await withTempDir('worldlet-notion-collection-',async dir=>{
  offline=false;now+=30_000;kind='database';assert.equal(await sync.tick(),false,'database contents are not implicitly traversed');
  kind='page';markdown='New context';now+=60_000;assert.equal(await sync.tick(),true);
  assert.equal(sync.notionContext({operation:'fetch',id:PAGE}).page.markdown,'New context');
+ // A registered public client can reopen a fresh PKCE flow on its exact callback without another DCR.
+ const registered={client_id:'synthetic-worldlet-client',issuer:ORIGIN,redirect_uri:query.get('redirect_uri')!};
+ const registrationCount=registrations.length;
+ await accounts.connect('notion',MCP,'',async url=>{
+  const params=new URL(url).searchParams;assert.equal(params.get('redirect_uri'),registered.redirect_uri);assert.equal(params.get('client_id'),registered.client_id);
+  assert.notEqual(params.get('state'),query.get('state'));assert.notEqual(params.get('code_challenge'),query.get('code_challenge'));
+  await fetch(params.get('redirect_uri')+'?'+new URLSearchParams({code:'synthetic-code',state:params.get('state')!}));
+ },()=>false,undefined,registered);
+ assert.equal(registrations.length,registrationCount,'reusing a public client never registers again');
+ for(const invalid of [{...registered,issuer:'https://example.com'},{...registered,redirect_uri:'http://localhost:1234/callback'},{...registered,redirect_uri:registered.redirect_uri+'?extra=1'}])await assert.rejects(accounts.connect('notion',MCP,'',async()=>{throw Error('must not open');},()=>false,undefined,invalid),/registered public client/);
+ assert.equal(registrations.length,registrationCount);
+ metadataIssuer='https://example.com';const exchangeCount=exchanges.length;
+ await assert.rejects(accounts.connect('notion',MCP,'',async()=>{throw Error('must not open');},()=>false,undefined,registered),/authorization server metadata/);
+ assert.equal(registrations.length,registrationCount);assert.equal(exchanges.length,exchangeCount);metadataIssuer=ORIGIN;
  // A reauthorization invalidates earlier job bindings, even when the OAuth server reuses its client ID.
  await signIn();assert.notEqual(mcp.worldNotionBinding(),binding);assert.throws(()=>sync.notionContext({operation:'fetch',id:PAGE}),/not been collected/);
  enable();assert.equal(ledger.value('service-sync-snapshots','selected-page'),null);assert.equal(await sync.tick(),true);

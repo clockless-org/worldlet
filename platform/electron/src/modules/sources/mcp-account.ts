@@ -19,6 +19,8 @@ export interface McpAccountOptions {
  fetch?:typeof fetch;
  now?:()=>number;
 }
+/** A public client already registered for this exact authorization server and loopback callback. No token or secret. */
+export interface McpPublicClient {client_id:string;issuer:string;redirect_uri:string}
 /** A World connection in the vault. `expires_at` in ms. */
 interface WorldGrant {
  v:1;url:string;kind:'oauth'|'bearer';
@@ -64,13 +66,13 @@ export class McpAccounts {
  /** Connects through Worldlet: a token when one is given, else OAuth in the browser (`open`), within five minutes. A
   * token is first checked by `verify` on a connection that is not kept yet: one it refuses is never saved, so a
   * mistyped paste leaves the connection already kept as it was. */
- async connect(name:string,url:string,token:string,open:(url:string)=>Promise<void>,cancelled:()=>boolean=()=>false,verify?:(connection:McpConnection)=>Promise<void>):Promise<McpConnection> {
+ async connect(name:string,url:string,token:string,open:(url:string)=>Promise<void>,cancelled:()=>boolean=()=>false,verify?:(connection:McpConnection)=>Promise<void>,registeredClient?:McpPublicClient):Promise<McpConnection> {
   if(!NAME.test(name))throw new WorldletError('Invalid connection name.');
   const parsed=safeUrl(url);
   if(!parsed)throw new WorldletError('Use an HTTPS service endpoint.');
   const bearer=token.replace(/^\s*bearer\s+/i,'').trim();
   if(token.trim()&&(!bearer||bearer.toLowerCase()==='bearer'))throw new WorldletError('Bearer token is required');
-  const grant:WorldGrant={...(bearer?{v:1 as const,url:parsed,kind:'bearer' as const,bearer}:await this.consent(parsed,open,cancelled)),generation:crypto.randomUUID()};
+  const grant:WorldGrant={...(bearer?{v:1 as const,url:parsed,kind:'bearer' as const,bearer}:await this.consent(parsed,open,cancelled,registeredClient)),generation:crypto.randomUUID()};
   const connection:McpConnection={source:'world',name,url:parsed,grant};
   if(bearer&&verify)await verify(connection);
   this.vault.set(vaultId(name),JSON.stringify(grant));
@@ -150,10 +152,12 @@ export class McpAccounts {
  /** MCP authorization (2025-06-18): the server's protected-resource metadata names its authorization server, whose
   * metadata gives the endpoints; the World registers itself there (RFC 7591) for this loopback address and signs
   * in with PKCE, the resource indicator naming the server (RFC 8707). */
- private async consent(url:string,open:(url:string)=>Promise<void>,cancelled:()=>boolean):Promise<WorldGrant> {
+ private async consent(url:string,open:(url:string)=>Promise<void>,cancelled:()=>boolean,registeredClient?:McpPublicClient):Promise<WorldGrant> {
   const resource=await this.resourceMetadata(url);
   const issuer=typeof resource?.authorization_servers?.[0]==='string'?resource.authorization_servers[0]:new URL(url).origin;
+  const port=registeredClient?publicClientPort(registeredClient,issuer):0;
   const server=await this.authorizationMetadata(issuer);
+  if(registeredClient&&server?.issuer!==issuer)throw new WorldletError('The registered public client does not match this authorization server metadata.');
   if(!server||typeof server.authorization_endpoint!=='string'||typeof server.token_endpoint!=='string')throw new WorldletError('This service does not offer a sign-in Worldlet can use.');
   if(!safeUrl(server.authorization_endpoint)||!safeUrl(server.token_endpoint))throw new WorldletError('This service does not offer a sign-in Worldlet can use.');
   const methods=Array.isArray(server.code_challenge_methods_supported)?server.code_challenge_methods_supported:['S256'];
@@ -164,12 +168,15 @@ export class McpAccounts {
   const challenge=crypto.createHash('sha256').update(verifier).digest('base64url');
   let client:{client_id:string;client_secret?:string}|null=null;
   const code=await loopback(async redirect=>{
-   if(typeof server.registration_endpoint!=='string'||!safeUrl(server.registration_endpoint))throw new WorldletError('This service does not let Worldlet register to sign in. Connect it with a token instead.');
-   const registered=await this.post(server.registration_endpoint,{client_name:'Worldlet',redirect_uris:[redirect],grant_types:['authorization_code','refresh_token'],response_types:['code'],token_endpoint_auth_method:'none'});
-   if(!registered.ok||typeof registered.value.client_id!=='string')throw new WorldletError('This service did not let Worldlet register to sign in.');
-   client={client_id:registered.value.client_id,...typeof registered.value.client_secret==='string'?{client_secret:registered.value.client_secret}:{}};
+   if(registeredClient)client={client_id:registeredClient.client_id};
+   else{
+    if(typeof server.registration_endpoint!=='string'||!safeUrl(server.registration_endpoint))throw new WorldletError('This service does not let Worldlet register to sign in. Connect it with a token instead.');
+    const registered=await this.post(server.registration_endpoint,{client_name:'Worldlet',redirect_uris:[redirect],grant_types:['authorization_code','refresh_token'],response_types:['code'],token_endpoint_auth_method:'none'});
+    if(!registered.ok||typeof registered.value.client_id!=='string')throw new WorldletError('This service did not let Worldlet register to sign in.');
+    client={client_id:registered.value.client_id,...typeof registered.value.client_secret==='string'?{client_secret:registered.value.client_secret}:{}};
+   }
    return server.authorization_endpoint+(server.authorization_endpoint.includes('?')?'&':'?')+new URLSearchParams({response_type:'code',client_id:client.client_id,redirect_uri:redirect,state,code_challenge:challenge,code_challenge_method:'S256',resource:target,...scopes?{scope:scopes}:{}}).toString();
-  },state,open,cancelled);
+  },state,open,cancelled,port);
   const registered=client as {client_id:string;client_secret?:string}|null;
   if(!registered)throw new WorldletError('Authorization did not complete.');
   const answer=await this.post(server.token_endpoint,new URLSearchParams({grant_type:'authorization_code',code:code.code,redirect_uri:code.redirect,client_id:registered.client_id,code_verifier:verifier,resource:target,...registered.client_secret?{client_secret:registered.client_secret}:{}}));
@@ -213,9 +220,17 @@ export class McpAccounts {
 function safeUrl(value:string):string|null {
  try{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password?value:null;}catch{return null;}
 }
+/** A reused registration must bind the same issuer and exact loopback address. Never silently register again. */
+function publicClientPort(client:McpPublicClient,issuer:string):number {
+ try{
+  const url=new URL(client.redirect_uri),port=Number(url.port);
+  if(!client.client_id||client.issuer!==issuer||url.protocol!=='http:'||url.hostname!=='127.0.0.1'||url.pathname!=='/callback'||url.search||url.hash||url.username||url.password||!Number.isInteger(port)||port<1||port>65535||url.href!==client.redirect_uri)throw Error();
+  return port;
+ }catch{throw new WorldletError('The registered public client does not match this sign-in callback or authorization server.');}
+}
 /** The browser signs in and comes back to a loopback address with the code. `authorize(redirect)` gives the address
  * to open once the listener is up. */
-function loopback(authorize:(redirect:string)=>Promise<string>,state:string,open:(url:string)=>Promise<void>,cancelled:()=>boolean):Promise<{code:string;redirect:string}> {
+function loopback(authorize:(redirect:string)=>Promise<string>,state:string,open:(url:string)=>Promise<void>,cancelled:()=>boolean,port=0):Promise<{code:string;redirect:string}> {
  return new Promise((resolve,reject)=>{
   let settled=false,redirect='';
   const finish=(error:Error|null,code?:string)=>{if(settled)return;settled=true;clearTimeout(timer);clearInterval(watch);server.close();if(error)reject(error);else resolve({code:code!,redirect});};
@@ -232,7 +247,7 @@ function loopback(authorize:(redirect:string)=>Promise<string>,state:string,open
   const timer=setTimeout(()=>finish(new WorldletError('Sign-in timed out. Try again.')),300_000);
   const watch=setInterval(()=>{if(cancelled())finish(new WorldletError('Sign-in was cancelled.'));},500);
   server.on('error',error=>finish(error));
-  server.listen(0,'127.0.0.1',()=>{
+  server.listen(port,'127.0.0.1',()=>{
    redirect=`http://127.0.0.1:${(server.address() as {port:number}).port}/callback`;
    authorize(redirect).then(open).catch(error=>finish(error instanceof Error?error:new WorldletError(String(error))));
   });
