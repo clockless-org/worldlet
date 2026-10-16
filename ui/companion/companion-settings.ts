@@ -9,6 +9,7 @@ import {showAgentRoutines} from './agent-routines.ts';
 import {showAgentSkills} from './agent-skills.ts';
 import {showAgentMemory} from './agent-memory.ts';
 import {showWorldletAccounts} from './worldlet-accounts.ts';
+import {showBoard} from './board-view.ts';
 import {agentEl as el} from './agent-change.ts';
 
 /** What the World view lends Settings: the sample world switch and which host features exist. */
@@ -325,6 +326,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
  const items:Item[]=[
   {id:'fox',label:'Fox',hint:'Name, look and personality',page:true,show:target=>{target.append(pages.fox);}},
   {id:'model',label:'Agent',hint:'What it runs on and may use',show:modelSetting},
+  {id:'board',label:'Board',hint:'Numbers and lists from your Services',show:target=>{const turn=ticket;return showBoard(target,call,()=>turn===ticket);}},
   {id:'phone',label:'Phone',hint:'Attention and Fox on your phone',page:true,show:target=>{target.append(pages.phone);}},
   {id:'general',label:'General',hint:'Updates, start at login, default browser, usage counts',show:async target=>{
    target.append(subhead('Updates'));await updates(target);
