@@ -1,3 +1,4 @@
+import {sendOAuthCallbackPage} from './oauth-callback.ts';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
@@ -147,11 +148,10 @@ export class GoogleAccount {
    const server=http.createServer((request,response)=>{
     const url=new URL(request.url??'/',redirect);
     if(url.pathname!=='/'||(!url.searchParams.has('code')&&!url.searchParams.has('error'))){response.writeHead(404).end();return;}
-    const page=(text:string)=>{response.writeHead(200,{'content-type':'text/plain; charset=utf-8'});response.end(text);};
-    if(url.searchParams.get('state')!==state){page('This sign-in link is out of date. Return to Worldlet and try again.');return;}
+    if(url.searchParams.get('state')!==state){sendOAuthCallbackPage(response,'stale');return;}
     const code=url.searchParams.get('code');
-    if(!code){page('Google authorization was not completed. You can return to Worldlet.');finish(new WorldletError('Google authorization was not completed.'));return;}
-    page('Google authorization received. You can return to Worldlet.');
+    if(!code){sendOAuthCallbackPage(response,'declined');finish(new WorldletError('Google authorization was not completed.'));return;}
+    sendOAuthCallbackPage(response,'received');
     this.request(client.token_uri,{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},
      body:new URLSearchParams({grant_type:'authorization_code',code,redirect_uri:redirect,client_id:client.client_id,client_secret:client.client_secret,code_verifier:verifier}).toString()},15_000)
      .then(async answer=>{

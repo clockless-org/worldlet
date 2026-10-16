@@ -3,6 +3,7 @@
 // a reusable grant is refreshed instead of asking again, access tokens refresh before they expire and after a 401,
 // a revoked grant says so, a disconnect is not undone by adopting the old grant again, and receipts are created once.
 import assert from 'node:assert/strict';
+import {assertOAuthCallback} from './oauth-callback-fixture.ts';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -67,11 +68,12 @@ await withTempDir('worldlet-google-account-',async temp=>{
 
  // Drive is not granted: consent opens on a loopback address with PKCE, Mail and Calendar kept, identity scopes added.
  // The fake browser signs in; Google grants less than asked, so the connection is refused.
+ const callbackChecks:Promise<void>[]=[];
  const browser=async(url:string,answer:(query:URLSearchParams)=>Record<string,string>)=>{
   const consent=new URL(url),query=consent.searchParams;opened.push(url);
   const redirect=query.get('redirect_uri')!;
   assert.match(redirect,/^http:\/\/127\.0\.0\.1:\d+\/$/);
-  setTimeout(async()=>{await fetch(redirect+'?'+new URLSearchParams(answer(query))).catch(()=>{});},10);
+  callbackChecks.push(new Promise(resolve=>setTimeout(resolve,10)).then(()=>fetch(redirect+'?'+new URLSearchParams(answer(query)))).then(assertOAuthCallback));
  };
  await assert.rejects(account.connect(['google-drive'],url=>browser(url,query=>({code:'code-1',state:query.get('state')!}))),/did not grant the requested access/);
  const asked=new URL(opened.at(-1)!).searchParams;
@@ -112,5 +114,6 @@ await withTempDir('worldlet-google-account-',async temp=>{
  const earlier='7C9E6679-7425-40DE-944B-E07FC1F90AE7';
  fs.writeFileSync(path.join(profile,'mail-receipts',earlier+'.json'),JSON.stringify({status:'sent'}));
  assert.deepEqual(receipts.read(earlier),{status:'sent'});assert.equal(receipts.create(earlier,{}),false);
+ await Promise.all(callbackChecks);
 });
 console.log('PASS World Google connection: adoption, loopback PKCE consent, scope reuse, refresh and 401 retry, revoked grants, mirror, disconnect and receipts');

@@ -12,6 +12,7 @@ import {platformName,profileFrom} from '../../electron/src/profile.ts';
 import {Preferences} from '../../electron/src/preferences.ts';
 import {WorldStore} from '../../electron/src/store/world-store.ts';
 import {HostRouter} from '../../electron/src/host/router.ts';
+import {redactDiagnosticText} from '../../../core/diagnostics/index.ts';
 import {createDiagnostics} from '../../electron/src/host/diagnostics.ts';
 import {endStrayChildren,withDeadline} from '../../electron/src/host/quit.ts';
 import {FEATURE_OWNERS,hostCapabilities} from '../../electron/src/capabilities.ts';
@@ -55,7 +56,7 @@ const here=__dirname,resources=fs.existsSync(path.join(here,'WorldletWeb'))?here
 const profile=profileFrom({packaged:true,resourcesPath:resources,appPath:here,rootOverride:true});
 useProfileRoot(profile.root);
 ensureDirectory(profile.root);
-const log=(line:string)=>process.stdout.write(`worldlet: ${line}\n`);
+const log=(line:string)=>process.stdout.write(`worldlet: ${redactDiagnosticText(line)}\n`);
 
 const diagnostics=createDiagnostics(profile.root);
 const preferences=Preferences.at(profile.root,()=>({}));

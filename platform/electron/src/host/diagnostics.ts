@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import {StringDecoder} from 'node:string_decoder';
 import {core} from '../core.ts';
+import {redactDiagnosticText,diagnosticLineCapture} from '../../../../core/diagnostics/index.ts';
 import {ensureDirectory,errorMessage} from '../files.ts';
 /** Appends text to a log file, renamed to `<name>.previous<ext>` once past 1 MB. Never throws. */
 export function appendRotated(file:string,text:string){
@@ -10,15 +12,17 @@ export function appendRotated(file:string,text:string){
   fs.appendFileSync(file,text,{mode:0o600});
  }catch{}
 }
-/** Everything the main process writes to stdout and stderr is also kept in `logs/main.log`, so an Order can carry it
+/** Complete lines the main process writes to stdout and stderr are redacted and kept in `logs/main.log`, so an Order can carry it
  * after the terminal (or nothing at all, for an app opened from the Dock) is gone (owner 2026-10-06). */
 export function keepProcessOutput(root:string){
  const file=path.join(root,'logs','main.log');
  for(const stream of [process.stdout,process.stderr]){
   const write=stream.write.bind(stream) as (...args:any[])=>boolean;
+  const decoder=new StringDecoder('utf8');
+  const capture=diagnosticLineCapture(line=>appendRotated(file,`${new Date().toISOString().slice(11,23)} ${line}`));
   let inside=false;
   stream.write=((chunk:any,...rest:any[])=>{
-   if(!inside){inside=true;try{appendRotated(file,`${new Date().toISOString().slice(11,23)} ${typeof chunk==='string'?chunk:Buffer.from(chunk).toString('utf8')}`);}finally{inside=false;}}
+   if(!inside){inside=true;try{capture(typeof chunk==='string'?chunk:decoder.write(Buffer.from(chunk)));}finally{inside=false;}}
    return write(chunk,...rest);
   }) as typeof stream.write;
  }
@@ -36,15 +40,15 @@ export function createDiagnostics(root:string){
  const append=(line:string)=>appendRotated(file,line+'\n');
  return {
   record(error:unknown,operation='host',requestId=''){
-   const message=errorMessage(error),at=new Date().toISOString();
-   notes.push({at,operation:String(operation),requestId:String(requestId??''),message});
+   const message=redactDiagnosticText(errorMessage(error)),at=new Date().toISOString();
+   notes.push({at,operation:redactDiagnosticText(operation),requestId:redactDiagnosticText(requestId),message});
    if(notes.length>RECENT_NOTES)notes.splice(0,notes.length-RECENT_NOTES);
    // Core classifies the failure; the time is the host's fact (Core's row has no clock).
    try{append(JSON.stringify({at,...core('diagnosticError',{operation,requestId,message,name:(error as Error)?.name,cancelled:(error as Error)?.name==='AbortError',platform:process.platform})}));}
-   catch{append(JSON.stringify({operation,requestId,message,at}));}
+   catch{append(JSON.stringify({operation:'host',code:'operationFailed',at}));}
   },
   /** The last failures recorded in this process, oldest first, with their error text. */
   recent():DiagnosticNote[]{return notes.map(note=>({...note}));},
-  log(line:string){if(process.env.WORLDLET_DEV==='1'||!process.env.WORLDLET_QUIET)process.stderr.write('[Worldlet] '+line+'\n');}
+  log(line:string){if(process.env.WORLDLET_DEV==='1'||!process.env.WORLDLET_QUIET)process.stderr.write('[Worldlet] '+redactDiagnosticText(line)+'\n');}
  };
 }

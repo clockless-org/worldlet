@@ -1,3 +1,4 @@
+import {sendOAuthCallbackPage} from './oauth-callback.ts';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
@@ -237,11 +238,10 @@ function loopback(authorize:(redirect:string)=>Promise<string>,state:string,open
   const server=http.createServer((request,response)=>{
    const url=new URL(request.url??'/',redirect);
    if(url.pathname!=='/callback'||(!url.searchParams.has('code')&&!url.searchParams.has('error'))){response.writeHead(404).end();return;}
-   const page=(text:string)=>{response.writeHead(200,{'content-type':'text/plain; charset=utf-8'});response.end(text);};
-   if(url.searchParams.get('state')!==state){page('This sign-in link is out of date. Return to Worldlet and try again.');return;}
+   if(url.searchParams.get('state')!==state){sendOAuthCallbackPage(response,'stale');return;}
    const code=url.searchParams.get('code');
-   if(!code){page('Authorization was not completed. You can return to Worldlet.');finish(new WorldletError('Authorization did not complete.'));return;}
-   page('Authorization received. You can return to Worldlet.');
+   if(!code){sendOAuthCallbackPage(response,'declined');finish(new WorldletError('Authorization did not complete.'));return;}
+   sendOAuthCallbackPage(response,'received');
    finish(null,code);
   });
   const timer=setTimeout(()=>finish(new WorldletError('Sign-in timed out. Try again.')),300_000);
