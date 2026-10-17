@@ -6,15 +6,18 @@
  * (core/board/README.md), "Can save conversations" and "Can search conversations"
  * (core/agent/GRANTS.md#conversation-archive), "Can see your tracked links" and "Can keep your tracked links"
  * (core/agent/GRANTS.md#tracked-links), and "Can report its work" and "Can see other Agents"
- * (core/agent/GRANTS.md#agent-reports), the same way; what each Agent last reported it is doing; and "Add an Agent for a
- * script" (core/agent/GRANTS.md#agents-for-scripts), which sends only the name the person typed. Plain words: the page names
+ * (core/agent/GRANTS.md#agent-reports), the same way; once a GitHub App is connected, "Can update Issues in <repo>
+ * without asking" (core/agent/GRANTS.md#standing-github-writes), one per repository with Remove; what each Agent last
+ * reported it is doing; and "Add an Agent for a script" (core/agent/GRANTS.md#agents-for-scripts), which sends only the
+ * name the person typed. Plain words: the page names
  * places in the World and what was allowed, never tokens, endpoints or MCP. */
 import {agentButton as button,agentEl as el} from './agent-change.ts';
 import {showRemoteAccess} from './remote-access.ts';
-type Grant={id:string;targets:string[];access:'read'|'write';duration:'standing'|'once';grantedAt:string;expiresAt?:string;revokedAt?:string};
+type Scope={repo:string;writes:string[];labelPrefix?:string};
+type Grant={id:string;targets:string[];access:'read'|'write';duration:'standing'|'once';grantedAt:string;expiresAt?:string;revokedAt?:string;github?:Scope};
 type Audit={at:string;target:string;action:string;decision:'allowed'|'denied'|'asked';reason?:string};
 type Service={provider:string;title:string;granted:boolean};
-type Agent={id:string;name:string;harness:string;kind:'local'|'remote';createdAt:string;lastSeenAt?:string;revokedAt?:string;grants:Grant[];audit:Audit[];services?:Service[];asks?:{ask:boolean;work:boolean};board?:{read:boolean;define:boolean};githubDrafts?:boolean;conversations?:{add:boolean;search:boolean};links?:{read:boolean;save:boolean};
+type Agent={id:string;name:string;harness:string;kind:'local'|'remote';createdAt:string;lastSeenAt?:string;revokedAt?:string;grants:Grant[];audit:Audit[];services?:Service[];asks?:{ask:boolean;work:boolean};board?:{read:boolean;define:boolean};githubDrafts?:boolean;githubWrites?:{add:boolean;grants:Scope[]};conversations?:{add:boolean;search:boolean};links?:{read:boolean;save:boolean};
  reports?:{report:boolean;list:boolean};liveness?:'live'|'stale'|'offline';report?:Report;
  /** An Agent for a script: the file its program reads its endpoint and token from. */
  endpointFile?:string};
@@ -32,6 +35,14 @@ const CONVERSATION_TOGGLES=[['add','Can save conversations','can now save conver
 const DRAFT_TOGGLES=[['draft','Can draft GitHub changes','can now draft GitHub changes for you to approve','can no longer draft GitHub changes']] as const;
 /** "Can report its work" and "Can see other Agents" (core reportGrant), the same way. */
 const REPORT_TOGGLES=[['report','Can report its work','can now report what it is doing','can no longer report what it is doing'],['list','Can see other Agents','can now see what your other Agents are doing','can no longer see your other Agents']] as const;
+/** "Can update Issues in <repo> without asking" (core githubWriteGrant): the page sends the Agent, the repository and
+ * one of these choices (with the label prefix the labels need), never targets. */
+const WRITE_CHOICES=[['comment-labels','Comment and change labels'],['comment','Comment'],['labels','Change labels']] as const;
+/** What one allows, in plain words: "comment and change “state:” labels" (core githubWriteScopeWords). */
+export function githubWritesLine(scope:Scope):string {
+ const what=[scope.writes.includes('issue.comment')?'comment':'',scope.writes.includes('labels.set')?`change “${scope.labelPrefix}” labels`:''].filter(Boolean).join(' and ');
+ return `Can update Issues in ${scope.repo} without asking: ${what}.`;
+}
 const date=(at:string)=>new Date(at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
 const time=(at:string)=>new Date(at).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
 const SHOWN_PLACES=6,SHOWN_AUDIT=5;
@@ -55,6 +66,7 @@ export function reportLine(agent:Agent,clock=Date.now()):string {
 }
 /** One Grant in a sentence: what it allows and where. Applet copies of a place are not repeated. */
 export function grantLine(grant:Grant):string {
+ if(grant.github)return githubWritesLine(grant.github);
  const verb=grant.access==='write'?(grant.duration==='once'?'Read, and change after asking you,':'Read and change'):'Read';
  const places=[...new Set(grant.targets.map(t=>t.split('/')[0]).filter(t=>!t.startsWith('applet:')))];
  const all=places.includes('*');
@@ -77,6 +89,10 @@ export function auditLine(entry:Audit):string {
  if(entry.target==='github-drafts'&&(entry.action==='grant'||entry.action==='ungrant'))return `${time(entry.at)} · Drafting GitHub changes · ${entry.action==='ungrant'?'You turned it off':'You allowed it'}`;
  if(entry.target==='github-drafts'&&entry.action==='approve')return `${time(entry.at)} · You approved its GitHub draft · ${entry.decision==='allowed'?'Written':'Not written'}`;
  if(entry.target==='github-drafts'&&entry.action==='dismiss')return `${time(entry.at)} · You dismissed its GitHub draft`;
+ // "Can update Issues in <repo> without asking", its calls, and what each wrote.
+ if(entry.target==='github-writes'&&(entry.action==='grant'||entry.action==='ungrant'))return `${time(entry.at)} · Updating GitHub Issues without asking · ${entry.action==='ungrant'?'You removed it':'You allowed it'}`;
+ if(entry.target==='github-writes'&&entry.action==='run')return `${time(entry.at)} · Change on GitHub without asking · ${DECISION[entry.decision]??entry.decision}`;
+ if(entry.target==='github-writes'&&entry.action==='write')return `${time(entry.at)} · Changed GitHub without asking · ${entry.decision==='allowed'?'Written':'Not written'}`;
  if(entry.action==='grant'||entry.action==='ungrant')return `${time(entry.at)} · ${entry.target} · ${entry.action==='grant'?'You let it read':'You stopped it reading'}`;
  return `${time(entry.at)} · ${entry.target} ${entry.action} · ${DECISION[entry.decision]??entry.decision}`;
 }
@@ -123,7 +139,8 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
    if(agent.endpointFile)words.append(el('span','companion-settings-quiet',`For a script. Its key is in ${agent.endpointFile}.`));
    const reported=agent.revokedAt?'':reportLine(agent);
    if(reported){const line=el('span','companion-settings-access-report',reported);line.dataset.liveness=agent.liveness??'offline';words.append(line);}
-   for(const grant of agent.grants.filter(g=>!g.revokedAt))words.append(el('span','companion-settings-quiet',grantLine(grant)));
+   // Standing GitHub writes are listed below with their Remove.
+   for(const grant of agent.grants.filter(g=>!g.revokedAt&&!g.github))words.append(el('span','companion-settings-quiet',grantLine(grant)));
    const recent=agent.audit.slice(0,SHOWN_AUDIT);
    if(recent.length){
     const log=el('ul','companion-settings-quiet companion-settings-access-audit');log.setAttribute('aria-label',`What ${agent.name} last asked for`);
@@ -171,6 +188,35 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
    toggles(agent.links,LINK_TOGGLES,'Links','links');
    toggles(agent.reports,REPORT_TOGGLES,'Reports','reports');
    toggles(agent.githubDrafts===undefined?undefined:{draft:agent.githubDrafts},DRAFT_TOGGLES,'GithubDrafts','githubDrafts');
+   // "Can update Issues in <repo> without asking": each with Remove, and Allow for another repository.
+   if(!agent.revokedAt&&agent.githubWrites){
+    const group=el('div','companion-settings-access-writes');group.dataset.githubWrites=agent.id;
+    for(const scope of agent.githubWrites.grants){
+     const line=el('div','companion-settings-access-write');line.dataset.repo=scope.repo;
+     line.append(el('span','',githubWritesLine(scope)),button('Remove','remove-github-writes',async()=>{
+      said.textContent='';
+      try{await call('agentAccess',{operation:'ungrantGithubWrites',id:agent.id,repo:scope.repo});await draw();said.textContent=`${agent.name} can no longer update ${scope.repo} without asking.`;}
+      catch(e){said.textContent='Could not change that: '+((e as Error).message||'try again.');}
+     }));
+     group.append(line);
+    }
+    if(agent.githubWrites.add){
+     const form=el('div','companion-settings-access-write'),repo=document.createElement('input'),choice=document.createElement('select'),prefix=document.createElement('input');
+     repo.className='companion-settings-input';repo.placeholder='owner/repo';repo.setAttribute('aria-label','Repository');repo.autocomplete='off';repo.spellcheck=false;
+     choice.className='companion-settings-select';choice.setAttribute('aria-label','What it may do');
+     for(const [value,title] of WRITE_CHOICES)choice.append(Object.assign(document.createElement('option'),{value,textContent:title}));
+     prefix.className='companion-settings-input';prefix.value='state:';prefix.setAttribute('aria-label','Labels starting with');prefix.autocomplete='off';prefix.spellcheck=false;
+     choice.onchange=()=>{prefix.hidden=choice.value==='comment';};
+     form.append(el('span','','Let it update Issues in a repository without asking you:'),repo,choice,prefix,button('Allow','allow-github-writes',async()=>{
+      said.textContent='';
+      const body={operation:'grantGithubWrites',id:agent.id,repo:repo.value.trim(),choice:choice.value,...choice.value==='comment'?{}:{labelPrefix:prefix.value}};
+      try{await call('agentAccess',body);await draw();said.textContent=`${agent.name} can now update ${body.repo} without asking.`;}
+      catch(e){said.textContent='Could not change that: '+((e as Error).message||'try again.');}
+     }));
+     group.append(form);
+    }
+    words.append(group);
+   }
    row.append(words);
    if(!agent.revokedAt)row.append(button('Revoke','revoke-agent',()=>confirmRevoke(row,agent)));
    rows.append(row);

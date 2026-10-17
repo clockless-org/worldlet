@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {linkGrant,linkGrantAuditEntry,linkGrantTargets,linkGranted,conversationGrant,conversationGrantAuditEntry,conversationGrantTargets,conversationGranted,githubDraftGrant,githubDraftGrantAuditEntry,githubDraftGranted,boardGrant,boardGrantAuditEntry,boardGrantTargets,boardGranted,askGrant,askGrantAuditEntry,askGrantTargets,askGranted,AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites,reportGrant,reportGrantAuditEntry,reportGrantTargets,reportGranted} from '../core/agent/grants.ts';
+import {linkGrant,linkGrantAuditEntry,linkGrantTargets,linkGranted,conversationGrant,conversationGrantAuditEntry,conversationGrantTargets,conversationGranted,githubWriteGrant,githubWriteGrantAuditEntry,githubWriteGrantFor,githubWriteGrants,githubWriteScopeWords,OWN_GRANT_TARGETS,githubDraftGrant,githubDraftGrantAuditEntry,githubDraftGranted,boardGrant,boardGrantAuditEntry,boardGrantTargets,boardGranted,askGrant,askGrantAuditEntry,askGrantTargets,askGranted,AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites,reportGrant,reportGrantAuditEntry,reportGrantTargets,reportGranted} from '../core/agent/grants.ts';
 import {HERMES_CHANNEL_READ_ONLY,hermesChannelToolAllowed} from '../core/agent/hermes-server.ts';
 import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
 import {turnWriteAdmission,writeDecision} from '../core/agent/turn-trust.ts';
+import {GITHUB_DRAFT_REASONS,GITHUB_WRITE_REASONS,readGithubWriteRun,readGithubWriteScope} from '../core/agent/github-drafts.ts';
 import {prepareWorldItem} from '../core/items/world-item-state.ts';
 import {mergeArtifact,readArtifact} from '../core/artifacts/artifacts.ts';
 
@@ -125,7 +126,7 @@ assert.equal(worldCallWrites('start_applet_task'),true);assert.equal(worldCallWr
 // describe_world_tools: only granted targets outside a turn; everything while a Fox turn holds the server; none revoked.
 const listed=new Set(standingActions(actions,hermes,defaults,false,now).map(a=>a.target));
 assert.ok(listed.has('items')&&listed.has('world')&&!listed.has('content'));
-assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.filter(a=>!['asks','board','github-drafts','conversations','links','agents'].includes(a.target)).length,'everything but asks, the board, GitHub drafts, the conversation archive and tracked links, which only the Agent\'s own Grants name');
+assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.filter(a=>!['asks','board','github-drafts','github-writes','conversations','links','agents'].includes(a.target)).length,'everything but asks, the board, GitHub drafts and writes, the conversation archive and tracked links, which only the Agent\'s own Grants name');
 assert.deepEqual(standingActions(actions,{...hermes,revokedAt:earlier},defaults,true,now),[]);
 // A resolved call maps back to its target and action (channelToolReply checks Grants by them).
 assert.deepEqual(worldActionOf(actions,'query_world_items',{}),{target:'items',action:'query'});
@@ -324,4 +325,65 @@ assert.deepEqual(standingActions(actions,codex,[...codexDefaults,listingGrant],f
 assert.equal(reportGranted('codex',[listingGrant],'list',now),true);assert.equal(reportGranted('codex',[listingGrant],'report',now),false);assert.equal(reportGranted('hermes',[listingGrant],'list',now),false);
 assert.deepEqual(reportGrantAuditEntry('codex','list',true,now),{at:now,agentId:'codex',target:'agents',action:'grant-list',decision:'allowed',grantId:'codex-agents-list',reason:'The person let this Agent see other Agents in Settings.'});
 
-console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server, per-Service read Grants, ask Grants, board Grants, report Grants, GitHub draft Grants, conversation archive Grants, tracked link Grants.');
+// "Can update Issues in <repo> without asking": exactly github-writes/run, a standing write Grant built by Core from
+// the repository and a fixed choice, its reach kept on the Grant; never default, never a Fox turn's, never a read
+// Grant's (it writes at once), and only for its own repository, writes and label prefix.
+const writeGrant=githubWriteGrant('codex','example/App','comment-labels','state:',now)!;
+assert.deepEqual(writeGrant,{id:'codex-github-writes-example/app',agentId:'codex',targets:['github-writes/run'],access:'write',duration:'standing',grantedAt:now,
+ github:{repo:'example/App',writes:['issue.comment','labels.set'],labelPrefix:'state:'}});
+assert.deepEqual(githubWriteGrant('codex','example/app','comment','',now)!.github,{repo:'example/app',writes:['issue.comment']});
+assert.deepEqual(githubWriteGrant('codex','example/app','labels','triage/',now)!.github,{repo:'example/app',writes:['labels.set'],labelPrefix:'triage/'});
+for(const [repo,choice,prefix] of [['example/app','close',''],['example/app','labels',''],['example/app','labels',' state:'],['example/app','labels','a\nb'],['example/app','comment','state:'],
+ ['example','comment',''],['example/app#1','comment',''],['../x','comment',''],['example/app','*/*','']] as const)assert.equal(githubWriteGrant('codex',repo,choice,prefix,now),null,`refused: ${repo} ${choice} ${JSON.stringify(prefix)}`);
+assert.equal(githubWriteGrant('Not An Id','example/app','comment','',now),null);
+assert.ok(OWN_GRANT_TARGETS.includes('github-writes'));
+assert.ok(!channelDefaultGrants('codex',earlier,actions).some(g=>g.targets.some(t=>t.startsWith('github-writes/'))),'no GitHub writes in the default Grants');
+// A stored Grant keeps its reach; one whose reach is not valid is dropped rather than widened.
+assert.deepEqual(readGrant(JSON.parse(JSON.stringify(writeGrant))),writeGrant);
+assert.equal(readGrant({...writeGrant,github:{repo:'example/app',writes:['issue.create']}}),null);
+assert.equal(readGrant({...writeGrant,github:{repo:'example/app',writes:['labels.set']}}),null,'labels need a prefix');
+assert.equal(readGithubWriteScope({repo:'example/app',writes:['issue.comment','issue.comment']}),null);
+const writeCall=(grants:Grant[],args:Record<string,unknown>,foxTurn:{own:boolean}|null=null,identity=codex)=>{
+ const resolved=resolveAction(actions,'github-writes','run',args);
+ assert.equal(resolved.name,'github_writes');assert.equal(worldCallWrites(resolved.name,resolved.args),true,'a standing GitHub write writes');
+ return standingCallDecision({identity,grants,target:'github-writes',action:'run',tool:resolved.name,args:resolved.args,foxTurn,now});
+};
+const moving={write:'labels.set',target:'example/app#7',prefix:'state:',expected:['state:queued'],set:['state:running']};
+assert.equal(writeCall(codexDefaults,moving).decision,'denied','ungranted: refused');
+assert.equal(writeCall([...codexDefaults,draftGrant,serviceReadGrant('codex','github',now)!],moving).decision,'denied','drafting and reading GitHub are not writing');
+assert.deepEqual(writeCall([...codexDefaults,writeGrant],moving),{decision:'allowed',grantId:'codex-github-writes-example/app'},'the turn rule admits it and the standing write Grant allows it');
+assert.equal(writeCall([...codexDefaults,{...writeGrant,revokedAt:earlier}],moving).decision,'denied','removed: refused');
+assert.equal(writeCall(defaults,moving,{own:true},hermes).decision,'denied','a Fox turn\'s */* Grant never writes to GitHub');
+assert.equal(writeCall([...defaults,githubWriteGrant('hermes','example/app','labels','state:',now)!],moving,{own:false},hermes).decision,'allowed','its own Grant does, in a turn too');
+assert.ok(!standingActions(actions,hermes,defaults,true,now).some(a=>a.target==='github-writes'),'not listed in a Fox turn without a Grant');
+assert.deepEqual(standingActions(actions,codex,[...codexDefaults,writeGrant],false,now).filter(a=>a.target==='github-writes').map(a=>a.action),['run']);
+// The reach: the host checks it after the gateway's decision, before GitHub is asked anything.
+const reach=(args:Record<string,unknown>,grants:Grant[]=[writeGrant],agent='codex')=>githubWriteGrantFor(agent,grants,readGithubWriteRun(args),now)?.id??null;
+assert.equal(reach(moving),'codex-github-writes-example/app');
+assert.equal(reach({...moving,target:'EXAMPLE/APP#7'}),'codex-github-writes-example/app','the repository compares case-insensitively');
+assert.equal(reach({write:'issue.comment',target:'example/app#7',body:'Started.'}),'codex-github-writes-example/app');
+assert.equal(reach({...moving,target:'example/other#7'}),null,'another repository');
+assert.equal(reach({...moving,prefix:'stage:',expected:['stage:a'],set:['stage:b']}),null,'another prefix');
+assert.equal(reach({...moving,prefix:undefined}),null,'every label, not only state:');
+assert.equal(reach({...moving,prefix:'state:q',expected:['state:queued'],set:['state:quiet']}),'codex-github-writes-example/app','a narrower prefix');
+assert.equal(reach({write:'issue.comment',target:'example/app#7',body:'Hi'},[githubWriteGrant('codex','example/app','labels','state:',now)!]),null,'labels only: no comment');
+assert.equal(reach(moving,[githubWriteGrant('codex','example/app','comment','',now)!]),null,'comment only: no labels');
+assert.equal(reach(moving,[writeGrant],'claude-code'),null,'another Agent\'s Grant');
+assert.equal(reach(moving,[{...writeGrant,revokedAt:earlier}]),null);
+assert.deepEqual(githubWriteGrants('codex',[writeGrant,draftGrant],now),[writeGrant]);
+// What a run may hold: only a comment or a label transition on an Issue, checked as a draft is.
+const bad=(args:Record<string,unknown>)=>{try{readGithubWriteRun(args);}catch(error){return (error as Error).message;}return '';};
+assert.equal(bad({write:'issue.close',target:'example/app#7'}),GITHUB_WRITE_REASONS.write);
+assert.equal(bad({write:'issue.create',target:'example/app',title:'x'}),GITHUB_WRITE_REASONS.write);
+assert.equal(bad({write:'issue.comment',target:'example/app#7',body:'key ghp_'+'a'.repeat(36)}),GITHUB_DRAFT_REASONS.secret);
+assert.equal(bad({write:'issue.comment',target:'example/app#7',body:'bell \u0007'}),GITHUB_DRAFT_REASONS.control);
+assert.equal(bad({...moving,set:['done']}),GITHUB_DRAFT_REASONS.prefix);
+assert.equal(bad({...moving,set:['STATE:QUEUED']}),GITHUB_DRAFT_REASONS.unchanged);
+assert.equal(bad({...moving,expectedState:'merged'}),GITHUB_DRAFT_REASONS.invalid);
+assert.equal(bad({...moving,expected:undefined}),GITHUB_DRAFT_REASONS.invalid,'what it read is required');
+assert.equal(bad({...moving,expected:[]}),'','none under the prefix is a state');
+assert.equal(githubWriteScopeWords(writeGrant.github!),'comment and change “state:” labels');
+assert.deepEqual(githubWriteGrantAuditEntry('codex',writeGrant.github!,true,now),{at:now,agentId:'codex',target:'github-writes',action:'grant',decision:'allowed',grantId:'codex-github-writes-example/app',
+ reason:'The person let this Agent comment and change “state:” labels on example/App without asking, in Settings.'});
+
+console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server, per-Service read Grants, ask Grants, board Grants, report Grants, GitHub draft Grants, standing GitHub write Grants and their reach, conversation archive Grants, tracked link Grants.');

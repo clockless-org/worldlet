@@ -5,7 +5,7 @@ import path from 'node:path';
 import {describeActions,resolveAction,worldActions,worldGatewayTools,type WorldAction} from '../../../../../core/tools/index.ts';
 import {HERMES_WORLD_TOOLS_SHIM,agentAuditEntry,standingActions,standingCallDecision,type GrantDecision,type HermesOwnCalls,type HermesWorldToolsServer,type WorldToolServer} from '../../../../../core/agent/index.ts';
 import type {AgentAccess} from '../../host/services.ts';
-import type {AgentIdentity} from '../../../../../contracts/agent-identity.ts';
+import type {AgentIdentity,Grant} from '../../../../../contracts/agent-identity.ts';
 import {writeAtomic} from '../../files.ts';
 import {AGENT_ASK_LIMITS} from '../../../../../contracts/agent-asks.ts';
 import type {Row} from './types.ts';
@@ -102,6 +102,8 @@ const CONVERSATIONS_TOOL='world_conversations';
 const LINKS_TOOL='world_links';
 /** The World tool behind `agents/*` (core/tools/gateway.ts). */
 const REPORT_TOOL='agent_reports';
+/** The World tool behind `github-writes/*` (core/tools/gateway.ts). */
+const WRITE_TOOL='github_writes';
 
 /** What one Agent may reach on the standing server (core/agent/GRANTS.md): the actions it may discover and the decision
  * for one resolved call. Absent for a Fox turn's own bridge, whose calls the turn's trust alone decides. */
@@ -226,8 +228,11 @@ export const standingEndpointFile=(agentId:string)=>`worldlet-mcp-endpoint.${age
  * the Agent whose token made it, the same way. */
 /** `links`: a tracked links call (`world_links`, core/agent/GRANTS.md#tracked-links) by the Agent whose token made it,
  * the same way. `reports`: an Agent report call (`agent_reports`, core/agent/GRANTS.md#agent-reports), the same way. */
-export async function openStandingWorldTools({channel,access,asks,board,drafts,conversations,links,reports,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;
- board?:(agentId:string,args:Row,canRead:(provider:string,operation:string)=>boolean)=>Promise<Row>;drafts?:(agentId:string,args:Row)=>Promise<Row>;conversations?:(agentId:string,args:Row)=>Row;links?:(agentId:string,args:Row)=>Row;reports?:(agentId:string,args:Row)=>Row;runner?:string}):Promise<StandingWorldTools> {
+/** `writes`: a standing GitHub write (`github_writes`, core/agent/GRANTS.md#standing-github-writes) by the Agent whose
+ * token made it, the same way, with that Agent's own Grants, whose reach (repository, writes, label prefix) it checks. */
+export async function openStandingWorldTools({channel,access,asks,board,drafts,writes,conversations,links,reports,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;
+ board?:(agentId:string,args:Row,canRead:(provider:string,operation:string)=>boolean)=>Promise<Row>;drafts?:(agentId:string,args:Row)=>Promise<Row>;writes?:(agentId:string,args:Row,grants:Grant[])=>Promise<Row>;
+ conversations?:(agentId:string,args:Row)=>Row;links?:(agentId:string,args:Row)=>Row;reports?:(agentId:string,args:Row)=>Row;runner?:string}):Promise<StandingWorldTools> {
  const route='/'+crypto.randomUUID();
  const call=(body:{name:unknown;arguments:unknown},identity:AgentIdentity)=>{
   const call:McpCall={name:body.name,arguments:body.arguments,agent:{id:identity.id,name:identity.name}};
@@ -238,6 +243,7 @@ export async function openStandingWorldTools({channel,access,asks,board,drafts,c
   return worldGateway(body.name,body.arguments,{sample:false,
    dispatch:async(name,args)=>name===ASK_TOOL?asks?.(identity.id,args)??{error:'Asks are not available in this build.'}
     :name===DRAFT_TOOL?await drafts?.(identity.id,args)??{error:'GitHub drafts are not available in this build.'}
+    :name===WRITE_TOOL?await writes?.(identity.id,args,grants)??{error:'GitHub writes are not available in this build.'}
     :name===CONVERSATIONS_TOOL?conversations?.(identity.id,args)??{error:'The conversation archive is not available in this build.'}
     :name===LINKS_TOOL?links?.(identity.id,args)??{error:'Tracked links are not available in this build.'}
     :name===REPORT_TOOL?reports?.(identity.id,args)??{error:'Agent reports are not available in this build.'}

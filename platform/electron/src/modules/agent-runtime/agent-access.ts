@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
-import {AGENT_AUDIT_KEEP,agentRevoked,channelDefaultGrants,grantActive,readAgentIdentity,readGrant,askGrant,askGrantAuditEntry,boardGrant,boardGrantAuditEntry,conversationGrant,conversationGrantAuditEntry,linkGrant,linkGrantAuditEntry,githubDraftGrant,githubDraftGrantAuditEntry,serviceGrantAuditEntry,serviceReadGrant,reportGrant,reportGrantAuditEntry} from '../../../../../core/agent/index.ts';
+import {AGENT_AUDIT_KEEP,agentRevoked,channelDefaultGrants,grantActive,readAgentIdentity,readGrant,askGrant,askGrantAuditEntry,boardGrant,boardGrantAuditEntry,conversationGrant,conversationGrantAuditEntry,linkGrant,linkGrantAuditEntry,githubDraftGrant,githubDraftGrantAuditEntry,githubWriteGrant,githubWriteGrantAuditEntry,githubWriteGrants,githubWriteGrantId,serviceGrantAuditEntry,serviceReadGrant,reportGrant,reportGrantAuditEntry} from '../../../../../core/agent/index.ts';
+import {GITHUB_WRITE_LIMITS} from '../../../../../contracts/github-drafts.ts';
 import type {AgentAuditEntry,AgentIdentity,Grant} from '../../../../../contracts/agent-identity.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 import type {AgentAccess,VaultService} from '../../host/services.ts';
@@ -103,6 +104,17 @@ export function createAgentAccess({root,vault,ledger,now=()=>new Date().toISOStr
   ungrantLinks(agentId,kind){return takeBack(agentId,linkGrant(agentId,kind,now()),at=>linkGrantAuditEntry(agentId,kind,false,at));},
   grantReports(agentId,kind){return give(agentId,reportGrant(agentId,kind,now()),at=>reportGrantAuditEntry(agentId,kind,true,at));},
   ungrantReports(agentId,kind){return takeBack(agentId,reportGrant(agentId,kind,now()),at=>reportGrantAuditEntry(agentId,kind,false,at));},
+  grantGithubWrites(agentId,repo,choice,labelPrefix){
+   const at=now(),grant=githubWriteGrant(agentId,repo,choice,labelPrefix,at);
+   // At most GITHUB_WRITE_LIMITS.grantsPerAgent repositories; choosing again for one of them replaces its Grant.
+   if(!grant||githubWriteGrants(agentId,load().grants,at).filter(item=>item.id!==grant.id).length>=GITHUB_WRITE_LIMITS.grantsPerAgent)return false;
+   return give(agentId,grant,at=>githubWriteGrantAuditEntry(agentId,grant.github!,true,at));
+  },
+  ungrantGithubWrites(agentId,repo){
+   const at=now(),found=typeof repo==='string'?githubWriteGrants(agentId,load().grants,at).find(item=>item.id===githubWriteGrantId(agentId,repo)):undefined;
+   if(!found)return typeof repo==='string'&&load().identities.some(item=>item.id===agentId);
+   return takeBack(agentId,found,at=>githubWriteGrantAuditEntry(agentId,found.github!,false,at));
+  },
   onRevoke(listener){listeners.push(listener);}
  };
  // A Grant the person gives or takes back in Settings (Core builds it from a name only: a Service, or ask or work), each
@@ -110,7 +122,8 @@ export function createAgentAccess({root,vault,ledger,now=()=>new Date().toISOStr
  function give(agentId:string,grant:Grant|null,entry:(at:string)=>AgentAuditEntry):boolean {
   const stored=load(),identity=stored.identities.find(item=>item.id===agentId),at=now();
   if(!identity||agentRevoked(identity,at)||!grant)return false;
-  if(stored.grants.some(item=>item.id===grant.id&&item.agentId===agentId&&grantActive(item,at)))return true;
+  // The same Grant already active (a standing GitHub write Grant's reach included) changes nothing.
+  if(stored.grants.some(item=>item.id===grant.id&&item.agentId===agentId&&grantActive(item,at)&&JSON.stringify(item.github)===JSON.stringify(grant.github)))return true;
   stored.grants=[...stored.grants.filter(item=>item.id!==grant.id),{...grant,grantedAt:at}];
   save(stored);
   try{ledger()?.recordAgentAudit(entry(at) as unknown as Row,AGENT_AUDIT_KEEP);}catch{}

@@ -12,9 +12,11 @@ try{
   // Settings › Agent › Access (core/agent/GRANTS.md): one Agent with its default Grants and newest decisions.
   w.access=[{id:'hermes',name:'Hermes Agent',harness:'hermes',kind:'local',createdAt:'2026-10-01T09:00:00.000Z',lastSeenAt:'2026-10-14T18:30:00.000Z',
    grants:[{id:'hermes-channel-read',agentId:'hermes',targets:['items/query','history/query','companion/recall','meetings/decisions','gmail/draft','gmail/read','google-calendar/read','apple-notes/read','todoist/read','applet:mail/read'],access:'read',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'},
-    {id:'hermes-channel-link',agentId:'hermes',targets:['world/link'],access:'write',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'}],
-   audit:[{at:'2026-10-14T18:30:00.000Z',agentId:'hermes',target:'items',action:'update',decision:'denied',reason:'Only reading here.'},{at:'2026-10-14T18:29:00.000Z',agentId:'hermes',target:'items',action:'query',decision:'allowed',grantId:'hermes-channel-read'}],
+    {id:'hermes-channel-link',agentId:'hermes',targets:['world/link'],access:'write',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'},
+    {id:'hermes-github-writes-example/app',agentId:'hermes',targets:['github-writes/run'],access:'write',duration:'standing',grantedAt:'2026-10-02T09:00:00.000Z',github:{repo:'example/app',writes:['issue.comment','labels.set'],labelPrefix:'state:'}}],
+   audit:[{at:'2026-10-14T18:30:00.000Z',agentId:'hermes',target:'items',action:'update',decision:'denied',reason:'Only reading here.'},{at:'2026-10-14T18:29:30.000Z',agentId:'hermes',target:'github-writes',action:'write',decision:'allowed',grantId:'hermes-github-writes-example/app'},{at:'2026-10-14T18:29:00.000Z',agentId:'hermes',target:'items',action:'query',decision:'allowed',grantId:'hermes-channel-read'}],
    services:[{provider:'github',title:'GitHub',granted:false},{provider:'posthog',title:'PostHog',granted:true}],asks:{ask:false,work:true},board:{read:true,define:false},githubDrafts:false,conversations:{add:false,search:true},links:{read:false,save:false},
+   githubWrites:{add:true,grants:[{repo:'example/app',writes:['issue.comment','labels.set'],labelPrefix:'state:'}]},
    reports:{report:true,list:false},liveness:'stale',report:{status:'working',summary:'Building the installer',work:[{title:'Fix the build'}],runs:[],reportedAt:new Date(Date.now()-25*60_000).toISOString()}}];
   w.rules=[{id:'rule-00000000000000a1',allows:'npm test',agent:'default',kind:'command',main:true,grantedAt:Date.UTC(2026,9,8,12),thread:'In Fox’s main conversation',inWorld:true},{id:'rule-00000000000000a2',allows:'github › search_issues',agent:'default',kind:'tool',main:true,note:'Any arguments'}];
   w.jobs=[{id:'job-1',name:'Morning digest',kind:'prompt',paused:false,when:{cron:'0 8 * * *'},delivery:'telegram',last:{at:Date.UTC(2026,9,10,8),status:'ok'}},{id:'job-2',name:'Plant check',kind:'prompt',paused:true,when:{everySeconds:7200}}];
@@ -51,11 +53,16 @@ try{
   if(b.action==='agentAccess'&&(b.operation==='grantConversations'||b.operation==='ungrantConversations')){w.access=w.access.map(a=>a.id===b.id?{...a,conversations:{...a.conversations,[b.kind]:b.operation==='grantConversations'}}:a);return {ok:true};}
   if(b.action==='agentAccess'&&(b.operation==='grantReports'||b.operation==='ungrantReports')){w.access=w.access.map(a=>a.id===b.id?{...a,reports:{...a.reports,[b.kind]:b.operation==='grantReports'}}:a);return {ok:true};}
   if(b.action==='agentAccess'&&(b.operation==='grantGithubDrafts'||b.operation==='ungrantGithubDrafts')){w.access=w.access.map(a=>a.id===b.id?{...a,githubDrafts:b.operation==='grantGithubDrafts'}:a);return {ok:true};}
+  // "Can update Issues in <repo> without asking": the page sends the Agent, the repository and a choice; Core builds it.
+  if(b.action==='agentAccess'&&b.operation==='grantGithubWrites'){if(!/^[\w-]+\/[\w.-]+$/.test(b.repo))throw new Error('Could not allow that. Name the repository as owner/repo.');
+   const writes={comment:['issue.comment'],labels:['labels.set'],'comment-labels':['issue.comment','labels.set']}[b.choice];
+   w.access=w.access.map(a=>a.id===b.id?{...a,githubWrites:{...a.githubWrites,grants:[...a.githubWrites.grants.filter(g=>g.repo!==b.repo),{repo:b.repo,writes,...b.labelPrefix?{labelPrefix:b.labelPrefix}:{}}]}}:a);return {ok:true};}
+  if(b.action==='agentAccess'&&b.operation==='ungrantGithubWrites'){w.access=w.access.map(a=>a.id===b.id?{...a,githubWrites:{...a.githubWrites,grants:a.githubWrites.grants.filter(g=>g.repo!==b.repo)}}:a);return {ok:true};}
   // The GitHub App that writes approved GitHub drafts: the page sends its settings once and never gets them back.
   if(b.action==='githubApp'&&b.operation==='status')return {connected:!!w.githubApp};
   if(b.action==='githubApp'&&b.operation==='connect'){if(b.appId!=='1001')throw new Error('The GitHub App is not valid: enter its App ID, its installation ID and its private key (a .pem file\'s whole text).');w.githubApp=true;return {ok:true,connected:true};}
   if(b.action==='githubApp'&&b.operation==='disconnect'){w.githubApp=false;return {ok:true,connected:false};}
-  if(b.action==='agentAccess'&&b.operation==='revoke'){w.access=w.access.map(a=>a.id===b.id?{...a,services:[],asks:undefined,board:undefined,githubDrafts:undefined,conversations:undefined,links:undefined,reports:undefined,report:undefined,revokedAt:'2026-10-15T08:00:00.000Z',grants:a.grants.map(g=>({...g,revokedAt:'2026-10-15T08:00:00.000Z'}))}:a);return {ok:true};}
+  if(b.action==='agentAccess'&&b.operation==='revoke'){w.access=w.access.map(a=>a.id===b.id?{...a,services:[],asks:undefined,board:undefined,githubDrafts:undefined,githubWrites:undefined,conversations:undefined,links:undefined,reports:undefined,report:undefined,revokedAt:'2026-10-15T08:00:00.000Z',grants:a.grants.map(g=>({...g,revokedAt:'2026-10-15T08:00:00.000Z'}))}:a);return {ok:true};}
   // An Agent for a script: the page sends only the name; the host makes the Agent and its file.
   if(b.action==='agentAccess'&&b.operation==='addScript'){if(!String(b.name||'').trim())throw new Error('Give it a name of one line, at most 60 characters, with a letter or digit in it.');
    const file='/Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json';
@@ -248,7 +255,8 @@ try{
  await hermesAccess.getByText(/^On this computer\. Last used .*2026\.$/).waitFor();
  await hermesAccess.getByText('Read: items, history, companion, meetings, gmail, google-calendar and 2 more.',{exact:true}).waitFor();
  await hermesAccess.getByText('Read and change: world (link).',{exact:true}).waitFor();
- assert.equal(await hermesAccess.locator('.companion-settings-access-audit li').count(),2);
+ assert.equal(await hermesAccess.locator('.companion-settings-access-audit li').count(),3);
+ await hermesAccess.locator('.companion-settings-access-audit li').nth(1).getByText(/Changed GitHub without asking · Written$/).waitFor();
  await hermesAccess.locator('.companion-settings-access-audit li').first().getByText(/items update · Refused$/).waitFor();
  assert.doesNotMatch(await accessPart.innerText(),/\bMCP\b|token|endpoint/i,'plain words only');
  // "Can read <Service>" for each connected Service: on and off at once, the page sending only the Agent and the Service.
@@ -306,6 +314,28 @@ try{
  await accessPart.getByText('Hermes Agent can now draft GitHub changes for you to approve.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/GithubDrafts$/.test(c.operation))),
   [{action:'agentAccess',operation:'grantGithubDrafts',id:'hermes'}],'only the Agent, never targets');
+ // "Can update Issues in <repo> without asking" (core/agent/GRANTS.md#standing-github-writes): each one with its
+ // repository and Remove, listed once (not again among the Grants), and Allow for another, the page sending the Agent,
+ // the repository and a choice with its label prefix, never targets.
+ const writesPart=hermesAccess.locator('[data-github-writes=hermes]');
+ await writesPart.getByText('Can update Issues in example/app without asking: comment and change “state:” labels.',{exact:true}).waitFor();
+ assert.equal(await hermesAccess.getByText(/^Can update Issues in /).count(),1,'listed once, not again among the Grants');
+ await writesPart.getByLabel('Repository',{exact:true}).fill('example/tools');
+ await writesPart.getByLabel('What it may do',{exact:true}).selectOption('labels');
+ assert.equal(await writesPart.getByLabel('Labels starting with',{exact:true}).inputValue(),'state:');
+ await writesPart.getByRole('button',{name:'Allow',exact:true}).click();
+ await accessPart.getByText('Hermes Agent can now update example/tools without asking.',{exact:true}).waitFor();
+ await writesPart.getByText('Can update Issues in example/tools without asking: change “state:” labels.',{exact:true}).waitFor();
+ await writesPart.getByLabel('Repository',{exact:true}).fill('not a repo');
+ await writesPart.getByRole('button',{name:'Allow',exact:true}).click();
+ await accessPart.getByText(/^Could not change that: Could not allow that\./).waitFor();
+ await writesPart.locator('[data-repo="example/app"]').getByRole('button',{name:'Remove',exact:true}).click();
+ await accessPart.getByText('Hermes Agent can no longer update example/app without asking.',{exact:true}).waitFor();
+ assert.equal(await writesPart.locator('[data-repo="example/app"]').count(),0);
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/GithubWrites$/.test(c.operation))),
+  [{action:'agentAccess',operation:'grantGithubWrites',id:'hermes',repo:'example/tools',choice:'labels',labelPrefix:'state:'},
+   {action:'agentAccess',operation:'grantGithubWrites',id:'hermes',repo:'not a repo',choice:'comment-labels',labelPrefix:'state:'},
+   {action:'agentAccess',operation:'ungrantGithubWrites',id:'hermes',repo:'example/app'}],'the Agent, the repository and a choice, never targets');
  // What it last reported (core/agent/GRANTS.md#agent-reports), and "Can report its work" and "Can see other Agents".
  await hermesAccess.getByText(/^Quiet: Building the installer · Fix the build · reported \d+ min ago\.$/).waitFor();
  const reporting=hermesAccess.getByRole('checkbox',{name:'Can report its work',exact:true}),listing=hermesAccess.getByRole('checkbox',{name:'Can see other Agents',exact:true});

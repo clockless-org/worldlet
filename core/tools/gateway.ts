@@ -109,6 +109,10 @@ function buildWorldActions(sample:boolean):WorldAction[]{
  // "Can keep your tracked links" name.
  operations('links','world_links');
  for(const action of actions.filter(a=>a.tool==='world_links'))action.parameters.required=action.action==='save'?['rows']:[];
+ // Standing GitHub writes (core/agent/GRANTS.md#standing-github-writes): their own Grant target, which only a standing
+ // GitHub write Grant for one repository names.
+ operations('github-writes','github_writes');
+ for(const action of actions.filter(a=>a.tool==='github_writes'))action.parameters.required=['write','target'];
  operations('weather','manage_weather_location');
  for(const action of actions.filter(a=>a.tool==='manage_weather_location'))action.parameters.required=action.action==='search'?['query']:action.action==='select'?['choice']:[];
  operations('music','control_background_music');operations('local-music','control_local_music');operations('youtube','use_youtube');operations('stripe','use_stripe_crm');
