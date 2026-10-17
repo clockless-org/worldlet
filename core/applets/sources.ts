@@ -1,5 +1,5 @@
 /** Account sources an Agent connects and reads directly. */
-export const SOURCE_PROVIDERS=['gmail','google-calendar','google-drive','github','notion','linear','paypal','todoist','supabase','posthog','cloudflare'];
+export const SOURCE_PROVIDERS=['gmail','google-calendar','google-drive','github','notion','linear','paypal','todoist','supabase','posthog','cloudflare','http'];
 /** One Google sign-in grants Mail and Calendar together. */
 export const GOOGLE_SIGN_IN=['google','gmail','google-calendar'];
 export const GOOGLE_SIGN_IN_SERVICES=['gmail','google-calendar'];
@@ -8,8 +8,8 @@ export interface TokenField {key:string;label:string;hint?:string;value?:string;
 /** Sources that connect only with a token the person pastes (GitHub's server offers no sign-in Worldlet can register
  * for; PostHog and Cloudflare take an API key), each with the one line saying what the token needs, what the token is
  * called there, the settings it also needs, and a token shape that is a common mistake. The token is checked with
- * one read before it is kept. */
-export const TOKEN_PROVIDERS:Readonly<Record<string,{hint:string;token:RegExp;label?:string;fields?:readonly TokenField[];wrong?:{token:RegExp;message:string}}>>=Object.freeze({
+ * one read before it is kept. `optional`: the source also connects with no token (an open HTTP JSON endpoint). */
+export const TOKEN_PROVIDERS:Readonly<Record<string,{hint:string;token:RegExp;label?:string;optional?:boolean;fields?:readonly TokenField[];wrong?:{token:RegExp;message:string}}>>=Object.freeze({
  github:{hint:'Paste a fine-grained token with read-only access to Issues, Pull requests and Metadata.',token:/^[A-Za-z0-9_]{20,255}$/},
  posthog:{hint:'Paste a personal API key with read access to Project, Query, Insight, Dashboard, Feature flag and Annotation.',token:/^[A-Za-z0-9_-]{20,255}$/,label:'personal API key',
   fields:Object.freeze([
@@ -22,6 +22,12 @@ export const TOKEN_PROVIDERS:Readonly<Record<string,{hint:string;token:RegExp;la
    {key:'account',label:'Account ID',placeholder:'32 letters and digits',hint:'The part after dash.cloudflare.com/ in your dashboard\'s address.',maxLength:40},
   ]),
   wrong:{token:/^[0-9a-f]{37}$/,message:'That looks like the Global API Key, which can change everything in your account. Create an API token with read-only analytics access instead.'}},
+ // Each connect adds or replaces one named endpoint; the others stay (service-source.ts).
+ http:{hint:'Paste a token only if the endpoint needs one: Worldlet sends it as a Bearer header and only to that address.',token:/^[\x21-\x7e]{8,2000}$/,label:'token (optional)',optional:true,
+  fields:Object.freeze([
+   {key:'name',label:'Name',placeholder:'status',hint:'A short name Agents and presets use: lowercase letters, digits and -.',maxLength:32},
+   {key:'url',label:'Base address',placeholder:'https://api.example.com/v1/',hint:'Reads are GET requests to paths under this HTTPS address.',maxLength:300},
+  ])},
 });
 /** The token a `connect` request carries: only for a source that connects with one, required there, and shaped like a
  * token. An error never repeats what was pasted. */
@@ -29,6 +35,7 @@ export function connectToken(provider:string,value:unknown):string {
  const rule=Object.hasOwn(TOKEN_PROVIDERS,provider)?TOKEN_PROVIDERS[provider]:null;
  if(!rule){if(value!==undefined&&value!=='')throw Error('This source does not connect with a token.');return '';}
  const token=typeof value==='string'?value.trim():'';
+ if(!token&&rule.optional&&(value===undefined||typeof value==='string'))return '';
  if(!token)throw Error(rule.hint);
  if(rule.wrong?.token.test(token))throw Error(rule.wrong.message);
  if(!rule.token.test(token))throw Error('That does not look like a token. '+rule.hint);

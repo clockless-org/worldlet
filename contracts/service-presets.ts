@@ -2,7 +2,7 @@
  * a PostHog HogQL query or a GitHub search over a set of repositories, kept in the person's own World so a board block
  * (or anything else) names the preset instead of repeating the read. A preset holds only what to read: the Service's
  * key stays in the vault (`mcp:github`, `service:<name>`) and the Service's connection keeps its own settings (PostHog's
- * address and project, Cloudflare's account). Anything that looks like a password, token or key is refused, never kept.
+ * address and project, Cloudflare's account, HTTP JSON's endpoints). Anything that looks like a password, token or key is refused, never kept.
  * Hosts own the clock and storage; Core decides (core/accounts/services/presets.ts). */
 import type {ServiceOperation} from './services.ts';
 import {SERVICE_PROVIDERS} from './services.ts';

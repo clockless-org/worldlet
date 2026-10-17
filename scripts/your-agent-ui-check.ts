@@ -62,6 +62,11 @@ try{
   if(b.action==='githubApp'&&b.operation==='status')return {connected:!!w.githubApp};
   if(b.action==='githubApp'&&b.operation==='connect'){if(b.appId!=='1001')throw new Error('The GitHub App is not valid: enter its App ID, its installation ID and its private key (a .pem file\'s whole text).');w.githubApp=true;return {ok:true,connected:true};}
   if(b.action==='githubApp'&&b.operation==='disconnect'){w.githubApp=false;return {ok:true,connected:false};}
+  // HTTP JSON endpoints: connected through `connect` with the token once; listed without it.
+  if(b.action==='httpJson'&&b.operation==='list')return {endpoints:w.endpoints??[]};
+  if(b.action==='httpJson'&&b.operation==='remove'){w.endpoints=w.endpoints.filter(e=>e.name!==b.name);return {endpoints:w.endpoints};}
+  if(b.action==='connect'&&b.provider==='http'){if(!b.settings.url.startsWith('https://'))throw new Error('Use the endpoint\'s base address, starting with https://.');w.endpoints=[...(w.endpoints??[]).filter(e=>e.name!==b.settings.name),{name:b.settings.name,url:b.settings.url,token:!!b.token}];return {ok:true,connected:true};}
+  if(b.action==='disconnectSource'&&b.provider==='http'){w.endpoints=[];return {ok:true};}
   if(b.action==='agentAccess'&&b.operation==='revoke'){w.access=w.access.map(a=>a.id===b.id?{...a,services:[],asks:undefined,wake:undefined,board:undefined,githubDrafts:undefined,githubWrites:undefined,conversations:undefined,links:undefined,reports:undefined,report:undefined,revokedAt:'2026-10-15T08:00:00.000Z',grants:a.grants.map(g=>({...g,revokedAt:'2026-10-15T08:00:00.000Z'}))}:a);return {ok:true};}
   // An Agent for a script: the page sends only the name; the host makes the Agent and its file.
   if(b.action==='agentAccess'&&b.operation==='addScript'){if(!String(b.name||'').trim())throw new Error('Give it a name of one line, at most 60 characters, with a letter or digit in it.');
@@ -239,6 +244,31 @@ try{
  assert.ok(!(await page.content()).includes('FIXTUREKEY'),'the key is nowhere in the page');
  await githubApp.getByRole('button',{name:'Disconnect',exact:true}).click();
  await githubApp.getByRole('textbox',{name:'App ID'}).waitFor();
+ // HTTP JSON: a name, an HTTPS base address and an optional token; the token field is cleared as soon as it is sent and
+ // the token never comes back. Remove forgets one endpoint; the last one is disconnected.
+ const httpJson=accounts.locator('[data-accounts=http]'),endpointToken='Fixture.'+'endpoint'.repeat(3);
+ await httpJson.getByText('JSON endpoints',{exact:true}).waitFor();
+ await httpJson.getByRole('textbox',{name:'Endpoint name'}).fill('status');
+ await httpJson.getByRole('textbox',{name:'Base address'}).fill('http://api.example.com/v1/');
+ await httpJson.getByLabel('Token (optional)').fill(endpointToken);
+ await httpJson.getByRole('button',{name:'Connect',exact:true}).click();
+ await accounts.getByText(/^Use the endpoint's base address/).waitFor();
+ assert.equal(await httpJson.getByLabel('Token (optional)').inputValue(),'','the token is cleared as soon as it is sent');
+ await httpJson.getByRole('textbox',{name:'Base address'}).fill('https://api.example.com/v1/');
+ await httpJson.getByLabel('Token (optional)').fill(endpointToken);
+ await httpJson.getByRole('button',{name:'Connect',exact:true}).click();
+ await httpJson.locator('[data-endpoint=status]').getByText('https://api.example.com/v1/ · with a token',{exact:true}).waitFor();
+ await httpJson.getByRole('textbox',{name:'Endpoint name'}).fill('open');
+ await httpJson.getByRole('textbox',{name:'Base address'}).fill('https://open.example.com/');
+ await httpJson.getByRole('button',{name:'Connect',exact:true}).click();
+ await httpJson.locator('[data-endpoint=open]').getByText('https://open.example.com/',{exact:true}).waitFor();
+ assert.ok(!(await page.content()).includes(endpointToken),'the token is nowhere in the page');
+ await httpJson.locator('[data-endpoint=status]').getByRole('button',{name:'Remove',exact:true}).click();
+ await httpJson.locator('[data-endpoint=status]').waitFor({state:'detached'});
+ await httpJson.locator('[data-endpoint=open]').getByRole('button',{name:'Disconnect',exact:true}).click();
+ await httpJson.locator('[data-endpoint=open]').waitFor({state:'detached'});
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='connect'||c.action==='disconnectSource'||c.action==='httpJson'&&c.operation==='remove').map(c=>[c.action,c.settings?.name??c.name??c.provider,c.token?c.token.length:0])),
+  [['connect','status',endpointToken.length],['connect','status',endpointToken.length],['connect','open',0],['httpJson','status',0],['disconnectSource','http',0]],'the token goes to the host only with connect');
  const rule=permissions.locator('[data-rule=rule-00000000000000a1]');
  await rule.getByText('npm test',{exact:true}).waitFor();
  await rule.getByText(/^Allowed .*2026, in Fox’s main conversation\.$/).waitFor();

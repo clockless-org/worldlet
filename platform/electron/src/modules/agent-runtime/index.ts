@@ -643,6 +643,15 @@ export function installAgentRuntime(host:Host){
   }catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
   throw new WorldletError('Unknown GitHub App operation.');
  }});
+ /** HTTP JSON's endpoints (Settings › Agent › Connections): `list` (each one's name, address and whether it has a token,
+  * never the token) and `remove` (one by `name`; the last goes with Disconnect). Connecting one is `connect` with
+  * provider `http`. Not in ROOM_ALLOWED. */
+ host.register({httpJson:async request=>{
+  const endpoints=new ServiceSource({vault});
+  if(request.operation==='list')return {endpoints:endpoints.endpointList('http')};
+  if(request.operation==='remove'){endpoints.removeEndpoint('http',request.name);return {endpoints:endpoints.endpointList('http')};}
+  throw new WorldletError('Unknown HTTP JSON operation.');
+ }});
  let adapter=selectAdapter(context,undefined,remote,vault);
  // Once the runtime is ready and Fox's profile exists (after its first turn), and again whenever Fox changes Agent.
  listeners.push(()=>{void residentHermes(context,adapter);});

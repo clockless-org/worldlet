@@ -18,7 +18,8 @@ import {backgroundLaunch} from '../../background-launch.ts';
 // and local files/folders (Mac Store.importFiles, Windows FolderImport/TextFileImport).
 // Linear and PayPal had a native token sheet on the Mac; here they use the Agent's own MCP authorization like Notion,
 // because the World page owns all connection UI. GitHub and PostHog connect with a token pasted in that page
-// (TOKEN_PROVIDERS), PostHog with its address and project beside it.
+// (TOKEN_PROVIDERS), PostHog with its address and project beside it; an HTTP JSON endpoint with its name and address,
+// its token optional.
 const DIRECT=['google',...SOURCE_PROVIDERS];
 const TEXT_EXTENSIONS=['md','txt','json','csv'];
 
@@ -67,11 +68,12 @@ export function createConnections(ctx:SourcesContext){
   * World's state, put in an event or returned. `settings`: what such a source also needs (PostHog's address and project). */
  async function connectAgentSource(provider:string,region:string|undefined,mock:boolean,token='',settings:Record<string,string>={}){
   if(!store.writable||store.busy)throw new WorldletError('Wait for the current task to finish.');
-  let connected=false,checking=false;
-  store.busy=true;store.error=null;store.status=mock?'Connecting the mock Google account…':token?'Checking the token…':'Complete authorization in your browser.';
+  // An HTTP JSON endpoint may have settings and no token: it is checked the same way.
+  let connected=false,checking=false;const pasted=!!token||Object.keys(settings).length>0;
+  store.busy=true;store.error=null;store.status=mock?'Connecting the mock Google account…':pasted?'Checking the token…':'Complete authorization in your browser.';
   try{
    if(mock&&(host.profile.channel!=='dev'||provider!=='google'))throw new WorldletError('Mock Google is available only in development builds.');
-   await ctx.sourceConnections().connect({provider,target:'',endpoint:'',token,...token?{settings}:{},home:ctx.home(),mock,
+   await ctx.sourceConnections().connect({provider,target:'',endpoint:'',token,...pasted?{settings}:{},home:ctx.home(),mock,
     // Sign-in stages reach the page as they happen (contracts/platform.ts GOOGLE_SIGN_IN_EVENT).
     onStage:(stage,url)=>host.page.event('worldlet:google-sign-in',url?{stage,url}:stage),
     onConnected:receipt=>acceptAgentConnection({id:typeof (receipt as Row).id==='string'?(receipt as Row).id:`${ctx.accountsId()}-${receipt.provider}`,provider:receipt.provider,target:receipt.target,status:'connected',connector:receipt.connector},region)});
@@ -80,7 +82,7 @@ export function createConnections(ctx:SourcesContext){
    if(!backgroundLaunch()){if(process.platform==='darwin')app.focus({steal:true});host.window()?.focus();}
   }finally{
    store.busy=false;
-   if(!connected)store.status=token?'The token was not kept. Existing connections are kept; try again when ready.':'Sign-in did not finish. Existing connections are kept; try again when ready.';
+   if(!connected)store.status=pasted?'The token was not kept. Existing connections are kept; try again when ready.':'Sign-in did not finish. Existing connections are kept; try again when ready.';
   }
   return checking;
  }

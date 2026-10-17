@@ -1,4 +1,4 @@
-/** Public component API: the World's own account connections (Google Mail, Calendar and Drive; Notion, Todoist, Linear, PayPal, Supabase and GitHub through their official MCP servers; PostHog and Cloudflare through their own APIs; DoorDash through its official CLI). Cross-component consumers import this entry point. */
+/** Public component API: the World's own account connections (Google Mail, Calendar and Drive; Notion, Todoist, Linear, PayPal, Supabase and GitHub through their official MCP servers; PostHog and Cloudflare through their own APIs; HTTP JSON endpoints the person names; DoorDash through its official CLI). Cross-component consumers import this entry point. */
 export {GoogleRestError,type GoogleQuery,type GoogleRest,type MailReceipts} from './google/rest.ts';
 export {DISCOVERY_QUERIES,MIN_PICTURE_WIDTH,MailText,compactMessage,contentImage,discover,jsonSize,readPage,tidyMail,type MailPage,type MailPicture} from './google/gmail.ts';
 export {HtmlParser,unescape as htmlUnescape,type HtmlAttrs} from './google/html-parser.ts';
@@ -22,9 +22,10 @@ export {PAYPAL_ENDPOINTS,PAYPAL_GATE,paypalPayload,readPaypal} from './mcp/paypa
 export {GITHUB_ENDPOINT,GITHUB_ENDPOINTS,GITHUB_TOOLS,GITHUB_GATE,GITHUB_LIMITS,githubRecordId,githubRepository,readGithub} from './mcp/github.ts';
 export {SUPABASE_ENDPOINT,SUPABASE_TOOLS,SUPABASE_GATE,supabaseProjectId,readSupabase} from './mcp/supabase.ts';
 // Worldlet Services read over their own API with a pasted key (PostHog, Cloudflare): the Platform gates each request, Core reads.
-export type {ServiceGate,ServiceHttp} from './services/http.ts';
+export {privateAddress,type ServiceGate,type ServiceHttp} from './services/http.ts';
 export {POSTHOG_GATE,POSTHOG_HOSTS,POSTHOG_LIMITS,POSTHOG_LISTS,checkPosthog,hogqlSelect,posthogHost,posthogProject,posthogSettings,readPosthog,type PosthogSettings} from './services/posthog.ts';
 export {CLOUDFLARE_API,CLOUDFLARE_GATE,CLOUDFLARE_LIMITS,CLOUDFLARE_READS,checkCloudflare,cloudflareAccount,cloudflareSettings,readCloudflare,type CloudflareSettings} from './services/cloudflare.ts';
+export {HTTP_JSON_GATE,HTTP_JSON_LIMITS,HTTP_JSON_NAME,checkHttpJson,httpJsonBaseUrl,httpJsonEndpoints,httpJsonName,httpJsonPath,httpJsonRequest,httpJsonSettings,readHttpJson,type HttpJsonRequest,type HttpJsonSettings} from './services/http-json.ts';
 // DoorDash's official CLI: which operations and arguments, and what reaches Fox; the Platform runs it.
 export {DOORDASH_CLI_VERSION,DOORDASH_MUTATIONS,doordashArgs,cleanDoordash,validDoordashCheckout,doordashOutcome,type DoordashRun} from './doordash.ts';
 // Service presets: named, saved reads of a Worldlet Service (a HogQL query, a GitHub search) that a board block names.

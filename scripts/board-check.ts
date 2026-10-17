@@ -114,6 +114,9 @@ assert.deepEqual(one({kind:'trend',x:'day',y:'signups'},records('posthog',[row('
 assert.equal(one({kind:'trend',x:'day',y:'signups'},records('posthog',[])).error,'The read returned nothing.');
 assert.equal(one({kind:'list'},records('posthog',Array.from({length:30},(_,i)=>row('r'+i,{})))).list?.items.length,BOARD_LIMITS.listDefault);
 assert.equal(one({},{error:'x'.repeat(1000)}).error?.length,BOARD_LIMITS.error,'a Service error is cut short');
+// An HTTP JSON preset shows like any other Service's: its records' fields, flat.
+const http=saveServicePreset(presets,{id:'uptime',name:'Uptime',provider:'http',read:{operation:'read',id:'status',query:'status.json'}},now).presets;
+assert.deepEqual(resolveBoard(readBoardDefinition(block({preset:'uptime',field:'uptime',goodAtLeast:99.5})),http,{uptime:records('http',[row('status/1',{uptime:99.9})])},now).tabs[0].blocks[0].number,{value:99.9,tone:'good'});
 // Nothing but the definition, the presets and the reads goes in; the same in gives the same out.
 assert.deepEqual(resolveBoard(board,presets,reads,now),view);
 const typed:BoardDefinition=board;assert.ok(typed);

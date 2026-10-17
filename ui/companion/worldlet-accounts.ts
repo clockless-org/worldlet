@@ -17,8 +17,9 @@ export async function showWorldletAccounts(target:HTMLElement,call:(action:strin
  async function draw(){
   const state=await call('snapshot').catch(()=>null);if(!current())return;
   const live=(state?.connections||[]).filter(connectionLive),rows=el('div','companion-settings-rows');
-  if(!live.length)rows.append(el('p','companion-info-note','No accounts are connected yet. Open a Thing in the world to connect it.'));
-  for(const c of live){
+  if(!live.some((c:any)=>c.provider!=='http'))rows.append(el('p','companion-info-note','No accounts are connected yet. Open a Thing in the world to connect it.'));
+  // HTTP JSON's endpoints have their own section below (showHttpJson).
+  for(const c of live.filter((c:any)=>c.provider!=='http')){
    const app=getApp(c.provider),google=c.transport!=='native'&&GOOGLE.includes(c.provider);
    const row=el('div','companion-settings-row'),text=el('div');row.dataset.account=c.provider;
    text.append(el('strong','',app?.title||c.provider),el('span','',c.label||'Connected'));row.append(text);
@@ -33,6 +34,7 @@ export async function showWorldletAccounts(target:HTMLElement,call:(action:strin
  target.append(own,said);
  await draw();
  if(current())await showGithubApp(target,call,current);
+ if(current())await showHttpJson(target,call,current);
  if(current())await showServiceCollection(target,call,current);
  // The Agent's own tools and chat accounts, with Add and Remove through its own commands.
  if(current())await showAgentConnections(target,call,current);
@@ -71,6 +73,53 @@ export async function showGithubApp(target:HTMLElement,call:(action:string,body?
    catch(e){said.textContent=(e as Error).message||'Could not connect the GitHub App.';}
   }));
   box.replaceChildren(el('h5','companion-settings-subhead','GitHub writes'),row);
+ }
+ target.append(box,said);
+ await draw();
+}
+
+/** HTTP JSON (core/applets/INTEGRATIONS.md#http-json-service): JSON endpoints an Agent may read with "Can read HTTP JSON",
+ * each a name, an HTTPS base address and an optional token. Connect goes through `connect` (provider `http`), which
+ * checks the endpoint with one read before keeping it; the token leaves the page once, its field cleared at once, and
+ * never comes back (`httpJson` `list` says only whether an endpoint has one). Remove forgets one endpoint; the last
+ * one is disconnected instead. */
+export async function showHttpJson(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){
+ const box=el('div','companion-settings-http-json'),said=el('p','companion-settings-status');said.setAttribute('role','status');
+ box.dataset.accounts='http';
+ const button=(label:string,run:()=>Promise<void>)=>{const b=el('button','companion-info-action',label) as HTMLButtonElement;b.type='button';b.onclick=async()=>{if(b.disabled)return;b.disabled=true;try{await run();}finally{if(b.isConnected)b.disabled=false;}};return b;};
+ const field=(label:string,placeholder:string,secret=false)=>{
+  const input=document.createElement('input');input.className='companion-settings-input';input.setAttribute('aria-label',label);input.placeholder=placeholder;
+  input.autocomplete='off';input.spellcheck=false;if(secret)input.type='password';
+  return input;
+ };
+ async function draw(){
+  const listed=await call('httpJson',{operation:'list'}).catch(()=>null);if(!current())return;
+  const endpoints:{name:string;url:string;token:boolean}[]=Array.isArray(listed?.endpoints)?listed.endpoints:[];
+  const rows=el('div','companion-settings-rows');
+  for(const endpoint of endpoints){
+   const row=el('div','companion-settings-row'),text=el('div');row.dataset.endpoint=endpoint.name;
+   text.append(el('strong','',endpoint.name),el('span','',endpoint.url+(endpoint.token?' · with a token':'')));
+   row.append(text,button(endpoints.length>1?'Remove':'Disconnect',async()=>{
+    try{
+     if(endpoints.length>1)await call('httpJson',{operation:'remove',name:endpoint.name});else await call('disconnectSource',{provider:'http'});
+     said.textContent=`${endpoint.name} was removed.`;await draw();
+    }catch(e){said.textContent=(e as Error).message||'Could not remove it.';}
+   }));
+   rows.append(row);
+  }
+  const name=field('Endpoint name','Name, such as status'),url=field('Base address','https://api.example.com/v1/'),token=field('Token (optional)','Token (optional)',true);
+  const add=el('div','companion-settings-row'),words=el('div');
+  words.append(el('strong','',endpoints.length?'Add an endpoint':'JSON endpoints'),
+   el('span','','Let Agents you allow read JSON from an address on the internet, with GET only. A token stays on this computer and goes only to that address.'),name,url,token);
+  add.append(words,button('Connect',async()=>{
+   const body={provider:'http',token:token.value.trim(),settings:{name:name.value.trim(),url:url.value.trim()}};
+   // The token leaves the page once: the field is cleared before the endpoint answers.
+   token.value='';said.textContent='Checking the endpoint…';
+   try{await call('connect',body);said.textContent=`${body.settings.name} is connected.`;await draw();}
+   catch(e){said.textContent=(e as Error).message||'Could not connect the endpoint.';}
+  }));
+  rows.append(add);
+  box.replaceChildren(el('h5','companion-settings-subhead','HTTP JSON'),rows);
  }
  target.append(box,said);
  await draw();
