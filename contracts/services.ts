@@ -7,7 +7,7 @@ export type ServiceOperation=typeof SERVICE_OPERATIONS[number];
 /** Each Service's operations, each its own Grant target (`<provider>/<operation>`), with the arguments it requires.
  * GitHub: `list` (what is waiting for the person), `read` (one Issue or pull request by `id`) and `search` (`query`).
  * PostHog: `query` (one read-only HogQL SELECT) and `read` (a list of insights, dashboards, feature flags or
- * annotations, `id` naming which). Cloudflare: `read` only, `id` naming one of its fixed analytics reports. */
+ * annotations, or the production error groups, `id` naming which). Cloudflare: `read` only, `id` naming one of its fixed analytics reports. */
 export const SERVICE_ACTIONS:Readonly<Record<string,Readonly<Partial<Record<ServiceOperation,readonly string[]>>>>>=Object.freeze({
  github:Object.freeze({list:[],read:['id'],search:['query']}),
  posthog:Object.freeze({query:['query'],read:['id']}),
