@@ -4,9 +4,16 @@ import {GOOGLE_SIGN_IN_EVENT,googleSignInStage} from '../../contracts/platform.t
 import {googleConsentActions,googleConsentUrl} from './google-consent.ts';
 import {connectionGuide} from '../applets/index.ts';
 import {WORLD_PRESETS} from '../world/index.ts';
+import {connectorTiles} from '../../core/accounts/index.ts';
 const el=(tag: string,text?: string,cls?: string): any=>Object.assign(document.createElement(tag),{...(text==null?{}:{textContent:text}),className:cls||''});
 const providerTitle=p=>getApp(p)?.title||{google:'Google','google-drive':'Google Drive',folder:'Local folder'}[p];
-const suggestions={home:[...HOME_NATIVE],work:['github','posthog','cloudflare'],library:['notion'],money:[],health:[],travel:[],people:[]};
+const suggestions={home:[...HOME_NATIVE],work:[],library:['notion'],money:[],health:[],travel:[],people:[]};
+/** Regions whose step shows the same tiles as Settings › Connectors (core connectorTiles): each service that signs in,
+ * with Connect; the ones that take a key only under Advanced. */
+const TILED=['work'];
+/** A source that also signs in (TOKEN_PROVIDERS `signIn`) connects with no key by default; its key is under Advanced. */
+const signsIn=(provider:string)=>TOKEN_PROVIDERS[provider]?.signIn===true;
+const keyOnly=(provider:string)=>Object.hasOwn(TOKEN_PROVIDERS,provider)&&!signsIn(provider);
 
 // Source authorization is owned by the native Agent adapter. Never build on a click or a timer.
 export function mountWorldOnboarding({root,call,view,state:initial,toggleSample,applySnapshot}){
@@ -22,7 +29,7 @@ export function mountWorldOnboarding({root,call,view,state:initial,toggleSample,
  async function run(fn){if(saving)return;saving=true;notice.textContent='';panel.setAttribute('aria-busy','true');disableButtons(true);try{await fn();}catch(e){notice.textContent=e.message;if(screen==='start')render(true);}finally{saving=false;panel.removeAttribute('aria-busy');disableButtons(false);}}
  function head(title,description){guideText='**'+title+'**\n\n'+description;panel.replaceChildren();}
  function checkSupport(provider){const support=appletSupport(provider,hostFeatures(state));if(support.supported)return true;view.revealGuide?.();view.setGuide({text:support.reason,takeover:true,actions:[]});return false;}
- function show(next,id=region,key=moduleKey){if(next==='closed')view.setGuide(null,{forget:true});if(['app','connection'].includes(next)&&!checkSupport(WORLD_APPS.find(a=>a.key===key)?.provider||key))return;const target=['app','connection'].includes(next)?WORLD_APPS.find(a=>a.key===key):null;if(next==='connection'&&target&&target.capability==='connect'&&target.connection?.flow!=='in-applet'&&!connectionLive(state.connections.find(c=>c.provider===target.provider))){screen='closed';render();void run(()=>connect(target.provider));return;}if(next==='app'&&target&&(target.connection?.flow==='in-applet'||['web','scene','launcher'].includes(target.fullView?.kind))){screen='closed';render();view.openApplet?.(target.id);return;}view.revealGuide?.();screen=next;moduleKey=key;region=WORLD_PRESETS.some(p=>p.id===id)?id:'home';notice.textContent='';render(true);}
+ function show(next,id=region,key=moduleKey){if(next==='closed')view.setGuide(null,{forget:true});if(['app','connection','key'].includes(next)&&!checkSupport(WORLD_APPS.find(a=>a.key===key)?.provider||key))return;const target=['app','connection'].includes(next)?WORLD_APPS.find(a=>a.key===key):null;if(next==='connection'&&target&&target.capability==='connect'&&target.connection?.flow!=='in-applet'&&!connectionLive(state.connections.find(c=>c.provider===target.provider))){screen='closed';render();void run(()=>connect(target.provider));return;}if(next==='app'&&target&&(target.connection?.flow==='in-applet'||['web','scene','launcher'].includes(target.fullView?.kind))){screen='closed';render();view.openApplet?.(target.id);return;}view.revealGuide?.();screen=next;moduleKey=key;region=WORLD_PRESETS.some(p=>p.id===id)?id:'home';notice.textContent='';render(true);}
  function markOnboarding(value){const next=String(value);if(root.dataset.onboarding===next)return;root.dataset.onboarding=next;root.dispatchEvent(new Event('worldlet:recommendations'));}
  async function explore(){if(!state.onboarding?.completed)await call('onboarding',{operation:'complete'});screen='closed';markOnboarding(false);render();view.showOverview();}
  // A source that connects only with a pasted token (TOKEN_PROVIDERS) gets one password field, plus a field for each
@@ -53,7 +60,7 @@ export function mountWorldOnboarding({root,call,view,state:initial,toggleSample,
  }
  async function connect(provider,token?:string,settings?:Record<string,string>){
   if(!checkSupport(provider))return {connected:false};
-  if(Object.hasOwn(TOKEN_PROVIDERS,provider)&&!token){const app=WORLD_APPS.find(a=>a.provider===provider);screen='connection';moduleKey=app?.key??provider;view.revealGuide?.();render(true);setTimeout(()=>tokenInput?.focus(),0);return {connected:false};}
+  if(keyOnly(provider)&&!token){const app=WORLD_APPS.find(a=>a.provider===provider);screen='key';moduleKey=app?.key??provider;view.revealGuide?.();render(true);setTimeout(()=>tokenInput?.focus(),0);return {connected:false};}
   if(provider==='folder'&&hostFeatures(state).folderManagement){
    view.setGuide({text:'Choose a local folder. Worldlet will copy its supported text files; you can sync changes or disconnect later.',actions:[],takeover:true});
    try{const result=await call('connect',{provider,region});state=await call('snapshot');screen='sources';render(true);if(result.connected)notice.textContent='Folder connected. Saved originals stay available even if files are removed from the folder.';return result;}
@@ -93,7 +100,7 @@ export function mountWorldOnboarding({root,call,view,state:initial,toggleSample,
     if(provider==='google-drive'){view.setGuide({text:'**Google Drive is connected.** With private context enabled, ask Fox to list recent files. The Drive Thing reads recent files and Google Docs text. Other formats remain in Web. Disconnecting Google signs out Gmail, Calendar and Drive in this profile.',actions:[button('Done',()=>show('closed'))],takeover:true});return result;}
     const app=WORLD_APPS.find(a=>a.provider===provider),title=providerTitle(provider)||provider,consent=!!state.cloudConsent;
     // A Service read only when asked (PostHog: no Attention reader) promises no background checks.
-    if(Object.hasOwn(TOKEN_PROVIDERS,provider)&&!app?.attention){view.setGuide({text:'**'+title+' is connected.** Fox reads it when you ask; another Agent reads it only with a Grant you give it. Nothing is read in the background or changed in '+title+'.',actions:[button('Done',()=>show('closed'))],takeover:true});return result;}
+    if(Object.hasOwn(TOKEN_PROVIDERS,provider)&&!app?.attention){view.setGuide({text:'**'+title+' is connected.** Fox and the Agent it uses can look at it when asked; other Agents ask you first. Nothing is read in the background or changed in '+title+' without asking you.',actions:[button('Done',()=>show('closed'))],takeover:true});return result;}
     if(CURATED_READERS.includes(provider)){view.setGuide({text:'**'+title+' is connected.** Open the Thing to read original content on demand. Background checks and automatic Attention items are not enabled for this connection.',actions:[button('Open '+title,()=>{show('closed');view.openApplet?.(app.id);}),button('Done',()=>show('closed'))],takeover:true});return result;}
     if(!hostFeatures(state).backgroundSourceChecks&&provider==='notion'){
      view.setGuide({text:'**Notion is connected.** Open its shelf to read recent pages and their originals. '+(consent?'Fox can read pages and save findings when you ask.':'Allow private context to let Fox read pages and save findings.')+' Background checks are not available with this setup.',actions:[button('Open Notion',()=>{show('closed');view.openApplet?.(app.id);}),button('Done',()=>show('closed'))],takeover:true});return result;
@@ -102,7 +109,17 @@ export function mountWorldOnboarding({root,call,view,state:initial,toggleSample,
     const account=state.connections.find(c=>c.provider===provider)?.label;
     view.setGuide({text:'**'+title+' is connected'+(account?' as '+account:'')+'.** '+(consent?'Fox reads it on demand and checks it in the background.':'Start lets Fox read it on demand and check it in the background. Nothing is copied.'),
      actions:consent?[...open,button('Done',()=>show('closed'))]:[button('Start',async()=>{await call('foxPreferences',{cloudConsent:true});state=await call('snapshot');view.setGuide({text:'**Reading '+title+' now.** Tasks, events and updates will appear on the left as I find them, and I\u2019ll check again every 30 minutes while Worldlet is open.',actions:[button('Done',()=>show('closed'))],takeover:true});}),...open,button('Not now',()=>show('closed'))],takeover:true});}else if(googlePair){throw new Error('Google connection was not completed.');}else show('start');}
-  catch(error){view.revealGuide?.();view.setGuide({text:cancelled?'Connection cancelled. Close the old sign-in tab. Choose Try again to open a fresh sign-in page.':error.message,actions:googlePair?[button('Try again',()=>connect(provider))]:[button('Try again',()=>connect(provider)),button('More options',()=>show('sources')),button('Done',()=>show('closed'))],takeover:true});return {connected:false};}
+  catch(error){
+   // A refused key asks for the key again; a sign-in that did not finish opens a fresh one.
+   const again=()=>token?show('key',region,WORLD_APPS.find(a=>a.provider===provider)?.key??provider):connect(provider);
+   view.revealGuide?.();view.setGuide({text:cancelled?'Connection cancelled. Close the old sign-in tab. Choose Try again to open a fresh sign-in page.':error.message,actions:googlePair?[button('Try again',()=>connect(provider))]:[button('Try again',again),button('More options',()=>show('sources')),button('Done',()=>show('closed'))],takeover:true});return {connected:false};}
+ }
+ /** Advanced, folded: Connect with a key, one button per source, each opening its key form. */
+ function advanced(providers:string[]){
+  const details=el('details',null,'onboarding-advanced');details.dataset.advanced='setup';
+  details.append(el('summary','Advanced'),el('p','Connect with a key you already have. A key stays on this computer.','ui-caption'));
+  for(const provider of providers)details.append(button((providerTitle(provider)||provider)+' with a key',()=>show('key',region,WORLD_APPS.find(a=>a.provider===provider)?.key??provider)));
+  return details;
  }
  function render(takeover=false){
   const closed=screen==='closed'||screen==='start';
@@ -122,8 +139,9 @@ export function mountWorldOnboarding({root,call,view,state:initial,toggleSample,
    const guide=connectionGuide(app.key);
    if(!hostFeatures(state).backgroundSourceChecks&&['gmail','google-calendar'].includes(app.provider))panel.append(el('p','Google sign-in connects Gmail and Calendar with read-only access. Open either app to read originals. With private context enabled, Fox can read and save findings when asked. Google background checks are not available with this setup yet.','ui-caption'));
    else if(guide)panel.append(el('p',guide.scope,'ui-caption'),el('p',guide.next,'ui-caption'),el('p',guide.user,'ui-caption'));
-   if(app.capability==='connect'&&Object.hasOwn(TOKEN_PROVIDERS,app.provider))panel.append(...tokenField(app.provider,app.title));
+   if(app.capability==='connect'&&keyOnly(app.provider))panel.append(...tokenField(app.provider,app.title));
    else if(app.capability==='connect')panel.append(button(connected?'Reconnect '+app.title:'Connect '+app.title,()=>connect(app.provider),true));
+   if(app.capability==='connect'&&signsIn(app.provider))panel.append(advanced([app.provider]));
    if(connected&&['gmail','google-calendar','notion','apple-notes','apple-reminders','todoist','google-drive','github','posthog','cloudflare'].includes(app.provider)){
     const google=connection?.transport!=='native'&&(app.provider.startsWith('google-')||app.provider==='gmail');
     panel.append(button(google?'Disconnect Google':'Disconnect '+app.title,async()=>{await call('disconnectSource',{provider:app.provider});state=await call('snapshot');render(true);}));
@@ -136,6 +154,11 @@ export function mountWorldOnboarding({root,call,view,state:initial,toggleSample,
     panel.append(el('p','This deletes the items Worldlet saved from '+app.title+', the copies it imported and what Fox derived from them, on this computer. An item that also rests on another source keeps that evidence. Nothing is deleted in '+app.title+', and the connection is left as it is.','ui-caption'));
    }
 
+  }else if(screen==='key'){
+   // Advanced: one service's key form, for someone who already has a key (a self-hosted PostHog, a team's token).
+   const app=WORLD_APPS.find(a=>a.key===moduleKey||a.provider===moduleKey);if(!app||!Object.hasOwn(TOKEN_PROVIDERS,app.provider)){show('sources');return;}
+   head('Connect '+app.title+' with a key',app.description);
+   panel.append(...tokenField(app.provider,app.title),button('Back',()=>show('sources',app.region||region)));
   }else if(screen==='presets'){
    head('Room to grow','Each region has a permanent place. Connect something meaningful to bring it to life.');
    const list=el('div',null,'onboarding-regions');
@@ -155,11 +178,27 @@ export function mountWorldOnboarding({root,call,view,state:initial,toggleSample,
    // for is the list underneath. head() also cleared the panel, so clear it here.
    guideText='';panel.replaceChildren();
    if(built)panel.append(button('Explore '+preset().title,explore,true));
+   // The same tiles as Settings › Connectors: Connect signs in with the service's own page; nothing to paste.
+   const tiles=TILED.includes(region)?connectorTiles(state.connections).filter(tile=>tile.region===region&&(tile.signIn||tile.state==='connected')):[];
+   if(tiles.length){
+    const grid=el('div',null,'onboarding-regions onboarding-connectors');grid.setAttribute('role','list');grid.setAttribute('aria-label','Services');
+    for(const tile of tiles){
+     const open=tile.state==='off'||tile.state==='needs-you';
+     const box=open?button('',()=>connect(tile.provider),false):el('div',null,'onboarding-connector');
+     box.setAttribute('role','listitem');box.dataset.connector=tile.id;box.dataset.state=tile.state;
+     box.append(el('strong',tile.name),el('small',tile.state==='off'?'Connect · '+tile.line:tile.state==='needs-you'?'Sign in again · '+tile.line:tile.line));
+     grid.append(box);
+    }
+    panel.append(grid);
+   }
    const list=el('div',null,'onboarding-sources');
    for(const provider of suggestions[region])list.append(button('Connect '+(providerTitle(provider)),()=>connect(provider),!built&&list.children.length===0));
-   for(const app of WORLD_APPS.filter(a=>a.region===region&&inAppletCatalog(a)&&!suggestions[region].includes(a.provider)))list.append(button(app.title,()=>show('app',region,app.key)));
+   for(const app of WORLD_APPS.filter(a=>a.region===region&&inAppletCatalog(a)&&!suggestions[region].includes(a.provider)&&!tiles.some(tile=>tile.provider===a.provider)))list.append(button(app.title,()=>show('app',region,app.key)));
    list.append(button('Google Drive',()=>show('connection',region,'google-drive')));
    panel.append(list);
+   // Keys, for people who have them: every source of this region that connects with one.
+   const keyed=TILED.includes(region)?WORLD_APPS.filter(a=>a.region===region&&a.capability==='connect'&&Object.hasOwn(TOKEN_PROVIDERS,a.provider)&&inAppletCatalog(a)).map(a=>a.provider):[];
+   if(keyed.length)panel.append(advanced(keyed));
    const existing=sources();
    if(!built&&(existing.length||connections().length)){
     const details=el('details'),summary=el('summary','Use an existing source');details.append(summary);
