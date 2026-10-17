@@ -19,6 +19,10 @@ import {projectWorldItems} from '../core/items/world-items.ts';
 // host token appear in no item, audit entry, ledger row or log line.
 
 const say=(line:string)=>{process.stdout.write(line+'\n');};
+// A hard stop: a check that waits on something that never comes fails here with what was still open, instead of
+// holding a release host's lane until the runner kills it (Windows Alpha 4473 stopped it after 8 minutes).
+const watchdog=setTimeout(()=>{process.stderr.write(`FAIL remote-mcp-check: no result after 90 s; still open: ${process.getActiveResourcesInfo().join(', ')}\n`);process.exit(1);},90_000);
+watchdog.unref();
 const b64url=(bytes:Buffer)=>bytes.toString('base64url');
 class FakeSocket {
  static last:FakeSocket|null=null;static all:FakeSocket[]=[];
@@ -66,9 +70,11 @@ await withTempDir('worldlet-remote-mcp-',async dir=>{
   async function front(method:string,pathname:string,{query='',headers={},body=''}:{query?:string,headers?:Record<string,string>,body?:string}={}){
    const id='r'+(next++),before=ws.sent.length;
    ws.onmessage!({data:JSON.stringify({t:'req',id,method,base,path:pathname,query,headers,body})});
-   for(let i=0;i<200&&ws.sent.length===before;i++)await new Promise(resolve=>setTimeout(resolve,5));
-   const frame=JSON.parse(ws.sent.at(-1)!);
-   assert.equal(frame.t,'res');assert.equal(frame.id,id);
+   // The answer to this request, by id, not whatever was sent last; a slow host gets 10 s.
+   const answer=()=>ws.sent.slice(before).map(data=>JSON.parse(data)).find(frame=>frame.t==='res'&&frame.id===id);
+   const started=Date.now();let frame=answer();
+   while(!frame&&Date.now()-started<10_000){await new Promise(resolve=>setTimeout(resolve,5));frame=answer();}
+   assert.ok(frame,`no answer to ${method} ${pathname}`);
    return {status:frame.status as number,headers:frame.headers as Record<string,string>,body:frame.body as string,json:()=>JSON.parse(frame.body)};
   }
   const rpc=(bearer:string,message:unknown)=>front('POST','/',{headers:{authorization:'Bearer '+bearer,'content-type':'application/json',accept:'application/json, text/event-stream'},body:JSON.stringify(message)});
@@ -277,7 +283,7 @@ await withTempDir('worldlet-remote-mcp-',async dir=>{
   assert.ok(changes>0);
   say('PASS no token or host token appears in items, consents, audit or logs.');
  }finally{
-  remote.close();standing.close();
+  remote.close();standing.close();ledger.close();
   Object.assign(console,original);
  }
 });
