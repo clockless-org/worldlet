@@ -14,6 +14,7 @@ import {keepHermesResident} from './hermes-service.ts';
 import {openStandingWorldTools,standingEndpointFile,type StandingWorldTools} from './world-tool-bridge.ts';
 import {createAgentAccess} from './agent-access.ts';
 import {createAgentAsks,type AgentAsks} from './agent-asks.ts';
+import {createAgentOrders,type AgentOrdersHost} from './agent-orders.ts';
 import {createWorldBoard,type WorldBoard} from './board.ts';
 import {createAgentReports,type AgentReports} from './agent-reports.ts';
 import {createScriptAgents,mcpHome,type ScriptAgents} from './script-agents.ts';
@@ -292,6 +293,8 @@ let channelTool:((name:string,args:Row,agent?:string)=>Promise<Row>)|null=null;
 let agentAccess:AgentAccess|null=null;
 /** Agent asks (agent-asks.ts), made with agentAccess. */
 let agentAsks:AgentAsks|null=null;
+/** Orders and wake commands (agent-orders.ts), made with agentAccess. */
+let agentOrders:AgentOrdersHost|null=null;
 /** The board (board.ts), made with the Agent service whose Service readers it reads through. */
 let worldBoard:WorldBoard|null=null;
 /** GitHub drafts (github-drafts.ts), made with agentAccess. */
@@ -584,9 +587,13 @@ export function installAgentRuntime(host:Host){
   }catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
   throw new WorldletError('Unknown remote access operation.');
  }});
+ // Orders (core/agent/GRANTS.md#orders-and-waking-an-agent): which Agent new work goes to, and the program the person
+ // set to wake each Agent, run here when work is posted for it.
+ agentOrders=createAgentOrders({root:context.root,access:agentAccess,ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()?host.store.ledger():null;}catch{return null;}}});
+ host.onQuit(()=>agentOrders?.close());
  // Asks need the person's own World with private context allowed, as a channel's reads do.
  agentAsks=createAgentAsks({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
-  name:agentId=>agentAccess?.identity(agentId)?.name??agentId,changed:()=>host.store.worldChanged(),drafts:()=>githubDrafts});
+  name:agentId=>agentAccess?.identity(agentId)?.name??agentId,changed:()=>host.store.worldChanged(),drafts:()=>githubDrafts,orders:()=>agentOrders});
  // Agents for scripts (core/agent/GRANTS.md#agents-for-scripts): their endpoint files are written again each run.
  scriptAgents=createScriptAgents({root:context.root,access:agentAccess,tools:()=>standingWorldTools()});
  void scriptAgents.open().catch(error=>host.diagnostics.record(error,'scriptAgents'));
@@ -792,9 +799,22 @@ export function installAgentRuntime(host:Host){
    }else if(!access.ungrantGithubWrites(id,request.repo))throw new WorldletError('Could not change that.');
    return {ok:true};
   }
-  const services=connectedServices(),now=new Date().toISOString();
+  // "Give new work to" (an Agent's ID, or empty for none) and an Agent's wake command (`command`: the program's full
+  // path, then its arguments, as a list; empty removes it). The host checks both; the page sends no shell line.
+  if(request.operation==='setOrderTarget'){
+   try{agentOrders!.setDefault(typeof request.id==='string'&&request.id?request.id:null);}catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not change that.');}
+   return {ok:true};
+  }
+  if(request.operation==='setWake'){
+   const id=typeof request.id==='string'?request.id:'';
+   try{agentOrders!.setWake(id,request.command);}catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not change that.');}
+   return {ok:true};
+  }
+  const services=connectedServices(),now=new Date().toISOString(),orders=agentOrders?.read()??{wake:{}};
   const githubApp=githubDrafts?.app.status().connected===true;
-  return {agents:access.list(AGENT_ACCESS_AUDIT).map(({identity,grants,audit})=>({...identity,grants,audit,
+  return {orders:{...orders.defaultFor?{defaultFor:orders.defaultFor}:{}},agents:access.list(AGENT_ACCESS_AUDIT).map(({identity,grants,audit})=>({...identity,grants,audit,
+   // Its wake command, as the person typed it (shown only to this computer's pages, as all of this action is).
+   ...agentRevoked(identity,now)?{}:{wake:orders.wake[identity.id]??[]},
    services:agentRevoked(identity,now)?[]:services.map(provider=>({provider,title:SERVICE_TITLES[provider],granted:serviceGranted(identity.id,grants,provider,now)})),
    asks:{ask:askGranted(identity.id,grants,'ask',now),work:askGranted(identity.id,grants,'work',now)},
    board:{read:boardGranted(identity.id,grants,'read',now),define:boardGranted(identity.id,grants,'define',now)},

@@ -17,7 +17,7 @@ try{
    audit:[{at:'2026-10-14T18:30:00.000Z',agentId:'hermes',target:'items',action:'update',decision:'denied',reason:'Only reading here.'},{at:'2026-10-14T18:29:30.000Z',agentId:'hermes',target:'github-writes',action:'write',decision:'allowed',grantId:'hermes-github-writes-example/app'},{at:'2026-10-14T18:29:00.000Z',agentId:'hermes',target:'items',action:'query',decision:'allowed',grantId:'hermes-channel-read'}],
    services:[{provider:'github',title:'GitHub',granted:false},{provider:'posthog',title:'PostHog',granted:true}],asks:{ask:false,work:true},board:{read:true,define:false},githubDrafts:false,conversations:{add:false,search:true},links:{read:false,save:false},
    githubWrites:{add:true,grants:[{repo:'example/app',writes:['issue.comment','labels.set'],labelPrefix:'state:'}]},
-   reports:{report:true,list:false},liveness:'stale',report:{status:'working',summary:'Building the installer',work:[{title:'Fix the build'}],runs:[],reportedAt:new Date(Date.now()-25*60_000).toISOString()}}];
+   reports:{report:true,list:false},wake:[],liveness:'stale',report:{status:'working',summary:'Building the installer',work:[{title:'Fix the build'}],runs:[],reportedAt:new Date(Date.now()-25*60_000).toISOString()}}];
   w.rules=[{id:'rule-00000000000000a1',allows:'npm test',agent:'default',kind:'command',main:true,grantedAt:Date.UTC(2026,9,8,12),thread:'In Fox’s main conversation',inWorld:true},{id:'rule-00000000000000a2',allows:'github › search_issues',agent:'default',kind:'tool',main:true,note:'Any arguments'}];
   w.jobs=[{id:'job-1',name:'Morning digest',kind:'prompt',paused:false,when:{cron:'0 8 * * *'},delivery:'telegram',last:{at:Date.UTC(2026,9,10,8),status:'ok'}},{id:'job-2',name:'Plant check',kind:'prompt',paused:true,when:{everySeconds:7200}}];
   w.skills=[{name:'seed-swap',description:'Organize seed swaps.',lastRanAt:Date.now()-3*86_400_000,enabled:true,removable:false},{name:'k8s',description:'Kubernetes help.',lastRanAt:null,enabled:false,removable:true}];
@@ -62,13 +62,19 @@ try{
   if(b.action==='githubApp'&&b.operation==='status')return {connected:!!w.githubApp};
   if(b.action==='githubApp'&&b.operation==='connect'){if(b.appId!=='1001')throw new Error('The GitHub App is not valid: enter its App ID, its installation ID and its private key (a .pem file\'s whole text).');w.githubApp=true;return {ok:true,connected:true};}
   if(b.action==='githubApp'&&b.operation==='disconnect'){w.githubApp=false;return {ok:true,connected:false};}
-  if(b.action==='agentAccess'&&b.operation==='revoke'){w.access=w.access.map(a=>a.id===b.id?{...a,services:[],asks:undefined,board:undefined,githubDrafts:undefined,githubWrites:undefined,conversations:undefined,links:undefined,reports:undefined,report:undefined,revokedAt:'2026-10-15T08:00:00.000Z',grants:a.grants.map(g=>({...g,revokedAt:'2026-10-15T08:00:00.000Z'}))}:a);return {ok:true};}
+  if(b.action==='agentAccess'&&b.operation==='revoke'){w.access=w.access.map(a=>a.id===b.id?{...a,services:[],asks:undefined,wake:undefined,board:undefined,githubDrafts:undefined,githubWrites:undefined,conversations:undefined,links:undefined,reports:undefined,report:undefined,revokedAt:'2026-10-15T08:00:00.000Z',grants:a.grants.map(g=>({...g,revokedAt:'2026-10-15T08:00:00.000Z'}))}:a);return {ok:true};}
   // An Agent for a script: the page sends only the name; the host makes the Agent and its file.
   if(b.action==='agentAccess'&&b.operation==='addScript'){if(!String(b.name||'').trim())throw new Error('Give it a name of one line, at most 60 characters, with a letter or digit in it.');
    const file='/Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json';
    w.access=[...w.access,{id:'nightly-build',name:b.name,harness:'script',kind:'local',createdAt:'2026-10-15T09:00:00.000Z',grants:[],audit:[],services:[],asks:{ask:false,work:false},board:{read:false,define:false},reports:{report:false,list:false},liveness:'offline',endpointFile:file}];
    return {ok:true,id:'nightly-build',name:b.name,endpointFile:file};}
-  if(b.action==='agentAccess')return {agents:w.access};
+  // Orders (core/agent/GRANTS.md#orders-and-waking-an-agent): the page sends the Agent, and a wake command as a list of
+  // words; the host checks it (here, as the host does, the program's full path).
+  if(b.action==='agentAccess'&&b.operation==='setOrderTarget'){w.orders=b.id?{defaultFor:b.id}:{};return {ok:true};}
+  if(b.action==='agentAccess'&&b.operation==='setWake'){if(!Array.isArray(b.command))throw new Error('A wake command is a list of words: the program, then each of its arguments.');
+   if(b.command.length&&!b.command[0].startsWith('/'))throw new Error('A wake command starts with the full path of a program, like /usr/local/bin/wake-agent.');
+   w.access=w.access.map(a=>a.id===b.id?{...a,wake:[...b.command],audit:[{at:'2026-10-15T08:30:00.000Z',agentId:a.id,target:'asks',action:b.command.length?'set-wake':'clear-wake',decision:'allowed'},...a.audit]}:a);return {ok:true};}
+  if(b.action==='agentAccess')return {orders:w.orders??{},agents:w.access};
   if(b.action==='harnessApprovalRules'&&b.operation==='revoke'){w.rules=w.rules.filter(r=>r.id!==b.id);return {ok:true};}
   if(b.action==='harnessApprovalRules')return {harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,revoke:'restart',note:'Hermes Agent reads these when it starts, so Worldlet restarts its own conversation with it.',rules:w.rules},
    {harness:'claude-code',title:'Claude Code',revoke:null,note:'Claude Code keeps these in its settings.json. Change them with /permissions in Claude Code; rules for one project stay in that project’s .claude folder.',rules:[{id:'rule-00000000000000b1',allows:'pnpm test',agent:'*',kind:'command'}]}]};
@@ -353,6 +359,34 @@ try{
  await accessPart.locator('[data-access-agent=nightly-build]').getByText('For a script. Its key is in /Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='addScript')),
   [{action:'agentAccess',operation:'addScript',name:''},{action:'agentAccess',operation:'addScript',name:'Nightly build'}],'only the name');
+ // "Give new work to" and each Agent's wake command (core/agent/GRANTS.md#orders-and-waking-an-agent): the page sends
+ // the Agent, and the command as a list of words, one per line as typed; the host's refusal shows in plain words.
+ const target=accessPart.getByRole('combobox',{name:'Give new work to',exact:true});
+ assert.equal(await target.inputValue(),'');
+ assert.deepEqual(await target.locator('option').allTextContents(),['No Agent in particular','Hermes Agent','Nightly build']);
+ await target.selectOption('hermes');
+ await accessPart.getByText('New work now goes to Hermes Agent.',{exact:true}).waitFor();
+ assert.equal(await accessPart.getByRole('combobox',{name:'Give new work to',exact:true}).inputValue(),'hermes');
+ const wakePart=hermesAccess.locator('[data-wake=hermes]'),wakeBox=wakePart.getByRole('textbox',{name:'Wake command for Hermes Agent',exact:true});
+ await wakePart.getByText(/^When work is given to Hermes Agent, Worldlet runs this program on this computer/).waitFor();
+ assert.equal(await wakePart.getByRole('button',{name:'Remove',exact:true}).count(),0,'nothing to remove yet');
+ await wakeBox.fill('bin/wake-agent\n{askId}');
+ await wakePart.getByRole('button',{name:'Save',exact:true}).click();
+ await accessPart.getByText('Could not change that: A wake command starts with the full path of a program, like /usr/local/bin/wake-agent.',{exact:true}).waitFor();
+ await wakeBox.fill('/Users/alex/bin/wake-agent\n--work\n\n{askId}\n');
+ await wakePart.getByRole('button',{name:'Save',exact:true}).click();
+ await accessPart.getByText('Worldlet will run this program on this computer when work is given to Hermes Agent.',{exact:true}).waitFor();
+ assert.equal(await hermesAccess.getByRole('textbox',{name:'Wake command for Hermes Agent',exact:true}).inputValue(),'/Users/alex/bin/wake-agent\n--work\n{askId}');
+ await hermesAccess.locator('.companion-settings-access-audit li').first().getByText(/Waking it for new work · You set it$/).waitFor();
+ await hermesAccess.locator('[data-wake=hermes]').getByRole('button',{name:'Remove',exact:true}).click();
+ await accessPart.getByText('Hermes Agent will no longer be woken for new work.',{exact:true}).waitFor();
+ await target.selectOption('');
+ await accessPart.getByText('New work no longer goes to one Agent.',{exact:true}).waitFor();
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/^set(OrderTarget|Wake)$/.test(c.operation))),
+  [{action:'agentAccess',operation:'setOrderTarget',id:'hermes'},{action:'agentAccess',operation:'setWake',id:'hermes',command:['bin/wake-agent','{askId}']},
+   {action:'agentAccess',operation:'setWake',id:'hermes',command:['/Users/alex/bin/wake-agent','--work','{askId}']},{action:'agentAccess',operation:'setWake',id:'hermes',command:[]},
+   {action:'agentAccess',operation:'setOrderTarget',id:''}],'the Agent and a list of words, never a shell line');
+ assert.doesNotMatch(await hermesAccess.innerText(),/\bMCP\b|token|endpoint|shell/i,'plain words only');
  await hermesAccess.getByRole('button',{name:'Revoke',exact:true}).click();
  await hermesAccess.getByText(/^Hermes Agent will no longer reach your World's tools/).waitFor();
  assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='revoke').length),0,'Revoke asks first');

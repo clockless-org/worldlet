@@ -36,18 +36,22 @@ export type AskDrafts={
  summaries(ids:readonly string[]):{id:string;agentId:string;status:string;resultUrl?:string;reason?:string}[];
  approve(id:string):Promise<Row>;
 };
+/** Orders (agent-orders.ts): the Agents work may be for, the World's order target, and the wake of the Agent new work
+ * is for. */
+export type AskOrders={agents():string[];read():{defaultFor?:string};assigned(ask:AgentAsk):void};
 const sha256=(bytes:Uint8Array)=>crypto.createHash('sha256').update(bytes).digest('hex');
 /** The bytes of each attachment as the call sent them, before Core checks them (Core refuses the post when they are not
  * valid base64 of an allowed kind and size). */
 const sentBytes=(input:Row)=>(Array.isArray(input.attachments)?input.attachments:[]).map((entry:Row)=>Buffer.from(typeof entry?.data==='string'?entry.data:'','base64'));
 const NOT_READY='Worldlet is not ready for this yet: the person has not finished setting up their own World.';
 
-export function createAgentAsks({ledger,name,changed,drafts,now=()=>new Date().toISOString(),newId=()=>crypto.randomUUID()}:
- {ledger:()=>AskLedger|null;name:(agentId:string)=>string;changed:()=>void;drafts?:()=>AskDrafts|null;now?:()=>string;newId?:()=>string}):AgentAsks {
+export function createAgentAsks({ledger,name,changed,drafts,orders,now=()=>new Date().toISOString(),newId=()=>crypto.randomUUID()}:
+ {ledger:()=>AskLedger|null;name:(agentId:string)=>string;changed:()=>void;drafts?:()=>AskDrafts|null;orders?:()=>AskOrders|null;now?:()=>string;newId?:()=>string}):AgentAsks {
  // An ask's drafts as asks/read shows them: the Agent's own only.
  const withDrafts=(ask:AgentAsk)=>ask.draftIds?.length?{...ask,drafts:(drafts?.()?.summaries(ask.draftIds)??[]).filter(d=>d.agentId===ask.agentId).map(({agentId:_agentId,...draft})=>draft)}:ask;
  const load=(db:AskLedger)=>db.agentAsks().flatMap(row=>{const ask=readStoredAsk(row);return ask?[ask]:[];});
- const save=(db:AskLedger,ask:AgentAsk,origin:'user'|'agent')=>db.saveAgentAsk(ask as unknown as Row,askAttentionItem(ask,name(ask.agentId)) as Row,origin);
+ const item=(ask:AgentAsk)=>askAttentionItem(ask,name(ask.agentId),ask.for?name(ask.for):undefined) as Row;
+ const save=(db:AskLedger,ask:AgentAsk,origin:'user'|'agent')=>db.saveAgentAsk(ask as unknown as Row,item(ask),origin);
  const audit=(db:AskLedger,ask:AgentAsk,at:string)=>{
   try{db.recordAgentAudit({at,agentId:ask.agentId,target:AGENT_ASK_TARGET,action:'answer',decision:'allowed',reason:'The person answered this Agent\'s ask in Attention.'},AGENT_AUDIT_KEEP);}catch{}
  };
@@ -67,7 +71,9 @@ export function createAgentAsks({ledger,name,changed,drafts,now=()=>new Date().t
    try{
     const at=now(),{operation,...input}=args??{},asks=settle(db,load(db),at);
     if(operation==='post'){
-     const bytes=sentBytes(input),ask=postAsk(asks,agentId,input,newId(),at,bytes.map(sha256));
+     // Work is for the Agent it names, or the World's order target ("Give new work to").
+     const order=orders?.()??null,bytes=sentBytes(input);
+     const ask=postAsk(asks,agentId,input,newId(),at,bytes.map(sha256),{agents:order?.agents()??[],defaultFor:order?.read().defaultFor});
      const files=(ask.attachments??[]).map((attachment,index)=>{
       if(bytes[index].length!==attachment.size)throw new Error(ASK_REASONS.attachment);
       return {id:attachment.id,data:bytes[index]};
@@ -77,7 +83,9 @@ export function createAgentAsks({ledger,name,changed,drafts,now=()=>new Date().t
       const found=drafts?.()?.summaries(ask.draftIds)??[];
       if(found.length!==ask.draftIds.length||found.some(draft=>draft.agentId!==agentId||draft.status!=='pending'))return {error:ASK_REASONS.drafts};
      }
-     db.saveAgentAsk(ask as unknown as Row,askAttentionItem(ask,name(ask.agentId)) as Row,'agent',files);changed();
+     db.saveAgentAsk(ask as unknown as Row,item(ask),'agent',files);changed();
+     // Saved first: the woken Agent claims it with asks/claim as usual.
+     try{order?.assigned(ask);}catch{}
      return {ok:true,ask,guidance:'The person sees this in their Attention Center. Read it later with asks/read to get their answer; do not post it again.'};
     }
     if(operation==='read')return {asks:readAsks(asks,agentId,input).map(withDrafts)};

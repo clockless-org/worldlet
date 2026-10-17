@@ -9,7 +9,9 @@
  * (core/agent/GRANTS.md#agent-reports), the same way; once a GitHub App is connected, "Can update Issues in <repo>
  * without asking" (core/agent/GRANTS.md#standing-github-writes), one per repository with Remove; what each Agent last
  * reported it is doing; and "Add an Agent for a script" (core/agent/GRANTS.md#agents-for-scripts), which sends only the
- * name the person typed. Plain words: the page names
+ * name the person typed; "Give new work to", the Agent that work posted for no Agent in particular goes to, and each
+ * Agent's wake command, the program the host runs on this computer when work is given to it, sent as a list of words
+ * (core/agent/GRANTS.md#orders-and-waking-an-agent). Plain words: the page names
  * places in the World and what was allowed, never tokens, endpoints or MCP. */
 import {agentButton as button,agentEl as el} from './agent-change.ts';
 import {showRemoteAccess} from './remote-access.ts';
@@ -18,7 +20,9 @@ type Grant={id:string;targets:string[];access:'read'|'write';duration:'standing'
 type Audit={at:string;target:string;action:string;decision:'allowed'|'denied'|'asked';reason?:string};
 type Service={provider:string;title:string;granted:boolean};
 type Agent={id:string;name:string;harness:string;kind:'local'|'remote';createdAt:string;lastSeenAt?:string;revokedAt?:string;grants:Grant[];audit:Audit[];services?:Service[];asks?:{ask:boolean;work:boolean};board?:{read:boolean;define:boolean};githubDrafts?:boolean;githubWrites?:{add:boolean;grants:Scope[]};conversations?:{add:boolean;search:boolean};links?:{read:boolean;save:boolean};
- reports?:{report:boolean;list:boolean};liveness?:'live'|'stale'|'offline';report?:Report;
+ reports?:{report:boolean;list:boolean};
+ /** Its wake command as the person typed it: the program's full path, then each argument. */
+ wake?:string[];liveness?:'live'|'stale'|'offline';report?:Report;
  /** An Agent for a script: the file its program reads its endpoint and token from. */
  endpointFile?:string};
 type Report={status:'working'|'idle'|'blocked'|'offline';summary:string;work:{title:string;state?:string}[];runs:{title:string;status:string}[];reportedAt:string};
@@ -80,6 +84,10 @@ export function auditLine(entry:Audit):string {
  // "Can ask you" and "Can take work" (core askGrantAuditEntry), and the person's answer to one of its asks.
  if(entry.target==='asks'&&/^(un)?grant-(ask|work)$/.test(entry.action))return `${time(entry.at)} · ${entry.action.endsWith('work')?'Taking work':'Asking you'} · ${entry.action.startsWith('un')?'You turned it off':'You allowed it'}`;
  if(entry.target==='asks'&&entry.action==='answer')return `${time(entry.at)} · You answered its ask`;
+ // Orders: its wake command set or removed, it chosen for new work, and how each wake ended (core wakeAuditEntry).
+ if(entry.target==='asks'&&/^(set|clear)-wake$/.test(entry.action))return `${time(entry.at)} · Waking it for new work · ${entry.action==='clear-wake'?'You removed it':'You set it'}`;
+ if(entry.target==='asks'&&/^(clear-)?order-target$/.test(entry.action))return `${time(entry.at)} · Getting new work · ${entry.action.startsWith('clear')?'You turned it off':'You chose it'}`;
+ if(entry.target==='asks'&&entry.action==='wake'){const how=(entry.reason??'').replace(/^Woken for work [^:]*: /,'').replace(/\.$/,'');return `${time(entry.at)} · Woken for new work${how?' · '+how[0].toUpperCase()+how.slice(1):''}`;}
  if(entry.target==='links'&&/^(un)?grant-(read|save)$/.test(entry.action))return `${time(entry.at)} · ${entry.action.endsWith('save')?'Keeping your tracked links':'Seeing your tracked links'} · ${entry.action.startsWith('un')?'You turned it off':'You allowed it'}`;
  if(entry.target==='conversations'&&/^(un)?grant-(add|search)$/.test(entry.action))return `${time(entry.at)} · ${entry.action.endsWith('add')?'Saving conversations':'Searching conversations'} · ${entry.action.startsWith('un')?'You turned it off':'You allowed it'}`;
  if(entry.target==='agents'&&/^(un)?grant-(report|list)$/.test(entry.action))return `${time(entry.at)} · ${entry.action.endsWith('list')?'Seeing other Agents':'Reporting its work'} · ${entry.action.startsWith('un')?'You turned it off':'You allowed it'}`;
@@ -132,6 +140,18 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
   if(listed?.error){box.append(el('p','companion-info-note',listed.error));return;}
   const agents:Agent[]=Array.isArray(listed?.agents)?listed.agents:[];
   if(!agents.length){box.append(el('p','companion-info-note','No Agent has reached your World on its own yet.'));return;}
+  // "Give new work to": the Agent work goes to when whoever posts it names none.
+  const order=el('label','companion-settings-access-order'),target=document.createElement('select'),chosen=typeof listed?.orders?.defaultFor==='string'?listed.orders.defaultFor:'';
+  target.className='companion-settings-select';target.setAttribute('aria-label','Give new work to');target.dataset.orderTarget='';
+  target.append(Object.assign(document.createElement('option'),{value:'',textContent:'No Agent in particular'}));
+  for(const agent of agents.filter(a=>!a.revokedAt))target.append(Object.assign(document.createElement('option'),{value:agent.id,textContent:agent.name}));
+  target.value=chosen;
+  target.onchange=async()=>{
+   const id=target.value,named=agents.find(a=>a.id===id)?.name;target.disabled=true;said.textContent='';
+   try{await call('agentAccess',{operation:'setOrderTarget',id});await draw();said.textContent=named?`New work now goes to ${named}.`:'New work no longer goes to one Agent.';}
+   catch(e){target.value=chosen;target.disabled=false;said.textContent='Could not change that: '+((e as Error).message||'try again.');}
+  };
+  order.append(el('span','','Give new work to:'),target);box.append(order);
   const rows=el('div','companion-settings-rows');box.append(rows);
   for(const agent of agents){
    const row=el('div','companion-settings-row'),words=el('div');row.dataset.accessAgent=agent.id;
@@ -215,6 +235,23 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
      }));
      group.append(form);
     }
+    words.append(group);
+   }
+   // Its wake command: a program this computer runs only because the person typed it here, one word per line.
+   if(!agent.revokedAt&&agent.wake){
+    const group=el('div','companion-settings-access-wake'),command=document.createElement('textarea');group.dataset.wake=agent.id;
+    command.className='companion-settings-input';command.rows=3;command.spellcheck=false;command.value=agent.wake.join('\n');command.placeholder='/Users/alex/bin/wake-agent\n{askId}';
+    command.setAttribute('aria-label',`Wake command for ${agent.name}`);
+    const send=async(words:string[])=>{
+     said.textContent='';
+     try{await call('agentAccess',{operation:'setWake',id:agent.id,command:words});await draw();
+      said.textContent=words.length?`Worldlet will run this program on this computer when work is given to ${agent.name}.`:`${agent.name} will no longer be woken for new work.`;}
+     catch(e){said.textContent='Could not change that: '+((e as Error).message||'try again.');}
+    };
+    group.append(el('span','','Wake it for new work'),
+     el('span','companion-settings-quiet',`When work is given to ${agent.name}, Worldlet runs this program on this computer, at most once a minute. First line: the program's full path; then one argument per line. A line that is just {askId} becomes the work's ID. Nothing runs unless you save it here.`),
+     command,button('Save','save-wake',()=>send(command.value.split('\n').map(line=>line.replace(/\r$/,'')).filter(line=>line.trim()))));
+    if(agent.wake.length)group.append(button('Remove','remove-wake',()=>send([])));
     words.append(group);
    }
    row.append(words);
