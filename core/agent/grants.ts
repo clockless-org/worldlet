@@ -126,6 +126,8 @@ export function readGrant(value:unknown):Grant|null {
  const grant:Grant={id:v.id,agentId:v.agentId,targets,access:v.access,duration:v.duration,grantedAt:v.grantedAt as string};
  if(instant(v.expiresAt))grant.expiresAt=v.expiresAt as string;
  if(instant(v.revokedAt))grant.revokedAt=v.revokedAt as string;
+ // An ask Grant names today's ask targets, so one given before `asks/attachment` existed covers it too.
+ for(const kind of ASK_GRANT_KINDS)if(grant.id===askGrantId(grant.agentId,kind))grant.targets=askGrantTargets(kind);
  return grant;
 }
 
@@ -179,7 +181,8 @@ export function serviceGrantAuditEntry(agentId:string,provider:string,granted:bo
 export type AskGrantKind='ask'|'work';
 export const ASK_GRANT_KINDS:readonly AskGrantKind[]=Object.freeze(['ask','work']);
 export function askGrantTargets(kind:string):string[] {
- return kind==='ask'?[AGENT_ASK_ACTIONS.post,AGENT_ASK_ACTIONS.read]:kind==='work'?[AGENT_ASK_ACTIONS.claim,AGENT_ASK_ACTIONS.resolve]:[];
+ // Both read an ask's attachments: the Agent that posted it, and the one that claimed it (core/agent/asks.ts decides which).
+ return kind==='ask'?[AGENT_ASK_ACTIONS.post,AGENT_ASK_ACTIONS.read,AGENT_ASK_ACTIONS.attachment]:kind==='work'?[AGENT_ASK_ACTIONS.claim,AGENT_ASK_ACTIONS.resolve,AGENT_ASK_ACTIONS.attachment]:[];
 }
 export const askGrantId=(agentId:string,kind:string)=>agentId+'-asks-'+kind;
 /** The standing Grant for one of the two, or null for anything else. Hosts build it from the kind only. Access is

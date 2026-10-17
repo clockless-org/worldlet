@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {AGENT_ASK_LIMITS,AGENT_ASK_PROVIDER,type AgentAsk} from '../contracts/agent-asks.ts';
-import {ASK_REASONS,askApprovesDrafts,answerAsk,askAttentionItem,askClaimable,askItemId,claimAsks,postAsk,readAskPost,readAsks,readStoredAsk,resolveAsk} from '../core/agent/asks.ts';
+import {ASK_REASONS,askApprovesDrafts,answerAsk,askAttachmentIsImage,askAttachmentName,askAttentionItem,askClaimable,askItemId,claimAsks,postAsk,readAskAttachment,readAskPost,readAsks,readStoredAsk,resolveAsk} from '../core/agent/asks.ts';
 import {validateWorldItem} from '../core/items/world-item-validation.ts';
 
 // Agent asks (contracts/agent-asks.ts, core/agent/asks.ts): validation, the open cap, claims and their lease, resolve
@@ -137,4 +137,87 @@ assert.equal(askAttentionItem(posted,'bad\u0007name').agentName,'claude-code','a
  assert.deepEqual(readStoredAsk(JSON.parse(JSON.stringify(carrying)))!.draftIds,ids);
  assert.deepEqual(askAttentionItem(carrying,'Codex').askDraftIds,ids);
 }
-console.log('PASS Agent asks: validation, open cap, claims and leases, resolve, answers, Attention items and asks carrying GitHub drafts.');
+// Attachments: pictures and other files of allowed types, within count and size limits, names made safe, first bytes
+// matching the type, kept as metadata only (the host's SHA-256), read back only by the poster or the claimer.
+{
+ const at='2026-10-15T12:00:00.000Z',b64=(...bytes:number[])=>Buffer.from(bytes).toString('base64'),text=(value:string)=>Buffer.from(value).toString('base64');
+ const png=b64(0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a,1,2,3,4),jpeg=b64(0xff,0xd8,0xff,0xe0,0,0x10),gif=text('GIF89a....'),webp=text('RIFF\0\0\0\0WEBPVP8 ');
+ const zip=b64(0x50,0x4b,3,4,0,0),gzip=b64(0x1f,0x8b,8,0),log=text('2026-10-15 12:00 ERROR token=sk-'+'z'.repeat(30)+'\n');
+ const digest='a'.repeat(64);
+ const post=readAskPost({title:'App feedback',attachments:[{name:'Screen Shot.png',type:'image/png',data:png},{name:'C:\\Users\\alex\\app.log',type:'text/plain',data:log}]});
+ assert.deepEqual(post.attachments!.map(({name,type,size})=>[name,type,size]),[['Screen Shot.png','image/png',12],['app.log','text/plain',Buffer.from(log,'base64').length]],
+  'names lose their folders; a log that looks like it holds a token is kept as data');
+ const carrying=postAsk([],'codex',{kind:'input',title:'Crash on save',attachments:[{name:'shot.png',type:'image/png',data:png},{name:'trace.json',type:'application/json',data:text('{}')}]},'ask-f0000001',at,[digest,'b'.repeat(64)]);
+ assert.deepEqual(carrying.attachments,[{id:'att-1',name:'shot.png',type:'image/png',size:12,sha256:digest},{id:'att-2',name:'trace.json',type:'application/json',size:2,sha256:'b'.repeat(64)}]);
+ assert.ok(!JSON.stringify(carrying).includes(png),'the ask keeps no bytes');
+ refused(()=>postAsk([],'codex',{title:'t',attachments:[{name:'a.png',type:'image/png',data:png}]},'ask-f0000002',at),ASK_REASONS.invalid);
+ refused(()=>postAsk([],'codex',{title:'t',attachments:[{name:'a.png',type:'image/png',data:png}]},'ask-f0000002',at,['NOT A HASH']),ASK_REASONS.invalid);
+ refused(()=>postAsk([],'codex',{title:'t'},'ask-f0000002',at,[digest]),ASK_REASONS.invalid);
+ for(const [type,data] of [['image/png',png],['image/jpeg',jpeg],['image/gif',gif],['image/webp',webp],['application/zip',zip],['application/gzip',gzip],['text/csv',text('a,b\n')],['application/json',text('[]')],['text/plain',text('x')]])
+  assert.equal(readAskPost({title:'t',attachments:[{name:'f',type,data}]}).attachments![0].type,type,type);
+ assert.equal(readAskPost({title:'t',attachments:[{name:'f',type:' IMAGE/PNG ',data:png}]}).attachments![0].type,'image/png');
+ // Types: nothing that runs or renders as markup; a picture, ZIP or gzip whose first bytes are not its type's.
+ for(const type of ['image/svg+xml','text/html','application/javascript','application/x-msdownload','application/octet-stream','application/x-sh',''])
+  refused(()=>readAskPost({title:'t',attachments:[{name:'f',type,data:png}]}),ASK_REASONS.attachmentType);
+ refused(()=>readAskPost({title:'t',attachments:[{name:'f.png',type:'image/png',data:text('<svg onload=alert(1)>')}]}),ASK_REASONS.attachmentKind);
+ refused(()=>readAskPost({title:'t',attachments:[{name:'f.jpg',type:'image/jpeg',data:png}]}),ASK_REASONS.attachmentKind);
+ refused(()=>readAskPost({title:'t',attachments:[{name:'f.zip',type:'application/zip',data:text('MZ program')}]}),ASK_REASONS.attachmentKind);
+ // Data: base64 only, not empty; only name, type and data.
+ for(const data of ['','not base64!','abc','YWJj=a=='])refused(()=>readAskPost({title:'t',attachments:[{name:'f',type:'text/plain',data}]}),ASK_REASONS.attachment);
+ refused(()=>readAskPost({title:'t',attachments:[{name:'f',type:'text/plain',data:text('x'),url:'https://example.com'}]}),ASK_REASONS.invalid);
+ refused(()=>readAskPost({title:'t',attachments:{name:'f'}}),ASK_REASONS.attachment);
+ // Counts: 8 pictures and 12 other files.
+ const pictures=(n:number)=>Array.from({length:n},(_,i)=>({name:'p'+i+'.png',type:'image/png',data:png}));
+ const files=(n:number)=>Array.from({length:n},(_,i)=>({name:'f'+i+'.log',type:'text/plain',data:text('line '+i)}));
+ assert.equal(readAskPost({title:'t',attachments:[...pictures(8),...files(12)]}).attachments!.length,20);
+ refused(()=>readAskPost({title:'t',attachments:pictures(9)}),ASK_REASONS.attachmentCount);
+ refused(()=>readAskPost({title:'t',attachments:files(13)}),ASK_REASONS.attachmentCount);
+ refused(()=>readAskPost({title:'t',attachments:[...pictures(8),...files(13)]}),ASK_REASONS.attachmentCount);
+ // Sizes: 5 MB a picture, 2 MB another file, 20 MB in all (counted from the base64, nothing decoded).
+ const sized=(header:string,bytes:number)=>{const raw=Buffer.alloc(bytes);Buffer.from(header,'base64').copy(raw);return raw.toString('base64');};
+ assert.equal(readAskPost({title:'t',attachments:[{name:'big.png',type:'image/png',data:sized(png,AGENT_ASK_LIMITS.imageBytes)}]}).attachments![0].size,AGENT_ASK_LIMITS.imageBytes);
+ refused(()=>readAskPost({title:'t',attachments:[{name:'big.png',type:'image/png',data:sized(png,AGENT_ASK_LIMITS.imageBytes+1)}]}),ASK_REASONS.attachmentSize);
+ refused(()=>readAskPost({title:'t',attachments:[{name:'big.log',type:'text/plain',data:sized('',AGENT_ASK_LIMITS.fileBytes+1)}]}),ASK_REASONS.attachmentSize);
+ const four=Array.from({length:4},(_,i)=>({name:i+'.png',type:'image/png',data:sized(png,AGENT_ASK_LIMITS.imageBytes)}));
+ assert.equal(readAskPost({title:'t',attachments:four}).attachments!.length,4,'20 MB in all fits');
+ refused(()=>readAskPost({title:'t',attachments:[...four,{name:'one.log',type:'text/plain',data:text('x')}]}),ASK_REASONS.attachmentSize);
+ // Names: folders dropped, unsafe characters replaced, no leading dot, the type's own extension, at most 120 characters.
+ const name=(value:unknown,type='text/plain')=>askAttachmentName(value,type);
+ assert.equal(name('../../etc/passwd'),'passwd.txt');
+ assert.equal(name('run.exe'),'run.exe.txt','an executable name is not kept as one');
+ assert.equal(name('setup.sh','application/gzip'),'setup.sh.gz');
+ assert.equal(name('.bashrc'),'bashrc.txt');
+ assert.equal(name('a<b>:c|d?e*.log'),'a_b__c_d_e_.log');
+ assert.equal(name('bell\u0007‮gnp.exe','image/png'),'bell__gnp.exe.png');
+ assert.equal(name('CON.txt'),'_CON.txt');
+ assert.equal(name('PHOTO.JPEG','image/jpeg'),'PHOTO.JPEG');
+ assert.equal(name('',  'image/png'),'attachment.png');
+ assert.equal([...name('x'.repeat(300)+'.log')].length,AGENT_ASK_LIMITS.attachmentName);
+ refused(()=>name('ghp_'+'a'.repeat(36)+'.txt'),ASK_REASONS.secret);
+ refused(()=>name(42),ASK_REASONS.attachment);
+ // Reading: only the poster or the claimer, a known attachment, from an offset, at most AGENT_ASK_LIMITS.attachmentRead.
+ const big={...carrying,attachments:[{...carrying.attachments![0],size:200_000}]};
+ assert.deepEqual(readAskAttachment([big],'codex',{id:'ask-f0000001',attachment:'att-1'}).length,AGENT_ASK_LIMITS.attachmentRead);
+ const last=readAskAttachment([big],'codex',{id:'ask-f0000001',attachment:'att-1',offset:2*AGENT_ASK_LIMITS.attachmentRead});
+ assert.equal(last.length,200_000-2*AGENT_ASK_LIMITS.attachmentRead);
+ refused(()=>readAskAttachment([big],'codex',{id:'ask-f0000001',attachment:'att-1',offset:200_001}),ASK_REASONS.invalid);
+ refused(()=>readAskAttachment([big],'codex',{id:'ask-f0000001',attachment:'att-1',offset:-1}),ASK_REASONS.invalid);
+ refused(()=>readAskAttachment([big],'codex',{id:'ask-f0000001',attachment:'att-9'}),ASK_REASONS.noAttachment);
+ refused(()=>readAskAttachment([big],'codex',{id:'ask-f0000001',attachment:'../x'}),ASK_REASONS.noAttachment);
+ refused(()=>readAskAttachment([big],'hermes',{id:'ask-f0000001',attachment:'att-1'}),ASK_REASONS.missing,);
+ refused(()=>readAskAttachment([big],'codex',{id:'ask-f0000001',attachment:'att-1',agentId:'hermes'}),ASK_REASONS.invalid);
+ const [taken]=claimAsks([carrying],'hermes',{},at);
+ assert.equal(readAskAttachment([taken],'hermes',{id:'ask-f0000001',attachment:'att-2'}).length,2,'the claimer reads them');
+ assert.equal(readAskAttachment([taken],'codex',{id:'ask-f0000001',attachment:'att-2'}).length,2,'and the poster still does');
+ refused(()=>readAskAttachment([taken],'claude-code',{id:'ask-f0000001',attachment:'att-2'}),ASK_REASONS.missing);
+ // Kept when settled, read back from storage, and listed (never their bytes) on the Attention item.
+ const settled=answerAsk(carrying,{id:'ask-f0000001',outcome:'done'},at);
+ assert.deepEqual(settled.attachments,carrying.attachments);
+ assert.deepEqual(readStoredAsk(JSON.parse(JSON.stringify(settled)))!.attachments,carrying.attachments);
+ assert.deepEqual(readStoredAsk({...carrying,attachments:[{id:'att-1',name:'x.exe',type:'application/x-msdownload',size:1,sha256:digest},{id:'bad',name:'a',type:'text/plain',size:1,sha256:digest}]})!.attachments,undefined);
+ const item=askAttentionItem(carrying,'Codex');
+ assert.deepEqual(item.askAttachments,[{id:'att-1',name:'shot.png',type:'image/png',size:12},{id:'att-2',name:'trace.json',type:'application/json',size:2}]);
+ validateWorldItem(item as any,{start:null,end:null});
+ assert.equal(askAttachmentIsImage('image/webp'),true);assert.equal(askAttachmentIsImage('application/zip'),false);
+}
+console.log('PASS Agent asks: validation, open cap, claims and leases, resolve, answers, Attention items, asks carrying GitHub drafts and attachments.');

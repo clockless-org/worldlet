@@ -163,13 +163,18 @@ assert.equal(serviceGranted('codex',[githubGrant],'posthog',now),false);assert.e
 assert.deepEqual(serviceGrantAuditEntry('codex','github',true,now),{at:now,agentId:'codex',target:'github',action:'grant',decision:'allowed',grantId:'codex-service-github',reason:'The person let this Agent read this Service in Settings.'});
 assert.equal(serviceGrantAuditEntry('codex','github',false,now).action,'ungrant');
 
-// "Can ask you" and "Can take work": exactly asks/post+read and asks/claim+resolve, never default, never given by a Fox
-// turn. An ask is not a guarded write: a granted call runs outside a turn, as a draft for review does.
-assert.deepEqual(askGrantTargets('ask'),['asks/post','asks/read']);assert.deepEqual(askGrantTargets('work'),['asks/claim','asks/resolve']);
+// "Can ask you" and "Can take work": exactly asks/post+read and asks/claim+resolve, each with asks/attachment (the poster
+// and the claimer read an ask's attachments), never default, never given by a Fox turn. An ask is not a guarded write: a
+// granted call runs outside a turn, as a draft for review does.
+assert.deepEqual(askGrantTargets('ask'),['asks/post','asks/read','asks/attachment']);assert.deepEqual(askGrantTargets('work'),['asks/claim','asks/resolve','asks/attachment']);
 for(const name of ['*','asks','all','__proto__',''])assert.deepEqual(askGrantTargets(name),[],'not an ask Grant: '+name);
 assert.equal(askGrant('codex','*/*',now),null);assert.equal(askGrant('Not An Id','ask',now),null);
 const askingGrant=askGrant('codex','ask',now)!,workGrant=askGrant('codex','work',now)!;
-assert.deepEqual(askingGrant,{id:'codex-asks-ask',agentId:'codex',targets:['asks/post','asks/read'],access:'read',duration:'standing',grantedAt:now});
+assert.deepEqual(askingGrant,{id:'codex-asks-ask',agentId:'codex',targets:['asks/post','asks/read','asks/attachment'],access:'read',duration:'standing',grantedAt:now});
+// One given before asks/attachment existed is read with today's targets; another Grant's targets are kept as stored.
+assert.deepEqual(readGrant({...askingGrant,targets:['asks/post','asks/read']})!.targets,askGrantTargets('ask'));
+assert.deepEqual(readGrant({...workGrant,targets:['asks/claim']})!.targets,askGrantTargets('work'));
+assert.deepEqual(readGrant({...askingGrant,id:'codex-other',targets:['asks/post']})!.targets,['asks/post']);
 assert.ok(!channelDefaultGrants('codex',earlier,actions).some(g=>g.targets.some(t=>t.startsWith('asks/'))),'no asks in the default Grants');
 const askCall=(grants:Grant[],action:string,args:Record<string,unknown>,foxTurn:{own:boolean}|null=null,identity=codex)=>{
  const resolved=resolveAction(actions,'asks',action,args);
@@ -187,7 +192,7 @@ assert.equal(askCall([...codexDefaults,{...askingGrant,agentId:'hermes'}],'post'
 assert.equal(askCall(defaults,'post',{title:'x'},{own:true},hermes).decision,'denied','a Fox turn never grants asks');
 assert.equal(askCall([...defaults,askGrant('hermes','ask',now)!],'post',{title:'x'},{own:false},hermes).decision,'allowed','its own Grant does, in a turn too');
 assert.ok(!standingActions(actions,hermes,defaults,true,now).some(a=>a.target==='asks'),'not listed in a Fox turn without a Grant');
-assert.deepEqual(standingActions(actions,codex,[...codexDefaults,askingGrant],false,now).filter(a=>a.target==='asks').map(a=>a.action),['post','read']);
+assert.deepEqual(standingActions(actions,codex,[...codexDefaults,askingGrant],false,now).filter(a=>a.target==='asks').map(a=>a.action),['post','read','attachment']);
 assert.equal(askGranted('codex',[askingGrant],'ask',now),true);assert.equal(askGranted('codex',[askingGrant],'work',now),false);assert.equal(askGranted('hermes',[askingGrant],'ask',now),false);
 assert.deepEqual(askGrantAuditEntry('codex','work',true,now),{at:now,agentId:'codex',target:'asks',action:'grant-work',decision:'allowed',grantId:'codex-asks-work',reason:'The person let this Agent take work in Settings.'});
 

@@ -7,6 +7,7 @@ import {HERMES_WORLD_TOOLS_SHIM,agentAuditEntry,standingActions,standingCallDeci
 import type {AgentAccess} from '../../host/services.ts';
 import type {AgentIdentity} from '../../../../../contracts/agent-identity.ts';
 import {writeAtomic} from '../../files.ts';
+import {AGENT_ASK_LIMITS} from '../../../../../contracts/agent-asks.ts';
 import type {Row} from './types.ts';
 
 // World tools for a local Harness (Claude Code, Codex, Hermes Agent, OpenClaw, pi): the same two gateway
@@ -87,6 +88,8 @@ module.exports=async function(pi){
 `;
 
 const RESULT_LIMIT=200_000;
+/** Bytes one call may send. The standing server takes an ask with all its attachments in base64 (contracts/agent-asks.ts). */
+const CALL_LIMIT=1_000_000,STANDING_CALL_LIMIT=Math.ceil(AGENT_ASK_LIMITS.attachmentBytes/3)*4+CALL_LIMIT;
 /** The World tool behind `asks/*` (core/tools/gateway.ts). */
 const ASK_TOOL='agent_asks';
 /** The World tool behind `board/*` (core/tools/gateway.ts). */
@@ -130,14 +133,16 @@ export interface WorldToolBridge {server:WorldToolServer;close():void}
 export type McpCall={name:unknown;arguments:unknown;agent?:{id:string;name:string}};
 /** A loopback endpoint for the stdio server: `list` and `call` at `route`, for a bearer token `authorize` accepts (it
  * returns who made the call: an Agent on the standing server, `true` for a turn's own bridge). */
-async function serveWorldTools<T>(authorize:(token:string)=>T|null,route:string,call:(body:{name:unknown;arguments:unknown},caller:T)=>Promise<Row>):Promise<http.Server> {
+async function serveWorldTools<T>(authorize:(token:string)=>T|null,route:string,call:(body:{name:unknown;arguments:unknown},caller:T)=>Promise<Row>,limit=CALL_LIMIT):Promise<http.Server> {
  const server=http.createServer((request,response)=>{
   const answer=(status:number,value:Row)=>{response.writeHead(status,{'content-type':'application/json'});response.end(JSON.stringify(value));};
   const header=request.headers.authorization??'',caller=header.startsWith('Bearer ')?authorize(header.slice(7)):null;
   if(request.method!=='POST'||request.url!==route||caller===null){request.resume();answer(404,{});return;}
   const chunks:Buffer[]=[];let size=0;
-  request.on('data',(chunk:Buffer)=>{size+=chunk.length;if(size>1_000_000)request.destroy();else chunks.push(chunk);});
+  // Too large: the rest is read and dropped, and the caller is told so in words.
+  request.on('data',(chunk:Buffer)=>{size+=chunk.length;if(size<=limit)chunks.push(chunk);else chunks.length=0;});
   request.on('end',()=>{
+   if(size>limit){answer(200,{text:JSON.stringify({error:`This call is larger than Worldlet takes (${Math.floor(limit/1048576)} MB).`}),isError:true});return;}
    void (async()=>{
     let body:Row;
     try{body=JSON.parse(Buffer.concat(chunks).toString('utf8'));}catch{answer(400,{});return;}
@@ -247,7 +252,7 @@ export async function openStandingWorldTools({channel,access,asks,board,drafts,c
     }
    }});
  };
- const server=await serveWorldTools(token=>access.identify(token),route,call);
+ const server=await serveWorldTools(token=>access.identify(token),route,call,STANDING_CALL_LIMIT);
  const url=`http://127.0.0.1:${portOf(server)}${route}`,files=new Map<string,Set<string>>();
  const remove=(agentId:string)=>{for(const file of files.get(agentId)??[])fs.rmSync(file,{force:true});files.delete(agentId);};
  access.onRevoke(remove);

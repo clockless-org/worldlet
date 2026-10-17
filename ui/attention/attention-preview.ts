@@ -61,7 +61,10 @@ export function mountAttentionPreview({root,onClose,onOriginal,onLink}){
  const review=make('p','attention-preview-review');review.hidden=true;review.setAttribute('role','group');
  // A reply Fox prepared for this item waits in the Journal (owner decision 2026-10-09): one quiet line that opens it.
  const drafted=make('p','attention-preview-drafted');drafted.hidden=true;
- panel.append(art,scrim,tools,hero,summary,review,drafted,footer);root.append(panel);
+ // What an Agent's ask carries: each picture as a thumbnail the host reads, each other file by name. Data, never run.
+ const attached=make('div','attention-preview-attachments');attached.hidden=true;attached.setAttribute('aria-label','Attachments');
+ let attachedRequest=0;
+ panel.append(art,scrim,tools,hero,summary,review,attached,drafted,footer);root.append(panel);
  panel.addEventListener('keydown',e=>{if(!panel.hidden&&e.key==='Escape'){e.preventDefault();e.stopPropagation();onClose();}});
  root.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden&&!e.defaultPrevented){e.preventDefault();onClose();}});
  panel.addEventListener('pointerdown',e=>{(e as any).worldletKeepFox=true;});
@@ -71,7 +74,7 @@ export function mountAttentionPreview({root,onClose,onOriginal,onLink}){
    if(panel.hidden){returnFocus=document.activeElement as HTMLElement;returnItem=returnFocus?.closest('[data-world-item-id]')?.getAttribute('data-world-item-id');}
    selected=page;const data=attentionPreviewData(page),signal=page.worldItemSignal||{};
    panel.dataset.sourceId='attention:'+page.worldItemId;panel.dataset.kind=data.kind;root.dataset.attentionPreview='true';root.dataset.attentionKind=data.kind;
-   review.hidden=true;review.replaceChildren();drafted.hidden=true;drafted.replaceChildren();
+   review.hidden=true;review.replaceChildren();drafted.hidden=true;drafted.replaceChildren();attached.hidden=true;attached.replaceChildren();attachedRequest++;
    const sources=attentionSources(page);provenance.textContent=sources.length===1?'Source':sources.length+' sources';provenance.hidden=!sources.length;sourceIcons.replaceChildren();actions.replaceChildren();
    sources.forEach((source,index)=>{const label='Open '+source.label+(sources.filter(s=>s.label===source.label).length>1?' · '+(index+1):'');const button=control(label,()=>onOriginal(page,source.ref),source.icon);button.classList.add('attention-preview-original');sourceIcons.append(button);});
    // The "Source" word opens it too (owner feedback 2026-10-02: clicking Source did nothing); with several, the icons choose.
@@ -125,12 +128,28 @@ export function mountAttentionPreview({root,onClose,onOriginal,onLink}){
     b.onclick=async()=>{buttons.forEach(x=>x.disabled=true);try{await choice.run(note?.value.trim()||undefined);}finally{buttons.forEach(x=>x.disabled=false);}};return b;});
    review.setAttribute('aria-label',value.text);review.append(make('span','attention-preview-review-text',value.text),...quote?[quote]:[],...link?[link]:[],...note?[note]:[],...buttons);
   },
+  /** What an Agent's ask carries, or null: a picture (`image`) is drawn only from a data: URL of a picture `load` gives
+   * back, and anything else is named with its size. Nothing it carries is rendered as markup or opened. */
+  setAttachments(list:{name:string;size:number;image:boolean;load?:()=>Promise<string|null>}[]|null){
+   const request=++attachedRequest;
+   attached.replaceChildren();attached.hidden=!list?.length;if(!list?.length)return;
+   const kb=(size:number)=>size>=1048576?(size/1048576).toFixed(1)+' MB':Math.max(1,Math.round(size/1024))+' KB';
+   for(const item of list){
+    const entry=make('span','attention-preview-attachment'+(item.image?' is-image':''));entry.title=item.name+' · '+kb(item.size);
+    if(item.image&&item.load){
+     const picture=make('img','attention-preview-attachment-image') as HTMLImageElement;picture.alt=item.name;picture.hidden=true;entry.append(picture);
+     item.load().then(url=>{if(request===attachedRequest&&typeof url==='string'&&/^data:image\/(png|jpeg|webp|gif);base64,/.test(url)){picture.src=url;picture.hidden=false;}}).catch(()=>{});
+    }
+    entry.append(make('span','attention-preview-attachment-name',item.name),make('span','attention-preview-attachment-size',kb(item.size)));
+    attached.append(entry);
+   }
+  },
   /** A reply Fox prepared for this item, waiting in the Journal, or null. */
   setDraft(value:{text:string;label:string;run:()=>void}|null){
    drafted.replaceChildren();drafted.hidden=!value;if(!value)return;
    const b=make('button','attention-preview-review-choice',value.label) as HTMLButtonElement;b.type='button';b.dataset.draftChoice='review';b.onclick=()=>value.run();
    drafted.append(make('span','attention-preview-review-text',value.text),b);
   },
-  close({restoreFocus=true}={}){selected=null;artRequest++;panel.hidden=true;delete root.dataset.attentionPreview;delete root.dataset.attentionKind;if(restoreFocus){const target=returnFocus?.isConnected?returnFocus:returnItem?root.querySelector('[data-world-item-id="'+CSS.escape(returnItem)+'"]'):null;(target as HTMLElement)?.focus({preventScroll:true});}},
+  close({restoreFocus=true}={}){selected=null;artRequest++;attachedRequest++;panel.hidden=true;delete root.dataset.attentionPreview;delete root.dataset.attentionKind;if(restoreFocus){const target=returnFocus?.isConnected?returnFocus:returnItem?root.querySelector('[data-world-item-id="'+CSS.escape(returnItem)+'"]'):null;(target as HTMLElement)?.focus({preventScroll:true});}},
  };
 }

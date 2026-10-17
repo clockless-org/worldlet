@@ -594,8 +594,13 @@ export function installAgentRuntime(host:Host){
  /** The person's answer on an ask's Attention card (core/agent/GRANTS.md#agent-asks): `answer` with the ask's ID and
   * `answered` (one of its own choices and an optional note), `done` or `skipped`. Core checks it against the stored
   * ask; the page never names an Agent. Approve on an ask that carries GitHub drafts is `approveDrafts`, which runs them
-  * first; a World page on another device may send only `answer` (ROOM_ALLOWED), so it cannot approve them. */
+  * first; a World page on another device may send only `answer` (ROOM_ALLOWED), so it cannot approve them. `attachment`
+  * (the ask's `id` and the `attachment`) reads one attachment's bytes for the card; it too stays on this computer, since
+  * a picture an Agent attached may be private. */
  host.register({agentAsk:async request=>{
+  if(request.operation==='attachment'){
+   try{return agentAsks!.attachment(request);}catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not read this attachment.');}
+  }
   if(request.operation!=='answer'&&request.operation!=='approveDrafts')throw new WorldletError('Unknown asks operation.');
   try{return await agentAsks!.answer(request);}catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not answer this.');}
  }});
