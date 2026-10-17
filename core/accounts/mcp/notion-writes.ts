@@ -47,7 +47,10 @@ async function load(store:NotionReviewStore,identifier:unknown){
 /** The review as the shelf shows it. */
 export const publicReview=(review:Record<string,any>)=>Object.fromEntries(PUBLIC.map(key=>[key,dget(review,key)]));
 
-async function checkedArgs(session:McpSession,name:string,candidates:unknown[]){
+/** The first of `candidates` (as given, or wrapped in `data`) that the server's own schema for tool `name` accepts, so a
+ * write is never sent in a shape the server would read differently. Also used by Notion drafts
+ * (core/agent/service-drafts.ts). */
+export async function notionWriteArgs(session:McpSession,name:string,candidates:unknown[]){
  const listed=await session.listTools();
  const tool=(listed?.tools??[]).find(tool=>tool?.name===name);
  if(!tool)throw new ValueError('Your Notion connection does not provide this write tool. Reconnect with page editing access.');
@@ -83,7 +86,7 @@ async function prepare(session:McpSession,body:unknown,store:NotionReviewStore,b
   // Append only: never replace a page, apply a template or change properties.
   candidates=[{page_id:target,command:'insert_content',new_str:'\n\n'+text,allow_async:false}];
  }
- const args=await checkedArgs(session,name,candidates);
+ const args=await notionWriteArgs(session,name,candidates);
  if((await store.list()).filter(file=>file.endsWith('.json')).length>=MAX_REVIEWS)throw new ValueError('Close existing Notion reviews before preparing another.');
  const review={id:(options.uuid??(()=>globalThis.crypto.randomUUID()))(),operation,target,targetTitle:page.title,title,markdown:text,binding,
   priorCount:count(page.markdown,strip(text)),url:page.url,status:'review',createdAt:(options.now??(()=>Date.now()/1000))(),tool:name,args,
@@ -135,7 +138,7 @@ export async function handleNotionWrite(session:McpSession,body:Record<string,an
   const raw=notionPayload(await session.callTool('notion-fetch',{id:item(review,'target')},TIMEOUT));
   if(await notionFingerprint(raw,review.target)!==item(review,'fingerprint'))throw new ValueError('The destination changed. Review a fresh draft before writing.');
   // Revalidate against today's server schema before any mutation.
-  const args=await checkedArgs(session,item(review,'tool'),[item(review,'args')]);
+  const args=await notionWriteArgs(session,item(review,'tool'),[item(review,'args')]);
   if(!await store.create(review.id+'.attempt'))throw new ValueError('This write was already attempted. Check its result instead.');
   review.status='unconfirmed';
   await save(store,review);

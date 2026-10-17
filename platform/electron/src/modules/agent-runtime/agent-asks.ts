@@ -30,10 +30,11 @@ export interface AgentAsks {
   * whole, in base64. Not in ROOM_ALLOWED: a picture an Agent attached may be private. */
  attachment(request:Row):Row;
 }
-/** The GitHub drafts an ask may carry (github-drafts.ts): what became of them, and the same Approve as on a draft's own
- * card (read the target again, refuse when it changed, otherwise write once). */
+/** The drafts an ask may carry (github-drafts.ts, service-drafts.ts): what became of them, which Service each writes
+ * to, and the same Approve as on a draft's own card (read the target again, refuse when it changed, otherwise write
+ * once). */
 export type AskDrafts={
- summaries(ids:readonly string[]):{id:string;agentId:string;status:string;resultUrl?:string;reason?:string}[];
+ summaries(ids:readonly string[]):{id:string;agentId:string;service:string;status:string;resultUrl?:string;reason?:string}[];
  approve(id:string):Promise<Row>;
 };
 /** Orders (agent-orders.ts): the Agents work may be for, the World's order target, and the wake of the Agent new work
@@ -48,9 +49,11 @@ const NOT_READY='Worldlet is not ready for this yet: the person has not finished
 export function createAgentAsks({ledger,name,changed,drafts,orders,now=()=>new Date().toISOString(),newId=()=>crypto.randomUUID()}:
  {ledger:()=>AskLedger|null;name:(agentId:string)=>string;changed:()=>void;drafts?:()=>AskDrafts|null;orders?:()=>AskOrders|null;now?:()=>string;newId?:()=>string}):AgentAsks {
  // An ask's drafts as asks/read shows them: the Agent's own only.
- const withDrafts=(ask:AgentAsk)=>ask.draftIds?.length?{...ask,drafts:(drafts?.()?.summaries(ask.draftIds)??[]).filter(d=>d.agentId===ask.agentId).map(({agentId:_agentId,...draft})=>draft)}:ask;
+ const own=(ask:AgentAsk)=>(drafts?.()?.summaries(ask.draftIds??[])??[]).filter(d=>d.agentId===ask.agentId);
+ const shown=(ask:AgentAsk)=>own(ask).map(({agentId:_agentId,service:_service,...draft})=>draft);
+ const withDrafts=(ask:AgentAsk)=>ask.draftIds?.length?{...ask,drafts:shown(ask)}:ask;
  const load=(db:AskLedger)=>db.agentAsks().flatMap(row=>{const ask=readStoredAsk(row);return ask?[ask]:[];});
- const item=(ask:AgentAsk)=>askAttentionItem(ask,name(ask.agentId),ask.for?name(ask.for):undefined) as Row;
+ const item=(ask:AgentAsk)=>askAttentionItem(ask,name(ask.agentId),ask.for?name(ask.for):undefined,ask.draftIds?.length?own(ask).map(d=>d.service):[]) as Row;
  const save=(db:AskLedger,ask:AgentAsk,origin:'user'|'agent')=>db.saveAgentAsk(ask as unknown as Row,item(ask),origin);
  const audit=(db:AskLedger,ask:AgentAsk,at:string)=>{
   try{db.recordAgentAudit({at,agentId:ask.agentId,target:AGENT_ASK_TARGET,action:'answer',decision:'allowed',reason:'The person answered this Agent\'s ask in Attention.'},AGENT_AUDIT_KEEP);}catch{}
@@ -123,15 +126,15 @@ export function createAgentAsks({ledger,name,changed,drafts,orders,now=()=>new D
    let results:Row[]|undefined;
    if(approving){
     const owner=drafts?.();
-    if(!owner)throw new Error('GitHub drafts are not available here.');
-    // Each draft as on its own card. One already settled is left as it is; one that could not be tried (GitHub did
-    // not answer, no GitHub App) leaves the ask unanswered, so Approve can be chosen again.
+    if(!owner)throw new Error('Drafts are not available here.');
+    // Each draft as on its own card. One already settled is left as it is; one that could not be tried (the Service did
+    // not answer, no GitHub App, PostHog or Notion not connected) leaves the ask unanswered, so Approve can be chosen again.
     for(const id of ask!.draftIds??[]){
      const [found]=owner.summaries([id]);
      if(!found||found.agentId!==ask!.agentId||found.status!=='pending')continue;
      await owner.approve(id);
     }
-    results=owner.summaries(ask!.draftIds??[]).filter(draft=>draft.agentId===ask!.agentId).map(({agentId:_agentId,...draft})=>draft);
+    results=shown(ask!);
    }
    // Read again: approving took time, and the ask may have changed meanwhile.
    const at=now(),next=answerAsk(settle(db,load(db),at).find(item=>item.id===reply.id),reply,at);

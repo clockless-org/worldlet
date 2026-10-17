@@ -4,6 +4,8 @@ import type {Row} from './types.ts';
 import type {HarnessApprovals,HarnessCalls,HarnessEvents,HarnessSend,HarnessSkills,HarnessTools,HarnessVoice} from '../../../../contracts/harness-services.ts';
 import type {PhonePushRequest} from '../../../../core/phone/index.ts';
 import type {AgentAuditEntry,AgentIdentity,Grant} from '../../../../contracts/agent-identity.ts';
+import type {McpSession,PosthogSettings} from '../../../../core/accounts/index.ts';
+import type {PosthogRequest} from '../../../../core/agent/index.ts';
 // Cross-module service contracts inside the Electron host. A module provides one with
 // `host.provide(NAME, impl)` and others reach it with `host.use(NAME)` / `host.optional(NAME)`.
 // Modules never import each other's implementation files.
@@ -55,6 +57,10 @@ export interface AgentService {
  collectServicePage?(request:ServiceRead,signal:AbortSignal):Promise<Row>;
  /** Opaque binding for the World's own Notion OAuth connection; never an Agent token or a provider call. */
  worldNotionBinding?():string|null;
+ /** The World's own PostHog and Notion connections, lent to PostHog and Notion drafts for a write the person approved
+  * (agent-runtime/service-drafts.ts): PostHog's settings and a request function that keeps its key, and a Notion
+  * session the caller closes. Either is null when that Service is not connected. */
+ serviceDraftConnections?():{posthog():{settings:PosthogSettings;request:PosthogRequest}|null;notion():(McpSession&{close():Promise<void>})|null};
  makeSourceConnections():AgentSourceConnections;
  /** The World's own Google connection, when this build has one: the signed-in account for analytics and greetings. */
  googleAccount?():{authorized():boolean;profile():{email:string;user_id:string;name?:string}|null}|null;
@@ -441,6 +447,10 @@ export interface AgentAccess {
   * agent-artifacts/read), the same way (core artifactGrant), each change audited. */
  grantArtifacts(agentId:string,kind:string):boolean;
  ungrantArtifacts(agentId:string,kind:string):boolean;
+ /** "Can draft PostHog changes" and "Can draft Notion changes" (`<provider>-drafts/create` and read), the same way (core
+  * serviceDraftGrant), each change audited. */
+ grantServiceDrafts(agentId:string,provider:string):boolean;
+ ungrantServiceDrafts(agentId:string,provider:string):boolean;
  onRevoke(listener:(agentId:string)=>void):void;
 }
 export interface VaultService {

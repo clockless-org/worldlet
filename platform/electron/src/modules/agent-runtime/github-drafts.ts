@@ -35,7 +35,7 @@ export interface GithubDrafts {
  dismiss(id:unknown):Row;
  /** What became of these drafts, for the asks that carry them (agent-asks.ts): each found draft's Agent, status, result
   * link and why it was not written. */
- summaries(ids:readonly string[]):{id:string;agentId:string;status:string;resultUrl?:string;reason?:string}[];
+ summaries(ids:readonly string[]):{id:string;agentId:string;service:'github';status:string;resultUrl?:string;reason?:string}[];
  /** One `github_writes` call (`github-writes/run`) by `agentId`, already admitted by its Grants (`grants`, its own):
   * refused unless one of its standing GitHub write Grants reaches this repository, write and label prefix; otherwise
   * the target is read again, refused when it is not as the Agent read it, and written once. Each is audited. */
@@ -242,7 +242,7 @@ export function createGithubDrafts({ledger,vault,name,changed,fetch=globalThis.f
    if(!db)return [];
    const drafts=settle(db,load(db),now());
    return ids.flatMap(id=>{const draft=drafts.find(item=>item.id===id);
-    return draft?[{id,agentId:draft.agentId,status:draft.status,...draft.resultUrl?{resultUrl:draft.resultUrl}:{},...draft.reason?{reason:draft.reason}:{}}]:[];});
+    return draft?[{id,agentId:draft.agentId,service:'github' as const,status:draft.status,...draft.resultUrl?{resultUrl:draft.resultUrl}:{},...draft.reason?{reason:draft.reason}:{}}]:[];});
   },
   async run(agentId,args,grants){
    const db=ledger();

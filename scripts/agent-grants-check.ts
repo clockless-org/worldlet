@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {artifactGrant,artifactGrantAuditEntry,artifactGrantTargets,artifactGranted,linkGrant,linkGrantAuditEntry,linkGrantTargets,linkGranted,conversationGrant,conversationGrantAuditEntry,conversationGrantTargets,conversationGranted,githubWriteGrant,githubWriteGrantAuditEntry,githubWriteGrantFor,githubWriteGrants,githubWriteScopeWords,OWN_GRANT_TARGETS,githubDraftGrant,githubDraftGrantAuditEntry,githubDraftGranted,boardGrant,boardGrantAuditEntry,boardGrantTargets,boardGranted,askGrant,askGrantAuditEntry,askGrantTargets,askGranted,AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites,reportGrant,reportGrantAuditEntry,reportGrantTargets,reportGranted} from '../core/agent/grants.ts';
+import {serviceDraftGrant,serviceDraftGrantAuditEntry,serviceDraftGranted,artifactGrant,artifactGrantAuditEntry,artifactGrantTargets,artifactGranted,linkGrant,linkGrantAuditEntry,linkGrantTargets,linkGranted,conversationGrant,conversationGrantAuditEntry,conversationGrantTargets,conversationGranted,githubWriteGrant,githubWriteGrantAuditEntry,githubWriteGrantFor,githubWriteGrants,githubWriteScopeWords,OWN_GRANT_TARGETS,githubDraftGrant,githubDraftGrantAuditEntry,githubDraftGranted,boardGrant,boardGrantAuditEntry,boardGrantTargets,boardGranted,askGrant,askGrantAuditEntry,askGrantTargets,askGranted,AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites,reportGrant,reportGrantAuditEntry,reportGrantTargets,reportGranted} from '../core/agent/grants.ts';
 import {HERMES_CHANNEL_READ_ONLY,hermesChannelToolAllowed} from '../core/agent/hermes-server.ts';
 import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
 import {turnWriteAdmission,writeDecision} from '../core/agent/turn-trust.ts';
@@ -126,7 +126,7 @@ assert.equal(worldCallWrites('start_applet_task'),true);assert.equal(worldCallWr
 // describe_world_tools: only granted targets outside a turn; everything while a Fox turn holds the server; none revoked.
 const listed=new Set(standingActions(actions,hermes,defaults,false,now).map(a=>a.target));
 assert.ok(listed.has('items')&&listed.has('world')&&!listed.has('content'));
-assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.filter(a=>!['asks','board','github-drafts','github-writes','conversations','links','agents','agent-artifacts'].includes(a.target)).length,'everything but asks, the board, GitHub drafts and writes, the conversation archive and tracked links, which only the Agent\'s own Grants name');
+assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.filter(a=>!['asks','board','github-drafts','github-writes','conversations','links','agents','agent-artifacts','posthog-drafts','notion-drafts'].includes(a.target)).length,'everything but asks, the board, GitHub, PostHog and Notion drafts, GitHub writes, the conversation archive, tracked links, Agent reports and Journal artifacts, which only the Agent\'s own Grants name');
 assert.deepEqual(standingActions(actions,{...hermes,revokedAt:earlier},defaults,true,now),[]);
 // A resolved call maps back to its target and action (channelToolReply checks Grants by them).
 assert.deepEqual(worldActionOf(actions,'query_world_items',{}),{target:'items',action:'query'});
@@ -417,4 +417,30 @@ assert.deepEqual(standingActions(actions,codex,[...codexDefaults,journalReadGran
 assert.equal(artifactGranted('codex',[journalSaveGrant],'save',now),true);assert.equal(artifactGranted('codex',[journalSaveGrant],'read',now),false,'saving is not reading every Agent\'s');assert.equal(artifactGranted('hermes',[journalSaveGrant],'save',now),false);
 assert.deepEqual(artifactGrantAuditEntry('codex','read',true,now),{at:now,agentId:'codex',target:'agent-artifacts',action:'grant-read',decision:'allowed',grantId:'codex-artifacts-read',reason:'The person let this Agent read Agents\' Journal artifacts in Settings.'});
 
-console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server, per-Service read Grants, ask Grants, board Grants, report Grants, GitHub draft Grants, standing GitHub write Grants and their reach, conversation archive Grants, tracked link Grants., Journal artifact Grants.');
+// "Can draft PostHog changes" and "Can draft Notion changes": each exactly that Service's drafts/create and read, never
+// default, never given by a Fox turn's `*/*` Grant, by reading the Service or by the other Service's draft Grant.
+const posthogDraft=serviceDraftGrant('codex','posthog',now)!,notionDraft=serviceDraftGrant('codex','notion',now)!;
+assert.deepEqual(posthogDraft,{id:'codex-posthog-drafts',agentId:'codex',targets:['posthog-drafts/create','posthog-drafts/read'],access:'read',duration:'standing',grantedAt:now});
+assert.deepEqual(notionDraft.targets,['notion-drafts/create','notion-drafts/read']);
+assert.equal(serviceDraftGrant('codex','github',now),null,'GitHub drafts have their own Grant');
+assert.equal(serviceDraftGrant('Not An Id','posthog',now),null);
+assert.ok(!channelDefaultGrants('codex',earlier,actions).some(g=>g.targets.some(t=>/^(posthog|notion)-drafts\//.test(t))),'no PostHog or Notion drafts in the default Grants');
+const serviceDraftCall=(grants:Grant[],target:string,action:string,args:Record<string,unknown>,foxTurn:{own:boolean}|null=null,identity=codex)=>{
+ const resolved=resolveAction(actions,target,action,args);
+ assert.equal(resolved.name,'service_drafts');assert.equal(resolved.args.provider,target.split('-')[0]);assert.equal(worldCallWrites(resolved.name,resolved.args),false,'a draft is not a guarded write');
+ return standingCallDecision({identity,grants,target,action,tool:resolved.name,args:resolved.args,foxTurn,now});
+};
+const flagging={write:'flag.set',target:'new-checkout',active:true};
+assert.equal(serviceDraftCall(codexDefaults,'posthog-drafts','create',flagging).decision,'denied','ungranted: refused');
+assert.equal(serviceDraftCall([...codexDefaults,serviceReadGrant('codex','posthog',now)!],'posthog-drafts','create',flagging).decision,'denied','reading PostHog is not drafting');
+assert.equal(serviceDraftCall([...codexDefaults,notionDraft],'posthog-drafts','create',flagging).decision,'denied','the Notion Grant is not the PostHog one');
+assert.deepEqual(serviceDraftCall([...codexDefaults,posthogDraft],'posthog-drafts','create',flagging),{decision:'allowed',grantId:'codex-posthog-drafts'});
+assert.equal(serviceDraftCall([...codexDefaults,notionDraft],'notion-drafts','read',{}).decision,'allowed');
+assert.equal(serviceDraftCall([...codexDefaults,{...posthogDraft,revokedAt:earlier}],'posthog-drafts','create',flagging).decision,'denied','taken back: refused');
+assert.equal(serviceDraftCall(defaults,'notion-drafts','create',{write:'page.append',target:'a'.repeat(32),body:'Hi'},{own:true},hermes).decision,'denied','a Fox turn\'s */* Grant never drafts a PostHog or Notion write');
+assert.ok(!standingActions(actions,hermes,defaults,true,now).some(a=>/^(posthog|notion)-drafts$/.test(a.target)),'not listed in a Fox turn without a Grant');
+assert.deepEqual(standingActions(actions,codex,[...codexDefaults,posthogDraft],false,now).filter(a=>a.target.endsWith('-drafts')).map(a=>a.target+'/'+a.action),['posthog-drafts/create','posthog-drafts/read']);
+assert.equal(serviceDraftGranted('codex',[posthogDraft],'posthog',now),true);assert.equal(serviceDraftGranted('codex',[posthogDraft],'notion',now),false);
+assert.deepEqual(serviceDraftGrantAuditEntry('codex','notion',true,now),{at:now,agentId:'codex',target:'notion-drafts',action:'grant',decision:'allowed',grantId:'codex-notion-drafts',reason:'The person let this Agent draft Notion changes in Settings.'});
+
+console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server, per-Service read Grants, ask Grants, board Grants, report Grants, GitHub draft Grants, standing GitHub write Grants and their reach, conversation archive Grants, tracked link Grants, Journal artifact Grants, PostHog and Notion draft Grants.');

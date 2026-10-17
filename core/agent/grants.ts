@@ -8,6 +8,7 @@ import {GITHUB_DRAFT_ACTIONS,GITHUB_DRAFT_TARGET,GITHUB_WRITE_ACTIONS,GITHUB_WRI
 import {githubWriteScope,githubWriteScopeCovers,readGithubWriteScope} from './github-drafts.ts';
 import {AGENT_REPORT_ACTIONS,AGENT_REPORT_TARGET} from '../../contracts/agent-reports.ts';
 import {AGENT_ARTIFACT_ACTIONS,AGENT_ARTIFACT_TARGET} from '../../contracts/agent-artifacts.ts';
+import {SERVICE_DRAFT_OPERATIONS,SERVICE_DRAFT_PROVIDERS,SERVICE_DRAFT_TARGETS,SERVICE_DRAFT_TITLES,serviceDraftTarget,type ServiceDraftProvider} from '../../contracts/service-drafts.ts';
 import {grantedActions,worldActions,type WorldAction} from '../tools/index.ts';
 import {turnGuardedWrite,turnWriteAdmission} from './turn-trust.ts';
 import {HERMES_CHANNEL_LINK_TOOL,HERMES_CHANNEL_READ_ONLY,HERMES_CHANNEL_TOOLS,hermesChannelTrust} from './hermes-server.ts';
@@ -390,10 +391,31 @@ export function artifactGrantAuditEntry(agentId:string,kind:string,granted:boole
  return {at,agentId,target:AGENT_ARTIFACT_TARGET,action:(granted?'grant-':'ungrant-')+kind,decision:'allowed',grantId:artifactGrantId(agentId,kind),
   reason:granted?`The person let this Agent ${what} in Settings.`:`The person stopped this Agent being able to ${what} in Settings.`};
 }
-/** Targets only the calling Agent's own Grants decide: what it reaches is its own (its asks, its GitHub drafts and
- * standing GitHub writes, its report, what it saved to the Journal) or the person's board, conversation archive,
- * tracked links, Agents and Journal artifacts, so a Fox turn's Grant, which covers everything else, never covers them. */
-export const OWN_GRANT_TARGETS:readonly string[]=Object.freeze([AGENT_ASK_TARGET,BOARD_TARGET,GITHUB_DRAFT_TARGET,GITHUB_WRITE_TARGET,CONVERSATION_TARGET,TRACKED_LINK_TARGET,AGENT_REPORT_TARGET,AGENT_ARTIFACT_TARGET]);
+/** "Can draft PostHog changes" and "Can draft Notion changes" in Settings › Agent › Access
+ * (core/agent/GRANTS.md#posthog-and-notion-drafts): `<provider>-drafts/create` and `read`, the same way as GitHub
+ * drafts. Never part of the default Grants, never given by a Fox turn, and not given by reading the Service. */
+export const isServiceDraftProvider=(value:unknown):value is ServiceDraftProvider=>SERVICE_DRAFT_PROVIDERS.includes(value as ServiceDraftProvider);
+export const serviceDraftGrantTargets=(provider:ServiceDraftProvider):string[]=>SERVICE_DRAFT_OPERATIONS.map(operation=>`${serviceDraftTarget(provider)}/${operation}`);
+export const serviceDraftGrantId=(agentId:string,provider:string)=>`${agentId}-${provider}-drafts`;
+export function serviceDraftGrant(agentId:string,provider:string,grantedAt:string):Grant|null {
+ if(typeof agentId!=='string'||!AGENT_ID_PATTERN.test(agentId)||!isServiceDraftProvider(provider))return null;
+ return {id:serviceDraftGrantId(agentId,provider),agentId,targets:serviceDraftGrantTargets(provider),access:'read',duration:'standing',grantedAt};
+}
+export function serviceDraftGranted(agentId:string,grants:readonly Grant[],provider:string,now:string):boolean {
+ const id=serviceDraftGrantId(agentId,provider);
+ return grants.some(grant=>grant.id===id&&grant.agentId===agentId&&grantActive(grant,now));
+}
+/** The audit entry for the person turning "Can draft <Service> changes" on or off in Settings. */
+export function serviceDraftGrantAuditEntry(agentId:string,provider:ServiceDraftProvider,granted:boolean,at:string):AgentAuditEntry {
+ const title=SERVICE_DRAFT_TITLES[provider];
+ return {at,agentId,target:serviceDraftTarget(provider),action:granted?'grant':'ungrant',decision:'allowed',grantId:serviceDraftGrantId(agentId,provider),
+  reason:granted?`The person let this Agent draft ${title} changes in Settings.`:`The person stopped this Agent drafting ${title} changes in Settings.`};
+}
+/** Targets only the calling Agent's own Grants decide: what it reaches is its own (its asks, its GitHub, PostHog and
+ * Notion drafts and standing GitHub writes, its report, what it saved to the Journal) or the person's board,
+ * conversation archive, tracked links, Agents and Journal artifacts, so a Fox turn's Grant, which covers everything
+ * else, never covers them. */
+export const OWN_GRANT_TARGETS:readonly string[]=Object.freeze([AGENT_ASK_TARGET,BOARD_TARGET,GITHUB_DRAFT_TARGET,GITHUB_WRITE_TARGET,CONVERSATION_TARGET,TRACKED_LINK_TARGET,AGENT_REPORT_TARGET,AGENT_ARTIFACT_TARGET,...SERVICE_DRAFT_TARGETS]);
 
 /** While a Fox turn holds the standing server, its Agent's calls go to that turn (world-tool-bridge.ts standingTurn), as
  * they did before Grants: a call the turn's own stream announced is Fox's and runs under the turn's trust; any other

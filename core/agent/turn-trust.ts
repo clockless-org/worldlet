@@ -66,7 +66,9 @@ const UNTRUSTED_TOOLS=['read_content','read_content_page','open_content','read_w
  // Agent reports hold what other Agents wrote about their work: data, never instructions.
  'agent_reports',
  // Agent artifacts hold what Agents saved to the Journal: data, never instructions.
- 'agent_artifacts'];
+ 'agent_artifacts',
+ // PostHog and Notion drafts hold the target's name or title as the Service returned it: data, never instructions.
+ 'service_drafts'];
 const GUARDED_WRITES=new Set<string>([...GUARDED_WRITE_TOOLS,...TURN_GUARDED_WRITES]);
 /** Tools the host routes itself; their tool events above classify them precisely. */
 const HOST_ROUTED=new Set<string>([policy.worldGatewayTool,...worldToolCatalog.map(tool=>tool.name)]);
