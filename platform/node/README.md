@@ -95,7 +95,7 @@ answers on its control socket says so and exits with code 1.
 | `link [--qr]` | Prints the browser link (`world/link`'s, the one in `room-link.txt`), with `--qr` also its QR code; anyone who has it reaches this World, so it is for the person alone |
 | `setup --agent <id>` | Chooses the Agent Fox talks through with setup's own `agentHarness` `select` (it proves the Agent answers first; Codex alone is no Agent for Fox), then registers Claude Code or Codex as below |
 | `register --agent <id>` | Registers the `worldlet` MCP server and skill in `claude-code` or `codex`. Hermes Agent gets its entry in its own profile once it is Fox's Agent ([World tools on Hermes](../../core/agent/PORTABILITY.md#world-tools-on-hermes)) |
-| `remote [on\|off]` | Turns [remote access](../../core/agent/REMOTE-MCP.md) for cloud connectors on or off, as Settings › Agent › Access does, and prints this World's address and what is connected. Each connector still waits for Allow on its card in Attention |
+| `remote [on\|off]` | Turns [remote access](../../core/agent/REMOTE-MCP.md) for cloud connectors (on by default) on or off, as Settings › Agent › Access does, and prints this World's address and what is connected. Each connector still waits for Allow on its card in Attention |
 | `remote token <name>` | Makes a [token](../../core/agent/REMOTE-MCP.md#a-token-for-a-script-or-another-computer) for an Agent that cannot open a browser, such as a script or a daemon on another computer, and prints it once with the address. Remote access must be on |
 | `register --script <name>` | Adds an [Agent for a script](../../core/agent/GRANTS.md#agents-for-scripts) (a daemon or scheduled job on this computer) and prints its endpoint file in the MCP home |
 

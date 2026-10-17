@@ -46,13 +46,20 @@ await withTempDir('worldlet-remote-mcp-',async dir=>{
  for(const name of ['log','error','warn'] as const)console[name]=(...args:unknown[])=>{logged.push(args.map(String).join(' '));};
  const standing=await openStandingWorldTools({access,channel:async()=>({error:'not here'})});
  let changes=0;
- const remote=createRemoteMcpHost({vault,access,tools:()=>Promise.resolve(standing),ledger:()=>ledger,changed:()=>{changes+=1;},WebSocket:FakeSocket as any,now});
+ const remote=createRemoteMcpHost({vault,access,tools:()=>Promise.resolve(standing),ledger:()=>ledger,changed:()=>{changes+=1;},WebSocket:FakeSocket as any,now,onByDefault:true});
  const issued:string[]=[];
  try{
-  // Off until the person turns it on: no socket, no address.
-  assert.deepEqual(await remote.status(),{enabled:false,connected:false,connectors:[]});
-  assert.equal(FakeSocket.all.length,0);
+  // A development build, a check or another library stays off until turned on.
+  const devSecrets=new Map<string,string>();
+  const dev=createRemoteMcpHost({vault:{...vault,get:(id:string)=>devSecrets.get(id)??null,set:(id:string,value:string)=>{devSecrets.set(id,value);}},access,tools:()=>Promise.resolve(standing),ledger:()=>ledger,changed:()=>{},WebSocket:FakeSocket as any,now});
+  assert.deepEqual(await dev.status(),{enabled:false,connected:false,connectors:[]});
+  dev.close();
+  // On by default: the first run makes the address and opens its room without being asked; Turn on changes nothing.
+  assert.equal((await remote.status()).enabled,true);
+  for(let i=0;i<200&&!FakeSocket.all.length;i++)await new Promise(resolve=>setTimeout(resolve,5));
+  assert.equal(FakeSocket.all.length,1);
   const on=await remote.enable();
+  assert.equal(FakeSocket.all.length,1);
   const ws=FakeSocket.last!,{token}=JSON.parse(secrets.get(REMOTE_MCP_VAULT)!);
   const room=await remoteMcpRoom(token);
   assert.equal(ws.url,`wss://worldlet.ai/api/mcp-host/${room}`);
@@ -62,7 +69,7 @@ await withTempDir('worldlet-remote-mcp-',async dir=>{
   assert.equal(on.connected,false);
   ws.open();
   assert.equal((await remote.status()).connected,true);
-  say('PASS turned on, the host opens its room with its token and gives the address mcp.worldlet.ai/<room>.');
+  say('PASS on by default, the host opens its room with its token and gives the address mcp.worldlet.ai/<room>.');
 
   // The front: one request in, one answer out, in order.
   const base=`https://mcp.worldlet.ai/${room}`;
@@ -259,6 +266,12 @@ await withTempDir('worldlet-remote-mcp-',async dir=>{
   // Off: the socket closes and nothing reconnects; on again: the same address.
   const off=await remote.disable();
   assert.deepEqual([off.enabled,FakeSocket.last!.closedWith],[false,1000]);
+  // Turned off stays off when Worldlet starts again.
+  const sockets=FakeSocket.all.length;
+  const restarted=createRemoteMcpHost({vault,access,tools:()=>Promise.resolve(standing),ledger:()=>ledger,changed:()=>{},WebSocket:FakeSocket as any,now,onByDefault:true});
+  await new Promise(resolve=>setTimeout(resolve,50));
+  assert.deepEqual([(await restarted.status()).enabled,FakeSocket.all.length],[false,sockets]);
+  restarted.close();
   const again=await remote.enable();
   assert.equal(again.address,on.address);
   FakeSocket.last!.open();
@@ -270,7 +283,7 @@ await withTempDir('worldlet-remote-mcp-',async dir=>{
   assert.equal(JSON.parse(secrets.get(REMOTE_MCP_VAULT)!).state.clients.length,0);
   const oldRoomAnswer=readRemoteMcpRequest(JSON.stringify({t:'req',id:'x',method:'POST',base,path:'/',query:'',headers:{authorization:'Bearer '+confidentialAccess},body:'{}'}));
   assert.ok(oldRoomAnswer);
-  say('PASS the host reconnects on its own; off closes the room and keeps the address; a new address ends every connection.');
+  say('PASS the host reconnects on its own; off closes the room, keeps the address and stays off after a restart; a new address ends every connection.');
 
   // Malformed frames are dropped.
   for(const bad of ['nope','{}',JSON.stringify({t:'req',id:'a',method:'get',base,path:'/',query:'',headers:{},body:''}),JSON.stringify({t:'req',id:'a',method:'GET',base:'javascript:x',path:'/',query:'',headers:{},body:''})])assert.equal(readRemoteMcpRequest(bad),null);
