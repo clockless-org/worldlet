@@ -2,12 +2,13 @@ import crypto from 'node:crypto';
 import dns from 'node:dns/promises';
 import net from 'node:net';
 import {WorldletError} from '../../files.ts';
-import {CLOUDFLARE_API,CLOUDFLARE_GATE,GOOGLE_TOKEN_URL,HTTP_JSON_GATE,HTTP_JSON_LIMITS,POSTHOG_GATE,SEARCH_CONSOLE_API,SEARCH_CONSOLE_GATE,checkCloudflare,checkHttpJson,checkPosthog,checkSearchConsole,cloudflareSettings,httpJsonEndpoints,httpJsonSettings,posthogSettings,privateAddress,readCloudflare,readHttpJson,readPosthog,readSearchConsole,searchConsoleAccessToken,searchConsoleAssertion,searchConsoleKey,searchConsoleSettings,type HttpJsonSettings,type ServiceGate,type ServiceHttp} from '../../../../../core/accounts/index.ts';
+import {CLOUDFLARE_API,CLOUDFLARE_GATE,GOOGLE_TOKEN_URL,HTTP_JSON_GATE,HTTP_JSON_LIMITS,POSTHOG_GATE,POSTHOG_SIGN_IN,POSTHOG_SIGN_IN_HOSTS,connector,posthogProjects,type PosthogSettings,SEARCH_CONSOLE_API,SEARCH_CONSOLE_GATE,checkCloudflare,checkHttpJson,checkPosthog,checkSearchConsole,cloudflareSettings,httpJsonEndpoints,httpJsonSettings,posthogSettings,privateAddress,readCloudflare,readHttpJson,readPosthog,readSearchConsole,searchConsoleAccessToken,searchConsoleAssertion,searchConsoleKey,searchConsoleSettings,type HttpJsonSettings,type ServiceGate,type ServiceHttp} from '../../../../../core/accounts/index.ts';
 import {SERVICE_ACTIONS} from '../../../../../contracts/services.ts';
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections,VaultService} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
 import {validateWorldTool} from './google-source.ts';
 import {ExecutionJournal} from '../agent-runtime/journal.ts';
+import {McpAccounts} from './mcp-account.ts';
 
 /** Worldlet Services read over the service's own HTTPS API with a key the person pasted (contracts/services.ts,
  * core/accounts/services): PostHog, whose remote MCP server serves only PostHog Cloud and chooses its own project,
@@ -18,7 +19,11 @@ import {ExecutionJournal} from '../agent-runtime/journal.ts';
  * stops at its time and size limits (ServiceGate); the key is never logged, put in the World's state or an event, or
  * given to an Agent. Google Search Console's key is a service account's private key, which is never sent at all: it signs
  * a short-lived assertion that only Google's token address receives, and the access token that comes back is kept in
- * memory until a minute before it expires. */
+ * memory until a minute before it expires. A Service that signs in (PostHog) is read with the access token of its own
+ * sign-in instead (McpAccounts, `mcp:<name>`), renewed there; the vault entry then keeps only the settings the sign-in
+ * found and the choices it offered. */
+/** One choice the person makes after signing in (a PostHog project). */
+type Choice={id:string;name:string};
 interface Definition<S> {
  gate:ServiceGate;
  /** What the person gave besides the key, checked (a ValueError says what is wrong in plain words). */
@@ -33,10 +38,14 @@ interface Definition<S> {
  named?:{name(settings:S):string;list(endpoints:{settings:S;token:boolean}[]):unknown};
  /** The kept key is a Google service account's, exchanged for access tokens (Search Console). */
  serviceAccount?:true;
+ /** The Service's own sign-in, at `url` (its MCP server, which names its authorization server). `locate` finds, with
+  * the signed-in account, the settings to read with and the choices it has; `wanted` is a choice the person made. */
+ signIn?:{url:string;locate(http:(origin:string)=>ServiceHttp,wanted:Record<string,string>):Promise<{settings:S;choices:Choice[]}>};
 }
 const define=<S,>(definition:Definition<S>)=>definition as unknown as Definition<unknown>;
 const SERVICES:Readonly<Record<string,Definition<unknown>>>=Object.freeze({
- posthog:define({gate:POSTHOG_GATE,settings:posthogSettings,origin:settings=>settings.host,check:checkPosthog,read:readPosthog}),
+ posthog:define<PosthogSettings>({gate:POSTHOG_GATE,settings:posthogSettings,origin:settings=>settings.host,check:checkPosthog,read:readPosthog,
+  signIn:{url:POSTHOG_SIGN_IN,locate:locatePosthog}}),
  cloudflare:define({gate:CLOUDFLARE_GATE,settings:cloudflareSettings,origin:()=>CLOUDFLARE_API,check:(http,settings)=>checkCloudflare(http,settings),read:(http,settings,body)=>readCloudflare(http,settings,body)}),
  http:define<HttpJsonSettings>({gate:HTTP_JSON_GATE,settings:httpJsonSettings,origin:settings=>new URL(settings.url).origin,check:checkHttpJson,read:readHttpJson,
   named:{name:settings=>settings.name,list:httpJsonEndpoints}}),
@@ -49,16 +58,21 @@ const vaultId=(provider:string)=>'service:'+provider;
 
 /** A kept key the service refuses (401): the person connects again with a new one. */
 class ServiceUnauthorized extends Error {override name='ServiceUnauthorized';}
-interface Kept {v:1;settings:unknown;token:string}
+/** `signIn`: read with the Service's own sign-in, not a key (`token` is empty); `choices` what it offered. */
+interface Kept {v:1;settings:unknown;token:string;signIn?:true;choices?:Choice[]}
 /** A connection of named endpoints (Definition.named): each with its settings and its key, which may be empty. */
 interface KeptNamed {v:1;endpoints:{settings:unknown;token:string}[]}
-type Endpoint={settings:unknown;token:string};
+type Endpoint={settings:unknown;token:string;signIn?:true};
 
 export interface ServiceSourceOptions {vault:VaultService;fetch?:typeof fetch;
  /** Every address a host name resolves to, for a gate that is `publicOnly` (the system resolver by default). */
  lookup?:(host:string)=>Promise<string[]>;
  /** Milliseconds now, for when an access token expires (Date.now by default). */
- clock?:()=>number}
+ clock?:()=>number;
+ /** Opens a sign-in page in the browser on this computer (a Service that signs in). */
+ openExternal?:(url:string)=>Promise<void>;
+ /** The World's own sign-ins (McpAccounts over the same vault by default). */
+ accounts?:McpAccounts}
 export class ServiceSource {
  private readonly vault:VaultService;
  private readonly fetch:typeof fetch;
@@ -66,8 +80,12 @@ export class ServiceSource {
  private readonly clock:()=>number;
  /** Access tokens exchanged for a service account key, by the key's hash: in memory only. */
  private readonly access=new Map<string,{token:string;until:number}>();
+ readonly accounts:McpAccounts;
+ readonly openExternal:(url:string)=>Promise<void>;
  constructor(options:ServiceSourceOptions){
   this.vault=options.vault;this.fetch=options.fetch??fetch;this.clock=options.clock??Date.now;
+  this.accounts=options.accounts??new McpAccounts({vault:this.vault,agentHomes:()=>[],fetch:this.fetch,now:this.clock});
+  this.openExternal=options.openExternal??(async()=>{throw new WorldletError('Could not open your browser. Try again.');});
   this.lookup=options.lookup??(async host=>(await dns.lookup(host,{all:true})).map(entry=>entry.address));
  }
  connected(provider:string){return this.endpoints(provider).length>0;}
@@ -82,6 +100,8 @@ export class ServiceSource {
    if(service.named)return (Array.isArray(value.endpoints)?value.endpoints:[]).slice(0,HTTP_JSON_LIMITS.endpoints).flatMap(entry=>{
     try{return typeof entry?.token==='string'?[{settings:service.settings(entry.settings),token:entry.token}]:[];}catch{return [];}
    });
+   // A sign-in counts while its grant is kept; the settings it found are checked again like a key's.
+   if(value.signIn===true)return service.signIn&&this.accounts.worldConnection(provider)?[{settings:service.settings(value.settings),token:'',signIn:true}]:[];
    if(typeof value.token!=='string'||!value.token)return [];
    if(service.serviceAccount)searchConsoleKey(value.token);
    return [{settings:service.settings(value.settings),token:value.token}];
@@ -121,8 +141,8 @@ export class ServiceSource {
    return service.named.list(kept.map(entry=>({settings:entry.settings,token:!!entry.token}))) as Row;
   }
   const kept=this.endpoint(service,provider,body);
-  try{return await service.read(this.http(service,kept.settings,kept.token),kept.settings,body) as Row;}
-  catch(error){if(error instanceof ServiceUnauthorized)throw new WorldletError(service.gate.disconnected);throw error;}
+  try{return await service.read(this.http(service,kept.settings,kept.token,kept.signIn),kept.settings,body) as Row;}
+  catch(error){if(error instanceof ServiceUnauthorized)throw new WorldletError(unauthorized(service,kept));throw error;}
  }
  /** The connection still works: the same one read connecting made, for each endpoint. */
  async test(provider:string):Promise<Row> {
@@ -130,16 +150,18 @@ export class ServiceSource {
   const kept=service?this.endpoints(provider):[];
   if(!service||!kept.length)throw new WorldletError(service?.gate.connectMessage??'Unsupported Service.');
   for(const entry of kept){
-   try{await service.check(this.http(service,entry.settings,entry.token),entry.settings);}
-   catch(error){if(error instanceof ServiceUnauthorized)throw new WorldletError(service.gate.disconnected);throw error;}
+   try{await service.check(this.http(service,entry.settings,entry.token,entry.signIn),entry.settings);}
+   catch(error){if(error instanceof ServiceUnauthorized)throw new WorldletError(unauthorized(service,entry));throw error;}
   }
   return {ok:true,status:'connected'};
  }
  /** Checks the settings, then the key with one read on a connection not kept yet: only a key the service accepts is
-  * kept, so a refused paste leaves the connection already kept as it was. */
- async connect(provider:string,token:string,settings:unknown):Promise<void> {
+  * kept, so a refused paste leaves the connection already kept as it was. With no key, a Service that signs in signs in
+  * (`open`, `cancelled`), or, already signed in, takes the choice in `settings` (a PostHog project). */
+ async connect(provider:string,token:string,settings:unknown,open?:(url:string)=>Promise<void>,cancelled:()=>boolean=()=>false):Promise<void> {
   const service=definition(provider);
   if(!service)throw new WorldletError('Unsupported Service.');
+  if(!token.trim()&&service.signIn)return this.signIn(provider,service,settings,open??this.openExternal,cancelled);
   let chosen:unknown;
   try{chosen=service.settings(settings);}catch(error){throw new WorldletError((error as Error).message);}
   let key:string;
@@ -155,8 +177,39 @@ export class ServiceSource {
   try{await service.check(this.http(service,chosen,key),chosen);}
   catch(error){if(error instanceof ServiceUnauthorized)throw new WorldletError(service.gate.refused);throw error;}
   this.vault.set(vaultId(provider),JSON.stringify(named?{v:1,endpoints:[...others,{settings:chosen,token:key}]} satisfies KeptNamed:{v:1,settings:chosen,token:key} satisfies Kept));
+  // A key replaces a sign-in: its grant is forgotten.
+  if(service.signIn)this.accounts.disconnect(provider);
  }
- disconnect(provider:string){if(definition(provider)){this.vault.delete(vaultId(provider));this.access.clear();}}
+ /** Signs in to the Service in the browser (McpAccounts: its own page, a loopback address, PKCE, the connector's read
+  * scopes), finds the settings to read with and what the person can choose, checks them with one read, and keeps them.
+  * Already signed in and given a choice (`settings`), it keeps that choice without signing in again. A sign-in that does
+  * not finish leaves a kept key as it was. */
+ private async signIn(provider:string,service:Definition<unknown>,settings:unknown,open:(url:string)=>Promise<void>,cancelled:()=>boolean){
+  const signIn=service.signIn!,wanted=settings&&typeof settings==='object'?settings as Record<string,string>:{};
+  const before=this.kept(provider),choosing=before?.signIn===true&&Object.keys(wanted).length>0&&!!this.accounts.worldConnection(provider);
+  if(!choosing)await this.accounts.connect(provider,signIn.url,'',open,cancelled);
+  try{
+   const located=await signIn.locate(origin=>this.http(service,{host:origin},'',true,false),wanted);
+   try{await service.check(this.http(service,located.settings,'',true),located.settings);}
+   catch(error){if(error instanceof ServiceUnauthorized)throw new WorldletError(service.gate.signedOut??service.gate.disconnected);throw error;}
+   this.vault.set(vaultId(provider),JSON.stringify({v:1,settings:located.settings,token:'',signIn:true,choices:located.choices} satisfies Kept));
+  }catch(error){
+   if(!choosing&&before?.signIn!==true)this.accounts.disconnect(provider);
+   throw error;
+  }
+ }
+ private kept(provider:string):Kept|null {
+  try{const value=JSON.parse(this.vault.get(vaultId(provider))??'null');return value?.v===1?value as Kept:null;}catch{return null;}
+ }
+ /** What a signed-in Service lets the person choose (PostHog's projects) and which one is chosen; nothing for a key. */
+ choices(provider:string):{choices:Choice[];chosen:string|null} {
+  const kept=this.kept(provider),endpoint=this.endpoints(provider)[0];
+  if(!kept?.signIn||!endpoint?.signIn||!Array.isArray(kept.choices))return {choices:[],chosen:null};
+  const choices=kept.choices.filter(choice=>choice&&typeof choice.id==='string'&&typeof choice.name==='string').slice(0,50).map(choice=>({id:choice.id,name:choice.name}));
+  const project=(endpoint.settings as Row).project;
+  return {choices,chosen:typeof project==='string'?project:null};
+ }
+ disconnect(provider:string){const service=definition(provider);if(service){this.vault.delete(vaultId(provider));this.access.clear();if(service.signIn)this.accounts.disconnect(provider);}}
  /** An access token for a kept service account key: the one in memory until a minute before it expires, otherwise a
   * new one from Google's token address for an assertion the key signs (RS256). Only the assertion is sent; a key
   * Google refuses is ServiceUnauthorized, and nothing Google says about it is repeated. */
@@ -199,18 +252,32 @@ export class ServiceSource {
   // A Service with one endpoint only (PostHog): a named Service has no single connection to write to.
   const service=definition(provider),kept=service&&!service.named?this.endpoints(provider)[0]:undefined;
   if(!service||!kept)return null;
-  return {settings:kept.settings,request:this.http(service,kept.settings,kept.token).raw};
+  const raw=this.http(service,kept.settings,kept.token,kept.signIn).raw;
+  if(!kept.signIn)return {settings:kept.settings,request:raw};
+  // A sign-in asked only to read. The first change the person approves asks the Service, in the browser, for the
+  // connector's write list too; the access token that comes back writes.
+  return {settings:kept.settings,request:async(method,path,body)=>{
+   if(method!=='GET'){
+    const granted=this.accounts.grantedScopes(provider),needed=connector(provider)?.scopes.write??[];
+    if(granted.length&&needed.some(scope=>!granted.includes(scope)))await this.accounts.connect(provider,service.signIn!.url,'',this.openExternal,()=>false,undefined,undefined,{write:true});
+   }
+   return raw(method,path,body);
+  }};
  }
- /** Requests to the connection's one origin, with its key, bounded in time and size. Paths are the reader's own. */
- private http(service:Definition<unknown>,settings:unknown,token:string):ServiceHttp&{raw(method:'GET'|'POST'|'PATCH',path:string,body?:unknown):Promise<{status:number;json:unknown}>} {
+ /** Requests to the connection's one origin, with its key, bounded in time and size. Paths are the reader's own.
+  * `signIn`: with the access token of the Service's own sign-in instead, renewed once when the Service refuses it
+  * (`renew`), and ServiceUnauthorized when it is refused again. */
+ private http(service:Definition<unknown>,settings:unknown,token:string,signIn?:boolean,renew=true):ServiceHttp&{raw(method:'GET'|'POST'|'PATCH',path:string,body?:unknown):Promise<{status:number;json:unknown}>} {
   const {gate}=service,origin=service.origin(settings);
   // `raw`: the status and JSON of any answer that is not a redirect (a write's refusal is the caller's to explain).
   const raw=(method:'GET'|'POST'|'PATCH',path:string,body?:unknown)=>send(method,path,body,true) as Promise<{status:number;json:unknown}>;
-  const send=async(method:'GET'|'POST'|'PATCH',path:string,body?:unknown,answer=false):Promise<unknown>=>{
+  const send=async(method:'GET'|'POST'|'PATCH',path:string,body?:unknown,answer=false,force=false):Promise<unknown>=>{
    if(!path.startsWith('/')||path.startsWith('//'))throw new WorldletError('Invalid Service request.');
    const url=new URL(path,origin);
    if(url.origin!==origin)throw new WorldletError(`${gate.title} is read only at the address you gave.`);
-   const authorization=service.serviceAccount?'Bearer '+await this.accessToken(gate,token):token?'Bearer '+token:'';
+   let authorization:string;
+   if(signIn){const header=await this.accounts.bearer(gate.name,force);if(!header)throw new ServiceUnauthorized();authorization=header;}
+   else authorization=service.serviceAccount?'Bearer '+await this.accessToken(gate,token):token?'Bearer '+token:'';
    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),gate.timeoutSeconds*1000);
    try{
     if(gate.publicOnly)await this.publicHost(gate,url.hostname);
@@ -222,7 +289,11 @@ export class ServiceSource {
     }catch{throw new WorldletError(controller.signal.aborted?`${gate.title} took too long to answer. Try a narrower read.`:`Could not reach ${gate.title} at ${origin}. Check the address and your internet connection.`);}
     const discard=()=>response.body?.cancel().catch(()=>{});
     if(response.type==='opaqueredirect'||response.status>=300&&response.status<400){void discard();throw new WorldletError(`${gate.title} answered from another address. Worldlet reads it only at ${origin}; check the address you gave.`);}
-    if(response.status===401){void discard();if(service.serviceAccount)this.access.clear();if(answer)return {status:401,json:null};throw new ServiceUnauthorized();}
+    if(response.status===401){
+     void discard();if(service.serviceAccount)this.access.clear();
+     if(signIn&&renew&&!force)return send(method,path,body,answer,true);
+     if(answer)return {status:401,json:null};throw new ServiceUnauthorized();
+    }
     const text=await bounded(response,gate,controller);
     if(answer){let json:unknown=null;try{json=JSON.parse(text);}catch{}return {status:response.status,json};}
     if(!response.ok){
@@ -255,6 +326,25 @@ export class ServiceSource {
   else try{addresses=await this.lookup(host);}catch{throw new WorldletError(`Could not find ${host}. Check the address and your internet connection.`);}
   if(!addresses.length||addresses.some(privateAddress))throw new WorldletError(`Worldlet reads ${gate.title} only on the internet: ${host} points to this computer or your local network.`);
  }
+}
+
+/** What a refused connection says: a sign-in the Service no longer accepts, or a kept key it refuses. */
+function unauthorized(service:Definition<unknown>,endpoint:Endpoint){return endpoint.signIn?service.gate.signedOut??service.gate.disconnected:service.gate.disconnected;}
+
+/** Where a PostHog account that signed in reads: the Cloud (US, then EU) whose API answers `/api/users/@me/` with its
+ * token, and the project chosen there (`wanted`, else the one PostHog has it on now). */
+async function locatePosthog(http:(origin:string)=>ServiceHttp,wanted:Record<string,string>):Promise<{settings:PosthogSettings;choices:Choice[]}> {
+ for(const host of POSTHOG_SIGN_IN_HOSTS){
+  let me:unknown;
+  try{me=await http(host).get('/api/users/@me/');}
+  catch(error){if(error instanceof ServiceUnauthorized||error instanceof WorldletError)continue;throw error;}
+  const {projects,current}=posthogProjects(me);
+  if(wanted.project!==undefined&&!projects.some(item=>item.id===wanted.project))throw new WorldletError('That project is not in your PostHog account. Choose one from the list.');
+  const project=wanted.project??current;
+  if(!project)throw new WorldletError('Your PostHog account has no project yet. Make one in PostHog, then connect again.');
+  return {settings:posthogSettings({host,project}),choices:projects};
+ }
+ throw new WorldletError('PostHog did not let Worldlet in. Try signing in again.');
 }
 
 /** The answer's text, read only up to the gate's size. */
@@ -324,10 +414,16 @@ export class ServiceSourceConnections implements AgentSourceConnections {
  constructor(source:ServiceSource,fallback:()=>AgentSourceConnections,transport:()=>string){this.source=source;this.fallback=fallback;this.transport=transport;}
  private other(){return this.delegate??=this.fallback();}
  providers(provider:string){return DIRECT_SERVICES.includes(provider)?[provider]:this.other().providers(provider);}
- cancel(){this.delegate?.cancel();}
+ private cancelled=false;
+ cancel(){this.cancelled=true;this.delegate?.cancel();}
  async connect(options:Parameters<AgentSourceConnections['connect']>[0]){
   if(!DIRECT_SERVICES.includes(options.provider))return this.other().connect(options);
-  await this.source.connect(options.provider,options.token,options.settings??{});
+  this.cancelled=false;
+  await this.source.connect(options.provider,options.token,options.settings??{},async url=>{
+   try{await this.source.openExternal(url);}catch{throw new WorldletError('Could not open your browser. Try again.');}
+   options.onStage('browser',url);
+  },()=>this.cancelled);
+  if(this.cancelled)throw new WorldletError('Sign-in was cancelled.');
   options.onConnected({provider:options.provider,target:TITLES[options.provider],transport:this.transport(),connector:'service'});
  }
  async disconnect(connection:Row,home:string){

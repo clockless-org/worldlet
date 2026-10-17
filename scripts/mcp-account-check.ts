@@ -137,7 +137,7 @@ if(process.platform!=='win32')assert.equal(fs.statSync(path.join(hermes,'mcp-tok
  assert.deepEqual(connectorScopes('unknown',['a','b']),[]);
  for(const item of CONNECTORS){
   assert.equal(connector(item.id),item);
-  assert.ok(item.scopes.read.length<=5,item.id+' asks for a short list');
+  assert.ok(item.scopes.read.length<=8,item.id+' asks for a short list');
   assert.ok(!/\b(key|token|scope|MCP|OAuth|API|ID)\b/i.test(item.purpose),item.id+'\'s line is plain');
  }
  // The World's own comes first, even where the Agent has one by that name; disconnecting forgets only the World's.

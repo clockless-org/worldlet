@@ -1,4 +1,5 @@
-// Bounded reads of the person's own PostHog project through PostHog's API, with a personal API key they pasted: one
+// Bounded reads of the person's own PostHog project through PostHog's API, with PostHog's own sign-in or a personal API
+// key they pasted (under Advanced): one
 // read-only HogQL SELECT (`query`), a page of their insights, dashboards, feature flags or annotations (`read`), or their
 // production errors: each error group seen in the last 7 days with its last 24 hours (`read` `errors`).
 // No writes. PostHog's remote MCP server serves only PostHog Cloud and picks its project itself, so a self-hosted
@@ -19,7 +20,35 @@ export const POSTHOG_GATE:ServiceGate=Object.freeze({name:'posthog',title:'PostH
  forbidden:'This PostHog key cannot read that. Check the project ID and that the key has read access to it.',
  missing:'PostHog has no such project at this address. Check the PostHog address and the project ID.',
  invalid:'PostHog could not run this read.',
- busy:'PostHog is limiting reads right now. Try again in a minute.'});
+ busy:'PostHog is limiting reads right now. Try again in a minute.',
+ signedOut:'PostHog signed you out. Sign in to PostHog again in Settings › Connectors.'});
+
+/** PostHog's own sign-in (core/accounts/connectors.ts, `mcp-oauth`): its remote MCP server's address names its
+ * authorization server, where Worldlet registers itself and signs in with PKCE on this computer. The access token it
+ * gives is then sent as a Bearer to PostHog Cloud's API (the same endpoints a personal API key reads), never to the MCP
+ * server's tools. */
+export const POSTHOG_SIGN_IN='https://mcp.posthog.com/mcp';
+/** Where a signed-in account's API answers: US Cloud first, then EU. */
+export const POSTHOG_SIGN_IN_HOSTS:readonly string[]=Object.freeze([POSTHOG_HOSTS.us,POSTHOG_HOSTS.eu]);
+/** One PostHog project the person can choose after signing in. */
+export interface PosthogProject {id:string;name:string}
+/** The projects `GET /api/users/@me/` names (its organization's teams) and the one it is on now. Ids are PostHog's
+ * project numbers; names are cut to a title's length. At most 50, in PostHog's order. */
+export function posthogProjects(me:unknown):{projects:PosthogProject[];current:string|null} {
+ const row=isDict(me)?me:{};
+ const organization=isDict(row.organization)?row.organization:{};
+ const teams=Array.isArray(organization.teams)?organization.teams:[];
+ const projects:PosthogProject[]=[];
+ for(const team of teams){
+  if(!isDict(team))continue;
+  const id=String(team.id??'');
+  if(!/^[1-9][0-9]{0,11}$/.test(id)||projects.some(project=>project.id===id))continue;
+  projects.push({id,name:cut(team.name,POSTHOG_LIMITS.title)||'Project '+id});
+  if(projects.length>=50)break;
+ }
+ const team=isDict(row.team)?String(row.team.id??''):'';
+ return {projects,current:projects.some(project=>project.id===team)?team:projects[0]?.id??null};
+}
 
 /** PostHog's ingestion addresses and its old app address serve no private API; their Cloud's own address does. */
 const CLOUD_ALIASES=new Map([['app.posthog.com',POSTHOG_HOSTS.us],['us.i.posthog.com',POSTHOG_HOSTS.us],['eu.i.posthog.com',POSTHOG_HOSTS.eu]]);

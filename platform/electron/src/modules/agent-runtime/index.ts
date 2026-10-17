@@ -120,7 +120,7 @@ export function worldSources(context:RuntimeContext,vault:VaultService,accountsH
   return savedNotion(body);
  }},github:{read:body=>mcp.read('github',body)}});
  const doordash=new DoorDash({folder:path.join(context.root,'accounts','doordash'),legacyHomes:homes});
- return {google,mcp,services:new ServiceSource({vault}),doordash};
+ return {google,mcp,services:new ServiceSource({vault,openExternal}),doordash};
 }
 
 export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>Adapter),listeners:((reason:AgentChange)=>void)[],sources:((accountsHome:()=>string)=>WorldSources)|null=null):AgentService {
@@ -690,6 +690,9 @@ export function installAgentRuntime(host:Host){
   if(request.operation==='remove'){endpoints.removeEndpoint('http',request.name);return {endpoints:endpoints.endpointList('http')};}
   throw new WorldletError('Unknown HTTP JSON operation.');
  }});
+ /** What a Service that signed in lets the person choose (PostHog's projects) and which one is chosen (Settings ›
+  * Connectors). Choosing is `connect` with the choice in `settings` and no key. Not in ROOM_ALLOWED. */
+ host.register({serviceChoices:async request=>new ServiceSource({vault}).choices(String(request.provider??''))});
  let adapter=selectAdapter(context,undefined,remote,vault);
  // Once the runtime is ready and Fox's profile exists (after its first turn), and again whenever Fox changes Agent.
  listeners.push(()=>{void residentHermes(context,adapter);});

@@ -110,7 +110,11 @@ await withTempDir('worldlet-posthog-service-',async temp=>{
  assert.equal(connectToken('posthog','  '+KEY+' '),KEY);
  assert.match((()=>{try{connectToken('posthog','phc_'+'a'.repeat(30));return '';}catch(e){return (e as Error).message;}})(),/project API key.*starts with phx_/);
  assert.deepEqual(connectSettings('posthog',{host:' eu.posthog.com ',project:'12345'}),{host:'eu.posthog.com',project:'12345'});
- assert.throws(()=>connectSettings('posthog',{host:HOST}),/Enter the Project ID/);
+ assert.throws(()=>connectSettings('posthog',{host:HOST},KEY),/Enter the Project ID/);
+ // With no key PostHog signs in: only a choice made after signing in is taken.
+ assert.equal(connectToken('posthog',''),'');
+ assert.deepEqual(connectSettings('posthog',{project:'2'}),{project:'2'});
+ assert.deepEqual(connectSettings('posthog',undefined),{});
  assert.throws(()=>connectSettings('posthog',{host:HOST,project:'1',extra:'x'}),/does not take these settings/);
  assert.throws(()=>connectSettings('github',{host:HOST}),/does not take these settings/);
  assert.deepEqual(connectSettings('github',undefined),{});

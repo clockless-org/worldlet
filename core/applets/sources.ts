@@ -9,9 +9,11 @@ export interface TokenField {key:string;label:string;hint?:string;value?:string;
  * for; PostHog and Cloudflare take an API key; Search Console a service account's JSON key), each with the one line saying what the token needs, what the token is
  * called there, the settings it also needs, and a token shape that is a common mistake. The token is checked with
  * one read before it is kept. `optional`: the source also connects with no token (an open HTTP JSON endpoint). */
-export const TOKEN_PROVIDERS:Readonly<Record<string,{hint:string;token:RegExp;label?:string;optional?:boolean;fields?:readonly TokenField[];wrong?:{token:RegExp;message:string}}>>=Object.freeze({
+/** `signIn`: the source also connects with no token, through its own sign-in (core/accounts/connectors.ts); its
+ * settings may then be partly given (a project chosen after signing in). */
+export const TOKEN_PROVIDERS:Readonly<Record<string,{hint:string;token:RegExp;label?:string;optional?:boolean;signIn?:boolean;fields?:readonly TokenField[];wrong?:{token:RegExp;message:string}}>>=Object.freeze({
  github:{hint:'Paste a fine-grained token with read-only access to Issues, Pull requests and Metadata.',token:/^[A-Za-z0-9_]{20,255}$/},
- posthog:{hint:'Paste a personal API key with read access to Project, Query, Insight, Dashboard, Feature flag and Annotation.',token:/^[A-Za-z0-9_-]{20,255}$/,label:'personal API key',
+ posthog:{hint:'Paste a personal API key with read access to Project, Query, Insight, Dashboard, Feature flag and Annotation.',token:/^[A-Za-z0-9_-]{20,255}$/,label:'personal API key',signIn:true,
   fields:Object.freeze([
    {key:'host',label:'PostHog address',value:'https://us.posthog.com',hint:'US Cloud is https://us.posthog.com and EU Cloud https://eu.posthog.com; a self-hosted PostHog uses its own address.',maxLength:200},
    {key:'project',label:'Project ID',placeholder:'12345',hint:'The number after /project/ in your PostHog address bar.',numeric:true,maxLength:12},
@@ -38,19 +40,21 @@ export function connectToken(provider:string,value:unknown):string {
  const rule=Object.hasOwn(TOKEN_PROVIDERS,provider)?TOKEN_PROVIDERS[provider]:null;
  if(!rule){if(value!==undefined&&value!=='')throw Error('This source does not connect with a token.');return '';}
  const token=typeof value==='string'?value.trim():'';
- if(!token&&rule.optional&&(value===undefined||typeof value==='string'))return '';
+ if(!token&&(rule.optional||rule.signIn)&&(value===undefined||typeof value==='string'))return '';
  if(!token)throw Error(rule.hint);
  if(rule.wrong?.token.test(token))throw Error(rule.wrong.message);
  if(!rule.token.test(token))throw Error('That does not look like a token. '+rule.hint);
  return token;
 }
 /** The settings a `connect` request carries beside the token: exactly the source's fields, each given and short.
- * Their meaning (an address, a project) is checked by the connection's owner before anything is sent. */
-export function connectSettings(provider:string,value:unknown):Record<string,string> {
- const fields=Object.hasOwn(TOKEN_PROVIDERS,provider)?TOKEN_PROVIDERS[provider].fields??[]:[];
+ * Their meaning (an address, a project) is checked by the connection's owner before anything is sent. With no token
+ * for a source that signs in (`signIn`), only the fields given are taken (a project chosen after signing in). */
+export function connectSettings(provider:string,value:unknown,token=''):Record<string,string> {
+ const rule=Object.hasOwn(TOKEN_PROVIDERS,provider)?TOKEN_PROVIDERS[provider]:null,fields=rule?.fields??[];
  const given=value===undefined||value===null?{}:value;
  if(typeof given!=='object'||Array.isArray(given)||Object.keys(given).some(key=>!fields.some(field=>field.key===key)))throw Error('This source does not take these settings.');
- return Object.fromEntries(fields.map(field=>{
+ const partial=!token&&rule?.signIn===true;
+ return Object.fromEntries(fields.filter(field=>!partial||Object.hasOwn(given,field.key)).map(field=>{
   const entry=(given as Record<string,unknown>)[field.key],text=typeof entry==='string'?entry.trim():'';
   if(!text)throw Error(`Enter the ${field.label}.`);
   if(text.length>field.maxLength)throw Error(`The ${field.label} is too long.`);
