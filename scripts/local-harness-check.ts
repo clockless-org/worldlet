@@ -28,6 +28,14 @@ assert.match(turn.system,/You are Fox/);assert.match(turn.system,/Be warm\./);
 assert.match(turn.prompt,/Person: hi\nFox: Hello!/);assert.match(turn.prompt,/"view":"world"/);assert.ok(turn.prompt.endsWith('Person: What is next?'));
 assert.match(turn.system,/cannot act in Worldlet/,'text-only by default');
 assert.match(localHarnessTurn({text:'hi'},{worldTools:true}).system,/describe_world_tools.*call_world_tool/);
+// An Applet analysis names query_world_items and upsert_world_items; a local Agent has only call_world_tool, so the
+// instructions say which target and action they are (Beta 4464: Codex answered they "aren't available" and saved nothing).
+{
+ const analysis=localHarnessTurn({text:'Read it with query_world_items, then submit with upsert_world_items.'},{worldTools:true}).system;
+ assert.match(analysis,/query_world_items is target "items", action "query"; upsert_world_items is target "items", action "save"/);
+ assert.doesNotMatch(localHarnessTurn({text:'hi'},{worldTools:true}).system,/Tool names in the message/,'only names the message uses');
+ assert.doesNotMatch(localHarnessTurn({text:'Use query_world_items.'}).system,/query_world_items/,'no World tools, no aliases');
+}
 {
  // Known actions travel with the instructions, so Fox calls one without discovery rounds (owner 2026-10-12: Fox slow).
  const tools=localHarnessTurn({text:'hi'},{worldTools:true}).system;
