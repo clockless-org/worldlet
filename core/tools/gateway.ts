@@ -94,6 +94,10 @@ function buildWorldActions(sample:boolean):WorldAction[]{
  // board" name.
  operations('board','world_board');
  for(const action of actions.filter(a=>a.tool==='world_board'))action.parameters.required=action.action==='define'?['definition','expectedRevision']:[];
+ // Agent reports (core/agent/reports.ts): each its own Grant target, which only "Can report its work" and "Can see
+ // other Agents" name.
+ operations('agents','agent_reports');
+ for(const action of actions.filter(a=>a.tool==='agent_reports'))action.parameters.required=action.action==='report'?['status']:[];
  // GitHub drafts (core/agent/github-drafts.ts): each its own Grant target, which only "Can draft GitHub changes" names.
  operations('github-drafts','github_drafts');
  for(const action of actions.filter(a=>a.tool==='github_drafts'))action.parameters.required=action.action==='create'?['write','target']:[];

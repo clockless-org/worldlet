@@ -427,6 +427,10 @@ export interface AgentAccess {
   * way (core linkGrant), each change audited. */
  grantLinks(agentId:string,kind:string):boolean;
  ungrantLinks(agentId:string,kind:string):boolean;
+ /** "Can report its work" (`report`: agents/report) and "Can see other Agents" (`list`: agents/list), the same way
+  * (core reportGrant), each change audited. */
+ grantReports(agentId:string,kind:string):boolean;
+ ungrantReports(agentId:string,kind:string):boolean;
  onRevoke(listener:(agentId:string)=>void):void;
 }
 export interface VaultService {

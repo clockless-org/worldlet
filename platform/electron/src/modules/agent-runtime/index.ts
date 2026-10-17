@@ -15,6 +15,7 @@ import {openStandingWorldTools,type StandingWorldTools} from './world-tool-bridg
 import {createAgentAccess} from './agent-access.ts';
 import {createAgentAsks,type AgentAsks} from './agent-asks.ts';
 import {createWorldBoard,type WorldBoard} from './board.ts';
+import {createAgentReports,type AgentReports} from './agent-reports.ts';
 import {createGithubDrafts,type GithubDrafts} from './github-drafts.ts';
 import {createRemoteMcpHost,type RemoteMcpHost} from './remote-mcp.ts';
 import {createConversationArchive,type ConversationArchive} from './conversations.ts';
@@ -32,7 +33,7 @@ import {harnessConnections} from './harness-connections.ts';
 import {harnessScheduleControls} from './harness-schedule-controls.ts';
 import {harnessSkills} from './harness-skills.ts';
 import {harnessMemory} from './harness-memory.ts';
-import {AGENT_VERSIONS,agentRevoked,serviceGranted,askGranted,ASK_GRANT_KINDS,type AskGrantKind,boardGranted,BOARD_GRANT_KINDS,type BoardGrantKind,githubDraftGranted,conversationGranted,CONVERSATION_GRANT_KINDS,type ConversationGrantKind,linkGranted,LINK_GRANT_KINDS,type LinkGrantKind,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
+import {AGENT_VERSIONS,agentRevoked,serviceGranted,askGranted,ASK_GRANT_KINDS,type AskGrantKind,boardGranted,BOARD_GRANT_KINDS,type BoardGrantKind,githubDraftGranted,conversationGranted,CONVERSATION_GRANT_KINDS,type ConversationGrantKind,linkGranted,LINK_GRANT_KINDS,type LinkGrantKind,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId,reportGranted,REPORT_GRANT_KINDS,type ReportGrantKind} from '../../../../../core/agent/index.ts';
 import {harnessTools} from './harness-services.ts';
 import {ongoingId} from '../../../../../core/tasks/index.ts';
 import {SERVICE_PROVIDERS,SERVICE_TITLES} from '../../../../../contracts/services.ts';
@@ -281,7 +282,7 @@ export function standingWorldTools():Promise<StandingWorldTools>|null {
   board:(agentId,args,canRead)=>worldBoard?worldBoard.call(agentId,args,canRead):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),
   drafts:(agentId,args)=>githubDrafts?githubDrafts.call(agentId,args):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),
   conversations:(agentId,args)=>conversationArchive?conversationArchive.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},
-  links:(agentId,args)=>trackedLinks?trackedLinks.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},channel:(name,args,agent)=>channelTool?channelTool(name,args,agent):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})});
+  links:(agentId,args)=>trackedLinks?trackedLinks.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},reports:(agentId,args)=>agentReports?agentReports.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},channel:(name,args,agent)=>channelTool?channelTool(name,args,agent):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})});
 }
 let channelTool:((name:string,args:Row,agent?:string)=>Promise<Row>)|null=null;
 /** Each Agent's identity, Grants and audit (agent-access.ts), made when the runtime is installed. */
@@ -298,6 +299,8 @@ let remoteMcp:RemoteMcpHost|null=null;
 let conversationArchive:ConversationArchive|null=null;
 /** Tracked links (tracked-links.ts), made with agentAccess. */
 let trackedLinks:TrackedLinks|null=null;
+/** Agent reports (agent-reports.ts), made with agentAccess. */
+let agentReports:AgentReports|null=null;
 /** How many of each Agent's newest audit entries Settings shows. */
 const AGENT_ACCESS_AUDIT=20;
 
@@ -575,6 +578,9 @@ export function installAgentRuntime(host:Host){
  // Asks need the person's own World with private context allowed, as a channel's reads do.
  agentAsks=createAgentAsks({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
   name:agentId=>agentAccess?.identity(agentId)?.name??agentId,changed:()=>host.store.worldChanged(),drafts:()=>githubDrafts});
+ // Agent reports (core/agent/GRANTS.md#agent-reports): in the person's own World with private context allowed, as asks are.
+ agentReports=createAgentReports({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
+  identities:()=>agentAccess?.list(0).map(entry=>entry.identity)??[]});
  /** The person's answer on an ask's Attention card (core/agent/GRANTS.md#agent-asks): `answer` with the ask's ID and
   * `answered` (one of its own choices and an optional note), `done` or `skipped`. Core checks it against the stored
   * ask; the page never names an Agent. Approve on an ask that carries GitHub drafts is `approveDrafts`, which runs them
@@ -740,6 +746,17 @@ export function installAgentRuntime(host:Host){
    }else if(!access.ungrantGithubDrafts(id))throw new WorldletError('Could not change that.');
    return {ok:true};
   }
+  if(request.operation==='grantReports'||request.operation==='ungrantReports'){
+   const id=typeof request.id==='string'?request.id:'',kind=typeof request.kind==='string'?request.kind:'';
+   const identity=access.identity(id);
+   if(!identity)throw new WorldletError('That Agent is not known here.');
+   if(!REPORT_GRANT_KINDS.includes(kind as ReportGrantKind))throw new WorldletError('That is not something an Agent can be allowed here.');
+   if(request.operation==='grantReports'){
+    if(agentRevoked(identity,new Date().toISOString()))throw new WorldletError('This Agent was revoked.');
+    if(!access.grantReports(id,kind))throw new WorldletError('Could not change that.');
+   }else if(!access.ungrantReports(id,kind))throw new WorldletError('Could not change that.');
+   return {ok:true};
+  }
   const services=connectedServices(),now=new Date().toISOString();
   const githubApp=githubDrafts?.app.status().connected===true;
   return {agents:access.list(AGENT_ACCESS_AUDIT).map(({identity,grants,audit})=>({...identity,grants,audit,
@@ -748,6 +765,9 @@ export function installAgentRuntime(host:Host){
    board:{read:boardGranted(identity.id,grants,'read',now),define:boardGranted(identity.id,grants,'define',now)},
    conversations:{add:conversationGranted(identity.id,grants,'add',now),search:conversationGranted(identity.id,grants,'search',now)},
    links:{read:linkGranted(identity.id,grants,'read',now),save:linkGranted(identity.id,grants,'save',now)},
+   // What it last reported and how that reads now (core/agent/GRANTS.md#agent-reports), with its two Grants.
+   reports:{report:reportGranted(identity.id,grants,'report',now),list:reportGranted(identity.id,grants,'list',now)},
+   ...agentRevoked(identity,now)?{}:agentReports?.state(identity.id)??{},
    // "Can draft GitHub changes", shown once a GitHub App can write them (or while the Grant is still on).
    ...!agentRevoked(identity,now)&&(githubApp||githubDraftGranted(identity.id,grants,now))?{githubDrafts:githubDraftGranted(identity.id,grants,now)}:{}}))};
  }});

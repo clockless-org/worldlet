@@ -135,6 +135,10 @@ export class WorldLedger {
    this.delete('service-presets',id);
   });
  }
+ // Agent reports (core/agent/reports.ts, core/agent/GRANTS.md#agent-reports) ------------------------------------
+ /** Each Agent's one report (`state.agent-reports`, keyed by the Agent). */
+ agentReports():Row[]{return this.records('agent-reports');}
+ saveAgentReport(report:Row){this.put('agent-reports',report.agentId,report);}
  // The board (core/board/README.md) -------------------------------------------------------------------------------
  /** The board's current definition and revision (`state.board`), or null with none. */
  board():Row|null{return this.value('board','board');}

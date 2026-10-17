@@ -5,6 +5,7 @@ import {BOARD_ACTIONS,BOARD_TARGET} from '../../contracts/board.ts';
 import {CONVERSATION_ACTIONS,CONVERSATION_TARGET} from '../../contracts/conversations.ts';
 import {TRACKED_LINK_ACTIONS,TRACKED_LINK_TARGET} from '../../contracts/tracked-links.ts';
 import {GITHUB_DRAFT_ACTIONS,GITHUB_DRAFT_TARGET} from '../../contracts/github-drafts.ts';
+import {AGENT_REPORT_ACTIONS,AGENT_REPORT_TARGET} from '../../contracts/agent-reports.ts';
 import {grantedActions,worldActions,type WorldAction} from '../tools/index.ts';
 import {turnGuardedWrite,turnWriteAdmission} from './turn-trust.ts';
 import {HERMES_CHANNEL_LINK_TOOL,HERMES_CHANNEL_READ_ONLY,HERMES_CHANNEL_TOOLS,hermesChannelTrust} from './hermes-server.ts';
@@ -294,9 +295,34 @@ export function linkGrantAuditEntry(agentId:string,kind:string,granted:boolean,a
  return {at,agentId,target:TRACKED_LINK_TARGET,action:(granted?'grant-':'ungrant-')+kind,decision:'allowed',grantId:linkGrantId(agentId,kind),
   reason:granted?`The person let this Agent ${what} in Settings.`:`The person stopped this Agent being able to ${what} in Settings.`};
 }
-/** Targets only the calling Agent's own Grants decide: what it reaches is its own (its asks, its GitHub drafts) or the
- * person's board, conversation archive and tracked links, so a Fox turn's Grant, which covers everything else, never covers them. */
-export const OWN_GRANT_TARGETS:readonly string[]=Object.freeze([AGENT_ASK_TARGET,BOARD_TARGET,GITHUB_DRAFT_TARGET,CONVERSATION_TARGET,TRACKED_LINK_TARGET]);
+/** "Can report its work" (`report`: agents/report) and "Can see other Agents" (`list`: agents/list) in Settings › Agent
+ * › Access (core/agent/GRANTS.md#agent-reports). Never part of the default Grants, and never given by a Fox turn. Access
+ * is `read`: a report only changes what the person and other Agents see of this Agent, and is not a guarded write. */
+export type ReportGrantKind='report'|'list';
+export const REPORT_GRANT_KINDS:readonly ReportGrantKind[]=Object.freeze(['report','list']);
+export function reportGrantTargets(kind:string):string[] {
+ return kind==='report'?[AGENT_REPORT_ACTIONS.report]:kind==='list'?[AGENT_REPORT_ACTIONS.list]:[];
+}
+export const reportGrantId=(agentId:string,kind:string)=>agentId+'-agents-'+kind;
+export function reportGrant(agentId:string,kind:string,grantedAt:string):Grant|null {
+ const targets=reportGrantTargets(kind);
+ if(!targets.length||typeof agentId!=='string'||!AGENT_ID_PATTERN.test(agentId))return null;
+ return {id:reportGrantId(agentId,kind),agentId,targets,access:'read',duration:'standing',grantedAt};
+}
+export function reportGranted(agentId:string,grants:readonly Grant[],kind:string,now:string):boolean {
+ const id=reportGrantId(agentId,kind);
+ return reportGrantTargets(kind).length>0&&grants.some(grant=>grant.id===id&&grant.agentId===agentId&&grantActive(grant,now));
+}
+/** The audit entry for the person turning "Can report its work" or "Can see other Agents" on or off in Settings. */
+export function reportGrantAuditEntry(agentId:string,kind:string,granted:boolean,at:string):AgentAuditEntry {
+ const what=kind==='list'?'see other Agents':'report its work';
+ return {at,agentId,target:AGENT_REPORT_TARGET,action:(granted?'grant-':'ungrant-')+kind,decision:'allowed',grantId:reportGrantId(agentId,kind),
+  reason:granted?`The person let this Agent ${what} in Settings.`:`The person stopped this Agent being able to ${what} in Settings.`};
+}
+/** Targets only the calling Agent's own Grants decide: what it reaches is its own (its asks, its GitHub drafts, its
+ * report) or the person's board, conversation archive, tracked links and Agents, so a Fox turn's Grant, which covers everything else,
+ * never covers them. */
+export const OWN_GRANT_TARGETS:readonly string[]=Object.freeze([AGENT_ASK_TARGET,BOARD_TARGET,GITHUB_DRAFT_TARGET,CONVERSATION_TARGET,TRACKED_LINK_TARGET,AGENT_REPORT_TARGET]);
 
 /** While a Fox turn holds the standing server, its Agent's calls go to that turn (world-tool-bridge.ts standingTurn), as
  * they did before Grants: a call the turn's own stream announced is Fox's and runs under the turn's trust; any other
