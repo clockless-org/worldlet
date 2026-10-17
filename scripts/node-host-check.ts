@@ -222,7 +222,7 @@ await withTempDir('wl-',async temp=>{
    try{
     const page=await bootstrap.newPage();
     await page.goto(local.stdout.trim());await waitForWorld(page);
-    assert.deepEqual(await page.evaluate(()=>(window as any).worldletWebHost.request({action:'agentAccess',operation:'list'})),{agents:[]},'before setup, the local window can inspect owner access without granting it');
+    assert.deepEqual(await page.evaluate(()=>(window as any).worldletWebHost.request({action:'agentAccess',operation:'list'})),{orders:{},agents:[]},'before setup, the local window can inspect owner access without granting it');
     assert.match(await page.evaluate(()=>(window as any).worldletWebHost.request({action:'serviceSync',operation:'list'}).then(()=>'',(error:Error)=>error.message)),/own writable World/,'unconsented setup cannot access collection');
     assert.equal(new URL(page.url()).hash,'','the local window removes its token from the address');
     assert.match(cli('status').stdout,/Setup: The person has not finished setup yet/,'opening the owner window does not supply consent');

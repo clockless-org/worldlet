@@ -2,6 +2,8 @@
  * An ask is posted by one Agent through the `worldlet` MCP server; the host stamps its `agentId` from the token that
  * made the call, never from what the model sent. The person answers it on its Attention card; an Agent reads the
  * answer by polling `asks/read`. An `input` ask is work any Agent with "Can take work" may claim (a lease) and resolve.
+ * Work may name the one Agent it is for (`for`, an order): that Agent sees it first, and the host may wake it
+ * (core/agent/GRANTS.md#orders-and-waking-an-agent).
  * Hosts own IDs, clocks and storage; Core decides (core/agent/asks.ts). */
 
 /** `ask`: a question for the person, answered with one of its choices or a note. `input`: work an Agent may claim. */
@@ -69,6 +71,10 @@ export interface AgentAsk {
  answer?:AgentAskAnswer;
  resolution?:AgentAskResolution;
  tags:string[];
+ /** `input` work only: the Agent it is for (an order), named by the poster or the World's order target. That Agent reads
+  * it with `asks/read` and may claim it at once; another may claim it only once it has waited
+  * AGENT_ASK_LIMITS.forMinutes unclaimed, or after a lease on it ran out. */
+ for?:string;
  /** GitHub drafts this ask carries (core/agent/GRANTS.md#github-drafts), each the posting Agent's own and pending when
   * posted. Answering the ask's `Approve` choice on this computer approves them all, each read again first and refused
   * when its target changed; any other answer leaves them unrun. */
@@ -91,6 +97,8 @@ export const AGENT_ASK_LIMITS=Object.freeze({
  claim:10,
  /** How long a claim holds; after it, another Agent may claim the ask again. */
  leaseMinutes:60,
+ /** Minutes work that names an Agent (`for`) waits for that Agent before any other Agent may claim it. */
+ forMinutes:15,
  /** Asks one `asks/read` call returns, newest first. */
  read:50,
  /** Pictures and other files one ask may carry. */
@@ -111,6 +119,8 @@ export const AGENT_ASK_PROVIDER='agents';
 
 /** `asks/post` arguments, as the model sends them (any `agentId` is ignored). */
 export interface AgentAskPost {kind?:AgentAskKind;title:string;body?:string;choices?:string[];link?:string;tags?:string[];draftIds?:string[];
+ /** `input` only: the Agent this work is for, by its ID. */
+ for?:string;
  /** Checked: the name made safe, the size counted from the base64. */
  attachments?:(AgentAskAttachmentInput&{size:number})[]}
 /** The choice that approves an ask's GitHub drafts. An ask that carries drafts always offers it; with no choices of its
@@ -127,3 +137,23 @@ export interface AgentAskResolve {id:string;note:string;links?:string[];expected
 export interface AgentAskReply {id:string;outcome:'answered'|'done'|'skipped';choice?:string;note?:string}
 /** What became of one of an ask's GitHub drafts, as `asks/read` shows it. */
 export interface AgentAskDraft {id:string;status:string;resultUrl?:string;reason?:string}
+
+/** Orders and waking an Agent (core/agent/GRANTS.md#orders-and-waking-an-agent): the World's own setting, kept with the
+ * Agents' Grants in world.sqlite (`agent_settings`, `agent-orders`), changed only in Settings › Agent › Access. */
+export interface AgentOrders {
+ /** "Give new work to": the Agent that `input` work posted without `for` is for. */
+ defaultFor?:string;
+ /** Each Agent's wake command, as the person typed it: the program's absolute path, then its arguments. Never a shell
+  * line: the host runs the program itself, with WAKE_ASK_ID as a whole argument replaced by the work's ID. */
+ wake:Record<string,string[]>;
+}
+/** The one placeholder a wake command may hold, as a whole argument: the ID of the work the Agent is woken for. */
+export const WAKE_ASK_ID='{askId}';
+export const AGENT_WAKE_LIMITS=Object.freeze({
+ /** Arguments after the program, and characters in each word. */
+ args:16,arg:500,
+ /** A wake still running after this is stopped. */
+ timeoutSeconds:300,
+ /** At most one wake per Agent in this time; work assigned meanwhile wakes it once when it ends. */
+ debounceSeconds:60,
+});

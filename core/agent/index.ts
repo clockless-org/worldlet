@@ -5,6 +5,7 @@ export * from './harness-protocol.ts';
 export * from './turn-trust.ts';
 export * from './grants.ts';
 export * from './asks.ts';
+export * from './orders.ts';
 export * from './script-agents.ts';
 export * from './reports.ts';
 export * from './github-drafts.ts';

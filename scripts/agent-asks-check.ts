@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import {AGENT_ASK_LIMITS,AGENT_ASK_PROVIDER,type AgentAsk} from '../contracts/agent-asks.ts';
 import {ASK_REASONS,askApprovesDrafts,answerAsk,askAttachmentIsImage,askAttachmentName,askAttentionItem,askClaimable,askItemId,claimAsks,postAsk,readAskAttachment,readAskPost,readAsks,readStoredAsk,resolveAsk} from '../core/agent/asks.ts';
 import {validateWorldItem} from '../core/items/world-item-validation.ts';
+import {ORDER_REASONS,askWakes,orderAuditEntry,readOrders,readWakeCommand,wakeArgv,wakeAuditEntry,wakeDelay} from '../core/agent/orders.ts';
+import {AGENT_WAKE_LIMITS} from '../contracts/agent-asks.ts';
 
 // Agent asks (contracts/agent-asks.ts, core/agent/asks.ts): validation, the open cap, claims and their lease, resolve
 // with a stale revision refused, the person's answer and the Attention item the host writes.
@@ -220,4 +222,74 @@ assert.equal(askAttentionItem(posted,'bad\u0007name').agentName,'claude-code','a
  validateWorldItem(item as any,{start:null,end:null});
  assert.equal(askAttachmentIsImage('image/webp'),true);assert.equal(askAttachmentIsImage('application/zip'),false);
 }
-console.log('PASS Agent asks: validation, open cap, claims and leases, resolve, answers, Attention items, asks carrying GitHub drafts and attachments.');
+
+// Orders (core/agent/GRANTS.md#orders-and-waking-an-agent): work may name the Agent it is for, one of the World's
+// Agents not revoked; work naming none is for the World's order target; that Agent reads it, claims it first and is
+// the one woken. A question for the person names no Agent.
+{
+ const agents=['hermes','codex','claude-code'],t0='2026-10-15T12:00:00.000Z',t10='2026-10-15T12:10:00.000Z',t16='2026-10-15T12:16:00.000Z';
+ const order=postAsk([],'hermes',{kind:'input',title:'Ship the fix',for:'codex',tags:['order']},id(700),t0,[],{agents});
+ assert.deepEqual([order.for,order.tags],['codex',['order']]);
+ refused(()=>postAsk([],'hermes',{kind:'input',title:'x',for:'nobody'},id(701),t0,[],{agents}),ASK_REASONS.forUnknown);
+ refused(()=>postAsk([],'hermes',{kind:'input',title:'x',for:'codex'},id(701),t0),ASK_REASONS.forUnknown);
+ refused(()=>readAskPost({title:'x',for:'codex'}),ASK_REASONS.forKind);
+ refused(()=>readAskPost({kind:'input',title:'x',for:'Not An Agent'}),ASK_REASONS.forUnknown);
+ refused(()=>readAskPost({kind:'input',title:'x',for:7}),ASK_REASONS.forUnknown);
+ // The order target: applied to work naming no Agent, never to a question, never to the poster itself, never to a
+ // revoked or unknown Agent.
+ assert.equal(postAsk([],'hermes',{kind:'input',title:'x'},id(702),t0,[],{agents,defaultFor:'claude-code'}).for,'claude-code');
+ assert.equal(postAsk([],'hermes',{kind:'input',title:'x',for:'codex'},id(702),t0,[],{agents,defaultFor:'claude-code'}).for,'codex','a named Agent wins');
+ assert.equal(postAsk([],'hermes',{title:'x'},id(702),t0,[],{agents,defaultFor:'claude-code'}).for,undefined);
+ assert.equal(postAsk([],'claude-code',{kind:'input',title:'x'},id(702),t0,[],{agents,defaultFor:'claude-code'}).for,undefined);
+ assert.equal(postAsk([],'hermes',{kind:'input',title:'x'},id(702),t0,[],{agents:['hermes'],defaultFor:'claude-code'}).for,undefined);
+ // Reading: the Agent it is for reads it, and its attachments; any other Agent does not.
+ assert.deepEqual(readAsks([order],'codex').map(ask=>ask.id),[id(700)]);
+ assert.deepEqual(readAsks([order],'claude-code'),[]);
+ // Claiming: the named Agent at once, first among its claims; another only after AGENT_ASK_LIMITS.forMinutes.
+ const plain=postAsk([],'hermes',{kind:'input',title:'Older work'},id(703),'2026-10-15T11:00:00.000Z');
+ assert.equal(askClaimable(order,t10,'claude-code'),false);assert.equal(askClaimable(order,t10,'codex'),true);
+ assert.equal(askClaimable(order,t16,'claude-code'),true,'it waited long enough');assert.equal(askClaimable(order,t10),false);
+ assert.deepEqual(claimAsks([plain,order],'claude-code',{},t10).map(ask=>ask.id),[id(703)]);
+ assert.deepEqual(claimAsks([plain,order],'claude-code',{ids:[id(700)]},t10),[],'naming it does not jump the wait');
+ assert.deepEqual(claimAsks([plain,order],'codex',{},t10).map(ask=>ask.id),[id(700),id(703)],'work for it first, then the oldest');
+ assert.equal(AGENT_ASK_LIMITS.forMinutes,15);
+ const [held]=claimAsks([order],'codex',{},t0);
+ assert.deepEqual(claimAsks([held],'claude-code',{},'2026-10-15T13:00:01.000Z').map(ask=>ask.claimedBy),['claude-code'],'a stale lease is anyone\'s');
+ // Kept and shown: the stored ask keeps it; the card says whom the work is for.
+ assert.equal(readStoredAsk(order)!.for,'codex');
+ assert.equal(readStoredAsk({...posted,for:'codex'})!.for,undefined,'a question is for no Agent');
+ const card=askAttentionItem(order,'Hermes Agent','Codex');
+ assert.deepEqual([card.reason,(card as any).askFor],['Hermes Agent left work for Codex','codex']);
+ validateWorldItem(card as any,{start:null,end:null});
+ // Waking: only work for another Agent, still open.
+ assert.equal(askWakes(order),'codex');
+ assert.equal(askWakes({...order,for:'hermes'}),null,'an Agent\'s own work for itself wakes nothing');
+ assert.equal(askWakes(plain),null);assert.equal(askWakes({...posted,for:'codex'}),null);assert.equal(askWakes(held),null);
+ // A wake command: the program's absolute path, then at most 16 arguments of at most 500 characters, no control
+ // characters, no credentials; the placeholder only as a whole argument, never the program.
+ assert.deepEqual(readWakeCommand(['/usr/local/bin/wake-agent','--work','{askId}']),['/usr/local/bin/wake-agent','--work','{askId}']);
+ assert.deepEqual(readWakeCommand(['C:\\Tools\\wake.exe']),['C:\\Tools\\wake.exe']);
+ assert.equal(readWakeCommand([]),null,'an empty list clears it');
+ refused(()=>readWakeCommand('/bin/wake --now'),ORDER_REASONS.invalid);
+ refused(()=>readWakeCommand(['/bin/wake',3]),ORDER_REASONS.invalid);
+ for(const program of ['wake','./wake','~/wake','//server/wake','{askId}','/bin/{askId}',''])refused(()=>readWakeCommand([program]),ORDER_REASONS.program);
+ refused(()=>readWakeCommand(['/bin/wake',...Array(AGENT_WAKE_LIMITS.args+1).fill('a')]),ORDER_REASONS.args);
+ assert.equal(readWakeCommand(['/bin/wake',...Array(AGENT_WAKE_LIMITS.args).fill('a')])!.length,17);
+ refused(()=>readWakeCommand(['/bin/wake','x'.repeat(501)]),ORDER_REASONS.args);
+ for(const word of ['a\nb','tab\t','bell\u0007','‮flip'])refused(()=>readWakeCommand(['/bin/wake',word]),ORDER_REASONS.control);
+ refused(()=>readWakeCommand(['/bin/wake','sk-'+'a'.repeat(30)]),ORDER_REASONS.secret);
+ // Only a whole-argument placeholder is replaced; nothing else is read into the arguments.
+ assert.deepEqual(wakeArgv(['/bin/wake','{askId}','id={askId}','$HOME','; rm -rf /'],id(700)),{program:'/bin/wake',args:[id(700),'id={askId}','$HOME','; rm -rf /']});
+ // The setting: what is not valid is dropped.
+ assert.deepEqual(readOrders({defaultFor:'codex',wake:{codex:['/bin/wake'],hermes:['wake'],'Bad Id':['/bin/wake']}}),{defaultFor:'codex',wake:{codex:['/bin/wake']}});
+ assert.deepEqual(readOrders(null),{wake:{}});assert.deepEqual(readOrders({defaultFor:'Not One',wake:[]}),{wake:{}});
+ // At most once a minute per Agent.
+ assert.equal(wakeDelay(undefined,1000),0);assert.equal(wakeDelay(0,30_000),30_000);assert.equal(wakeDelay(0,60_000),0);
+ // The audit: a short line of how it ended, no output.
+ assert.deepEqual(wakeAuditEntry('codex',id(700),{code:0},t0),{at:t0,agentId:'codex',target:'asks',action:'wake',decision:'allowed',reason:`Woken for work ${id(700)}: exited with 0.`});
+ assert.equal(wakeAuditEntry('codex',id(700),{code:2},t0).decision,'denied');
+ assert.match(wakeAuditEntry('codex',id(700),{timedOut:true},t0).reason!,/stopped after 5 minutes\.$/);
+ assert.match(wakeAuditEntry('codex',id(700),{error:'spawn ENOENT'},t0).reason!,/could not start: spawn ENOENT\.$/);
+ assert.equal(orderAuditEntry('codex','set-wake',t0).action,'set-wake');
+}
+console.log('PASS Agent asks: validation, open cap, claims and leases, resolve, answers, Attention items, asks carrying GitHub drafts and attachments, orders: work for one Agent, the order target, claiming first, wake commands.');

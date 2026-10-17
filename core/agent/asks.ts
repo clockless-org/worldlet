@@ -27,13 +27,15 @@ export const ASK_REASONS=Object.freeze({
  attachmentSize:`A picture may be at most ${AGENT_ASK_LIMITS.imageBytes/1048576} MB, another file at most ${AGENT_ASK_LIMITS.fileBytes/1048576} MB, and all of one ask's attachments together at most ${AGENT_ASK_LIMITS.attachmentBytes/1048576} MB.`,
  attachmentKind:'This file is not the kind its type says it is.',
  noAttachment:'This ask has no such attachment.',
+ forKind:'Only work (kind input) can name the Agent it is for.',
+ forUnknown:'The Agent this work is for is not one of this World\'s Agents, or it was revoked.',
 });
 
 /** An ask ID: host-made, file-name safe. */
 export const ASK_ID_PATTERN=/^[a-z0-9][a-z0-9-]{7,63}$/;
 /** A GitHub draft's ID (core/agent/github-drafts.ts GITHUB_DRAFT_ID_PATTERN). */
 const DRAFT_ID=/^[a-z0-9][a-z0-9-]{7,63}$/;
-const LEASE_MS=AGENT_ASK_LIMITS.leaseMinutes*60_000;
+const LEASE_MS=AGENT_ASK_LIMITS.leaseMinutes*60_000,FOR_MS=AGENT_ASK_LIMITS.forMinutes*60_000;
 // C0 controls (except tab and line breaks, allowed in multi-line text only), DEL, C1 controls, and the bidirectional
 // overrides that can make a card read differently from what it holds.
 const CONTROL=/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f‪-‮⁦-⁩]/;
@@ -136,7 +138,7 @@ export function readAskAttachments(value:unknown):(AgentAskAttachmentInput&{size
 /** `asks/post` arguments, checked. An `agentId` the model sent is dropped: the host stamps the caller's own. */
 export function readAskPost(input:unknown):AgentAskPost {
  const value={...record(input)};delete value.agentId;
- only(value,['kind','title','body','choices','link','tags','draftIds','attachments']);
+ only(value,['kind','title','body','choices','link','tags','draftIds','attachments','for']);
  const kind=value.kind===undefined?'ask':value.kind;
  if(!AGENT_ASK_KINDS.includes(kind as AgentAskKind))fail(ASK_REASONS.invalid);
  const post:AgentAskPost={kind:kind as AgentAskKind,title:text(value.title,AGENT_ASK_LIMITS.title,{required:true})};
@@ -153,6 +155,12 @@ export function readAskPost(input:unknown):AgentAskPost {
   post.draftIds=drafts;
  }
  const attachments=readAskAttachments(value.attachments);if(attachments.length)post.attachments=attachments;
+ // The Agent this work is for (an order): checked against the World's Agents in postAsk.
+ if(value.for!==undefined){
+  if(typeof value.for!=='string'||!AGENT_ID_PATTERN.test(value.for))fail(ASK_REASONS.forUnknown);
+  if(post.kind!=='input')fail(ASK_REASONS.forKind);
+  post.for=value.for as string;
+ }
  return post;
 }
 
@@ -161,16 +169,21 @@ export const askOpen=(ask:AgentAsk)=>ask.status==='open'||ask.status==='claimed'
 
 /** A new ask from `agentId` (the caller's own, from its token). Refused when the input is not valid or this Agent
  * already has AGENT_ASK_LIMITS.openPerAgent open asks. `digests` are the host's SHA-256 of each attachment's bytes, in
- * order; the ask keeps only what describes each (`att-1`, `att-2`, …), and the host keeps the bytes beside it. */
-export function postAsk(asks:readonly AgentAsk[],agentId:string,input:unknown,id:string,now:string,digests:readonly string[]=[]):AgentAsk {
+ * order; the ask keeps only what describes each (`att-1`, `att-2`, …), and the host keeps the bytes beside it.
+ * Work (`input`) is for the Agent it names, which must be one of `agents` (the World's Agents not revoked); work that
+ * names none is for `defaultFor`, the World's order target, when that is one of them and not the posting Agent. */
+export function postAsk(asks:readonly AgentAsk[],agentId:string,input:unknown,id:string,now:string,digests:readonly string[]=[],
+ {agents=[],defaultFor}:{agents?:readonly string[];defaultFor?:string}={}):AgentAsk {
  if(!AGENT_ID_PATTERN.test(agentId)||!ASK_ID_PATTERN.test(id)||!instant(now))fail(ASK_REASONS.invalid);
  const post=readAskPost(input),files=post.attachments??[];
  if(digests.length!==files.length||!digests.every(digest=>typeof digest==='string'&&SHA256.test(digest)))fail(ASK_REASONS.invalid);
  if(asks.filter(ask=>ask.agentId===agentId&&askOpen(ask)).length>=AGENT_ASK_LIMITS.openPerAgent)fail(ASK_REASONS.full);
  if(asks.some(ask=>ask.id===id))fail(ASK_REASONS.invalid);
+ if(post.for!==undefined&&!agents.includes(post.for))fail(ASK_REASONS.forUnknown);
+ const target=post.for??(post.kind==='input'&&defaultFor&&defaultFor!==agentId&&agents.includes(defaultFor)?defaultFor:undefined);
  const attachments:AgentAskAttachment[]=files.map(({name,type,size},index)=>({id:'att-'+(index+1),name,type,size,sha256:digests[index]}));
  return {id,agentId,kind:post.kind??'ask',title:post.title,body:post.body??'',choices:post.choices??[],...post.link?{link:post.link}:{},...post.draftIds?{draftIds:post.draftIds}:{},
-  ...attachments.length?{attachments}:{},status:'open',tags:post.tags??[],revision:1,createdAt:now,updatedAt:now};
+  ...target?{for:target}:{},...attachments.length?{attachments}:{},status:'open',tags:post.tags??[],revision:1,createdAt:now,updatedAt:now};
 }
 
 /** One of the ask's attachments by its ID, or a refusal. */
@@ -180,44 +193,49 @@ export function askAttachment(ask:AgentAsk|null|undefined,id:unknown):AgentAskAt
  return found??fail(ASK_REASONS.noAttachment);
 }
 /** `asks/attachment`: which part of one attachment's bytes to return, at most AGENT_ASK_LIMITS.attachmentRead from
- * `offset`. Only the Agent that posted the ask or the one that claimed it reads them; to any other the ask is not there. */
+ * `offset`. Only the Agent that posted the ask, the one it is for and the one that claimed it read them; to any other
+ * the ask is not there. */
 export function readAskAttachment(asks:readonly AgentAsk[],agentId:string,input:unknown):{ask:AgentAsk;attachment:AgentAskAttachment;offset:number;length:number} {
  const value=record(input);only(value,['id','attachment','offset']);
  if(typeof value.id!=='string'||!ASK_ID_PATTERN.test(value.id))fail(ASK_REASONS.invalid);
  const offset=value.offset===undefined?0:value.offset;
  if(typeof offset!=='number'||!Number.isInteger(offset)||offset<0)return fail(ASK_REASONS.invalid);
- const ask=asks.find(item=>item.id===value.id&&(item.agentId===agentId||item.claimedBy===agentId));
+ const ask=asks.find(item=>item.id===value.id&&askReader(item,agentId));
  const attachment=askAttachment(ask,value.attachment);
  if(offset>attachment.size)fail(ASK_REASONS.invalid);
  return {ask:ask!,attachment,offset,length:Math.min(AGENT_ASK_LIMITS.attachmentRead,attachment.size-offset)};
 }
 
-/** `asks/read`: the caller's own asks (posted by it, or claimed by it), newest first, optionally of one status or the
- * IDs it names. Another Agent's asks are never returned. */
+/** Whether `agentId` reads this ask: it posted it, the work is for it, or it claimed it. */
+const askReader=(ask:AgentAsk,agentId:string)=>ask.agentId===agentId||ask.for===agentId||ask.claimedBy===agentId;
+/** `asks/read`: the caller's own asks (posted by it, for it, or claimed by it), newest first, optionally of one status or
+ * the IDs it names. Another Agent's asks are never returned. */
 export function readAsks(asks:readonly AgentAsk[],agentId:string,input:unknown={}):AgentAsk[] {
  const value=record(input);only(value,['status','ids']);
  if(value.status!==undefined&&!AGENT_ASK_STATUSES.includes(value.status as AgentAskStatus))fail(ASK_REASONS.invalid);
  const ids=list(value.ids,AGENT_ASK_LIMITS.read,entry=>typeof entry==='string'&&ASK_ID_PATTERN.test(entry)?entry:fail(ASK_REASONS.invalid));
- return asks.filter(ask=>(ask.agentId===agentId||ask.claimedBy===agentId)&&(value.status===undefined||ask.status===value.status)&&(!ids.length||ids.includes(ask.id)))
+ return asks.filter(ask=>askReader(ask,agentId)&&(value.status===undefined||ask.status===value.status)&&(!ids.length||ids.includes(ask.id)))
   .sort((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)).slice(0,AGENT_ASK_LIMITS.read);
 }
 
-/** Whether an Agent may claim this ask now: `input` work that is open, or whose lease ran out. */
-export function askClaimable(ask:AgentAsk,now:string):boolean {
+/** Whether an Agent may claim this ask now: `input` work that is open, or whose lease ran out. Work for another Agent
+ * (`for`) still open waits AGENT_ASK_LIMITS.forMinutes for that Agent first; `agentId` left out asks for any Agent. */
+export function askClaimable(ask:AgentAsk,now:string,agentId?:string):boolean {
  if(ask.kind!=='input')return false;
- if(ask.status==='open')return true;
+ if(ask.status==='open')return !ask.for||ask.for===agentId||!instant(ask.createdAt)||Date.parse(ask.createdAt)+FOR_MS<=Date.parse(now);
  return ask.status==='claimed'&&(!instant(ask.claimedAt)||Date.parse(ask.claimedAt)+LEASE_MS<=Date.parse(now));
 }
-/** `asks/claim`: the named asks, or the oldest claimable ones, at most AGENT_ASK_LIMITS.claim. Returns only the asks it
- * claimed, each with a new lease and revision; a named ask that is not claimable now is left out. */
+/** `asks/claim`: the named asks, or the oldest claimable ones, at most AGENT_ASK_LIMITS.claim, work for the caller
+ * first. Returns only the asks it claimed, each with a new lease and revision; a named ask that is not claimable now
+ * is left out. */
 export function claimAsks(asks:readonly AgentAsk[],agentId:string,input:unknown,now:string):AgentAsk[] {
  if(!AGENT_ID_PATTERN.test(agentId)||!instant(now))fail(ASK_REASONS.invalid);
  const value=record(input);only(value,['ids','limit']);
  const ids=list(value.ids,AGENT_ASK_LIMITS.claim,entry=>typeof entry==='string'&&ASK_ID_PATTERN.test(entry)?entry:fail(ASK_REASONS.invalid));
  const limit=value.limit===undefined?AGENT_ASK_LIMITS.claim:value.limit;
  if(typeof limit!=='number'||!Number.isInteger(limit)||limit<1||limit>AGENT_ASK_LIMITS.claim)fail(ASK_REASONS.invalid);
- return asks.filter(ask=>(!ids.length||ids.includes(ask.id))&&askClaimable(ask,now))
-  .sort((a,b)=>Date.parse(a.createdAt)-Date.parse(b.createdAt)).slice(0,limit as number)
+ return asks.filter(ask=>(!ids.length||ids.includes(ask.id))&&askClaimable(ask,now,agentId))
+  .sort((a,b)=>Number(b.for===agentId)-Number(a.for===agentId)||Date.parse(a.createdAt)-Date.parse(b.createdAt)).slice(0,limit as number)
   .map(ask=>({...ask,status:'claimed',claimedBy:agentId,claimedAt:now,revision:ask.revision+1,updatedAt:now}));
 }
 
@@ -270,6 +288,7 @@ export function readStoredAsk(value:unknown):AgentAsk|null {
   &&typeof a.type==='string'&&extensions(a.type).length>0&&Number.isInteger(a.size)&&(a.size as number)>=0&&typeof a.sha256==='string'&&SHA256.test(a.sha256)
   ?[{id:a.id,name:a.name,type:a.type,size:a.size as number,sha256:a.sha256}]:[]).slice(0,AGENT_ASK_LIMITS.images+AGENT_ASK_LIMITS.files);
  if(attachments.length)ask.attachments=attachments;
+ if(ask.kind==='input'&&typeof v.for==='string'&&AGENT_ID_PATTERN.test(v.for))ask.for=v.for;
  if(typeof v.claimedBy==='string'&&AGENT_ID_PATTERN.test(v.claimedBy))ask.claimedBy=v.claimedBy;
  if(instant(v.claimedAt))ask.claimedAt=v.claimedAt;
  const answer=record(v.answer),resolution=record(v.resolution);
@@ -283,16 +302,19 @@ export const askItemId=(askId:string)=>'ask-'+askId;
 const ITEM_STATUS:Record<AgentAskStatus,'open'|'done'|'dismissed'>={open:'open',claimed:'open',answered:'done',done:'done',skipped:'dismissed'};
 /** The ask as an Attention item (provider `agents`), written by the host with no model: a task when it offers choices,
  * otherwise an update. It carries the posting Agent's ID, so the card names which Agent asks, and the ask's own ID,
- * revision and choices, so the card answers this ask and no other. `agentName` is the name the person knows it by. */
-export function askAttentionItem(ask:AgentAsk,agentName:string):WorldItem {
+ * revision and choices, so the card answers this ask and no other. `agentName` is the name the person knows it by, and
+ * `forName` the name of the Agent the work is for. */
+export function askAttentionItem(ask:AgentAsk,agentName:string,forName?:string):WorldItem {
  let name=ask.agentId;try{name=text(agentName,80)||ask.agentId;}catch{}
+ let target=ask.for??'';try{target=ask.for?text(forName,80)||ask.for:'';}catch{}
  const kind=ask.choices.length?'task':'update';
- const context=[...(ask.body||ask.title)].slice(0,1200).join(''),reason=[...(name+(ask.kind==='input'?' left work for Agents':' asks you'))].slice(0,56).join('');
+ const context=[...(ask.body||ask.title)].slice(0,1200).join(''),reason=[...(name+(ask.kind==='input'?' left work for '+(target||'Agents'):' asks you'))].slice(0,56).join('');
  // Written by the host, not a model: its content is final as it stands (attentionContentVersion 1), and the card shows it.
  return {id:askItemId(ask.id),provider:AGENT_ASK_PROVIDER,kind,status:ITEM_STATUS[ask.status],title:ask.title,context,reason,summary:context,attentionContentVersion:1,
   ...kind==='task'?{attentionReason:[...(name+' asks you to choose.')].slice(0,600).join('')}:{},
   sources:[{provider:AGENT_ASK_PROVIDER,id:ask.id,quote:[...ask.title].slice(0,1000).join(''),...ask.link?{url:ask.link}:{}}],
   agentId:ask.agentId,agentName:name,askId:ask.id,askKind:ask.kind,askRevision:ask.revision,askStatus:ask.status,askChoices:[...ask.choices],...ask.draftIds?.length?{askDraftIds:[...ask.draftIds]}:{},
+  ...ask.for?{askFor:ask.for}:{},
   // What it carries, so the card shows each picture (read from the host) and names each file.
   ...ask.attachments?.length?{askAttachments:ask.attachments.map(({id,name,type,size})=>({id,name,type,size}))}:{},
   ...ask.answer?.choice?{askChoice:ask.answer.choice}:{},createdAt:ask.createdAt,updatedAt:ask.updatedAt};
