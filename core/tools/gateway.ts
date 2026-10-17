@@ -152,6 +152,18 @@ export function worldToolIndex({sample=false}={}){
  for(const a of actions)byTarget.set(a.target,[...byTarget.get(a.target)||[],known.has(a.target)||!Object.keys(a.parameters?.properties||{}).length?`${a.action}(${required(a).join(',')})`:a.action]);
  return [...byTarget].map(([target,actions])=>target+': '+actions.join(', ')).join('; ');
 }
+/** The World actions behind internal tool names an instruction names (an Applet analysis says "read it with
+ * query_world_items"): a local Agent has only call_world_tool, so it must be told which target and action that is, or
+ * it answers that the tools "aren't available" and saves nothing (Mac Alpha 4450/4459 and Beta 4464 test:onboarding,
+ * 2026-10-15/16: Codex had the worldlet server and made no call). Empty when the text names none. */
+export function worldToolAliases(text:string,{sample=false}={}):string{
+ const named=new Map<string,WorldAction>();
+ for(const a of worldActions({sample}))if(!a.target.startsWith('applet:')&&!Object.keys(a.defaults).length&&!named.has(a.tool)&&new RegExp(`\\b${a.tool}\\b`).test(text))named.set(a.tool,a);
+ if(!named.size)return '';
+ return 'Tool names in the message are World actions you call through call_world_tool, and they are available here: '
+  +[...named.values()].map(a=>`${a.tool} is target "${a.target}", action "${a.action}"`).join('; ')
+  +'. Pass that tool\'s arguments as the arguments JSON string.';
+}
 export function describeActions(actions:WorldAction[],target='',action=''){
  if(!target)return {version:WORLD_TOOL_VERSION,targets:[...new Set(actions.map(a=>a.target))]};
  const matches=actions.filter(a=>a.target===target);
