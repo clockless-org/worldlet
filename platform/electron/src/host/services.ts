@@ -431,6 +431,12 @@ export interface AgentAccess {
   * (core reportGrant), each change audited. */
  grantReports(agentId:string,kind:string):boolean;
  ungrantReports(agentId:string,kind:string):boolean;
+ /** "Can update Issues in <repo> without asking" (github-writes/run on one repository, core githubWriteGrant): built
+  * from the repository, the choice (`comment`, `labels`, `comment-labels`) and its label prefix only, one per
+  * repository (choosing again replaces it), at most GITHUB_WRITE_LIMITS.grantsPerAgent; removed by repository. Each
+  * change audited. False for an unknown or revoked Agent or a choice Core refuses. */
+ grantGithubWrites(agentId:string,repo:unknown,choice:unknown,labelPrefix?:unknown):boolean;
+ ungrantGithubWrites(agentId:string,repo:unknown):boolean;
  onRevoke(listener:(agentId:string)=>void):void;
 }
 export interface VaultService {

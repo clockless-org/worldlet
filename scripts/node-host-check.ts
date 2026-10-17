@@ -59,6 +59,9 @@ console.log('PASS node host vault storage: sealed under an owner-only key, unrea
 // Local-window selection is explicit and only valid for `link`.
 assert.deepEqual(readControlRequest({command:'link',local:true}),{command:'link',local:true});
 for(const request of [{command:'link',local:'true'},{command:'status',local:true}])assert.equal(readControlRequest(request),null);
+// An Agent for a script: only with register, never beside --agent; the host checks the name itself.
+assert.deepEqual(readControlRequest({command:'register',script:'Nightly build'}),{command:'register',script:'Nightly build'});
+for(const request of [{command:'setup',script:'x'},{command:'register',script:'x',agent:'codex'},{command:'register',script:' '},{command:'register',script:'x'.repeat(61)},{command:'register',script:1}])assert.equal(readControlRequest(request),null);
 
 // The control socket refuses a path the system would cut short (macOS binds at most 103 bytes, Linux 107) instead of
 // binding a shorter one it cannot remove on close, which left the next start with the address in use.

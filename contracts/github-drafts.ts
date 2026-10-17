@@ -6,10 +6,11 @@
  * (core/agent/github-drafts.ts). */
 
 /** What a draft writes. `issue.create`: a new Issue in `repo`. `issue.comment`: a comment on an Issue or pull request.
- * `labels.add` and `labels.remove`: labels on an Issue or pull request. `issue.close` and `issue.reopen`: an Issue's
- * state (not a pull request's). */
-export type GithubWrite='issue.create'|'issue.comment'|'labels.add'|'labels.remove'|'issue.close'|'issue.reopen';
-export const GITHUB_WRITES:readonly GithubWrite[]=Object.freeze(['issue.create','issue.comment','labels.add','labels.remove','issue.close','issue.reopen']);
+ * `labels.add` and `labels.remove`: labels on an Issue or pull request. `labels.set`: a label transition on an Issue or
+ * pull request, checked against the labels the Agent read (optionally only those under one prefix, such as `state:`),
+ * removing and adding only what differs. `issue.close` and `issue.reopen`: an Issue's state (not a pull request's). */
+export type GithubWrite='issue.create'|'issue.comment'|'labels.add'|'labels.remove'|'labels.set'|'issue.close'|'issue.reopen';
+export const GITHUB_WRITES:readonly GithubWrite[]=Object.freeze(['issue.create','issue.comment','labels.add','labels.remove','labels.set','issue.close','issue.reopen']);
 
 /** `pending` until the person acts. `written` once GitHub accepted it (`result`). `stale` when the target changed after
  * the draft, so nothing was written. `failed` when GitHub refused the write or did not answer it. `dismissed` when the
@@ -29,6 +30,8 @@ export interface GithubDraftTarget {
  title:string;
  /** The target on github.com. */
  url:string;
+ /** An Issue or pull request's label names as GitHub returned them, when it did: what `labels.set` checks. */
+ labels?:string[];
 }
 
 export interface GithubDraft {
@@ -45,8 +48,12 @@ export interface GithubDraft {
  title?:string;
  /** `issue.create` and `issue.comment`: the exact text written. */
  body?:string;
- /** `issue.create`, `labels.add` and `labels.remove`. */
+ /** `issue.create`, `labels.add` and `labels.remove`; for `labels.set`, the labels (under `labelPrefix`) it leaves. */
  labels?:string[];
+ /** `labels.set`: only labels starting with this are compared and changed (case-insensitive); absent, all of them. */
+ labelPrefix?:string;
+ /** `labels.set`: the labels (under `labelPrefix`) the Agent read, which the target must have exactly when it runs. */
+ expectedLabels?:string[];
  target:GithubDraftTarget;
  status:GithubDraftStatus;
  /** Once written: what GitHub made or changed, on github.com. */
@@ -72,8 +79,31 @@ export const GITHUB_DRAFT_TARGET='github-drafts';
 export const GITHUB_DRAFT_ACTIONS=Object.freeze({create:'github-drafts/create',read:'github-drafts/read'} as const);
 
 /** `github-drafts/create` arguments, as the model sends them (any `agentId` is ignored). `target` is `owner/repo` for
- * `issue.create` and `owner/repo#123` otherwise. */
-export interface GithubDraftCreate {write:GithubWrite;target:string;title?:string;body?:string;labels?:string[]}
+ * `issue.create` and `owner/repo#123` otherwise. `labels.set` takes `expected` (the labels it read, under `prefix` when
+ * one is given) and `set` (what they become): `{prefix:'state:',expected:['state:queued'],set:['state:running']}`. */
+export interface GithubDraftCreate {write:GithubWrite;target:string;title?:string;body?:string;labels?:string[];prefix?:string;expected?:string[];set?:string[]}
+
+/** Standing GitHub writes (core/agent/GRANTS.md#standing-github-writes): writes one Agent may run on one repository
+ * without a card, under a Grant the person gives it in Settings › Agent › Access. Only a comment and a label transition
+ * under one prefix: never a new Issue, closing or reopening. */
+export type GithubStandingWrite='issue.comment'|'labels.set';
+export const GITHUB_STANDING_WRITES:readonly GithubStandingWrite[]=Object.freeze(['issue.comment','labels.set']);
+/** What the person chooses in Settings: `comment`, `labels` (move labels under one prefix) or `comment-labels` (both). */
+export type GithubWriteGrantChoice='comment'|'labels'|'comment-labels';
+export const GITHUB_WRITE_GRANT_CHOICES:readonly GithubWriteGrantChoice[]=Object.freeze(['comment','labels','comment-labels']);
+/** One standing GitHub write Grant's reach, kept on the Grant (contracts/agent-identity.ts Grant.github): this
+ * repository only, these writes only and, for `labels.set`, labels under this prefix only. */
+export interface GithubWriteScope {repo:string;writes:GithubStandingWrite[];labelPrefix?:string}
+/** The World gateway target (`github-writes/run`): its own Grant target, which only a standing GitHub write Grant names. */
+export const GITHUB_WRITE_TARGET='github-writes';
+export const GITHUB_WRITE_ACTIONS=Object.freeze({run:'github-writes/run'} as const);
+/** `github-writes/run` arguments: a `github-drafts/create` of a standing write on `owner/repo#123`, and optionally the
+ * Issue's state and `updatedAt` as the Agent read them, refused as stale when either differs when it runs. */
+export interface GithubWriteRun extends GithubDraftCreate {write:GithubStandingWrite;expectedState?:'open'|'closed';expectedUpdatedAt?:string}
+export const GITHUB_WRITE_LIMITS=Object.freeze({
+ /** Repositories one Agent may hold a standing GitHub write Grant for. */
+ grantsPerAgent:10,
+});
 
 /** The GitHub App the person connected as GitHub's write identity: kept only in the vault (`github-app`), never echoed
  * to a page, an Agent, a log or an event. */

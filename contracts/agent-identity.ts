@@ -1,3 +1,5 @@
+import type {GithubWriteScope} from './github-drafts.ts';
+
 /** Per-Agent identity, Grants and audit (core/agent/GRANTS.md). Each Agent that reaches the World through the
  * `worldlet` MCP server has its own identity; what it may call is a list of Grants; every decision is one audit
  * entry. Hosts own identities, tokens, clocks and storage; Core decides (core/agent/grants.ts). A model never names
@@ -38,6 +40,9 @@ export interface Grant {
  grantedAt:string;
  expiresAt?:string;
  revokedAt?:string;
+ /** A standing GitHub write Grant's reach (core/agent/GRANTS.md#standing-github-writes): which repository, writes and
+  * label prefix its `github-writes/run` calls may use. Absent on every other Grant. */
+ github?:GithubWriteScope;
 }
 
 export type AgentAuditDecision='allowed'|'denied'|'asked';

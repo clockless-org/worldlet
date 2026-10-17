@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {withTempDir} from './test-temp.ts';
@@ -90,6 +91,49 @@ await withTempDir('worldlet-asks-',async dir=>{
   assert.equal(ledger.value('items',askItemId(work.id))!.status,'done');
   assert.deepEqual((await codex('read',{ids:[work.id]})).asks,[],'no longer its own once another took it');
 
+  // Attachments: a screenshot and a log, kept in world.sqlite apart from the ask (which keeps their name, type, size and
+  // SHA-256), read back in parts only by the Agent that posted the ask or the one that claimed it, and by the person's
+  // own page through agentAsk attachment; they stay when the ask settles.
+  {
+   const screenshot=Buffer.alloc(150_000,7);Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]).copy(screenshot);
+   const log=Buffer.from('12:00 started\n12:01 ERROR could not save\n');
+   const sha=(bytes:Buffer)=>crypto.createHash('sha256').update(bytes).digest('hex');
+   const sent=await codex('post',{kind:'input',title:'Save fails',attachments:[{name:'Desktop/screen.png',type:'image/png',data:screenshot.toString('base64')},{name:'app.log',type:'text/plain',data:log.toString('base64')}]});
+   assert.equal(sent.ok,true,JSON.stringify(sent).slice(0,300));
+   const askId=sent.ask.id;
+   assert.deepEqual(sent.ask.attachments,[{id:'att-1',name:'screen.png',type:'image/png',size:screenshot.length,sha256:sha(screenshot)},{id:'att-2',name:'app.log',type:'text/plain',size:log.length,sha256:sha(log)}]);
+   assert.ok(!JSON.stringify(ledger.agentAsks()).includes(log.toString('base64')),'the ask record keeps no bytes');
+   assert.deepEqual(ledger.value('items',askItemId(askId))!.askAttachments.map((a:any)=>a.name),['screen.png','app.log']);
+   assert.deepEqual((await codex('read',{ids:[askId]})).asks[0].attachments.map((a:any)=>a.id),['att-1','att-2']);
+   // In parts of at most 96 KB, following nextOffset.
+   const parts:Buffer[]=[];let offset:number|undefined=0;
+   while(offset!==undefined){
+    const part=await codex('attachment',{id:askId,attachment:'att-1',offset});
+    assert.equal(part.untrustedContent,true);assert.equal(part.sha256,sha(screenshot));
+    parts.push(Buffer.from(part.data,'base64'));offset=part.nextOffset;
+   }
+   assert.equal(parts.length,2);assert.ok(Buffer.concat(parts).equals(screenshot),'the bytes come back exactly');
+   assert.equal(Buffer.from((await codex('attachment',{id:askId,attachment:'att-2'})).data,'base64').toString(),log.toString());
+   assert.equal((await codex('attachment',{id:askId,attachment:'att-3'})).error,ASK_REASONS.noAttachment);
+   // Another Agent: not there, even with its own Grant; the one that claims it may read them.
+   assert.equal((await claude('attachment',{id:askId,attachment:'att-2'})).error,ASK_REASONS.missing);
+   assert.equal((await hermes('attachment',{id:askId,attachment:'att-2'})).error,HERMES_CHANNEL_READ_ONLY);
+   assert.deepEqual((await claude('claim',{ids:[askId]})).asks.map((ask:any)=>ask.id),[askId]);
+   assert.equal(Buffer.from((await claude('attachment',{id:askId,attachment:'att-2'})).data,'base64').toString(),log.toString(),'the claimer reads them');
+   // Refused in words: a type that runs, a picture that is not one, too large a call.
+   assert.equal((await codex('post',{title:'x',attachments:[{name:'a.svg',type:'image/svg+xml',data:log.toString('base64')}]})).error,ASK_REASONS.attachmentType);
+   assert.equal((await codex('post',{title:'x',attachments:[{name:'a.png',type:'image/png',data:log.toString('base64')}]})).error,ASK_REASONS.attachmentKind);
+   assert.match((await codex('post',{title:'x',body:'y'.repeat(30*1024*1024)})).error,/larger than Worldlet takes/);
+   // The person's page reads one whole; settled, they stay.
+   const whole=asks.attachment({action:'agentAsk',operation:'attachment',id:askId,attachment:'att-1'});
+   assert.deepEqual([whole.name,whole.type,whole.size],['screen.png','image/png',screenshot.length]);assert.ok(Buffer.from(whole.data,'base64').equals(screenshot));
+   assert.throws(()=>asks.attachment({id:askId,attachment:'att-7'}),{message:ASK_REASONS.noAttachment});
+   assert.throws(()=>asks.attachment({id:'ask-00000000',attachment:'att-1'}),{message:ASK_REASONS.missing});
+   await asks.answer({operation:'answer',id:askId,outcome:'done'});
+   assert.equal((await codex('attachment',{id:askId,attachment:'att-2'})).size,log.length,'kept once settled');
+   assert.equal(ledger.agentAskAttachment(askId,'att-1',0,8)!.length,8);
+  }
+
   // The open cap: at most 20 open asks per Agent.
   for(let n=0;n<20;n++)assert.equal((await codex('post',{title:'Ask '+n})).ok,true);
   assert.equal((await codex('post',{title:'One too many'})).error,ASK_REASONS.full);
@@ -106,7 +150,7 @@ await withTempDir('worldlet-asks-',async dir=>{
   assert.deepEqual(audit('codex').slice(0,4),[['post','denied'],['grant-ask','allowed'],['grant-work','allowed'],['post','allowed']]);
   assert.ok(audit('codex').some(([action,decision])=>action==='answer'&&decision==='allowed'),'the person\'s answer');
   assert.ok(audit('codex').some(([action,decision])=>action==='resolve'&&decision==='allowed'));
-  assert.deepEqual(audit('hermes'),[['read','denied']]);
+  assert.deepEqual(audit('hermes'),[['read','denied'],['attachment','denied']]);
   assert.deepEqual(ledger.agentAsks().map(ask=>ask.agentId).filter(agentId=>agentId!=='codex'&&agentId!=='claude-code'),[],'nothing stored for anyone else');
  }finally{standing.close();ledger.close();}
 });

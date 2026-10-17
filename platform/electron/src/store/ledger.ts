@@ -82,9 +82,14 @@ export class WorldLedger {
  /** Every Agent ask's current value (`state.agent-asks`). */
  agentAsks():Row[]{return this.records('agent-asks');}
  /** One ask and its Attention item, saved together. The item is the host's own (provider `agents`): its status is the
-  * ask's, set by the person (`user`) or by an Agent's claim or resolve (`agent`), and its Agent the ask's. */
- saveAgentAsk(ask:Row,item:Row,origin:'user'|'agent'){
+  * ask's, set by the person (`user`) or by an Agent's claim or resolve (`agent`), and its Agent the ask's. The bytes of
+  * the attachments a new ask carries are saved with it (`agent_ask_attachments`); the ask keeps only what describes them. */
+ saveAgentAsk(ask:Row,item:Row,origin:'user'|'agent',attachments:{id:string;data:Uint8Array}[]=[]){
   this.transaction(()=>{
+   if(attachments.length){
+    this.ensureAskAttachments();
+    for(const file of attachments)this.run('INSERT INTO agent_ask_attachments(ask_id,id,data) VALUES(?,?,?) ON CONFLICT(ask_id,id) DO UPDATE SET data=excluded.data',String(ask.id),file.id,file.data);
+   }
    core('worldItemValidate',{item,dates:{start:null,end:null}});
    const previous=this.value('items',item.id);
    const prepared=core<Row>('worldItemPrepare',{item,previous:previous??{},id:item.id,identity:WorldLedger.identity(item),run:'agent-asks',now:iso(),
@@ -92,6 +97,18 @@ export class WorldLedger {
    prepared.status=item.status;prepared.statusOrigin=origin;
    this.put('agent-asks',ask.id,ask);this.put('items',item.id,prepared);
   });
+ }
+ private askAttachmentsReady=false;
+ private ensureAskAttachments(){
+  if(this.askAttachmentsReady)return;
+  this.exec('CREATE TABLE IF NOT EXISTS agent_ask_attachments (ask_id TEXT NOT NULL, id TEXT NOT NULL, data BLOB NOT NULL, PRIMARY KEY(ask_id, id));');
+  this.askAttachmentsReady=true;
+ }
+ /** `length` bytes of one ask's attachment from `offset` (SQLite reads only that part), or null when it is not kept. */
+ agentAskAttachment(askId:string,id:string,offset:number,length:number):Uint8Array|null {
+  this.ensureAskAttachments();
+  const row=this.all('SELECT substr(data,?,?) AS part FROM agent_ask_attachments WHERE ask_id=? AND id=?',Math.max(0,offset)+1,Math.max(0,length),askId,id)[0];
+  return row?(row.part instanceof Uint8Array?row.part:new Uint8Array(0)):null;
  }
  // GitHub drafts (core/agent/github-drafts.ts, core/agent/GRANTS.md#github-drafts) -------------------------------
  /** Every GitHub draft's current value (`state.github-drafts`). */

@@ -56,8 +56,9 @@ const UNTRUSTED_TOOLS=['read_content','read_content_page','open_content','read_w
  'agent_asks',
  // The board holds what Services returned (titles, list fields, labels): data, never instructions.
  'world_board',
- // GitHub drafts hold the target's title as GitHub returned it: data, never instructions.
- 'github_drafts',
+ // GitHub drafts and standing GitHub writes hold the target's title and labels as GitHub returned them: data, never
+ // instructions.
+ 'github_drafts','github_writes',
  // The conversation archive holds what people and other Agents wrote elsewhere: data, never instructions.
  'world_conversations',
  // Tracked links hold what other Agents wrote about the person's posts: data, never instructions.

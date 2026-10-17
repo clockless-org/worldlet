@@ -97,6 +97,7 @@ answers on its control socket says so and exits with code 1.
 | `register --agent <id>` | Registers the `worldlet` MCP server and skill in `claude-code` or `codex`. Hermes Agent gets its entry in its own profile once it is Fox's Agent ([World tools on Hermes](../../core/agent/PORTABILITY.md#world-tools-on-hermes)) |
 | `remote [on\|off]` | Turns [remote access](../../core/agent/REMOTE-MCP.md) for cloud connectors on or off, as Settings › Agent › Access does, and prints this World's address and what is connected. Each connector still waits for Allow on its card in Attention |
 | `remote token <name>` | Makes a [token](../../core/agent/REMOTE-MCP.md#a-token-for-a-script-or-another-computer) for an Agent that cannot open a browser, such as a script or a daemon on another computer, and prints it once with the address. Remote access must be on |
+| `register --script <name>` | Adds an [Agent for a script](../../core/agent/GRANTS.md#agents-for-scripts) (a daemon or scheduled job on this computer) and prints its endpoint file in the MCP home |
 
 Neither command gives consent or finishes onboarding: World tools on the standing server keep answering that the person
 has not finished setting up until they do so in the World, as in the desktop app.
@@ -123,6 +124,9 @@ lists the Agents registered here. Each registers with its own command (`core/age
 - Claude Code: `claude mcp add --scope user worldlet --env WORLDLET_MCP_ENDPOINT_FILE=… --env WORLDLET_MCP_TOOLS_FILE=… -- <node> ~/.worldlet/mcp/worldlet-mcp-standing.cjs`, after `claude mcp remove --scope user worldlet`; the skill goes to `~/.claude/skills/worldlet/SKILL.md` (under `CLAUDE_CONFIG_DIR` when set).
 - Codex: `codex mcp add worldlet --env … -- <node> …`, after `codex mcp remove worldlet`; the skill goes to `~/.codex/skills/worldlet/SKILL.md` (under `CODEX_HOME` when set).
 
+An [Agent for a script](../../core/agent/GRANTS.md#agents-for-scripts) has its endpoint file here too, written again each
+run by this host and the desktop app alike; its program reads it directly and registers nothing.
+
 `<node>` is `~/.worldlet/current/node/bin/node` when that is the Node running the host (an install by install.sh), so
 the registration keeps working after an update removes the build it came from; otherwise it is the host's own Node.
 
@@ -136,7 +140,7 @@ The skill is [harness/skills/worldlet/SKILL.md](../../harness/skills/worldlet/SK
 | `npm run build:node-host` | Bundle the host to `dist/node/worldlet.cjs` (`--out <dir>` for another folder) |
 | `node dist/node/worldlet.cjs` | Run it; SIGTERM or Ctrl-C stops it. On Windows, where SIGTERM ends a process at once, a parent that started it with an IPC channel sends `{type:'worldlet:stop'}` for a clean stop |
 | `node dist/node/worldlet.cjs --host-contract-check` | Print the actions, services and capabilities it implements, on a temporary library |
-| `node dist/node/worldlet.cjs status` | The [command line](#the-worldlet-command): `status`, `link [--qr]`, `setup --agent <id>`, `register --agent <id>` |
+| `node dist/node/worldlet.cjs status` | The [command line](#the-worldlet-command): `status`, `link [--qr]`, `setup --agent <id>`, `register --agent <id>`, `register --script <name>` |
 | `npm run package:linux` | The [Linux package](#package) in `dist/ci/linux` (`-- --arch x64` for one architecture, `-- --reuse-web` to keep the interface build already there) |
 | `npm run test:node-host` | Shim and vault storage checks, then build, contract check, boot, restart and stop; the command line against fake `claude` and `codex` commands (socket and endpoint files owner-only, the link never in the log); `link --qr` read back as the link's QR code; then the World in headless Chromium (SwiftShader WebGL) on a library with one item, and the server's refusals (`-- --screenshot <file>` keeps a picture) |
 

@@ -1,4 +1,4 @@
-import {ASK_APPROVE_CHOICE,ASK_DRAFT_CHOICES,AGENT_ASK_KINDS,AGENT_ASK_LIMITS,AGENT_ASK_PROVIDER,AGENT_ASK_STATUSES,type AgentAsk,type AgentAskClaim,type AgentAskKind,type AgentAskPost,type AgentAskReply,type AgentAskResolve,type AgentAskStatus} from '../../contracts/agent-asks.ts';
+import {ASK_APPROVE_CHOICE,ASK_DRAFT_CHOICES,AGENT_ASK_FILE_TYPES,AGENT_ASK_IMAGE_TYPES,AGENT_ASK_KINDS,AGENT_ASK_LIMITS,AGENT_ASK_PROVIDER,AGENT_ASK_STATUSES,type AgentAsk,type AgentAskAttachment,type AgentAskAttachmentInput,type AgentAskClaim,type AgentAskKind,type AgentAskPost,type AgentAskReply,type AgentAskResolve,type AgentAskStatus} from '../../contracts/agent-asks.ts';
 import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
 import type {WorldItem} from '../../contracts/world.ts';
 import {looksSecret} from './agent-profile.ts';
@@ -21,6 +21,12 @@ export const ASK_REASONS=Object.freeze({
  approve:'An ask that carries GitHub drafts must offer Approve as one of its choices.',
  drafts:'Each GitHub draft an ask carries must be this Agent\'s own and still waiting.',
  local:'Approving GitHub drafts writes to GitHub: approve this ask in Worldlet on the computer itself.',
+ attachment:'Each attachment needs a name, a type and its bytes in base64 (data).',
+ attachmentType:'This kind of file cannot be attached. Pictures: PNG, JPEG, WebP or GIF. Other files: plain text, CSV, JSON, ZIP or gzip.',
+ attachmentCount:`An ask may carry at most ${AGENT_ASK_LIMITS.images} pictures and ${AGENT_ASK_LIMITS.files} other files.`,
+ attachmentSize:`A picture may be at most ${AGENT_ASK_LIMITS.imageBytes/1048576} MB, another file at most ${AGENT_ASK_LIMITS.fileBytes/1048576} MB, and all of one ask's attachments together at most ${AGENT_ASK_LIMITS.attachmentBytes/1048576} MB.`,
+ attachmentKind:'This file is not the kind its type says it is.',
+ noAttachment:'This ask has no such attachment.',
 });
 
 /** An ask ID: host-made, file-name safe. */
@@ -36,6 +42,10 @@ const record=(value:unknown):Record<string,unknown>=>value&&typeof value==='obje
 const instant=(value:unknown):value is string=>typeof value==='string'&&Number.isFinite(Date.parse(value));
 const count=(value:string)=>[...value].length;
 const fail=(reason:string):never=>{throw new Error(reason);};
+/** An attachment's ID within its ask (Core-made: `att-1` … `att-20`). */
+export const ASK_ATTACHMENT_ID_PATTERN=/^att-[1-9][0-9]?$/;
+const SHA256=/^[0-9a-f]{64}$/;
+const BASE64=/^[A-Za-z0-9+/]*={0,2}$/;
 
 /** Clean text, or a refusal: control characters and anything that looks like a credential are refused, never kept. */
 function text(value:unknown,limit:number,{multiline=false,required=false}={}):string {
@@ -61,10 +71,72 @@ function list(value:unknown,limit:number,item:(entry:unknown)=>string):string[] 
 }
 const only=(value:Record<string,unknown>,keys:string[])=>{for(const key of Object.keys(value))if(!keys.includes(key))fail(ASK_REASONS.invalid);};
 
+/** The extensions a type is named with: a picture's, another file's, or none when it may not be attached. */
+const extensions=(type:string):readonly string[]=>Object.hasOwn(AGENT_ASK_IMAGE_TYPES,type)?AGENT_ASK_IMAGE_TYPES[type]:Object.hasOwn(AGENT_ASK_FILE_TYPES,type)?AGENT_ASK_FILE_TYPES[type]:[];
+/** Whether an attachment's type is a picture the card shows. */
+export const askAttachmentIsImage=(type:string)=>Object.hasOwn(AGENT_ASK_IMAGE_TYPES,type);
+const CONTROLS=new RegExp(CONTROL.source,'g');
+/** A safe name for an attachment: its folders dropped, control characters and characters a file name may not hold made
+ * `_`, no leading dot, and an extension of its own type (`run.exe` sent as text is `run.exe.txt`), so it never opens as
+ * something that runs. A name that looks like it holds a password, token or key is refused. */
+export function askAttachmentName(value:unknown,type:string):string {
+ const kinds=extensions(type);
+ if(typeof value!=='string'||!kinds.length)return fail(ASK_REASONS.attachment);
+ let name=(value.split(/[\\/]/).pop()??'').replace(CONTROLS,'_').replace(/[\t\r\n<>:"|?*]/g,'_').replace(/\s+/g,' ').replace(/^[.\s]+|[.\s]+$/g,'');
+ if(/^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\.|$)/i.test(name))name='_'+name;
+ const dot=name.lastIndexOf('.'),own=dot>0&&kinds.includes(name.slice(dot+1).toLowerCase());
+ const ext=own?name.slice(dot):'.'+kinds[0];
+ const stem=[...(own?name.slice(0,dot):name)].slice(0,AGENT_ASK_LIMITS.attachmentName-count(ext)).join('').trim()||'attachment';
+ name=stem+ext;
+ if(looksSecret(name))fail(ASK_REASONS.secret);
+ return name;
+}
+/** The first bytes of base64 data, without decoding the rest. */
+function head(data:string,bytes:number):number[] {
+ try{return [...atob(data.slice(0,Math.ceil(bytes/3)*4))].map(c=>c.charCodeAt(0));}catch{return [];}
+}
+/** Whether the bytes begin as their type's do (pictures, ZIP and gzip); text needs no signature. */
+function kindMatches(type:string,data:string):boolean {
+ const b=head(data,12),is=(at:number,...bytes:number[])=>bytes.every((v,i)=>b[at+i]===v);
+ switch(type){
+  case 'image/png':return is(0,0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a);
+  case 'image/jpeg':return is(0,0xff,0xd8,0xff);
+  case 'image/gif':return is(0,0x47,0x49,0x46,0x38)&&(is(4,0x37,0x61)||is(4,0x39,0x61));
+  case 'image/webp':return is(0,0x52,0x49,0x46,0x46)&&is(8,0x57,0x45,0x42,0x50);
+  case 'application/zip':return is(0,0x50,0x4b)&&(is(2,3,4)||is(2,5,6)||is(2,7,8));
+  case 'application/gzip':return is(0,0x1f,0x8b);
+  default:return true;
+ }
+}
+/** `asks/post` attachments, checked: at most AGENT_ASK_LIMITS.images pictures and .files other files, each of an allowed
+ * type whose first bytes match it, within the size limits; the name made safe and the size counted from the base64.
+ * The bytes are kept as they are: an attachment is data, never read for instructions or scanned for secrets (a log
+ * often holds strings that look like tokens). */
+export function readAskAttachments(value:unknown):(AgentAskAttachmentInput&{size:number})[] {
+ if(value===undefined)return [];
+ if(!Array.isArray(value))return fail(ASK_REASONS.attachment);
+ if(value.length>AGENT_ASK_LIMITS.images+AGENT_ASK_LIMITS.files)return fail(ASK_REASONS.attachmentCount);
+ let images=0,files=0,total=0;
+ return value.map(entry=>{
+  const v=record(entry);only(v,['name','type','data']);
+  if(typeof v.type!=='string'||typeof v.data!=='string'||!v.data)return fail(ASK_REASONS.attachment);
+  const type=v.type.trim().toLowerCase();
+  if(!extensions(type).length)return fail(ASK_REASONS.attachmentType);
+  if(v.data.length%4!==0||!BASE64.test(v.data))return fail(ASK_REASONS.attachment);
+  const size=v.data.length/4*3-(v.data.endsWith('==')?2:v.data.endsWith('=')?1:0),image=askAttachmentIsImage(type);
+  if(image)images+=1;else files+=1;
+  if(images>AGENT_ASK_LIMITS.images||files>AGENT_ASK_LIMITS.files)fail(ASK_REASONS.attachmentCount);
+  total+=size;
+  if(size>(image?AGENT_ASK_LIMITS.imageBytes:AGENT_ASK_LIMITS.fileBytes)||total>AGENT_ASK_LIMITS.attachmentBytes)fail(ASK_REASONS.attachmentSize);
+  if(!kindMatches(type,v.data))fail(ASK_REASONS.attachmentKind);
+  return {name:askAttachmentName(v.name,type),type,data:v.data,size};
+ });
+}
+
 /** `asks/post` arguments, checked. An `agentId` the model sent is dropped: the host stamps the caller's own. */
 export function readAskPost(input:unknown):AgentAskPost {
  const value={...record(input)};delete value.agentId;
- only(value,['kind','title','body','choices','link','tags','draftIds']);
+ only(value,['kind','title','body','choices','link','tags','draftIds','attachments']);
  const kind=value.kind===undefined?'ask':value.kind;
  if(!AGENT_ASK_KINDS.includes(kind as AgentAskKind))fail(ASK_REASONS.invalid);
  const post:AgentAskPost={kind:kind as AgentAskKind,title:text(value.title,AGENT_ASK_LIMITS.title,{required:true})};
@@ -80,6 +152,7 @@ export function readAskPost(input:unknown):AgentAskPost {
   if(!post.choices.includes(ASK_APPROVE_CHOICE))fail(ASK_REASONS.approve);
   post.draftIds=drafts;
  }
+ const attachments=readAskAttachments(value.attachments);if(attachments.length)post.attachments=attachments;
  return post;
 }
 
@@ -87,14 +160,36 @@ export function readAskPost(input:unknown):AgentAskPost {
 export const askOpen=(ask:AgentAsk)=>ask.status==='open'||ask.status==='claimed';
 
 /** A new ask from `agentId` (the caller's own, from its token). Refused when the input is not valid or this Agent
- * already has AGENT_ASK_LIMITS.openPerAgent open asks. */
-export function postAsk(asks:readonly AgentAsk[],agentId:string,input:unknown,id:string,now:string):AgentAsk {
+ * already has AGENT_ASK_LIMITS.openPerAgent open asks. `digests` are the host's SHA-256 of each attachment's bytes, in
+ * order; the ask keeps only what describes each (`att-1`, `att-2`, …), and the host keeps the bytes beside it. */
+export function postAsk(asks:readonly AgentAsk[],agentId:string,input:unknown,id:string,now:string,digests:readonly string[]=[]):AgentAsk {
  if(!AGENT_ID_PATTERN.test(agentId)||!ASK_ID_PATTERN.test(id)||!instant(now))fail(ASK_REASONS.invalid);
- const post=readAskPost(input);
+ const post=readAskPost(input),files=post.attachments??[];
+ if(digests.length!==files.length||!digests.every(digest=>typeof digest==='string'&&SHA256.test(digest)))fail(ASK_REASONS.invalid);
  if(asks.filter(ask=>ask.agentId===agentId&&askOpen(ask)).length>=AGENT_ASK_LIMITS.openPerAgent)fail(ASK_REASONS.full);
  if(asks.some(ask=>ask.id===id))fail(ASK_REASONS.invalid);
+ const attachments:AgentAskAttachment[]=files.map(({name,type,size},index)=>({id:'att-'+(index+1),name,type,size,sha256:digests[index]}));
  return {id,agentId,kind:post.kind??'ask',title:post.title,body:post.body??'',choices:post.choices??[],...post.link?{link:post.link}:{},...post.draftIds?{draftIds:post.draftIds}:{},
-  status:'open',tags:post.tags??[],revision:1,createdAt:now,updatedAt:now};
+  ...attachments.length?{attachments}:{},status:'open',tags:post.tags??[],revision:1,createdAt:now,updatedAt:now};
+}
+
+/** One of the ask's attachments by its ID, or a refusal. */
+export function askAttachment(ask:AgentAsk|null|undefined,id:unknown):AgentAskAttachment {
+ if(!ask)return fail(ASK_REASONS.missing);
+ const found=typeof id==='string'&&ASK_ATTACHMENT_ID_PATTERN.test(id)?ask.attachments?.find(item=>item.id===id):undefined;
+ return found??fail(ASK_REASONS.noAttachment);
+}
+/** `asks/attachment`: which part of one attachment's bytes to return, at most AGENT_ASK_LIMITS.attachmentRead from
+ * `offset`. Only the Agent that posted the ask or the one that claimed it reads them; to any other the ask is not there. */
+export function readAskAttachment(asks:readonly AgentAsk[],agentId:string,input:unknown):{ask:AgentAsk;attachment:AgentAskAttachment;offset:number;length:number} {
+ const value=record(input);only(value,['id','attachment','offset']);
+ if(typeof value.id!=='string'||!ASK_ID_PATTERN.test(value.id))fail(ASK_REASONS.invalid);
+ const offset=value.offset===undefined?0:value.offset;
+ if(typeof offset!=='number'||!Number.isInteger(offset)||offset<0)return fail(ASK_REASONS.invalid);
+ const ask=asks.find(item=>item.id===value.id&&(item.agentId===agentId||item.claimedBy===agentId));
+ const attachment=askAttachment(ask,value.attachment);
+ if(offset>attachment.size)fail(ASK_REASONS.invalid);
+ return {ask:ask!,attachment,offset,length:Math.min(AGENT_ASK_LIMITS.attachmentRead,attachment.size-offset)};
 }
 
 /** `asks/read`: the caller's own asks (posted by it, or claimed by it), newest first, optionally of one status or the
@@ -171,6 +266,10 @@ export function readStoredAsk(value:unknown):AgentAsk|null {
   status:v.status as AgentAskStatus,tags:strings(v.tags),revision:v.revision as number,createdAt:v.createdAt,updatedAt:v.updatedAt};
  if(typeof v.link==='string')ask.link=v.link;
  const drafts=strings(v.draftIds).filter(id=>DRAFT_ID.test(id)).slice(0,AGENT_ASK_LIMITS.drafts);if(drafts.length)ask.draftIds=drafts;
+ const attachments=(Array.isArray(v.attachments)?v.attachments:[]).map(record).flatMap(a=>typeof a.id==='string'&&ASK_ATTACHMENT_ID_PATTERN.test(a.id)&&typeof a.name==='string'&&!!a.name
+  &&typeof a.type==='string'&&extensions(a.type).length>0&&Number.isInteger(a.size)&&(a.size as number)>=0&&typeof a.sha256==='string'&&SHA256.test(a.sha256)
+  ?[{id:a.id,name:a.name,type:a.type,size:a.size as number,sha256:a.sha256}]:[]).slice(0,AGENT_ASK_LIMITS.images+AGENT_ASK_LIMITS.files);
+ if(attachments.length)ask.attachments=attachments;
  if(typeof v.claimedBy==='string'&&AGENT_ID_PATTERN.test(v.claimedBy))ask.claimedBy=v.claimedBy;
  if(instant(v.claimedAt))ask.claimedAt=v.claimedAt;
  const answer=record(v.answer),resolution=record(v.resolution);
@@ -194,5 +293,7 @@ export function askAttentionItem(ask:AgentAsk,agentName:string):WorldItem {
   ...kind==='task'?{attentionReason:[...(name+' asks you to choose.')].slice(0,600).join('')}:{},
   sources:[{provider:AGENT_ASK_PROVIDER,id:ask.id,quote:[...ask.title].slice(0,1000).join(''),...ask.link?{url:ask.link}:{}}],
   agentId:ask.agentId,agentName:name,askId:ask.id,askKind:ask.kind,askRevision:ask.revision,askStatus:ask.status,askChoices:[...ask.choices],...ask.draftIds?.length?{askDraftIds:[...ask.draftIds]}:{},
+  // What it carries, so the card shows each picture (read from the host) and names each file.
+  ...ask.attachments?.length?{askAttachments:ask.attachments.map(({id,name,type,size})=>({id,name,type,size}))}:{},
   ...ask.answer?.choice?{askChoice:ask.answer.choice}:{},createdAt:ask.createdAt,updatedAt:ask.updatedAt};
 }
