@@ -51,7 +51,7 @@ for(const text of shared){assert.ok(agentPage.includes(text),'agent.md says '+te
 assert.ok(skillText.includes('https://worldlet.ai/agent.md'),'the skill points at agent.md');
 assert.match(sh,/--agent\) AGENT=/);assert.match(ps,/\[string\]\$Agent/);
 const control=readFileSync('platform/node/src/control.ts','utf8');
-assert.match(control,/CONTROL_COMMANDS=\['setup','link','status','register'\]/,'the commands agent.md names exist');
+assert.match(control,/CONTROL_COMMANDS=\['setup','link','status','register','remote'\]/,'the commands agent.md names exist');
 assert.ok(control.includes("rest.includes('--qr')"),'and link --qr');
 assert.ok(!/password|token|api key/i.test(agentPage.replace(/needs no password, token or API key|never pass it one|paste a key, password or token/gi,'')),'agent.md never asks for a secret');
 const acceptance=readFileSync('platform/install/install-acceptance.ps1','utf8');
