@@ -282,6 +282,12 @@
 .companion-settings-connector-pick{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;color:#354132}
 .companion-settings-connector-pick>span{flex:1 1 100%}
 .companion-settings-connector-pick>select{flex:1 1 140px;min-width:0}
+.companion-settings-connector-who{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#354132}
+.companion-settings-connector-reader{display:flex;align-items:flex-start;gap:6px;cursor:pointer}
+.companion-settings-connector-reader>input{margin:2px 0 0;flex:none}
+.companion-settings-connector-others{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.companion-settings-connector-others>span{flex:1 1 140px;color:#656651}
+.companion-settings-connector-agents{display:flex;flex-direction:column;gap:4px;padding-left:4px}
 .companion-settings-advanced .companion-settings-row{flex-wrap:wrap}
 .companion-settings-advanced .companion-settings-row>div{flex:1 1 240px;gap:4px}
 .companion-settings-elsewhere{align-self:stretch;margin-top:6px}

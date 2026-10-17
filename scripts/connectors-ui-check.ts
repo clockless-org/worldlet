@@ -17,6 +17,8 @@ await withBrowser(async browser=>{
  await page.evaluate(async()=>{
   const w=window as any;w.calls=[];w.connections=[{provider:'github',label:'GitHub',transport:'hermes',syncStatus:'connected',connected:true,failed:false}];
   w.pending=null;w.refuse=null;w.chosen='2';
+  // The Agents that have reached the World, and which may read which Service ("<agent>:<provider>").
+  w.agents=[{id:'claude-code',name:'Claude Code'},{id:'codex',name:'Codex'}];w.granted=new Set(['claude-code:github']);
   const call=async(action:string,body:any={})=>{
    w.calls.push({action,...body});
    if(action==='snapshot')return {connections:structuredClone(w.connections)};
@@ -35,6 +37,13 @@ await withBrowser(async browser=>{
    if(action==='disconnectSource'){w.connections=w.connections.filter((c:any)=>c.provider!==body.provider);return {ok:true};}
    if(action==='githubApp')return {connected:false};
    if(action==='httpJson')return {endpoints:[]};
+   if(action==='agentAccess'&&body.operation==='serviceReaders'){
+    const of=(agent:any)=>({...agent,granted:w.granted.has(agent.id+':'+body.provider)});
+    return {main:of(w.agents[0]),others:w.agents.slice(1).map(of)};
+   }
+   if(action==='agentAccess'&&(body.operation==='grantService'||body.operation==='ungrantService')){
+    w.granted[body.operation==='grantService'?'add':'delete'](body.id+':'+body.provider);return {ok:true};
+   }
    if(action==='serviceChoices'){
     if(!w.connections.some((c:any)=>c.provider===body.provider))return {choices:[],chosen:null};
     if(body.provider==='posthog')return {choices:[{id:'1',name:'Mobile'},{id:'2',name:'Web'}],chosen:w.chosen};
@@ -65,8 +74,27 @@ await withBrowser(async browser=>{
  assert.equal(await tile('github').getByRole('button',{name:'Disconnect',exact:true}).count(),1,'a service connected with a key shows as connected');
  assert.equal(await tile('github').getByRole('button',{name:'Connect',exact:true}).count(),0);
  assert.equal(await page.locator('[data-advanced]').evaluate(node=>(node as HTMLDetailsElement).open),false,'Advanced starts folded');
- assert.equal(await page.locator('input:visible,textarea:visible').count(),0,'nothing to type on the default path');
+ assert.equal(await page.locator('input:visible:not([type="checkbox"]),textarea:visible').count(),0,'nothing to type on the default path');
  await plain('opened');
+ // Who may use it: the Agent Fox uses is on, changes always ask, the other Agents behind Choose Agents.
+ const who=tile('github').locator('[data-who]');
+ const main=who.getByRole('checkbox',{name:'Fox and Claude Code can look at your GitHub.',exact:true});
+ assert.equal(await main.isChecked(),true,'reading is on by default for the Agent in use');
+ await who.getByText('Before anything is changed, Worldlet asks you.',{exact:true}).waitFor();
+ await who.getByText('Other Agents look only if you choose them.',{exact:true}).waitFor();
+ assert.equal(await who.getByRole('checkbox').count(),1,'the other Agents stay folded');
+ await main.uncheck();
+ await page.waitForFunction(()=>(window as any).calls.some((c:any)=>c.action==='agentAccess'&&c.operation==='ungrantService'));
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.operation==='ungrantService')),[{action:'agentAccess',operation:'ungrantService',id:'claude-code',provider:'github'}]);
+ await tile('github').getByRole('checkbox',{name:'Fox and Claude Code can look at your GitHub.',exact:true,checked:false}).waitFor();
+ await tile('github').getByRole('button',{name:'Choose Agents',exact:true}).click();
+ const codex=tile('github').getByRole('checkbox',{name:'Codex can look at your GitHub',exact:true});
+ await codex.check();
+ await tile('github').getByText('Codex can look too. Other Agents look only if you choose them.',{exact:true}).waitFor();
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.operation==='grantService')),[{action:'agentAccess',operation:'grantService',id:'codex',provider:'github'}]);
+ await plain('who may use it');
+ await tile('github').getByRole('button',{name:'Done',exact:true}).click();
+ assert.equal(await tile('github').getByRole('checkbox').count(),1);
  const screenshot=process.argv.includes('--screenshot')?process.argv[process.argv.indexOf('--screenshot')+1]:'';
 
  // Connect: waiting, with Cancel, then Connected; the request names the Thing's region.
@@ -152,4 +180,4 @@ await withBrowser(async browser=>{
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'narrow settings do not overflow horizontally');
  if(screenshot)await page.screenshot({path:screenshot.replace(/\.png$/,'-narrow.png'),fullPage:true});
 });
-console.log('PASS Settings › Connectors: sign-in tiles with Connect, waiting and Cancel, Connected as, Disconnect asks once, plain words for a refusal and a sign-out, the PostHog project and Cloudflare account choices, key services shown connected, keys and addresses only under Advanced, no technical word on the default path, narrow layout');
+console.log('PASS Settings › Connectors: sign-in tiles with Connect, waiting and Cancel, Connected as, Disconnect asks once, plain words for a refusal and a sign-out, who may use it (the Agent in use on, Choose Agents), the PostHog project and Cloudflare account choices, key services shown connected, keys and addresses only under Advanced, no technical word on the default path, narrow layout');

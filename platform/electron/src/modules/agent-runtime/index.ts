@@ -32,6 +32,7 @@ import {UPDATED,backgroundSignIn,claudeCodeSignedIn,openSignIn} from './provider
 import {codexHome} from './agent-files.ts';
 import {parseJSON5} from './openclaw-files.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
+import {serviceReadDefaults,serviceReaders} from './service-readers.ts';
 import {ExternalAgentAdapter,NoAgentAdapter,UnavailableAgentAdapter,loadAgentConfiguration} from './external.ts';
 import {LocalHarnessAdapter,LocalHarnessRuntime,currentEnvironment,forgetNotStarting,harnessEnvironment,harnessVersion,locateLocalHarnesses,openClawConfigFile,readSelection,selectedInstall,writeSelection,type LocalHarnessInstall} from './local-harness.ts';
 import {runHarnessCommand,standingRules} from './harness-approvals.ts';
@@ -753,8 +754,20 @@ export function installAgentRuntime(host:Host){
   let connections:Row[]=[];try{connections=host.store.state.connections??[];}catch{}
   return SERVICE_DRAFT_PROVIDERS.filter(provider=>connections.some(c=>c.provider===provider&&canBuild(c)));
  };
+ // Reading is on by default: a Service that becomes connected can be read by the Agent Fox uses (service-readers.ts).
+ const defaultServiceReads=serviceReadDefaults({root:context.root,access:()=>agentAccess&&host.store.writable&&!host.store.sampleEnabled()?agentAccess:null,selected:()=>readSelection(context.root)});
+ const connectedNow=()=>{try{defaultServiceReads(connectedServices());}catch{}};
+ connectedNow();
+ host.store.onChange(connectedNow);
  host.register({agentAccess:async request=>{
   const access=agentAccess!;
+  // "Who may use it" under a connected Service's tile in Settings › Connectors: the Agent Fox uses and every other Agent
+  // not revoked, each with whether it may read that Service now. Changing one is grantService or ungrantService.
+  if(request.operation==='serviceReaders'){
+   const provider=typeof request.provider==='string'?request.provider:'';
+   if(!SERVICE_PROVIDERS.includes(provider))throw new WorldletError('That is not a Service Worldlet reads.');
+   return serviceReaders(access,provider,readSelection(context.root));
+  }
   if(request.operation==='revoke'){
    const id=typeof request.id==='string'?request.id:'';
    if(!access.identity(id))throw new WorldletError('That Agent is not known here.');

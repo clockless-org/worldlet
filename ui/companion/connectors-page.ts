@@ -1,5 +1,6 @@
 import {TOKEN_PROVIDERS} from '../../core/applets/index.ts';
-import {connector,connectorTiles,connectorDisconnectQuestion,connectorFailure,type ConnectorTile} from '../../core/accounts/index.ts';
+import {connector,connectorTiles,connectorDisconnectQuestion,connectorFailure,connectorWhoMayUse,type ConnectorReaders,type ConnectorTile} from '../../core/accounts/index.ts';
+import {SERVICE_PROVIDERS} from '../../contracts/services.ts';
 import {agentButton as button,agentEl as el} from './agent-change.ts';
 import {showGithubApp,showHttpJson,showSearchConsole} from './worldlet-accounts.ts';
 
@@ -22,6 +23,9 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
  let connections:any[]=[];
  // What a signed-in service lets the person choose (PostHog's projects), by connector.
  const picks=new Map<string,{choices:{id:string;name:string}[];chosen:string|null}>();
+ // Who may read a connected Service (agentAccess serviceReaders), by connector; the one whose Choose Agents is open.
+ const readers=new Map<string,ConnectorReaders>();
+ let choosing:string|null=null;
  // Search Console's box under Advanced shows its field again once its tile is disconnected.
  let searchConsole=async()=>{};
  async function read(){const state=await call('snapshot').catch(()=>null);if(Array.isArray(state?.connections))connections=state.connections;}
@@ -36,6 +40,11 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
    const answer=await call('serviceChoices',{provider:item.provider}).catch(()=>null);
    if(Array.isArray(answer?.choices)&&answer.choices.length>1)picks.set(item.id,answer);
   }
+  readers.clear();
+  for(const item of connectorTiles(connections))if(item.state==='connected'&&SERVICE_PROVIDERS.includes(item.provider)){
+   const answer=await call('agentAccess',{operation:'serviceReaders',provider:item.provider}).catch(()=>null);
+   if(answer&&Array.isArray(answer.others))readers.set(item.id,{main:answer.main??null,others:answer.others});
+  }
   if(current())render();
  }
  function tile(item:ConnectorTile){
@@ -47,7 +56,7 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
   else if(item.state==='off'&&item.signIn)actions.append(button('Connect','connect',()=>signIn(item),true));
   else if(item.state==='needs-you')actions.append(button('Sign in again','sign-in-again',()=>signIn(item),true));
   else if(item.state==='connected'&&asking!==item.id)actions.append(button('Disconnect','disconnect',()=>{asking=item.id;notes.delete(item.id);render();}));
-  box.append(words,actions);
+  box.append(words);
   const pick=item.state==='connected'?picks.get(item.id):undefined;
   if(pick&&asking!==item.id){
    const kind=connector(item.id)?.pick??'one';
@@ -62,6 +71,10 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
    }));
    box.append(row);
   }
+  const who=item.state==='connected'&&asking!==item.id?readers.get(item.id):undefined;
+  if(who)box.append(whoMayUse(item,who));
+  // Its buttons last, at the foot of the tile.
+  box.append(actions);
   if(item.state==='connected'&&asking===item.id){
    const ask=el('div','companion-settings-confirm');ask.setAttribute('role','group');ask.dataset.confirm=item.id;
    ask.append(el('span','',connectorDisconnectQuestion(item.name)),
@@ -72,6 +85,37 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
     },true),
     button('Keep','keep',()=>{asking=null;render();}));
    box.append(ask);
+  }
+  return box;
+ }
+ /** "Who may use it" (connectorWhoMayUse): the Agent Fox uses, on by default; changes always ask; the other Agents
+  * behind Choose Agents. Each switch gives or takes back that Agent's read Grant for this Service at once. */
+ function whoMayUse(item:ConnectorTile,who:ConnectorReaders){
+  const view=connectorWhoMayUse(item.name,who),box=el('div','companion-settings-connector-who');box.dataset.who=item.id;
+  const toggle=(agent:{id:string;text:string;on:boolean})=>{
+   const label=el('label','companion-settings-connector-reader'),check=document.createElement('input');
+   check.type='checkbox';check.checked=agent.on;check.dataset.reader=agent.id;
+   check.onchange=async()=>{
+    const on=check.checked;check.disabled=true;said.textContent='';
+    try{await call('agentAccess',{operation:on?'grantService':'ungrantService',id:agent.id,provider:item.provider});}
+    catch(e){said.textContent=connectorFailure(item.name,(e as Error).message).replace(/^Could not connect/,'Could not change who can look at');}
+    await draw();
+   };
+   label.append(check,document.createTextNode(agent.text));
+   return label;
+  };
+  if(view.main)box.append(toggle(view.main));
+  if(view.fox)box.append(el('span','',view.fox));
+  box.append(el('span','',view.changes));
+  if(view.others){
+   const line=el('div','companion-settings-connector-others');
+   line.append(el('span','',view.others.text),button(choosing===item.id?'Done':view.others.choose,'choose-agents',()=>{choosing=choosing===item.id?null:item.id;render();}));
+   box.append(line);
+   if(choosing===item.id){
+    const list=el('div','companion-settings-connector-agents');list.setAttribute('role','group');list.setAttribute('aria-label',`Agents that can look at your ${item.name}`);
+    list.append(...view.others.agents.map(toggle));
+    box.append(list);
+   }
   }
   return box;
  }
@@ -86,7 +130,7 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
   await draw();
  }
  page.append(grid,
-  el('p','companion-info-note','Fox can look at a service once you connect it. Other Agents can look only if you let them, in Agent › Access. Before anything is changed, Worldlet asks you.'),
+  el('p','companion-info-note','Once you connect a service, Fox and the Agent it uses can look at it. Other Agents look only if you choose them. Before anything is changed, Worldlet asks you.'),
   said);
  target.append(page);
  await draw();
