@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import {AGENT_AUDIT_KEEP,agentRevoked,channelDefaultGrants,grantActive,readAgentIdentity,readGrant,askGrant,askGrantAuditEntry,boardGrant,boardGrantAuditEntry,githubDraftGrant,githubDraftGrantAuditEntry,serviceGrantAuditEntry,serviceReadGrant} from '../../../../../core/agent/index.ts';
+import {AGENT_AUDIT_KEEP,agentRevoked,channelDefaultGrants,grantActive,readAgentIdentity,readGrant,askGrant,askGrantAuditEntry,boardGrant,boardGrantAuditEntry,conversationGrant,conversationGrantAuditEntry,githubDraftGrant,githubDraftGrantAuditEntry,serviceGrantAuditEntry,serviceReadGrant} from '../../../../../core/agent/index.ts';
 import type {AgentAuditEntry,AgentIdentity,Grant} from '../../../../../contracts/agent-identity.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 import type {AgentAccess,VaultService} from '../../host/services.ts';
@@ -97,6 +97,8 @@ export function createAgentAccess({root,vault,ledger,now=()=>new Date().toISOStr
   ungrantBoard(agentId,kind){return takeBack(agentId,boardGrant(agentId,kind,now()),at=>boardGrantAuditEntry(agentId,kind,false,at));},
   grantGithubDrafts(agentId){return give(agentId,githubDraftGrant(agentId,now()),at=>githubDraftGrantAuditEntry(agentId,true,at));},
   ungrantGithubDrafts(agentId){return takeBack(agentId,githubDraftGrant(agentId,now()),at=>githubDraftGrantAuditEntry(agentId,false,at));},
+  grantConversations(agentId,kind){return give(agentId,conversationGrant(agentId,kind,now()),at=>conversationGrantAuditEntry(agentId,kind,true,at));},
+  ungrantConversations(agentId,kind){return takeBack(agentId,conversationGrant(agentId,kind,now()),at=>conversationGrantAuditEntry(agentId,kind,false,at));},
   onRevoke(listener){listeners.push(listener);}
  };
  // A Grant the person gives or takes back in Settings (Core builds it from a name only: a Service, or ask or work), each

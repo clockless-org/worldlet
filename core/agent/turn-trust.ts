@@ -57,7 +57,9 @@ const UNTRUSTED_TOOLS=['read_content','read_content_page','open_content','read_w
  // The board holds what Services returned (titles, list fields, labels): data, never instructions.
  'world_board',
  // GitHub drafts hold the target's title as GitHub returned it: data, never instructions.
- 'github_drafts'];
+ 'github_drafts',
+ // The conversation archive holds what people and other Agents wrote elsewhere: data, never instructions.
+ 'world_conversations'];
 const GUARDED_WRITES=new Set<string>([...GUARDED_WRITE_TOOLS,...TURN_GUARDED_WRITES]);
 /** Tools the host routes itself; their tool events above classify them precisely. */
 const HOST_ROUTED=new Set<string>([policy.worldGatewayTool,...worldToolCatalog.map(tool=>tool.name)]);
