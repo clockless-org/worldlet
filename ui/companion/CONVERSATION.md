@@ -143,7 +143,7 @@ Source collection, analysis and Attention publication follow the shared [Applet 
 
 MCP servers are enabled only after authorization and tool discovery succeed. External write tools are not in the allowed list. Disconnecting Google revokes the grant and removes the Gmail and Calendar connections; local data stays. Remote revocation and local credential removal are separate facts.
 
-Google client registration: the release build bundles `GoogleOAuthClient.json`; development can point `WORLDLET_GOOGLE_CLIENT_FILE` at a Desktop OAuth client file. The Google OAuth project is unverified for restricted scopes; external users see the unverified-app screen.
+Google client registration: the release build bundles `GoogleOAuthClient.json`; development can point `WORLDLET_GOOGLE_CLIENT_FILE` at a Desktop OAuth client file. The Google OAuth project is unverified for restricted scopes and for Search Console's sensitive `webmasters.readonly`; external users see the unverified-app screen.
 
 ## Live voice
 

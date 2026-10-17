@@ -23,7 +23,7 @@ export interface ServiceRequests {
 export function createServiceRequests({ledger,access,connected,title,changed,now=()=>new Date().toISOString()}:
  {ledger:()=>ServiceRequestLedger|null;access:()=>AgentAccess|null;connected:(provider:string)=>boolean;title:(provider:string)=>string;changed:()=>void;now?:()=>string}):ServiceRequests {
  // A Service that signs in is connected from the card itself; one that takes a key, under Settings › Connectors.
- const signsIn=(provider:string)=>connector(provider)?.mechanism==='mcp-oauth';
+ const signsIn=(provider:string)=>['mcp-oauth','google'].includes(connector(provider)?.mechanism??'');
  const load=(db:ServiceRequestLedger)=>db.serviceRequests().flatMap(row=>{const request=readServiceRequest(row);return request?[request]:[];});
  const save=(db:ServiceRequestLedger,request:ServiceRequest,origin:'user'|'agent')=>db.saveServiceRequest(request as unknown as Row,serviceRequestItem(request,title(request.provider),{signIn:signsIn(request.provider),region:connector(request.provider)?.region}) as unknown as Row,origin);
  return {

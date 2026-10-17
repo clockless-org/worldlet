@@ -30,8 +30,9 @@ export const TOKEN_PROVIDERS:Readonly<Record<string,{hint:string;token:RegExp;la
    {key:'name',label:'Name',placeholder:'status',hint:'A short name Agents and presets use: lowercase letters, digits and -.',maxLength:32},
    {key:'url',label:'Base address',placeholder:'https://api.example.com/v1/',hint:'Reads are GET requests to paths under this HTTPS address.',maxLength:300},
   ])},
- // The whole JSON key file; the host checks what is in it (core/accounts/services/search-console.ts).
- 'search-console':{hint:'Paste the JSON key of a Google service account that you added as a user of your sites in Search Console.',token:/^\{[\s\S]{50,7998}\}$/,label:'service account key',
+ // The whole JSON key file; the host checks what is in it (core/accounts/services/search-console.ts). With no key,
+ // it signs in with Worldlet's Google sign-in instead.
+ 'search-console':{hint:'Paste the JSON key of a Google service account that you added as a user of your sites in Search Console.',token:/^\{[\s\S]{50,7998}\}$/,label:'service account key',signIn:true,
   wrong:{token:/^\{\s*"(?:installed|web)"\s*:/,message:'That is an OAuth client file, not a service account key. Create a JSON key for a service account instead.'}},
 });
 /** The token a `connect` request carries: only for a source that connects with one, required there, and shaped like a

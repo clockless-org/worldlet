@@ -26,7 +26,7 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
  // Who may read a connected Service (agentAccess serviceReaders), by connector; the one whose Choose Agents is open.
  const readers=new Map<string,ConnectorReaders>();
  let choosing:string|null=null;
- // Search Console's box under Advanced shows its field again once its tile is disconnected.
+ // Search Console's box under Advanced follows its tile: connected, or its field again once disconnected.
  let searchConsole=async()=>{};
  async function read(){const state=await call('snapshot').catch(()=>null);if(Array.isArray(state?.connections))connections=state.connections;}
  function render(){
@@ -127,7 +127,7 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
    said.textContent=`${item.name} is connected.`;
   }catch(e){notes.set(item.id,connectorFailure(item.name,(e as Error).message));}
   finally{waiting=null;}
-  await draw();
+  await draw();await searchConsole();
  }
  page.append(grid,
   el('p','companion-info-note','Once you connect a service, Fox and the Agent it uses can look at it. Other Agents ask you the first time. Before anything is changed, Worldlet asks you.'),

@@ -123,8 +123,8 @@ export async function showHttpJson(target:HTMLElement,call:(action:string,body?:
  await draw();
 }
 
-/** Google Search Console (core/applets/INTEGRATIONS.md#search-console-service), which has no Thing of its own: a Google
- * service account's JSON key, pasted once. The host checks it with Google and keeps it only in the vault; the field is
+/** Google Search Console (core/applets/INTEGRATIONS.md#search-console-service), which has no Thing of its own: its tile
+ * signs in with Google; here, under Advanced, a Google service account's JSON key instead, pasted once. The host checks it with Google and keeps it only in the vault; the field is
  * cleared before Google answers and the page never gets the key back. Disconnect is in the list above. Returns its
  * redraw. */
 export async function showSearchConsole(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean,changed:()=>Promise<void>):Promise<()=>Promise<void>>{
@@ -141,7 +141,7 @@ export async function showSearchConsole(target:HTMLElement,call:(action:string,b
   const key=document.createElement('textarea');
   key.className='companion-settings-input';key.rows=4;key.autocomplete='off';key.spellcheck=false;key.maxLength=8000;
   key.setAttribute('aria-label','Service account key');key.placeholder='Service account key (the whole .json file)';
-  text.append(el('strong','','Search Console'),el('span','',TOKEN_PROVIDERS['search-console'].hint+' It stays on this computer and is only read from, never changed.'),key);
+  text.append(el('strong','','Search Console with a service account'),el('span','',TOKEN_PROVIDERS['search-console'].hint+' It stays on this computer and is only read from, never changed. Without one, use Connect on the Search Console tile above.'),key);
   const connect=el('button','companion-info-action','Connect') as HTMLButtonElement;connect.type='button';
   connect.onclick=async()=>{
    if(connect.disabled)return;
