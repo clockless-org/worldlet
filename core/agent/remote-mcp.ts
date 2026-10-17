@@ -79,8 +79,11 @@ export const remoteMcpResponseFrame=(id:string,response:RemoteMcpResponse)=>JSON
 // What this computer keeps: the clients that registered and the connections the person allowed (each one Agent).
 export type RemoteMcpClient={id:string;name:string;redirectUris:string[];secretHash?:string;createdAt:number};
 export type RemoteMcpConnection={agentId:string;clientId:string;accessHash:string;accessExpiresAt:number;refreshHash:string;createdAt:number};
-export type RemoteMcpState={clients:RemoteMcpClient[];connections:RemoteMcpConnection[]};
-export const emptyRemoteMcpState=():RemoteMcpState=>({clients:[],connections:[]});
+/** A token the person made for an Agent that cannot open a browser (a script, a daemon): a bearer with no expiry, good
+ * until the person revokes that Agent or makes it a new token. One per Agent. */
+export type RemoteMcpToken={agentId:string;hash:string;createdAt:number};
+export type RemoteMcpState={clients:RemoteMcpClient[];connections:RemoteMcpConnection[];tokens:RemoteMcpToken[]};
+export const emptyRemoteMcpState=():RemoteMcpState=>({clients:[],connections:[],tokens:[]});
 const HASH=/^[a-f0-9]{64}$/;
 /** A kept state, with anything that does not fit dropped. */
 export function readRemoteMcpState(value:unknown):RemoteMcpState {
@@ -89,7 +92,8 @@ export function readRemoteMcpState(value:unknown):RemoteMcpState {
   &&(c.secretHash===undefined||HASH.test(c.secretHash))&&Number.isFinite(c.createdAt));
  const connections=(Array.isArray(v.connections)?v.connections:[]).filter((c:any)=>typeof c?.agentId==='string'&&AGENT_ID_PATTERN.test(c.agentId)&&typeof c.clientId==='string'
   &&HASH.test(c.accessHash)&&HASH.test(c.refreshHash)&&Number.isFinite(c.accessExpiresAt)&&Number.isFinite(c.createdAt));
- return {clients,connections};
+ const tokens=(Array.isArray(v.tokens)?v.tokens:[]).filter((t:any)=>typeof t?.agentId==='string'&&AGENT_ID_PATTERN.test(t.agentId)&&HASH.test(t.hash)&&Number.isFinite(t.createdAt));
+ return {clients,connections,tokens};
 }
 
 /** A redirect a client may register: https, http to this device's loopback, or an app's own scheme (cursor://…). */
@@ -153,7 +157,9 @@ export interface RemoteMcpServer {
  /** The person's Allow or Deny on the card; false when it is no longer waiting. */
  decide(id:string,allow:boolean):boolean;
  consents():RemoteMcpConsent[];
- /** The Agent was revoked: its connections end at once. */
+ /** A new token for this Agent, replacing any it had; only its hash is kept. */
+ mint(agentId:string):Promise<string>;
+ /** The Agent was revoked: its connections and token end at once. */
  forget(agentId:string):void;
  /** Ends every connection and registration (a new address). */
  reset():void;
@@ -198,7 +204,7 @@ export function createRemoteMcpServer(deps:RemoteMcpDeps):RemoteMcpServer {
   const token=/^Bearer ([A-Za-z0-9_-]{43})$/.exec(header??'')?.[1];
   if(!token)return null;
   const hash=await tokenHash(token),at=now();
-  const found=load().connections.find(c=>c.accessHash===hash&&c.accessExpiresAt>at);
+  const state=load(),found=state.connections.find(c=>c.accessHash===hash&&c.accessExpiresAt>at)??state.tokens.find(t=>t.hash===hash);
   return found&&deps.active(found.agentId)?found:null;
  }
  async function issue(state:RemoteMcpState,agentId:string,clientId:string,createdAt:number){
@@ -388,9 +394,14 @@ export function createRemoteMcpServer(deps:RemoteMcpDeps):RemoteMcpServer {
   },
   decide,
   consents(){sweep();return [...pending.values()].map(entry=>entry.consent);},
+  async mint(agentId){
+   const token=newRemoteMcpToken(random),hash=await tokenHash(token),state=load();
+   deps.save({...state,tokens:[...state.tokens.filter(t=>t.agentId!==agentId),{agentId,hash,createdAt:now()}]});
+   return token;
+  },
   forget(agentId){
-   const state=load(),kept=state.connections.filter(c=>c.agentId!==agentId);
-   if(kept.length!==state.connections.length)deps.save({...state,connections:kept});
+   const state=load(),kept=state.connections.filter(c=>c.agentId!==agentId),tokens=state.tokens.filter(t=>t.agentId!==agentId);
+   if(kept.length!==state.connections.length||tokens.length!==state.tokens.length)deps.save({...state,connections:kept,tokens});
   },
   reset(){
    deps.save(emptyRemoteMcpState());codes.clear();

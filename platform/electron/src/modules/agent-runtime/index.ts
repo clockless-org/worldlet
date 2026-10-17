@@ -563,7 +563,8 @@ export function installAgentRuntime(host:Host){
  host.onQuit(()=>remoteMcp?.close());
  /** Remote access (Settings › Agent › Access): `status`, `enable`, `disable`, `renew` (a new address, every connection
   * ends) and the person's answer on a consent card (`allow`, `deny` with its ID). Not in ROOM_ALLOWED: only this
-  * computer's pages may let a connector in. */
+  * computer's pages may let a connector in. `token` (a `name`, or a remote Agent's `id`) makes a token for an Agent that
+  * cannot open a browser; it is answered once and never shown again. */
  host.register({remoteMcp:async request=>{
   const remote=remoteMcp!;
   try{
@@ -572,6 +573,7 @@ export function installAgentRuntime(host:Host){
    if(request.operation==='disable')return await remote.disable();
    if(request.operation==='renew')return await remote.renew();
    if(request.operation==='allow'||request.operation==='deny')return remote.decide(request.id,request.operation==='allow');
+   if(request.operation==='token')return await remote.token(request.name,request.id);
   }catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
   throw new WorldletError('Unknown remote access operation.');
  }});

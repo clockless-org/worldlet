@@ -213,6 +213,8 @@ await withTempDir('wl-',async temp=>{
    assert.equal(remote.status,0,remote.stderr);
    assert.match(remote.stdout,/Remote access is off/);
    assert.equal(cli('remote','maybe').status,2);
+   assert.equal(cli('remote','token').status,2,'a token needs the Agent\'s name');
+   assert.match(cli('remote','token','Build machine').stderr,/Turn on remote access first/);
    const bootstrap=await launchTestBrowser();
    try{
     const page=await bootstrap.newPage();

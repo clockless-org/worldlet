@@ -207,6 +207,11 @@ async function answer(request:ControlRequest):Promise<ControlReply> {
  if(request.command==='register')return {lines:await registerAgent(request.agent!)};
  // Remote access (core/agent/REMOTE-MCP.md), the same as Settings › Agent › Access: each connector still asks the
  // person on a card in Attention.
+ if(request.command==='remote'&&request.remote==='token'){
+  const made=await router.dispatch({action:'remoteMcp',operation:'token',name:request.name}) as {ok:boolean;error?:string;token?:string;address?:string;agent?:{name:string}};
+  if(!made.ok)throw Error(made.error||'Could not make a token.');
+  return {lines:[`Address: ${made.address}`,`Token for ${made.agent?.name}: ${made.token}`,'Send it as "Authorization: Bearer <token>" to the address. It is shown only now; worldlet remote token again replaces it with a new Agent, and Revoke in Settings › Agent › Access ends it.']};
+ }
  if(request.command==='remote'){
   const operation=request.remote==='on'?'enable':request.remote==='off'?'disable':'status';
   const status=await router.dispatch({action:'remoteMcp',operation}) as {enabled:boolean;connected:boolean;address?:string;connectors:{name:string}[]};

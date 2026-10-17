@@ -199,6 +199,27 @@ await withTempDir('worldlet-remote-mcp-',async dir=>{
   assert.equal(confidential.status,200);issued.push(confidential.json().access_token,confidential.json().refresh_token);
   say('PASS a client registered with a secret must present it.');
 
+  // A token for an Agent that cannot open a browser: an Agent of its own, no expiry, replaced by a new one, ended by Revoke.
+  assert.equal((await remote.token('')).ok,false);
+  const made=await remote.token('Build machine') as any;
+  assert.equal(made.ok,true);issued.push(made.token);
+  assert.equal(made.address,on.address);
+  assert.match(made.agent.id,/^remote-build-machine-[a-f0-9]{6}$/);
+  assert.deepEqual([access.identity(made.agent.id)!.kind,access.identity(made.agent.id)!.harness],['remote','token']);
+  assert.equal((await rpc(made.token,{jsonrpc:'2.0',id:40,method:'tools/list'})).status,200);
+  clock+=30*86400_000;
+  assert.equal((await rpc(made.token,{jsonrpc:'2.0',id:41,method:'ping'})).status,200,'a token does not run out');
+  const remade=await remote.token(undefined,made.agent.id) as any;issued.push(remade.token);
+  assert.equal(remade.agent.id,made.agent.id);
+  assert.equal((await rpc(made.token,{jsonrpc:'2.0',id:42,method:'ping'})).status,401,'the old token stops');
+  assert.equal((await rpc(remade.token,{jsonrpc:'2.0',id:43,method:'ping'})).status,200);
+  assert.ok((await remote.status()).connectors.some(c=>c.id===made.agent.id&&c.token));
+  access.ensure({id:'codex',name:'Codex',harness:'codex',kind:'local'});
+  assert.equal((await remote.token(undefined,'codex')).ok,false,'only a remote Agent gets a token');
+  access.revoke(made.agent.id);
+  assert.equal((await rpc(remade.token,{jsonrpc:'2.0',id:44,method:'ping'})).status,401,'Revoke ends it');
+  say('PASS a token for a script is an Agent of its own, does not run out, is replaced by a new one and ends with Revoke.');
+
   // Deny: the page is sent back with access_denied, and no Agent is made.
   const before=access.list().length;
   const denyPage=await front('GET','/authorize',{query:authorizeQuery()});
