@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import {hermesConfigValues} from '../../../../../core/agent/index.ts';
+import {connectorScopes} from '../../../../../core/accounts/index.ts';
 import {WorldletError,writeAtomic} from '../../files.ts';
 import type {VaultService} from '../../host/services.ts';
 import {McpHttpClient,McpUnauthorized} from './mcp-client.ts';
@@ -73,7 +74,7 @@ export class McpAccounts {
   if(!parsed)throw new WorldletError('Use an HTTPS service endpoint.');
   const bearer=token.replace(/^\s*bearer\s+/i,'').trim();
   if(token.trim()&&(!bearer||bearer.toLowerCase()==='bearer'))throw new WorldletError('Bearer token is required');
-  const grant:WorldGrant={...(bearer?{v:1 as const,url:parsed,kind:'bearer' as const,bearer}:await this.consent(parsed,open,cancelled,registeredClient)),generation:crypto.randomUUID()};
+  const grant:WorldGrant={...(bearer?{v:1 as const,url:parsed,kind:'bearer' as const,bearer}:await this.consent(name,parsed,open,cancelled,registeredClient)),generation:crypto.randomUUID()};
   const connection:McpConnection={source:'world',name,url:parsed,grant};
   if(bearer&&verify)await verify(connection);
   this.vault.set(vaultId(name),JSON.stringify(grant));
@@ -152,8 +153,9 @@ export class McpAccounts {
  }
  /** MCP authorization (2025-06-18): the server's protected-resource metadata names its authorization server, whose
   * metadata gives the endpoints; the World registers itself there (RFC 7591) for this loopback address and signs
-  * in with PKCE, the resource indicator naming the server (RFC 8707). */
- private async consent(url:string,open:(url:string)=>Promise<void>,cancelled:()=>boolean,registeredClient?:McpPublicClient):Promise<WorldGrant> {
+  * in with PKCE, the resource indicator naming the server (RFC 8707). It asks only for the connector's own short
+  * scope list (core/accounts/connectors.ts), never every scope the server offers. */
+ private async consent(name:string,url:string,open:(url:string)=>Promise<void>,cancelled:()=>boolean,registeredClient?:McpPublicClient):Promise<WorldGrant> {
   const resource=await this.resourceMetadata(url);
   const issuer=typeof resource?.authorization_servers?.[0]==='string'?resource.authorization_servers[0]:new URL(url).origin;
   const port=registeredClient?publicClientPort(registeredClient,issuer):0;
@@ -164,7 +166,7 @@ export class McpAccounts {
   const methods=Array.isArray(server.code_challenge_methods_supported)?server.code_challenge_methods_supported:['S256'];
   if(!methods.includes('S256'))throw new WorldletError('This service does not offer a sign-in Worldlet can use.');
   const target=typeof resource?.resource==='string'?resource.resource:url;
-  const scopes=Array.isArray(resource?.scopes_supported)?resource.scopes_supported.filter((s:unknown)=>typeof s==='string').join(' '):'';
+  const scopes=connectorScopes(name,resource?.scopes_supported).join(' ');
   const verifier=crypto.randomBytes(48).toString('base64url'),state=crypto.randomBytes(24).toString('base64url');
   const challenge=crypto.createHash('sha256').update(verifier).digest('base64url');
   let client:{client_id:string;client_secret?:string}|null=null;

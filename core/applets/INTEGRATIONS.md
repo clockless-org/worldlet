@@ -48,6 +48,22 @@ The provider chapters below retain unique adapter behavior, permissions and limi
 - Embedded sites use the [browser contract](../../platform/browser/INTEGRATION.md). A loaded site or
   public MCP tool list does not prove structured ingestion or background sync.
 
+## Connectors and what a sign-in asks for
+
+[`core/accounts/connectors.ts`](../accounts/connectors.ts) lists every service a person connects to their World, one entry each: its name, one plain line of what connecting lets Worldlet see, how it connects (the service's own sign-in, Worldlet's Google sign-in, or a pasted key until it has a sign-in), what else connects it under Advanced, whether it connects on a host with no screen, and its scope lists.
+
+A sign-in through a service's MCP server (`mcp-account.ts` `consent()`) asks only for the connector's own read list, kept to the scopes the server says it offers (`connectorScopes`). It never asks for every scope the server offers: for PostHog that would be about 200, writes included. A connector with no list of its own (PayPal) sends no scope and gets the service's default; an unknown connector asks for nothing. The write list is for asking again when the person first approves a change that needs it; nothing asks for it yet. The lists as of 2026-10-17:
+
+| Connector | Read | Write, asked for later |
+| --- | --- | --- |
+| Notion | `default` (the only one offered) | |
+| Linear | `read` | `write` |
+| Todoist | `data:read_write` (the only one offered; completing a task still waits for the person's approval) | |
+| Supabase | `organizations:read`, `projects:read` | |
+| PayPal | the service's default | |
+
+A connection made before this change keeps the scopes it was granted until it signs in again.
+
 ## Verification
 
 - `npm run test:electron` runs the host contract, module checks and an app smoke run on a disposable library: the `attention` module covers source checks and World tools, the `agent-runtime` module covers Hermes source-connection mapping.

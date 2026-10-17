@@ -7,6 +7,8 @@ export {readCalendar,readDriveList,googleReadResult} from './google/reads.ts';
 export {SEND_SCOPE,address as mailAddress,greeted,prepare as prepareMail,draftHash,reconcile as reconcileMail,send as sendMail} from './google/mail.ts';
 export {normalize as normalizeSource,sourceFailure} from './google/normalize.ts';
 export {mockGoogle,MOCK_GOOGLE_EMAIL} from './google/mock.ts';
+// The connectors a person connects, one entry each: name, purpose, how it signs in and its short scope lists.
+export {CONNECTORS,connector,connectorScopes,type Connector,type ConnectorFallback,type ConnectorMechanism} from './connectors.ts';
 // MCP connectors (Notion, Todoist, Linear, PayPal, Supabase): the Platform gates the session (McpGate), Core reads.
 export type {McpContent,McpToolResult,McpTool,McpSession,McpGate} from './mcp/session.ts';
 export {ValueError as McpValueError} from './mcp/python.ts';
