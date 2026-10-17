@@ -8,6 +8,7 @@
  * (core/agent/GRANTS.md#tracked-links), the same way. Plain words: the page names
  * places in the World and what was allowed, never tokens, endpoints or MCP. */
 import {agentButton as button,agentEl as el} from './agent-change.ts';
+import {showRemoteAccess} from './remote-access.ts';
 type Grant={id:string;targets:string[];access:'read'|'write';duration:'standing'|'once';grantedAt:string;expiresAt?:string;revokedAt?:string};
 type Audit={at:string;target:string;action:string;decision:'allowed'|'denied'|'asked';reason?:string};
 type Service={provider:string;title:string;granted:boolean};
@@ -59,6 +60,8 @@ export function auditLine(entry:Audit):string {
 }
 
 export async function showAgentAccess(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){
+ // Remote access first: the connectors it lets in are listed below like any other Agent.
+ const remote=el('div');target.append(remote);
  const box=el('div','companion-settings-approvals companion-settings-access'),said=el('p','companion-settings-status');said.setAttribute('role','status');
  target.append(box,said);
  function confirmRevoke(row:HTMLElement,agent:Agent){
@@ -136,5 +139,5 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
    rows.append(row);
   }
  }
- await draw();
+ await Promise.all([draw(),showRemoteAccess(remote,call,current)]);
 }

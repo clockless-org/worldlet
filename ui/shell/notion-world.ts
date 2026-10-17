@@ -1199,6 +1199,26 @@ export function mountNotionWorld(data: World, native: any) {
     showDraftLine(page);voice?.setAttentionActions?.([]);
     return;
    }
+   // A connector asking to reach the World (core/agent/REMOTE-MCP.md): Allow makes it an Agent of its own; Deny sends it
+   // away. Only this computer's pages can answer (not in ROOM_ALLOWED). The card names where it returns and the code
+   // its waiting page shows.
+   const consent=page.worldItemRemoteConsent&&page.worldItemRemoteConsent.status==='pending'&&!data.sample&&native?.remoteMcp?page.worldItemRemoteConsent:null;
+   if(consent){
+    let busy=false;
+    const act=(operation:'allow'|'deny')=>async()=>{
+     if(busy)return;busy=true;
+     try{
+      const result=await native.remoteMcp(operation,consent.id);
+      if(!result?.ok)throw Error(result?.error||'Could not do that.');
+      await settleAttention(page,result.status==='allowed'?'done':'dismissed',null,{advance:true,hosted:true});
+      notify(result.status==='allowed'?`${consent.client} can now reach your World. Choose what it may do in Settings › Agent › Access.`:'Declined. Nothing was connected.');
+     }catch(e){notify(e.message);}finally{busy=false;}
+    };
+    attentionPreview.setActions([{key:'allow',label:'Allow',primary:true,run:act('allow')},{key:'deny',label:'Deny',run:act('deny')}]);
+    attentionPreview.setReview({text:`${consent.client} · returns to ${consent.returnsTo}`,quote:`Code ${consent.code}`,choices:[]});
+    showDraftLine(page);voice?.setAttentionActions?.([]);
+    return;
+   }
    attentionPreview.setActions(outcomes());
    // Changed evidence for this task, found by a background pass, is decided here, not in Fox's dialog (owner Order 2026-10-07).
    attentionPreview.setReview(native?.taskReview?taskReviewLine(data.taskReviews,id,(review,choice,candidate)=>native.taskReview(review,choice,candidate)

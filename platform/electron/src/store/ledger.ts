@@ -108,6 +108,21 @@ export class WorldLedger {
    this.put('github-drafts',draft.id,draft);this.put('items',item.id,prepared);
   });
  }
+ // Remote MCP consents (core/agent/remote-mcp.ts, core/agent/REMOTE-MCP.md) ----------------------------------------
+ /** Every remote connection the person was asked to allow (`state.remote-mcp-consents`). */
+ remoteConsents():Row[]{return this.records('remote-mcp-consents');}
+ /** One consent and its Attention item, saved together: the item is the host's own (provider `agents`), its status the
+  * consent's, set by the person's answer (`user`) or by the request itself, or its running out (`agent`). */
+ saveRemoteConsent(consent:Row,item:Row,origin:'user'|'agent'){
+  this.transaction(()=>{
+   core('worldItemValidate',{item,dates:{start:null,end:null}});
+   const previous=this.value('items',item.id);
+   const prepared=core<Row>('worldItemPrepare',{item,previous:previous??{},id:item.id,identity:WorldLedger.identity(item),run:'remote-mcp',now:iso(),
+    previousIdentity:previous?WorldLedger.identity(previous):''});
+   prepared.status=item.status;prepared.statusOrigin=origin;
+   this.put('remote-mcp-consents',consent.id,consent);this.put('items',item.id,prepared);
+  });
+ }
  // Service presets (core/accounts/services/presets.ts, core/applets/INTEGRATIONS.md#service-presets) ---------------
  /** Every saved Service preset (`state.service-presets`), by ID. */
  servicePresets():Row[]{return this.records('service-presets');}

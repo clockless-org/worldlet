@@ -205,6 +205,15 @@ async function answer(request:ControlRequest):Promise<ControlReply> {
   return {lines:[status.link]};
  }
  if(request.command==='register')return {lines:await registerAgent(request.agent!)};
+ // Remote access (core/agent/REMOTE-MCP.md), the same as Settings › Agent › Access: each connector still asks the
+ // person on a card in Attention.
+ if(request.command==='remote'){
+  const operation=request.remote==='on'?'enable':request.remote==='off'?'disable':'status';
+  const status=await router.dispatch({action:'remoteMcp',operation}) as {enabled:boolean;connected:boolean;address?:string;connectors:{name:string}[]};
+  if(!status.enabled)return {lines:['Remote access is off (worldlet remote on turns it on).']};
+  return {lines:[status.address??'',status.connected?'Remote access is on: add this address as a connector, then choose Allow on the card in Attention.':'Remote access is on, but the front cannot be reached right now; it keeps trying.',
+   `Connected: ${status.connectors.length?status.connectors.map(c=>c.name).join(', '):'nothing yet'}.`]};
+ }
  if(request.command==='setup'){
   const id=request.agent!,lines:string[]=[];
   // The same choice setup's first page makes in the World: it proves the Agent answers before Fox switches to it.

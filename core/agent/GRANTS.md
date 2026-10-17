@@ -45,11 +45,13 @@ The `worldlet` MCP server registered in an Agent's profile (World tools on Herme
 - **Revoke.** Revoking an Agent stamps `revokedAt` on it and its Grants, deletes its token hash and removes its endpoint files, so its registered server answers that Worldlet is not open. It stays revoked across runs.
 - **Upgrading.** A Hermes Agent registered before per-Agent tokens names the profile's single `worldlet-mcp-endpoint.json`. On the first run after the upgrade, Hermes Agent becomes the `hermes` identity with the default Grants, and that file holds the same token for that run. Its registered entry is outdated, so `hermes mcp add` saves the new file's path and its gateway restarts. The old file goes on quit.
 
+Agents in the cloud reach the same server's call through [remote MCP](REMOTE-MCP.md): each connection the person allows is an Agent of its own (kind `remote`), with the same default Grants and audit.
+
 `node scripts/harness-sessions-check.ts` checks the token, the files, migration, default Grants, discovery, audit and revoke against a fixture Hermes Agent.
 
 ## Settings › Agent › Access
 
-The Access part of Settings › Agent ([`ui/companion/agent-access.ts`](../../ui/companion/agent-access.ts), host action `agentAccess` in `agent-runtime/index.ts`) lists each Agent, the one used most recently first. For each it shows where it runs, its last use (or when it was revoked), its active Grants in plain words, and its five newest audit entries. Revoke asks once more in the page and then calls `agentAccess` `revoke`. That stamps `revokedAt`, deletes the Agent's token hash and removes its endpoint files. The page names places in the World and what was allowed. It never shows tokens, endpoints or MCP.
+The Access part of Settings › Agent ([`ui/companion/agent-access.ts`](../../ui/companion/agent-access.ts), host action `agentAccess` in `agent-runtime/index.ts`) lists each Agent, the one used most recently first. For each it shows where it runs, its last use (or when it was revoked), its active Grants in plain words, and its five newest audit entries. Revoke asks once more in the page and then calls `agentAccess` `revoke`. That stamps `revokedAt`, deletes the Agent's token hash and removes its endpoint files. The page names places in the World and what was allowed. It never shows tokens, endpoints or MCP, except Remote access at its top, which shows the one address the person copies into a connector ([REMOTE-MCP.md](REMOTE-MCP.md)).
 
 Under an Agent that is not revoked, each connected Worldlet Service has a **Can read <Service>** checkbox (Can read GitHub, PostHog, Cloudflare). Turning it on calls `agentAccess` `grantService` with the Agent and the Service's name; turning it off calls `ungrantService`.
 
