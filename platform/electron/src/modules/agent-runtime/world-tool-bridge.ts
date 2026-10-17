@@ -94,6 +94,8 @@ const BOARD_TOOL='world_board';
 const DRAFT_TOOL='github_drafts';
 /** The World tool behind `conversations/*` (core/tools/gateway.ts). */
 const CONVERSATIONS_TOOL='world_conversations';
+/** The World tool behind `links/*` (core/tools/gateway.ts). */
+const LINKS_TOOL='world_links';
 
 /** What one Agent may reach on the standing server (core/agent/GRANTS.md): the actions it may discover and the decision
  * for one resolved call. Absent for a Fox turn's own bridge, whose calls the turn's trust alone decides. */
@@ -208,8 +210,10 @@ export const standingEndpointFile=(agentId:string)=>`worldlet-mcp-endpoint.${age
  * the same way: its own Grants decide it, never a Fox turn's. */
 /** `conversations`: a conversation archive call (`world_conversations`, core/agent/GRANTS.md#conversation-archive) by
  * the Agent whose token made it, the same way. */
-export async function openStandingWorldTools({channel,access,asks,board,drafts,conversations,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;
- board?:(agentId:string,args:Row,canRead:(provider:string,operation:string)=>boolean)=>Promise<Row>;drafts?:(agentId:string,args:Row)=>Promise<Row>;conversations?:(agentId:string,args:Row)=>Row;runner?:string}):Promise<StandingWorldTools> {
+/** `links`: a tracked links call (`world_links`, core/agent/GRANTS.md#tracked-links) by the Agent whose token made it,
+ * the same way. */
+export async function openStandingWorldTools({channel,access,asks,board,drafts,conversations,links,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;
+ board?:(agentId:string,args:Row,canRead:(provider:string,operation:string)=>boolean)=>Promise<Row>;drafts?:(agentId:string,args:Row)=>Promise<Row>;conversations?:(agentId:string,args:Row)=>Row;links?:(agentId:string,args:Row)=>Row;runner?:string}):Promise<StandingWorldTools> {
  const route='/'+crypto.randomUUID();
  const server=await serveWorldTools(token=>access.identify(token),route,(body,identity)=>{
   const call:McpCall={name:body.name,arguments:body.arguments,agent:{id:identity.id,name:identity.name}};
@@ -221,6 +225,7 @@ export async function openStandingWorldTools({channel,access,asks,board,drafts,c
    dispatch:async(name,args)=>name===ASK_TOOL?asks?.(identity.id,args)??{error:'Asks are not available in this build.'}
     :name===DRAFT_TOOL?await drafts?.(identity.id,args)??{error:'GitHub drafts are not available in this build.'}
     :name===CONVERSATIONS_TOOL?conversations?.(identity.id,args)??{error:'The conversation archive is not available in this build.'}
+    :name===LINKS_TOOL?links?.(identity.id,args)??{error:'Tracked links are not available in this build.'}
     :name===BOARD_TOOL?board?.(identity.id,args,(provider,operation)=>standingCallDecision({identity,grants,target:provider,action:operation,tool:'read_service',args:{provider,operation},foxTurn:null,now}).decision==='allowed')??{error:'The board is not available in this build.'}
     :turn?turn.dispatch(name,args,call):channel(name,args,identity.id),
    access:{
