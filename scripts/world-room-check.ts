@@ -104,7 +104,7 @@ const within=<T>(promise:Promise<T>,what:string,ms=10_000)=>Promise.race([promis
  // An Agent's ask is answered from another device, but approving the GitHub drafts it carries writes to GitHub: only here.
  assert.equal(roomDenied({action:'agentAsk',operation:'answer'}),'');
  assert.equal(roomDenied({action:'agentAsk',operation:'approveDrafts'}),ROOM_DENIED_MESSAGE,'approving GitHub drafts stays on this computer');
- for(const action of ['githubDraft','githubApp'])assert.equal(roomDenied({action,operation:'approve'}),ROOM_DENIED_MESSAGE,action+' stays on this computer');
+ for(const action of ['githubDraft','githubApp','httpJson'])assert.equal(roomDenied({action,operation:'approve'}),ROOM_DENIED_MESSAGE,action+' stays on this computer');
  // One browser link for both: the full World where the device can draw it, the Center where it cannot.
  const web='https://worldlet.ai/open/#v=1&s='+'B'.repeat(43)+'&n=Studio+Mac&m=room',both=withWorldLink(web,link);
  assert.equal(withWorldLink(web,null),web,'without a World pairing, the browser link as before');

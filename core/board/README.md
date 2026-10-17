@@ -1,6 +1,6 @@
 # The board
 
-The board shows numbers the person tracks: a north-star number, a funnel, the pull requests waiting, signups over time, the state of a release. It is laid out as tabs of blocks. Each block shows one preset: a [Service preset](../applets/INTEGRATIONS.md#service-presets), a saved read of GitHub, PostHog or Cloudflare, or a saved read of the World's own records, [the Agents' reports](#the-agents-source). The board is general: anyone can define their own. A team's board and its presets are data in that person's own World, never code.
+The board shows numbers the person tracks: a north-star number, a funnel, the pull requests waiting, signups over time, the state of a release. It is laid out as tabs of blocks. Each block shows one preset: a [Service preset](../applets/INTEGRATIONS.md#service-presets), a saved read of GitHub, PostHog, Cloudflare or an HTTP JSON endpoint, or a saved read of the World's own records, [the Agents' reports](#the-agents-source). The board is general: anyone can define their own. A team's board and its presets are data in that person's own World, never code.
 
 The shapes are in [`contracts/board.ts`](../../contracts/board.ts) and the rules in [`board.ts`](board.ts). `node scripts/board-check.ts` checks both.
 

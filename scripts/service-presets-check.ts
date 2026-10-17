@@ -28,6 +28,12 @@ refused(()=>readServicePresetRead('github',{operation:'search',query:'x'.repeat(
 refused(()=>readServicePresetRead('github',{operation:'read',id:'not an id'}),/owner\/repo#123/);
 refused(()=>readServicePresetRead('github',{operation:'list',query:'is:open'}),/takes nothing else/);
 refused(()=>readServicePresetRead('cloudflare',{operation:'read',id:'graphql'}),/workers or zones/);
+// HTTP JSON: an endpoint's name and a path under its address (or the read as a JSON object); its list takes nothing.
+assert.deepEqual(readServicePresetRead('http',{operation:'read',id:'status',query:'items?state=open'}),{operation:'read',id:'status',query:'items?state=open'});
+assert.deepEqual(readServicePresetRead('http',{operation:'read',id:'status'}),{operation:'read',id:'status'});
+refused(()=>readServicePresetRead('http',{operation:'read',id:'status',query:'https://evil.example.com/'}),/path under the endpoint/);
+refused(()=>readServicePresetRead('http',{operation:'read',query:'items'}),/Name the endpoint/);
+refused(()=>readServicePresetRead('http',{operation:'search',query:'items'}),/read with list or read/);
 refused(()=>readServicePresetRead('stripe',{operation:'read'}),PRESET_REASONS.service);
 refused(()=>readServicePresetRead('__proto__',{operation:'read'}),PRESET_REASONS.service);
 refused(()=>readServicePresetRead('github',{operation:'search',query:'is:open',cursor:'2'}),PRESET_REASONS.invalid);
