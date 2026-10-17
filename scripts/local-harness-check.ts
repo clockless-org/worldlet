@@ -435,6 +435,15 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
     assert.equal(fs.readFileSync(tries,'utf8').trim().split('\n').length,2,'background work runs again after turning busy mid-pass');
    }finally{BUSY_RETRIES.splice(0,BUSY_RETRIES.length,...waits);}
   }
+  // A turn that stays silent until its deadline, nothing shown and no World tool called, runs once more on a new process
+  // (Mac Alpha 4469, #623).
+  {
+   const tries=path.join(scratch,'silent-tries.txt');fs.rmSync(tries,{force:true});
+   script(path.join(bin,'claude'),`${runs}echo try >> "${tries}"\ncat > "$PWD/stdin.txt"\nif [ "$(wc -l < "${tries}")" -lt 2 ]; then exec sleep 60; fi\ncat "${fixture}"\n`);
+   const quiet={action:'chat',text:'Hi',_background:true,_taskTimeoutSeconds:15};
+   assert.equal((await new LocalHarnessRuntime(found[0],unix).run(quiet,agentHome,async()=>null)).message,'Hello from Claude Code');
+   assert.equal(fs.readFileSync(tries,'utf8').trim().split('\n').length,2,'one more try after the silent one');
+  }
   // Cancellation stops the process.
   script(path.join(bin,'claude'),'sleep 30\n');
   const slow=new LocalHarnessRuntime(found[0],unix);

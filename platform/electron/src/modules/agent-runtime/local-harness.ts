@@ -28,6 +28,10 @@ import {setTimeout as sleep} from 'node:timers/promises';
 
 /** A turn the provider turned away because its model was busy for everyone, and that can run again as it is. */
 class ModelBusy extends WorldletError {}
+/** A turn whose Agent went silent until its deadline before showing anything or calling a World tool: it did nothing,
+ * so it runs once more on a new process (Mac Alpha 4469, #623: a Codex turn sent no output for 120 s while three other
+ * Codex turns answered, and the same message answered in 14 s when sent again). */
+class SilentTurn extends WorldletError {}
 /** Waits before each new try of a turn whose model was busy: a busy model is usually free again within seconds
  * (Mac Alpha 4312's onboarding mail conversation failed on Codex's "Selected model is at capacity", #416). */
 export const BUSY_RETRIES=[4000,15000];
@@ -418,9 +422,11 @@ export class LocalHarnessRuntime implements AgentRuntime {
  }
  /** One turn; tried again, after a wait, while the provider turns it away as busy before anything happened. */
  private async execute(body:Row,home:string,onEvent:AgentEventHandler):Promise<Row> {
+  let silent=false;
   for(let tried=0;;tried++){
    try{return await this.attempt(body,home,onEvent);}
    catch(error){
+    if(error instanceof SilentTurn&&!silent&&!this.cancelled){silent=true;tried--;continue;}
     if(!(error instanceof ModelBusy)||tried>=BUSY_RETRIES.length||this.cancelled)throw error;
     if(body._background!==true)await onEvent(agentEvent({type:'progress',name:`${this.install.title}'s model is busy right now. Trying again…`}));
     await sleep(BUSY_RETRIES[tried]);
@@ -486,7 +492,7 @@ export class LocalHarnessRuntime implements AgentRuntime {
   // its output open long after, and a stop must not wait for that (owner report 2026-10-09: setup stayed on Connecting).
   child.once('exit',()=>{setTimeout(()=>reader.end(),EXIT_READ_MS).unref();});
   let timedOut=false;
-  const stopped=()=>{if(this.cancelled)throw new AgentCancelled();if(timedOut)throw new WorldletError(`${this.install.title} took too long to answer. Try again.`);};
+  const stopped=()=>{if(this.cancelled)throw new AgentCancelled();if(timedOut)throw new (!started&&calls===0?SilentTurn:WorldletError)(`${this.install.title} took too long to answer. Try again.`);};
   let standing=()=>{};
   const own=new HermesOwnCalls();
   try{
