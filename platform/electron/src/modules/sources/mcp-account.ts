@@ -181,7 +181,10 @@ export class McpAccounts {
   const methods=Array.isArray(server.code_challenge_methods_supported)?server.code_challenge_methods_supported:['S256'];
   if(!methods.includes('S256'))throw new WorldletError('This service does not offer a sign-in Worldlet can use.');
   const target=typeof resource?.resource==='string'?resource.resource:url;
-  const scopes=connectorScopes(name,resource?.scopes_supported,{write}).join(' ');
+  // What the server offers: its resource metadata's list and its authorization server's (Cloudflare names only two in
+  // the first). The connector's own list is still all that is asked for.
+  const offered=[resource?.scopes_supported,server.scopes_supported].filter(Array.isArray).flat();
+  const scopes=connectorScopes(name,offered.length?offered:undefined,{write}).join(' ');
   const verifier=crypto.randomBytes(48).toString('base64url'),state=crypto.randomBytes(24).toString('base64url');
   const challenge=crypto.createHash('sha256').update(verifier).digest('base64url');
   let client:{client_id:string;client_secret?:string}|null=null;

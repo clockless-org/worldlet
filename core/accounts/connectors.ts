@@ -63,7 +63,10 @@ export const CONNECTORS:readonly Connector[]=Object.freeze([
  // `user:read` names the projects to choose from.
  entry({id:'posthog',name:'PostHog',purpose:'See your product numbers and errors in PostHog.',mechanism:'mcp-oauth',providers:['posthog'],shown:'always',region:'work',
   scopes:scopes(['user:read','project:read','query:read','insight:read','dashboard:read','feature_flag:read','annotation:read','error_tracking:read'],['annotation:write','feature_flag:write']),pick:'project',fallback:['key'],headless:false}),
- entry({id:'cloudflare',name:'Cloudflare',purpose:'See your site traffic in Cloudflare.',mechanism:'key',providers:['cloudflare'],shown:'connected',region:'work',scopes:scopes([]),pick:'account',fallback:['key'],headless:true}),
+ // Cloudflare's server names only its own two in its resource metadata; its authorization server offers the rest.
+ // `offline_access` keeps the sign-in past a day; the three analytics reads are Workers, zones and their traffic.
+ entry({id:'cloudflare',name:'Cloudflare',purpose:'See your site traffic in Cloudflare.',mechanism:'mcp-oauth',providers:['cloudflare'],shown:'always',region:'work',
+  scopes:scopes(['offline_access','user:read','account:read','account-analytics.read','zone.read','analytics.read']),pick:'account',fallback:['key'],headless:false}),
  entry({id:'search-console',name:'Search Console',purpose:'See how your sites do in Google Search.',mechanism:'key',providers:['search-console'],shown:'connected',region:'work',scopes:scopes([]),fallback:['service-account'],headless:true}),
  entry({id:'http',name:'HTTP JSON',purpose:'Read your own JSON address.',mechanism:'key',providers:['http'],shown:'advanced',scopes:scopes([]),fallback:['key'],headless:true}),
 ]);

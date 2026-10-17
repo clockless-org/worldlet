@@ -12,7 +12,7 @@ const plain=(tiles:ConnectorTile[])=>{for(const tile of tiles)for(const text of 
 
 // Nothing connected: the sign-in services, each with its purpose and Connect; key services and HTTP JSON stay away.
 const empty=connectorTiles([]);
-assert.deepEqual(empty.map(tile=>tile.id),['google','notion','linear','todoist','supabase','posthog']);
+assert.deepEqual(empty.map(tile=>tile.id),['google','notion','linear','todoist','supabase','posthog','cloudflare']);
 assert.ok(empty.every(tile=>tile.state==='off'&&tile.signIn));
 assert.equal(empty.find(tile=>tile.id==='google')!.provider,'gmail');
 assert.equal(empty.find(tile=>tile.id==='notion')!.region,'work');
@@ -34,7 +34,7 @@ const rows=[
  row('http','status'),
 ];
 const tiles=connectorTiles(rows),by=(id:string)=>tiles.find(tile=>tile.id===id)!;
-assert.deepEqual(tiles.map(tile=>tile.id),['google','notion','linear','todoist','supabase','paypal','github','posthog'],'key services show once connected; HTTP JSON never');
+assert.deepEqual(tiles.map(tile=>tile.id),['google','notion','linear','todoist','supabase','paypal','github','posthog','cloudflare'],'key services show once connected; HTTP JSON never');
 assert.deepEqual([by('google').state,by('google').line],['connected','Connected as alex@example.com']);
 assert.deepEqual([by('notion').state,by('notion').line],['connected','Connected'],'a target that is only the service\'s name says Connected');
 assert.deepEqual([by('linear').state,by('linear').line],['needs-you','Linear signed you out. Sign in again to keep seeing it here.']);
@@ -42,6 +42,7 @@ assert.equal(by('todoist').state,'connected','a slow read is not a sign-out');
 assert.deepEqual([by('github').state,by('github').signIn],['connected',false]);
 assert.deepEqual([by('posthog').state,by('posthog').signIn],['connected',true],'PostHog signs in; a key under Advanced shows the same tile');
 assert.equal(by('posthog').state,'connected');
+assert.deepEqual([by('cloudflare').state,by('cloudflare').signIn],['off',true],'Cloudflare signs in too');
 plain(tiles);
 // Calendar read from this computer is not Google's sign-in.
 assert.equal(connectorTiles([row('google-calendar','Calendar',{transport:'native'})]).find(tile=>tile.id==='google')!.state,'off');
