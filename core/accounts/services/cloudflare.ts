@@ -1,10 +1,13 @@
-// Bounded, read-only analytics of the person's own Cloudflare account through Cloudflare's GraphQL Analytics API, with
-// an API token they pasted: a fixed set of reads over the last 24 hours (`read` with `id` `workers`: invocations and
-// errors per Worker; `zones`: requests per zone). No writes, and nothing but these reads: an Agent picks which, never
-// the query. Cloudflare's own MCP servers sign in with OAuth for one person at a time and offer far more than these
-// reads, so the World reads the API directly; the Platform sends each request only to Cloudflare's API address
-// (service-source.ts). Every answer is cut to a fixed size before it reaches an Agent (contracts/services.ts).
+// Bounded, read-only analytics of the person's own Cloudflare account through Cloudflare's GraphQL Analytics API: a
+// fixed set of reads over the last 24 hours (`read` with `id` `workers`: invocations and errors per Worker; `zones`:
+// requests per zone). No writes, and nothing but these reads: an Agent picks which, never the query. By default the
+// person signs in to Cloudflare (core/accounts/connectors.ts): its sign-in belongs to Cloudflare's own MCP server, which
+// runs a short program against Cloudflare's API with it, so each read goes there as one fixed request built here
+// (cloudflareExecute), never code an Agent wrote. With an API token pasted under Advanced the Platform sends each
+// request only to Cloudflare's API address (service-source.ts). Every answer is cut to a fixed size before it reaches
+// an Agent (contracts/services.ts).
 import type {ServiceRead,ServiceRecord,ServiceRecords} from '../../../contracts/services.ts';
+import type {McpToolResult} from '../mcp/session.ts';
 import type {ServiceGate,ServiceHttp} from './http.ts';
 import {ValueError,isDict} from '../mcp/python.ts';
 
@@ -18,7 +21,69 @@ export const CLOUDFLARE_GATE:ServiceGate=Object.freeze({name:'cloudflare',title:
  forbidden:'This Cloudflare token cannot read that. Check the account ID and that the token has Account Analytics Read for it (and Zone Read and Zone Analytics Read for zones).',
  missing:'Cloudflare has no such account for this token. Check the account ID.',
  invalid:'Cloudflare could not run this read.',
- busy:'Cloudflare is limiting reads right now. Try again in a minute.'});
+ busy:'Cloudflare is limiting reads right now. Try again in a minute.',
+ signedOut:'Cloudflare signed you out. Sign in to Cloudflare again in Settings › Connectors.',
+ signInForbidden:'Your Cloudflare sign-in does not let Worldlet read that. Sign in to Cloudflare again in Settings › Connectors and keep reading analytics allowed.'});
+
+/** Cloudflare's own MCP server, where the person signs in. */
+export const CLOUDFLARE_SIGN_IN='https://mcp.cloudflare.com/mcp';
+/** The same server for reads, asked for whole answers: it otherwise cuts a long one down to fit a chat, and Core cuts
+ * each answer to its own limits anyway. */
+export const CLOUDFLARE_SIGN_IN_READS=CLOUDFLARE_SIGN_IN+'?truncateToolResult=false';
+/** The server's one tool that reaches Cloudflare's API. */
+export const CLOUDFLARE_EXECUTE='execute';
+const API_PATH='/client/v4';
+
+/** The `execute` arguments for one request to Cloudflare's API (`path` under /client/v4, with its query): a fixed
+ * program that makes exactly that request with the person's sign-in and returns the answer. Built only from the
+ * reads here; nothing an Agent wrote is ever run. */
+export function cloudflareExecute(method:'GET'|'POST'|'PATCH',path:string,body?:unknown):{code:string} {
+ const url=new URL(path,CLOUDFLARE_API);
+ if(url.origin!==CLOUDFLARE_API||!url.pathname.startsWith(API_PATH+'/'))throw new ValueError('Cloudflare is read only through its API.');
+ const query=Object.fromEntries(url.searchParams);
+ const request={method,path:url.pathname.slice(API_PATH.length),...Object.keys(query).length?{query}:{},...body===undefined?{}:{body}};
+ // JSON is a JavaScript literal: the request is data inside the program, never code.
+ return {code:`async () => cloudflare.request(${JSON.stringify(request)})`};
+}
+
+/** Cloudflare's REST error codes, as the server reports them, by the status a direct request would have had. */
+const FORBIDDEN_CODES=new Set([9103,9106,9109,10000,10001]),MISSING_CODES=new Set([1001,1049,7000,7003,10007]),BUSY_CODES=new Set([971,1015,10429]);
+/** The answer `execute` gave for `path`, as a direct request would have: its status and JSON text. GraphQL comes back
+ * as `{data,errors}`; a refusal gets the status its message or code names, and the message in short as
+ * `{error:{message}}`. */
+export function cloudflareExecuteAnswer(result:McpToolResult,path:string):{status:number;text:string} {
+ const text=(Array.isArray(result?.content)?result.content:[]).map(part=>isDict(part)&&part.type==='text'&&typeof part.text==='string'?part.text:'').join('');
+ if(result?.isError){
+  const said=text.replace(/^\s*Error:\s*/,'').replace(/\s+/g,' ').trim();
+  const refusal=(status:number,message:string)=>({status,text:JSON.stringify({error:{message:cut(message,300)}})});
+  const status=/^Cloudflare API error: ([1-5]\d\d)\b/.exec(said);
+  if(status)return refusal(Number(status[1]),said.slice(status[0].length).trim());
+  const coded=/^Cloudflare API error: (\d+): (.*)$/.exec(said);
+  if(coded){
+   const code=Number(coded[1]);
+   return refusal(FORBIDDEN_CODES.has(code)?403:MISSING_CODES.has(code)?404:BUSY_CODES.has(code)?429:400,coded[2]);
+  }
+  return refusal(400,said.replace(/^GraphQL error: /,''));
+ }
+ let value:unknown;
+ try{value=JSON.parse(text);}catch{return {status:502,text:''};}
+ if(/\/graphql\/?(?:\?|$)/.test(path))return {status:200,text:JSON.stringify(isDict(value)?{data:value.result??null,errors:Array.isArray(value.errors)?value.errors:[]}:null)};
+ return {status:200,text:JSON.stringify(value)};
+}
+
+/** One Cloudflare account the sign-in can read. */
+export interface CloudflareChoice {id:string;name:string}
+/** The accounts in an answer to GET /client/v4/accounts, up to 50. */
+export function cloudflareAccounts(answer:unknown):CloudflareChoice[] {
+ const listed=isDict(answer)&&Array.isArray(answer.result)?answer.result:[];
+ const accounts:CloudflareChoice[]=[];
+ for(const item of listed){
+  if(!isDict(item)||typeof item.id!=='string'||!/^[0-9a-f]{32}$/.test(item.id)||accounts.some(account=>account.id===item.id))continue;
+  accounts.push({id:item.id,name:cut(item.name,CLOUDFLARE_LIMITS.name)||'Account '+item.id.slice(0,6)});
+  if(accounts.length>=50)break;
+ }
+ return accounts;
+}
 
 /** A Cloudflare account ID: 32 hexadecimal characters, from the dashboard's address or the account's overview. */
 export function cloudflareAccount(value:unknown):string {

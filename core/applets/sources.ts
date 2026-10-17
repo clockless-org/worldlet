@@ -19,7 +19,7 @@ export const TOKEN_PROVIDERS:Readonly<Record<string,{hint:string;token:RegExp;la
    {key:'project',label:'Project ID',placeholder:'12345',hint:'The number after /project/ in your PostHog address bar.',numeric:true,maxLength:12},
   ]),
   wrong:{token:/^phc_/,message:'That is a project API key, which only sends events. Paste a personal API key (it starts with phx_).'}},
- cloudflare:{hint:'Paste an API token with Account Analytics Read (and Zone Read and Zone Analytics Read to see your zones).',token:/^[A-Za-z0-9_-]{30,255}$/,label:'API token',
+ cloudflare:{hint:'Paste an API token with Account Analytics Read (and Zone Read and Zone Analytics Read to see your zones).',token:/^[A-Za-z0-9_-]{30,255}$/,label:'API token',signIn:true,
   fields:Object.freeze([
    {key:'account',label:'Account ID',placeholder:'32 letters and digits',hint:'The part after dash.cloudflare.com/ in your dashboard\'s address.',maxLength:40},
   ]),

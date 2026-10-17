@@ -2,13 +2,14 @@ import crypto from 'node:crypto';
 import dns from 'node:dns/promises';
 import net from 'node:net';
 import {WorldletError} from '../../files.ts';
-import {CLOUDFLARE_API,CLOUDFLARE_GATE,GOOGLE_TOKEN_URL,HTTP_JSON_GATE,HTTP_JSON_LIMITS,POSTHOG_GATE,POSTHOG_SIGN_IN,POSTHOG_SIGN_IN_HOSTS,connector,posthogProjects,type PosthogSettings,SEARCH_CONSOLE_API,SEARCH_CONSOLE_GATE,checkCloudflare,checkHttpJson,checkPosthog,checkSearchConsole,cloudflareSettings,httpJsonEndpoints,httpJsonSettings,posthogSettings,privateAddress,readCloudflare,readHttpJson,readPosthog,readSearchConsole,searchConsoleAccessToken,searchConsoleAssertion,searchConsoleKey,searchConsoleSettings,type HttpJsonSettings,type ServiceGate,type ServiceHttp} from '../../../../../core/accounts/index.ts';
+import {CLOUDFLARE_API,CLOUDFLARE_EXECUTE,CLOUDFLARE_GATE,CLOUDFLARE_SIGN_IN,CLOUDFLARE_SIGN_IN_READS,cloudflareAccounts,cloudflareExecute,cloudflareExecuteAnswer,type CloudflareSettings,GOOGLE_TOKEN_URL,HTTP_JSON_GATE,HTTP_JSON_LIMITS,POSTHOG_GATE,POSTHOG_SIGN_IN,POSTHOG_SIGN_IN_HOSTS,connector,posthogProjects,type PosthogSettings,SEARCH_CONSOLE_API,SEARCH_CONSOLE_GATE,checkCloudflare,checkHttpJson,checkPosthog,checkSearchConsole,cloudflareSettings,httpJsonEndpoints,httpJsonSettings,posthogSettings,privateAddress,readCloudflare,readHttpJson,readPosthog,readSearchConsole,searchConsoleAccessToken,searchConsoleAssertion,searchConsoleKey,searchConsoleSettings,type HttpJsonSettings,type ServiceGate,type ServiceHttp} from '../../../../../core/accounts/index.ts';
 import {SERVICE_ACTIONS} from '../../../../../contracts/services.ts';
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections,VaultService} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
 import {validateWorldTool} from './google-source.ts';
 import {ExecutionJournal} from '../agent-runtime/journal.ts';
 import {McpAccounts} from './mcp-account.ts';
+import {McpHttpClient,McpUnauthorized} from './mcp-client.ts';
 
 /** Worldlet Services read over the service's own HTTPS API with a key the person pasted (contracts/services.ts,
  * core/accounts/services): PostHog, whose remote MCP server serves only PostHog Cloud and chooses its own project,
@@ -19,10 +20,11 @@ import {McpAccounts} from './mcp-account.ts';
  * stops at its time and size limits (ServiceGate); the key is never logged, put in the World's state or an event, or
  * given to an Agent. Google Search Console's key is a service account's private key, which is never sent at all: it signs
  * a short-lived assertion that only Google's token address receives, and the access token that comes back is kept in
- * memory until a minute before it expires. A Service that signs in (PostHog) is read with the access token of its own
- * sign-in instead (McpAccounts, `mcp:<name>`), renewed there; the vault entry then keeps only the settings the sign-in
- * found and the choices it offered. */
-/** One choice the person makes after signing in (a PostHog project). */
+ * memory until a minute before it expires. A Service that signs in (PostHog, Cloudflare) is read with its own sign-in
+ * instead (McpAccounts, `mcp:<name>`), renewed there; the vault entry then keeps only the settings the sign-in found and
+ * the choices it offered. PostHog's sign-in reads its API directly; Cloudflare's belongs to Cloudflare's MCP server,
+ * so each request goes there as the one fixed program Core builds for it (`mcp`). */
+/** One choice the person makes after signing in (a PostHog project, a Cloudflare account). */
 type Choice={id:string;name:string};
 interface Definition<S> {
  gate:ServiceGate;
@@ -39,14 +41,18 @@ interface Definition<S> {
  /** The kept key is a Google service account's, exchanged for access tokens (Search Console). */
  serviceAccount?:true;
  /** The Service's own sign-in, at `url` (its MCP server, which names its authorization server). `locate` finds, with
-  * the signed-in account, the settings to read with and the choices it has; `wanted` is a choice the person made. */
- signIn?:{url:string;locate(http:(origin:string)=>ServiceHttp,wanted:Record<string,string>):Promise<{settings:S;choices:Choice[]}>};
+  * the signed-in account, the settings to read with and the choices it has; `wanted` is a choice the person made.
+  * `pick`: the setting that choice is (Connector.pick). `mcp`: the sign-in is the MCP server's own, so each request
+  * goes to its `tool` at `url` (`request` the tool's arguments, `answer` what it said as a direct answer would be). */
+ signIn?:{url:string;pick:string;locate(http:(origin:string)=>ServiceHttp,wanted:Record<string,string>):Promise<{settings:S;choices:Choice[]}>;
+  mcp?:{url:string;tool:string;request(method:'GET'|'POST'|'PATCH',path:string,body?:unknown):Record<string,unknown>;answer(result:Awaited<ReturnType<McpHttpClient['callTool']>>,path:string):{status:number;text:string}}};
 }
 const define=<S,>(definition:Definition<S>)=>definition as unknown as Definition<unknown>;
 const SERVICES:Readonly<Record<string,Definition<unknown>>>=Object.freeze({
  posthog:define<PosthogSettings>({gate:POSTHOG_GATE,settings:posthogSettings,origin:settings=>settings.host,check:checkPosthog,read:readPosthog,
-  signIn:{url:POSTHOG_SIGN_IN,locate:locatePosthog}}),
- cloudflare:define({gate:CLOUDFLARE_GATE,settings:cloudflareSettings,origin:()=>CLOUDFLARE_API,check:(http,settings)=>checkCloudflare(http,settings),read:(http,settings,body)=>readCloudflare(http,settings,body)}),
+  signIn:{url:POSTHOG_SIGN_IN,pick:'project',locate:locatePosthog}}),
+ cloudflare:define<CloudflareSettings>({gate:CLOUDFLARE_GATE,settings:cloudflareSettings,origin:()=>CLOUDFLARE_API,check:(http,settings)=>checkCloudflare(http,settings),read:(http,settings,body)=>readCloudflare(http,settings,body),
+  signIn:{url:CLOUDFLARE_SIGN_IN,pick:'account',locate:locateCloudflare,mcp:{url:CLOUDFLARE_SIGN_IN_READS,tool:CLOUDFLARE_EXECUTE,request:cloudflareExecute,answer:cloudflareExecuteAnswer}}}),
  http:define<HttpJsonSettings>({gate:HTTP_JSON_GATE,settings:httpJsonSettings,origin:settings=>new URL(settings.url).origin,check:checkHttpJson,read:readHttpJson,
   named:{name:settings=>settings.name,list:httpJsonEndpoints}}),
  'search-console':define({gate:SEARCH_CONSOLE_GATE,settings:searchConsoleSettings,origin:()=>SEARCH_CONSOLE_API,check:http=>checkSearchConsole(http),read:(http,settings,body)=>readSearchConsole(http,settings,body),serviceAccount:true}),
@@ -157,7 +163,8 @@ export class ServiceSource {
  }
  /** Checks the settings, then the key with one read on a connection not kept yet: only a key the service accepts is
   * kept, so a refused paste leaves the connection already kept as it was. With no key, a Service that signs in signs in
-  * (`open`, `cancelled`), or, already signed in, takes the choice in `settings` (a PostHog project). */
+  * (`open`, `cancelled`), or, already signed in, takes the choice in `settings` (a PostHog project, a Cloudflare
+  * account). */
  async connect(provider:string,token:string,settings:unknown,open?:(url:string)=>Promise<void>,cancelled:()=>boolean=()=>false):Promise<void> {
   const service=definition(provider);
   if(!service)throw new WorldletError('Unsupported Service.');
@@ -201,15 +208,31 @@ export class ServiceSource {
  private kept(provider:string):Kept|null {
   try{const value=JSON.parse(this.vault.get(vaultId(provider))??'null');return value?.v===1?value as Kept:null;}catch{return null;}
  }
- /** What a signed-in Service lets the person choose (PostHog's projects) and which one is chosen; nothing for a key. */
+ /** What a signed-in Service lets the person choose (PostHog's projects, Cloudflare's accounts) and which one is chosen;
+  * nothing for a key. */
  choices(provider:string):{choices:Choice[];chosen:string|null} {
-  const kept=this.kept(provider),endpoint=this.endpoints(provider)[0];
-  if(!kept?.signIn||!endpoint?.signIn||!Array.isArray(kept.choices))return {choices:[],chosen:null};
+  const kept=this.kept(provider),endpoint=this.endpoints(provider)[0],pick=definition(provider)?.signIn?.pick;
+  if(!pick||!kept?.signIn||!endpoint?.signIn||!Array.isArray(kept.choices))return {choices:[],chosen:null};
   const choices=kept.choices.filter(choice=>choice&&typeof choice.id==='string'&&typeof choice.name==='string').slice(0,50).map(choice=>({id:choice.id,name:choice.name}));
-  const project=(endpoint.settings as Row).project;
-  return {choices,chosen:typeof project==='string'?project:null};
+  const chosen=(endpoint.settings as Row)[pick];
+  return {choices,chosen:typeof chosen==='string'?chosen:null};
  }
- disconnect(provider:string){const service=definition(provider);if(service){this.vault.delete(vaultId(provider));this.access.clear();if(service.signIn)this.accounts.disconnect(provider);}}
+ disconnect(provider:string){const service=definition(provider);if(service){this.vault.delete(vaultId(provider));this.access.clear();this.mcp.delete(provider);if(service.signIn)this.accounts.disconnect(provider);}}
+ /** One MCP client per Service whose sign-in is its MCP server's, sending that sign-in (renewed there). */
+ private readonly mcp=new Map<string,McpHttpClient>();
+ /** One request through the Service's MCP server (Definition.signIn.mcp): its status and text as a direct request's
+  * would be, 401 when the sign-in is refused even after renewing, and cut at the gate's size. */
+ private async overMcp(service:Definition<unknown>,method:'GET'|'POST'|'PATCH',path:string,body:unknown):Promise<{status:number;text:string}> {
+  const via=service.signIn!.mcp!,{gate}=service;
+  let client=this.mcp.get(gate.name);
+  if(!client){client=new McpHttpClient({url:via.url,title:gate.title,fetch:this.fetch,authorization:force=>this.accounts.bearer(gate.name,force)});this.mcp.set(gate.name,client);}
+  let result:Awaited<ReturnType<McpHttpClient['callTool']>>;
+  try{result=await client.callTool(via.tool,via.request(method,path,body),gate.timeoutSeconds);}
+  catch(error){if(error instanceof McpUnauthorized)return {status:401,text:''};throw error;}
+  const answer=via.answer(result,path);
+  if(Buffer.byteLength(answer.text)>gate.maxBytes)throw new WorldletError(`${gate.title} sent more than Worldlet reads at once. Narrow the read.`);
+  return answer;
+ }
  /** An access token for a kept service account key: the one in memory until a minute before it expires, otherwise a
   * new one from Google's token address for an assertion the key signs (RS256). Only the assertion is sent; a key
   * Google refuses is ServiceUnauthorized, and nothing Google says about it is repeated. */
@@ -275,47 +298,55 @@ export class ServiceSource {
    if(!path.startsWith('/')||path.startsWith('//'))throw new WorldletError('Invalid Service request.');
    const url=new URL(path,origin);
    if(url.origin!==origin)throw new WorldletError(`${gate.title} is read only at the address you gave.`);
-   let authorization:string;
-   if(signIn){const header=await this.accounts.bearer(gate.name,force);if(!header)throw new ServiceUnauthorized();authorization=header;}
-   else authorization=service.serviceAccount?'Bearer '+await this.accessToken(gate,token):token?'Bearer '+token:'';
-   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),gate.timeoutSeconds*1000);
-   try{
-    if(gate.publicOnly)await this.publicHost(gate,url.hostname);
-    let response:Response;
-    try{
-     response=await this.fetch(url.href,{method,redirect:'manual',signal:controller.signal,
-      headers:{...authorization?{authorization}:{},accept:'application/json',...body===undefined?{}:{'content-type':'application/json'}},
-      ...body===undefined?{}:{body:JSON.stringify(body)}});
-    }catch{throw new WorldletError(controller.signal.aborted?`${gate.title} took too long to answer. Try a narrower read.`:`Could not reach ${gate.title} at ${origin}. Check the address and your internet connection.`);}
-    const discard=()=>response.body?.cancel().catch(()=>{});
-    if(response.type==='opaqueredirect'||response.status>=300&&response.status<400){void discard();throw new WorldletError(`${gate.title} answered from another address. Worldlet reads it only at ${origin}; check the address you gave.`);}
-    if(response.status===401){
-     void discard();if(service.serviceAccount)this.access.clear();
-     if(signIn&&renew&&!force)return send(method,path,body,answer,true);
-     if(answer)return {status:401,json:null};throw new ServiceUnauthorized();
+   // A sign-in that belongs to the Service's MCP server goes there (renewed by its client); anything else to the address.
+   const viaMcp=signIn&&!!service.signIn?.mcp;
+   const {status,text}=viaMcp?await this.overMcp(service,method,url.pathname+url.search,body):await this.direct(service,url,method,body,token,signIn,force);
+   if(status===401){
+    if(signIn&&!viaMcp&&renew&&!force)return send(method,path,body,answer,true);
+    if(answer)return {status:401,json:null};throw new ServiceUnauthorized();
+   }
+   if(answer){let json:unknown=null;try{json=JSON.parse(text);}catch{}return {status,json};}
+   if(status<200||status>299){
+    if(status===403)throw new WorldletError(signIn&&gate.signInForbidden||gate.forbidden);
+    if(status===404)throw new WorldletError(gate.missing);
+    if(status===429)throw new WorldletError(gate.busy);
+    if(status===400){
+     // The service's own short reason (a HogQL error names the field it could not find; Google says what it could not
+     // take): data, never the key.
+     let detail='';try{const value=JSON.parse(text);detail=typeof value?.detail==='string'?value.detail:typeof value?.error?.message==='string'?value.error.message:'';}catch{}
+     detail=[...detail.replace(/\s+/g,' ').trim()].slice(0,300).join('');
+     throw new WorldletError(gate.invalid+(detail?` ${gate.title} said: ${detail}`:''));
     }
-    const text=await bounded(response,gate,controller);
-    if(answer){let json:unknown=null;try{json=JSON.parse(text);}catch{}return {status:response.status,json};}
-    if(!response.ok){
-     if(response.status===403)throw new WorldletError(gate.forbidden);
-     if(response.status===404)throw new WorldletError(gate.missing);
-     if(response.status===429)throw new WorldletError(gate.busy);
-     if(response.status===400){
-      // The service's own short reason (a HogQL error names the field it could not find; Google says what it could not
-      // take): data, never the key.
-      let detail='';try{const value=JSON.parse(text);detail=typeof value?.detail==='string'?value.detail:typeof value?.error?.message==='string'?value.error.message:'';}catch{}
-      detail=[...detail.replace(/\s+/g,' ').trim()].slice(0,300).join('');
-      throw new WorldletError(gate.invalid+(detail?` ${gate.title} said: ${detail}`:''));
-     }
-     throw new WorldletError(`${gate.title} could not answer right now (${response.status}). Try again later.`);
-    }
-    try{return JSON.parse(text);}catch{throw new WorldletError(`${gate.title} returned an unsupported answer.`);}
-   }finally{clearTimeout(timer);}
+    throw new WorldletError(`${gate.title} could not answer right now (${status}). Try again later.`);
+   }
+   try{return JSON.parse(text);}catch{throw new WorldletError(`${gate.title} returned an unsupported answer.`);}
   };
   // An address the person typed (HTTP JSON) is read with GET only, raw requests included.
   const getOnly=(method:string)=>gate.publicOnly&&method!=='GET';
   return {get:path=>send('GET',path),post:(path,body)=>getOnly('POST')?Promise.reject(new WorldletError(`${gate.title} reads with GET only.`)):send('POST',path,body),
    raw:(method,path,body)=>getOnly(method)?Promise.reject(new WorldletError(`${gate.title} reads with GET only.`)):raw(method,path,body)};
+ }
+ /** One request straight to the Service's address, with its key, its service account's access token or its sign-in's
+  * (`signIn`; `force`: renewed first): the status and the text of the answer, read only up to the gate's size. */
+ private async direct(service:Definition<unknown>,url:URL,method:'GET'|'POST'|'PATCH',body:unknown,token:string,signIn:boolean|undefined,force:boolean):Promise<{status:number;text:string}> {
+  const {gate}=service,origin=url.origin;
+  let authorization:string;
+  if(signIn){const header=await this.accounts.bearer(gate.name,force);if(!header)return {status:401,text:''};authorization=header;}
+  else authorization=service.serviceAccount?'Bearer '+await this.accessToken(gate,token):token?'Bearer '+token:'';
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),gate.timeoutSeconds*1000);
+  try{
+   if(gate.publicOnly)await this.publicHost(gate,url.hostname);
+   let response:Response;
+   try{
+    response=await this.fetch(url.href,{method,redirect:'manual',signal:controller.signal,
+     headers:{...authorization?{authorization}:{},accept:'application/json',...body===undefined?{}:{'content-type':'application/json'}},
+     ...body===undefined?{}:{body:JSON.stringify(body)}});
+   }catch{throw new WorldletError(controller.signal.aborted?`${gate.title} took too long to answer. Try a narrower read.`:`Could not reach ${gate.title} at ${origin}. Check the address and your internet connection.`);}
+   const discard=()=>response.body?.cancel().catch(()=>{});
+   if(response.type==='opaqueredirect'||response.status>=300&&response.status<400){void discard();throw new WorldletError(`${gate.title} answered from another address. Worldlet reads it only at ${origin}; check the address you gave.`);}
+   if(response.status===401){void discard();if(service.serviceAccount)this.access.clear();return {status:401,text:''};}
+   return {status:response.status,text:await bounded(response,gate,controller)};
+  }finally{clearTimeout(timer);}
  }
  /** A host name the person typed must resolve only to addresses on the internet (privateAddress), never this computer
   * or the local network, whatever name points there. Checked before every request. */
@@ -345,6 +376,15 @@ async function locatePosthog(http:(origin:string)=>ServiceHttp,wanted:Record<str
   return {settings:posthogSettings({host,project}),choices:projects};
  }
  throw new WorldletError('PostHog did not let Worldlet in. Try signing in again.');
+}
+
+/** Which Cloudflare account a sign-in reads: the one chosen (`wanted`), else the first the sign-in may read. */
+async function locateCloudflare(http:(origin:string)=>ServiceHttp,wanted:Record<string,string>):Promise<{settings:CloudflareSettings;choices:Choice[]}> {
+ const accounts=cloudflareAccounts(await http(CLOUDFLARE_API).get('/client/v4/accounts?per_page=50'));
+ if(wanted.account!==undefined&&!accounts.some(item=>item.id===wanted.account))throw new WorldletError('That account is not in your Cloudflare sign-in. Choose one from the list.');
+ const account=wanted.account??accounts[0]?.id;
+ if(!account)throw new WorldletError('Your Cloudflare sign-in has no account Worldlet can see. Sign in again and allow one of your accounts.');
+ return {settings:cloudflareSettings({account}),choices:accounts};
 }
 
 /** The answer's text, read only up to the gate's size. */

@@ -20,6 +20,8 @@ export interface ServiceGate {
  publicOnly?:boolean;
  /** When a sign-in (not a pasted key) is refused and cannot be renewed: the service signed the person out. */
  signedOut?:string;
+ /** When a sign-in is refused one read (403): what it allows does not cover it. */
+ signInForbidden?:string;
 }
 
 /** An IP address no Service is read at: this computer (loopback, unspecified), the local network (private ranges,

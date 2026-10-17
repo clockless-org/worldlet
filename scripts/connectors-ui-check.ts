@@ -35,7 +35,12 @@ await withBrowser(async browser=>{
    if(action==='disconnectSource'){w.connections=w.connections.filter((c:any)=>c.provider!==body.provider);return {ok:true};}
    if(action==='githubApp')return {connected:false};
    if(action==='httpJson')return {endpoints:[]};
-   if(action==='serviceChoices')return body.provider==='posthog'&&w.connections.some((c:any)=>c.provider==='posthog')?{choices:[{id:'1',name:'Mobile'},{id:'2',name:'Web'}],chosen:w.chosen}:{choices:[],chosen:null};
+   if(action==='serviceChoices'){
+    if(!w.connections.some((c:any)=>c.provider===body.provider))return {choices:[],chosen:null};
+    if(body.provider==='posthog')return {choices:[{id:'1',name:'Mobile'},{id:'2',name:'Web'}],chosen:w.chosen};
+    if(body.provider==='cloudflare')return {choices:[{id:'a'.repeat(32),name:'Alex'},{id:'b'.repeat(32),name:'Shop'}],chosen:'a'.repeat(32)};
+    return {choices:[],chosen:null};
+   }
    throw Error('Unexpected settings action '+action);
   };
   w.draw=async()=>{document.querySelector('#settings')!.replaceChildren();await w.ConnectorsPage.showConnectors(document.querySelector('#settings'),call,()=>true);};
@@ -55,7 +60,7 @@ await withBrowser(async browser=>{
  const plain=async(when:string)=>{for(const text of await defaultPath())assert.doesNotMatch(text,CONNECTOR_TECHNICAL_WORDS,`${when}: "${text}" is on the default path`);};
 
  assert.equal(await page.title(),'Worldlet connectors settings check');
- assert.deepEqual(await page.locator('[data-connector]').evaluateAll(nodes=>nodes.map(node=>(node as HTMLElement).dataset.connector)),['google','notion','linear','todoist','supabase','github','posthog']);
+ assert.deepEqual(await page.locator('[data-connector]').evaluateAll(nodes=>nodes.map(node=>(node as HTMLElement).dataset.connector)),['google','notion','linear','todoist','supabase','github','posthog','cloudflare']);
  assert.match(await tile('notion').innerText(),/See your pages and databases in Notion\./);
  assert.equal(await tile('github').getByRole('button',{name:'Disconnect',exact:true}).count(),1,'a service connected with a key shows as connected');
  assert.equal(await tile('github').getByRole('button',{name:'Connect',exact:true}).count(),0);
@@ -99,6 +104,16 @@ await withBrowser(async browser=>{
  await page.getByText('PostHog now shows Mobile.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='connect'&&c.provider==='posthog')),[{action:'connect',provider:'posthog',region:'work'},{action:'connect',provider:'posthog',settings:{project:'1'}}]);
  await plain('choosing a project');
+ // Cloudflare signs in the same way and asks which account.
+ await tile('cloudflare').getByRole('button',{name:'Connect',exact:true}).click();
+ await page.evaluate(()=>(window as any).pending.resolve());
+ const account=tile('cloudflare').getByLabel('Which Cloudflare account?',{exact:true});
+ assert.equal(await account.inputValue(),'a'.repeat(32));
+ await account.selectOption({label:'Shop'});
+ await tile('cloudflare').getByRole('button',{name:'Use',exact:true}).click();
+ await page.getByText('Cloudflare now shows Shop.',{exact:true}).waitFor();
+ assert.deepEqual((await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='connect'&&c.provider==='cloudflare'))).at(-1).settings,{account:'b'.repeat(32)});
+ await plain('choosing an account');
  // The service signed the person out: Sign in again, in plain words.
  await page.evaluate(async()=>{const w=window as any;w.connections.push({provider:'supabase',label:'Supabase',transport:'hermes',syncStatus:'sync_error',syncError:'Supabase is disconnected. Reconnect with Fox.',connected:true,failed:true});await w.draw();});
  await tile('supabase').getByText('Supabase signed you out. Sign in again to keep seeing it here.',{exact:true}).waitFor();
@@ -137,4 +152,4 @@ await withBrowser(async browser=>{
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'narrow settings do not overflow horizontally');
  if(screenshot)await page.screenshot({path:screenshot.replace(/\.png$/,'-narrow.png'),fullPage:true});
 });
-console.log('PASS Settings › Connectors: sign-in tiles with Connect, waiting and Cancel, Connected as, Disconnect asks once, plain words for a refusal and a sign-out, the PostHog project choice, key services shown connected, keys and addresses only under Advanced, no technical word on the default path, narrow layout');
+console.log('PASS Settings › Connectors: sign-in tiles with Connect, waiting and Cancel, Connected as, Disconnect asks once, plain words for a refusal and a sign-out, the PostHog project and Cloudflare account choices, key services shown connected, keys and addresses only under Advanced, no technical word on the default path, narrow layout');
