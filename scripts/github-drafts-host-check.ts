@@ -45,6 +45,8 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
  const requests:{method:string;path:string;auth:string;body?:any}[]=[];
  const jwts:string[]=[];
  let comments=0;
+ // Issues the App made, as GitHub lists them back.
+ const madeIssues:any[]=[];
  const answer=(status:number,json:unknown)=>({status,json:async()=>json});
  const github:GithubFetch=async(url,init)=>{
   assert.equal(init.redirect,'manual');
@@ -71,13 +73,17 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
    if(!issue[4]&&init.method==='PATCH'){Object.assign(found,{state:body.state,updated_at:'2026-10-15T13:00:00Z'});return answer(200,found);}
    if(issue[4]==='/comments'&&init.method==='POST'){comments+=1;found.updated_at='2026-10-15T13:00:00Z';return answer(201,{html_url:`${found.html_url}#issuecomment-${900+comments}`});}
    if(issue[4]==='/labels'&&init.method==='POST')return answer(200,body.labels.map((name:string)=>({name})));
-   if(issue[4]?.startsWith('/labels/')&&init.method==='DELETE')return answer(issue[4]==='/labels/wontfix'?404:200,[]);
+   if(issue[4]?.startsWith('/labels/')&&init.method==='DELETE')return issue[4]==='/labels/locked'?answer(403,{message:'Must have admin rights'}):answer(issue[4]==='/labels/wontfix'?404:200,[]);
   }
   if(repo){
    const found=repos.get(`${repo[1]}/${repo[2]}`);
    if(!found)return answer(404,{message:'Not Found'});
    if(!repo[3]&&init.method==='GET')return answer(200,found);
-   if(repo[3]&&init.method==='POST')return answer(201,{number:99,html_url:'https://github.com/example/app/issues/99'});
+   if(repo[3]&&init.method==='POST'){
+    const number=99+madeIssues.length,made={number,title:body.title,created_at:now(),html_url:`https://github.com/example/app/issues/${number}`,user:{login:'worldlet-test[bot]',type:'Bot'},performed_via_github_app:{id:1001}};
+    madeIssues.push(made);return answer(201,made);
+   }
+   if(repo[3]&&init.method==='GET'){assert.equal(u.searchParams.get('state'),'all');return answer(200,[...madeIssues].reverse());}
   }
   return answer(500,{message:'unexpected'});
  };
@@ -217,6 +223,43 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
   assert.deepEqual(audit,[['grant','allowed'],['approve','denied'],['approve','denied'],['approve','denied'],['approve','allowed'],['approve','allowed'],['approve','allowed'],['approve','allowed'],['dismiss','allowed'],['dismiss','allowed'],['approve','denied']]);
   assert.ok(changes>0);
 
+  // Removing some labels but not others: written, saying which were removed and which GitHub refused; none removed is
+  // failed. Each label is asked once.
+  const partial=await codex('create',{write:'labels.remove',target:'example/app#16',labels:['triage','locked']});
+  assert.deepEqual(keep(await drafts.approve(partial.draft.id)),{ok:true,status:'written',url:'https://github.com/example/app/issues/16',
+   reason:'Removed triage. GitHub refused removing locked (403: Must have admin rights), so it is still there.'});
+  assert.equal((await codex('read',{ids:[partial.draft.id]})).drafts[0].reason,'Removed triage. GitHub refused removing locked (403: Must have admin rights), so it is still there.');
+  const none=await codex('create',{write:'labels.remove',target:'example/app#16',labels:['locked']});
+  assert.deepEqual(await drafts.approve(none.draft.id),{ok:true,status:'failed',reason:'GitHub refused the write (403: Must have admin rights).'});
+
+  // A new Issue is recorded as begun before it is posted. Worldlet stopping after GitHub made it (its result never
+  // saved): Approve again finds the Issue the App made and keeps its link, and posts nothing.
+  const posts=()=>requests.filter(r=>r.method==='POST'&&/\/issues$/.test(r.path)).length;
+  const crashing:any={githubDrafts:()=>ledger.githubDrafts(),value:(bucket:string,id:string)=>ledger.value(bucket,id),recordAgentAudit:(entry:any,n:number)=>ledger.recordAgentAudit(entry,n),
+   saveGithubDraft:(draft:any,item:any,origin:'user'|'agent')=>{if(draft.status!=='pending')throw new Error('Worldlet quit');ledger.saveGithubDraft(draft,item,origin);}};
+  const quitting=(fetch:GithubFetch)=>createGithubDrafts({ledger:()=>crashing,vault,name:()=>'Codex',changed:()=>{},fetch,now,clock:()=>clock});
+  const made=await codex('create',{write:'issue.create',target:'example/app',title:'Settings reset on update'});
+  const postsBefore=posts();
+  assert.equal(await refused(()=>quitting(github).approve(made.draft.id)),'Worldlet quit');
+  const begun=(await codex('read',{ids:[made.draft.id]})).drafts[0];
+  assert.deepEqual([begun.status,typeof begun.writeStartedAt,posts()],['pending','string',postsBefore+1]);
+  clock+=60_000;
+  assert.deepEqual(keep(await drafts.approve(made.draft.id)),{ok:true,status:'written',url:madeIssues.at(-1).html_url});
+  assert.equal(posts(),postsBefore+1,'never posted twice');
+  // Stopped before GitHub made it: no such Issue from the App, so unknown (check GitHub), and still not posted again.
+  const unmade=await codex('create',{write:'issue.create',target:'example/app',title:'Sync stalls'});
+  const busy:GithubFetch=async(url,init)=>init.method==='POST'&&url.endsWith('/issues')?answer(502,{message:'Server Error'}):github(url,init);
+  assert.equal(await refused(()=>quitting(busy).approve(unmade.draft.id)),'Worldlet quit');
+  assert.deepEqual(keep(await drafts.approve(unmade.draft.id)),{ok:true,status:'unknown',reason:GITHUB_DRAFT_MESSAGES.notFoundAfterStart});
+  assert.equal(ledger.value('items',githubDraftItemId(unmade.draft.id))!.githubDraftStatus,'unknown');
+  // GitHub not answering the post: the draft stays begun, and Dismiss then says it is unknown, never "nothing written".
+  const silent=await codex('create',{write:'issue.create',target:'example/app',title:'Export is empty'});
+  const lost:GithubFetch=async(url,init)=>{if(init.method==='POST'&&url.endsWith('/issues'))throw new Error('socket hang up');return github(url,init);};
+  assert.equal(await refused(()=>createGithubDrafts({ledger:()=>ledger,vault,name:()=>'Codex',changed:()=>{},fetch:lost,now,clock:()=>clock}).approve(silent.draft.id)),GITHUB_DRAFT_MESSAGES.createLost);
+  assert.equal((await codex('read',{ids:[silent.draft.id]})).drafts[0].status,'pending');
+  assert.deepEqual(drafts.dismiss(silent.draft.id),{ok:true,status:'unknown',reason:GITHUB_DRAFT_REASONS.unknown});
+  assert.equal(posts(),postsBefore+1);
+
   // An ask that carries drafts (b5): it offers Approve; only the Agent's own pending drafts; Approve sent as a plain
   // answer (what a page on another device may send) is refused; approveDrafts runs each as on its own card, a changed
   // target refused; any other answer leaves them unrun; the Agent reads what became of them through asks/read.
@@ -273,4 +316,4 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
   assert.deepEqual(logged.filter(line=>!line.includes('ExperimentalWarning')),[],'nothing is logged');
  }finally{standing.close();ledger.close();Object.assign(console,original);}
 });
-console.log('PASS GitHub drafts on the host: own Grant only, drafted against the target as read, Approve re-reads and refuses a changed, closed or deleted target, writes once as the GitHub App and keeps the link, Dismiss and a phone settle write nothing, every Approve and Dismiss audited, an ask carrying drafts runs them only on this computer’s Approve and the Agent reads the results, and the App key and tokens appear nowhere');
+console.log('PASS GitHub drafts on the host: own Grant only, drafted against the target as read, Approve re-reads and refuses a changed, closed or deleted target, writes once as the GitHub App and keeps the link, reports labels removed in part, looks for a new Issue begun but not seen to finish instead of posting it twice, Dismiss and a phone settle write nothing, every Approve and Dismiss audited, an ask carrying drafts runs them only on this computer’s Approve and the Agent reads the results, and the App key and tokens appear nowhere');

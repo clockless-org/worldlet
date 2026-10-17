@@ -59,12 +59,13 @@ await withBrowser(async browser=>{
  assert.equal(await card('errors').locator('.board-error').textContent(),'Cloudflare is not connected. Connect it in Worldlet first.');
  await card('errors').getByRole('button',{name:'Connect Cloudflare'}).click();
  // Fox's actions follow the selected block: the first number, then the one chosen.
- let context=await page.evaluate(()=>{const c=(window as any).panel.context();return {title:c.context.title,labels:c.actions.map((a:any)=>a.label+(a.disabled?' (off)':''))};});
- assert.deepEqual(context,{title:'Board · Installs this week',labels:['Explain this number','What changed?']});
+ let context=await page.evaluate(()=>{const c=(window as any).panel.context();return {title:c.context.title,labels:c.actions.map((a:any)=>a.label+(a.disabled?' (off)':'')),questions:c.actions.map((a:any)=>a.description)};});
+ // One-word titles fit Fox's action column on one line; the full question is the tooltip and what the chat shows.
+ assert.deepEqual(context,{title:'Board · Installs this week',labels:['Explain','Changes'],questions:['Explain this number','What changed?']});
  await card('funnel').locator('.board-card-title').click();
  assert.equal(await card('funnel').getAttribute('data-selected'),'true');
- context=await page.evaluate(()=>{const c=(window as any).panel.context();return {title:c.context.title,labels:c.actions.map((a:any)=>a.label+(a.disabled?' (off)':''))};});
- assert.deepEqual(context,{title:'Board · Funnel',labels:['Explain this number (off)','What changed?']});
+ context=await page.evaluate(()=>{const c=(window as any).panel.context();return {title:c.context.title,labels:c.actions.map((a:any)=>a.label+(a.disabled?' (off)':'')),questions:c.actions.map((a:any)=>a.description)};});
+ assert.deepEqual(context,{title:'Board · Funnel',labels:['Explain (off)','Changes'],questions:['Explain this number','What changed?']});
  await page.evaluate(()=>(window as any).panel.context().actions[1].run());
  await page.screenshot({path:tmp+'/board-panel-1280.png',fullPage:true});
  // Tabs and Refresh read one tab again, through `board` `read` only.

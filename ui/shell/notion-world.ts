@@ -1212,7 +1212,7 @@ export function mountNotionWorld(data: World, native: any) {
       if(!result?.ok)throw Error(result?.error||'Could not do that.');
       await settleAttention(page,result.status==='written'?'done':'dismissed',null,{advance:true,hosted:true});
       // Said once the card has moved on, so the next card's line does not hide it.
-      notify(result.status==='written'?'Written on GitHub.':result.status==='dismissed'?'Dismissed. Nothing was written.':result.reason||'Nothing was written.');
+      notify(result.status==='written'?result.reason||'Written on GitHub.':result.status==='dismissed'?'Dismissed. Nothing was written.':result.reason||'Nothing was written.');
      }catch(e){notify(e.message);}finally{busy=false;}
     };
     attentionPreview.setActions([{key:'approve',label:'Approve',primary:true,run:act('approve')},{key:'dismiss',label:'Dismiss',run:act('dismiss')}]);

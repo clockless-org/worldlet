@@ -11,11 +11,13 @@
 export type GithubWrite='issue.create'|'issue.comment'|'labels.add'|'labels.remove'|'issue.close'|'issue.reopen';
 export const GITHUB_WRITES:readonly GithubWrite[]=Object.freeze(['issue.create','issue.comment','labels.add','labels.remove','issue.close','issue.reopen']);
 
-/** `pending` until the person acts. `written` once GitHub accepted it (`result`). `stale` when the target changed after
- * the draft, so nothing was written. `failed` when GitHub refused the write or did not answer it. `dismissed` when the
- * person dismissed it. */
-export type GithubDraftStatus='pending'|'written'|'stale'|'failed'|'dismissed';
-export const GITHUB_DRAFT_STATUSES:readonly GithubDraftStatus[]=Object.freeze(['pending','written','stale','failed','dismissed']);
+/** `pending` until the person acts. `written` once GitHub accepted it (`result`; with a `reason` when only part of it
+ * was, such as some labels removed and others refused). `stale` when the target changed after the draft, so nothing was
+ * written. `failed` when GitHub refused the write. `unknown` when the write began but GitHub's answer never came back
+ * (no answer, or Worldlet stopped mid-write) and no such new Issue was found: check GitHub before drafting it again.
+ * `dismissed` when the person dismissed it. */
+export type GithubDraftStatus='pending'|'written'|'stale'|'failed'|'unknown'|'dismissed';
+export const GITHUB_DRAFT_STATUSES:readonly GithubDraftStatus[]=Object.freeze(['pending','written','stale','failed','unknown','dismissed']);
 
 /** The target as the host read it when the draft was made: the repository for a new Issue, otherwise the Issue or pull
  * request. Approve compares the target as it is then with this. */
@@ -51,8 +53,11 @@ export interface GithubDraft {
  status:GithubDraftStatus;
  /** Once written: what GitHub made or changed, on github.com. */
  resultUrl?:string;
- /** Why it was not written (`stale`, `failed`), in plain words. */
+ /** Why it was not written (`stale`, `failed`, `unknown`), or what part was not (`written`), in plain words. */
  reason?:string;
+ /** `issue.create`: when Approve began the write, saved before GitHub is asked, so a create that Worldlet stopped in the
+  * middle of is looked for on GitHub rather than posted again. */
+ writeStartedAt?:string;
  createdAt:string;
  updatedAt:string;
  /** When the person approved, dismissed, or the host refused it. */
