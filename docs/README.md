@@ -56,13 +56,13 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **282 Markdown documents** and **745 supporting documentation files**.
+Indexed: **283 Markdown documents** and **745 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
 | Root entry points | 6 |
 | Product, architecture and operations guides | 16 |
-| Applet runtime descriptions | 119 |
+| Applet runtime descriptions | 120 |
 | UI and Applet authoring references | 30 |
 | Resource and artwork records | 74 |
 | Module and service documentation | 37 |
@@ -101,7 +101,7 @@ Indexed: **282 Markdown documents** and **745 supporting documentation files**.
 
 </details>
 
-<details><summary>Applet runtime descriptions (119)</summary>
+<details><summary>Applet runtime descriptions (120)</summary>
 
 - [ui/applets/acrobat/applet.md](../ui/applets/acrobat/applet.md)
 - [ui/applets/agar-io/applet.md](../ui/applets/agar-io/applet.md)
@@ -114,6 +114,7 @@ Indexed: **282 Markdown documents** and **745 supporting documentation files**.
 - [ui/applets/apple-reminders/applet.md](../ui/applets/apple-reminders/applet.md)
 - [ui/applets/baidu-netdisk/applet.md](../ui/applets/baidu-netdisk/applet.md)
 - [ui/applets/bilibili/applet.md](../ui/applets/bilibili/applet.md)
+- [ui/applets/board/applet.md](../ui/applets/board/applet.md)
 - [ui/applets/booking/applet.md](../ui/applets/booking/applet.md)
 - [ui/applets/browser/applet.md](../ui/applets/browser/applet.md)
 - [ui/applets/canva/applet.md](../ui/applets/canva/applet.md)

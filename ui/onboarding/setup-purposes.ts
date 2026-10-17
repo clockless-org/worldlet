@@ -36,6 +36,7 @@ export const purposeCopy:Record<string,string[]>={
  'Chat with your communities on Discord’s website':['在 Discord 网站和社区聊天','Discord のサイトでコミュニティと話せます','Chatea con tus comunidades en la web de Discord'],
  'Visit any website; Fox can look things up for you':['访问任何网站；Fox 可以帮你查资料','どんなサイトも開けます。Fox が調べものをします','Visita cualquier web; Fox puede buscar cosas por ti'],
  'Ask Fox for a page for right now; it works on your phone too':['让 Fox 为眼下做一个页面；手机上也能用','今この時のページを Fox に頼めます。スマホでも使えます','Pide a Fox una página para este momento; también funciona en tu móvil'],
+ 'See the numbers you track in one place':['把你关注的数字放在一处','追っている数字を一か所で見られます','Ve en un solo lugar las cifras que sigues'],
  'Keep the conversations you keep coming back to in one place':['把你一直在继续的对话放在一处','何度も戻ってくる会話を一か所にまとめられます','Reúne en un lugar las conversaciones a las que siempre vuelves'],
  'Order food; Fox finds it and prepares your cart':['点外卖；Fox 帮你找餐并备好购物车','料理を注文。Fox が探してカートを用意します','Pide comida; Fox la encuentra y prepara tu carrito'],
  'Slide the numbered tiles; equal ones merge. Reach 2048.':['滑动数字方块，相同的会合并。凑出 2048。','数字のタイルをスライドし、同じ数を合体。2048 を目指そう。','Desliza las fichas; las iguales se unen. Llega a 2048.'],

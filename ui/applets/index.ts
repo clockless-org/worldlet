@@ -9,6 +9,7 @@ export {appletSceneKey} from './scene/scene-family.ts';
 export {createPanelScene} from './scene/panel-scene.ts';
 export {setMailAvatarLookup} from './gmail/presentation.ts';
 export {createAppletPanel} from './panels.ts';
+export {BOARD_READ_EVENT} from './board/panel.ts';
 export {createGameApplet} from './games.ts';
 export {stripeMoney} from './stripe/panel.ts';
 export {appHudIcon,appLogoSource,AGENT_ICONS} from './visuals.ts';

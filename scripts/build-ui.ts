@@ -15,7 +15,7 @@ export async function buildUI(root,output){
  // Historical styles stay below the current system, even if they use more specific selectors.
  const legacy=(await Promise.all(['room.css','notion.css','homestead.css'].map(n=>readFile(path.join(root,'ui/shell',n),'utf8')))).join('\n').replace(/!important/g,'');
  const layers=await Promise.all(['foundations','components','layout','states','hud'].map(async n=>`@layer ${n}{\n${await readFile(path.join(root,'ui/components',n+'.css'),'utf8')}
-${n==='components'?(await Promise.all([...['youtube','stripe','weather','moment','ongoing'].map(key=>key+'/panel.css'),'_shared/games.css'].map(file=>readFile(path.join(root,'ui/applets',file),'utf8')))).join('\n'):''}
+${n==='components'?(await Promise.all([...['youtube','stripe','weather','moment','ongoing','board'].map(key=>key+'/panel.css'),'_shared/games.css'].map(file=>readFile(path.join(root,'ui/applets',file),'utf8')))).join('\n'):''}
 ${n==='states'?(await Promise.all(STATE_STYLES.map(file=>readFile(path.join(root,file),'utf8')))).join('\n'):''}\n}`));
  const builtinControls='resources/styles/builtin/controls.css';
  // The surfaces a theme can paint (ui/themes/theme-surfaces.css); the host's controls are the layer below.
