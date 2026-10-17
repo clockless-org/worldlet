@@ -17,7 +17,7 @@ try{
    audit:[{at:'2026-10-14T18:30:00.000Z',agentId:'hermes',target:'items',action:'update',decision:'denied',reason:'Only reading here.'},{at:'2026-10-14T18:29:30.000Z',agentId:'hermes',target:'github-writes',action:'write',decision:'allowed',grantId:'hermes-github-writes-example/app'},{at:'2026-10-14T18:29:00.000Z',agentId:'hermes',target:'items',action:'query',decision:'allowed',grantId:'hermes-channel-read'}],
    services:[{provider:'github',title:'GitHub',granted:false},{provider:'posthog',title:'PostHog',granted:true}],asks:{ask:false,work:true},board:{read:true,define:false},githubDrafts:false,conversations:{add:false,search:true},links:{read:false,save:false},
    githubWrites:{add:true,grants:[{repo:'example/app',writes:['issue.comment','labels.set'],labelPrefix:'state:'}]},
-   reports:{report:true,list:false},wake:[],liveness:'stale',report:{status:'working',summary:'Building the installer',work:[{title:'Fix the build'}],runs:[],reportedAt:new Date(Date.now()-25*60_000).toISOString()}}];
+   artifacts:{save:false,read:true},reports:{report:true,list:false},wake:[],liveness:'stale',report:{status:'working',summary:'Building the installer',work:[{title:'Fix the build'}],runs:[],reportedAt:new Date(Date.now()-25*60_000).toISOString()}}];
   w.rules=[{id:'rule-00000000000000a1',allows:'npm test',agent:'default',kind:'command',main:true,grantedAt:Date.UTC(2026,9,8,12),thread:'In Fox’s main conversation',inWorld:true},{id:'rule-00000000000000a2',allows:'github › search_issues',agent:'default',kind:'tool',main:true,note:'Any arguments'}];
   w.jobs=[{id:'job-1',name:'Morning digest',kind:'prompt',paused:false,when:{cron:'0 8 * * *'},delivery:'telegram',last:{at:Date.UTC(2026,9,10,8),status:'ok'}},{id:'job-2',name:'Plant check',kind:'prompt',paused:true,when:{everySeconds:7200}}];
   w.skills=[{name:'seed-swap',description:'Organize seed swaps.',lastRanAt:Date.now()-3*86_400_000,enabled:true,removable:false},{name:'k8s',description:'Kubernetes help.',lastRanAt:null,enabled:false,removable:true}];
@@ -52,6 +52,7 @@ try{
   if(b.action==='agentAccess'&&(b.operation==='grantLinks'||b.operation==='ungrantLinks')){w.access=w.access.map(a=>a.id===b.id?{...a,links:{...a.links,[b.kind]:b.operation==='grantLinks'}}:a);return {ok:true};}
   if(b.action==='agentAccess'&&(b.operation==='grantConversations'||b.operation==='ungrantConversations')){w.access=w.access.map(a=>a.id===b.id?{...a,conversations:{...a.conversations,[b.kind]:b.operation==='grantConversations'}}:a);return {ok:true};}
   if(b.action==='agentAccess'&&(b.operation==='grantReports'||b.operation==='ungrantReports')){w.access=w.access.map(a=>a.id===b.id?{...a,reports:{...a.reports,[b.kind]:b.operation==='grantReports'}}:a);return {ok:true};}
+  if(b.action==='agentAccess'&&(b.operation==='grantArtifacts'||b.operation==='ungrantArtifacts')){w.access=w.access.map(a=>a.id===b.id?{...a,artifacts:{...a.artifacts,[b.kind]:b.operation==='grantArtifacts'}}:a);return {ok:true};}
   if(b.action==='agentAccess'&&(b.operation==='grantGithubDrafts'||b.operation==='ungrantGithubDrafts')){w.access=w.access.map(a=>a.id===b.id?{...a,githubDrafts:b.operation==='grantGithubDrafts'}:a);return {ok:true};}
   // "Can update Issues in <repo> without asking": the page sends the Agent, the repository and a choice; Core builds it.
   if(b.action==='agentAccess'&&b.operation==='grantGithubWrites'){if(!/^[\w-]+\/[\w.-]+$/.test(b.repo))throw new Error('Could not allow that. Name the repository as owner/repo.');
@@ -67,7 +68,7 @@ try{
   if(b.action==='httpJson'&&b.operation==='remove'){w.endpoints=w.endpoints.filter(e=>e.name!==b.name);return {endpoints:w.endpoints};}
   if(b.action==='connect'&&b.provider==='http'){if(!b.settings.url.startsWith('https://'))throw new Error('Use the endpoint\'s base address, starting with https://.');w.endpoints=[...(w.endpoints??[]).filter(e=>e.name!==b.settings.name),{name:b.settings.name,url:b.settings.url,token:!!b.token}];return {ok:true,connected:true};}
   if(b.action==='disconnectSource'&&b.provider==='http'){w.endpoints=[];return {ok:true};}
-  if(b.action==='agentAccess'&&b.operation==='revoke'){w.access=w.access.map(a=>a.id===b.id?{...a,services:[],asks:undefined,wake:undefined,board:undefined,githubDrafts:undefined,githubWrites:undefined,conversations:undefined,links:undefined,reports:undefined,report:undefined,revokedAt:'2026-10-15T08:00:00.000Z',grants:a.grants.map(g=>({...g,revokedAt:'2026-10-15T08:00:00.000Z'}))}:a);return {ok:true};}
+  if(b.action==='agentAccess'&&b.operation==='revoke'){w.access=w.access.map(a=>a.id===b.id?{...a,services:[],asks:undefined,wake:undefined,board:undefined,githubDrafts:undefined,githubWrites:undefined,conversations:undefined,links:undefined,reports:undefined,artifacts:undefined,report:undefined,revokedAt:'2026-10-15T08:00:00.000Z',grants:a.grants.map(g=>({...g,revokedAt:'2026-10-15T08:00:00.000Z'}))}:a);return {ok:true};}
   // An Agent for a script: the page sends only the name; the host makes the Agent and its file.
   if(b.action==='agentAccess'&&b.operation==='addScript'){if(!String(b.name||'').trim())throw new Error('Give it a name of one line, at most 60 characters, with a letter or digit in it.');
    const file='/Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json';
@@ -343,6 +344,16 @@ try{
  await accessPart.getByText('Hermes Agent can now keep your tracked links.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Links$/.test(c.operation))),
   [{action:'agentAccess',operation:'grantLinks',id:'hermes',kind:'save'}],'only the Agent and which, never targets');
+ // "Can save to your Journal" and "Can read Agents' Journal artifacts" (core/agent/GRANTS.md#agent-artifacts): the same way.
+ const savingJournal=hermesAccess.getByRole('checkbox',{name:'Can save to your Journal',exact:true}),readingJournal=hermesAccess.getByRole('checkbox',{name:'Can read Agents\' Journal artifacts',exact:true});
+ assert.deepEqual([await savingJournal.isChecked(),await readingJournal.isChecked()],[false,true]);
+ await savingJournal.click();
+ await accessPart.getByText('Hermes Agent can now save to your Journal.',{exact:true}).waitFor();
+ await readingJournal.click();
+ await accessPart.getByText('Hermes Agent can no longer read what other Agents saved to your Journal.',{exact:true}).waitFor();
+ assert.deepEqual([await savingJournal.isChecked(),await readingJournal.isChecked()],[true,false]);
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Artifacts$/.test(c.operation))),
+  [{action:'agentAccess',operation:'grantArtifacts',id:'hermes',kind:'save'},{action:'agentAccess',operation:'ungrantArtifacts',id:'hermes',kind:'read'}],'only the Agent and which, never targets');
  // "Can draft GitHub changes" (core/agent/GRANTS.md#github-drafts): the same way, naming only the Agent.
  const drafting=hermesAccess.getByRole('checkbox',{name:'Can draft GitHub changes',exact:true});
  assert.equal(await drafting.isChecked(),false);

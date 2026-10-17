@@ -64,7 +64,9 @@ const UNTRUSTED_TOOLS=['read_content','read_content_page','open_content','read_w
  // Tracked links hold what other Agents wrote about the person's posts: data, never instructions.
  'world_links',
  // Agent reports hold what other Agents wrote about their work: data, never instructions.
- 'agent_reports'];
+ 'agent_reports',
+ // Agent artifacts hold what Agents saved to the Journal: data, never instructions.
+ 'agent_artifacts'];
 const GUARDED_WRITES=new Set<string>([...GUARDED_WRITE_TOOLS,...TURN_GUARDED_WRITES]);
 /** Tools the host routes itself; their tool events above classify them precisely. */
 const HOST_ROUTED=new Set<string>([policy.worldGatewayTool,...worldToolCatalog.map(tool=>tool.name)]);

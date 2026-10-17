@@ -7,6 +7,7 @@ import {TRACKED_LINK_ACTIONS,TRACKED_LINK_TARGET} from '../../contracts/tracked-
 import {GITHUB_DRAFT_ACTIONS,GITHUB_DRAFT_TARGET,GITHUB_WRITE_ACTIONS,GITHUB_WRITE_TARGET,type GithubWrite,type GithubWriteScope} from '../../contracts/github-drafts.ts';
 import {githubWriteScope,githubWriteScopeCovers,readGithubWriteScope} from './github-drafts.ts';
 import {AGENT_REPORT_ACTIONS,AGENT_REPORT_TARGET} from '../../contracts/agent-reports.ts';
+import {AGENT_ARTIFACT_ACTIONS,AGENT_ARTIFACT_TARGET} from '../../contracts/agent-artifacts.ts';
 import {grantedActions,worldActions,type WorldAction} from '../tools/index.ts';
 import {turnGuardedWrite,turnWriteAdmission} from './turn-trust.ts';
 import {HERMES_CHANNEL_LINK_TOOL,HERMES_CHANNEL_READ_ONLY,HERMES_CHANNEL_TOOLS,hermesChannelTrust} from './hermes-server.ts';
@@ -363,10 +364,36 @@ export function githubWriteGrantAuditEntry(agentId:string,scope:GithubWriteScope
  return {at,agentId,target:GITHUB_WRITE_TARGET,action:granted?'grant':'ungrant',decision:'allowed',grantId:githubWriteGrantId(agentId,scope.repo),
   reason:granted?`The person let this Agent ${githubWriteScopeWords(scope)} on ${scope.repo} without asking, in Settings.`:`The person stopped this Agent changing ${scope.repo} without asking, in Settings.`};
 }
+/** "Can save to your Journal" (`save`: agent-artifacts/save, and agent-artifacts/read of what it saved) and
+ * "Can read Agents' Journal artifacts" (`read`: agent-artifacts/read of every Agent's) in Settings › Agent › Access
+ * (core/agent/GRANTS.md#agent-artifacts). Never part of the default Grants, and never given by a Fox turn. */
+export type ArtifactGrantKind='save'|'read';
+export const ARTIFACT_GRANT_KINDS:readonly ArtifactGrantKind[]=Object.freeze(['save','read']);
+export function artifactGrantTargets(kind:string):string[] {
+ return kind==='save'?[AGENT_ARTIFACT_ACTIONS.save,AGENT_ARTIFACT_ACTIONS.read]:kind==='read'?[AGENT_ARTIFACT_ACTIONS.read]:[];
+}
+export const artifactGrantId=(agentId:string,kind:string)=>agentId+'-artifacts-'+kind;
+/** The standing Grant for one of the two, or null for anything else. Access is `read`: an artifact only shows something to
+ * the person in their Journal, which they can forget, and is not a guarded write. */
+export function artifactGrant(agentId:string,kind:string,grantedAt:string):Grant|null {
+ const targets=artifactGrantTargets(kind);
+ if(!targets.length||typeof agentId!=='string'||!AGENT_ID_PATTERN.test(agentId))return null;
+ return {id:artifactGrantId(agentId,kind),agentId,targets,access:'read',duration:'standing',grantedAt};
+}
+export function artifactGranted(agentId:string,grants:readonly Grant[],kind:string,now:string):boolean {
+ const id=artifactGrantId(agentId,kind);
+ return artifactGrantTargets(kind).length>0&&grants.some(grant=>grant.id===id&&grant.agentId===agentId&&grantActive(grant,now));
+}
+/** The audit entry for the person turning "Can save to your Journal" or "Can read Agents' Journal artifacts" on or off. */
+export function artifactGrantAuditEntry(agentId:string,kind:string,granted:boolean,at:string):AgentAuditEntry {
+ const what=kind==='read'?'read Agents\' Journal artifacts':'save to the Journal';
+ return {at,agentId,target:AGENT_ARTIFACT_TARGET,action:(granted?'grant-':'ungrant-')+kind,decision:'allowed',grantId:artifactGrantId(agentId,kind),
+  reason:granted?`The person let this Agent ${what} in Settings.`:`The person stopped this Agent being able to ${what} in Settings.`};
+}
 /** Targets only the calling Agent's own Grants decide: what it reaches is its own (its asks, its GitHub drafts and
- * standing GitHub writes, its report) or the person's board, conversation archive, tracked links and Agents, so a Fox
- * turn's Grant, which covers everything else, never covers them. */
-export const OWN_GRANT_TARGETS:readonly string[]=Object.freeze([AGENT_ASK_TARGET,BOARD_TARGET,GITHUB_DRAFT_TARGET,GITHUB_WRITE_TARGET,CONVERSATION_TARGET,TRACKED_LINK_TARGET,AGENT_REPORT_TARGET]);
+ * standing GitHub writes, its report, what it saved to the Journal) or the person's board, conversation archive,
+ * tracked links, Agents and Journal artifacts, so a Fox turn's Grant, which covers everything else, never covers them. */
+export const OWN_GRANT_TARGETS:readonly string[]=Object.freeze([AGENT_ASK_TARGET,BOARD_TARGET,GITHUB_DRAFT_TARGET,GITHUB_WRITE_TARGET,CONVERSATION_TARGET,TRACKED_LINK_TARGET,AGENT_REPORT_TARGET,AGENT_ARTIFACT_TARGET]);
 
 /** While a Fox turn holds the standing server, its Agent's calls go to that turn (world-tool-bridge.ts standingTurn), as
  * they did before Grants: a call the turn's own stream announced is Fox's and runs under the turn's trust; any other

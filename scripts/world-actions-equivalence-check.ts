@@ -63,6 +63,8 @@ function oldWorldActions({sample=false}={}):WorldAction[]{
  for(const action of actions.filter(a=>a.tool==='world_board'))action.parameters.required=action.action==='define'?['definition','expectedRevision']:[];
  operations('agents','agent_reports');
  for(const action of actions.filter(a=>a.tool==='agent_reports'))action.parameters.required=action.action==='report'?['status']:[];
+ operations('agent-artifacts','agent_artifacts');
+ for(const action of actions.filter(a=>a.tool==='agent_artifacts'))action.parameters.required=action.action==='save'?['title','body']:[];
  operations('github-drafts','github_drafts');
  for(const action of actions.filter(a=>a.tool==='github_drafts'))action.parameters.required=action.action==='create'?['write','target']:[];
  operations('conversations','world_conversations');

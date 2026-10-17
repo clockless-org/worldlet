@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {linkGrant,linkGrantAuditEntry,linkGrantTargets,linkGranted,conversationGrant,conversationGrantAuditEntry,conversationGrantTargets,conversationGranted,githubWriteGrant,githubWriteGrantAuditEntry,githubWriteGrantFor,githubWriteGrants,githubWriteScopeWords,OWN_GRANT_TARGETS,githubDraftGrant,githubDraftGrantAuditEntry,githubDraftGranted,boardGrant,boardGrantAuditEntry,boardGrantTargets,boardGranted,askGrant,askGrantAuditEntry,askGrantTargets,askGranted,AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites,reportGrant,reportGrantAuditEntry,reportGrantTargets,reportGranted} from '../core/agent/grants.ts';
+import {artifactGrant,artifactGrantAuditEntry,artifactGrantTargets,artifactGranted,linkGrant,linkGrantAuditEntry,linkGrantTargets,linkGranted,conversationGrant,conversationGrantAuditEntry,conversationGrantTargets,conversationGranted,githubWriteGrant,githubWriteGrantAuditEntry,githubWriteGrantFor,githubWriteGrants,githubWriteScopeWords,OWN_GRANT_TARGETS,githubDraftGrant,githubDraftGrantAuditEntry,githubDraftGranted,boardGrant,boardGrantAuditEntry,boardGrantTargets,boardGranted,askGrant,askGrantAuditEntry,askGrantTargets,askGranted,AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites,reportGrant,reportGrantAuditEntry,reportGrantTargets,reportGranted} from '../core/agent/grants.ts';
 import {HERMES_CHANNEL_READ_ONLY,hermesChannelToolAllowed} from '../core/agent/hermes-server.ts';
 import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
 import {turnWriteAdmission,writeDecision} from '../core/agent/turn-trust.ts';
@@ -126,7 +126,7 @@ assert.equal(worldCallWrites('start_applet_task'),true);assert.equal(worldCallWr
 // describe_world_tools: only granted targets outside a turn; everything while a Fox turn holds the server; none revoked.
 const listed=new Set(standingActions(actions,hermes,defaults,false,now).map(a=>a.target));
 assert.ok(listed.has('items')&&listed.has('world')&&!listed.has('content'));
-assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.filter(a=>!['asks','board','github-drafts','github-writes','conversations','links','agents'].includes(a.target)).length,'everything but asks, the board, GitHub drafts and writes, the conversation archive and tracked links, which only the Agent\'s own Grants name');
+assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.filter(a=>!['asks','board','github-drafts','github-writes','conversations','links','agents','agent-artifacts'].includes(a.target)).length,'everything but asks, the board, GitHub drafts and writes, the conversation archive and tracked links, which only the Agent\'s own Grants name');
 assert.deepEqual(standingActions(actions,{...hermes,revokedAt:earlier},defaults,true,now),[]);
 // A resolved call maps back to its target and action (channelToolReply checks Grants by them).
 assert.deepEqual(worldActionOf(actions,'query_world_items',{}),{target:'items',action:'query'});
@@ -387,4 +387,33 @@ assert.equal(githubWriteScopeWords(writeGrant.github!),'comment and change “st
 assert.deepEqual(githubWriteGrantAuditEntry('codex',writeGrant.github!,true,now),{at:now,agentId:'codex',target:'github-writes',action:'grant',decision:'allowed',grantId:'codex-github-writes-example/app',
  reason:'The person let this Agent comment and change “state:” labels on example/App without asking, in Settings.'});
 
-console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server, per-Service read Grants, ask Grants, board Grants, report Grants, GitHub draft Grants, standing GitHub write Grants and their reach, conversation archive Grants, tracked link Grants.');
+// "Can save to your Journal" (save, and reading its own) and "Can read Agents' Journal artifacts": exactly those targets,
+// never default, never given by a Fox turn's `*/*` Grant, and not a guarded write.
+assert.deepEqual(artifactGrantTargets('save'),['agent-artifacts/save','agent-artifacts/read']);assert.deepEqual(artifactGrantTargets('read'),['agent-artifacts/read']);
+for(const name of ['*','artifacts','all','__proto__','','define'])assert.deepEqual(artifactGrantTargets(name),[],'not a Journal artifact Grant: '+name);
+assert.equal(artifactGrant('codex','*/*',now),null);assert.equal(artifactGrant('Not An Id','save',now),null);
+const journalSaveGrant=artifactGrant('codex','save',now)!,journalReadGrant=artifactGrant('codex','read',now)!;
+assert.deepEqual(journalSaveGrant,{id:'codex-artifacts-save',agentId:'codex',targets:['agent-artifacts/save','agent-artifacts/read'],access:'read',duration:'standing',grantedAt:now});
+assert.ok(!channelDefaultGrants('codex',earlier,actions).some(g=>g.targets.some(t=>t.startsWith('agent-artifacts/'))),'no Journal artifacts in the default Grants');
+const journalCall=(grants:Grant[],action:string,args:Record<string,unknown>,foxTurn:{own:boolean}|null=null,identity=codex)=>{
+ const resolved=resolveAction(actions,'agent-artifacts',action,args);
+ assert.equal(resolved.name,'agent_artifacts');assert.equal(worldCallWrites(resolved.name,resolved.args),false,'a Journal artifact is not a guarded write');
+ return standingCallDecision({identity,grants,target:'agent-artifacts',action,tool:resolved.name,args:resolved.args,foxTurn,now});
+};
+const journalEntry={title:'Hourly status',body:'All green.',key:'hourly-2026-10-17T07'};
+assert.equal(journalCall(codexDefaults,'save',journalEntry).decision,'denied','ungranted: refused');
+assert.equal(journalCall(codexDefaults,'read',{}).decision,'denied');
+assert.deepEqual(journalCall([...codexDefaults,journalSaveGrant],'save',journalEntry),{decision:'allowed',grantId:'codex-artifacts-save'});
+assert.equal(journalCall([...codexDefaults,journalSaveGrant],'read',{}).decision,'allowed','saving includes reading its own');
+assert.equal(journalCall([...codexDefaults,journalReadGrant],'save',journalEntry).decision,'denied','reading is not saving');
+assert.deepEqual(journalCall([...codexDefaults,journalReadGrant],'read',{agent:'hermes'}),{decision:'allowed',grantId:'codex-artifacts-read'});
+assert.equal(journalCall([...codexDefaults,{...journalSaveGrant,revokedAt:earlier}],'save',journalEntry).decision,'denied','taken back: refused');
+assert.equal(journalCall(defaults,'save',journalEntry,{own:true},hermes).decision,'denied','a Fox turn never saves an Agent\'s Journal artifact');
+assert.equal(journalCall(defaults,'read',{},{own:true},hermes).decision,'denied','nor reads them');
+assert.equal(journalCall([...defaults,artifactGrant('hermes','save',now)!],'save',journalEntry,{own:false},hermes).decision,'allowed','its own Grant does, in a turn too');
+assert.ok(!standingActions(actions,hermes,defaults,true,now).some(a=>a.target==='agent-artifacts'),'not listed in a Fox turn without a Grant');
+assert.deepEqual(standingActions(actions,codex,[...codexDefaults,journalReadGrant],false,now).filter(a=>a.target==='agent-artifacts').map(a=>a.action),['read']);
+assert.equal(artifactGranted('codex',[journalSaveGrant],'save',now),true);assert.equal(artifactGranted('codex',[journalSaveGrant],'read',now),false,'saving is not reading every Agent\'s');assert.equal(artifactGranted('hermes',[journalSaveGrant],'save',now),false);
+assert.deepEqual(artifactGrantAuditEntry('codex','read',true,now),{at:now,agentId:'codex',target:'agent-artifacts',action:'grant-read',decision:'allowed',grantId:'codex-artifacts-read',reason:'The person let this Agent read Agents\' Journal artifacts in Settings.'});
+
+console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server, per-Service read Grants, ask Grants, board Grants, report Grants, GitHub draft Grants, standing GitHub write Grants and their reach, conversation archive Grants, tracked link Grants., Journal artifact Grants.');

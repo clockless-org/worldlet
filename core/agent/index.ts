@@ -11,6 +11,7 @@ export * from './reports.ts';
 export * from './github-drafts.ts';
 export * from './conversations.ts';
 export * from './tracked-links.ts';
+export * from './agent-artifacts.ts';
 export * from './auth-handoff.ts';
 export * from './local-harness.ts';
 export * from './openclaw-migration.ts';

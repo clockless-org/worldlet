@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {describeActions,resolveAction,worldActions,worldGatewayTools,type WorldAction} from '../../../../../core/tools/index.ts';
-import {HERMES_WORLD_TOOLS_SHIM,agentAuditEntry,standingActions,standingCallDecision,type GrantDecision,type HermesOwnCalls,type HermesWorldToolsServer,type WorldToolServer} from '../../../../../core/agent/index.ts';
+import {HERMES_WORLD_TOOLS_SHIM,agentAuditEntry,artifactGranted,standingActions,standingCallDecision,type GrantDecision,type HermesOwnCalls,type HermesWorldToolsServer,type WorldToolServer} from '../../../../../core/agent/index.ts';
 import type {AgentAccess} from '../../host/services.ts';
 import type {AgentIdentity,Grant} from '../../../../../contracts/agent-identity.ts';
 import {AGENT_REPORT_TARGET} from '../../../../../contracts/agent-reports.ts';
@@ -105,6 +105,8 @@ const LINKS_TOOL='world_links';
 const REPORT_TOOL='agent_reports';
 /** The World tool behind `github-writes/*` (core/tools/gateway.ts). */
 const WRITE_TOOL='github_writes';
+/** The World tool behind `agent-artifacts/*` (core/tools/gateway.ts). */
+const ARTIFACT_TOOL='agent_artifacts';
 
 /** What one Agent may reach on the standing server (core/agent/GRANTS.md): the actions it may discover and the decision
  * for one resolved call. Absent for a Fox turn's own bridge, whose calls the turn's trust alone decides. */
@@ -231,9 +233,12 @@ export const standingEndpointFile=(agentId:string)=>`worldlet-mcp-endpoint.${age
  * the same way. `reports`: an Agent report call (`agent_reports`, core/agent/GRANTS.md#agent-reports), the same way. */
 /** `writes`: a standing GitHub write (`github_writes`, core/agent/GRANTS.md#standing-github-writes) by the Agent whose
  * token made it, the same way, with that Agent's own Grants, whose reach (repository, writes, label prefix) it checks. */
-export async function openStandingWorldTools({channel,access,asks,board,drafts,writes,conversations,links,reports,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;
+/** `artifacts`: a Journal artifact call (`agent_artifacts`, core/agent/GRANTS.md#agent-artifacts) by the Agent whose token made it,
+ * the same way; `readsAll` says whether its own Grants let it read what every Agent saved, not only its own. */
+export async function openStandingWorldTools({channel,access,asks,board,drafts,writes,conversations,links,reports,artifacts,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;
  board?:(agentId:string,args:Row,canRead:(provider:string,operation:string)=>boolean)=>Promise<Row>;drafts?:(agentId:string,args:Row)=>Promise<Row>;writes?:(agentId:string,args:Row,grants:Grant[])=>Promise<Row>;
- conversations?:(agentId:string,args:Row)=>Row;links?:(agentId:string,args:Row)=>Row;reports?:(agentId:string,args:Row)=>Row;runner?:string}):Promise<StandingWorldTools> {
+ conversations?:(agentId:string,args:Row)=>Row;links?:(agentId:string,args:Row)=>Row;reports?:(agentId:string,args:Row)=>Row;
+ artifacts?:(agentId:string,args:Row,readsAll:boolean)=>Row;runner?:string}):Promise<StandingWorldTools> {
  const route='/'+crypto.randomUUID();
  const call=(body:{name:unknown;arguments:unknown},identity:AgentIdentity)=>{
   const call:McpCall={name:body.name,arguments:body.arguments,agent:{id:identity.id,name:identity.name}};
@@ -248,6 +253,7 @@ export async function openStandingWorldTools({channel,access,asks,board,drafts,w
     :name===CONVERSATIONS_TOOL?conversations?.(identity.id,args)??{error:'The conversation archive is not available in this build.'}
     :name===LINKS_TOOL?links?.(identity.id,args)??{error:'Tracked links are not available in this build.'}
     :name===REPORT_TOOL?reports?.(identity.id,args)??{error:'Agent reports are not available in this build.'}
+    :name===ARTIFACT_TOOL?artifacts?.(identity.id,args,artifactGranted(identity.id,grants,'read',now))??{error:'Saving to the Journal is not available in this build.'}
     :name===BOARD_TOOL?board?.(identity.id,args,(provider,operation)=>standingCallDecision({identity,grants,target:provider,action:operation,tool:provider===AGENT_REPORT_TARGET?REPORT_TOOL:'read_service',args:provider===AGENT_REPORT_TARGET?{operation}:{provider,operation},foxTurn:null,now}).decision==='allowed')??{error:'The board is not available in this build.'}
     :turn?turn.dispatch(name,args,call):channel(name,args,identity.id),
    access:{
