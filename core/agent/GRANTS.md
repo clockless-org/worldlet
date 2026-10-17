@@ -57,9 +57,23 @@ Under each connected Service's tile, **who may use it** says this in sentences (
 
 - "Fox and Claude Code can look at your PostHog." with a checkbox, on by default. It gives or takes back that Agent's read Grant (`grantService`, `ungrantService`). With no Agent in use it reads "Fox can look at your PostHog when you ask." with no checkbox.
 - "Before anything is changed, Worldlet asks you." It has no switch: an Agent's write to a service is always a draft the person approves on its card ([GitHub drafts](#github-drafts), [PostHog and Notion drafts](#posthog-and-notion-drafts)), whatever the Grants say.
-- "Other Agents look only if you choose them." (naming any that already may), with **Choose Agents**: one checklist of the other Agents' names, each a checkbox calling `grantService` or `ungrantService`.
+- "Other Agents ask you the first time." (naming any that already may), with **Choose Agents**: one checklist of the other Agents' names, each a checkbox calling `grantService` or `ungrantService`. An Agent not chosen asks on an Attention card ([below](#when-an-agent-first-needs-a-service)).
 
 Fine-grained Grants stay in Settings › Agent › Access. `node scripts/connector-readers-check.ts` checks the sentences and the default against a real Agent access store; `node scripts/connectors-ui-check.ts` checks the page.
+
+## When an Agent first needs a Service
+
+An Agent's `read_service` call on the standing server can be refused because it may not read that Service, or because the Service is not connected. Then the host asks the person once, instead of only answering with text ([`service-requests.ts`](service-requests.ts) decides; [`agent-runtime/service-requests.ts`](../../platform/electron/src/modules/agent-runtime/service-requests.ts) keeps it):
+
+- **The card.** One Attention item from provider `agents`, written with no model, at most once a day for the same Agent and Service (`serviceRequestDue`). It is kept with its request in the World's ledger (`state.service-requests`), in the person's own World with private context allowed, as asks are.
+  - "Claude Code wants to look at your PostHog." with **Allow** and **Not now**.
+  - "Claude Code wants to use Cloudflare. It isn't connected yet." with **Connect Cloudflare** and **Not now**. Connect opens the Service's own sign-in, the same as its tile in Settings › Connectors, then allows.
+  - A Service that connects with a key (GitHub, Search Console, HTTP JSON) has **Open Connectors** instead, which opens Settings › Connectors, and **Allow**, which works once it is connected.
+- **Allow** gives that Agent the Service's `serviceReadGrant` (`grantService`, audited as in Access). It is refused while the Service is not connected. **Not now** gives nothing; the card does not come back that day.
+- **The refusal** keeps its reason and adds that Worldlet asked the person in their Attention Center (or already did), so the Agent tries again later instead of asking again itself. A revoked or unknown Agent never asks, and the reason is unchanged when no card applies.
+- **Who may answer.** The host action `serviceRequest` (`allow` or `decline` with the request's ID). It is not in `ROOM_ALLOWED`, so only this computer's pages give an Agent a Grant.
+
+`node scripts/service-requests-check.ts` checks the rules, the card's plain words and the whole path on a real ledger, Agent access store and standing server.
 
 ## Settings › Agent › Access
 

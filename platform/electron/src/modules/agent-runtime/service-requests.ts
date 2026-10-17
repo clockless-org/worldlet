@@ -1,0 +1,56 @@
+import {answerServiceRequest,readServiceRequest,serviceRequestDue,serviceRequestItem,serviceRequestRefusal,type ServiceRequest} from '../../../../../core/agent/index.ts';
+import {connector} from '../../../../../core/accounts/index.ts';
+import type {AgentAccess} from '../../host/services.ts';
+import type {Row} from './types.ts';
+
+// When an Agent first needs a Service (core/agent/GRANTS.md#when-an-agent-first-needs-a-service). Core decides; this
+// keeps each request in the World's ledger (`state.service-requests`) beside its Attention card (provider `agents`),
+// written together with no model, and answers the card: Allow gives the read Grant, Not now leaves it.
+
+/** The World's ledger, while it is the person's own World (not the practice World) and writable. */
+export type ServiceRequestLedger={
+ serviceRequests():Row[];
+ saveServiceRequest(request:Row,item:Row,origin:'user'|'agent'):void;
+};
+export interface ServiceRequests {
+ /** An Agent's `read_service` call was refused for `provider`: puts the card in Attention when one is due, and answers
+  * what the refusal should say after its reason ('' when nothing). */
+ asked(agent:{id:string;name:string},provider:string):string;
+ /** The person's answer on the card (`serviceRequest`): `allow` or `decline` with its ID. Only this computer's pages. */
+ answer(request:Row):Row;
+}
+
+export function createServiceRequests({ledger,access,connected,title,changed,now=()=>new Date().toISOString()}:
+ {ledger:()=>ServiceRequestLedger|null;access:()=>AgentAccess|null;connected:(provider:string)=>boolean;title:(provider:string)=>string;changed:()=>void;now?:()=>string}):ServiceRequests {
+ // A Service that signs in is connected from the card itself; one that takes a key, under Settings › Connectors.
+ const signsIn=(provider:string)=>connector(provider)?.mechanism==='mcp-oauth';
+ const load=(db:ServiceRequestLedger)=>db.serviceRequests().flatMap(row=>{const request=readServiceRequest(row);return request?[request]:[];});
+ const save=(db:ServiceRequestLedger,request:ServiceRequest,origin:'user'|'agent')=>db.saveServiceRequest(request as unknown as Row,serviceRequestItem(request,title(request.provider),{signIn:signsIn(request.provider),region:connector(request.provider)?.region}) as unknown as Row,origin);
+ return {
+  asked(agent,provider){
+   try{
+    const db=ledger();
+    if(!db)return '';
+    const previous=load(db).find(item=>item.agentId===agent.id&&item.provider===provider)??null,linked=connected(provider);
+    const due=serviceRequestDue(previous,agent,provider,linked,now());
+    if(due){save(db,due,'agent');changed();return serviceRequestRefusal(title(provider),linked,true);}
+    return previous?.status==='pending'?serviceRequestRefusal(title(provider),linked,false):'';
+   }catch{return '';}
+  },
+  answer(request){
+   const db=ledger();
+   if(!db)throw new Error('Worldlet is not ready for this yet: the person has not finished setting up their own World.');
+   const outcome=request?.operation==='allow'?'allow':request?.operation==='decline'?'decline':null;
+   if(!outcome)throw new Error('Unknown request operation.');
+   const found=load(db).find(item=>item.id===request.id);
+   const next=answerServiceRequest(found,outcome,found?connected(found.provider):false,now());
+   if(outcome==='allow'){
+    const agents=access();
+    // The same Grant as "Can read" in Settings › Agent › Access, audited the same way.
+    if(!agents||!agents.grantService(next.agentId,next.provider))throw new Error('Could not change that. The Agent may have been revoked.');
+   }
+   save(db,next,'user');changed();
+   return {ok:true,status:next.status};
+  },
+ };
+}

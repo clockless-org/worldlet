@@ -17,11 +17,11 @@ const one=connectorWhoMayUse('PostHog',{main:{id:'claude-code',name:'Claude Code
 assert.deepEqual(one.main,{id:'claude-code',text:'Fox and Claude Code can look at your PostHog.',on:true});
 assert.equal(one.fox,null);
 assert.equal(one.changes,'Before anything is changed, Worldlet asks you.');
-assert.deepEqual(one.others,{text:'Hermes Agent can look too. Other Agents look only if you choose them.',choose:'Choose Agents',
+assert.deepEqual(one.others,{text:'Hermes Agent can look too. Other Agents ask you the first time.',choose:'Choose Agents',
  agents:[{id:'codex',text:'Codex can look at your PostHog',on:false},{id:'hermes',text:'Hermes Agent can look at your PostHog',on:true}]});
 const alone=connectorWhoMayUse('GitHub',{main:null,others:[]});
 assert.deepEqual([alone.main,alone.fox,alone.others],[null,'Fox can look at your GitHub when you ask.',null]);
-assert.equal(connectorWhoMayUse('GitHub',{main:null,others:[{id:'a',name:'A',granted:true},{id:'b',name:'B',granted:true},{id:'c',name:'C',granted:true}]}).others!.text,'A, B and C can look too. Other Agents look only if you choose them.');
+assert.equal(connectorWhoMayUse('GitHub',{main:null,others:[{id:'a',name:'A',granted:true},{id:'b',name:'B',granted:true},{id:'c',name:'C',granted:true}]}).others!.text,'A, B and C can look too. Other Agents ask you the first time.');
 for(const view of [one,alone])for(const text of [view.main?.text,view.fox,view.changes,view.others?.text,view.others?.choose,...view.others?.agents.map(agent=>agent.text)??[]].filter(Boolean))
  assert.ok(plainConnectorText(String(text)),'plain words: '+text);
 

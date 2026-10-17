@@ -81,7 +81,7 @@ await withBrowser(async browser=>{
  const main=who.getByRole('checkbox',{name:'Fox and Claude Code can look at your GitHub.',exact:true});
  assert.equal(await main.isChecked(),true,'reading is on by default for the Agent in use');
  await who.getByText('Before anything is changed, Worldlet asks you.',{exact:true}).waitFor();
- await who.getByText('Other Agents look only if you choose them.',{exact:true}).waitFor();
+ await who.getByText('Other Agents ask you the first time.',{exact:true}).waitFor();
  assert.equal(await who.getByRole('checkbox').count(),1,'the other Agents stay folded');
  await main.uncheck();
  await page.waitForFunction(()=>(window as any).calls.some((c:any)=>c.action==='agentAccess'&&c.operation==='ungrantService'));
@@ -90,7 +90,7 @@ await withBrowser(async browser=>{
  await tile('github').getByRole('button',{name:'Choose Agents',exact:true}).click();
  const codex=tile('github').getByRole('checkbox',{name:'Codex can look at your GitHub',exact:true});
  await codex.check();
- await tile('github').getByText('Codex can look too. Other Agents look only if you choose them.',{exact:true}).waitFor();
+ await tile('github').getByText('Codex can look too. Other Agents ask you the first time.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.operation==='grantService')),[{action:'agentAccess',operation:'grantService',id:'codex',provider:'github'}]);
  await plain('who may use it');
  await tile('github').getByRole('button',{name:'Done',exact:true}).click();
