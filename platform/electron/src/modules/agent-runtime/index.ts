@@ -122,7 +122,10 @@ export function worldSources(context:RuntimeContext,vault:VaultService,accountsH
   return savedNotion(body);
  }},github:{read:body=>mcp.read('github',body)}});
  const doordash=new DoorDash({folder:path.join(context.root,'accounts','doordash'),legacyHomes:homes});
- return {google,mcp,services:new ServiceSource({vault,openExternal}),doordash};
+ // Search Console reads with the same Google sign-in, which adds its permission only when its tile is connected.
+ const searchConsole={connect:(open:(url:string)=>Promise<void>,cancelled:()=>boolean)=>account.connect(['search-console'],open,cancelled),
+  allows:()=>account.allows('search-console'),bearer:(force:boolean)=>account.bearer('search-console',force)};
+ return {google,mcp,services:new ServiceSource({vault,openExternal,google:searchConsole}),doordash};
 }
 
 export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>Adapter),listeners:((reason:AgentChange)=>void)[],sources:((accountsHome:()=>string)=>WorldSources)|null=null):AgentService {

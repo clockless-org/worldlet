@@ -23,7 +23,9 @@ import {McpHttpClient,McpUnauthorized} from './mcp-client.ts';
  * memory until a minute before it expires. A Service that signs in (PostHog, Cloudflare) is read with its own sign-in
  * instead (McpAccounts, `mcp:<name>`), renewed there; the vault entry then keeps only the settings the sign-in found and
  * the choices it offered. PostHog's sign-in reads its API directly; Cloudflare's belongs to Cloudflare's MCP server,
- * so each request goes there as the one fixed program Core builds for it (`mcp`). */
+ * so each request goes there as the one fixed program Core builds for it (`mcp`). Search Console signs in with the
+ * World's own Google sign-in instead (`google`, the host's GoogleAccount), which adds its read-only permission only when
+ * the person connects it; the vault entry then says only that, and the access token stays with the Google sign-in. */
 /** One choice the person makes after signing in (a PostHog project, a Cloudflare account). */
 type Choice={id:string;name:string};
 interface Definition<S> {
@@ -40,6 +42,8 @@ interface Definition<S> {
  named?:{name(settings:S):string;list(endpoints:{settings:S;token:boolean}[]):unknown};
  /** The kept key is a Google service account's, exchanged for access tokens (Search Console). */
  serviceAccount?:true;
+ /** With no key, the Service signs in with the World's own Google sign-in (ServiceSourceOptions.google). */
+ google?:true;
  /** The Service's own sign-in, at `url` (its MCP server, which names its authorization server). `locate` finds, with
   * the signed-in account, the settings to read with and the choices it has; `wanted` is a choice the person made.
   * `pick`: the setting that choice is (Connector.pick). `mcp`: the sign-in is the MCP server's own, so each request
@@ -55,7 +59,7 @@ const SERVICES:Readonly<Record<string,Definition<unknown>>>=Object.freeze({
   signIn:{url:CLOUDFLARE_SIGN_IN,pick:'account',locate:locateCloudflare,mcp:{url:CLOUDFLARE_SIGN_IN_READS,tool:CLOUDFLARE_EXECUTE,request:cloudflareExecute,answer:cloudflareExecuteAnswer}}}),
  http:define<HttpJsonSettings>({gate:HTTP_JSON_GATE,settings:httpJsonSettings,origin:settings=>new URL(settings.url).origin,check:checkHttpJson,read:readHttpJson,
   named:{name:settings=>settings.name,list:httpJsonEndpoints}}),
- 'search-console':define({gate:SEARCH_CONSOLE_GATE,settings:searchConsoleSettings,origin:()=>SEARCH_CONSOLE_API,check:http=>checkSearchConsole(http),read:(http,settings,body)=>readSearchConsole(http,settings,body),serviceAccount:true}),
+ 'search-console':define({gate:SEARCH_CONSOLE_GATE,settings:searchConsoleSettings,origin:()=>SEARCH_CONSOLE_API,check:http=>checkSearchConsole(http),read:(http,settings,body)=>readSearchConsole(http,settings,body),serviceAccount:true,google:true}),
 });
 /** The Services read here; the rest of `read_service` (GitHub) runs over MCP (mcp-source.ts). */
 export const DIRECT_SERVICES:readonly string[]=Object.freeze(Object.keys(SERVICES));
@@ -64,8 +68,9 @@ const vaultId=(provider:string)=>'service:'+provider;
 
 /** A kept key the service refuses (401): the person connects again with a new one. */
 class ServiceUnauthorized extends Error {override name='ServiceUnauthorized';}
-/** `signIn`: read with the Service's own sign-in, not a key (`token` is empty); `choices` what it offered. */
-interface Kept {v:1;settings:unknown;token:string;signIn?:true;choices?:Choice[]}
+/** `signIn`: read with the Service's own sign-in, not a key (`token` is empty); `choices` what it offered. `google`: read
+ * with the World's Google sign-in. */
+interface Kept {v:1;settings:unknown;token:string;signIn?:true;google?:true;choices?:Choice[]}
 /** A connection of named endpoints (Definition.named): each with its settings and its key, which may be empty. */
 interface KeptNamed {v:1;endpoints:{settings:unknown;token:string}[]}
 type Endpoint={settings:unknown;token:string;signIn?:true};
@@ -78,7 +83,17 @@ export interface ServiceSourceOptions {vault:VaultService;fetch?:typeof fetch;
  /** Opens a sign-in page in the browser on this computer (a Service that signs in). */
  openExternal?:(url:string)=>Promise<void>;
  /** The World's own sign-ins (McpAccounts over the same vault by default). */
- accounts?:McpAccounts}
+ accounts?:McpAccounts;
+ /** The World's own Google sign-in, for a Service that reads with it (Search Console): `connect` adds the Service's
+  * permission in the browser, `allows` says whether the sign-in has it, and `bearer` is its authorization header (null
+  * when Google no longer accepts it). Without it such a Service connects only with a key. */
+ google?:ServiceGoogle}
+/** What a Service that reads with the World's Google sign-in needs of it (the host's GoogleAccount for one service). */
+export interface ServiceGoogle {
+ connect(open:(url:string)=>Promise<void>,cancelled:()=>boolean):Promise<void>;
+ allows():boolean;
+ bearer(force:boolean):Promise<string|null>;
+}
 export class ServiceSource {
  private readonly vault:VaultService;
  private readonly fetch:typeof fetch;
@@ -88,8 +103,9 @@ export class ServiceSource {
  private readonly access=new Map<string,{token:string;until:number}>();
  readonly accounts:McpAccounts;
  readonly openExternal:(url:string)=>Promise<void>;
+ private readonly google:ServiceGoogle|null;
  constructor(options:ServiceSourceOptions){
-  this.vault=options.vault;this.fetch=options.fetch??fetch;this.clock=options.clock??Date.now;
+  this.vault=options.vault;this.fetch=options.fetch??fetch;this.clock=options.clock??Date.now;this.google=options.google??null;
   this.accounts=options.accounts??new McpAccounts({vault:this.vault,agentHomes:()=>[],fetch:this.fetch,now:this.clock});
   this.openExternal=options.openExternal??(async()=>{throw new WorldletError('Could not open your browser. Try again.');});
   this.lookup=options.lookup??(async host=>(await dns.lookup(host,{all:true})).map(entry=>entry.address));
@@ -108,6 +124,8 @@ export class ServiceSource {
    });
    // A sign-in counts while its grant is kept; the settings it found are checked again like a key's.
    if(value.signIn===true)return service.signIn&&this.accounts.worldConnection(provider)?[{settings:service.settings(value.settings),token:'',signIn:true}]:[];
+   // The Google sign-in counts while it still allows this Service.
+   if(value.google===true)return service.google&&this.google?.allows()?[{settings:service.settings(value.settings),token:'',signIn:true}]:[];
    if(typeof value.token!=='string'||!value.token)return [];
    if(service.serviceAccount)searchConsoleKey(value.token);
    return [{settings:service.settings(value.settings),token:value.token}];
@@ -169,6 +187,7 @@ export class ServiceSource {
   const service=definition(provider);
   if(!service)throw new WorldletError('Unsupported Service.');
   if(!token.trim()&&service.signIn)return this.signIn(provider,service,settings,open??this.openExternal,cancelled);
+  if(!token.trim()&&service.google)return this.googleSignIn(provider,service,open??this.openExternal,cancelled);
   let chosen:unknown;
   try{chosen=service.settings(settings);}catch(error){throw new WorldletError((error as Error).message);}
   let key:string;
@@ -204,6 +223,18 @@ export class ServiceSource {
    if(!choosing&&before?.signIn!==true)this.accounts.disconnect(provider);
    throw error;
   }
+ }
+ /** Adds the Service's read permission to the World's Google sign-in in the browser (or reuses it when it already has
+  * it), checks it with one read and keeps that it reads so. A sign-in that does not finish, or a read Google refuses,
+  * leaves a kept key as it was. Disconnecting later forgets only this; the Google sign-in stays for Mail and Calendar. */
+ private async googleSignIn(provider:string,service:Definition<unknown>,open:(url:string)=>Promise<void>,cancelled:()=>boolean){
+  if(!this.google)throw new WorldletError(`${service.gate.title} cannot sign in with Google here. Connect it under Advanced instead.`);
+  await this.google.connect(open,cancelled);
+  const settings=service.settings({});
+  try{await service.check(this.http(service,settings,'',true),settings);}
+  catch(error){if(error instanceof ServiceUnauthorized)throw new WorldletError(service.gate.signedOut??service.gate.disconnected);throw error;}
+  this.vault.set(vaultId(provider),JSON.stringify({v:1,settings,token:'',google:true} satisfies Kept));
+  this.access.clear();
  }
  private kept(provider:string):Kept|null {
   try{const value=JSON.parse(this.vault.get(vaultId(provider))??'null');return value?.v===1?value as Kept:null;}catch{return null;}
@@ -331,7 +362,7 @@ export class ServiceSource {
  private async direct(service:Definition<unknown>,url:URL,method:'GET'|'POST'|'PATCH',body:unknown,token:string,signIn:boolean|undefined,force:boolean):Promise<{status:number;text:string}> {
   const {gate}=service,origin=url.origin;
   let authorization:string;
-  if(signIn){const header=await this.accounts.bearer(gate.name,force);if(!header)return {status:401,text:''};authorization=header;}
+  if(signIn){const header=service.google?await this.google?.bearer(force)??null:await this.accounts.bearer(gate.name,force);if(!header)return {status:401,text:''};authorization=header;}
   else authorization=service.serviceAccount?'Bearer '+await this.accessToken(gate,token):token?'Bearer '+token:'';
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),gate.timeoutSeconds*1000);
   try{

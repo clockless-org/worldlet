@@ -1,11 +1,13 @@
 // Bounded, read-only Google Search Console reads of the sites a Google service account can see, through the Search
 // Console API: `list` (the sites) and `query` (one Search Analytics query for one site: clicks, impressions,
 // click-through rate and position, over the last N days or between two dates, grouped by up to three of query, page,
-// date, country and device). No writes. The person pastes the service account's JSON key; the Platform keeps it only in
-// the vault, signs a short-lived assertion with it (RS256, the claims below) and exchanges that at Google's token
-// address for an access token kept in memory (service-source.ts). A service account suits a World that runs with no
-// one at the screen: it needs no sign-in window and no refresh token. Core decides which requests are made and what of
-// each answer reaches an Agent (contracts/services.ts).
+// date, country and device). No writes. By default the person signs in with Worldlet's own Google sign-in, which adds
+// the read-only Search Console permission (SEARCH_CONSOLE_SCOPE) only when they connect it, and reads the sites their
+// Google account can see. Under Advanced, a service account instead: the person pastes its JSON key; the Platform keeps
+// it only in the vault, signs a short-lived assertion with it (RS256, the claims below) and exchanges that at Google's
+// token address for an access token kept in memory (service-source.ts). A service account suits a World that runs with
+// no one at the screen: it needs no sign-in window and no refresh token. Core decides which requests are made and what
+// of each answer reaches an Agent (contracts/services.ts).
 import type {ServiceRead,ServiceRecord,ServiceRecords} from '../../../contracts/services.ts';
 import type {ServiceGate,ServiceHttp} from './http.ts';
 import {ValueError,isDict} from '../mcp/python.ts';
@@ -25,7 +27,9 @@ export const SEARCH_CONSOLE_GATE:ServiceGate=Object.freeze({name:'search-console
  forbidden:'This service account cannot read that site. In Search Console, open Settings › Users and permissions for the site and add the service account\'s email as a user.',
  missing:'Search Console has no such site for this service account. Read list for the sites it can see.',
  invalid:'Search Console could not run this read.',
- busy:'Search Console is limiting reads right now. Try again in a minute.'});
+ busy:'Search Console is limiting reads right now. Try again in a minute.',
+ signedOut:'Google signed you out of Search Console. Sign in again in Settings › Connectors.',
+ signInForbidden:'Your Google account cannot see that site in Search Console. Read list for the sites it can see, or ask the site\'s owner in Search Console to add you as a user.'});
 
 /** What is kept of a pasted key, and all the Platform signs with. */
 export interface SearchConsoleKey {clientEmail:string;privateKey:string;keyId?:string}
@@ -44,7 +48,7 @@ export function searchConsoleKey(value:unknown):SearchConsoleKey {
  if(parsed.token_uri!==undefined&&parsed.token_uri!==GOOGLE_TOKEN_URL)throw new ValueError('This key names another token address. Worldlet exchanges keys only with Google at '+GOOGLE_TOKEN_URL+'.');
  return {clientEmail:email.toLowerCase(),privateKey:key.replace(/\r\n/g,'\n'),...typeof id==='string'&&/^[0-9a-f]{16,64}$/i.test(id)?{keyId:id}:{}};
 }
-/** Search Console takes no settings besides the key. */
+/** Search Console takes no settings besides the key (or the Google sign-in). */
 export function searchConsoleSettings(value:unknown):Record<string,never> {
  if(value!==undefined&&value!==null&&(!isDict(value)||Object.keys(value).length))throw new ValueError('Search Console takes only the service account key.');
  return {};
@@ -144,7 +148,7 @@ export async function readSearchConsole(http:ServiceHttp,_settings:unknown,body:
    return [{id:site,title:site.replace(/^sc-domain:/,''),url:performance(site),
     fields:{kind:site.startsWith('sc-domain:')?'domain':'url-prefix',permission:cut(entry.permissionLevel,40)}}];
   }).slice(0,SEARCH_CONSOLE_LIMITS.sites).sort((a:ServiceRecord,b:ServiceRecord)=>a.id.localeCompare(b.id));
-  return {provider:'search-console',operation:'list',records,scope:`The Search Console sites this service account can see · up to ${SEARCH_CONSOLE_LIMITS.sites} · Read only`};
+  return {provider:'search-console',operation:'list',records,scope:`The Search Console sites this connection can see · up to ${SEARCH_CONSOLE_LIMITS.sites} · Read only`};
  }
  const site=searchConsoleSite(body.id),spec=searchConsoleSpec(body.query),{startDate,endDate}=dates(spec,now);
  const answer=await http.post(`${sitesPath}/${encodeURIComponent(site)}/searchAnalytics/query`,{startDate,endDate,dimensions:spec.dimensions,rowLimit:spec.rowLimit});

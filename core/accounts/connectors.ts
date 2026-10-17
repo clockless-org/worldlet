@@ -4,7 +4,7 @@
 /** How a service is connected by default.
  * - `mcp-oauth`: the service's own sign-in page, opened from this device; Worldlet registers itself there as a
  *   public client (no secret) and waits on a loopback address (platform/electron/src/modules/sources/mcp-account.ts).
- * - `google`: Worldlet's own Google sign-in (Mail, Calendar, Drive).
+ * - `google`: Worldlet's own Google sign-in (Mail, Calendar, Drive; Search Console adds its own read permission).
  * - `key`: a pasted key or file (`TOKEN_PROVIDERS` in core/applets/sources.ts), until the service gets a sign-in.
  * - `github-device` and `local` are reserved for GitHub's sign-in and this computer's own apps. */
 export type ConnectorMechanism='mcp-oauth'|'github-device'|'google'|'key'|'local';
@@ -67,7 +67,10 @@ export const CONNECTORS:readonly Connector[]=Object.freeze([
  // `offline_access` keeps the sign-in past a day; the three analytics reads are Workers, zones and their traffic.
  entry({id:'cloudflare',name:'Cloudflare',purpose:'See your site traffic in Cloudflare.',mechanism:'mcp-oauth',providers:['cloudflare'],shown:'always',region:'work',
   scopes:scopes(['offline_access','user:read','account:read','account-analytics.read','zone.read','analytics.read']),pick:'account',fallback:['key'],headless:false}),
- entry({id:'search-console',name:'Search Console',purpose:'See how your sites do in Google Search.',mechanism:'key',providers:['search-console'],shown:'connected',region:'work',scopes:scopes([]),fallback:['service-account'],headless:true}),
+ // Worldlet's own Google sign-in with the read-only Search Console permission, asked for only from this tile; a service
+ // account under Advanced for a World with no one at the screen.
+ entry({id:'search-console',name:'Search Console',purpose:'See how your sites do in Google Search.',mechanism:'google',providers:['search-console'],shown:'always',region:'work',
+  scopes:scopes(['https://www.googleapis.com/auth/webmasters.readonly']),fallback:['service-account'],headless:false}),
  entry({id:'http',name:'HTTP JSON',purpose:'Read your own JSON address.',mechanism:'key',providers:['http'],shown:'advanced',scopes:scopes([]),fallback:['key'],headless:true}),
 ]);
 

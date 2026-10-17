@@ -69,7 +69,7 @@ await withBrowser(async browser=>{
  const plain=async(when:string)=>{for(const text of await defaultPath())assert.doesNotMatch(text,CONNECTOR_TECHNICAL_WORDS,`${when}: "${text}" is on the default path`);};
 
  assert.equal(await page.title(),'Worldlet connectors settings check');
- assert.deepEqual(await page.locator('[data-connector]').evaluateAll(nodes=>nodes.map(node=>(node as HTMLElement).dataset.connector)),['google','notion','linear','todoist','supabase','github','posthog','cloudflare']);
+ assert.deepEqual(await page.locator('[data-connector]').evaluateAll(nodes=>nodes.map(node=>(node as HTMLElement).dataset.connector)),['google','notion','linear','todoist','supabase','github','posthog','cloudflare','search-console']);
  assert.match(await tile('notion').innerText(),/See your pages and databases in Notion\./);
  assert.equal(await tile('github').getByRole('button',{name:'Disconnect',exact:true}).count(),1,'a service connected with a key shows as connected');
  assert.equal(await tile('github').getByRole('button',{name:'Connect',exact:true}).count(),0);
@@ -142,6 +142,14 @@ await withBrowser(async browser=>{
  await page.getByText('Cloudflare now shows Shop.',{exact:true}).waitFor();
  assert.deepEqual((await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='connect'&&c.provider==='cloudflare'))).at(-1).settings,{account:'b'.repeat(32)});
  await plain('choosing an account');
+ // Search Console signs in with Google, into Work, with nothing typed; its box under Advanced then says it is connected.
+ await tile('search-console').getByRole('button',{name:'Connect',exact:true}).click();
+ await page.evaluate(()=>(window as any).pending.resolve());
+ await page.getByText('Search Console is connected.',{exact:true}).waitFor();
+ assert.deepEqual((await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='connect'&&c.provider==='search-console'))),[{action:'connect',provider:'search-console',region:'work'}]);
+ assert.equal(await tile('search-console').getAttribute('data-state'),'connected');
+ await page.locator('[data-advanced] [data-accounts="search-console"]').getByText(/^Connected\./).waitFor({state:'attached'});
+ await plain('Search Console signed in');
  // The service signed the person out: Sign in again, in plain words.
  await page.evaluate(async()=>{const w=window as any;w.connections.push({provider:'supabase',label:'Supabase',transport:'hermes',syncStatus:'sync_error',syncError:'Supabase is disconnected. Reconnect with Fox.',connected:true,failed:true});await w.draw();});
  await tile('supabase').getByText('Supabase signed you out. Sign in again to keep seeing it here.',{exact:true}).waitFor();
@@ -180,4 +188,4 @@ await withBrowser(async browser=>{
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'narrow settings do not overflow horizontally');
  if(screenshot)await page.screenshot({path:screenshot.replace(/\.png$/,'-narrow.png'),fullPage:true});
 });
-console.log('PASS Settings › Connectors: sign-in tiles with Connect, waiting and Cancel, Connected as, Disconnect asks once, plain words for a refusal and a sign-out, who may use it (the Agent in use on, Choose Agents), the PostHog project and Cloudflare account choices, key services shown connected, keys and addresses only under Advanced, no technical word on the default path, narrow layout');
+console.log('PASS Settings › Connectors: sign-in tiles with Connect, waiting and Cancel, Connected as, Disconnect asks once, plain words for a refusal and a sign-out, who may use it (the Agent in use on, Choose Agents), the PostHog project and Cloudflare account choices, Search Console signing in with Google, key services shown connected, keys and addresses only under Advanced, no technical word on the default path, narrow layout');

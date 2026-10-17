@@ -67,8 +67,8 @@ An Agent's `read_service` call on the standing server can be refused because it 
 
 - **The card.** One Attention item from provider `agents`, written with no model, at most once a day for the same Agent and Service (`serviceRequestDue`). It is kept with its request in the World's ledger (`state.service-requests`), in the person's own World with private context allowed, as asks are.
   - "Claude Code wants to look at your PostHog." with **Allow** and **Not now**.
-  - "Claude Code wants to use Cloudflare. It isn't connected yet." with **Connect Cloudflare** and **Not now**. Connect opens the Service's own sign-in, the same as its tile in Settings › Connectors, then allows.
-  - A Service that connects with a key (GitHub, Search Console, HTTP JSON) has **Open Connectors** instead, which opens Settings › Connectors, and **Allow**, which works once it is connected.
+  - "Claude Code wants to use Cloudflare. It isn't connected yet." with **Connect Cloudflare** and **Not now**. Connect opens the Service's own sign-in (Google's for Search Console), the same as its tile in Settings › Connectors, then allows.
+  - A Service that connects with a key (GitHub, HTTP JSON) has **Open Connectors** instead, which opens Settings › Connectors, and **Allow**, which works once it is connected.
 - **Allow** gives that Agent the Service's `serviceReadGrant` (`grantService`, audited as in Access). It is refused while the Service is not connected. **Not now** gives nothing; the card does not come back that day.
 - **The refusal** keeps its reason and adds that Worldlet asked the person in their Attention Center (or already did), so the Agent tries again later instead of asking again itself. A revoked or unknown Agent never asks, and the reason is unchanged when no card applies.
 - **Who may answer.** The host action `serviceRequest` (`allow` or `decline` with the request's ID). It is not in `ROOM_ALLOWED`, so only this computer's pages give an Agent a Grant.

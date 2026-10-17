@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
-import {GoogleRestError,type GoogleQuery,type GoogleRest,type MailReceipts} from '../../../../../core/accounts/index.ts';
+import {GoogleRestError,SEARCH_CONSOLE_SCOPE,type GoogleQuery,type GoogleRest,type MailReceipts} from '../../../../../core/accounts/index.ts';
 import {WorldletError,ensureDirectory,readJSON,writeJSON} from '../../files.ts';
 import type {VaultService} from '../../host/services.ts';
 
@@ -17,6 +17,8 @@ export const GOOGLE_SCOPES={
  // The reader uses only calendars/primary; shared calendars are not imported.
  'google-calendar':'https://www.googleapis.com/auth/calendar.events.owned.readonly',
  'google-drive':'https://www.googleapis.com/auth/drive.readonly',
+ // Read only, asked for only from Search Console's tile (core/accounts/services/search-console.ts, read by service-source.ts).
+ 'search-console':SEARCH_CONSOLE_SCOPE,
 } as const;
 export type GoogleService=keyof typeof GOOGLE_SCOPES;
 const IDENTITY=['openid','https://www.googleapis.com/auth/userinfo.email','https://www.googleapis.com/auth/userinfo.profile'];
@@ -71,6 +73,16 @@ export class GoogleAccount {
  /** The services the grant covers. */
  services():GoogleService[] {const scopes=this.grant()?.scopes??[];return (['gmail','google-calendar','google-drive'] as const).filter(name=>scopes.includes(GOOGLE_SCOPES[name]));}
  canSend(){return this.grant()?.scopes.includes(GOOGLE_SCOPES['gmail-send'])===true;}
+ /** The saved grant allows `service` (Search Console's tile asks this). */
+ allows(service:GoogleService){return this.grant()?.scopes.includes(GOOGLE_SCOPES[service])===true;}
+ /** An authorization header for `service`, for a reader that makes its own requests (Search Console, service-source.ts):
+  * null when the grant does not allow it or Google no longer accepts it, so the reader says to sign in again. `force`
+  * renews the access token first (after a 401). */
+ async bearer(service:GoogleService,force=false):Promise<string|null> {
+  if(!this.allows(service))return null;
+  try{return 'Bearer '+(await this.fresh(force)).token;}
+  catch(error){if(error instanceof WorldletError&&error.message===EXPIRED)return null;throw error;}
+ }
 
  private async refresh(grant:Grant):Promise<Grant> {
   const client=this.client();
@@ -120,9 +132,10 @@ export class GoogleAccount {
   };
  }
 
- /** Mail and Calendar share one read-only authorization from either entry; Drive and sending are added only on
-  * request. A saved grant with every needed scope is reused once it still refreshes; otherwise the person signs in
-  * in their browser (`open`), on a loopback address with PKCE, within five minutes. */
+ /** Mail and Calendar share one read-only authorization from either entry; Drive, Search Console and sending are added
+  * only on request. A new sign-in keeps what the saved grant already allowed, so adding one never takes another away.
+  * A saved grant with every needed scope is reused once it still refreshes; otherwise the person signs in in their
+  * browser (`open`), on a loopback address with PKCE, within five minutes. */
  async connect(requested:GoogleService[],open:(url:string)=>Promise<void>,cancelled:()=>boolean=()=>false){
   if(!requested.length||requested.some(service=>!(service in GOOGLE_SCOPES)))throw new WorldletError('Unsupported Google service.');
   const services=requested.some(service=>service==='gmail'||service==='google-calendar')?[...new Set<GoogleService>(['gmail','google-calendar',...requested])]:requested;
@@ -133,8 +146,8 @@ export class GoogleAccount {
    // A saved scope is not proof the grant still works: a reconnect escapes a revoked grant, a network failure keeps it.
    try{await this.refresh(stored);return;}catch(error){if(!(error instanceof WorldletError&&error.message===EXPIRED))throw error;}
   }
-  const core=[GOOGLE_SCOPES.gmail,GOOGLE_SCOPES['google-calendar'],GOOGLE_SCOPES['gmail-send']];
-  const scopes=[...new Set([...required,...(stored?.scopes??[]).filter(scope=>core.includes(scope as any)),...IDENTITY])].sort();
+  const kept:string[]=Object.values(GOOGLE_SCOPES);
+  const scopes=[...new Set([...required,...(stored?.scopes??[]).filter(scope=>kept.includes(scope)),...IDENTITY])].sort();
   const grant=await this.consent(client,scopes,open,cancelled);
   if(!scopes.every(scope=>grant.scopes.includes(scope)))throw new WorldletError('Google authorization did not grant the requested access.');
   this.save(grant);
