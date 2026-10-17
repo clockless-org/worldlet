@@ -437,6 +437,10 @@ export interface AgentAccess {
   * change audited. False for an unknown or revoked Agent or a choice Core refuses. */
  grantGithubWrites(agentId:string,repo:unknown,choice:unknown,labelPrefix?:unknown):boolean;
  ungrantGithubWrites(agentId:string,repo:unknown):boolean;
+ /** "Can save to your Journal" (`save`: agent-artifacts/save and read) and "Can read Agents' Journal artifacts" (`read`:
+  * agent-artifacts/read), the same way (core artifactGrant), each change audited. */
+ grantArtifacts(agentId:string,kind:string):boolean;
+ ungrantArtifacts(agentId:string,kind:string):boolean;
  onRevoke(listener:(agentId:string)=>void):void;
 }
 export interface VaultService {

@@ -6,7 +6,8 @@
  * (core/board/README.md), "Can save conversations" and "Can search conversations"
  * (core/agent/GRANTS.md#conversation-archive), "Can see your tracked links" and "Can keep your tracked links"
  * (core/agent/GRANTS.md#tracked-links), and "Can report its work" and "Can see other Agents"
- * (core/agent/GRANTS.md#agent-reports), the same way; once a GitHub App is connected, "Can update Issues in <repo>
+ * (core/agent/GRANTS.md#agent-reports), and "Can save to your Journal" and "Can read Agents' Journal artifacts"
+ * (core/agent/GRANTS.md#agent-artifacts), the same way; once a GitHub App is connected, "Can update Issues in <repo>
  * without asking" (core/agent/GRANTS.md#standing-github-writes), one per repository with Remove; what each Agent last
  * reported it is doing; and "Add an Agent for a script" (core/agent/GRANTS.md#agents-for-scripts), which sends only the
  * name the person typed; "Give new work to", the Agent that work posted for no Agent in particular goes to, and each
@@ -20,7 +21,7 @@ type Grant={id:string;targets:string[];access:'read'|'write';duration:'standing'
 type Audit={at:string;target:string;action:string;decision:'allowed'|'denied'|'asked';reason?:string};
 type Service={provider:string;title:string;granted:boolean};
 type Agent={id:string;name:string;harness:string;kind:'local'|'remote';createdAt:string;lastSeenAt?:string;revokedAt?:string;grants:Grant[];audit:Audit[];services?:Service[];asks?:{ask:boolean;work:boolean};board?:{read:boolean;define:boolean};githubDrafts?:boolean;githubWrites?:{add:boolean;grants:Scope[]};conversations?:{add:boolean;search:boolean};links?:{read:boolean;save:boolean};
- reports?:{report:boolean;list:boolean};
+ reports?:{report:boolean;list:boolean};artifacts?:{save:boolean;read:boolean};
  /** Its wake command as the person typed it: the program's full path, then each argument. */
  wake?:string[];liveness?:'live'|'stale'|'offline';report?:Report;
  /** An Agent for a script: the file its program reads its endpoint and token from. */
@@ -34,6 +35,9 @@ const BOARD_TOGGLES=[['read','Can see your board','can now see your board','can 
 /** "Can see your tracked links" and "Can keep your tracked links" (core linkGrant, core/agent/GRANTS.md#tracked-links), the same way. */
 const LINK_TOGGLES=[['read','Can see your tracked links','can now see your tracked links','can no longer see your tracked links'],['save','Can keep your tracked links','can now keep your tracked links','can no longer keep your tracked links']] as const;
 const CONVERSATION_TOGGLES=[['add','Can save conversations','can now save conversations to your World','can no longer save conversations'],['search','Can search conversations','can now search conversations saved in your World','can no longer search conversations']] as const;
+/** "Can save to your Journal" and "Can read Agents' Journal artifacts" (core artifactGrant,
+ * core/agent/GRANTS.md#agent-artifacts), the same way. */
+const ARTIFACT_TOGGLES=[['save','Can save to your Journal','can now save to your Journal','can no longer save to your Journal'],['read','Can read Agents\' Journal artifacts','can now read what Agents saved to your Journal','can no longer read what other Agents saved to your Journal']] as const;
 /** "Can draft GitHub changes" (core githubDraftGrant, core/agent/GRANTS.md#github-drafts): shown once a GitHub App can
  * write what the person approves. */
 const DRAFT_TOGGLES=[['draft','Can draft GitHub changes','can now draft GitHub changes for you to approve','can no longer draft GitHub changes']] as const;
@@ -93,6 +97,7 @@ export function auditLine(entry:Audit):string {
  if(entry.target==='agents'&&/^(un)?grant-(report|list)$/.test(entry.action))return `${time(entry.at)} · ${entry.action.endsWith('list')?'Seeing other Agents':'Reporting its work'} · ${entry.action.startsWith('un')?'You turned it off':'You allowed it'}`;
  if(entry.target==='agents'&&entry.action==='report'&&entry.decision==='allowed')return `${time(entry.at)} · Reported its work`;
  if(entry.target==='board'&&/^(un)?grant-(read|define)$/.test(entry.action))return `${time(entry.at)} · ${entry.action.endsWith('define')?'Setting up your board':'Seeing your board'} · ${entry.action.startsWith('un')?'You turned it off':'You allowed it'}`;
+ if(entry.target==='agent-artifacts'&&/^(un)?grant-(save|read)$/.test(entry.action))return `${time(entry.at)} · ${entry.action.endsWith('read')?'Reading Agents\' Journal artifacts':'Saving to your Journal'} · ${entry.action.startsWith('un')?'You turned it off':'You allowed it'}`;
  // "Can draft GitHub changes", and the person's Approve or Dismiss on one of its drafts.
  if(entry.target==='github-drafts'&&(entry.action==='grant'||entry.action==='ungrant'))return `${time(entry.at)} · Drafting GitHub changes · ${entry.action==='ungrant'?'You turned it off':'You allowed it'}`;
  if(entry.target==='github-drafts'&&entry.action==='approve')return `${time(entry.at)} · You approved its GitHub draft · ${entry.decision==='allowed'?'Written':'Not written'}`;
@@ -186,7 +191,7 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
    }
    // "Can ask you" and "Can take work"; "Can see your board" and "Can set up your board": each gives or takes back one
    // Grant at once, naming only which.
-   const toggles=(granted:Record<string,boolean>|undefined,list:readonly (readonly [string,string,string,string])[],operation:'Asks'|'Board'|'GithubDrafts'|'Conversations'|'Links'|'Reports',data:'asks'|'board'|'githubDrafts'|'conversations'|'links'|'reports')=>{
+   const toggles=(granted:Record<string,boolean>|undefined,list:readonly (readonly [string,string,string,string])[],operation:'Asks'|'Board'|'GithubDrafts'|'Conversations'|'Links'|'Reports'|'Artifacts',data:'asks'|'board'|'githubDrafts'|'conversations'|'links'|'reports'|'artifacts')=>{
     if(agent.revokedAt||!granted)return;
     const group=el('div','companion-settings-access-services');
     for(const [kind,title,on,off] of list){
@@ -207,6 +212,7 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
    toggles(agent.conversations,CONVERSATION_TOGGLES,'Conversations','conversations');
    toggles(agent.links,LINK_TOGGLES,'Links','links');
    toggles(agent.reports,REPORT_TOGGLES,'Reports','reports');
+   toggles(agent.artifacts,ARTIFACT_TOGGLES,'Artifacts','artifacts');
    toggles(agent.githubDrafts===undefined?undefined:{draft:agent.githubDrafts},DRAFT_TOGGLES,'GithubDrafts','githubDrafts');
    // "Can update Issues in <repo> without asking": each with Remove, and Allow for another repository.
    if(!agent.revokedAt&&agent.githubWrites){

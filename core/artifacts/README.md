@@ -132,6 +132,8 @@ The **Journal** (owner decisions 2026-10-06: not an Applet; 2026-10-07: all the 
 
 Pages Fox made are listed from their own records in their `page` rows of the person's own Applets ([one table](../applets/MY-APPLETS.md#one-table); `madeArtifacts`), which the phone also syncs, rather than copied into `artifacts`: one whose moment lasts, or that was kept, opens as its Applet; one whose moment is over shows **Keep and open**, which keeps it (the moment Applet's own Keep it) and opens it. Deleting one stays in its Applet.
 
+Agents save artifacts here too, on their own outside any Fox turn (the result of a Scheduled routine, such as an hourly summary): each is an answer artifact whose place is the Agent's name and whose `agentId` the host stamps from its token, saved with the World tool `agent_artifacts` under the Agent's own Grants. A `key` replaces the same artifact, each Agent keeps its newest 48, and Agents read them again with `agent-artifacts/read`, which never returns Fox's own answers or Attention cards ([Agent artifacts](../agent/GRANTS.md#agent-artifacts); not to be confused with an Agent's live status, [Agent reports](../agent/GRANTS.md#agent-reports)).
+
 Fox finds earlier artifacts with `list_artifacts` (target `artifact/list`: every word of the query matches the title or text, newest first) and shows one again with `open_artifact` (`artifact/open`).
 
 At most 500 are kept per World; the oldest past that are forgotten. The practice world keeps none.

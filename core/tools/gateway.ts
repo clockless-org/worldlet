@@ -98,6 +98,10 @@ function buildWorldActions(sample:boolean):WorldAction[]{
  // other Agents" name.
  operations('agents','agent_reports');
  for(const action of actions.filter(a=>a.tool==='agent_reports'))action.parameters.required=action.action==='report'?['status']:[];
+ // Agent artifacts (core/agent/agent-artifacts.ts): each its own Grant target, which only "Can save to your
+ // Journal" and "Can read Agents' Journal artifacts" name.
+ operations('agent-artifacts','agent_artifacts');
+ for(const action of actions.filter(a=>a.tool==='agent_artifacts'))action.parameters.required=action.action==='save'?['title','body']:[];
  // GitHub drafts (core/agent/github-drafts.ts): each its own Grant target, which only "Can draft GitHub changes" names.
  operations('github-drafts','github_drafts');
  for(const action of actions.filter(a=>a.tool==='github_drafts'))action.parameters.required=action.action==='create'?['write','target']:[];

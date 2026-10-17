@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import {AGENT_AUDIT_KEEP,agentRevoked,channelDefaultGrants,currentServiceGrant,grantActive,readAgentIdentity,readGrant,askGrant,askGrantAuditEntry,boardGrant,boardGrantAuditEntry,conversationGrant,conversationGrantAuditEntry,linkGrant,linkGrantAuditEntry,githubDraftGrant,githubDraftGrantAuditEntry,githubWriteGrant,githubWriteGrantAuditEntry,githubWriteGrants,githubWriteGrantId,serviceGrantAuditEntry,serviceReadGrant,reportGrant,reportGrantAuditEntry} from '../../../../../core/agent/index.ts';
+import {AGENT_AUDIT_KEEP,agentRevoked,channelDefaultGrants,currentServiceGrant,grantActive,readAgentIdentity,readGrant,askGrant,askGrantAuditEntry,artifactGrant,artifactGrantAuditEntry,boardGrant,boardGrantAuditEntry,conversationGrant,conversationGrantAuditEntry,linkGrant,linkGrantAuditEntry,githubDraftGrant,githubDraftGrantAuditEntry,githubWriteGrant,githubWriteGrantAuditEntry,githubWriteGrants,githubWriteGrantId,serviceGrantAuditEntry,serviceReadGrant,reportGrant,reportGrantAuditEntry} from '../../../../../core/agent/index.ts';
 import {GITHUB_WRITE_LIMITS} from '../../../../../contracts/github-drafts.ts';
 import type {AgentAuditEntry,AgentIdentity,Grant} from '../../../../../contracts/agent-identity.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
@@ -115,6 +115,8 @@ export function createAgentAccess({root,vault,ledger,now=()=>new Date().toISOStr
    if(!found)return typeof repo==='string'&&load().identities.some(item=>item.id===agentId);
    return takeBack(agentId,found,at=>githubWriteGrantAuditEntry(agentId,found.github!,false,at));
   },
+  grantArtifacts(agentId,kind){return give(agentId,artifactGrant(agentId,kind,now()),at=>artifactGrantAuditEntry(agentId,kind,true,at));},
+  ungrantArtifacts(agentId,kind){return takeBack(agentId,artifactGrant(agentId,kind,now()),at=>artifactGrantAuditEntry(agentId,kind,false,at));},
   onRevoke(listener){listeners.push(listener);}
  };
  // A Grant the person gives or takes back in Settings (Core builds it from a name only: a Service, or ask or work), each
