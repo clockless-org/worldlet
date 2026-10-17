@@ -46,7 +46,7 @@ for(const part of ['loginctl enable-linger','nohup "$node" "$program"','qrencode
 // agent.md (served at https://worldlet.ai/agent.md) and the Worldlet skill give an Agent the same commands, and those
 // commands exist.
 const agentPage=readFileSync('platform/install/agent.md','utf8'),skillText=readFileSync('harness/skills/worldlet/SKILL.md','utf8');
-const shared=['curl -fsSL https://worldlet.ai/install.sh | sh -s -- --agent <name>','& ([scriptblock]::Create((irm https://worldlet.ai/install.ps1))) -Agent <name>','worldlet setup --agent <name>','worldlet register --agent <name>','worldlet link --qr','~/.local/bin/worldlet','share_world_link','call_world_tool','ssh -L','https://worldlet.ai/download/','`openclaw`','`hermes`','`claude-code`','`codex`'];
+const shared=['curl -fsSL https://worldlet.ai/install.sh | sh -s -- --agent <name>','& ([scriptblock]::Create((irm https://worldlet.ai/install.ps1))) -Agent <name>','worldlet setup --agent <name>','worldlet register --agent <name>','worldlet link --qr','~/.local/bin/worldlet','share_world_link','call_world_tool','ssh -L','https://worldlet.ai/download/','`openclaw`','`hermes`','`claude-code`','`codex`','`pi`'];
 for(const text of shared){assert.ok(agentPage.includes(text),'agent.md says '+text);assert.ok(skillText.includes(text),'SKILL.md says '+text);}
 assert.ok(skillText.includes('https://worldlet.ai/agent.md'),'the skill points at agent.md');
 assert.match(sh,/--agent\) AGENT=/);assert.match(ps,/\[string\]\$Agent/);

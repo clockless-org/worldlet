@@ -37,7 +37,7 @@ Worldlet provides no model of its own. It talks through your Agent and borrows i
 | --- | --- | --- |
 | CPU | Model | Your model provider (your own sign-in or API key) |
 | Kernel | Harness: Hermes Agent, OpenClaw, Claude Code, Codex, pi | Your choice, replaceable |
-| Drivers and keychain | MCP servers, connectors and their tokens | Your Harness; Worldlet borrows them |
+| Drivers and keychain | MCP servers, connectors and their tokens | Your Harness; Worldlet borrows them, and keeps the services you connect in Settings › Connectors on your computer |
 | Terminal | Chat apps and command lines | Where Agents live today |
 | Graphical system | Worldlet: World, Things, Fox, Attention Center | This project |
 | System API | World tools, served to the Agent over the `worldlet` MCP server | This project |
@@ -127,6 +127,9 @@ Mail, Calendar, Notes, GitHub, Notion, Linear and the other Applets that connect
 - **[Phone companions](ios/README.md)**: the Attention Center and Fox on iPhone and [Android](android/README.md), paired by QR code through an end-to-end encrypted relay.
 - **[Journal](ui/artifacts/CARD-SYSTEM.md)**: the cards Fox makes are kept, day by day.
 - **[Scheduled](core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**: ask once ("every morning at 8, tell me the weather and my first meeting") and Fox keeps doing it; your Agent's scheduled jobs come along. Two come with every install, on unless you turn them off: [Today’s prep at 7 AM and Wrap up today at 6 PM](core/artifacts/README.md#the-days-plan-and-summary), each one Attention card.
+- **[Connectors](core/applets/INTEGRATIONS.md#settings--connectors)**: Settings › Connectors connects Google, Notion, Linear, PostHog, Cloudflare and more with their own sign-in, and GitHub or Search Console with a key that stays on this computer. Fox and its Agent can read a connected service, other Agents only if you choose them, and any change asks you first.
+- **[Board](core/board/README.md)**: a Thing for the numbers you track, such as a north-star number, a funnel or a release, read from GitHub, PostHog, Cloudflare, a JSON endpoint or your Agents' reports.
+- **[Cloud Agents](core/agent/REMOTE-MCP.md)**: turn on Remote access in Settings › Agent › Access and a ChatGPT, Claude or Cursor connector, or an Agent in the cloud, uses your World through `mcp.worldlet.ai`; you allow each connection on this computer.
 - **[Your Agent on another computer](core/agent/PORTABILITY.md#an-agent-on-another-computer)**: pair with the always-on machine where your Agent runs, and talk to it from this World.
 - **[Local first](docs/WORLD-STORAGE.md)**: your records stay in `world.sqlite` on your computer.
 
