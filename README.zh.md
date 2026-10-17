@@ -37,7 +37,7 @@ Worldlet 不提供自己的模型。它通过你的 Agent 对话，借用它的�
 | --- | --- | --- |
 | CPU | 模型 | 你的模型提供方（你自己的登录或 API key） |
 | 内核 | Harness：Hermes Agent、OpenClaw、Claude Code、Codex、pi | 你选，可以替换 |
-| 驱动和钥匙串 | MCP 服务器、连接器和它们的令牌 | 你的 Harness；Worldlet 借用 |
+| 驱动和钥匙串 | MCP 服务器、连接器和它们的令牌 | 你的 Harness；Worldlet 借用，你在 设置 › Connectors 里连接的服务则留在你的电脑上 |
 | 终端 | 聊天 App 和命令行 | Agent 现在待的地方 |
 | 图形界面 | Worldlet：World、Things、Fox、Attention Center | 本项目 |
 | 系统 API | World 工具，通过 `worldlet` MCP 服务器提供给 Agent | 本项目 |
@@ -127,6 +127,9 @@ Fox 是你用文字或语音对话的伙伴。它通过你的 Agent 干活，把
 - **[手机伴侣](ios/README.md)**：iPhone 和 [Android](android/README.md) 上的 Attention Center 和 Fox，扫码配对，经端到端加密中继连到电脑。
 - **[Journal](ui/artifacts/CARD-SYSTEM.md)**：Fox 做的卡片按天留存。
 - **[Scheduled（定时任务）](core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**：说一次（“每天早上 8 点告诉我天气和第一个会”），Fox 就一直做；你的 Agent 原有的定时任务也一起带过来。安装后默认有两个，可以关掉：[早上 7 点的“今日准备”和傍晚 6 点的“今日收尾”](core/artifacts/README.md#the-days-plan-and-summary)，各是一张 Attention 卡片。
+- **[Connectors（连接器）](core/applets/INTEGRATIONS.md#settings--connectors)**：在 设置 › Connectors 里，用各服务自己的登录连接 Google、Notion、Linear、PostHog、Cloudflare 等，GitHub 和 Search Console 则用留在这台电脑上的密钥连接。Fox 和它用的 Agent 能读取已连接的服务，其他 Agent 只有你选了才能读，任何改动都会先问你。
+- **[Board（看板）](core/board/README.md)**：一个 Thing，放你关注的数字，比如北极星指标、漏斗或一次发布，数据来自 GitHub、PostHog、Cloudflare、JSON 接口或你的 Agent 的汇报。
+- **[云端 Agent](core/agent/REMOTE-MCP.md)**：在 设置 › Agent › Access 里打开 Remote access，ChatGPT、Claude 或 Cursor 的连接器，或云端的 Agent，就能通过 `mcp.worldlet.ai` 使用你的 World；每个连接都要你在这台电脑上允许。
 - **[另一台电脑上的 Agent](core/agent/PORTABILITY.md#an-agent-on-another-computer)**：和一直开着、跑着你 Agent 的那台电脑配对，在这个 World 里和它对话。
 - **[本地优先](docs/WORLD-STORAGE.md)**：你的记录留在你电脑上的 `world.sqlite` 里。
 
@@ -165,6 +168,8 @@ npm run package        # 为当前系统打包桌面 App（不签名）
 | `resources/` | 世界、风格、美术、字体和媒体 |
 | `ios/`、`android/` | 手机伴侣 |
 | `scripts/`、`docs/` | 构建、校验和贡献指南 |
+
+Worldlet 只有一个主题：Village（村庄）。主题就是静态图片、声音和 JSON（[主题契约](resources/themes/CONTRACT.md)），Worldlet 据此画出会动的 World。没有主题选择器。
 
 ## 文档
 
