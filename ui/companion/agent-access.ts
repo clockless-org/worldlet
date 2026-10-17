@@ -7,7 +7,8 @@
  * (core/agent/GRANTS.md#conversation-archive), "Can see your tracked links" and "Can keep your tracked links"
  * (core/agent/GRANTS.md#tracked-links), and "Can report its work" and "Can see other Agents"
  * (core/agent/GRANTS.md#agent-reports), and "Can save to your Journal" and "Can read Agents' Journal artifacts"
- * (core/agent/GRANTS.md#agent-artifacts), the same way; once a GitHub App is connected, "Can update Issues in <repo>
+ * (core/agent/GRANTS.md#agent-artifacts), and "Can draft <Service> changes" for PostHog and Notion while connected
+ * (core/agent/GRANTS.md#posthog-and-notion-drafts), the same way; once a GitHub App is connected, "Can update Issues in <repo>
  * without asking" (core/agent/GRANTS.md#standing-github-writes), one per repository with Remove; what each Agent last
  * reported it is doing; and "Add an Agent for a script" (core/agent/GRANTS.md#agents-for-scripts), which sends only the
  * name the person typed; "Give new work to", the Agent that work posted for no Agent in particular goes to, and each
@@ -21,7 +22,7 @@ type Grant={id:string;targets:string[];access:'read'|'write';duration:'standing'
 type Audit={at:string;target:string;action:string;decision:'allowed'|'denied'|'asked';reason?:string};
 type Service={provider:string;title:string;granted:boolean};
 type Agent={id:string;name:string;harness:string;kind:'local'|'remote';createdAt:string;lastSeenAt?:string;revokedAt?:string;grants:Grant[];audit:Audit[];services?:Service[];asks?:{ask:boolean;work:boolean};board?:{read:boolean;define:boolean};githubDrafts?:boolean;githubWrites?:{add:boolean;grants:Scope[]};conversations?:{add:boolean;search:boolean};links?:{read:boolean;save:boolean};
- reports?:{report:boolean;list:boolean};artifacts?:{save:boolean;read:boolean};
+ reports?:{report:boolean;list:boolean};artifacts?:{save:boolean;read:boolean};serviceDrafts?:Service[];
  /** Its wake command as the person typed it: the program's full path, then each argument. */
  wake?:string[];liveness?:'live'|'stale'|'offline';report?:Report;
  /** An Agent for a script: the file its program reads its endpoint and token from. */
@@ -106,6 +107,11 @@ export function auditLine(entry:Audit):string {
  if(entry.target==='github-writes'&&(entry.action==='grant'||entry.action==='ungrant'))return `${time(entry.at)} · Updating GitHub Issues without asking · ${entry.action==='ungrant'?'You removed it':'You allowed it'}`;
  if(entry.target==='github-writes'&&entry.action==='run')return `${time(entry.at)} · Change on GitHub without asking · ${DECISION[entry.decision]??entry.decision}`;
  if(entry.target==='github-writes'&&entry.action==='write')return `${time(entry.at)} · Changed GitHub without asking · ${entry.decision==='allowed'?'Written':'Not written'}`;
+ // "Can draft PostHog changes" and "Can draft Notion changes", the same way.
+ const drafted=/^(posthog|notion)-drafts$/.exec(entry.target),service=drafted?.[1]==='posthog'?'PostHog':'Notion';
+ if(drafted&&(entry.action==='grant'||entry.action==='ungrant'))return `${time(entry.at)} · Drafting ${service} changes · ${entry.action==='ungrant'?'You turned it off':'You allowed it'}`;
+ if(drafted&&entry.action==='approve')return `${time(entry.at)} · You approved its ${service} draft · ${entry.decision==='allowed'?'Written':'Not written'}`;
+ if(drafted&&entry.action==='dismiss')return `${time(entry.at)} · You dismissed its ${service} draft`;
  if(entry.action==='grant'||entry.action==='ungrant')return `${time(entry.at)} · ${entry.target} · ${entry.action==='grant'?'You let it read':'You stopped it reading'}`;
  return `${time(entry.at)} · ${entry.target} ${entry.action} · ${DECISION[entry.decision]??entry.decision}`;
 }
@@ -191,7 +197,7 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
    }
    // "Can ask you" and "Can take work"; "Can see your board" and "Can set up your board": each gives or takes back one
    // Grant at once, naming only which.
-   const toggles=(granted:Record<string,boolean>|undefined,list:readonly (readonly [string,string,string,string])[],operation:'Asks'|'Board'|'GithubDrafts'|'Conversations'|'Links'|'Reports'|'Artifacts',data:'asks'|'board'|'githubDrafts'|'conversations'|'links'|'reports'|'artifacts')=>{
+   const toggles=(granted:Record<string,boolean>|undefined,list:readonly (readonly [string,string,string,string])[],operation:'Asks'|'Board'|'GithubDrafts'|'Conversations'|'Links'|'Reports'|'Artifacts'|'ServiceDrafts',data:'asks'|'board'|'githubDrafts'|'conversations'|'links'|'reports'|'artifacts'|'serviceDrafts')=>{
     if(agent.revokedAt||!granted)return;
     const group=el('div','companion-settings-access-services');
     for(const [kind,title,on,off] of list){
@@ -199,7 +205,7 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
      box.type='checkbox';box.checked=!!granted[kind];box.dataset[data]=kind;
      box.onchange=async()=>{
       const allowed=box.checked;box.disabled=true;said.textContent='';
-      try{await call('agentAccess',{operation:(allowed?'grant':'ungrant')+operation,id:agent.id,...operation==='GithubDrafts'?{}:{kind}});await draw();said.textContent=`${agent.name} ${allowed?on:off}.`;}
+      try{await call('agentAccess',{operation:(allowed?'grant':'ungrant')+operation,id:agent.id,...operation==='GithubDrafts'?{}:operation==='ServiceDrafts'?{provider:kind}:{kind}});await draw();said.textContent=`${agent.name} ${allowed?on:off}.`;}
       catch(e){box.checked=!allowed;box.disabled=false;said.textContent='Could not change that: '+((e as Error).message||'try again.');}
      };
      label.append(box,document.createTextNode(title));
@@ -214,6 +220,9 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
    toggles(agent.reports,REPORT_TOGGLES,'Reports','reports');
    toggles(agent.artifacts,ARTIFACT_TOGGLES,'Artifacts','artifacts');
    toggles(agent.githubDrafts===undefined?undefined:{draft:agent.githubDrafts},DRAFT_TOGGLES,'GithubDrafts','githubDrafts');
+   // "Can draft PostHog changes", "Can draft Notion changes": one for each such Service while it is connected.
+   if(agent.serviceDrafts?.length)toggles(Object.fromEntries(agent.serviceDrafts.map(s=>[s.provider,s.granted])),
+    agent.serviceDrafts.map(s=>[s.provider,`Can draft ${s.title} changes`,`can now draft ${s.title} changes for you to approve`,`can no longer draft ${s.title} changes`] as const),'ServiceDrafts','serviceDrafts');
    // "Can update Issues in <repo> without asking": each with Remove, and Allow for another repository.
    if(!agent.revokedAt&&agent.githubWrites){
     const group=el('div','companion-settings-access-writes');group.dataset.githubWrites=agent.id;

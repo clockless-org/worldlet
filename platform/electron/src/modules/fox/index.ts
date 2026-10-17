@@ -270,6 +270,8 @@ export function installFox(host:Host){
   // Agents' Journal artifacts are saved and read by Agents the person allowed in Settings, under their own Grants
   // (agent-runtime/agent-artifacts.ts), never by a Fox turn: Fox shows its own with show_artifact.
   if(name==='agent_artifacts')return {error:'Saving to the Journal is for Agents the person allowed in Settings › Agent › Access. Show your own with show_artifact, and find earlier ones with list_artifacts.'};
+  // PostHog and Notion drafts likewise (agent-runtime/service-drafts.ts): a Fox turn never drafts a write there.
+  if(name==='service_drafts')return {error:'PostHog and Notion drafts are for Agents the person allowed in Settings › Agent › Access. Tell the person here what you would change instead.'};
   // The World's browser link (`world/link`) runs here, on the host, so it works with no World page (a login launch,
   // Run in background); the guarded-write rule has already admitted it under the turn's trust.
   if(name==='share_world_link'){

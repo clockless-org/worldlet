@@ -75,8 +75,8 @@ export interface AgentAsk {
   * it with `asks/read` and may claim it at once; another may claim it only once it has waited
   * AGENT_ASK_LIMITS.forMinutes unclaimed, or after a lease on it ran out. */
  for?:string;
- /** GitHub drafts this ask carries (core/agent/GRANTS.md#github-drafts), each the posting Agent's own and pending when
-  * posted. Answering the ask's `Approve` choice on this computer approves them all, each read again first and refused
+ /** GitHub, PostHog and Notion drafts this ask carries (core/agent/GRANTS.md#agent-asks), each the posting Agent's
+  * own and pending when posted. Answering the ask's `Approve` choice on this computer approves them all, each read again first and refused
   * when its target changed; any other answer leaves them unrun. */
  draftIds?:string[];
  /** Screenshots and files it carries, as posted; they stay with the ask however it settles. */
@@ -89,7 +89,7 @@ export interface AgentAsk {
 
 export const AGENT_ASK_LIMITS=Object.freeze({
  title:200,body:4000,choices:4,choice:60,link:2000,tags:8,tag:40,note:2000,links:8,
- /** GitHub drafts one ask may carry. */
+ /** Drafts one ask may carry. */
  drafts:10,
  /** Open or claimed asks one Agent may have posted at once. */
  openPerAgent:20,
@@ -123,7 +123,7 @@ export interface AgentAskPost {kind?:AgentAskKind;title:string;body?:string;choi
  for?:string;
  /** Checked: the name made safe, the size counted from the base64. */
  attachments?:(AgentAskAttachmentInput&{size:number})[]}
-/** The choice that approves an ask's GitHub drafts. An ask that carries drafts always offers it; with no choices of its
+/** The choice that approves an ask's drafts. An ask that carries drafts always offers it; with no choices of its
  * own it offers `Approve` and `Not now`. */
 export const ASK_APPROVE_CHOICE='Approve';
 export const ASK_DRAFT_CHOICES:readonly string[]=Object.freeze([ASK_APPROVE_CHOICE,'Not now']);
@@ -135,7 +135,7 @@ export interface AgentAskAttachmentRead {id:string;attachment:string;offset?:num
 export interface AgentAskResolve {id:string;note:string;links?:string[];expectedRevision:number}
 /** The person's answer on the Attention card: a choice and an optional note (`answered`), or Done or Dismiss. */
 export interface AgentAskReply {id:string;outcome:'answered'|'done'|'skipped';choice?:string;note?:string}
-/** What became of one of an ask's GitHub drafts, as `asks/read` shows it. */
+/** What became of one of an ask's drafts, as `asks/read` shows it. */
 export interface AgentAskDraft {id:string;status:string;resultUrl?:string;reason?:string}
 
 /** Orders and waking an Agent (core/agent/GRANTS.md#orders-and-waking-an-agent): the World's own setting, kept with the

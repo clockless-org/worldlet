@@ -18,9 +18,9 @@ export const ASK_REASONS=Object.freeze({
  stale:'This ask changed since it was read. Read it again before resolving it.',
  settled:'This ask is already settled.',
  choice:'Choose one of the ask\'s own choices.',
- approve:'An ask that carries GitHub drafts must offer Approve as one of its choices.',
- drafts:'Each GitHub draft an ask carries must be this Agent\'s own and still waiting.',
- local:'Approving GitHub drafts writes to GitHub: approve this ask in Worldlet on the computer itself.',
+ approve:'An ask that carries drafts must offer Approve as one of its choices.',
+ drafts:'Each draft an ask carries must be this Agent\'s own and still waiting.',
+ local:'Approving drafts writes to GitHub, PostHog or Notion: approve this ask in Worldlet on the computer itself.',
  attachment:'Each attachment needs a name, a type and its bytes in base64 (data).',
  attachmentType:'This kind of file cannot be attached. Pictures: PNG, JPEG, WebP or GIF. Other files: plain text, CSV, JSON, ZIP or gzip.',
  attachmentCount:`An ask may carry at most ${AGENT_ASK_LIMITS.images} pictures and ${AGENT_ASK_LIMITS.files} other files.`,
@@ -33,7 +33,7 @@ export const ASK_REASONS=Object.freeze({
 
 /** An ask ID: host-made, file-name safe. */
 export const ASK_ID_PATTERN=/^[a-z0-9][a-z0-9-]{7,63}$/;
-/** A GitHub draft's ID (core/agent/github-drafts.ts GITHUB_DRAFT_ID_PATTERN). */
+/** A GitHub, PostHog or Notion draft's ID (GITHUB_DRAFT_ID_PATTERN, SERVICE_DRAFT_ID_PATTERN: the same shape). */
 const DRAFT_ID=/^[a-z0-9][a-z0-9-]{7,63}$/;
 const LEASE_MS=AGENT_ASK_LIMITS.leaseMinutes*60_000,FOR_MS=AGENT_ASK_LIMITS.forMinutes*60_000;
 // C0 controls (except tab and line breaks, allowed in multi-line text only), DEL, C1 controls, and the bidirectional
@@ -146,7 +146,7 @@ export function readAskPost(input:unknown):AgentAskPost {
  const choices=list(value.choices,AGENT_ASK_LIMITS.choices,entry=>text(entry,AGENT_ASK_LIMITS.choice,{required:true}));if(choices.length)post.choices=choices;
  if(value.link!==undefined)post.link=askLink(value.link);
  const tags=list(value.tags,AGENT_ASK_LIMITS.tags,entry=>text(entry,AGENT_ASK_LIMITS.tag,{required:true}).toLowerCase());if(tags.length)post.tags=tags;
- // GitHub drafts it carries: Approve on the ask approves them, so it always offers Approve.
+ // Drafts it carries (GitHub, PostHog, Notion): Approve on the ask approves them, so it always offers Approve.
  const drafts=list(value.draftIds,AGENT_ASK_LIMITS.drafts,entry=>typeof entry==='string'&&DRAFT_ID.test(entry)?entry:fail(ASK_REASONS.invalid));
  if(drafts.length){
   if(post.kind!=='ask')fail(ASK_REASONS.invalid);
@@ -250,7 +250,7 @@ export function resolveAsk(ask:AgentAsk|null|undefined,agentId:string,input:unkn
  return {...ask,status:'done',resolution:{note:resolve.note,links:resolve.links??[],at:now},revision:ask.revision+1,updatedAt:now};
 }
 
-/** Whether this answer approves the ask's GitHub drafts: its Approve choice, on an ask that carries any. */
+/** Whether this answer approves the ask's drafts: its Approve choice, on an ask that carries any. */
 export const askApprovesDrafts=(ask:AgentAsk,reply:{outcome:string;choice?:string})=>!!ask.draftIds?.length&&reply.outcome==='answered'&&reply.choice===ASK_APPROVE_CHOICE;
 /** The person's answer on the ask's Attention card: one of its choices and an optional note, or Done, or Dismiss.
  * Only an ask still open (or claimed) takes one. */
@@ -303,8 +303,9 @@ const ITEM_STATUS:Record<AgentAskStatus,'open'|'done'|'dismissed'>={open:'open',
 /** The ask as an Attention item (provider `agents`), written by the host with no model: a task when it offers choices,
  * otherwise an update. It carries the posting Agent's ID, so the card names which Agent asks, and the ask's own ID,
  * revision and choices, so the card answers this ask and no other. `agentName` is the name the person knows it by, and
- * `forName` the name of the Agent the work is for. */
-export function askAttentionItem(ask:AgentAsk,agentName:string,forName?:string):WorldItem {
+ * `forName` the name of the Agent the work is for. `services`: the Services the drafts it carries write to (`github`,
+ * `posthog`, `notion`), for the card's line. */
+export function askAttentionItem(ask:AgentAsk,agentName:string,forName?:string,services:readonly string[]=[]):WorldItem {
  let name=ask.agentId;try{name=text(agentName,80)||ask.agentId;}catch{}
  let target=ask.for??'';try{target=ask.for?text(forName,80)||ask.for:'';}catch{}
  const kind=ask.choices.length?'task':'update';
@@ -313,7 +314,7 @@ export function askAttentionItem(ask:AgentAsk,agentName:string,forName?:string):
  return {id:askItemId(ask.id),provider:AGENT_ASK_PROVIDER,kind,status:ITEM_STATUS[ask.status],title:ask.title,context,reason,summary:context,attentionContentVersion:1,
   ...kind==='task'?{attentionReason:[...(name+' asks you to choose.')].slice(0,600).join('')}:{},
   sources:[{provider:AGENT_ASK_PROVIDER,id:ask.id,quote:[...ask.title].slice(0,1000).join(''),...ask.link?{url:ask.link}:{}}],
-  agentId:ask.agentId,agentName:name,askId:ask.id,askKind:ask.kind,askRevision:ask.revision,askStatus:ask.status,askChoices:[...ask.choices],...ask.draftIds?.length?{askDraftIds:[...ask.draftIds]}:{},
+  agentId:ask.agentId,agentName:name,askId:ask.id,askKind:ask.kind,askRevision:ask.revision,askStatus:ask.status,askChoices:[...ask.choices],...ask.draftIds?.length?{askDraftIds:[...ask.draftIds],...services.length?{askDraftServices:[...new Set(services)]}:{}}:{},
   ...ask.for?{askFor:ask.for}:{},
   // What it carries, so the card shows each picture (read from the host) and names each file.
   ...ask.attachments?.length?{askAttachments:ask.attachments.map(({id,name,type,size})=>({id,name,type,size}))}:{},

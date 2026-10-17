@@ -55,6 +55,9 @@ import {alertAt,upcomingCalendarEvents} from '../../core/applets/index.ts';
 import type {World,WorldPage} from '../../contracts/world.ts';
 import {createAppletPanel,BOARD_READ_EVENT} from '../applets/index.ts';
 import {boardNorthStar,formatBoardNumber} from '../../core/board/index.ts';
+import {SERVICE_DRAFT_TITLES} from '../../contracts/service-drafts.ts';
+/** The Services a PostHog or Notion draft writes to, by provider, as the card names them. */
+const DRAFT_SERVICES:Record<string,string>=SERVICE_DRAFT_TITLES;
 import {createAppDevice} from './app-device.ts';
 import {createCodexApplet} from '../applets/index.ts';
 import {appLogoSource} from '../applets/index.ts';
@@ -370,10 +373,16 @@ export function mountNotionWorld(data: World, native: any) {
   $('notionWorldMeta').textContent=`${data.coverage.pages}  pages · ${data.coverage.rows}  database records · Stored locally`;
   function notify(text: string){$('notionStatus').hidden=true;voice?.setStatus(text);}
   /** What became of an ask's GitHub drafts once the person approved it, in one line. */
-  function askDraftsOutcome(drafts:{status:string;reason?:string}[]){
-    const written=drafts.filter(d=>d.status==='written').length,not=drafts.filter(d=>d.status!=='written');
-    if(!not.length)return written===1?'Written on GitHub.':`All ${written} written on GitHub.`;
-    return `${written} written on GitHub; ${not.length} not written. ${not[0].reason||''}`.trim();
+  function askDraftsOutcome(drafts:{status:string;reason?:string}[],service:string){
+    const written=drafts.filter(d=>d.status==='written').length,not=drafts.filter(d=>d.status!=='written'),where=service?(service==='GitHub'?' on GitHub':' in '+service):'';
+    if(!not.length)return written===1?`Written${where}.`:`All ${written} written${where}.`;
+    return `${written} written${where}; ${not.length} not written. ${not[0].reason||''}`.trim();
+  }
+  /** The one Service an ask's drafts write to ("GitHub", "PostHog", "Notion"), or '' when they write to several. An ask
+   * saved before it named them carried only GitHub drafts. */
+  function askDraftsService(asked:{services?:string[]}|null|undefined){
+    const names=[...new Set((asked?.services?.length?asked.services:['github']).map(s=>s==='github'?'GitHub':DRAFT_SERVICES[s]||''))];
+    return names.length===1?names[0]:'';
   }
   function dialog(title: string,{kind='detail'}: {kind?: string}={}){$('notionDialog').dataset.kind=kind;delete $('notionDialog').dataset.template;const body=$('notionDialogBody');body.classList.remove('ui-gallery','ui-large');delete body.dataset.theme;body.style.removeProperty('--ui-text-body');body.style.removeProperty('--ui-text-label');body.replaceChildren(Object.assign(element('h2','',title),{id:'notionDialogTitle'}));if(native){if(!$('notionDialog').open)$('notionDialog').show();}else $('notionDialog').showModal();return body}
   let worldPointerStart:{x:number,y:number,panelOpen:boolean,handled?:boolean,typing:''|'world'|'page'}|null=null;
@@ -942,14 +951,15 @@ export function mountNotionWorld(data: World, native: any) {
     for(const id of memberIds){
       if(data.sample){settleSampleItem(id,status);const saved=readSnoozes();if(snoozedUntil)saved[id]=snoozedUntil;else delete saved[id];native?.storage?.setItem('itemSnoozes',JSON.stringify(saved));}
       // An Agent's ask (core/agent/GRANTS.md#agent-asks) is answered on the host, which settles its item with it.
-      // A GitHub draft the host already approved or dismissed (core/agent/GRANTS.md#github-drafts): its item is settled.
+      // A GitHub, PostHog or Notion draft the host already approved or dismissed (core/agent/GRANTS.md#github-drafts): its
+      // item is settled.
       else if(hosted){}
       else if(ask){
-        // Approve on an ask that carries GitHub drafts approves them on the host first (core/agent/GRANTS.md#github-drafts).
+        // Approve on an ask that carries drafts approves them on the host first (core/agent/GRANTS.md#agent-asks).
         const asked=itemPage(id)?.worldItemAsk,askId=asked?.id,drafts=!!asked?.drafts&&ask.outcome==='answered'&&ask.choice==='Approve';
         const result=askId&&native?.agentAsk?await native.agentAsk(askId,ask.outcome,ask.choice,ask.note,drafts):null;
         if(!result?.ok){nativeHUD?.sync();throw Error(result?.error||'Could not answer this.');}
-        if(drafts&&Array.isArray(result.drafts))said=askDraftsOutcome(result.drafts);
+        if(drafts&&Array.isArray(result.drafts))said=askDraftsOutcome(result.drafts,askDraftsService(asked));
       }
       else {const result=await native.itemStatus(id,status,snoozedUntil,by);if(!result?.ok){nativeHUD?.sync();throw Error(result?.error||'Could not save this item.');}}
       for(const page of pages.values())if(page.worldItemId===id)settleItemPage(page,status,snoozedUntil);
@@ -1199,28 +1209,34 @@ export function mountNotionWorld(data: World, native: any) {
    if(asked){
     const answer=(outcome,choice?,note?)=>settleAttention(page,outcome==='skipped'?'dismissed':'done',null,{advance:true,ask:{outcome,...choice?{choice}:{},...note?{note}:{}}}).then(said=>{if(said)notify(said);});
     attentionPreview.setActions([{key:'done',label:'Done',primary:true,run:()=>answer('done').catch(e=>notify(e.message))},{key:'dismiss',label:'Dismiss',run:()=>answer('skipped').catch(e=>notify(e.message))}]);
-    attentionPreview.setReview({text:(asked.agent||'An Agent')+' asks'+(asked.drafts?` · Approve writes ${asked.drafts===1?'its GitHub draft':`its ${asked.drafts} GitHub drafts`}`:''),note:true,choices:asked.choices.length?asked.choices.map((choice,index)=>({key:'choice-'+index,label:choice,run:(note?:string)=>answer('answered',choice,note).catch(e=>notify(e.message))}))
+    const carried=askDraftsService(asked);
+    attentionPreview.setReview({text:(asked.agent||'An Agent')+' asks'+(asked.drafts?` · Approve writes ${asked.drafts===1?`its ${carried?carried+' ':''}draft`:`its ${asked.drafts} ${carried?carried+' ':''}drafts`}`:''),note:true,choices:asked.choices.length?asked.choices.map((choice,index)=>({key:'choice-'+index,label:choice,run:(note?:string)=>answer('answered',choice,note).catch(e=>notify(e.message))}))
      :[{key:'reply',label:'Reply',run:(note?:string)=>note?answer('answered',undefined,note).catch(e=>notify(e.message)):Promise.resolve(notify('Write a note first.'))}]});
     showDraftLine(page);voice?.setAttentionActions?.([]);
     return;
    }
-   // An Agent's GitHub draft: Approve writes it (the host reads the target again first and refuses if it changed),
-   // Dismiss drops it. The card shows the Agent, the repository, exactly what will be written and a link to the target.
-   const drafted=page.worldItemGithubDraft&&page.worldItemGithubDraft.status==='pending'&&!data.sample&&native?.githubDraft?page.worldItemGithubDraft:null;
+   // An Agent's GitHub, PostHog or Notion draft: Approve writes it (the host reads the target again first and refuses if
+   // it changed), Dismiss drops it. The card shows the Agent, where it writes, exactly what will be written and a link to
+   // the target.
+   const github=page.worldItemGithubDraft?.status==='pending'&&native?.githubDraft?page.worldItemGithubDraft:null;
+   const service=page.worldItemServiceDraft?.status==='pending'&&native?.serviceDraft?page.worldItemServiceDraft:null;
+   const serviceTitle=DRAFT_SERVICES[service?.provider]||'';
+   const drafted=data.sample?null:github?{...github,where:github.repo,open:'Open on GitHub',written:'Written on GitHub.',run:native.githubDraft}
+    :service&&serviceTitle?{...service,open:'Open in '+serviceTitle,written:`Written in ${serviceTitle}.`,run:native.serviceDraft}:null;
    if(drafted){
     let busy=false;
     const act=(operation:'approve'|'dismiss')=>async()=>{
      if(busy)return;busy=true;
      try{
-      const result=await native.githubDraft(operation,drafted.id);
+      const result=await drafted.run(operation,drafted.id);
       if(!result?.ok)throw Error(result?.error||'Could not do that.');
       await settleAttention(page,result.status==='written'?'done':'dismissed',null,{advance:true,hosted:true});
       // Said once the card has moved on, so the next card's line does not hide it.
-      notify(result.status==='written'?result.reason||'Written on GitHub.':result.status==='dismissed'?'Dismissed. Nothing was written.':result.reason||'Nothing was written.');
+      notify(result.status==='written'?result.reason||drafted.written:result.status==='dismissed'?'Dismissed. Nothing was written.':result.reason||'Nothing was written.');
      }catch(e){notify(e.message);}finally{busy=false;}
     };
     attentionPreview.setActions([{key:'approve',label:'Approve',primary:true,run:act('approve')},{key:'dismiss',label:'Dismiss',run:act('dismiss')}]);
-    attentionPreview.setReview({text:`${drafted.agent||'An Agent'} drafted this for ${drafted.repo}`,quote:drafted.text,...drafted.url?{link:{label:'Open on GitHub',url:drafted.url}}:{},choices:[]});
+    attentionPreview.setReview({text:`${drafted.agent||'An Agent'} drafted this for ${drafted.where}`,quote:drafted.text,...drafted.url?{link:{label:drafted.open,url:drafted.url}}:{},choices:[]});
     showDraftLine(page);voice?.setAttentionActions?.([]);
     return;
    }

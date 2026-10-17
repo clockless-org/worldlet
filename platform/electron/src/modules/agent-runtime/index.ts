@@ -23,6 +23,9 @@ import {createRemoteMcpHost,type RemoteMcpHost} from './remote-mcp.ts';
 import {createConversationArchive,type ConversationArchive} from './conversations.ts';
 import {createTrackedLinks,type TrackedLinks} from './tracked-links.ts';
 import {createAgentArtifacts,type AgentArtifacts} from './agent-artifacts.ts';
+import {createServiceDrafts,type ServiceDrafts} from './service-drafts.ts';
+import type {AskDrafts} from './agent-asks.ts';
+import type {PosthogSettings} from '../../../../../core/accounts/index.ts';
 import {moveFoxProfile} from './fox-move.ts';
 import {HERMES_WINDOW_DONE,endHermesInstall,hermesInstallWindow,hermesSessionModels,hermesStarts,installHermes,workingHermesAgent,installedHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
 import {UPDATED,backgroundSignIn,claudeCodeSignedIn,openSignIn} from './provider-sign-in.ts';
@@ -36,11 +39,12 @@ import {harnessConnections} from './harness-connections.ts';
 import {harnessScheduleControls} from './harness-schedule-controls.ts';
 import {harnessSkills} from './harness-skills.ts';
 import {harnessMemory} from './harness-memory.ts';
-import {AGENT_VERSIONS,agentRevoked,serviceGranted,askGranted,ASK_GRANT_KINDS,type AskGrantKind,boardGranted,BOARD_GRANT_KINDS,type BoardGrantKind,artifactGranted,ARTIFACT_GRANT_KINDS,type ArtifactGrantKind,githubDraftGranted,githubWriteGrants,conversationGranted,CONVERSATION_GRANT_KINDS,type ConversationGrantKind,linkGranted,LINK_GRANT_KINDS,type LinkGrantKind,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId,reportGranted,REPORT_GRANT_KINDS,type ReportGrantKind,SCRIPT_HARNESS} from '../../../../../core/agent/index.ts';
+import {AGENT_VERSIONS,agentRevoked,serviceGranted,askGranted,ASK_GRANT_KINDS,type AskGrantKind,boardGranted,BOARD_GRANT_KINDS,type BoardGrantKind,artifactGranted,ARTIFACT_GRANT_KINDS,type ArtifactGrantKind,githubDraftGranted,githubWriteGrants,isServiceDraftProvider,serviceDraftGranted,conversationGranted,CONVERSATION_GRANT_KINDS,type ConversationGrantKind,linkGranted,LINK_GRANT_KINDS,type LinkGrantKind,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId,reportGranted,REPORT_GRANT_KINDS,type ReportGrantKind,SCRIPT_HARNESS} from '../../../../../core/agent/index.ts';
 import {harnessTools} from './harness-services.ts';
 import {ongoingId} from '../../../../../core/tasks/index.ts';
 import {SERVICE_PROVIDERS,SERVICE_TITLES} from '../../../../../contracts/services.ts';
 import {GITHUB_WRITE_LIMITS} from '../../../../../contracts/github-drafts.ts';
+import {SERVICE_DRAFT_PROVIDERS,SERVICE_DRAFT_TITLES} from '../../../../../contracts/service-drafts.ts';
 import {canBuild} from '../../store/world-store.ts';
 import {harnessSend} from './harness-send.ts';
 import {harnessVoice} from './harness-voice.ts';
@@ -149,6 +153,7 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
   makeSourceAccess:()=>world?new GoogleSourceAccess(world.google,()=>new ServiceSourceAccess(world.services,()=>new McpSourceAccess(world.mcp,()=>new DoorDashSourceAccess(world.doordash,()=>current().makeSourceAccess())))):current().makeSourceAccess(),
   collectServicePage:async(request,signal)=>{if(!world)throw new WorldletError('World Services are unavailable.');return collectServicePage(world,request,signal);},
   worldNotionBinding:()=>world?.mcp.worldNotionBinding()??null,
+  serviceDraftConnections:()=>({posthog:()=>{const writer=world?.services.writer('posthog');return writer?{settings:writer.settings as PosthogSettings,request:writer.request}:null;},notion:()=>world?.mcp.notionSession()??null}),
   makeSourceConnections:()=>world?new GoogleSourceConnections(world.google,()=>new ServiceSourceConnections(world.services,()=>new McpSourceConnections(world.mcp,()=>current().makeSourceConnections(),()=>'hermes'),()=>'hermes'),()=>'hermes'):current().makeSourceConnections(),
   googleAccount:()=>worldGoogle?.account??null,
   makeRoutines:()=>current().makeRoutines(),
@@ -286,6 +291,7 @@ export function standingWorldTools():Promise<StandingWorldTools>|null {
   board:(agentId,args,canRead)=>worldBoard?worldBoard.call(agentId,args,canRead):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),
   drafts:(agentId,args)=>githubDrafts?githubDrafts.call(agentId,args):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),
   artifacts:(agentId,args,readsAll)=>agentArtifacts?agentArtifacts.call(agentId,args,readsAll):{error:'Worldlet is still starting. Try again in a moment.'},
+  serviceDrafts:(agentId,args)=>serviceDrafts?serviceDrafts.call(agentId,args):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),
   conversations:(agentId,args)=>conversationArchive?conversationArchive.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},
   links:(agentId,args)=>trackedLinks?trackedLinks.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},reports:(agentId,args)=>agentReports?agentReports.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},
   writes:(agentId,args,grants)=>githubDrafts?githubDrafts.run(agentId,args,grants):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),channel:(name,args,agent)=>channelTool?channelTool(name,args,agent):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})});
@@ -315,6 +321,16 @@ let scriptAgents:ScriptAgents|null=null;
 export const scriptAgentService=()=>scriptAgents;
 /** What Agents save to the Journal (agent-artifacts.ts), made with agentAccess. */
 let agentArtifacts:AgentArtifacts|null=null;
+/** PostHog and Notion drafts (service-drafts.ts), made with agentAccess. */
+let serviceDrafts:ServiceDrafts|null=null;
+/** The drafts an ask may carry, whichever Service they write to: each draft is found in the store that keeps it. */
+const askDrafts=():AskDrafts|null=>{
+ const owners=([githubDrafts,serviceDrafts] as (AskDrafts|null)[]).filter((owner):owner is AskDrafts=>owner!==null);
+ if(!owners.length)return null;
+ const find=(id:string)=>owners.find(owner=>owner.summaries([id]).length>0)??null;
+ return {summaries:ids=>ids.flatMap(id=>find(id)?.summaries([id])??[]),
+  approve:async id=>{const owner=find(id);if(!owner)throw new Error('No such draft.');return owner.approve(id);}};
+};
 /** How many of each Agent's newest audit entries Settings shows. */
 const AGENT_ACCESS_AUDIT=20;
 
@@ -597,7 +613,7 @@ export function installAgentRuntime(host:Host){
  host.onQuit(()=>agentOrders?.close());
  // Asks need the person's own World with private context allowed, as a channel's reads do.
  agentAsks=createAgentAsks({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
-  name:agentId=>agentAccess?.identity(agentId)?.name??agentId,changed:()=>host.store.worldChanged(),drafts:()=>githubDrafts,orders:()=>agentOrders});
+  name:agentId=>agentAccess?.identity(agentId)?.name??agentId,changed:()=>host.store.worldChanged(),drafts:askDrafts,orders:()=>agentOrders});
  // Agents for scripts (core/agent/GRANTS.md#agents-for-scripts): their endpoint files are written again each run.
  scriptAgents=createScriptAgents({root:context.root,access:agentAccess,tools:()=>standingWorldTools()});
  void scriptAgents.open().catch(error=>host.diagnostics.record(error,'scriptAgents'));
@@ -639,6 +655,20 @@ export function installAgentRuntime(host:Host){
    if(request.operation==='dismiss')return githubDrafts!.dismiss(request.id);
   }catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
   throw new WorldletError('Unknown GitHub draft operation.');
+ }});
+ // PostHog and Notion drafts (core/agent/GRANTS.md#posthog-and-notion-drafts): the same way, written through the World's
+ // own PostHog and Notion connections.
+ serviceDrafts=createServiceDrafts({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
+  connections:()=>service.serviceDraftConnections?.()??null,name:agentId=>agentAccess?.identity(agentId)?.name??agentId,changed:()=>host.store.worldChanged()});
+ /** The person's Approve or Dismiss on a PostHog or Notion draft's card (`approve`, `dismiss`, with the draft's ID).
+  * Approve reads the target again and writes only when it has not changed. Not in ROOM_ALLOWED: a page on another
+  * device cannot approve a write to an outside service. */
+ host.register({serviceDraft:async request=>{
+  try{
+   if(request.operation==='approve')return await serviceDrafts!.approve(request.id);
+   if(request.operation==='dismiss')return serviceDrafts!.dismiss(request.id);
+  }catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
+  throw new WorldletError('Unknown draft operation.');
  }});
  /** The GitHub App that writes approved drafts (Settings › Agent › Connections): `status`, `connect` (its App ID,
   * installation ID and private key, checked with GitHub before they are kept in the vault) and `disconnect`. None
@@ -714,6 +744,11 @@ export function installAgentRuntime(host:Host){
  const connectedServices=()=>{
   let connections:Row[]=[];try{connections=host.store.state.connections??[];}catch{}
   return SERVICE_PROVIDERS.filter(provider=>connections.some(c=>c.provider===provider&&canBuild(c)));
+ };
+ /** The Services PostHog and Notion drafts can write to now: connected in the World. */
+ const draftServices=()=>{
+  let connections:Row[]=[];try{connections=host.store.state.connections??[];}catch{}
+  return SERVICE_DRAFT_PROVIDERS.filter(provider=>connections.some(c=>c.provider===provider&&canBuild(c)));
  };
  host.register({agentAccess:async request=>{
   const access=agentAccess!;
@@ -840,7 +875,20 @@ export function installAgentRuntime(host:Host){
    try{agentOrders!.setWake(id,request.command);}catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not change that.');}
    return {ok:true};
   }
-  const services=connectedServices(),now=new Date().toISOString(),orders=agentOrders?.read()??{wake:{}};
+  // "Can draft PostHog changes", "Can draft Notion changes": the page names the Agent and the Service only.
+  if(request.operation==='grantServiceDrafts'||request.operation==='ungrantServiceDrafts'){
+   const id=typeof request.id==='string'?request.id:'',provider=typeof request.provider==='string'?request.provider:'';
+   const identity=access.identity(id);
+   if(!identity)throw new WorldletError('That Agent is not known here.');
+   if(!isServiceDraftProvider(provider))throw new WorldletError('That is not a Service Worldlet drafts changes for.');
+   if(request.operation==='grantServiceDrafts'){
+    if(agentRevoked(identity,new Date().toISOString()))throw new WorldletError('This Agent was revoked.');
+    if(!draftServices().includes(provider))throw new WorldletError(`Connect ${SERVICE_DRAFT_TITLES[provider]} first.`);
+    if(!access.grantServiceDrafts(id,provider))throw new WorldletError('Could not change that.');
+   }else if(!access.ungrantServiceDrafts(id,provider))throw new WorldletError('Could not change that.');
+   return {ok:true};
+  }
+  const services=connectedServices(),drafting=draftServices(),now=new Date().toISOString(),orders=agentOrders?.read()??{wake:{}};
   const githubApp=githubDrafts?.app.status().connected===true;
   return {orders:{...orders.defaultFor?{defaultFor:orders.defaultFor}:{}},agents:access.list(AGENT_ACCESS_AUDIT).map(({identity,grants,audit})=>({...identity,grants,audit,
    // Its wake command, as the person typed it (shown only to this computer's pages, as all of this action is).
@@ -860,7 +908,11 @@ export function installAgentRuntime(host:Host){
    ...!agentRevoked(identity,now)&&(githubApp||githubDraftGranted(identity.id,grants,now))?{githubDrafts:githubDraftGranted(identity.id,grants,now)}:{},
    // Its standing GitHub write Grants, each with its repository, and whether another can be given (a GitHub App is connected).
    ...!agentRevoked(identity,now)&&(githubApp||githubWriteGrants(identity.id,grants,now).length)?{githubWrites:{add:githubApp,
-    grants:githubWriteGrants(identity.id,grants,now).map(grant=>({repo:grant.github!.repo,writes:grant.github!.writes,...grant.github!.labelPrefix?{labelPrefix:grant.github!.labelPrefix}:{}}))}}:{}}))};
+    grants:githubWriteGrants(identity.id,grants,now).map(grant=>({repo:grant.github!.repo,writes:grant.github!.writes,...grant.github!.labelPrefix?{labelPrefix:grant.github!.labelPrefix}:{}}))}}:{},
+   // "Can draft PostHog changes", "Can draft Notion changes": each shown while that Service is connected (or while the
+   // Grant is still on).
+   serviceDrafts:agentRevoked(identity,now)?[]:SERVICE_DRAFT_PROVIDERS.filter(provider=>drafting.includes(provider)||serviceDraftGranted(identity.id,grants,provider,now))
+    .map(provider=>({provider,title:SERVICE_DRAFT_TITLES[provider],granted:serviceDraftGranted(identity.id,grants,provider,now)}))}))};
  }});
  host.register({agentHarness:localHarnessActions(context,switchTo,noAgent,remote,vault,()=>{const id=requested;requested=null;return id;},event=>host.page.event('worldlet:hermes-setup',event),
   async id=>{if(adapter instanceof LocalHarnessAdapter&&adapter.install.id===id)await adapter.whileStopped(async()=>{});},event=>{host.page.event('worldlet:agent-check',event);

@@ -73,6 +73,8 @@ function oldWorldActions({sample=false}={}):WorldAction[]{
  for(const action of actions.filter(a=>a.tool==='world_links'))action.parameters.required=action.action==='save'?['rows']:[];
  operations('github-writes','github_writes');
  for(const action of actions.filter(a=>a.tool==='github_writes'))action.parameters.required=['write','target'];
+ for(const provider of ['posthog','notion'])for(const operation of ['create','read'])add(provider+'-drafts',operation,'service_drafts',{provider,operation});
+ for(const action of actions.filter(a=>a.tool==='service_drafts'))action.parameters.required=action.action==='create'?['write']:[];
  operations('weather','manage_weather_location');
  for(const action of actions.filter(a=>a.tool==='manage_weather_location'))action.parameters.required=action.action==='search'?['query']:action.action==='select'?['choice']:[];
  operations('music','control_background_music');operations('local-music','control_local_music');operations('youtube','use_youtube');operations('stripe','use_stripe_crm');

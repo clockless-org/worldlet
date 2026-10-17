@@ -191,10 +191,22 @@ export class ServiceSource {
    return access.token;
   }finally{clearTimeout(timer);}
  }
+ /** A connected Service's settings and a request function over its key, for a write the person approved (PostHog
+  * drafts, core/agent/service-drafts.ts): each request answers its status and JSON instead of throwing for a refusal,
+  * so Core can say why. It still goes only to the connection's one origin, follows no redirect and stops at the gate's
+  * time and size; the key stays here. Null when the Service is not connected. */
+ writer(provider:string):{settings:unknown;request(method:'GET'|'POST'|'PATCH',path:string,body?:Record<string,unknown>):Promise<{status:number;json:unknown}>}|null {
+  // A Service with one endpoint only (PostHog): a named Service has no single connection to write to.
+  const service=definition(provider),kept=service&&!service.named?this.endpoints(provider)[0]:undefined;
+  if(!service||!kept)return null;
+  return {settings:kept.settings,request:this.http(service,kept.settings,kept.token).raw};
+ }
  /** Requests to the connection's one origin, with its key, bounded in time and size. Paths are the reader's own. */
- private http(service:Definition<unknown>,settings:unknown,token:string):ServiceHttp {
+ private http(service:Definition<unknown>,settings:unknown,token:string):ServiceHttp&{raw(method:'GET'|'POST'|'PATCH',path:string,body?:unknown):Promise<{status:number;json:unknown}>} {
   const {gate}=service,origin=service.origin(settings);
-  const send=async(method:'GET'|'POST',path:string,body?:unknown):Promise<unknown>=>{
+  // `raw`: the status and JSON of any answer that is not a redirect (a write's refusal is the caller's to explain).
+  const raw=(method:'GET'|'POST'|'PATCH',path:string,body?:unknown)=>send(method,path,body,true) as Promise<{status:number;json:unknown}>;
+  const send=async(method:'GET'|'POST'|'PATCH',path:string,body?:unknown,answer=false):Promise<unknown>=>{
    if(!path.startsWith('/')||path.startsWith('//'))throw new WorldletError('Invalid Service request.');
    const url=new URL(path,origin);
    if(url.origin!==origin)throw new WorldletError(`${gate.title} is read only at the address you gave.`);
@@ -210,8 +222,9 @@ export class ServiceSource {
     }catch{throw new WorldletError(controller.signal.aborted?`${gate.title} took too long to answer. Try a narrower read.`:`Could not reach ${gate.title} at ${origin}. Check the address and your internet connection.`);}
     const discard=()=>response.body?.cancel().catch(()=>{});
     if(response.type==='opaqueredirect'||response.status>=300&&response.status<400){void discard();throw new WorldletError(`${gate.title} answered from another address. Worldlet reads it only at ${origin}; check the address you gave.`);}
-    if(response.status===401){void discard();if(service.serviceAccount)this.access.clear();throw new ServiceUnauthorized();}
+    if(response.status===401){void discard();if(service.serviceAccount)this.access.clear();if(answer)return {status:401,json:null};throw new ServiceUnauthorized();}
     const text=await bounded(response,gate,controller);
+    if(answer){let json:unknown=null;try{json=JSON.parse(text);}catch{}return {status:response.status,json};}
     if(!response.ok){
      if(response.status===403)throw new WorldletError(gate.forbidden);
      if(response.status===404)throw new WorldletError(gate.missing);
@@ -228,8 +241,10 @@ export class ServiceSource {
     try{return JSON.parse(text);}catch{throw new WorldletError(`${gate.title} returned an unsupported answer.`);}
    }finally{clearTimeout(timer);}
   };
-  // An address the person typed (HTTP JSON) is read with GET only.
-  return {get:path=>send('GET',path),post:(path,body)=>gate.publicOnly?Promise.reject(new WorldletError(`${gate.title} reads with GET only.`)):send('POST',path,body)};
+  // An address the person typed (HTTP JSON) is read with GET only, raw requests included.
+  const getOnly=(method:string)=>gate.publicOnly&&method!=='GET';
+  return {get:path=>send('GET',path),post:(path,body)=>getOnly('POST')?Promise.reject(new WorldletError(`${gate.title} reads with GET only.`)):send('POST',path,body),
+   raw:(method,path,body)=>getOnly(method)?Promise.reject(new WorldletError(`${gate.title} reads with GET only.`)):raw(method,path,body)};
  }
  /** A host name the person typed must resolve only to addresses on the internet (privateAddress), never this computer
   * or the local network, whatever name points there. Checked before every request. */

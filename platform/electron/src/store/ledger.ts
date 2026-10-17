@@ -115,14 +115,20 @@ export class WorldLedger {
  githubDrafts():Row[]{return this.records('github-drafts');}
  /** One draft and its Attention item, saved together, as an ask is: the item is the host's own (provider `agents`), its
   * status the draft's, set by the person (`user`) or by the Agent's draft (`agent`), and its Agent the draft's. */
- saveGithubDraft(draft:Row,item:Row,origin:'user'|'agent'){
+ saveGithubDraft(draft:Row,item:Row,origin:'user'|'agent'){this.saveDraft('github-drafts',draft,item,origin);}
+ // PostHog and Notion drafts (core/agent/service-drafts.ts, core/agent/GRANTS.md#posthog-and-notion-drafts) -------
+ /** Every PostHog and Notion draft's current value (`state.service-drafts`). */
+ serviceDrafts():Row[]{return this.records('service-drafts');}
+ /** One draft and its Attention item, saved together, as a GitHub draft is. */
+ saveServiceDraft(draft:Row,item:Row,origin:'user'|'agent'){this.saveDraft('service-drafts',draft,item,origin);}
+ private saveDraft(bucket:string,draft:Row,item:Row,origin:'user'|'agent'){
   this.transaction(()=>{
    core('worldItemValidate',{item,dates:{start:null,end:null}});
    const previous=this.value('items',item.id);
-   const prepared=core<Row>('worldItemPrepare',{item,previous:previous??{},id:item.id,identity:WorldLedger.identity(item),run:'github-drafts',now:iso(),
+   const prepared=core<Row>('worldItemPrepare',{item,previous:previous??{},id:item.id,identity:WorldLedger.identity(item),run:bucket,now:iso(),
     previousIdentity:previous?WorldLedger.identity(previous):'',agentId:draft.agentId});
    prepared.status=item.status;prepared.statusOrigin=origin;
-   this.put('github-drafts',draft.id,draft);this.put('items',item.id,prepared);
+   this.put(bucket,draft.id,draft);this.put('items',item.id,prepared);
   });
  }
  // Remote MCP consents (core/agent/remote-mcp.ts, core/agent/REMOTE-MCP.md) ----------------------------------------

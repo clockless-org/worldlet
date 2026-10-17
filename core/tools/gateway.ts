@@ -117,6 +117,12 @@ function buildWorldActions(sample:boolean):WorldAction[]{
  // GitHub write Grant for one repository names.
  operations('github-writes','github_writes');
  for(const action of actions.filter(a=>a.tool==='github_writes'))action.parameters.required=['write','target'];
+ // PostHog and Notion drafts (core/agent/service-drafts.ts): one tool, each Service's own Grant targets
+ // (posthog-drafts/create…), which only "Can draft PostHog changes" or "Can draft Notion changes" names.
+ for(const provider of ['posthog','notion'])for(const operation of ['create','read']){
+  const draft=add(provider+'-drafts',operation,'service_drafts',{provider,operation});
+  if(draft)draft.parameters.required=operation==='create'?['write']:[];
+ }
  operations('weather','manage_weather_location');
  for(const action of actions.filter(a=>a.tool==='manage_weather_location'))action.parameters.required=action.action==='search'?['query']:action.action==='select'?['choice']:[];
  operations('music','control_background_music');operations('local-music','control_local_music');operations('youtube','use_youtube');operations('stripe','use_stripe_crm');
