@@ -33,6 +33,7 @@ import {codexHome} from './agent-files.ts';
 import {parseJSON5} from './openclaw-files.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 import {serviceReadDefaults,serviceReaders} from './service-readers.ts';
+import {createServiceRequests,type ServiceRequests} from './service-requests.ts';
 import {ExternalAgentAdapter,NoAgentAdapter,UnavailableAgentAdapter,loadAgentConfiguration} from './external.ts';
 import {LocalHarnessAdapter,LocalHarnessRuntime,currentEnvironment,forgetNotStarting,harnessEnvironment,harnessVersion,locateLocalHarnesses,openClawConfigFile,readSelection,selectedInstall,writeSelection,type LocalHarnessInstall} from './local-harness.ts';
 import {runHarnessCommand,standingRules} from './harness-approvals.ts';
@@ -293,11 +294,14 @@ export function standingWorldTools():Promise<StandingWorldTools>|null {
   drafts:(agentId,args)=>githubDrafts?githubDrafts.call(agentId,args):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),
   artifacts:(agentId,args,readsAll)=>agentArtifacts?agentArtifacts.call(agentId,args,readsAll):{error:'Worldlet is still starting. Try again in a moment.'},
   serviceDrafts:(agentId,args)=>serviceDrafts?serviceDrafts.call(agentId,args):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),
+  serviceRequest:(agent,provider)=>serviceRequests?.asked(agent,provider)??'',
   conversations:(agentId,args)=>conversationArchive?conversationArchive.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},
   links:(agentId,args)=>trackedLinks?trackedLinks.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},reports:(agentId,args)=>agentReports?agentReports.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},
   writes:(agentId,args,grants)=>githubDrafts?githubDrafts.run(agentId,args,grants):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),channel:(name,args,agent)=>channelTool?channelTool(name,args,agent):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})});
 }
 let channelTool:((name:string,args:Row,agent?:string)=>Promise<Row>)|null=null;
+/** Agents' first need of a Service (service-requests.ts), made with agentAccess. */
+let serviceRequests:ServiceRequests|null=null;
 /** Each Agent's identity, Grants and audit (agent-access.ts), made when the runtime is installed. */
 let agentAccess:AgentAccess|null=null;
 /** Agent asks (agent-asks.ts), made with agentAccess. */
@@ -615,6 +619,15 @@ export function installAgentRuntime(host:Host){
  // Asks need the person's own World with private context allowed, as a channel's reads do.
  agentAsks=createAgentAsks({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
   name:agentId=>agentAccess?.identity(agentId)?.name??agentId,changed:()=>host.store.worldChanged(),drafts:askDrafts,orders:()=>agentOrders});
+ // An Agent's first need of a Service (core/agent/GRANTS.md#when-an-agent-first-needs-a-service): in the person's own
+ // World with private context allowed, as asks are.
+ serviceRequests=createServiceRequests({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
+  access:()=>agentAccess,connected:provider=>connectedServices().includes(provider),title:provider=>SERVICE_TITLES[provider]??provider,changed:()=>host.store.worldChanged()});
+ /** The person's answer on a Service request's Attention card: `allow` (the Agent's read Grant for that Service, which
+  * must be connected) or `decline`, with its ID. Not in ROOM_ALLOWED: only this computer's pages give an Agent a Grant. */
+ host.register({serviceRequest:async request=>{
+  try{return serviceRequests!.answer(request);}catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
+ }});
  // Agents for scripts (core/agent/GRANTS.md#agents-for-scripts): their endpoint files are written again each run.
  scriptAgents=createScriptAgents({root:context.root,access:agentAccess,tools:()=>standingWorldTools()});
  void scriptAgents.open().catch(error=>host.diagnostics.record(error,'scriptAgents'));

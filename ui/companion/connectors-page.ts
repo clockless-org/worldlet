@@ -130,7 +130,7 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
   await draw();
  }
  page.append(grid,
-  el('p','companion-info-note','Once you connect a service, Fox and the Agent it uses can look at it. Other Agents look only if you choose them. Before anything is changed, Worldlet asks you.'),
+  el('p','companion-info-note','Once you connect a service, Fox and the Agent it uses can look at it. Other Agents ask you the first time. Before anything is changed, Worldlet asks you.'),
   said);
  target.append(page);
  await draw();

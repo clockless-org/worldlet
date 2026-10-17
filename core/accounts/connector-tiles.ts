@@ -85,13 +85,14 @@ export interface ConnectorReader {id:string;name:string;granted:boolean}
 export interface ConnectorReaders {main:ConnectorReader|null;others:ConnectorReader[]}
 /** "Who may use it", the sentences under a connected service's tile (core/agent/GRANTS.md#settings--connectors). `main`:
  * the switch for the Agent Fox uses; `fox` when there is none (Fox's own turns read it when the person asks). `changes`
- * cannot be turned off: every change is a draft the person approves. `others` leads to Choose Agents, each a switch. */
+ * cannot be turned off: every change is a draft the person approves. `others` leads to Choose Agents, each a switch; an
+ * Agent not chosen asks the person on an Attention card the first time it needs the service (core/agent/service-requests.ts). */
 export function connectorWhoMayUse(name:string,readers:ConnectorReaders):{main:{id:string;text:string;on:boolean}|null;fox:string|null;changes:string;others:{text:string;choose:string;agents:{id:string;text:string;on:boolean}[]}|null} {
  const main=readers.main?{id:readers.main.id,text:`Fox and ${readers.main.name} can look at your ${name}.`,on:readers.main.granted}:null;
  const others=readers.others.filter(agent=>agent.id!==readers.main?.id);
  const chosen=others.filter(agent=>agent.granted).map(agent=>agent.name);
  return {main,fox:main?null:`Fox can look at your ${name} when you ask.`,changes:'Before anything is changed, Worldlet asks you.',
-  others:others.length?{text:chosen.length?`${listed(chosen)} can look too. Other Agents look only if you choose them.`:'Other Agents look only if you choose them.',choose:'Choose Agents',
+  others:others.length?{text:chosen.length?`${listed(chosen)} can look too. Other Agents ask you the first time.`:'Other Agents ask you the first time.',choose:'Choose Agents',
    agents:others.map(agent=>({id:agent.id,text:`${agent.name} can look at your ${name}`,on:agent.granted}))}:null};
 }
 const listed=(names:string[])=>names.length<3?names.join(' and '):`${names.slice(0,-1).join(', ')} and ${names.at(-1)}`;

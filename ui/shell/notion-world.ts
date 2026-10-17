@@ -1260,6 +1260,31 @@ export function mountNotionWorld(data: World, native: any) {
     showDraftLine(page);voice?.setAttentionActions?.([]);
     return;
    }
+   // An Agent's first need of a Service (core/agent/GRANTS.md#when-an-agent-first-needs-a-service): Allow gives it that
+   // Service's read Grant; Connect signs in to the Service first, then allows. Only this computer's pages (not in
+   // ROOM_ALLOWED).
+   const wanted=page.worldItemServiceRequest&&page.worldItemServiceRequest.status==='pending'&&!data.sample&&native?.serviceRequest?page.worldItemServiceRequest:null;
+   if(wanted){
+    let busy=false;
+    const answer=(operation:'allow'|'decline')=>async()=>{
+     if(busy)return;busy=true;
+     try{
+      if(operation==='allow'&&!wanted.connected&&wanted.signIn)await native.connect(wanted.provider,wanted.region);
+      const result=await native.serviceRequest(operation,wanted.id);
+      if(!result?.ok)throw Error(result?.error||'Could not do that.');
+      await settleAttention(page,result.status==='allowed'?'done':'dismissed',null,{advance:true,hosted:true});
+      notify(result.status==='allowed'?`${wanted.agent} can now look at your ${wanted.service}.`:`${wanted.agent} will not look at your ${wanted.service}.`);
+     }catch(e){notify(e.message);}finally{busy=false;}
+    };
+    // A Service that takes a key is connected in Settings › Connectors; the card waits, and Allow works once it is.
+    const connectors=()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'connectors'}}));
+    attentionPreview.setActions(wanted.connected?[{key:'allow',label:'Allow',primary:true,run:answer('allow')},{key:'decline',label:'Not now',run:answer('decline')}]
+     :wanted.signIn?[{key:'connect',label:'Connect '+wanted.service,primary:true,run:answer('allow')},{key:'decline',label:'Not now',run:answer('decline')}]
+     :[{key:'connectors',label:'Open Connectors',primary:true,run:connectors},{key:'allow',label:'Allow',run:answer('allow')},{key:'decline',label:'Not now',run:answer('decline')}]);
+    attentionPreview.setReview(null);
+    showDraftLine(page);voice?.setAttentionActions?.([]);
+    return;
+   }
    attentionPreview.setActions(outcomes());
    // Changed evidence for this task, found by a background pass, is decided here, not in Fox's dialog (owner Order 2026-10-07).
    attentionPreview.setReview(native?.taskReview?taskReviewLine(data.taskReviews,id,(review,choice,candidate)=>native.taskReview(review,choice,candidate)

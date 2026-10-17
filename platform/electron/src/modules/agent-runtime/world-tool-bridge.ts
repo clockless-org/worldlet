@@ -3,10 +3,11 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {describeActions,resolveAction,worldActions,worldGatewayTools,type WorldAction} from '../../../../../core/tools/index.ts';
-import {HERMES_WORLD_TOOLS_SHIM,agentAuditEntry,artifactGranted,standingActions,standingCallDecision,type GrantDecision,type HermesOwnCalls,type HermesWorldToolsServer,type WorldToolServer} from '../../../../../core/agent/index.ts';
+import {GRANT_REASONS,HERMES_WORLD_TOOLS_SHIM,agentAuditEntry,artifactGranted,standingActions,standingCallDecision,type GrantDecision,type HermesOwnCalls,type HermesWorldToolsServer,type WorldToolServer} from '../../../../../core/agent/index.ts';
 import type {AgentAccess} from '../../host/services.ts';
 import type {AgentIdentity,Grant} from '../../../../../contracts/agent-identity.ts';
 import {AGENT_REPORT_TARGET} from '../../../../../contracts/agent-reports.ts';
+import {SERVICE_PROVIDERS} from '../../../../../contracts/services.ts';
 import {writeAtomic} from '../../files.ts';
 import {AGENT_ASK_LIMITS} from '../../../../../contracts/agent-asks.ts';
 import type {Row} from './types.ts';
@@ -238,10 +239,13 @@ export const standingEndpointFile=(agentId:string)=>`worldlet-mcp-endpoint.${age
  * token made it, the same way, with that Agent's own Grants, whose reach (repository, writes, label prefix) it checks. */
 /** `artifacts`: a Journal artifact call (`agent_artifacts`, core/agent/GRANTS.md#agent-artifacts) by the Agent whose token made it,
  * the same way; `readsAll` says whether its own Grants let it read what every Agent saved, not only its own. */
-export async function openStandingWorldTools({channel,access,asks,board,drafts,writes,conversations,links,reports,artifacts,serviceDrafts,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;
+/** `serviceRequest`: an Agent's `read_service` call was refused for a Service (not allowed to read it, or not connected):
+ * the host may ask the person on an Attention card (core/agent/service-requests.ts) and answers what the refusal says
+ * after its reason. */
+export async function openStandingWorldTools({channel,access,asks,board,drafts,writes,conversations,links,reports,artifacts,serviceDrafts,serviceRequest,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;
  board?:(agentId:string,args:Row,canRead:(provider:string,operation:string)=>boolean)=>Promise<Row>;drafts?:(agentId:string,args:Row)=>Promise<Row>;writes?:(agentId:string,args:Row,grants:Grant[])=>Promise<Row>;
  conversations?:(agentId:string,args:Row)=>Row;links?:(agentId:string,args:Row)=>Row;reports?:(agentId:string,args:Row)=>Row;
- artifacts?:(agentId:string,args:Row,readsAll:boolean)=>Row;serviceDrafts?:(agentId:string,args:Row)=>Promise<Row>;runner?:string}):Promise<StandingWorldTools> {
+ artifacts?:(agentId:string,args:Row,readsAll:boolean)=>Row;serviceDrafts?:(agentId:string,args:Row)=>Promise<Row>;serviceRequest?:(agent:{id:string;name:string},provider:string)=>string;runner?:string}):Promise<StandingWorldTools> {
  const route='/'+crypto.randomUUID();
  const call=(body:{name:unknown;arguments:unknown},identity:AgentIdentity)=>{
   const call:McpCall={name:body.name,arguments:body.arguments,agent:{id:identity.id,name:identity.name}};
@@ -265,6 +269,11 @@ export async function openStandingWorldTools({channel,access,asks,board,drafts,w
     decide:(target,action,tool,args)=>{
      const decision=standingCallDecision({identity,grants,target,action,tool,args,foxTurn,now});
      access.audit(agentAuditEntry(identity.id,target,action,decision,now));
+     // A Service read it may not make: the person is asked once (a revoked or unknown Agent never asks).
+     if(decision.decision!=='allowed'&&tool==='read_service'&&SERVICE_PROVIDERS.includes(target)&&decision.reason!==GRANT_REASONS.revoked&&decision.reason!==GRANT_REASONS.unknown){
+      const said=serviceRequest?.({id:identity.id,name:identity.name},target)??'';
+      if(said)return {...decision,reason:decision.reason+said};
+     }
      return decision;
     }
    }});
