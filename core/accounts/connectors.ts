@@ -59,7 +59,10 @@ export const CONNECTORS:readonly Connector[]=Object.freeze([
  entry({id:'paypal',name:'PayPal',purpose:'See your PayPal activity.',mechanism:'mcp-oauth',providers:['paypal'],shown:'connected',region:'money',scopes:scopes([]),fallback:['agent'],headless:false}),
  // GitHub offers no sign-in Worldlet can register for; until it has one, a pasted key or the Agent's own connection.
  entry({id:'github',name:'GitHub',purpose:'See your issues and pull requests on GitHub.',mechanism:'key',providers:['github'],shown:'connected',region:'work',scopes:scopes([]),fallback:['agent','key'],headless:true}),
- entry({id:'posthog',name:'PostHog',purpose:'See your product numbers and errors in PostHog.',mechanism:'key',providers:['posthog'],shown:'connected',region:'work',scopes:scopes([]),pick:'project',fallback:['key'],headless:true}),
+ // Reading only at sign-in; the two writes a PostHog draft makes are asked for when the person first approves one.
+ // `user:read` names the projects to choose from.
+ entry({id:'posthog',name:'PostHog',purpose:'See your product numbers and errors in PostHog.',mechanism:'mcp-oauth',providers:['posthog'],shown:'always',region:'work',
+  scopes:scopes(['user:read','project:read','query:read','insight:read','dashboard:read','feature_flag:read','annotation:read','error_tracking:read'],['annotation:write','feature_flag:write']),pick:'project',fallback:['key'],headless:false}),
  entry({id:'cloudflare',name:'Cloudflare',purpose:'See your site traffic in Cloudflare.',mechanism:'key',providers:['cloudflare'],shown:'connected',region:'work',scopes:scopes([]),pick:'account',fallback:['key'],headless:true}),
  entry({id:'search-console',name:'Search Console',purpose:'See how your sites do in Google Search.',mechanism:'key',providers:['search-console'],shown:'connected',region:'work',scopes:scopes([]),fallback:['service-account'],headless:true}),
  entry({id:'http',name:'HTTP JSON',purpose:'Read your own JSON address.',mechanism:'key',providers:['http'],shown:'advanced',scopes:scopes([]),fallback:['key'],headless:true}),

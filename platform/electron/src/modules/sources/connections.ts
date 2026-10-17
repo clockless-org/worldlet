@@ -233,7 +233,7 @@ export function createConnections(ctx:SourcesContext){
    const local=process.platform==='darwin'&&APPLE_PROVIDERS.includes(provider);
    const direct=!local&&DIRECT.includes(provider);
    let token:string,settings:Record<string,string>;
-   try{token=connectToken(provider,body.token);settings=connectSettings(provider,body.settings);}catch(error){throw new WorldletError((error as Error).message);}
+   try{token=connectToken(provider,body.token);settings=connectSettings(provider,body.settings,token);}catch(error){throw new WorldletError((error as Error).message);}
    let checking=false;
    if(local)await connectApple(ctx,provider,region);
    else if(direct)checking=await connectAgentSource(provider,region,body.mock===true&&host.profile.channel==='dev',token,settings);

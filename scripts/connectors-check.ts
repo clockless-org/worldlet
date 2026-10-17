@@ -12,7 +12,7 @@ const plain=(tiles:ConnectorTile[])=>{for(const tile of tiles)for(const text of 
 
 // Nothing connected: the sign-in services, each with its purpose and Connect; key services and HTTP JSON stay away.
 const empty=connectorTiles([]);
-assert.deepEqual(empty.map(tile=>tile.id),['google','notion','linear','todoist','supabase']);
+assert.deepEqual(empty.map(tile=>tile.id),['google','notion','linear','todoist','supabase','posthog']);
 assert.ok(empty.every(tile=>tile.state==='off'&&tile.signIn));
 assert.equal(empty.find(tile=>tile.id==='google')!.provider,'gmail');
 assert.equal(empty.find(tile=>tile.id==='notion')!.region,'work');
@@ -40,6 +40,7 @@ assert.deepEqual([by('notion').state,by('notion').line],['connected','Connected'
 assert.deepEqual([by('linear').state,by('linear').line],['needs-you','Linear signed you out. Sign in again to keep seeing it here.']);
 assert.equal(by('todoist').state,'connected','a slow read is not a sign-out');
 assert.deepEqual([by('github').state,by('github').signIn],['connected',false]);
+assert.deepEqual([by('posthog').state,by('posthog').signIn],['connected',true],'PostHog signs in; a key under Advanced shows the same tile');
 assert.equal(by('posthog').state,'connected');
 plain(tiles);
 // Calendar read from this computer is not Google's sign-in.

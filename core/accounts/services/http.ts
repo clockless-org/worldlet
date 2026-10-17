@@ -18,6 +18,8 @@ export interface ServiceGate {
  name:string;title:string;timeoutSeconds:number;maxBytes:number;
  refused:string;disconnected:string;forbidden:string;missing:string;invalid:string;busy:string;connectMessage:string;
  publicOnly?:boolean;
+ /** When a sign-in (not a pasted key) is refused and cannot be renewed: the service signed the person out. */
+ signedOut?:string;
 }
 
 /** An IP address no Service is read at: this computer (loopback, unspecified), the local network (private ranges,

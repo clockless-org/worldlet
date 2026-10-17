@@ -279,6 +279,9 @@
 .companion-settings-connector-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
 .companion-settings-connector>.companion-settings-confirm{gap:6px;font-size:12px}
 .companion-settings-connector>.companion-settings-confirm>span{flex:1 1 100%}
+.companion-settings-connector-pick{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;color:#354132}
+.companion-settings-connector-pick>span{flex:1 1 100%}
+.companion-settings-connector-pick>select{flex:1 1 140px;min-width:0}
 .companion-settings-advanced .companion-settings-row{flex-wrap:wrap}
 .companion-settings-advanced .companion-settings-row>div{flex:1 1 240px;gap:4px}
 .companion-settings-elsewhere{align-self:stretch;margin-top:6px}

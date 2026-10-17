@@ -26,7 +26,7 @@ export {GITHUB_ENDPOINT,GITHUB_ENDPOINTS,GITHUB_TOOLS,GITHUB_GATE,GITHUB_LIMITS,
 export {SUPABASE_ENDPOINT,SUPABASE_TOOLS,SUPABASE_GATE,supabaseProjectId,readSupabase} from './mcp/supabase.ts';
 // Worldlet Services read over their own API with a pasted key (PostHog, Cloudflare, Search Console): the Platform gates each request, Core reads.
 export {privateAddress,type ServiceGate,type ServiceHttp} from './services/http.ts';
-export {POSTHOG_GATE,POSTHOG_HOSTS,POSTHOG_LIMITS,POSTHOG_LISTS,checkPosthog,hogqlSelect,posthogHost,posthogProject,posthogSettings,readPosthog,type PosthogSettings} from './services/posthog.ts';
+export {POSTHOG_GATE,POSTHOG_HOSTS,POSTHOG_SIGN_IN,POSTHOG_SIGN_IN_HOSTS,posthogProjects,type PosthogProject,POSTHOG_LIMITS,POSTHOG_LISTS,checkPosthog,hogqlSelect,posthogHost,posthogProject,posthogSettings,readPosthog,type PosthogSettings} from './services/posthog.ts';
 export {CLOUDFLARE_API,CLOUDFLARE_GATE,CLOUDFLARE_LIMITS,CLOUDFLARE_READS,checkCloudflare,cloudflareAccount,cloudflareSettings,readCloudflare,type CloudflareSettings} from './services/cloudflare.ts';
 export {GOOGLE_TOKEN_URL,SEARCH_CONSOLE_API,SEARCH_CONSOLE_DIMENSIONS,SEARCH_CONSOLE_GATE,SEARCH_CONSOLE_LIMITS,SEARCH_CONSOLE_SCOPE,checkSearchConsole,readSearchConsole,searchConsoleAccessToken,searchConsoleAssertion,searchConsoleKey,searchConsoleSettings,searchConsoleSite,searchConsoleSpec,type SearchConsoleKey,type SearchConsoleSpec} from './services/search-console.ts';
 export {HTTP_JSON_GATE,HTTP_JSON_LIMITS,HTTP_JSON_NAME,checkHttpJson,httpJsonBaseUrl,httpJsonEndpoints,httpJsonName,httpJsonPath,httpJsonRequest,httpJsonSettings,readHttpJson,type HttpJsonRequest,type HttpJsonSettings} from './services/http-json.ts';

@@ -20,13 +20,24 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
  let waiting:string|null=null,asking:string|null=null;
  const notes=new Map<string,string>();
  let connections:any[]=[];
+ // What a signed-in service lets the person choose (PostHog's projects), by connector.
+ const picks=new Map<string,{choices:{id:string;name:string}[];chosen:string|null}>();
  // Search Console's box under Advanced shows its field again once its tile is disconnected.
  let searchConsole=async()=>{};
  async function read(){const state=await call('snapshot').catch(()=>null);if(Array.isArray(state?.connections))connections=state.connections;}
  function render(){
   grid.replaceChildren(...connectorTiles(connections,waiting).map(tile));
  }
- async function draw(){await read();if(current())render();}
+ async function draw(){
+  await read();
+  // A connected service with a choice to make after signing in (Connector.pick) says what it can choose.
+  picks.clear();
+  for(const item of connectorTiles(connections))if(item.state==='connected'&&connector(item.id)?.pick){
+   const answer=await call('serviceChoices',{provider:item.provider}).catch(()=>null);
+   if(Array.isArray(answer?.choices)&&answer.choices.length>1)picks.set(item.id,answer);
+  }
+  if(current())render();
+ }
  function tile(item:ConnectorTile){
   const box=el('div','companion-settings-connector');box.setAttribute('role','listitem');box.dataset.connector=item.id;box.dataset.state=item.state;
   const words=el('div','companion-settings-connector-words');
@@ -37,6 +48,20 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
   else if(item.state==='needs-you')actions.append(button('Sign in again','sign-in-again',()=>signIn(item),true));
   else if(item.state==='connected'&&asking!==item.id)actions.append(button('Disconnect','disconnect',()=>{asking=item.id;notes.delete(item.id);render();}));
   box.append(words,actions);
+  const pick=item.state==='connected'?picks.get(item.id):undefined;
+  if(pick&&asking!==item.id){
+   const kind=connector(item.id)?.pick??'one';
+   const row=el('div','companion-settings-connector-pick'),select=el('select','companion-settings-input') as HTMLSelectElement;
+   select.setAttribute('aria-label',`Which ${item.name} ${kind}?`);
+   for(const choice of pick.choices){const option=el('option','',choice.name) as HTMLOptionElement;option.value=choice.id;option.selected=choice.id===pick.chosen;select.append(option);}
+   row.append(el('span','',`Which ${item.name} ${kind}?`),select,button('Use','use-choice',async()=>{
+    if(select.value===pick.chosen)return;
+    try{await call('connect',{provider:item.provider,settings:{[kind]:select.value}});said.textContent=`${item.name} now shows ${select.selectedOptions[0]?.textContent??'that '+kind}.`;}
+    catch(e){notes.set(item.id,connectorFailure(item.name,(e as Error).message));}
+    await draw();
+   }));
+   box.append(row);
+  }
   if(item.state==='connected'&&asking===item.id){
    const ask=el('div','companion-settings-confirm');ask.setAttribute('role','group');ask.dataset.confirm=item.id;
    ask.append(el('span','',connectorDisconnectQuestion(item.name)),
