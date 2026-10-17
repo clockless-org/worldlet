@@ -22,6 +22,7 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | Five runtime layers: UI, Core, Platform, Harness, Models | [Five-layer architecture](UI-CORE-PLATFORM.md) · [shared UI, pure Core, thin Platform](../contracts/COMPONENTS.md) |
 | How Worldlet talks to an Agent, and an Agent to the World | [Platform–Harness contract](../contracts/HARNESS.md) · [Agent adapters](../harness/README.md) |
 | What each Agent may do in the World, and what it did | [Agent identity, Grants and audit](../core/agent/GRANTS.md) |
+| Let a ChatGPT, Claude or Cursor connector, or a cloud Agent, use the World | [Remote MCP](../core/agent/REMOTE-MCP.md) |
 | Interaction, HUD and Applet states | [Product interaction design](DESIGN.md) |
 | How the World is composed | [World and environment design](WORLD-LAYOUT.md) |
 | Applet lifecycle and execution | [Applet runtime](APPLET-RUNTIME.md) · [Core runtime](../core/applets/RUNTIME.md) |
@@ -55,7 +56,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **281 Markdown documents** and **745 supporting documentation files**.
+Indexed: **282 Markdown documents** and **745 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -64,7 +65,7 @@ Indexed: **281 Markdown documents** and **745 supporting documentation files**.
 | Applet runtime descriptions | 119 |
 | UI and Applet authoring references | 30 |
 | Resource and artwork records | 74 |
-| Module and service documentation | 36 |
+| Module and service documentation | 37 |
 | Website documentation and articles | 0 |
 | Documentation diagrams, previews and evidence | 745 |
 
@@ -338,7 +339,7 @@ Indexed: **281 Markdown documents** and **745 supporting documentation files**.
 
 </details>
 
-<details><summary>Module and service documentation (36)</summary>
+<details><summary>Module and service documentation (37)</summary>
 
 - [android/README.md](../android/README.md)
 - [contracts/COMPONENTS.md](../contracts/COMPONENTS.md)
@@ -347,6 +348,7 @@ Indexed: **281 Markdown documents** and **745 supporting documentation files**.
 - [core/README.md](../core/README.md)
 - [core/agent/GRANTS.md](../core/agent/GRANTS.md)
 - [core/agent/PORTABILITY.md](../core/agent/PORTABILITY.md)
+- [core/agent/REMOTE-MCP.md](../core/agent/REMOTE-MCP.md)
 - [core/applets/INTEGRATIONS.md](../core/applets/INTEGRATIONS.md)
 - [core/applets/MY-APPLETS.md](../core/applets/MY-APPLETS.md)
 - [core/applets/RUNTIME.md](../core/applets/RUNTIME.md)

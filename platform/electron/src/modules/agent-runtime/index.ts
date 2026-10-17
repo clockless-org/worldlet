@@ -16,6 +16,7 @@ import {createAgentAccess} from './agent-access.ts';
 import {createAgentAsks,type AgentAsks} from './agent-asks.ts';
 import {createWorldBoard,type WorldBoard} from './board.ts';
 import {createGithubDrafts,type GithubDrafts} from './github-drafts.ts';
+import {createRemoteMcpHost,type RemoteMcpHost} from './remote-mcp.ts';
 import {moveFoxProfile} from './fox-move.ts';
 import {HERMES_WINDOW_DONE,endHermesInstall,hermesInstallWindow,hermesSessionModels,hermesStarts,installHermes,workingHermesAgent,installedHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
 import {UPDATED,backgroundSignIn,claudeCodeSignedIn,openSignIn} from './provider-sign-in.ts';
@@ -287,6 +288,8 @@ let agentAsks:AgentAsks|null=null;
 let worldBoard:WorldBoard|null=null;
 /** GitHub drafts (github-drafts.ts), made with agentAccess. */
 let githubDrafts:GithubDrafts|null=null;
+/** Remote MCP (remote-mcp.ts), made with agentAccess. */
+let remoteMcp:RemoteMcpHost|null=null;
 /** How many of each Agent's newest audit entries Settings shows. */
 const AGENT_ACCESS_AUDIT=20;
 
@@ -542,6 +545,25 @@ export function installAgentRuntime(host:Host){
   onEnded:()=>{if(adapter instanceof RemoteHarnessAdapter)void switchTo(noAgent()).catch(error=>host.diagnostics.record(error,'agentRuntime'));}});
  const vault=host.use<VaultService>(VAULT);
  agentAccess=createAgentAccess({root:context.root,vault,ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()?host.store.ledger():null;}catch{return null;}}});
+ // Remote MCP (core/agent/REMOTE-MCP.md): cloud MCP clients reach the same World tools through the front, each
+ // connection an Agent of its own, allowed on a consent card in Attention.
+ remoteMcp=createRemoteMcpHost({vault,access:agentAccess,tools:()=>standingWorldTools(),relay:process.env.WORLDLET_PAIR_RELAY||undefined,changed:()=>host.store.worldChanged(),
+  ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()?host.store.ledger():null;}catch{return null;}}});
+ host.onQuit(()=>remoteMcp?.close());
+ /** Remote access (Settings › Agent › Access): `status`, `enable`, `disable`, `renew` (a new address, every connection
+  * ends) and the person's answer on a consent card (`allow`, `deny` with its ID). Not in ROOM_ALLOWED: only this
+  * computer's pages may let a connector in. */
+ host.register({remoteMcp:async request=>{
+  const remote=remoteMcp!;
+  try{
+   if(request.operation==='status')return await remote.status();
+   if(request.operation==='enable')return await remote.enable();
+   if(request.operation==='disable')return await remote.disable();
+   if(request.operation==='renew')return await remote.renew();
+   if(request.operation==='allow'||request.operation==='deny')return remote.decide(request.id,request.operation==='allow');
+  }catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
+  throw new WorldletError('Unknown remote access operation.');
+ }});
  // Asks need the person's own World with private context allowed, as a channel's reads do.
  agentAsks=createAgentAsks({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
   name:agentId=>agentAccess?.identity(agentId)?.name??agentId,changed:()=>host.store.worldChanged(),drafts:()=>githubDrafts});

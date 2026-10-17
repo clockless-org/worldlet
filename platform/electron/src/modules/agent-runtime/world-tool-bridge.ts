@@ -5,6 +5,7 @@ import path from 'node:path';
 import {describeActions,resolveAction,worldActions,worldGatewayTools,type WorldAction} from '../../../../../core/tools/index.ts';
 import {HERMES_WORLD_TOOLS_SHIM,agentAuditEntry,standingActions,standingCallDecision,type GrantDecision,type HermesOwnCalls,type HermesWorldToolsServer,type WorldToolServer} from '../../../../../core/agent/index.ts';
 import type {AgentAccess} from '../../host/services.ts';
+import type {AgentIdentity} from '../../../../../contracts/agent-identity.ts';
 import {writeAtomic} from '../../files.ts';
 import type {Row} from './types.ts';
 
@@ -136,17 +137,20 @@ async function serveWorldTools<T>(authorize:(token:string)=>T|null,route:string,
     try{body=JSON.parse(Buffer.concat(chunks).toString('utf8'));}catch{answer(400,{});return;}
     if(body.method==='list'){answer(200,{tools:worldToolList()});return;}
     if(body.method!=='call'){answer(400,{});return;}
-    const result=await call({name:body.name,arguments:body.arguments},caller);
-    let text=JSON.stringify(result??{error:'World tool is unavailable.'});
-    if(text.length>RESULT_LIMIT)text=text.slice(0,RESULT_LIMIT)+'… [truncated]';
-    answer(200,{text,isError:typeof result?.error==='string'});
+    answer(200,toolText(await call({name:body.name,arguments:body.arguments},caller)));
    })().catch(()=>{if(!response.headersSent)answer(500,{});});
   });
  });
  await new Promise<void>((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',()=>resolve());});
  return server;
 }
-const worldToolList=()=>worldGatewayTools.map(tool=>({name:tool.name,description:tool.description,inputSchema:tool.parameters}));
+/** A World tool's result as the MCP servers hand it back: its JSON, cut at RESULT_LIMIT, and whether it is an error. */
+export function toolText(result:Row|null|undefined):{text:string;isError:boolean} {
+ let text=JSON.stringify(result??{error:'World tool is unavailable.'});
+ if(text.length>RESULT_LIMIT)text=text.slice(0,RESULT_LIMIT)+'… [truncated]';
+ return {text,isError:typeof result?.error==='string'};
+}
+export const worldToolList=()=>worldGatewayTools.map(tool=>({name:tool.name,description:tool.description,inputSchema:tool.parameters}));
 const portOf=(server:http.Server)=>(server.address() as {port:number}).port;
 
 /** Opens the loopback endpoint and writes the stdio server into the turn's home. */
@@ -188,6 +192,9 @@ export interface StandingWorldTools {
  server(home:string,agent?:StandingAgent):HermesWorldToolsServer;
  /** The Agent was revoked: its endpoint files go, so its registered server answers that Worldlet is not open. */
  forget(agentId:string):void;
+ /** One call by this Agent, as its registered server makes it, for a host that reaches the same tools another way
+  * (remote MCP, remote-mcp.ts): the same Grants, audit and dispatch. */
+ call(identity:AgentIdentity,body:{name:unknown;arguments:unknown}):Promise<Row>;
  close():void;
 }
 export type StandingAgent={id:string;name:string;harness:string;kind:'local'|'remote'};
@@ -207,7 +214,7 @@ export const standingEndpointFile=(agentId:string)=>`worldlet-mcp-endpoint.${age
 export async function openStandingWorldTools({channel,access,asks,board,drafts,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;
  board?:(agentId:string,args:Row,canRead:(provider:string,operation:string)=>boolean)=>Promise<Row>;drafts?:(agentId:string,args:Row)=>Promise<Row>;runner?:string}):Promise<StandingWorldTools> {
  const route='/'+crypto.randomUUID();
- const server=await serveWorldTools(token=>access.identify(token),route,(body,identity)=>{
+ const call=(body:{name:unknown;arguments:unknown},identity:AgentIdentity)=>{
   const call:McpCall={name:body.name,arguments:body.arguments,agent:{id:identity.id,name:identity.name}};
   // Fox's turns run on Hermes Agent: only its calls can be theirs. Another Agent registered on this server (Claude Code
   // or Codex, platform/node mcp-home.ts) is always a call of its own, under its own Grants.
@@ -226,7 +233,8 @@ export async function openStandingWorldTools({channel,access,asks,board,drafts,r
      return decision;
     }
    }});
- });
+ };
+ const server=await serveWorldTools(token=>access.identify(token),route,call);
  const url=`http://127.0.0.1:${portOf(server)}${route}`,files=new Map<string,Set<string>>();
  const remove=(agentId:string)=>{for(const file of files.get(agentId)??[])fs.rmSync(file,{force:true});files.delete(agentId);};
  access.onRevoke(remove);
@@ -247,6 +255,7 @@ export async function openStandingWorldTools({channel,access,asks,board,drafts,r
    return {command:runner,args:[script],env:{ELECTRON_RUN_AS_NODE:'1',WORLDLET_MCP_ENDPOINT_FILE:endpoint,WORLDLET_MCP_TOOLS_FILE:tools}};
   },
   forget:remove,
+  call:(identity,body)=>call(body,identity),
   close(){server.close();server.closeAllConnections?.();for(const agentId of [...files.keys()])remove(agentId);}
  };
 }
