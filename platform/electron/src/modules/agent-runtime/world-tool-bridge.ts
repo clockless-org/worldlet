@@ -5,8 +5,9 @@ import path from 'node:path';
 import {describeActions,resolveAction,worldActions,worldGatewayTools,type WorldAction} from '../../../../../core/tools/index.ts';
 import {HERMES_WORLD_TOOLS_SHIM,agentAuditEntry,standingActions,standingCallDecision,type GrantDecision,type HermesOwnCalls,type HermesWorldToolsServer,type WorldToolServer} from '../../../../../core/agent/index.ts';
 import type {AgentAccess} from '../../host/services.ts';
-import type {AgentIdentity} from '../../../../../contracts/agent-identity.ts';
+import type {AgentIdentity,Grant} from '../../../../../contracts/agent-identity.ts';
 import {writeAtomic} from '../../files.ts';
+import {AGENT_ASK_LIMITS} from '../../../../../contracts/agent-asks.ts';
 import type {Row} from './types.ts';
 
 // World tools for a local Harness (Claude Code, Codex, Hermes Agent, OpenClaw, pi): the same two gateway
@@ -87,6 +88,8 @@ module.exports=async function(pi){
 `;
 
 const RESULT_LIMIT=200_000;
+/** Bytes one call may send. The standing server takes an ask with all its attachments in base64 (contracts/agent-asks.ts). */
+const CALL_LIMIT=1_000_000,STANDING_CALL_LIMIT=Math.ceil(AGENT_ASK_LIMITS.attachmentBytes/3)*4+CALL_LIMIT;
 /** The World tool behind `asks/*` (core/tools/gateway.ts). */
 const ASK_TOOL='agent_asks';
 /** The World tool behind `board/*` (core/tools/gateway.ts). */
@@ -99,6 +102,8 @@ const CONVERSATIONS_TOOL='world_conversations';
 const LINKS_TOOL='world_links';
 /** The World tool behind `agents/*` (core/tools/gateway.ts). */
 const REPORT_TOOL='agent_reports';
+/** The World tool behind `github-writes/*` (core/tools/gateway.ts). */
+const WRITE_TOOL='github_writes';
 
 /** What one Agent may reach on the standing server (core/agent/GRANTS.md): the actions it may discover and the decision
  * for one resolved call. Absent for a Fox turn's own bridge, whose calls the turn's trust alone decides. */
@@ -130,14 +135,16 @@ export interface WorldToolBridge {server:WorldToolServer;close():void}
 export type McpCall={name:unknown;arguments:unknown;agent?:{id:string;name:string}};
 /** A loopback endpoint for the stdio server: `list` and `call` at `route`, for a bearer token `authorize` accepts (it
  * returns who made the call: an Agent on the standing server, `true` for a turn's own bridge). */
-async function serveWorldTools<T>(authorize:(token:string)=>T|null,route:string,call:(body:{name:unknown;arguments:unknown},caller:T)=>Promise<Row>):Promise<http.Server> {
+async function serveWorldTools<T>(authorize:(token:string)=>T|null,route:string,call:(body:{name:unknown;arguments:unknown},caller:T)=>Promise<Row>,limit=CALL_LIMIT):Promise<http.Server> {
  const server=http.createServer((request,response)=>{
   const answer=(status:number,value:Row)=>{response.writeHead(status,{'content-type':'application/json'});response.end(JSON.stringify(value));};
   const header=request.headers.authorization??'',caller=header.startsWith('Bearer ')?authorize(header.slice(7)):null;
   if(request.method!=='POST'||request.url!==route||caller===null){request.resume();answer(404,{});return;}
   const chunks:Buffer[]=[];let size=0;
-  request.on('data',(chunk:Buffer)=>{size+=chunk.length;if(size>1_000_000)request.destroy();else chunks.push(chunk);});
+  // Too large: the rest is read and dropped, and the caller is told so in words.
+  request.on('data',(chunk:Buffer)=>{size+=chunk.length;if(size<=limit)chunks.push(chunk);else chunks.length=0;});
   request.on('end',()=>{
+   if(size>limit){answer(200,{text:JSON.stringify({error:`This call is larger than Worldlet takes (${Math.floor(limit/1048576)} MB).`}),isError:true});return;}
    void (async()=>{
     let body:Row;
     try{body=JSON.parse(Buffer.concat(chunks).toString('utf8'));}catch{answer(400,{});return;}
@@ -221,8 +228,11 @@ export const standingEndpointFile=(agentId:string)=>`worldlet-mcp-endpoint.${age
  * the Agent whose token made it, the same way. */
 /** `links`: a tracked links call (`world_links`, core/agent/GRANTS.md#tracked-links) by the Agent whose token made it,
  * the same way. `reports`: an Agent report call (`agent_reports`, core/agent/GRANTS.md#agent-reports), the same way. */
-export async function openStandingWorldTools({channel,access,asks,board,drafts,conversations,links,reports,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;
- board?:(agentId:string,args:Row,canRead:(provider:string,operation:string)=>boolean)=>Promise<Row>;drafts?:(agentId:string,args:Row)=>Promise<Row>;conversations?:(agentId:string,args:Row)=>Row;links?:(agentId:string,args:Row)=>Row;reports?:(agentId:string,args:Row)=>Row;runner?:string}):Promise<StandingWorldTools> {
+/** `writes`: a standing GitHub write (`github_writes`, core/agent/GRANTS.md#standing-github-writes) by the Agent whose
+ * token made it, the same way, with that Agent's own Grants, whose reach (repository, writes, label prefix) it checks. */
+export async function openStandingWorldTools({channel,access,asks,board,drafts,writes,conversations,links,reports,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;
+ board?:(agentId:string,args:Row,canRead:(provider:string,operation:string)=>boolean)=>Promise<Row>;drafts?:(agentId:string,args:Row)=>Promise<Row>;writes?:(agentId:string,args:Row,grants:Grant[])=>Promise<Row>;
+ conversations?:(agentId:string,args:Row)=>Row;links?:(agentId:string,args:Row)=>Row;reports?:(agentId:string,args:Row)=>Row;runner?:string}):Promise<StandingWorldTools> {
  const route='/'+crypto.randomUUID();
  const call=(body:{name:unknown;arguments:unknown},identity:AgentIdentity)=>{
   const call:McpCall={name:body.name,arguments:body.arguments,agent:{id:identity.id,name:identity.name}};
@@ -233,6 +243,7 @@ export async function openStandingWorldTools({channel,access,asks,board,drafts,c
   return worldGateway(body.name,body.arguments,{sample:false,
    dispatch:async(name,args)=>name===ASK_TOOL?asks?.(identity.id,args)??{error:'Asks are not available in this build.'}
     :name===DRAFT_TOOL?await drafts?.(identity.id,args)??{error:'GitHub drafts are not available in this build.'}
+    :name===WRITE_TOOL?await writes?.(identity.id,args,grants)??{error:'GitHub writes are not available in this build.'}
     :name===CONVERSATIONS_TOOL?conversations?.(identity.id,args)??{error:'The conversation archive is not available in this build.'}
     :name===LINKS_TOOL?links?.(identity.id,args)??{error:'Tracked links are not available in this build.'}
     :name===REPORT_TOOL?reports?.(identity.id,args)??{error:'Agent reports are not available in this build.'}
@@ -247,7 +258,7 @@ export async function openStandingWorldTools({channel,access,asks,board,drafts,c
     }
    }});
  };
- const server=await serveWorldTools(token=>access.identify(token),route,call);
+ const server=await serveWorldTools(token=>access.identify(token),route,call,STANDING_CALL_LIMIT);
  const url=`http://127.0.0.1:${portOf(server)}${route}`,files=new Map<string,Set<string>>();
  const remove=(agentId:string)=>{for(const file of files.get(agentId)??[])fs.rmSync(file,{force:true});files.delete(agentId);};
  access.onRevoke(remove);

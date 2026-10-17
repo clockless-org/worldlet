@@ -31,7 +31,7 @@ import {mcpHome,openMcpHome,registerAgent,registeredAgents} from './mcp-home.ts'
 import {installWorld} from '../../electron/src/modules/world.ts';
 import {installFox} from '../../electron/src/modules/fox/index.ts';
 import {installAttention} from '../../electron/src/modules/attention/index.ts';
-import {installAgentRuntime} from '../../electron/src/modules/agent-runtime/index.ts';
+import {installAgentRuntime,scriptAgentService} from '../../electron/src/modules/agent-runtime/index.ts';
 import {installSources} from '../../electron/src/modules/sources/index.ts';
 import {installPhone} from '../../electron/src/modules/phone/index.ts';
 import {installOngoing} from '../../electron/src/modules/tasks/index.ts';
@@ -203,6 +203,13 @@ async function answer(request:ControlRequest):Promise<ControlReply> {
   const status=await host.use<PhoneService>(PHONE).worldLink?.() as {link?:string}|undefined;
   if(!status?.link)throw Error('No browser link was made.');
   return {lines:[status.link]};
+ }
+ if(request.command==='register'&&request.script!==undefined){
+  const scripts=scriptAgentService();
+  if(!scripts)throw Error('The Agent runtime is not installed.');
+  const added=await scripts.add(request.script);
+  return {lines:[`${added.name} is an Agent for a script on this computer (${added.id}).`,`Its endpoint and token are in ${added.endpointFile}, written again each time Worldlet starts.`,
+   'Allow what it may do in Settings › Agent › Access in the World.']};
  }
  if(request.command==='register')return {lines:await registerAgent(request.agent!)};
  // Remote access (core/agent/REMOTE-MCP.md), the same as Settings › Agent › Access: each connector still asks the

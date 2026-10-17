@@ -1192,6 +1192,10 @@ export function mountNotionWorld(data: World, native: any) {
    function later(){try{return settle('open',attentionLaterUntil(Date.now(),Intl.DateTimeFormat().resolvedOptions().timeZone));}catch(error){notify(error.message);}}
    // An Agent's ask: Done or Dismiss settle the ask itself, and its choices wait on one line with an optional note.
    const asked=page.worldItemAsk&&['open','claimed'].includes(page.worldItemAsk.status)&&!data.sample&&native?.agentAsk?page.worldItemAsk:null;
+   // What the ask carries, however it settled: pictures read from the host on this computer only, other files by name.
+   const carried=page.worldItemAsk?.attachments,askId=page.worldItemAsk?.id;
+   attentionPreview.setAttachments(carried?.length?carried.map(a=>{const image=/^image\/(png|jpeg|webp|gif)$/.test(a.type);
+    return {name:a.name,size:a.size,image,...image&&native?.agentAskAttachment?{load:()=>Promise.resolve(native.agentAskAttachment(askId,a.id)).then(r=>r?.data?`data:${a.type};base64,${r.data}`:null)}:{}};}):null);
    if(asked){
     const answer=(outcome,choice?,note?)=>settleAttention(page,outcome==='skipped'?'dismissed':'done',null,{advance:true,ask:{outcome,...choice?{choice}:{},...note?{note}:{}}}).then(said=>{if(said)notify(said);});
     attentionPreview.setActions([{key:'done',label:'Done',primary:true,run:()=>answer('done').catch(e=>notify(e.message))},{key:'dismiss',label:'Dismiss',run:()=>answer('skipped').catch(e=>notify(e.message))}]);

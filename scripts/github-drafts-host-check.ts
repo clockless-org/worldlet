@@ -11,14 +11,17 @@ import {createAgentAsks} from '../platform/electron/src/modules/agent-runtime/ag
 import {ASK_REASONS,askItemId} from '../core/agent/asks.ts';
 import {roomDenied} from '../contracts/web-world.ts';
 import {STANDING_OUTSIDE_TURN} from '../core/agent/grants.ts';
-import {GITHUB_DRAFT_REASONS,GITHUB_DRAFT_STALE,githubDraftItemId} from '../core/agent/github-drafts.ts';
+import {GITHUB_DRAFT_REASONS,GITHUB_DRAFT_STALE,GITHUB_WRITE_REASONS,GITHUB_WRITE_STALE,githubDraftItemId} from '../core/agent/github-drafts.ts';
 
 // GitHub drafts on the host (core/agent/GRANTS.md#github-drafts), the same modules the Electron and Node hosts run,
 // against a stubbed GitHub: an Agent drafts only under its own "Can draft GitHub changes" Grant; the draft keeps the
 // target as read; Approve reads it again and refuses when its state or updatedAt changed or it is gone, and otherwise
 // writes once as the GitHub App (a JWT it signs, exchanged for an installation token) and keeps the result's link;
 // Dismiss writes nothing; everything is audited. The App's private key, its signed token and the installation token
-// appear in no answer, item, audit entry, stored row or log line.
+// appear in no answer, item, audit entry, stored row or log line. A label transition (`labels.set`) is drafted and
+// approved against the labels the Agent read. Standing GitHub writes (core/agent/GRANTS.md#standing-github-writes) run
+// at once, without a card, only within the reach of the Agent's own Grant for that repository, each read again and
+// refused when not as the Agent read it, each audited.
 await withTempDir('worldlet-github-drafts-',async dir=>{
  const ledger=new WorldLedger(path.join(dir,'world'));
  let clock=Date.parse('2026-10-15T12:00:00.000Z');
@@ -44,7 +47,8 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
  const repos=new Map<string,any>([['example/app',{full_name:'example/app',archived:false,updated_at:'2026-10-15T09:00:00Z',html_url:'https://github.com/example/app'}]]);
  const requests:{method:string;path:string;auth:string;body?:any}[]=[];
  const jwts:string[]=[];
- let comments=0;
+ let comments=0,edits=0;
+ const touch=(found:any)=>{edits+=1;found.updated_at=new Date(Date.parse('2026-10-15T15:00:00Z')+edits*1000).toISOString().replace('.000','');};
  // Issues the App made, as GitHub lists them back.
  const madeIssues:any[]=[];
  const answer=(status:number,json:unknown)=>({status,json:async()=>json});
@@ -72,6 +76,16 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
    if(!issue[4]&&init.method==='GET')return answer(200,found);
    if(!issue[4]&&init.method==='PATCH'){Object.assign(found,{state:body.state,updated_at:'2026-10-15T13:00:00Z'});return answer(200,found);}
    if(issue[4]==='/comments'&&init.method==='POST'){comments+=1;found.updated_at='2026-10-15T13:00:00Z';return answer(201,{html_url:`${found.html_url}#issuecomment-${900+comments}`});}
+   // An Issue that lists its labels keeps them: added and removed as GitHub would, each change moving updated_at.
+   if(issue[4]==='/labels'&&init.method==='POST'&&found.labels){
+    for(const name of body.labels)if(!found.labels.some((l:any)=>l.name.toLowerCase()===name.toLowerCase()))found.labels.push({name});
+    touch(found);return answer(200,found.labels);
+   }
+   if(issue[4]?.startsWith('/labels/')&&init.method==='DELETE'&&found.labels){
+    const name=decodeURIComponent(issue[4].slice('/labels/'.length)),at=found.labels.findIndex((l:any)=>l.name===name);
+    if(at<0)return answer(404,{message:'Label does not exist'});
+    found.labels.splice(at,1);touch(found);return answer(200,found.labels);
+   }
    if(issue[4]==='/labels'&&init.method==='POST')return answer(200,body.labels.map((name:string)=>({name})));
    if(issue[4]?.startsWith('/labels/')&&init.method==='DELETE')return issue[4]==='/labels/locked'?answer(403,{message:'Must have admin rights'}):answer(issue[4]==='/labels/wontfix'?404:200,[]);
   }
@@ -90,7 +104,7 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
  let changes=0;
  const drafts=createGithubDrafts({ledger:()=>ledger,vault,name:agentId=>access.identity(agentId)?.name??agentId,changed:()=>{changes+=1;},fetch:github,now,clock:()=>clock});
  const asks=createAgentAsks({ledger:()=>ledger,name:agentId=>access.identity(agentId)?.name??agentId,changed:()=>{},drafts:()=>drafts,now});
- const standing=await openStandingWorldTools({access,drafts:(agentId,args)=>drafts.call(agentId,args),asks:(agentId,args)=>asks.call(agentId,args),channel:async()=>({error:'not here'})});
+ const standing=await openStandingWorldTools({access,drafts:(agentId,args)=>drafts.call(agentId,args),writes:(agentId,args,grants)=>drafts.run(agentId,args,grants),asks:(agentId,args)=>asks.call(agentId,args),channel:async()=>({error:'not here'})});
  const said:string[]=[];
  const keep=<T>(value:T):T=>{said.push(JSON.stringify(value));return value;};
  const refused=async(run:()=>Promise<unknown>|unknown)=>{try{await run();}catch(error){return keep((error as Error).message);}assert.fail('expected a refusal');};
@@ -301,6 +315,83 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
   assert.equal(await refused(()=>offline.answer({operation:'approveDrafts',id:waiting.ask.id,outcome:'answered',choice:'Approve'})),GITHUB_DRAFT_MESSAGES.unreachable);
   assert.deepEqual([(await codex('asks/read',{ids:[waiting.ask.id]})).asks[0].status,(await codex('read',{ids:[later.draft.id]})).drafts[0].status],['open','pending']);
 
+  // A label transition (labels.set) as a draft: refused at once when the labels under its prefix are not the ones the
+  // Agent read; otherwise it adds and removes only what differs, other labels untouched.
+  issues.set('example/app#20',{number:20,title:'Index the archive',state:'open',updated_at:'2026-10-15T10:00:00Z',html_url:'https://github.com/example/app/issues/20',labels:[{name:'bug'},{name:'state:queued'}]});
+  const transition={write:'labels.set',target:'example/app#20',prefix:'state:',expected:['state:queued'],set:['state:running']};
+  assert.equal((await codex('create',{...transition,expected:['state:done']})).error,GITHUB_DRAFT_STALE.labels('state:',['state:queued']));
+  assert.equal((await codex('create',{...transition,set:['bug']})).error,GITHUB_DRAFT_REASONS.prefix);
+  const moved=await codex('create',transition);
+  assert.deepEqual([moved.draft.labels,moved.draft.labelPrefix,moved.draft.expectedLabels,moved.draft.target.labels],[['state:running'],'state:',['state:queued'],['bug','state:queued']]);
+  const movedItem=ledger.value('items',githubDraftItemId(moved.draft.id))!;
+  assert.deepEqual([movedItem.title,movedItem.githubDraftText],['Change labels on example/app#20','Add: state:running\nRemove: state:queued\nOnly if its labels under “state:” are exactly: state:queued']);
+  const beforeMove=requests.length;
+  assert.deepEqual(keep(await drafts.approve(moved.draft.id)),{ok:true,status:'written',url:'https://github.com/example/app/issues/20'});
+  assert.deepEqual(requests.slice(beforeMove).filter(r=>r.method!=='GET').map(r=>[r.method,r.path,r.body]),
+   [['POST','/repos/example/app/issues/20/labels',{labels:['state:running']}],['DELETE','/repos/example/app/issues/20/labels/state%3Aqueued',undefined]],'added, then removed: nothing else');
+  assert.deepEqual(issues.get('example/app#20').labels.map((l:any)=>l.name),['bug','state:running']);
+  // Approve finds other labels under the prefix now: stale, nothing written.
+  const again=await codex('create',{...transition,expected:['state:running'],set:['state:done']});
+  issues.get('example/app#20').labels.push({name:'state:blocked'});
+  assert.deepEqual(await drafts.approve(again.draft.id),{ok:true,status:'stale',reason:GITHUB_DRAFT_STALE.labels('state:',['state:running','state:blocked'])});
+  issues.get('example/app#20').labels.pop();
+
+  // Standing GitHub writes: none by default, nor from Can draft GitHub changes; nothing is read or written for them.
+  const write=(who:typeof codex,args:object)=>who('github-writes/run',args);
+  const comment20={write:'issue.comment',target:'example/app#20',body:'Started on this.'};
+  const step={write:'labels.set',target:'example/app#20',prefix:'state:',expected:['state:running'],set:['state:review']};
+  const quiet=requests.length;
+  assert.equal((await write(codex,comment20)).error,STANDING_OUTSIDE_TURN);
+  assert.equal(requests.length,quiet,'nothing asked of GitHub');
+  // The person allows it for one repository: a comment and state: labels. Another Agent still may not.
+  assert.equal(access.grantGithubWrites('codex','example/app','close',''),false,'only Core\'s choices');
+  assert.equal(access.grantGithubWrites('codex','example/app','labels',''),false,'labels need a prefix');
+  assert.ok(access.grantGithubWrites('codex','example/app','comment-labels','state:'));
+  assert.equal((await write(claude,comment20)).error,STANDING_OUTSIDE_TURN);
+  // Within its reach: written at once as the App, the result's link returned.
+  const commented=await write(codex,{...comment20,expectedState:'open'});
+  assert.deepEqual([commented.ok,commented.status,commented.untrustedContent],[true,'written',true]);
+  assert.match(commented.url,/^https:\/\/github\.com\/example\/app\/issues\/20#issuecomment-\d+$/);
+  assert.deepEqual(requests.at(-1),{method:'POST',path:'/repos/example/app/issues/20/comments',auth:INSTALLATION_TOKEN,body:{body:'Started on this.'}});
+  const stepped=await write(codex,step);
+  assert.deepEqual([stepped.status,stepped.url],['written','https://github.com/example/app/issues/20']);
+  assert.deepEqual(issues.get('example/app#20').labels.map((l:any)=>l.name),['bug','state:review']);
+  // Not as the Agent read it: stale, the answer says what it is now, nothing written.
+  const writesNow=writes();
+  const stale=await write(codex,step);
+  assert.deepEqual([stale.status,stale.error,stale.current.labels,stale.current.state],['stale',GITHUB_DRAFT_STALE.labels('state:',['state:review']),['bug','state:review'],'open']);
+  assert.equal((await write(codex,{...comment20,expectedState:'closed'})).error,GITHUB_WRITE_STALE.state('closed','open'));
+  assert.equal((await write(codex,{...comment20,expectedUpdatedAt:'2026-10-15T10:00:00Z'})).error,GITHUB_WRITE_STALE.updated);
+  assert.equal((await write(codex,{...comment20,target:'example/app#404'})).error,GITHUB_DRAFT_STALE.gone);
+  assert.equal(writes(),writesNow);
+  // Outside its reach, or not a standing write: refused before GitHub is asked anything.
+  const asked=requests.length;
+  repos.set('example/other',{full_name:'example/other',archived:false,updated_at:'2026-10-15T09:00:00Z',html_url:'https://github.com/example/other'});
+  assert.equal((await write(codex,{...comment20,target:'example/other#20'})).error,GITHUB_WRITE_REASONS.notGranted,'another repository');
+  assert.equal((await write(codex,{...step,prefix:'stage:',expected:['stage:a'],set:['stage:b']})).error,GITHUB_WRITE_REASONS.notGranted,'another prefix');
+  assert.equal((await write(codex,{...step,prefix:undefined,expected:['bug','state:review'],set:['bug']})).error,GITHUB_WRITE_REASONS.notGranted,'every label, not only state:');
+  assert.equal((await write(codex,{write:'issue.close',target:'example/app#20'})).error,GITHUB_WRITE_REASONS.write);
+  assert.equal((await write(codex,{write:'issue.create',target:'example/app',title:'New'})).error,GITHUB_WRITE_REASONS.write);
+  assert.equal((await write(codex,{...comment20,body:'token ghp_'+'b'.repeat(36)})).error,GITHUB_DRAFT_REASONS.secret);
+  assert.equal((await write(codex,{...comment20,body:'bell \u0007'})).error,GITHUB_DRAFT_REASONS.control);
+  assert.equal(requests.length,asked,'nothing asked of GitHub');
+  // Two writes to one Issue never overlap: the second waits for the Agent to read it again.
+  const both=await Promise.all([drafts.run('codex',{operation:'run',...comment20},access.grants('codex')),drafts.run('codex',{operation:'run',...comment20},access.grants('codex'))]);
+  assert.deepEqual(both.map(r=>r.status??r.error),['written',GITHUB_WRITE_REASONS.busy]);
+  // Choosing again for the repository replaces its Grant; Remove takes it back, and the next call is refused.
+  assert.ok(access.grantGithubWrites('codex','example/app','comment',''));
+  assert.equal(access.grants('codex').filter(g=>g.github&&!g.revokedAt).length,1,'one per repository');
+  assert.equal((await write(codex,{...step,expected:['state:review'],set:['state:done']})).error,GITHUB_WRITE_REASONS.notGranted,'comments only now');
+  assert.ok(access.ungrantGithubWrites('codex','example/app'));
+  assert.equal((await write(codex,comment20)).error,STANDING_OUTSIDE_TURN);
+  // Audit: each call's decision and what came of it, and each change the person made.
+  const writeAudit=ledger.agentAudit('codex',500).filter(e=>e.target==='github-writes').map(e=>[e.action,e.decision]).reverse();
+  assert.deepEqual(writeAudit.filter(([action])=>action!=='run'),[['grant','allowed'],['write','allowed'],['write','allowed'],['write','denied'],['write','denied'],['write','denied'],['write','denied'],
+   ['write','denied'],['write','denied'],['write','denied'],['write','allowed'],['grant','allowed'],['write','denied'],['ungrant','allowed']]);
+  const last=ledger.agentAudit('codex',500).find(e=>e.target==='github-writes'&&e.action==='write'&&e.decision==='allowed')!;
+  assert.match(String(last.reason),/^Comment on example\/app#20: written as the GitHub App without asking, under the person's standing Grant: https:\/\/github\.com\/example\/app\/issues\/20#issuecomment-\d+$/);
+  assert.equal(last.grantId,'codex-github-writes-example/app');
+
   // Disconnecting forgets the App; drafting then says so again.
   drafts.app.disconnect();
   assert.equal(vault.get(GITHUB_APP_VAULT_KEY),null);
@@ -316,4 +407,4 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
   assert.deepEqual(logged.filter(line=>!line.includes('ExperimentalWarning')),[],'nothing is logged');
  }finally{standing.close();ledger.close();Object.assign(console,original);}
 });
-console.log('PASS GitHub drafts on the host: own Grant only, drafted against the target as read, Approve re-reads and refuses a changed, closed or deleted target, writes once as the GitHub App and keeps the link, reports labels removed in part, looks for a new Issue begun but not seen to finish instead of posting it twice, Dismiss and a phone settle write nothing, every Approve and Dismiss audited, an ask carrying drafts runs them only on this computer’s Approve and the Agent reads the results, and the App key and tokens appear nowhere');
+console.log('PASS GitHub drafts on the host: own Grant only, drafted against the target as read, Approve re-reads and refuses a changed, closed or deleted target, writes once as the GitHub App and keeps the link, reports labels removed in part, looks for a new Issue begun but not seen to finish instead of posting it twice, Dismiss and a phone settle write nothing, every Approve and Dismiss audited, an ask carrying drafts runs them only on this computer’s Approve and the Agent reads the results, a label transition checked against the labels read, standing GitHub writes run at once only within their Grant’s repository, writes and label prefix, refused when stale and audited, and the App key and tokens appear nowhere');

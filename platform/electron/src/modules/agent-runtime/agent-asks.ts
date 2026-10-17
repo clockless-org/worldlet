@@ -1,26 +1,34 @@
 import crypto from 'node:crypto';
-import {AGENT_AUDIT_KEEP,ASK_REASONS,askApprovesDrafts,answerAsk,askAttentionItem,askItemId,askOpen,claimAsks,postAsk,readAsks,readStoredAsk,resolveAsk} from '../../../../../core/agent/index.ts';
+import {AGENT_AUDIT_KEEP,ASK_REASONS,askApprovesDrafts,answerAsk,askAttachment,askAttentionItem,askItemId,askOpen,claimAsks,postAsk,readAskAttachment,readAsks,readStoredAsk,resolveAsk} from '../../../../../core/agent/index.ts';
 import {AGENT_ASK_TARGET,type AgentAsk} from '../../../../../contracts/agent-asks.ts';
 import type {Row} from './types.ts';
 
 // Agent asks (core/agent/GRANTS.md#agent-asks). Core decides; this keeps the records: each ask in the World's ledger
 // (`state.agent-asks` in world.sqlite) beside its Attention item (provider `agents`), written together with no model.
 // The calling Agent is always the one whose token made the call (world-tool-bridge.ts), never one the model names.
+// An ask's attachments keep only what describes them in the ask; their bytes are saved in the same transaction in
+// `agent_ask_attachments`, keyed by the ask's ID and the attachment's, and stay as long as the ask does.
 
 /** The World's ledger, while it is the person's own World (not the practice World) and writable. */
 export type AskLedger={
  agentAsks():Row[];
- saveAgentAsk(ask:Row,item:Row,origin:'user'|'agent'):void;
+ saveAgentAsk(ask:Row,item:Row,origin:'user'|'agent',attachments?:{id:string;data:Uint8Array}[]):void;
+ /** `length` bytes of one ask's attachment from `offset`, or null when there is none. */
+ agentAskAttachment(askId:string,id:string,offset:number,length:number):Uint8Array|null;
  value(bucket:string,id:string):Row|null;
  recordAgentAudit(entry:Row,keep:number):boolean;
 };
 export interface AgentAsks {
- /** One `agent_asks` call (`asks/post`, `read`, `claim`, `resolve`) by `agentId`, already admitted by its Grants. */
+ /** One `agent_asks` call (`asks/post`, `read`, `claim`, `resolve`, `attachment`) by `agentId`, already admitted by
+  * its Grants. */
  call(agentId:string,args:Row):Row;
  /** The person's answer on the ask's Attention card (`agentAsk` `answer`): a choice and note, Done or Dismiss. Its
   * Approve on an ask that carries GitHub drafts is `approveDrafts` instead, which only this computer's pages may send
   * (contracts/web-world.ts ROOM_ALLOWED): each draft is approved as on its own card, then the ask is answered. */
  answer(request:Row):Promise<Row>;
+ /** One attachment's bytes for the person's own card (`agentAsk` `attachment`: the ask's `id` and the `attachment`),
+  * whole, in base64. Not in ROOM_ALLOWED: a picture an Agent attached may be private. */
+ attachment(request:Row):Row;
 }
 /** The GitHub drafts an ask may carry (github-drafts.ts): what became of them, and the same Approve as on a draft's own
  * card (read the target again, refuse when it changed, otherwise write once). */
@@ -28,6 +36,10 @@ export type AskDrafts={
  summaries(ids:readonly string[]):{id:string;agentId:string;status:string;resultUrl?:string;reason?:string}[];
  approve(id:string):Promise<Row>;
 };
+const sha256=(bytes:Uint8Array)=>crypto.createHash('sha256').update(bytes).digest('hex');
+/** The bytes of each attachment as the call sent them, before Core checks them (Core refuses the post when they are not
+ * valid base64 of an allowed kind and size). */
+const sentBytes=(input:Row)=>(Array.isArray(input.attachments)?input.attachments:[]).map((entry:Row)=>Buffer.from(typeof entry?.data==='string'?entry.data:'','base64'));
 const NOT_READY='Worldlet is not ready for this yet: the person has not finished setting up their own World.';
 
 export function createAgentAsks({ledger,name,changed,drafts,now=()=>new Date().toISOString(),newId=()=>crypto.randomUUID()}:
@@ -55,16 +67,28 @@ export function createAgentAsks({ledger,name,changed,drafts,now=()=>new Date().t
    try{
     const at=now(),{operation,...input}=args??{},asks=settle(db,load(db),at);
     if(operation==='post'){
-     const ask=postAsk(asks,agentId,input,newId(),at);
+     const bytes=sentBytes(input),ask=postAsk(asks,agentId,input,newId(),at,bytes.map(sha256));
+     const files=(ask.attachments??[]).map((attachment,index)=>{
+      if(bytes[index].length!==attachment.size)throw new Error(ASK_REASONS.attachment);
+      return {id:attachment.id,data:bytes[index]};
+     });
      // The drafts it carries are this Agent's own and still waiting.
      if(ask.draftIds){
       const found=drafts?.()?.summaries(ask.draftIds)??[];
       if(found.length!==ask.draftIds.length||found.some(draft=>draft.agentId!==agentId||draft.status!=='pending'))return {error:ASK_REASONS.drafts};
      }
-     save(db,ask,'agent');changed();
+     db.saveAgentAsk(ask as unknown as Row,askAttentionItem(ask,name(ask.agentId)) as Row,'agent',files);changed();
      return {ok:true,ask,guidance:'The person sees this in their Attention Center. Read it later with asks/read to get their answer; do not post it again.'};
     }
     if(operation==='read')return {asks:readAsks(asks,agentId,input).map(withDrafts)};
+    if(operation==='attachment'){
+     const {ask,attachment,offset,length}=readAskAttachment(asks,agentId,input);
+     const bytes=db.agentAskAttachment(ask.id,attachment.id,offset,length);
+     if(!bytes||bytes.length!==length)return {error:'This attachment\'s bytes are no longer kept.'};
+     const next=offset+length;
+     return {id:ask.id,attachment:attachment.id,name:attachment.name,type:attachment.type,size:attachment.size,sha256:attachment.sha256,offset,
+      data:Buffer.from(bytes).toString('base64'),...next<attachment.size?{nextOffset:next}:{},untrustedContent:true};
+    }
     if(operation==='claim'){
      const claimed=claimAsks(asks,agentId,input,at);
      for(const ask of claimed)save(db,ask,'agent');
@@ -105,6 +129,14 @@ export function createAgentAsks({ledger,name,changed,drafts,now=()=>new Date().t
    const at=now(),next=answerAsk(settle(db,load(db),at).find(item=>item.id===reply.id),reply,at);
    save(db,next,'user');audit(db,next,at);changed();
    return {ok:true,status:next.status,...results?{drafts:results}:{}};
+  },
+  attachment(request){
+   const db=ledger();
+   if(!db)throw new Error(NOT_READY);
+   const ask=load(db).find(item=>item.id===request?.id),attachment=askAttachment(ask,request?.attachment);
+   const bytes=db.agentAskAttachment(ask!.id,attachment.id,0,attachment.size);
+   if(!bytes||bytes.length!==attachment.size)throw new Error('This attachment\'s bytes are no longer kept.');
+   return {id:attachment.id,name:attachment.name,type:attachment.type,size:attachment.size,data:Buffer.from(bytes).toString('base64')};
   },
  };
 }

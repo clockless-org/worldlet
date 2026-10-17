@@ -4,7 +4,8 @@ import {AGENT_ASK_ACTIONS,AGENT_ASK_TARGET} from '../../contracts/agent-asks.ts'
 import {BOARD_ACTIONS,BOARD_TARGET} from '../../contracts/board.ts';
 import {CONVERSATION_ACTIONS,CONVERSATION_TARGET} from '../../contracts/conversations.ts';
 import {TRACKED_LINK_ACTIONS,TRACKED_LINK_TARGET} from '../../contracts/tracked-links.ts';
-import {GITHUB_DRAFT_ACTIONS,GITHUB_DRAFT_TARGET} from '../../contracts/github-drafts.ts';
+import {GITHUB_DRAFT_ACTIONS,GITHUB_DRAFT_TARGET,GITHUB_WRITE_ACTIONS,GITHUB_WRITE_TARGET,type GithubWrite,type GithubWriteScope} from '../../contracts/github-drafts.ts';
+import {githubWriteScope,githubWriteScopeCovers,readGithubWriteScope} from './github-drafts.ts';
 import {AGENT_REPORT_ACTIONS,AGENT_REPORT_TARGET} from '../../contracts/agent-reports.ts';
 import {grantedActions,worldActions,type WorldAction} from '../tools/index.ts';
 import {turnGuardedWrite,turnWriteAdmission} from './turn-trust.ts';
@@ -126,16 +127,20 @@ export function readGrant(value:unknown):Grant|null {
  const grant:Grant={id:v.id,agentId:v.agentId,targets,access:v.access,duration:v.duration,grantedAt:v.grantedAt as string};
  if(instant(v.expiresAt))grant.expiresAt=v.expiresAt as string;
  if(instant(v.revokedAt))grant.revokedAt=v.revokedAt as string;
+ // An ask Grant names today's ask targets, so one given before `asks/attachment` existed covers it too.
+ for(const kind of ASK_GRANT_KINDS)if(grant.id===askGrantId(grant.agentId,kind))grant.targets=askGrantTargets(kind);
+ // A standing GitHub write Grant's reach: one that is not valid drops the Grant rather than widening it.
+ if(v.github!==undefined){const scope=readGithubWriteScope(v.github);if(!scope)return null;grant.github=scope;}
  return grant;
 }
 
 // The standing `worldlet` MCP server (platform world-tool-bridge.ts): each Agent reaches it with its own token, and every
 // call is decided here before it runs.
 
-/** Whether a resolved World tool call writes, for a Grant's access: the turn rule's guarded writes, and handing work to
- * an Applet task (it then writes on its own runtime). */
+/** Whether a resolved World tool call writes, for a Grant's access: the turn rule's guarded writes, handing work to an
+ * Applet task (it then writes on its own runtime), and a standing GitHub write (it writes to GitHub at once). */
 export function worldCallWrites(tool:string,args:Record<string,unknown>={}):boolean {
- return turnGuardedWrite({type:'tool',name:tool,args})!==null||tool==='start_applet_task';
+ return turnGuardedWrite({type:'tool',name:tool,args})!==null||tool==='start_applet_task'||tool==='github_writes';
 }
 
 /** An Agent's default Grants: what a call outside any Fox turn could do before Grants existed (core/agent/hermes-server.ts
@@ -179,7 +184,8 @@ export function serviceGrantAuditEntry(agentId:string,provider:string,granted:bo
 export type AskGrantKind='ask'|'work';
 export const ASK_GRANT_KINDS:readonly AskGrantKind[]=Object.freeze(['ask','work']);
 export function askGrantTargets(kind:string):string[] {
- return kind==='ask'?[AGENT_ASK_ACTIONS.post,AGENT_ASK_ACTIONS.read]:kind==='work'?[AGENT_ASK_ACTIONS.claim,AGENT_ASK_ACTIONS.resolve]:[];
+ // Both read an ask's attachments: the Agent that posted it, and the one that claimed it (core/agent/asks.ts decides which).
+ return kind==='ask'?[AGENT_ASK_ACTIONS.post,AGENT_ASK_ACTIONS.read,AGENT_ASK_ACTIONS.attachment]:kind==='work'?[AGENT_ASK_ACTIONS.claim,AGENT_ASK_ACTIONS.resolve,AGENT_ASK_ACTIONS.attachment]:[];
 }
 export const askGrantId=(agentId:string,kind:string)=>agentId+'-asks-'+kind;
 /** The standing Grant for one of the two, or null for anything else. Hosts build it from the kind only. Access is
@@ -319,10 +325,40 @@ export function reportGrantAuditEntry(agentId:string,kind:string,granted:boolean
  return {at,agentId,target:AGENT_REPORT_TARGET,action:(granted?'grant-':'ungrant-')+kind,decision:'allowed',grantId:reportGrantId(agentId,kind),
   reason:granted?`The person let this Agent ${what} in Settings.`:`The person stopped this Agent being able to ${what} in Settings.`};
 }
-/** Targets only the calling Agent's own Grants decide: what it reaches is its own (its asks, its GitHub drafts, its
- * report) or the person's board, conversation archive, tracked links and Agents, so a Fox turn's Grant, which covers everything else,
- * never covers them. */
-export const OWN_GRANT_TARGETS:readonly string[]=Object.freeze([AGENT_ASK_TARGET,BOARD_TARGET,GITHUB_DRAFT_TARGET,CONVERSATION_TARGET,TRACKED_LINK_TARGET,AGENT_REPORT_TARGET]);
+/** "Can update Issues in <repo> without asking" in Settings › Agent › Access (core/agent/GRANTS.md#standing-github-writes):
+ * `github-writes/run` on one repository, only the writes the person chose (a comment, labels under one prefix, or both).
+ * Never part of the default Grants, never given by a Fox turn. Access is `write`, standing: each call writes to GitHub
+ * without a card, so a `read` Grant never covers it. The page sends only the Agent, the repository and the choice (with
+ * the label prefix); Core builds the Grant. One per repository: choosing again for it replaces it. */
+export const githubWriteGrantTargets=():string[]=>[GITHUB_WRITE_ACTIONS.run];
+export const githubWriteGrantId=(agentId:string,repo:string)=>agentId+'-github-writes-'+repo.toLowerCase();
+export function githubWriteGrant(agentId:string,repo:unknown,choice:unknown,labelPrefix:unknown,grantedAt:string):Grant|null {
+ if(typeof agentId!=='string'||!AGENT_ID_PATTERN.test(agentId))return null;
+ let github:GithubWriteScope;try{github=githubWriteScope(repo,choice,labelPrefix);}catch{return null;}
+ return {id:githubWriteGrantId(agentId,github.repo),agentId,targets:githubWriteGrantTargets(),access:'write',duration:'standing',grantedAt,github};
+}
+/** This Agent's active standing GitHub write Grants, one per repository. */
+export function githubWriteGrants(agentId:string,grants:readonly Grant[],now:string):Grant[] {
+ return grants.filter(grant=>grant.agentId===agentId&&grant.github&&grant.id===githubWriteGrantId(agentId,grant.github.repo)&&grantActive(grant,now));
+}
+/** The Grant whose reach covers this `github-writes/run` (its repository, write and label prefix), or null: the host
+ * checks this after the gateway's decision, before it asks GitHub anything. */
+export function githubWriteGrantFor(agentId:string,grants:readonly Grant[],run:{write:GithubWrite;owner:string;repoName:string;prefix?:string},now:string):Grant|null {
+ return githubWriteGrants(agentId,grants,now).find(grant=>githubWriteScopeCovers(grant.github!,run))??null;
+}
+/** What a reach allows, in plain words: "comment and change “state:” labels". */
+export function githubWriteScopeWords(scope:GithubWriteScope):string {
+ return [scope.writes.includes('issue.comment')?'comment':'',scope.writes.includes('labels.set')?`change “${scope.labelPrefix}” labels`:''].filter(Boolean).join(' and ');
+}
+/** The audit entry for the person giving or removing one in Settings. */
+export function githubWriteGrantAuditEntry(agentId:string,scope:GithubWriteScope,granted:boolean,at:string):AgentAuditEntry {
+ return {at,agentId,target:GITHUB_WRITE_TARGET,action:granted?'grant':'ungrant',decision:'allowed',grantId:githubWriteGrantId(agentId,scope.repo),
+  reason:granted?`The person let this Agent ${githubWriteScopeWords(scope)} on ${scope.repo} without asking, in Settings.`:`The person stopped this Agent changing ${scope.repo} without asking, in Settings.`};
+}
+/** Targets only the calling Agent's own Grants decide: what it reaches is its own (its asks, its GitHub drafts and
+ * standing GitHub writes, its report) or the person's board, conversation archive, tracked links and Agents, so a Fox
+ * turn's Grant, which covers everything else, never covers them. */
+export const OWN_GRANT_TARGETS:readonly string[]=Object.freeze([AGENT_ASK_TARGET,BOARD_TARGET,GITHUB_DRAFT_TARGET,GITHUB_WRITE_TARGET,CONVERSATION_TARGET,TRACKED_LINK_TARGET,AGENT_REPORT_TARGET]);
 
 /** While a Fox turn holds the standing server, its Agent's calls go to that turn (world-tool-bridge.ts standingTurn), as
  * they did before Grants: a call the turn's own stream announced is Fox's and runs under the turn's trust; any other
@@ -343,7 +379,7 @@ export const STANDING_OUTSIDE_TURN='This came from outside a conversation with F
  * (HERMES_CHANNEL_READ_ONLY for Hermes Agent, STANDING_OUTSIDE_TURN for another). */
 export function standingCallDecision(call:StandingCall):GrantDecision {
  const {identity,target,action,tool,args,foxTurn,now}=call,writes=worldCallWrites(tool,args);
- // Asks and the board: only the Agent's own Grants decide them, never a Fox turn's.
+ // Asks, the board and GitHub: only the Agent's own Grants decide them, never a Fox turn's.
  if(foxTurn&&!OWN_GRANT_TARGETS.includes(target)){
   const grants=identity?[...call.grants,foxTurnGrant(identity.id,foxTurn.own,now)]:[];
   return grantDecision({identity,grants,target,action,writes,now});

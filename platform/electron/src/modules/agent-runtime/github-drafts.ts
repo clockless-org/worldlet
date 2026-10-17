@@ -1,8 +1,8 @@
 import crypto from 'node:crypto';
-import {AGENT_AUDIT_KEEP,GITHUB_DRAFT_REASONS,githubAppJwtClaims,githubDraftAttentionItem,githubDraftChange,githubDraftCreatedPath,githubDraftCreatedUrl,githubDraftItemId,githubDraftOutcome,githubDraftPending,githubDraftReadPath,githubDraftRequests,
- githubDraftResultUrl,githubDraftTarget,githubDraftTargetParts,makeGithubDraft,readGithubApp,readGithubDraftCreate,readGithubDrafts,readStoredGithubApp,readStoredGithubDraft,settleGithubDraft,startGithubDraftWrite} from '../../../../../core/agent/index.ts';
+import {AGENT_AUDIT_KEEP,GITHUB_DRAFT_REASONS,GITHUB_WRITE_REASONS,githubAppJwtClaims,githubDraftAttentionItem,githubDraftChange,githubDraftCreatedPath,githubDraftCreatedUrl,githubDraftHeadline,githubDraftItemId,githubDraftOutcome,githubDraftPending,githubDraftReadPath,githubDraftRequests,
+ githubDraftResultUrl,githubDraftTarget,githubDraftTargetParts,githubWriteAuditEntry,githubWriteChange,githubWriteDraft,githubWriteGrantFor,makeGithubDraft,readGithubApp,readGithubDraftCreate,readGithubDrafts,readGithubWriteRun,readStoredGithubApp,readStoredGithubDraft,settleGithubDraft,startGithubDraftWrite,type GithubWriteRequest} from '../../../../../core/agent/index.ts';
 import {GITHUB_DRAFT_TARGET,type GithubAppCredentials,type GithubDraft,type GithubWrite} from '../../../../../contracts/github-drafts.ts';
-import type {AgentAuditEntry} from '../../../../../contracts/agent-identity.ts';
+import type {AgentAuditEntry,Grant} from '../../../../../contracts/agent-identity.ts';
 import type {VaultService} from '../../host/services.ts';
 import type {Row} from './types.ts';
 
@@ -11,7 +11,8 @@ import type {Row} from './types.ts';
 // each GitHub request over GitHub's REST API as the person's GitHub App. The App's ID, installation ID and private key
 // are kept only in the vault (`github-app`); they, the token the App signs and the installation token GitHub gives for
 // it never leave this module: not to a page, an Agent, an audit entry, a log or an event. Every error here is one of
-// this module's own sentences, never a message that could carry a request.
+// this module's own sentences, never a message that could carry a request. A standing GitHub write
+// (core/agent/GRANTS.md#standing-github-writes) runs the same way, at once, with no draft kept.
 
 export const GITHUB_APP_VAULT_KEY='github-app';
 export const GITHUB_API='https://api.github.com';
@@ -35,6 +36,10 @@ export interface GithubDrafts {
  /** What became of these drafts, for the asks that carry them (agent-asks.ts): each found draft's Agent, status, result
   * link and why it was not written. */
  summaries(ids:readonly string[]):{id:string;agentId:string;status:string;resultUrl?:string;reason?:string}[];
+ /** One `github_writes` call (`github-writes/run`) by `agentId`, already admitted by its Grants (`grants`, its own):
+  * refused unless one of its standing GitHub write Grants reaches this repository, write and label prefix; otherwise
+  * the target is read again, refused when it is not as the Agent read it, and written once. Each is audited. */
+ run(agentId:string,args:Row,grants:readonly Grant[]):Promise<Row>;
  /** The GitHub App as GitHub's write identity (`githubApp`): whether one is connected, connecting one (checked with
   * GitHub before it is kept) and disconnecting it. None of them returns the App's settings. */
  app:{status():Row;connect(input:unknown):Promise<Row>;disconnect():Row};
@@ -119,6 +124,31 @@ export function createGithubDrafts({ledger,vault,name,changed,fetch=globalThis.f
   return githubDraftTarget(write==='issue.create'?'repository':'issue',answer.json,parts);
  }
  const running=new Set<string>();
+ /** Each request once, in order, until one is not accepted: GitHub's own words, or that it did not answer. */
+ /** Each request once, in order, stopping at the first GitHub refuses unless `independent` (labels.remove: each label
+  * is its own request, so one refused does not stop the others). `refused` is the first refusal or no answer in words;
+  * `answers` what GitHub said to each; `lost` when one had no answer. */
+ async function write(requests:GithubWriteRequest[],independent=false):Promise<{refused:string;answer:unknown;answers:{status:number;message?:string}[];lost:boolean}> {
+  const auth=await token();
+  const answers:{status:number;message?:string}[]=[];
+  let answer:unknown=null,refused='',lost=false;
+  try{
+   for(const step of requests){
+    const reply=await request(step.method,step.path,auth,step.body),message=(reply.json as Row|null)?.message;
+    answers.push({status:reply.status,...typeof message==='string'?{message}:{}});
+    if(!step.accept.includes(reply.status)){
+     const said=typeof message==='string'?message.replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,200):'';
+     refused||=`GitHub refused the write (${reply.status}${said?': '+said:''}).`;
+     if(independent)continue;
+     break;
+    }
+    answer=reply.json;
+   }
+  }catch{refused||=GITHUB_DRAFT_MESSAGES.lost;lost=true;}
+  return {refused,answer,answers,lost};
+ }
+ // Issues a standing write is running on: a second write to the same one waits for the Agent to read it again.
+ const writing=new Set<string>();
 
  return {
   async call(agentId,args){
@@ -167,37 +197,27 @@ export function createGithubDrafts({ledger,vault,name,changed,fetch=globalThis.f
      save(db!,next,'user');audit(db!,next,'approve','denied','The person approved, but the target changed on GitHub: '+change,at);changed();
      return {ok:true,status:'stale',reason:change};
     }
-    const {requests,result}=githubDraftRequests(draft),auth=await token();
+    const {requests,result}=githubDraftRequests(draft);
     // A new Issue is the one write a later read cannot tell was made, so it is recorded as begun before GitHub is asked.
-    let writing=draft;
-    if(draft.write==='issue.create'){writing=startGithubDraftWrite(draft,now());save(db!,writing,'user');}
-    const answers:{status:number;message?:string}[]=[];
-    let answer:unknown=null,lost=false;
-    try{
-     for(const step of requests){
-      const reply=await request(step.method,step.path,auth,step.body),message=(reply.json as Row|null)?.message;
-      answers.push({status:reply.status,...typeof message==='string'?{message}:{}});
-      // Each label removed is its own request: one refused does not stop the others.
-      if(!step.accept.includes(reply.status)){if(draft.write!=='labels.remove')break;continue;}
-      answer=reply.json;
-     }
-    }catch{lost=true;}
+    let begun=draft;
+    if(draft.write==='issue.create'){begun=startGithubDraftWrite(draft,now());save(db!,begun,'user');}
+    const {answer,answers,lost}=await write(requests,draft.write==='labels.remove');
     const at=now();
     // A new Issue left unanswered stays begun: Approve again looks for it on GitHub instead of posting it twice.
     if(lost&&draft.write==='issue.create')error(GITHUB_DRAFT_MESSAGES.createLost);
     if(lost){
-     const next=settleGithubDraft(writing,'unknown',at,{reason:GITHUB_DRAFT_MESSAGES.lost});
+     const next=settleGithubDraft(begun,'unknown',at,{reason:GITHUB_DRAFT_MESSAGES.lost});
      save(db!,next,'user');audit(db!,next,'approve','allowed','The person approved; '+GITHUB_DRAFT_MESSAGES.lost,at);changed();
      return {ok:true,status:'unknown',reason:GITHUB_DRAFT_MESSAGES.lost};
     }
     const outcome=githubDraftOutcome(draft,answers);
     if(outcome.status==='failed'){
-     const next=settleGithubDraft(writing,'failed',at,{reason:outcome.reason});
+     const next=settleGithubDraft(begun,'failed',at,{reason:outcome.reason});
      save(db!,next,'user');audit(db!,next,'approve','denied','The person approved; '+outcome.reason,at);changed();
      return {ok:true,status:'failed',reason:outcome.reason};
     }
     const url=result==='response'?githubDraftResultUrl(draft,answer):draft.target.url;
-    const next=settleGithubDraft(writing,'written',at,{resultUrl:url,...outcome.reason?{reason:outcome.reason}:{}});
+    const next=settleGithubDraft(begun,'written',at,{resultUrl:url,...outcome.reason?{reason:outcome.reason}:{}});
     save(db!,next,'user');audit(db!,next,'approve','allowed','The person approved; written to GitHub as the GitHub App: '+url+(outcome.reason?' '+outcome.reason:''),at);changed();
     return {ok:true,status:'written',url,...outcome.reason?{reason:outcome.reason}:{}};
    }finally{running.delete(key);}
@@ -223,6 +243,39 @@ export function createGithubDrafts({ledger,vault,name,changed,fetch=globalThis.f
    const drafts=settle(db,load(db),now());
    return ids.flatMap(id=>{const draft=drafts.find(item=>item.id===id);
     return draft?[{id,agentId:draft.agentId,status:draft.status,...draft.resultUrl?{resultUrl:draft.resultUrl}:{},...draft.reason?{reason:draft.reason}:{}}]:[];});
+  },
+  async run(agentId,args,grants){
+   const db=ledger();
+   if(!db)return {error:NOT_READY};
+   const record=(entry:AgentAuditEntry)=>{try{db.recordAgentAudit(entry as unknown as Row,AGENT_AUDIT_KEEP);}catch{}};
+   let key='';
+   try{
+    const {operation,...input}=args??{};
+    if(operation!=='run')return {error:'Unknown GitHub writes operation.'};
+    // Checked before GitHub is asked anything: the same limits as a draft, then the Grant's reach.
+    const run=readGithubWriteRun(input),at=now(),parts={owner:run.owner,repo:run.repoName,number:run.number};
+    const grant=githubWriteGrantFor(agentId,grants,run,at),headline=githubDraftHeadline({write:run.write,repo:`${run.owner}/${run.repoName}`,number:run.number} as GithubDraft);
+    if(!grant){record(githubWriteAuditEntry(agentId,undefined,headline,{written:false,reason:GITHUB_WRITE_REASONS.notGranted},at));return {error:GITHUB_WRITE_REASONS.notGranted};}
+    key=`${run.owner}/${run.repoName}#${run.number}`.toLowerCase();
+    if(writing.has(key)){key='';return {error:GITHUB_WRITE_REASONS.busy};}
+    writing.add(key);
+    // Read as the App right before writing: anything not as the Agent read it refuses the whole write.
+    const found=await target('issue.comment',parts),change=githubWriteChange(run,found);
+    const current=found?{current:{state:found.state,updatedAt:found.updatedAt,title:found.title,url:found.url,...found.labels?{labels:found.labels}:{}}}:{};
+    if(change){
+     record(githubWriteAuditEntry(agentId,grant.id,headline,{written:false,reason:change},now()));
+     return {error:change,status:'stale',...current,untrustedContent:true};
+    }
+    const draft=githubWriteDraft(run,agentId,found!,at),{requests,result}=githubDraftRequests(draft),{refused,answer}=await write(requests);
+    if(refused){
+     record(githubWriteAuditEntry(agentId,grant.id,headline,{written:false,reason:refused},now()));
+     return {error:refused,status:'failed',untrustedContent:true};
+    }
+    const url=result==='response'?githubDraftResultUrl(draft,answer):draft.target.url;
+    record(githubWriteAuditEntry(agentId,grant.id,headline,{written:true,url},now()));
+    return {ok:true,status:'written',url,untrustedContent:true};
+   }catch(failure){return {error:own(failure)};}
+   finally{if(key)writing.delete(key);}
   },
   app:{
    status(){return {connected:readStoredGithubApp(vault.get(GITHUB_APP_VAULT_KEY))!==null};},

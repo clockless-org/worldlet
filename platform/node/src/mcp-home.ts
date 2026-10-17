@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {standingWorldTools} from '../../electron/src/modules/agent-runtime/index.ts';
+import {mcpHome,worldletHome} from '../../electron/src/modules/agent-runtime/script-agents.ts';
 import {currentEnvironment,locateLocalHarnesses} from '../../electron/src/modules/agent-runtime/local-harness.ts';
 import {runHarnessCommand} from '../../electron/src/modules/agent-runtime/harness-approvals.ts';
 import {codexHome} from '../../electron/src/modules/agent-runtime/agent-files.ts';
@@ -19,8 +20,7 @@ import {LOCAL_HARNESSES,commandReason,isWorldToolsRegistrar,worldToolsCommands,t
 declare const __WORLDLET_SKILL__:string|undefined;
 const REGISTERED='registered.json';
 
-export const worldletHome=(env:NodeJS.ProcessEnv=process.env)=>path.resolve(env.WORLDLET_HOME||path.join(os.homedir(),'.worldlet'));
-export const mcpHome=(env:NodeJS.ProcessEnv=process.env)=>path.join(worldletHome(env),'mcp');
+export {worldletHome,mcpHome};
 /** Where each Agent reads its skills: Claude Code `~/.claude/skills` (or under CLAUDE_CONFIG_DIR), Codex
  * `~/.codex/skills` (or under CODEX_HOME). */
 export function skillFile(harness:WorldToolsRegistrar,env:NodeJS.ProcessEnv=process.env,home=os.homedir()):string {
