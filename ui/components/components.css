@@ -256,6 +256,9 @@
 .onboarding-regions{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .world-onboarding .onboarding-regions button{margin:0;padding:10px;}
 .world-onboarding .onboarding-regions small{font-size:11px;margin-top:3px;}
+.world-onboarding .onboarding-connectors button,.world-onboarding .onboarding-connector{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;}
+.world-onboarding .onboarding-connector{box-sizing:border-box;padding:10px;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);color:var(--ui-ink);}
+.world-onboarding .onboarding-connectors small{overflow-wrap:anywhere;}
 
 /* Setup belongs to Fox; plots are simple connection targets in the world. */
 .companion-guide-actions{display:flex;gap:10px;flex-wrap:nowrap;margin-top:16px;pointer-events:auto}
