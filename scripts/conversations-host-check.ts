@@ -23,7 +23,7 @@ assert.equal(hideSecrets(`use ${key} now`),`use ${CONVERSATION_HIDDEN} now`);
 assert.equal(hideSecrets(`token ${github}`),`token ${CONVERSATION_HIDDEN}`);
 assert.equal(hideSecrets('Authorization: Bearer abcdefghijklmnop1234'),`Authorization: Bearer ${CONVERSATION_HIDDEN}`);
 assert.equal(hideSecrets(`merged as ${sha}`),`merged as ${sha}`,'a commit is not a secret');
-assert.equal(hideSecrets('-----BEGIN RSA PRIVATE KEY-----\nMIIE\n-----END RSA PRIVATE KEY-----'),CONVERSATION_HIDDEN);
+assert.equal(hideSecrets(['BEGIN','END'].map(edge=>`-----${edge} RSA PRIVATE KEY-----`).join('\nMIIE\n')),CONVERSATION_HIDDEN);
 
 await withTempDir('worldlet-conversations-',async dir=>{
  const ledger=new WorldLedger(path.join(dir,'world'));
