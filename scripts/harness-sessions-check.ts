@@ -519,7 +519,7 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
      assert.equal(access.grantService('nobody','github'),false,'an unknown Agent');
      assert.equal(access.grantService('codex','github'),true);
      assert.deepEqual(access.grants('codex').filter(g=>!g.revokedAt&&g.targets.some(t=>/^(github|posthog|cloudflare)\//.test(t))).map(g=>[g.id,g.targets,g.access,g.duration]),
-      [['codex-service-github',['github/list','github/read','github/search'],'read','standing']],'exactly GitHub\'s reads');
+      [['codex-service-github',['github/list','github/read','github/search','github/releases'],'read','standing']],'exactly GitHub\'s reads');
      await ask('call_world_tool',github);
      assert.equal((await ask('call_world_tool',{target:'posthog',action:'query',arguments:'{"query":"select 1"}'})).error,STANDING_OUTSIDE_TURN,'another Service stays refused');
      assert.deepEqual(channel.map(([name,args,agent])=>[name,args.provider,args.operation,agent]),[['read_service','github','list','codex']],'granted: its next call runs');

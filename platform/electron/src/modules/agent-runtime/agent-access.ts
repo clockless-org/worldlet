@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import {AGENT_AUDIT_KEEP,agentRevoked,channelDefaultGrants,grantActive,readAgentIdentity,readGrant,askGrant,askGrantAuditEntry,boardGrant,boardGrantAuditEntry,conversationGrant,conversationGrantAuditEntry,linkGrant,linkGrantAuditEntry,githubDraftGrant,githubDraftGrantAuditEntry,githubWriteGrant,githubWriteGrantAuditEntry,githubWriteGrants,githubWriteGrantId,serviceGrantAuditEntry,serviceReadGrant,reportGrant,reportGrantAuditEntry} from '../../../../../core/agent/index.ts';
+import {AGENT_AUDIT_KEEP,agentRevoked,channelDefaultGrants,currentServiceGrant,grantActive,readAgentIdentity,readGrant,askGrant,askGrantAuditEntry,boardGrant,boardGrantAuditEntry,conversationGrant,conversationGrantAuditEntry,linkGrant,linkGrantAuditEntry,githubDraftGrant,githubDraftGrantAuditEntry,githubWriteGrant,githubWriteGrantAuditEntry,githubWriteGrants,githubWriteGrantId,serviceGrantAuditEntry,serviceReadGrant,reportGrant,reportGrantAuditEntry} from '../../../../../core/agent/index.ts';
 import {GITHUB_WRITE_LIMITS} from '../../../../../contracts/github-drafts.ts';
 import type {AgentAuditEntry,AgentIdentity,Grant} from '../../../../../contracts/agent-identity.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
@@ -22,7 +22,7 @@ export function createAgentAccess({root,vault,ledger,now=()=>new Date().toISOStr
  const load=():Stored=>{
   let value:Row|null=null;try{value=readAgentSetting(root,SETTING);}catch{}
   const list=(key:string)=>Array.isArray(value?.[key])?value![key] as unknown[]:[];
-  return {identities:list('identities').flatMap(row=>{const v=readAgentIdentity(row);return v?[v]:[];}),grants:list('grants').flatMap(row=>{const v=readGrant(row);return v?[v]:[];})};
+  return {identities:list('identities').flatMap(row=>{const v=readAgentIdentity(row);return v?[v]:[];}),grants:list('grants').flatMap(row=>{const v=readGrant(row);return v?[currentServiceGrant(v)]:[];})};
  };
  const save=(stored:Stored)=>writeAgentSetting(root,SETTING,stored as unknown as Row);
  // Hash of this run's token → Agent; the vault keeps the same hash, so a token is checked against it.

@@ -1,24 +1,31 @@
-import {BOARD_REASONS,boardPresetIds,defineBoard,readBoardReadArgs,readStoredBoard,resolveBoard,type BoardRead} from '../../../../../core/board/index.ts';
+import {BOARD_PROVIDERS,BOARD_REASONS,boardPresetIds,defineBoard,readBoardReadArgs,readStoredBoard,resolveBoard,type BoardRead} from '../../../../../core/board/index.ts';
 import {servicePresetRead} from '../../../../../core/accounts/index.ts';
+import {agentBoardRecords} from '../../../../../core/agent/index.ts';
+import type {AgentListEntry} from '../../../../../contracts/agent-reports.ts';
 import type {BoardRecord} from '../../../../../contracts/board.ts';
 import type {ServicePreset} from '../../../../../contracts/service-presets.ts';
-import {SERVICE_PROVIDERS,type ServiceRead,type ServiceRecords} from '../../../../../contracts/services.ts';
+import type {ServiceRead,ServiceRecords} from '../../../../../contracts/services.ts';
 import {loadServicePresets,storeServicePresets,type PresetLedger} from '../sources/service-presets.ts';
 import type {Row} from './types.ts';
 
 // The board (core/board/README.md). Core checks and resolves; this keeps the board in the World's ledger (`state.board`
 // in world.sqlite, beside the Service presets it names) and makes each preset's Service read, on this device, through
-// the World's own Service readers, under each Service's own limits. No model is involved.
+// the World's own Service readers, under each Service's own limits. An `agents` preset is answered from the World's own
+// Agent reports (`agents/list`), with no Service and no network. No model is involved.
 
 export type BoardLedger=PresetLedger&{board():Row|null;saveBoard(board:Row):void};
 /** One Service read as `read_service` makes it, with no Agent and no turn: the World's own. */
 export type ServiceReader=(read:ServiceRead)=>Promise<unknown>;
+/** Every Agent the person has not revoked with its report, as `agents/list` returns them; null outside the person's own
+ * World. */
+export type AgentLister=()=>AgentListEntry[]|null;
 export interface WorldBoard {
  /** One `world_board` call (`board/read`, `board/define`) by `agentId`, already admitted by its Grants. `canRead` says
-  * whether this Agent's own Grants let it read a Service: a block of a Service it may not read shows that, never the
-  * Service's data. */
+  * whether this Agent's own Grants let it read a Service (`agents`, `list`: whether it may see other Agents): a block of
+  * a source it may not read shows that, never the source's data. */
  call(agentId:string,args:Row,canRead:(provider:string,operation:string)=>boolean):Promise<Row>;
- /** The board as the person sees it (host action `board`, `read`): every Service the World is connected to. */
+ /** The board as the person sees it (host action `board`, `read`): every Service the World is connected to, and every
+  * Agent's report. */
  view(request:Row):Promise<Row>;
 }
 const NOT_READY='Worldlet is not ready for this yet: the person has not finished setting up their own World.';
@@ -27,15 +34,24 @@ export const BOARD_READ_REUSE_MS=60_000;
 /** Service reads one board resolve makes at once. */
 const PARALLEL=4;
 
-export function createWorldBoard({ledger,read,now=()=>new Date().toISOString(),clock=()=>Date.now()}:
- {ledger:()=>BoardLedger|null;read:ServiceReader;now?:()=>string;clock?:()=>number}):WorldBoard {
+export function createWorldBoard({ledger,read,agents=()=>null,now=()=>new Date().toISOString(),clock=()=>Date.now()}:
+ {ledger:()=>BoardLedger|null;read:ServiceReader;agents?:AgentLister;now?:()=>string;clock?:()=>number}):WorldBoard {
  const reused=new Map<string,{at:number;records:ServiceRecords}>();
  const stored=(db:BoardLedger):BoardRecord|null=>readStoredBoard(db.board());
  /** Each named preset's read: from a recent read, or the Service now; why not, when it cannot be read. */
  async function reads(presets:readonly ServicePreset[],ids:readonly string[],canRead:(provider:string,operation:string)=>boolean):Promise<Record<string,BoardRead>> {
   const out:Record<string,BoardRead>={},queue=ids.flatMap(id=>{const preset=presets.find(item=>item.id===id);return preset?[preset]:[];});
   async function one(preset:ServicePreset){
-   if(!SERVICE_PROVIDERS.includes(preset.provider)){out[preset.id]={error:BOARD_REASONS.collection};return;}
+   if(!BOARD_PROVIDERS.includes(preset.provider)){out[preset.id]={error:BOARD_REASONS.collection};return;}
+   if(preset.provider==='agents'){
+    // The World's own records: read each time (nothing to reuse), and only for a caller that may see other Agents.
+    if(!canRead('agents','list')){out[preset.id]={error:'This Agent may not see other Agents. The person can allow it in Settings › Agent › Access.'};return;}
+    try{
+     const entries=agents();
+     out[preset.id]=entries?{records:agentBoardRecords(entries,preset.read)}:{error:'The Agents\' reports are kept in the person\'s own World, which is not ready.'};
+    }catch(error){out[preset.id]={error:error instanceof Error&&error.message?error.message:'The Agents\' reports could not be read.'};}
+    return;
+   }
    if(!canRead(preset.provider,preset.read.operation)){out[preset.id]={error:'This Agent may not read this Service. The person can allow it in Settings › Agent › Access.'};return;}
    const request=servicePresetRead(preset),key=JSON.stringify(request),hit=reused.get(key);
    if(hit&&clock()-hit.at<BOARD_READ_REUSE_MS){out[preset.id]={records:hit.records};return;}

@@ -1,6 +1,6 @@
 import {agentLiveness,listAgents,makeAgentReport,readStoredReport} from '../../../../../core/agent/index.ts';
 import type {AgentIdentity} from '../../../../../contracts/agent-identity.ts';
-import type {AgentLiveness,AgentReport} from '../../../../../contracts/agent-reports.ts';
+import type {AgentListEntry,AgentLiveness,AgentReport} from '../../../../../contracts/agent-reports.ts';
 import type {Row} from './types.ts';
 
 // Agent reports (core/agent/GRANTS.md#agent-reports). Core decides; this keeps each Agent's one report in the World's
@@ -12,6 +12,9 @@ export type ReportLedger={agentReports():Row[];saveAgentReport(report:Row):void}
 export interface AgentReports {
  /** One `agent_reports` call (`agents/report`, `agents/list`) by `agentId`, already admitted by its Grants. */
  call(agentId:string,args:Row):Row;
+ /** Every Agent the person has not revoked with its report, as `agents/list` answers, for the board's `agents` source
+  * (core/board/README.md#the-agents-source): null outside the person's own World. */
+ list():AgentListEntry[]|null;
  /** One Agent's report and how it reads now, for Settings › Agent: none outside the person's own World. */
  state(agentId:string):{liveness:AgentLiveness;report?:AgentReport};
 }
@@ -33,6 +36,10 @@ export function createAgentReports({ledger,identities,now=()=>new Date().toISOSt
     if(operation==='list')return {agents:listAgents(identities(),load(db),input,at),untrustedContent:true};
     return {error:'Unknown agents operation.'};
    }catch(error){return {error:error instanceof Error&&error.message?error.message:'Could not do that.'};}
+  },
+  list(){
+   let db:ReportLedger|null=null;try{db=ledger();}catch{}
+   return db?listAgents(identities(),load(db),{},now()):null;
   },
   state(agentId){
    let db:ReportLedger|null=null;try{db=ledger();}catch{}

@@ -19,7 +19,7 @@ export {NOTION_WRITE_OPERATIONS,NOTION_REVIEW_FOLDER,handleNotionWrite,publicRev
 export {TODOIST_ENDPOINT,TODOIST_TOOLS,TODOIST_GATE,todoistTimeoutSeconds,todoistTaskId,todoist,readTodoist,reviewedTodoist} from './mcp/todoist.ts';
 export {LINEAR_ENDPOINT,LINEAR_TOOLS,LINEAR_GATE,linearIssueId,linearListArguments,readLinear} from './mcp/linear.ts';
 export {PAYPAL_ENDPOINTS,PAYPAL_GATE,paypalPayload,readPaypal} from './mcp/paypal.ts';
-export {GITHUB_ENDPOINT,GITHUB_ENDPOINTS,GITHUB_TOOLS,GITHUB_GATE,GITHUB_LIMITS,githubRecordId,readGithub} from './mcp/github.ts';
+export {GITHUB_ENDPOINT,GITHUB_ENDPOINTS,GITHUB_TOOLS,GITHUB_GATE,GITHUB_LIMITS,githubRecordId,githubRepository,readGithub} from './mcp/github.ts';
 export {SUPABASE_ENDPOINT,SUPABASE_TOOLS,SUPABASE_GATE,supabaseProjectId,readSupabase} from './mcp/supabase.ts';
 // Worldlet Services read over their own API with a pasted key (PostHog, Cloudflare): the Platform gates each request, Core reads.
 export type {ServiceGate,ServiceHttp} from './services/http.ts';

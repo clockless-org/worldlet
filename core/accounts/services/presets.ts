@@ -6,10 +6,10 @@
 import {SERVICE_ACTIONS,SERVICE_TITLES,type ServiceOperation,type ServiceRead} from '../../../contracts/services.ts';
 import {SERVICE_PRESET_LIMITS,SERVICE_PRESET_PROVIDERS,type ServicePreset,type ServicePresetRead,type ServicePresetSave} from '../../../contracts/service-presets.ts';
 import {notionPageId} from '../mcp/notion.ts';
-import {looksSecret} from '../../agent/index.ts';
+import {looksSecret,readAgentBoardRead} from '../../agent/index.ts';
 import {hogqlSelect,POSTHOG_LIMITS,POSTHOG_LISTS} from './posthog.ts';
 import {CLOUDFLARE_READS} from './cloudflare.ts';
-import {GITHUB_LIMITS,githubRecordId} from '../mcp/github.ts';
+import {GITHUB_LIMITS,githubRecordId,githubRepository} from '../mcp/github.ts';
 
 export const PRESET_REASONS=Object.freeze({
  invalid:'This preset is not valid.',
@@ -52,7 +52,7 @@ function checked<T>(work:()=>T):T {
 export function readServicePresetRead(provider:unknown,input:unknown):ServicePresetRead {
  if(typeof provider!=='string'||!SERVICE_PRESET_PROVIDERS.includes(provider))return fail(PRESET_REASONS.service);
  const value=record(input);only(value,['operation','id','query']);
- const operations=provider==='notion'?{read:['id']}:SERVICE_ACTIONS[provider],title=SERVICE_TITLES[provider]??'Notion';
+ const operations=provider==='notion'?{read:['id']}:provider==='agents'?{list:['id']}:SERVICE_ACTIONS[provider],title=SERVICE_TITLES[provider]??(provider==='agents'?'Agents':'Notion');
  const operation=value.operation;
  if(typeof operation!=='string'||!Object.hasOwn(operations,operation))return fail(`${title} presets read with ${Object.keys(operations).join(' or ')}.`);
  for(const key of ['id','query'])if(!absent(value[key])&&(typeof value[key]!=='string'||/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f‪-‮⁦-⁩]/.test(value[key] as string)))fail(PRESET_REASONS.control);
@@ -70,6 +70,7 @@ export function readServicePresetRead(provider:unknown,input:unknown):ServicePre
    if(!query||[...query].length>GITHUB_LIMITS.query||/[\r\n\t]/.test(query))fail(`Search GitHub with one line of up to ${GITHUB_LIMITS.query} characters.`);
    read.query=query;
   }
+  if(operation==='releases'){takes(true,false);const parsed=checked(()=>githubRepository(id));read.id=`${parsed.owner}/${parsed.repo}`;}
  }else if(provider==='posthog'){
   if(operation==='query'){takes(false,true);read.query=checked(()=>hogqlSelect(query));}
   if(operation==='read'){
@@ -85,6 +86,9 @@ export function readServicePresetRead(provider:unknown,input:unknown):ServicePre
   read.id=id;
  }else if(provider==='notion'){
   takes(true,false);read.id=checked(()=>notionPageId(id));
+ }else if(provider==='agents'){
+  // The World's own Agent reports (contracts/agent-reports.ts): what each record is, and an optional filter.
+  Object.assign(read,checked(()=>readAgentBoardRead({operation,id,...query?{query}:{}})));
  }else{
   // A Service added to SERVICE_ACTIONS without rules here is refused until it has them.
   fail(PRESET_REASONS.service);

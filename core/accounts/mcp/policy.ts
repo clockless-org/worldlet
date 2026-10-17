@@ -17,7 +17,7 @@ export interface McpPolicy {
 /** Connector reads only: external writes need their own confirmation and receipt flow before chat may use them. */
 export const MCP_POLICY:Readonly<Record<string,McpPolicy>>=Object.freeze({
  notion:{tools:['notion-search','notion-fetch','notion-list-recent-pages','notion-query-data-sources','notion-get-self','notion-get-users','notion-get-user','notion-get-teams','notion-get-comments']},
- github:{tools:['get_me','get_file_contents','get_repository','list_branches','list_commits','get_commit','search_repositories','search_code','search_issues','search_pull_requests','list_issues','list_pull_requests','issue_read']},
+ github:{tools:['get_me','get_file_contents','get_repository','list_branches','list_commits','get_commit','search_repositories','search_code','search_issues','search_pull_requests','list_issues','list_pull_requests','issue_read','list_releases']},
  linear:{tools:READ_SHAPED},paypal:{tools:READ_SHAPED},
  todoist:{tools:TODOIST_TOOLS,endpoint:{url:TODOIST_ENDPOINT,message:'Use the official Todoist MCP endpoint.'},required:'Todoist task reading is unavailable on this server.'},
  supabase:{tools:SUPABASE_TOOLS,endpoint:{url:SUPABASE_ENDPOINT,message:'Use the official read-only Supabase MCP endpoint.'},required:'Supabase project reading is unavailable on this server.'},

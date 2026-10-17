@@ -1,6 +1,6 @@
-/** The board (core/board/README.md): tabs of blocks, each showing one Service preset (contracts/service-presets.ts) as
- * a number, a funnel, a list or a trend. A definition names presets and fields only, never a Service's key or a raw
- * read; Core resolves a definition and the presets' Service reads into the values a board shows, with no model and a
+/** The board (core/board/README.md): tabs of blocks, each showing one Service preset (contracts/service-presets.ts),
+ * a Service's read or the World's own Agent reports (`agents`), as a number, a funnel, a list or a trend. A definition
+ * names presets and fields only, never a Service's key or a raw read; Core resolves a definition and the presets' Service reads into the values a board shows, with no model and a
  * plain error for each block that cannot be shown. Everything stays on the device: the only network reads are the
  * presets' own Service reads, made by the host under the Service's rules. */
 

@@ -6,7 +6,8 @@ const el:(tag:string,cls?:string,text?:unknown)=>any=node;
 const SVG='http://www.w3.org/2000/svg';
 /** Every board read the panel makes is announced, so the World can draw the north-star number on the board's device. */
 export const BOARD_READ_EVENT='worldlet:board-read';
-const SERVICES:Record<string,string>={github:'GitHub',posthog:'PostHog',cloudflare:'Cloudflare'};
+import {WORLD_PRESET_PROVIDERS} from '../../../contracts/service-presets.ts';
+const SERVICES:Record<string,string>={github:'GitHub',posthog:'PostHog',cloudflare:'Cloudflare',agents:'Agents'};
 export const boardServiceTitle=(provider:string|undefined)=>provider?SERVICES[provider]||provider.charAt(0).toUpperCase()+provider.slice(1):'';
 type BoardRead={definition:BoardDefinition|null;view:BoardView|null;presets?:{id:string;provider:string;read:unknown}[]};
 const time=(value:string)=>{const d=new Date(value);return Number.isNaN(d.getTime())?'':d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});};
@@ -64,7 +65,8 @@ export function createBoardApplet({native,ask=(_text:string,_options?:any)=>{},s
   head.setAttribute('aria-pressed',String(block.id===selected));box.dataset.selected=String(block.id===selected);box.append(head);
   if(block.status==='error'){
    box.append(el('p','board-error',block.error||'This block cannot be shown.'));
-   if(block.provider&&connected(block.provider)===false)box.append(button('Connect '+boardServiceTitle(block.provider),()=>connect(block.provider!),'board-connect'));
+   // The World's own sources (the Agents' reports) have no connection to make.
+   if(block.provider&&!WORLD_PRESET_PROVIDERS.includes(block.provider)&&connected(block.provider)===false)box.append(button('Connect '+boardServiceTitle(block.provider),()=>connect(block.provider!),'board-connect'));
   }else if(block.kind==='number'&&block.number)number(box,block.number);
   else if(block.kind==='funnel'&&block.funnel)funnel(box,block.funnel);
   else if(block.kind==='list'&&block.list)list(box,block.list,block.provider);
@@ -92,8 +94,9 @@ export function createBoardApplet({native,ask=(_text:string,_options?:any)=>{},s
  function list(box:any,value:NonNullable<BoardBlockView['list']>,provider?:string){
   const rows=el('ul','board-list');
   for(const item of value.items){
-   const row=el('li','board-row'),link=el('a','board-link',item.title);link.href=item.url;link.rel='noopener noreferrer';
-   link.onclick=(e:MouseEvent)=>{e.preventDefault();openLink(item.url);};
+   // A record with no link (an Agent, or a run reported without one) is its title alone.
+   const row=el('li','board-row'),link=el(item.url?'a':'span','board-link',item.title);
+   if(item.url){link.href=item.url;link.rel='noopener noreferrer';link.onclick=(e:MouseEvent)=>{e.preventDefault();openLink(item.url);};}
    const fields=el('span','board-fields');for(const [key,field] of Object.entries(item.fields).slice(0,4))fields.append(el('span','',key+' '+String(field)));
    row.append(link,fields);rows.append(row);
   }

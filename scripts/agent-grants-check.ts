@@ -137,13 +137,13 @@ assert.equal(worldActionOf(actions,'_source_begin',{}),null);
 // "Can read <Service>" (Settings › Agent › Access): exactly that Service's read targets, as a standing read Grant; nothing
 // for a name that is not a Service; never in the default Grants. A granted Agent's read_service call passes outside a
 // Fox turn, an ungranted one (or another Service's) is refused, and taking it back refuses it again.
-assert.deepEqual(serviceReadTargets('github'),['github/list','github/read','github/search']);
+assert.deepEqual(serviceReadTargets('github'),['github/list','github/read','github/search','github/releases']);
 assert.deepEqual(serviceReadTargets('posthog'),['posthog/query','posthog/read']);
 assert.deepEqual(serviceReadTargets('cloudflare'),['cloudflare/read']);
 for(const name of ['gmail','*','github/*','__proto__','constructor','','toString'])assert.deepEqual(serviceReadTargets(name),[],'not a Service: '+name);
 assert.equal(serviceReadGrant('codex','*/*',now),null,'a page never names its own patterns');assert.equal(serviceReadGrant('Not An Id','github',now),null);
 const githubGrant=serviceReadGrant('codex','github',now)!;
-assert.deepEqual(githubGrant,{id:'codex-service-github',agentId:'codex',targets:['github/list','github/read','github/search'],access:'read',duration:'standing',grantedAt:now});
+assert.deepEqual(githubGrant,{id:'codex-service-github',agentId:'codex',targets:['github/list','github/read','github/search','github/releases'],access:'read',duration:'standing',grantedAt:now});
 assert.ok(!defaults.concat(channelDefaultGrants('codex',earlier,actions)).some(g=>g.targets.some(t=>/^(github|posthog|cloudflare)\//.test(t))),'no Service in the default Grants');
 const codexDefaults=channelDefaultGrants('codex',earlier,actions);
 const serviceCall=(grants:Grant[],target:string,action:string,args:Record<string,unknown>)=>{

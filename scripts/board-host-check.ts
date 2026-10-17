@@ -4,6 +4,7 @@ import path from 'node:path';
 import {withTempDir} from './test-temp.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/agent-access.ts';
+import {createAgentReports} from '../platform/electron/src/modules/agent-runtime/agent-reports.ts';
 import {BOARD_READ_REUSE_MS,createWorldBoard} from '../platform/electron/src/modules/agent-runtime/board.ts';
 import {openStandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
 import {STANDING_OUTSIDE_TURN} from '../core/agent/grants.ts';
@@ -14,7 +15,8 @@ import type {ServiceRead} from '../contracts/services.ts';
 // The board on the host (core/board/README.md, core/agent/GRANTS.md#the-board), the same modules the Electron and Node
 // hosts run: kept in world.sqlite beside its Service presets, reached only through the standing `worldlet` MCP server
 // with each Agent's own token and Grants (none by default, never a Fox turn's), each preset read once through the
-// World's own Service reader, a block of a Service the Agent may not read refused on that block alone, and audited.
+// World's own Service reader, a block of a Service the Agent may not read refused on that block alone, the World's own
+// `agents` source shown to an Agent only with its own agents/list Grant, and audited.
 await withTempDir('worldlet-board-',async dir=>{
  const ledger=new WorldLedger(path.join(dir,'world'));
  let clock=Date.parse('2026-10-15T12:00:00.000Z');
@@ -32,7 +34,10 @@ await withTempDir('worldlet-board-',async dir=>{
   return {provider:'cloudflare',operation:'read',scope:'Workers · Read only',records:[{id:'worker/api',title:'api',url:'https://dash.cloudflare.com/x',fields:{errors:2}}]};
  };
  let own=true;
- const board=createWorldBoard({ledger:()=>own?ledger:null,read,now,clock:()=>clock});
+ // The Agents' own reports, as agents/list answers them: the board's `agents` source, read with no Service.
+ const reports=createAgentReports({ledger:()=>own?ledger:null,identities:()=>access.list(0).map(entry=>entry.identity),now});
+ let listed=0;
+ const board=createWorldBoard({ledger:()=>own?ledger:null,read,agents:()=>{listed+=1;return reports.list();},now,clock:()=>clock});
  const standing=await openStandingWorldTools({access,board:(agentId,args,canRead)=>board.call(agentId,args,canRead),channel:async()=>({error:'not here'})});
  try{
   const agent=(id:string,name:string)=>{
@@ -134,6 +139,54 @@ await withTempDir('worldlet-board-',async dir=>{
   for(const answer of [collectionOwner,collectionAgent])assert.ok(answer.view.tabs[0].blocks.every((block:any)=>block.error===BOARD_REASONS.collection));
   assert.equal(asked.length,beforeCollection,'collection-only presets never reach the live Service reader');
 
+  // The World's own `agents` source beside a GitHub releases preset: a release machine reports its runs; the board shows
+  // them to the person, and to an Agent only when its own Grants let it see other Agents (agents/list).
+  agent('release-pc','Release PC');
+  assert.equal(reports.call('release-pc',{operation:'report',status:'working',role:'release',tags:['release','windows'],runs:[
+   {id:'beta-1234-windows',title:'Beta 1234 · Windows',status:'running',startedAt:'2026-10-15T12:00:00.000Z'},
+   {id:'alpha-1233-windows',title:'Alpha 1233 · Windows',status:'failed',url:'https://ci.example.com/runs/7',startedAt:'2026-10-15T11:00:00.000Z'}]}).ok,true);
+  const releases={id:'releases',title:'Releases',blocks:[
+   {id:'beta-runs',title:'Beta runs',kind:'list',preset:'beta-runs',fields:['status','agent']},
+   {id:'failing',title:'Runs failing',kind:'number',preset:'release-totals',field:'failed',goodAtMost:0},
+   {id:'shipped',title:'Releases',kind:'list',preset:'app-releases',fields:['tag']},
+  ]};
+  const releasePresets=[
+   {id:'beta-runs',name:'Beta runs',provider:'agents',read:{operation:'list',id:'runs',query:'tag:release beta'}},
+   {id:'release-totals',name:'Release machines',provider:'agents',read:{operation:'list',id:'totals',query:'role:release'}},
+   {id:'app-releases',name:'example/app releases',provider:'github',read:{operation:'releases',id:'example/app'}},
+  ];
+  const revision=ledger.board()!.revision as number;
+  assert.equal((await codex('define',{definition:{...definition,tabs:[...definition.tabs,releases]},presets:[presets[0],...releasePresets],expectedRevision:revision})).ok,true,'the funnel preset is saved again over the Notion one');
+  assert.deepEqual(ledger.servicePresets().filter(row=>row.provider==='agents').map(row=>[row.id,row.read]),
+   [['beta-runs',{operation:'list',id:'runs',query:'tag:release beta'}],['release-totals',{operation:'list',id:'totals',query:'role:release'}]]);
+  const releaseBlocks=(answer:any)=>Object.fromEntries(answer.view.tabs[0].blocks.map((block:any)=>[block.id,block]));
+  // Can see your board alone: the agents blocks say why, and the reports are not even read for this Agent.
+  const askedBefore=asked.length;listed=0;
+  const blindReleases=releaseBlocks(await claude('read',{tab:'releases'}));
+  assert.deepEqual([blindReleases['beta-runs'].status,blindReleases['beta-runs'].provider,blindReleases.failing.status],['error','agents','error']);
+  assert.match(blindReleases['beta-runs'].error,/may not see other Agents/);
+  assert.equal(listed,0,'no report is read for an Agent that may not see other Agents');
+  assert.ok(!JSON.stringify(blindReleases).includes('Beta 1234'));
+  // GitHub's releases go through Can read GitHub, which this Agent has.
+  assert.equal(blindReleases.shipped.status,'ok');
+  assert.deepEqual(asked.slice(askedBefore),[{provider:'github',operation:'releases',id:'example/app'}]);
+  // With Can see other Agents, the same blocks show the runs; the person sees them with no Grant at all.
+  assert.ok(access.grantReports('claude-code','list'));
+  const seenReleases=releaseBlocks(await claude('read',{tab:'releases'}));
+  assert.deepEqual(seenReleases['beta-runs'].list,{items:[{title:'Beta 1234 · Windows',url:'',fields:{status:'running',agent:'Release PC'}}],more:false});
+  assert.deepEqual(seenReleases.failing.number,{value:1,tone:'bad'});
+  assert.equal(seenReleases['beta-runs'].scope,'Runs the Agents in this World reported · tag:release beta · Read only');
+  assert.ok(access.ungrantReports('claude-code','list'));
+  assert.match(releaseBlocks(await claude('read',{tab:'releases'})).failing.error,/may not see other Agents/,'taking it back refuses the next read');
+  const personReleases=releaseBlocks(await board.view({tab:'releases'}));
+  assert.deepEqual([personReleases['beta-runs'].status,personReleases.failing.number],['ok',{value:1,tone:'bad'}]);
+  // A revoked Agent's runs leave the board; outside the person's own World there are no reports to show.
+  // (Agent access stamps the revocation on its own clock; this check's clock moves past it.)
+  access.revoke('release-pc');clock=Date.now()+1000;
+  assert.deepEqual(releaseBlocks(await board.view({tab:'releases'}))['beta-runs'].list,{items:[],more:false});
+  const notReady=createWorldBoard({ledger:()=>ledger,read,agents:()=>null,now,clock:()=>clock});
+  assert.match(releaseBlocks(await notReady.view({tab:'releases'}))['beta-runs'].error,/person's own World, which is not ready/);
+
   // Hermes Agent with no Grant is refused; taking a Grant back refuses the next call; revoking refuses everything.
   assert.equal((await hermes('read')).error.length>0,true);
   assert.ok(access.ungrantBoard('claude-code','read'));
@@ -151,4 +204,4 @@ await withTempDir('worldlet-board-',async dir=>{
   assert.deepEqual(audit('claude-code').at(-2),['ungrant-read','allowed']);
  }finally{standing.close();ledger.close();}
 });
-console.log('PASS board on the host: kept in world.sqlite with its presets, only through each Agent\'s own Grants, stale revisions refused, each preset read once and reused for a minute, Services the Agent may not read refused per block, audited.');
+console.log('PASS board on the host: kept in world.sqlite with its presets, only through each Agent\'s own Grants, stale revisions refused, each preset read once and reused for a minute, Services the Agent may not read refused per block, the agents source only with Can see other Agents, GitHub releases through Can read GitHub, audited.');

@@ -661,10 +661,12 @@ export function installAgentRuntime(host:Host){
   return sources.readNotionContext(request);
  }));
  // The board (core/board/README.md): in the person's own World with private context allowed, as asks are. Each preset is
- // read through the World's own Service readers, as the Attention Center reads a source: no Agent, no turn, no model.
+ // read through the World's own Service readers, as the Attention Center reads a source: no Agent, no turn, no model; an
+ // `agents` preset from the Agents' own reports, as `agents/list` answers.
  worldBoard=createWorldBoard({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
   read:request=>service.makeSourceAccess().run({action:'sourceTool',name:'read_service',args:{...request},_background:true},service.accountsHome(),
-   async event=>event.type==='tool'&&event.name==='_world_authorize'&&(event.args as Row|undefined)?.name==='read_service'?{ok:true}:{error:'The board only reads Services.'})});
+   async event=>event.type==='tool'&&event.name==='_world_authorize'&&(event.args as Row|undefined)?.name==='read_service'?{ok:true}:{error:'The board only reads Services.'}),
+  agents:()=>agentReports?.list()??null});
  /** The board as the person sees it (`read`, optionally one `tab`): every Service the World is connected to. */
  host.register({board:async request=>{
   if(request.operation!=='read')throw new WorldletError('Unknown board operation.');

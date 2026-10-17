@@ -6,6 +6,7 @@ import {describeActions,resolveAction,worldActions,worldGatewayTools,type WorldA
 import {HERMES_WORLD_TOOLS_SHIM,agentAuditEntry,standingActions,standingCallDecision,type GrantDecision,type HermesOwnCalls,type HermesWorldToolsServer,type WorldToolServer} from '../../../../../core/agent/index.ts';
 import type {AgentAccess} from '../../host/services.ts';
 import type {AgentIdentity,Grant} from '../../../../../contracts/agent-identity.ts';
+import {AGENT_REPORT_TARGET} from '../../../../../contracts/agent-reports.ts';
 import {writeAtomic} from '../../files.ts';
 import {AGENT_ASK_LIMITS} from '../../../../../contracts/agent-asks.ts';
 import type {Row} from './types.ts';
@@ -221,7 +222,7 @@ export const standingEndpointFile=(agentId:string)=>`worldlet-mcp-endpoint.${age
  * always that Agent's own, under its own Grants: never a Fox turn's, and never routed to one. */
 /** `board`: a board call (`world_board`, core/board/README.md) by the Agent whose token made it, the same way: its own
  * Grants decide it, and `canRead` says whether they let it read a Service, so the board never shows an Agent a Service
- * its own `read_service` call would be refused. */
+ * its own `read_service` call would be refused, nor other Agents' reports its own `agents/list` call would be. */
 /** `drafts`: a GitHub draft call (`github_drafts`, core/agent/GRANTS.md#github-drafts) by the Agent whose token made it,
  * the same way: its own Grants decide it, never a Fox turn's. */
 /** `conversations`: a conversation archive call (`world_conversations`, core/agent/GRANTS.md#conversation-archive) by
@@ -247,7 +248,7 @@ export async function openStandingWorldTools({channel,access,asks,board,drafts,w
     :name===CONVERSATIONS_TOOL?conversations?.(identity.id,args)??{error:'The conversation archive is not available in this build.'}
     :name===LINKS_TOOL?links?.(identity.id,args)??{error:'Tracked links are not available in this build.'}
     :name===REPORT_TOOL?reports?.(identity.id,args)??{error:'Agent reports are not available in this build.'}
-    :name===BOARD_TOOL?board?.(identity.id,args,(provider,operation)=>standingCallDecision({identity,grants,target:provider,action:operation,tool:'read_service',args:{provider,operation},foxTurn:null,now}).decision==='allowed')??{error:'The board is not available in this build.'}
+    :name===BOARD_TOOL?board?.(identity.id,args,(provider,operation)=>standingCallDecision({identity,grants,target:provider,action:operation,tool:provider===AGENT_REPORT_TARGET?REPORT_TOOL:'read_service',args:provider===AGENT_REPORT_TARGET?{operation}:{provider,operation},foxTurn:null,now}).decision==='allowed')??{error:'The board is not available in this build.'}
     :turn?turn.dispatch(name,args,call):channel(name,args,identity.id),
    access:{
     actions:all=>standingActions(all,identity,grants,foxTurn!==null,now),
