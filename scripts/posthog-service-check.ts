@@ -45,6 +45,10 @@ await withTempDir('worldlet-posthog-service-',async temp=>{
   const route=url.pathname.slice(('/api/projects/'+PROJECT).length);
   if(route==='/query/'){
    const query=JSON.parse(init.body).query.query as string;
+   if(query.includes("event = '$exception'"))return json({columns:['issue','types','message','occurrences','people','first_seen','last_seen'],results:[
+    ['0190-aaaa','["TypeError"]','["Cannot read x of undefined in /Users/alex/app.js for alex@example.com"]',42,'5',new Date(Date.now()-3600_000).toISOString(),new Date().toISOString()],
+    ['0190-bbbb','["Error"]','["Error (timeout)"]',1,1,'2026-01-01T00:00:00Z','2026-01-02T00:00:00Z'],
+    ['fp:client-made','["Error"]','["spoofed"]',999,1,'2026-01-01T00:00:00Z','2026-01-02T00:00:00Z']]});
    if(query.includes('missing_field'))return json({type:'validation_error',detail:'Unable to resolve field: missing_field'},400);
    if(query.includes('narrow'))return json({columns:['event'],results:Array.from({length:rows},(_,i)=>[`event_${i}`])});
    if(huge)return new Response('{"results":['+'"x",'.repeat(700_000)+'"x"]}',{headers:{'content-type':'application/json'}});
@@ -169,9 +173,17 @@ await withTempDir('worldlet-posthog-service-',async temp=>{
  assert.equal((await read({provider:'posthog',operation:'read',id:'dashboards'})).records[0].url,HOST+'/project/12345/dashboard/3');
  const notes=await read({provider:'posthog',operation:'read',id:'annotations'});
  assert.deepEqual(notes.records[0].fields,{kind:'annotation',date:'2026-10-01T00:00:00Z',scope:'project'});
+ // Errors: one fixed read; PostHog's own groups only, the loudest first, personal text in error messages replaced.
+ const errorsRead=await read({provider:'posthog',operation:'read',id:'errors'});
+ assert.match((calls.at(-1)!.body as any).query.query,/^SELECT toString\(properties\.\$exception_issue_id\)/);
+ assert.deepEqual(errorsRead.records.map((r:any)=>[r.id,r.fields.occurrences,r.fields.people,r.fields.new]),[['error/0190-aaaa',42,5,true],['error/0190-bbbb',1,1,false]],'a client fingerprint is never a group');
+ assert.equal(errorsRead.records[0].title,'Cannot read x of undefined in /Users/[name]/app.js for [email]');
+ assert.equal(errorsRead.records[0].url,HOST+'/project/12345/error_tracking/0190-aaaa');
+ assert.equal(errorsRead.records[0].fields.type,'TypeError');
+ await failing(read({provider:'posthog',operation:'read',id:'errors',query:'timeout'}),/take no filter or cursor/);
  for(const page of [insights,flags,notes])assert.ok(!JSON.stringify(page).includes('alex@example.com'),'who made it is left out');
  calls.length=0;
- await failing(read({provider:'posthog',operation:'read',id:'persons'}),/Read one PostHog list: insights, dashboards, feature-flags, annotations/);
+ await failing(read({provider:'posthog',operation:'read',id:'persons'}),/Read one PostHog list: insights, dashboards, feature-flags, annotations, errors/);
  await failing(read({provider:'posthog',operation:'read',id:'insights',cursor:'6'}),/Invalid PostHog cursor/);
  await failing(read({provider:'posthog',operation:'read',id:'insights',query:'q'.repeat(101)}),/name of up to 100/);
  assert.equal(calls.length,0);
@@ -239,4 +251,4 @@ assert.equal(posthog.attention,undefined);assert.equal(posthog.fullView?.kind,'w
 const [runtime]=validateAppletRuntimes([JSON.parse(fs.readFileSync(new URL('../ui/applets/posthog/runtime.json',import.meta.url),'utf8'))]);
 assert.equal(runtime.mode,'on-demand');assert.equal(runtime.publishAttention,false);assert.equal(runtime.intervalMinutes,0);
 
-console.log('PASS PostHog Service: a personal API key is checked with one read at the address and project given before it is kept and a refused one replaces nothing; query runs one read-only HogQL SELECT, at most 200 rows, and refuses anything else; read pages insights, dashboards, feature flags and annotations; only the address given, no redirect, bounded size; refused turn and expired key stop the read; posthog/query and posthog/read enforced and in no default Grant; the key is in no event, journal entry, receipt or message');
+console.log('PASS PostHog Service: a personal API key is checked with one read at the address and project given before it is kept and a refused one replaces nothing; query runs one read-only HogQL SELECT, at most 200 rows, and refuses anything else; read pages insights, dashboards, feature flags and annotations and reads the error groups; only the address given, no redirect, bounded size; refused turn and expired key stop the read; posthog/query and posthog/read enforced and in no default Grant; the key is in no event, journal entry, receipt or message');

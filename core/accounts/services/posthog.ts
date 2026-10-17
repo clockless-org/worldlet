@@ -1,5 +1,6 @@
 // Bounded reads of the person's own PostHog project through PostHog's API, with a personal API key they pasted: one
-// read-only HogQL SELECT (`query`), or a page of their insights, dashboards, feature flags or annotations (`read`).
+// read-only HogQL SELECT (`query`), a page of their insights, dashboards, feature flags or annotations (`read`), or their
+// production errors: each error group seen in the last 7 days with its last 24 hours (`read` `errors`).
 // No writes. PostHog's remote MCP server serves only PostHog Cloud and picks its project itself, so a self-hosted
 // PostHog and a chosen project are read here directly; the Platform sends each request only to the address the
 // person gave (service-source.ts). Every answer is cut to a fixed size before it reaches an Agent
@@ -121,7 +122,46 @@ const LISTS:ReadonlyMap<string,Lister>=new Map<string,Lister>([
    fields:present({kind:'annotation'},{date:cut(row.date_marker,40),scope:cut(row.scope,40)})};
  }}],
 ]);
-export const POSTHOG_LISTS:readonly string[]=Object.freeze([...LISTS.keys()]);
+/** What `read` takes as its `id`: the lists, and `errors`. */
+export const POSTHOG_LISTS:readonly string[]=Object.freeze([...LISTS.keys(),'errors']);
+/** `read` `errors`: each error group PostHog made from `$exception` events (its own `$exception_issue_id`, never a bare
+ * client fingerprint) seen in the last 7 days, the loudest in the last 24 hours first. `new` means first seen in the
+ * last 24 hours. Which groups need someone is the person's call (a board threshold, an Agent's routine), not this read. */
+export const POSTHOG_ERRORS=Object.freeze({groups:20,message:200,
+ query:"SELECT toString(properties.$exception_issue_id) AS issue, any(toString(properties.$exception_types)) AS types, any(toString(properties.$exception_values)) AS message, "
+  +"countIf(timestamp > now() - INTERVAL 24 HOUR) AS occurrences, uniqIf(person_id, timestamp > now() - INTERVAL 24 HOUR) AS people, min(timestamp) AS first_seen, max(timestamp) AS last_seen "
+  +"FROM events WHERE event = '$exception' AND timestamp > now() - INTERVAL 7 DAY AND notEmpty(toString(properties.$exception_issue_id)) "
+  +"GROUP BY issue ORDER BY occurrences DESC, last_seen DESC LIMIT 20"});
+const ISSUE_ID=/^[A-Za-z0-9-]{1,64}$/;
+/** An exception's types or values as PostHog keeps them (a JSON list as text), joined into one plain line; email
+ * addresses and home folders in it are replaced, since an app's error text can carry them. */
+function errorText(value:unknown,limit:number):string {
+ let parts:unknown=value;
+ if(typeof value==='string'){try{parts=JSON.parse(value);}catch{parts=[value];}}
+ const text=(Array.isArray(parts)?parts:[parts]).filter(part=>typeof part==='string'&&part).join(' · ')
+  .replace(/[^\s@]+@[^\s@]+\.[A-Za-z]{2,}/g,'[email]').replace(/(\/Users\/|\/home\/|[A-Za-z]:\\Users\\)[^\/\\\s]+/g,'$1[name]');
+ return cut(text,limit);
+}
+async function readPosthogErrors(http:ServiceHttp,project:string,web:string):Promise<ServiceRecords> {
+ const answer=await http.post(`/api/projects/${project}/query/`,{query:{kind:'HogQLQuery',query:POSTHOG_ERRORS.query}});
+ if(!isDict(answer)||!Array.isArray(answer.results))throw new Error('PostHog returned an unsupported answer.');
+ const columns:unknown[]=Array.isArray(answer.columns)?answer.columns:[];
+ const at=(row:unknown[],name:string)=>row[columns.indexOf(name)];
+ const day=Date.now()-24*3600_000;
+ const records=answer.results.slice(0,POSTHOG_ERRORS.groups).flatMap((row:unknown):ServiceRecord[]=>{
+  if(!Array.isArray(row))return [];
+  const issue=at(row,'issue');
+  if(typeof issue!=='string'||!ISSUE_ID.test(issue))return [];
+  const first=cut(at(row,'first_seen'),40),last=cut(at(row,'last_seen'),40),firstAt=Date.parse(first);
+  const title=errorText(at(row,'message'),POSTHOG_ERRORS.message)||errorText(at(row,'types'),POSTHOG_ERRORS.message)||'Error';
+  return [{id:`error/${issue}`,title,url:`${web}/error_tracking/${issue}`,...last?{updatedAt:last}:{},
+   fields:present({kind:'error',occurrences:count(at(row,'occurrences')),people:count(at(row,'people')),new:Number.isFinite(firstAt)&&firstAt>day},
+    {type:errorText(at(row,'types'),80),firstSeen:first,lastSeen:last})}];
+ });
+ return {provider:'posthog',operation:'read',records,
+  scope:`PostHog errors on project ${project}: groups seen in the last 7 days, counted over the last 24 hours, the loudest ${POSTHOG_ERRORS.groups} · Read only`};
+}
+const count=(value:unknown)=>{const n=typeof value==='number'?value:typeof value==='string'&&/^\d+$/.test(value)?Number(value):0;return Number.isFinite(n)?n:0;};
 
 /** The one read before a key is kept: the project, at that address, with that key. Returns its name. */
 export async function checkPosthog(http:ServiceHttp,settings:PosthogSettings):Promise<{name:string}> {
@@ -130,8 +170,8 @@ export async function checkPosthog(http:ServiceHttp,settings:PosthogSettings):Pr
  return {name:cut(project.name,POSTHOG_LIMITS.title)};
 }
 
-/** `query` (one HogQL SELECT, at most 200 rows) or `read` (`id`: insights, dashboards, feature-flags or annotations;
- * `query` filters them by name; `cursor` pages). */
+/** `query` (one HogQL SELECT, at most 200 rows) or `read` (`id`: insights, dashboards, feature-flags or annotations,
+ * where `query` filters them by name and `cursor` pages; or errors). */
 export async function readPosthog(http:ServiceHttp,settings:PosthogSettings,body:ServiceRead|Record<string,any>):Promise<ServiceRecords> {
  const {host,project}=settings;
  const web=`${host}/project/${project}`;
@@ -161,6 +201,10 @@ export async function readPosthog(http:ServiceHttp,settings:PosthogSettings,body
  }
  if(operation==='read'){
   const kind=typeof body.id==='string'?body.id:'';
+  if(kind==='errors'){
+   if(body.query||body.cursor)throw new ValueError('PostHog errors take no filter or cursor: the read is the loudest groups of the last 24 hours.');
+   return readPosthogErrors(http,project,web);
+  }
   const list=LISTS.get(kind);
   if(!list)throw new ValueError(`Read one PostHog list: ${POSTHOG_LISTS.join(', ')}.`);
   const search=body.query===undefined||body.query===null||body.query===''?'':typeof body.query==='string'&&[...body.query.trim()].length<=POSTHOG_LIMITS.search?body.query.trim():null;
