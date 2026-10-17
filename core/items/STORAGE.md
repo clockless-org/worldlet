@@ -296,7 +296,7 @@ source reads must not silently become conversation memory or item completion.
 | Tool | Behavior |
 | --- | --- |
 | `read_world_source` | Read a connected source; returns bounded records and stages this turn's evidence |
-| `read_service` | Read a Worldlet Service: GitHub (list, read one record or search), PostHog (one read-only HogQL query, or a page of insights, dashboards, feature flags or annotations) Cloudflare (Workers or zones analytics over the last 24 hours) or HTTP JSON (one GET under an endpoint the person named); bounded records, read only, no saved evidence |
+| `read_service` | Read a Worldlet Service: GitHub (list, read one record or search), PostHog (one read-only HogQL query, or a page of insights, dashboards, feature flags or annotations) Cloudflare (Workers or zones analytics over the last 24 hours) HTTP JSON (one GET under an endpoint the person named) or Search Console (its sites, or one Search Analytics query of a site); bounded records, read only, no saved evidence |
 | `query_world_items` | Query persistent items and check schedules |
 | `upsert_world_items` | After a read, add or update grounded items; an empty array means nothing important was found |
 | `review_world_item` | Reassess an item against this turn's originals as actionable / resolved / uncertain; user done or dismissed states are preserved |

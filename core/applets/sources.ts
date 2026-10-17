@@ -1,12 +1,12 @@
 /** Account sources an Agent connects and reads directly. */
-export const SOURCE_PROVIDERS=['gmail','google-calendar','google-drive','github','notion','linear','paypal','todoist','supabase','posthog','cloudflare','http'];
+export const SOURCE_PROVIDERS=['gmail','google-calendar','google-drive','github','notion','linear','paypal','todoist','supabase','posthog','cloudflare','http','search-console'];
 /** One Google sign-in grants Mail and Calendar together. */
 export const GOOGLE_SIGN_IN=['google','gmail','google-calendar'];
 export const GOOGLE_SIGN_IN_SERVICES=['gmail','google-calendar'];
 /** A setting a token source also needs, asked for beside the token (PostHog's address and project). */
 export interface TokenField {key:string;label:string;hint?:string;value?:string;placeholder?:string;numeric?:boolean;maxLength:number}
 /** Sources that connect only with a token the person pastes (GitHub's server offers no sign-in Worldlet can register
- * for; PostHog and Cloudflare take an API key), each with the one line saying what the token needs, what the token is
+ * for; PostHog and Cloudflare take an API key; Search Console a service account's JSON key), each with the one line saying what the token needs, what the token is
  * called there, the settings it also needs, and a token shape that is a common mistake. The token is checked with
  * one read before it is kept. `optional`: the source also connects with no token (an open HTTP JSON endpoint). */
 export const TOKEN_PROVIDERS:Readonly<Record<string,{hint:string;token:RegExp;label?:string;optional?:boolean;fields?:readonly TokenField[];wrong?:{token:RegExp;message:string}}>>=Object.freeze({
@@ -28,6 +28,9 @@ export const TOKEN_PROVIDERS:Readonly<Record<string,{hint:string;token:RegExp;la
    {key:'name',label:'Name',placeholder:'status',hint:'A short name Agents and presets use: lowercase letters, digits and -.',maxLength:32},
    {key:'url',label:'Base address',placeholder:'https://api.example.com/v1/',hint:'Reads are GET requests to paths under this HTTPS address.',maxLength:300},
   ])},
+ // The whole JSON key file; the host checks what is in it (core/accounts/services/search-console.ts).
+ 'search-console':{hint:'Paste the JSON key of a Google service account that you added as a user of your sites in Search Console.',token:/^\{[\s\S]{50,7998}\}$/,label:'service account key',
+  wrong:{token:/^\{\s*"(?:installed|web)"\s*:/,message:'That is an OAuth client file, not a service account key. Create a JSON key for a service account instead.'}},
 });
 /** The token a `connect` request carries: only for a source that connects with one, required there, and shaped like a
  * token. An error never repeats what was pasted. */
