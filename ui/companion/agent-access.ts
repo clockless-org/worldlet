@@ -3,16 +3,19 @@
  * more in the page, then removes that Agent's key so it can no longer reach the World; and, for each connected
  * Service, "Can read <Service>", which gives or takes back that Service's read Grant at once; "Can ask you" and "Can
  * take work" (Agent asks, core/agent/GRANTS.md#agent-asks), "Can see your board" and "Can set up your board"
- * (core/board/README.md), and "Can save conversations" and "Can search conversations"
- * (core/agent/GRANTS.md#conversation-archive), and "Can see your tracked links" and "Can keep your tracked links"
- * (core/agent/GRANTS.md#tracked-links), the same way. Plain words: the page names
+ * (core/board/README.md), "Can save conversations" and "Can search conversations"
+ * (core/agent/GRANTS.md#conversation-archive), "Can see your tracked links" and "Can keep your tracked links"
+ * (core/agent/GRANTS.md#tracked-links), and "Can report its work" and "Can see other Agents"
+ * (core/agent/GRANTS.md#agent-reports), the same way; and what each Agent last reported it is doing. Plain words: the page names
  * places in the World and what was allowed, never tokens, endpoints or MCP. */
 import {agentButton as button,agentEl as el} from './agent-change.ts';
 import {showRemoteAccess} from './remote-access.ts';
 type Grant={id:string;targets:string[];access:'read'|'write';duration:'standing'|'once';grantedAt:string;expiresAt?:string;revokedAt?:string};
 type Audit={at:string;target:string;action:string;decision:'allowed'|'denied'|'asked';reason?:string};
 type Service={provider:string;title:string;granted:boolean};
-type Agent={id:string;name:string;harness:string;kind:'local'|'remote';createdAt:string;lastSeenAt?:string;revokedAt?:string;grants:Grant[];audit:Audit[];services?:Service[];asks?:{ask:boolean;work:boolean};board?:{read:boolean;define:boolean};githubDrafts?:boolean;conversations?:{add:boolean;search:boolean};links?:{read:boolean;save:boolean}};
+type Agent={id:string;name:string;harness:string;kind:'local'|'remote';createdAt:string;lastSeenAt?:string;revokedAt?:string;grants:Grant[];audit:Audit[];services?:Service[];asks?:{ask:boolean;work:boolean};board?:{read:boolean;define:boolean};githubDrafts?:boolean;conversations?:{add:boolean;search:boolean};links?:{read:boolean;save:boolean};
+ reports?:{report:boolean;list:boolean};liveness?:'live'|'stale'|'offline';report?:Report};
+type Report={status:'working'|'idle'|'blocked'|'offline';summary:string;work:{title:string;state?:string}[];runs:{title:string;status:string}[];reportedAt:string};
 /** "Can ask you" and "Can take work" (core askGrant): the page names only which, never targets. */
 const ASK_TOGGLES=[['ask','Can ask you','can now ask you things in Attention','can no longer ask you things'],['work','Can take work','can now take work left for Agents','can no longer take work']] as const;
 /** "Can see your board" and "Can set up your board" (core boardGrant, core/board/README.md), the same way. */
@@ -24,6 +27,8 @@ const CONVERSATION_TOGGLES=[['add','Can save conversations','can now save conver
 /** "Can draft GitHub changes" (core githubDraftGrant, core/agent/GRANTS.md#github-drafts): shown once a GitHub App can
  * write what the person approves. */
 const DRAFT_TOGGLES=[['draft','Can draft GitHub changes','can now draft GitHub changes for you to approve','can no longer draft GitHub changes']] as const;
+/** "Can report its work" and "Can see other Agents" (core reportGrant), the same way. */
+const REPORT_TOGGLES=[['report','Can report its work','can now report what it is doing','can no longer report what it is doing'],['list','Can see other Agents','can now see what your other Agents are doing','can no longer see your other Agents']] as const;
 const date=(at:string)=>new Date(at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
 const time=(at:string)=>new Date(at).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
 const SHOWN_PLACES=6,SHOWN_AUDIT=5;
@@ -32,6 +37,18 @@ export function accessLine(agent:Agent):string {
  const where=agent.kind==='remote'?'On another computer':'On this computer';
  if(agent.revokedAt)return `${where}. Revoked ${date(agent.revokedAt)}.`;
  return `${where}. ${agent.lastSeenAt?'Last used '+date(agent.lastSeenAt):'Not used yet'}.`;
+}
+const STATUS:Record<Report['status'],string>={working:'Working',idle:'Free',blocked:'Blocked',offline:'Stopped'};
+/** What the Agent last reported, in a sentence: its status (or that it has gone quiet), its summary and when. Empty
+ * when it never reported. */
+export function reportLine(agent:Agent,clock=Date.now()):string {
+ const report=agent.report;
+ if(!report)return '';
+ const minutes=Math.max(0,Math.round((clock-Date.parse(report.reportedAt))/60_000));
+ const ago=minutes<1?'just now':minutes<60?`${minutes} min ago`:minutes<1440?`${Math.round(minutes/60)} h ago`:date(report.reportedAt);
+ const status=agent.liveness==='live'||report.status==='offline'?STATUS[report.status]:agent.liveness==='stale'?'Quiet':'Offline';
+ const work=report.work.length?` · ${report.work.slice(0,2).map(item=>item.title).join(', ')}${report.work.length>2?` and ${report.work.length-2} more`:''}`:'';
+ return `${status}${report.summary?': '+report.summary:''}${work} · reported ${ago}.`;
 }
 /** One Grant in a sentence: what it allows and where. Applet copies of a place are not repeated. */
 export function grantLine(grant:Grant):string {
@@ -50,6 +67,8 @@ export function auditLine(entry:Audit):string {
  if(entry.target==='asks'&&entry.action==='answer')return `${time(entry.at)} · You answered its ask`;
  if(entry.target==='links'&&/^(un)?grant-(read|save)$/.test(entry.action))return `${time(entry.at)} · ${entry.action.endsWith('save')?'Keeping your tracked links':'Seeing your tracked links'} · ${entry.action.startsWith('un')?'You turned it off':'You allowed it'}`;
  if(entry.target==='conversations'&&/^(un)?grant-(add|search)$/.test(entry.action))return `${time(entry.at)} · ${entry.action.endsWith('add')?'Saving conversations':'Searching conversations'} · ${entry.action.startsWith('un')?'You turned it off':'You allowed it'}`;
+ if(entry.target==='agents'&&/^(un)?grant-(report|list)$/.test(entry.action))return `${time(entry.at)} · ${entry.action.endsWith('list')?'Seeing other Agents':'Reporting its work'} · ${entry.action.startsWith('un')?'You turned it off':'You allowed it'}`;
+ if(entry.target==='agents'&&entry.action==='report'&&entry.decision==='allowed')return `${time(entry.at)} · Reported its work`;
  if(entry.target==='board'&&/^(un)?grant-(read|define)$/.test(entry.action))return `${time(entry.at)} · ${entry.action.endsWith('define')?'Setting up your board':'Seeing your board'} · ${entry.action.startsWith('un')?'You turned it off':'You allowed it'}`;
  // "Can draft GitHub changes", and the person's Approve or Dismiss on one of its drafts.
  if(entry.target==='github-drafts'&&(entry.action==='grant'||entry.action==='ungrant'))return `${time(entry.at)} · Drafting GitHub changes · ${entry.action==='ungrant'?'You turned it off':'You allowed it'}`;
@@ -87,6 +106,8 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
   for(const agent of agents){
    const row=el('div','companion-settings-row'),words=el('div');row.dataset.accessAgent=agent.id;
    words.append(el('strong','',agent.name),el('span','',accessLine(agent)));
+   const reported=agent.revokedAt?'':reportLine(agent);
+   if(reported){const line=el('span','companion-settings-access-report',reported);line.dataset.liveness=agent.liveness??'offline';words.append(line);}
    for(const grant of agent.grants.filter(g=>!g.revokedAt))words.append(el('span','companion-settings-quiet',grantLine(grant)));
    const recent=agent.audit.slice(0,SHOWN_AUDIT);
    if(recent.length){
@@ -113,7 +134,7 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
    }
    // "Can ask you" and "Can take work"; "Can see your board" and "Can set up your board": each gives or takes back one
    // Grant at once, naming only which.
-   const toggles=(granted:Record<string,boolean>|undefined,list:readonly (readonly [string,string,string,string])[],operation:'Asks'|'Board'|'GithubDrafts'|'Conversations'|'Links',data:'asks'|'board'|'githubDrafts'|'conversations'|'links')=>{
+   const toggles=(granted:Record<string,boolean>|undefined,list:readonly (readonly [string,string,string,string])[],operation:'Asks'|'Board'|'GithubDrafts'|'Conversations'|'Links'|'Reports',data:'asks'|'board'|'githubDrafts'|'conversations'|'links'|'reports')=>{
     if(agent.revokedAt||!granted)return;
     const group=el('div','companion-settings-access-services');
     for(const [kind,title,on,off] of list){
@@ -133,6 +154,7 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
    toggles(agent.board,BOARD_TOGGLES,'Board','board');
    toggles(agent.conversations,CONVERSATION_TOGGLES,'Conversations','conversations');
    toggles(agent.links,LINK_TOGGLES,'Links','links');
+   toggles(agent.reports,REPORT_TOGGLES,'Reports','reports');
    toggles(agent.githubDrafts===undefined?undefined:{draft:agent.githubDrafts},DRAFT_TOGGLES,'GithubDrafts','githubDrafts');
    row.append(words);
    if(!agent.revokedAt)row.append(button('Revoke','revoke-agent',()=>confirmRevoke(row,agent)));

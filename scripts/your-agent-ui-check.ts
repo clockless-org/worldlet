@@ -14,7 +14,8 @@ try{
    grants:[{id:'hermes-channel-read',agentId:'hermes',targets:['items/query','history/query','companion/recall','meetings/decisions','gmail/draft','gmail/read','google-calendar/read','apple-notes/read','todoist/read','applet:mail/read'],access:'read',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'},
     {id:'hermes-channel-link',agentId:'hermes',targets:['world/link'],access:'write',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'}],
    audit:[{at:'2026-10-14T18:30:00.000Z',agentId:'hermes',target:'items',action:'update',decision:'denied',reason:'Only reading here.'},{at:'2026-10-14T18:29:00.000Z',agentId:'hermes',target:'items',action:'query',decision:'allowed',grantId:'hermes-channel-read'}],
-   services:[{provider:'github',title:'GitHub',granted:false},{provider:'posthog',title:'PostHog',granted:true}],asks:{ask:false,work:true},board:{read:true,define:false},githubDrafts:false,conversations:{add:false,search:true},links:{read:false,save:false}}];
+   services:[{provider:'github',title:'GitHub',granted:false},{provider:'posthog',title:'PostHog',granted:true}],asks:{ask:false,work:true},board:{read:true,define:false},githubDrafts:false,conversations:{add:false,search:true},links:{read:false,save:false},
+   reports:{report:true,list:false},liveness:'stale',report:{status:'working',summary:'Building the installer',work:[{title:'Fix the build'}],runs:[],reportedAt:new Date(Date.now()-25*60_000).toISOString()}}];
   w.rules=[{id:'rule-00000000000000a1',allows:'npm test',agent:'default',kind:'command',main:true,grantedAt:Date.UTC(2026,9,8,12),thread:'In Fox’s main conversation',inWorld:true},{id:'rule-00000000000000a2',allows:'github › search_issues',agent:'default',kind:'tool',main:true,note:'Any arguments'}];
   w.jobs=[{id:'job-1',name:'Morning digest',kind:'prompt',paused:false,when:{cron:'0 8 * * *'},delivery:'telegram',last:{at:Date.UTC(2026,9,10,8),status:'ok'}},{id:'job-2',name:'Plant check',kind:'prompt',paused:true,when:{everySeconds:7200}}];
   w.skills=[{name:'seed-swap',description:'Organize seed swaps.',lastRanAt:Date.now()-3*86_400_000,enabled:true,removable:false},{name:'k8s',description:'Kubernetes help.',lastRanAt:null,enabled:false,removable:true}];
@@ -48,12 +49,13 @@ try{
   if(b.action==='agentAccess'&&(b.operation==='grantBoard'||b.operation==='ungrantBoard')){w.access=w.access.map(a=>a.id===b.id?{...a,board:{...a.board,[b.kind]:b.operation==='grantBoard'}}:a);return {ok:true};}
   if(b.action==='agentAccess'&&(b.operation==='grantLinks'||b.operation==='ungrantLinks')){w.access=w.access.map(a=>a.id===b.id?{...a,links:{...a.links,[b.kind]:b.operation==='grantLinks'}}:a);return {ok:true};}
   if(b.action==='agentAccess'&&(b.operation==='grantConversations'||b.operation==='ungrantConversations')){w.access=w.access.map(a=>a.id===b.id?{...a,conversations:{...a.conversations,[b.kind]:b.operation==='grantConversations'}}:a);return {ok:true};}
+  if(b.action==='agentAccess'&&(b.operation==='grantReports'||b.operation==='ungrantReports')){w.access=w.access.map(a=>a.id===b.id?{...a,reports:{...a.reports,[b.kind]:b.operation==='grantReports'}}:a);return {ok:true};}
   if(b.action==='agentAccess'&&(b.operation==='grantGithubDrafts'||b.operation==='ungrantGithubDrafts')){w.access=w.access.map(a=>a.id===b.id?{...a,githubDrafts:b.operation==='grantGithubDrafts'}:a);return {ok:true};}
   // The GitHub App that writes approved GitHub drafts: the page sends its settings once and never gets them back.
   if(b.action==='githubApp'&&b.operation==='status')return {connected:!!w.githubApp};
   if(b.action==='githubApp'&&b.operation==='connect'){if(b.appId!=='1001')throw new Error('The GitHub App is not valid: enter its App ID, its installation ID and its private key (a .pem file\'s whole text).');w.githubApp=true;return {ok:true,connected:true};}
   if(b.action==='githubApp'&&b.operation==='disconnect'){w.githubApp=false;return {ok:true,connected:false};}
-  if(b.action==='agentAccess'&&b.operation==='revoke'){w.access=w.access.map(a=>a.id===b.id?{...a,services:[],asks:undefined,board:undefined,githubDrafts:undefined,conversations:undefined,links:undefined,revokedAt:'2026-10-15T08:00:00.000Z',grants:a.grants.map(g=>({...g,revokedAt:'2026-10-15T08:00:00.000Z'}))}:a);return {ok:true};}
+  if(b.action==='agentAccess'&&b.operation==='revoke'){w.access=w.access.map(a=>a.id===b.id?{...a,services:[],asks:undefined,board:undefined,githubDrafts:undefined,conversations:undefined,links:undefined,reports:undefined,report:undefined,revokedAt:'2026-10-15T08:00:00.000Z',grants:a.grants.map(g=>({...g,revokedAt:'2026-10-15T08:00:00.000Z'}))}:a);return {ok:true};}
   if(b.action==='agentAccess')return {agents:w.access};
   if(b.action==='harnessApprovalRules'&&b.operation==='revoke'){w.rules=w.rules.filter(r=>r.id!==b.id);return {ok:true};}
   if(b.action==='harnessApprovalRules')return {harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,revoke:'restart',note:'Hermes Agent reads these when it starts, so Worldlet restarts its own conversation with it.',rules:w.rules},
@@ -299,6 +301,14 @@ try{
  await accessPart.getByText('Hermes Agent can now draft GitHub changes for you to approve.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/GithubDrafts$/.test(c.operation))),
   [{action:'agentAccess',operation:'grantGithubDrafts',id:'hermes'}],'only the Agent, never targets');
+ // What it last reported (core/agent/GRANTS.md#agent-reports), and "Can report its work" and "Can see other Agents".
+ await hermesAccess.getByText(/^Quiet: Building the installer · Fix the build · reported 2\d min ago\.$/).waitFor();
+ const reporting=hermesAccess.getByRole('checkbox',{name:'Can report its work',exact:true}),listing=hermesAccess.getByRole('checkbox',{name:'Can see other Agents',exact:true});
+ assert.deepEqual([await reporting.isChecked(),await listing.isChecked()],[true,false]);
+ await listing.click();
+ await accessPart.getByText('Hermes Agent can now see what your other Agents are doing.',{exact:true}).waitFor();
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Reports$/.test(c.operation))),
+  [{action:'agentAccess',operation:'grantReports',id:'hermes',kind:'list'}],'only the Agent and which, never targets');
  await hermesAccess.getByRole('button',{name:'Revoke',exact:true}).click();
  await hermesAccess.getByText(/^Hermes Agent will no longer reach your World's tools/).waitFor();
  assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='revoke').length),0,'Revoke asks first');
