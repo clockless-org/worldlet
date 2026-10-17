@@ -17,6 +17,12 @@ Remote access is off until the person turns it on, in Settings › Agent › Acc
 
 What the new Agent may do starts with the default Grants: reads, drafts for your review and the browser link. Give it more under its name in Settings › Agent › Access, for example **Can read GitHub**, **Can ask you** or **Can see your board**. **Revoke** ends its connection at once, its refresh token included.
 
+## A token for a script or another computer
+
+An Agent that cannot open a browser, such as a script, a daemon on another computer or a scheduled job, uses a token instead. Under Remote access, type the Agent's name and choose **New token**, or run `worldlet remote token "<name>"` on the Node host. The token is shown once. The Agent sends it as `Authorization: Bearer <token>` with MCP requests to the same address.
+
+The token makes an Agent of its own (kind `remote`, Harness `token`), listed in Settings › Agent › Access with the default Grants, its own audit and Revoke. It does not run out. Making a new token for the same Agent (`remoteMcp` `token` with its `id`) stops the old one, and Revoke ends it. Only its SHA-256 hash is kept, in the vault. Anyone who has the token can act as that Agent, so keep it as secret as a password.
+
 **New address** ends every connection and registration, and each client must be added again. **Turn off** stops the address answering but keeps it, so turning it on again needs no new connectors.
 
 ## How it works
@@ -30,6 +36,6 @@ What the new Agent may do starts with the default Grants: reads, drafts for your
   - `/authorize`, with PKCE S256 required. It shows the waiting page and puts the consent card in Attention (`remote-mcp-consents` in the ledger, provider `agents`). The page long-polls `/authorize/wait` until the person answers or ten minutes pass. Only this computer's pages can answer: `remoteMcp` is not in `ROOM_ALLOWED`.
   - `/token`. The authorization code works once and only with its verifier. Redeeming it makes the Agent (`remote-<client>-<random>`, kind `remote`). Access tokens last an hour, and each refresh token works once and is replaced.
   - MCP Streamable HTTP at the address itself: `initialize`, `ping`, `tools/list` and `tools/call`, single or batched, answered as JSON. Each call goes through the standing server's own call (`StandingWorldTools.call`), so it gets the same Grants, `describe_world_tools` filtering and audit.
-- **What is kept.** The host token, the registered clients and the SHA-256 hashes of each connection's tokens are kept only in the vault (`remote-mcp`). A token itself only ever goes to the client that asked for it.
+- **What is kept.** The host token, the registered clients and the SHA-256 hashes of each connection's tokens and of each script token are kept only in the vault (`remote-mcp`). A token itself only ever goes to the client that asked for it.
 
-`node scripts/remote-mcp-check.ts` checks all of it against a fake front: discovery, registration, the consent card, PKCE, refresh, a client secret, Deny, expiry, revoke, a new address, reconnecting, and that no token reaches an item, audit entry, ledger row or log.
+`node scripts/remote-mcp-check.ts` checks all of it against a fake front: discovery, registration, the consent card, PKCE, refresh, a client secret, script tokens, Deny, expiry, revoke, a new address, reconnecting, and that no token reaches an item, audit entry, ledger row or log.

@@ -25,7 +25,7 @@ export function controlSocketTooLong(file:string,limit=CONTROL_SOCKET_LIMIT):str
 export const CONTROL_COMMANDS=['setup','link','status','register','remote'] as const;
 export type ControlCommand=typeof CONTROL_COMMANDS[number];
 /** `remote` takes `on` or `off` (remote access, core/agent/REMOTE-MCP.md); without it, it only reports. */
-export type ControlRequest={command:ControlCommand;agent?:string;local?:boolean;remote?:'on'|'off'};
+export type ControlRequest={command:ControlCommand;agent?:string;local?:boolean;remote?:'on'|'off'|'token';name?:string};
 /** An answer: `lines` for the asker's stdout, or `error`. */
 export type ControlReply={lines:string[]}|{error:string};
 export const NOT_RUNNING='Worldlet is not running on this computer: start the Worldlet service, then try again.';
@@ -38,8 +38,11 @@ export function readControlRequest(value:unknown):ControlRequest|null {
  if(!(CONTROL_COMMANDS as readonly unknown[]).includes(v.command))return null;
  if(v.agent!==undefined&&(typeof v.agent!=='string'||!/^[a-z][a-z0-9-]{0,31}$/.test(v.agent)))return null;
  if(v.local!==undefined&&(v.command!=='link'||typeof v.local!=='boolean'))return null;
- if(v.remote!==undefined&&(v.command!=='remote'||v.remote!=='on'&&v.remote!=='off'))return null;
- return {command:v.command as ControlCommand,...typeof v.agent==='string'?{agent:v.agent}:{},...v.local===true?{local:true}:{},...v.remote?{remote:v.remote as 'on'|'off'}:{}};
+ if(v.remote!==undefined&&(v.command!=='remote'||!['on','off','token'].includes(v.remote as string)))return null;
+ // `remote token <name>`: the Agent's name, which the host checks again.
+ if(v.name!==undefined&&(v.remote!=='token'||typeof v.name!=='string'||!/^[^\u0000-\u001f\u007f]{1,40}$/u.test(v.name)))return null;
+ if(v.remote==='token'&&v.name===undefined)return null;
+ return {command:v.command as ControlCommand,...typeof v.agent==='string'?{agent:v.agent}:{},...v.local===true?{local:true}:{},...v.remote?{remote:v.remote as 'on'|'off'|'token'}:{},...typeof v.name==='string'?{name:v.name}:{}};
 }
 
 /** Listens on `file` for one JSON line per connection and answers it with one JSON line. A socket left by a host that
@@ -105,7 +108,8 @@ export const CONTROL_USAGE=`Usage: worldlet <command>
   link --local           Print the local World link for setup and connections (same computer or SSH forwarding)
   setup --agent <id>     Choose the Agent Fox talks through, and register Worldlet's MCP server in it
   register --agent <id>  Register Worldlet's MCP server and skill in an Agent (claude-code or codex)
-  remote [on|off]        Remote access for cloud connectors: turn it on or off, and print this World's address`;
+  remote [on|off]        Remote access for cloud connectors: turn it on or off, and print this World's address
+  remote token <name>    A token for an Agent that cannot open a browser (a script, another computer); keep it secret`;
 
 /** The command line: parses `argv` (after the program), asks the host on `socket`, prints the answer. Returns the exit
  * code. */
@@ -113,11 +117,11 @@ export async function runControlCommand(argv:string[],socket:string,{out=(text:s
  const [command,...rest]=argv;
  if(!(CONTROL_COMMANDS as readonly string[]).includes(command)){err(CONTROL_USAGE+'\n');return 2;}
  if(command==='link'&&rest.some(arg=>arg!=='--qr'&&arg!=='--local')||command!=='link'&&rest.includes('--local')){err(CONTROL_USAGE+'\n');return 2;}
- if(command==='remote'&&(rest.length>1||rest.length===1&&rest[0]!=='on'&&rest[0]!=='off')){err(CONTROL_USAGE+'\n');return 2;}
+ if(command==='remote'&&(rest[0]==='token'?rest.length!==2:rest.length>1||rest.length===1&&rest[0]!=='on'&&rest[0]!=='off')){err(CONTROL_USAGE+'\n');return 2;}
  const at=rest.indexOf('--agent'),agent=at>=0?rest[at+1]:undefined;
  if((command==='setup'||command==='register')&&!agent){err(`worldlet ${command} needs --agent <id>.\n`);return 2;}
- const request=readControlRequest({command,...agent?{agent}:{},...rest.includes('--local')?{local:true}:{},...command==='remote'&&rest[0]?{remote:rest[0]}:{}});
- if(!request){err(`Not an Agent name: ${agent}\n`);return 2;}
+ const request=readControlRequest({command,...agent?{agent}:{},...rest.includes('--local')?{local:true}:{},...command==='remote'&&rest[0]?{remote:rest[0]}:{},...command==='remote'&&rest[0]==='token'?{name:rest[1]}:{}});
+ if(!request){err(`Not an Agent name: ${command==='remote'?rest[1]:agent}\n`);return 2;}
  let reply:ControlReply|null;
  try{reply=await askControl(socket,request);}
  catch(error){err(`worldlet: ${(error as Error).message}\n`);return 1;}
