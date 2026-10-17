@@ -23,6 +23,7 @@ export const GITHUB_DRAFT_REASONS=Object.freeze({
  archived:'This repository is archived: nothing can be written to it.',
  missing:'No such GitHub draft.',
  settled:'This GitHub draft is already settled.',
+ unknown:'Worldlet began writing this but cannot tell whether GitHub made it. Check GitHub before drafting it again.',
  app:'The GitHub App is not valid: enter its App ID, its installation ID and its private key (a .pem file\'s whole text).',
  prefix:'labels.set: every label in expected and set must start with prefix.',
  unchanged:'labels.set: set is the same as expected, so nothing would change.',
@@ -217,20 +218,67 @@ export function githubDraftRequests(draft:GithubDraft):{requests:GithubWriteRequ
   case 'issue.reopen':return {requests:[{method:'PATCH',path:issue,body:{state:'open'},accept:[200]}],result:'target'};
  }
 }
+/** What the answers to an approved draft's requests (in order, as many as were made) come to: `written`, `failed` with
+ * GitHub's words, or, when labels.remove removed some labels and GitHub refused others, `written` with a reason naming
+ * both. Each label is its own request, so a refusal does not undo the removals before it. */
+export function githubDraftOutcome(draft:GithubDraft,answers:readonly {status:number;message?:string}[]):{status:'written'|'failed';reason?:string} {
+ const {requests}=githubDraftRequests(draft);
+ const said=(answer:{status:number;message?:string})=>{
+  const words=typeof answer.message==='string'?answer.message.replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,200):'';
+  return `${answer.status}${words?': '+words:''}`;
+ };
+ const refused=answers.flatMap((answer,i)=>requests[i]&&!requests[i].accept.includes(answer.status)?[{i,answer}]:[]);
+ if(!refused.length&&answers.length===requests.length)return {status:'written'};
+ const first=refused[0];
+ if(draft.write==='labels.remove'&&first){
+  const labels=draft.labels??[],failed=new Set(refused.map(r=>r.i));
+  const removed=labels.filter((_,i)=>i<answers.length&&!failed.has(i)),kept=labels.filter((_,i)=>failed.has(i));
+  if(removed.length)return {status:'written',reason:`Removed ${removed.join(', ')}. GitHub refused removing ${kept.join(', ')} (${said(first.answer)}), so ${kept.length===1?'it is':'they are'} still there.`};
+ }
+ return {status:'failed',reason:`GitHub refused the write (${first?said(first.answer):'no answer'}).`};
+}
+
+/** issue.create: the draft marked as being written, saved before the request is made. */
+export function startGithubDraftWrite(draft:GithubDraft,now:string):GithubDraft {
+ if(!githubDraftPending(draft))fail(GITHUB_DRAFT_REASONS.settled);
+ return {...draft,writeStartedAt:now,updatedAt:now};
+}
+/** How long after a create began its Issue is looked for: a write that began is answered within GitHub's timeout. */
+const CREATED_WITHIN_MS=10*60_000;
+/** A started create Worldlet did not see finish: the repository's Issues updated since a minute before it began,
+ * newest first, to look for it in (`githubDraftCreatedUrl`) instead of posting it again. */
+export function githubDraftCreatedPath(draft:GithubDraft):string {
+ const since=new Date(Date.parse(draft.writeStartedAt??draft.updatedAt)-60_000).toISOString();
+ return `${githubDraftReadPath('issue.create',githubDraftTargetParts(draft))}/issues?state=all&sort=created&direction=desc&per_page=50&since=${encodeURIComponent(since)}`;
+}
+/** The link of the Issue a started create made, from GitHub's answer to githubDraftCreatedPath: one with exactly the
+ * draft's title, made by the GitHub App `appId` within minutes of the write beginning; '' when there is none. */
+export function githubDraftCreatedUrl(draft:GithubDraft,answer:unknown,appId:string):string {
+ const started=Date.parse(draft.writeStartedAt??''),prefix=`https://github.com/${draft.repo.toLowerCase()}/issues/`;
+ if(!Number.isFinite(started)||!Array.isArray(answer))return '';
+ for(const value of answer){
+  const v=record(value),app=record(v.performed_via_github_app),user=record(v.user),made=Date.parse(String(v.created_at??''));
+  const byApp=v.performed_via_github_app?String(app.id)===appId:user.type==='Bot';
+  if(v.pull_request===undefined&&v.title===draft.title&&byApp&&made>=started-60_000&&made<=started+CREATED_WITHIN_MS
+   &&typeof v.html_url==='string'&&v.html_url.toLowerCase().startsWith(prefix))return v.html_url;
+ }
+ return '';
+}
+
 /** The written result's link: what GitHub answered with (a new Issue or comment), or else the target. */
 export function githubDraftResultUrl(draft:GithubDraft,answer:unknown):string {
  const web=record(answer).html_url;
  return typeof web==='string'&&web.toLowerCase().startsWith(`https://github.com/${draft.repo.toLowerCase()}/`)?web:draft.target.url;
 }
 
-/** The draft settled: written (with its result), stale or failed (with why), or dismissed. Only a pending draft
- * settles. */
+/** The draft settled: written (with its result, and what part was not written), stale, failed or unknown (with why),
+ * or dismissed. Only a pending draft settles. */
 export function settleGithubDraft(draft:GithubDraft|null|undefined,status:Exclude<GithubDraftStatus,'pending'>,now:string,detail:{resultUrl?:string;reason?:string}={}):GithubDraft {
  if(!draft)return fail(GITHUB_DRAFT_REASONS.missing);
  if(!githubDraftPending(draft))fail(GITHUB_DRAFT_REASONS.settled);
  const next:GithubDraft={...draft,status,updatedAt:now,settledAt:now};
  if(status==='written'&&detail.resultUrl)next.resultUrl=detail.resultUrl;
- if((status==='stale'||status==='failed')&&detail.reason)next.reason=[...detail.reason].slice(0,500).join('');
+ if(status!=='dismissed'&&detail.reason)next.reason=[...detail.reason].slice(0,500).join('');
  return next;
 }
 
@@ -266,6 +314,7 @@ export function readStoredGithubDraft(value:unknown):GithubDraft|null {
  if(typeof v.resultUrl==='string')draft.resultUrl=v.resultUrl;
  if(typeof v.reason==='string')draft.reason=v.reason;
  if(instant(v.settledAt))draft.settledAt=v.settledAt;
+ if(instant(v.writeStartedAt))draft.writeStartedAt=v.writeStartedAt;
  return draft;
 }
 
@@ -299,7 +348,7 @@ export function githubDraftText(draft:GithubDraft):string {
 
 /** The World item ID of a draft's Attention card. */
 export const githubDraftItemId=(draftId:string)=>'ghd-'+draftId;
-const ITEM_STATUS:Record<GithubDraftStatus,'open'|'done'|'dismissed'>={pending:'open',written:'done',stale:'dismissed',failed:'dismissed',dismissed:'dismissed'};
+const ITEM_STATUS:Record<GithubDraftStatus,'open'|'done'|'dismissed'>={pending:'open',written:'done',stale:'dismissed',failed:'dismissed',unknown:'dismissed',dismissed:'dismissed'};
 /** The draft as an Attention task from the host's own provider `agents`, written with no model: it names the Agent, the
  * repository and target, the exact text and a link to the target, and carries the draft's ID so its card approves this
  * draft and no other. */

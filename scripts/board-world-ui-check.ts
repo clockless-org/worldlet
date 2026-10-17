@@ -33,8 +33,12 @@ await withBrowser(fileAccess,async browser=>{
  await page.locator('.notion-pin[data-page="place-app-board"]').focus();await page.keyboard.press('Enter');
  const panel=page.locator('#notionContent[data-template=board] .board-applet');await panel.waitFor();
  await panel.locator('.board-card[data-block=north-star] .board-value',{hasText:'12,345'}).waitFor();
- await page.getByRole('button',{name:'Explain this number'}).first().waitFor();
- await page.getByRole('button',{name:'What changed?'}).first().waitFor();
+ // Fox's two actions in its action column, each title whole on one line, not cut to an ellipsis.
+ for(const [id,label] of [['explain','Explain'],['changed','Changes']]){
+  const action=page.locator(`.world-capsule[data-action-id="board:${id}"]`).first();await action.waitFor();
+  assert.equal((await action.innerText()).trim(),label);
+  assert.ok(await action.evaluate(el=>[el,...el.querySelectorAll('span')].every(e=>e.scrollWidth<=e.clientWidth+1)),label+' is cut short');
+ }
  await page.screenshot({path:tmp+'/board-focus.png'});
  // Reading another tab leaves the number as it was; a read with no board empties the device.
  await panel.locator('.board-tab',{hasText:'Health'}).click();

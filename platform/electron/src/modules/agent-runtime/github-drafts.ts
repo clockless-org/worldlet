@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
-import {AGENT_AUDIT_KEEP,GITHUB_DRAFT_REASONS,GITHUB_WRITE_REASONS,githubAppJwtClaims,githubDraftAttentionItem,githubDraftChange,githubDraftHeadline,githubDraftItemId,githubDraftPending,githubDraftReadPath,githubDraftRequests,
- githubDraftResultUrl,githubDraftTarget,githubDraftTargetParts,githubWriteAuditEntry,githubWriteChange,githubWriteDraft,githubWriteGrantFor,makeGithubDraft,readGithubApp,readGithubDraftCreate,readGithubDrafts,readGithubWriteRun,readStoredGithubApp,readStoredGithubDraft,settleGithubDraft,type GithubWriteRequest} from '../../../../../core/agent/index.ts';
+import {AGENT_AUDIT_KEEP,GITHUB_DRAFT_REASONS,GITHUB_WRITE_REASONS,githubAppJwtClaims,githubDraftAttentionItem,githubDraftChange,githubDraftCreatedPath,githubDraftCreatedUrl,githubDraftHeadline,githubDraftItemId,githubDraftOutcome,githubDraftPending,githubDraftReadPath,githubDraftRequests,
+ githubDraftResultUrl,githubDraftTarget,githubDraftTargetParts,githubWriteAuditEntry,githubWriteChange,githubWriteDraft,githubWriteGrantFor,makeGithubDraft,readGithubApp,readGithubDraftCreate,readGithubDrafts,readGithubWriteRun,readStoredGithubApp,readStoredGithubDraft,settleGithubDraft,startGithubDraftWrite,type GithubWriteRequest} from '../../../../../core/agent/index.ts';
 import {GITHUB_DRAFT_TARGET,type GithubAppCredentials,type GithubDraft,type GithubWrite} from '../../../../../contracts/github-drafts.ts';
 import type {AgentAuditEntry,Grant} from '../../../../../contracts/agent-identity.ts';
 import type {VaultService} from '../../host/services.ts';
@@ -54,6 +54,8 @@ export const GITHUB_DRAFT_MESSAGES=Object.freeze({
  unreadable:'GitHub could not read this right now. Try again in a moment.',
  busy:'This draft is already being written.',
  lost:'GitHub did not answer the write, so it may or may not have been made. Check on GitHub before drafting it again.',
+ createLost:'GitHub did not answer, so this Issue may or may not have been made. Choose Approve again to look for it on GitHub; it is not posted twice.',
+ notFoundAfterStart:'Writing this Issue began but was not seen to finish, and GitHub shows no Issue with its title from the GitHub App, so it may or may not have been made. Check on GitHub before drafting it again.',
 });
 const TIMEOUT_MS=30_000;
 const error=(message:string):never=>{throw new Error(message);};
@@ -73,8 +75,9 @@ export function createGithubDrafts({ledger,vault,name,changed,fetch=globalThis.f
   if(!githubDraftPending(draft))return draft;
   const item=db.value('items',githubDraftItemId(draft.id));
   if(item?.statusOrigin!=='user'||item.status!=='done'&&item.status!=='dismissed')return draft;
-  const next=settleGithubDraft(draft,'dismissed',at);
-  save(db,next,'user');audit(db,next,'dismiss','allowed','The person settled this draft\'s card without approving it; nothing was written.',at);
+  // A create already begun may have been made: never said to have written nothing.
+  const next=draft.writeStartedAt?settleGithubDraft(draft,'unknown',at,{reason:GITHUB_DRAFT_REASONS.unknown}):settleGithubDraft(draft,'dismissed',at);
+  save(db,next,'user');audit(db,next,'dismiss','allowed',draft.writeStartedAt?'The person settled this draft\'s card while its write had begun: '+GITHUB_DRAFT_REASONS.unknown:'The person settled this draft\'s card without approving it; nothing was written.',at);
   return next;
  });
 
@@ -122,20 +125,27 @@ export function createGithubDrafts({ledger,vault,name,changed,fetch=globalThis.f
  }
  const running=new Set<string>();
  /** Each request once, in order, until one is not accepted: GitHub's own words, or that it did not answer. */
- async function write(requests:GithubWriteRequest[]):Promise<{refused:string;answer:unknown}> {
+ /** Each request once, in order, stopping at the first GitHub refuses unless `independent` (labels.remove: each label
+  * is its own request, so one refused does not stop the others). `refused` is the first refusal or no answer in words;
+  * `answers` what GitHub said to each; `lost` when one had no answer. */
+ async function write(requests:GithubWriteRequest[],independent=false):Promise<{refused:string;answer:unknown;answers:{status:number;message?:string}[];lost:boolean}> {
   const auth=await token();
-  let answer:unknown=null,refused='';
+  const answers:{status:number;message?:string}[]=[];
+  let answer:unknown=null,refused='',lost=false;
   try{
    for(const step of requests){
-    const reply=await request(step.method,step.path,auth,step.body);
+    const reply=await request(step.method,step.path,auth,step.body),message=(reply.json as Row|null)?.message;
+    answers.push({status:reply.status,...typeof message==='string'?{message}:{}});
     if(!step.accept.includes(reply.status)){
-     const said=typeof (reply.json as Row|null)?.message==='string'?String((reply.json as Row).message).replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,200):'';
-     refused=`GitHub refused the write (${reply.status}${said?': '+said:''}).`;break;
+     const said=typeof message==='string'?message.replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,200):'';
+     refused||=`GitHub refused the write (${reply.status}${said?': '+said:''}).`;
+     if(independent)continue;
+     break;
     }
     answer=reply.json;
    }
-  }catch{refused=GITHUB_DRAFT_MESSAGES.lost;}
-  return {refused,answer};
+  }catch{refused||=GITHUB_DRAFT_MESSAGES.lost;lost=true;}
+  return {refused,answer,answers,lost};
  }
  // Issues a standing write is running on: a second write to the same one waits for the Agent to read it again.
  const writing=new Set<string>();
@@ -167,6 +177,19 @@ export function createGithubDrafts({ledger,vault,name,changed,fetch=globalThis.f
     const drafts=settle(db!,load(db!),now()),draft=drafts.find(item=>item.id===key);
     if(!draft)return error(GITHUB_DRAFT_REASONS.missing);
     if(!githubDraftPending(draft))error(GITHUB_DRAFT_REASONS.settled);
+    // A create that began before and was not seen to finish (Worldlet stopped mid-write): look for the Issue it made
+    // instead of posting it again; if there is none, say it is unknown rather than risk a second Issue.
+    if(draft.writeStartedAt){
+     const app=readStoredGithubApp(vault.get(GITHUB_APP_VAULT_KEY));
+     if(!app)error(GITHUB_DRAFT_MESSAGES.noApp);
+     const listed=await request('GET',githubDraftCreatedPath(draft),await token());
+     if(listed.status===401)installation=null;
+     if(listed.status!==200)error(GITHUB_DRAFT_MESSAGES.unreadable);
+     const url=githubDraftCreatedUrl(draft,listed.json,app!.appId),at=now();
+     const next=url?settleGithubDraft(draft,'written',at,{resultUrl:url}):settleGithubDraft(draft,'unknown',at,{reason:GITHUB_DRAFT_MESSAGES.notFoundAfterStart});
+     save(db!,next,'user');audit(db!,next,'approve','allowed',url?'The person approved; found already written to GitHub as the GitHub App: '+url:'The person approved; '+GITHUB_DRAFT_MESSAGES.notFoundAfterStart,at);changed();
+     return url?{ok:true,status:'written',url}:{ok:true,status:'unknown',reason:next.reason};
+    }
     // Read again, as the App, right before writing: anything not as it was refuses the whole draft.
     const change=githubDraftChange(draft,await target(draft.write,githubDraftTargetParts(draft)));
     if(change){
@@ -174,17 +197,29 @@ export function createGithubDrafts({ledger,vault,name,changed,fetch=globalThis.f
      save(db!,next,'user');audit(db!,next,'approve','denied','The person approved, but the target changed on GitHub: '+change,at);changed();
      return {ok:true,status:'stale',reason:change};
     }
-    const {requests,result}=githubDraftRequests(draft),{refused,answer}=await write(requests);
+    const {requests,result}=githubDraftRequests(draft);
+    // A new Issue is the one write a later read cannot tell was made, so it is recorded as begun before GitHub is asked.
+    let begun=draft;
+    if(draft.write==='issue.create'){begun=startGithubDraftWrite(draft,now());save(db!,begun,'user');}
+    const {answer,answers,lost}=await write(requests,draft.write==='labels.remove');
     const at=now();
-    if(refused){
-     const next=settleGithubDraft(draft,'failed',at,{reason:refused});
-     save(db!,next,'user');audit(db!,next,'approve','denied','The person approved; '+refused,at);changed();
-     return {ok:true,status:'failed',reason:refused};
+    // A new Issue left unanswered stays begun: Approve again looks for it on GitHub instead of posting it twice.
+    if(lost&&draft.write==='issue.create')error(GITHUB_DRAFT_MESSAGES.createLost);
+    if(lost){
+     const next=settleGithubDraft(begun,'unknown',at,{reason:GITHUB_DRAFT_MESSAGES.lost});
+     save(db!,next,'user');audit(db!,next,'approve','allowed','The person approved; '+GITHUB_DRAFT_MESSAGES.lost,at);changed();
+     return {ok:true,status:'unknown',reason:GITHUB_DRAFT_MESSAGES.lost};
+    }
+    const outcome=githubDraftOutcome(draft,answers);
+    if(outcome.status==='failed'){
+     const next=settleGithubDraft(begun,'failed',at,{reason:outcome.reason});
+     save(db!,next,'user');audit(db!,next,'approve','denied','The person approved; '+outcome.reason,at);changed();
+     return {ok:true,status:'failed',reason:outcome.reason};
     }
     const url=result==='response'?githubDraftResultUrl(draft,answer):draft.target.url;
-    const next=settleGithubDraft(draft,'written',at,{resultUrl:url});
-    save(db!,next,'user');audit(db!,next,'approve','allowed','The person approved; written to GitHub as the GitHub App: '+url,at);changed();
-    return {ok:true,status:'written',url};
+    const next=settleGithubDraft(begun,'written',at,{resultUrl:url,...outcome.reason?{reason:outcome.reason}:{}});
+    save(db!,next,'user');audit(db!,next,'approve','allowed','The person approved; written to GitHub as the GitHub App: '+url+(outcome.reason?' '+outcome.reason:''),at);changed();
+    return {ok:true,status:'written',url,...outcome.reason?{reason:outcome.reason}:{}};
    }finally{running.delete(key);}
   },
   dismiss(id){
@@ -192,6 +227,12 @@ export function createGithubDrafts({ledger,vault,name,changed,fetch=globalThis.f
    if(!db)error(NOT_READY);
    if(running.has(String(id)))error(GITHUB_DRAFT_MESSAGES.busy);
    const at=now(),drafts=settle(db!,load(db!),at),draft=drafts.find(item=>item.id===id);
+   // A create already begun may have been made: dismissing it never says nothing was written.
+   if(draft?.writeStartedAt){
+    const next=settleGithubDraft(draft,'unknown',at,{reason:GITHUB_DRAFT_REASONS.unknown});
+    save(db!,next,'user');audit(db!,next,'dismiss','allowed','The person dismissed this draft while its write had begun: '+GITHUB_DRAFT_REASONS.unknown,at);changed();
+    return {ok:true,status:'unknown',reason:GITHUB_DRAFT_REASONS.unknown};
+   }
    const next=settleGithubDraft(draft,'dismissed',at);
    save(db!,next,'user');audit(db!,next,'dismiss','allowed','The person dismissed this draft; nothing was written.',at);changed();
    return {ok:true,status:'dismissed'};

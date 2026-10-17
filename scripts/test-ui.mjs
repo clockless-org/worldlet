@@ -134,6 +134,8 @@ export const quickChecks=available([
 // The pull request set (`npm run test:ui:pr`, owner decision 2026-10-10: PR CI runs quick checks within five minutes):
 // the quick checks that finish in seconds on a GitHub Linux runner. Those that draw the World took 2 to 8 minutes there
 // on software WebGL, four at a time, and timed out clicking it (PR #125's first run), so they stay in Alpha.
+// github-draft-ui-check is one of those: its Attention card needs the whole World started (about 45 s locally, where
+// board-ui-check mounts its panel alone in 2 s), so it runs with the full suite only.
 export const prChecks=quickChecks.filter(c=>[
  'scripts/oauth-callback-ui-check.ts','scripts/service-collection-ui-check.ts','scripts/board-ui-check.ts',
  'scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts',
