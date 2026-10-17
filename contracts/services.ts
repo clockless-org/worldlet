@@ -10,19 +10,22 @@ export type ServiceOperation=typeof SERVICE_OPERATIONS[number];
  * PostHog: `query` (one read-only HogQL SELECT) and `read` (a list of insights, dashboards, feature flags or
  * annotations, or the production error groups, `id` naming which). Cloudflare: `read` only, `id` naming one of its
  * fixed analytics reports. HTTP JSON (`http`): `list` (the endpoints the person connected) and `read` (`id` naming an
- * endpoint, `query` its path). */
+ * endpoint, `query` its path). Search Console: `list` (the sites its service account can see) and `query` (one Search
+ * Analytics query of the site `id`, with an optional JSON `query` choosing the days, dimensions and rows;
+ * core/accounts/services/search-console.ts). */
 export const SERVICE_ACTIONS:Readonly<Record<string,Readonly<Partial<Record<ServiceOperation,readonly string[]>>>>>=Object.freeze({
  github:Object.freeze({list:[],read:['id'],search:['query'],releases:['id']}),
  posthog:Object.freeze({query:['query'],read:['id']}),
  cloudflare:Object.freeze({read:['id']}),
  http:Object.freeze({list:[],read:['id']}),
+ 'search-console':Object.freeze({list:[],query:['id']}),
 });
 /** The Services `read_service` reads. A Service's Attention reads (its Applet's registration) are the World's own
  * background reads: an Agent reads a Service only through `read_service` and a Grant naming it, never through
  * `read_world_source` (core/tools/gateway.ts). */
 export const SERVICE_PROVIDERS:readonly string[]=Object.freeze(Object.keys(SERVICE_ACTIONS));
 /** Each Service's name as the person knows it (Settings › Agent › Access: "Can read GitHub"). */
-export const SERVICE_TITLES:Readonly<Record<string,string>>=Object.freeze({github:'GitHub',posthog:'PostHog',cloudflare:'Cloudflare',http:'HTTP JSON'});
+export const SERVICE_TITLES:Readonly<Record<string,string>>=Object.freeze({github:'GitHub',posthog:'PostHog',cloudflare:'Cloudflare',http:'HTTP JSON','search-console':'Search Console'});
 
 /** One read: an operation of the Service's (SERVICE_ACTIONS), with the `id` or `query` it takes. `cursor` continues a
  * list or search where the last page said it could. */
@@ -31,7 +34,8 @@ export interface ServiceRead {provider:string;operation:ServiceOperation;id?:str
 export interface ServiceComment {author:string;at?:string;text:string}
 export interface ServiceRecord {
  /** Stable within the Service (GitHub: `owner/repo#123`, what its `read` takes, or `owner/repo@v1.2.0` for a release;
-  * PostHog: `insight/abc123`; Cloudflare: `worker/api`; HTTP JSON: `<endpoint>/<the record's own ID>`). */
+  * PostHog: `insight/abc123`; Cloudflare: `worker/api`; HTTP JSON: `<endpoint>/<the record's own ID>`;
+  * Search Console: a site, or a row's dimension values). */
  id:string;
  title:string;
  /** The record on the Service's own website. */

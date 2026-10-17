@@ -1,10 +1,11 @@
 import {connectionLive,getApp,TOKEN_PROVIDERS} from '../../core/applets/index.ts';
+import {SERVICE_TITLES} from '../../contracts/services.ts';
 import {showServiceCollection} from './service-collection.ts';
 import {showAgentConnections} from './agent-connections.ts';
 import {agentEl as el} from './agent-change.ts';
 
 // Disconnect exists for these; Google's three share one sign-in.
-const DISCONNECTABLE=['gmail','google-calendar','notion','apple-notes','apple-reminders','todoist','google-drive','github','posthog','cloudflare'];
+const DISCONNECTABLE=['gmail','google-calendar','notion','apple-notes','apple-reminders','todoist','google-drive','github','posthog','cloudflare','search-console'];
 const GOOGLE=['gmail','google-calendar','google-drive'];
 
 /** Settings › Agent › Connections (it was a section of its own, Accounts, until the Agent page took it
@@ -14,6 +15,8 @@ export async function showWorldletAccounts(target:HTMLElement,call:(action:strin
  const action=(label:string,run:()=>Promise<void>)=>{const b=el('button','companion-info-action',label) as HTMLButtonElement;b.type='button';b.onclick=async()=>{if(b.disabled)return;b.disabled=true;try{await run();}finally{if(b.isConnected)b.disabled=false;}};return b;};
  const own=el('div','companion-settings-worldlet-accounts'),said=el('p','companion-settings-status');said.setAttribute('role','status');
  own.dataset.accounts='worldlet';
+ // Search Console's own box, below, shows Connect again once it is disconnected here.
+ let searchConsole=async()=>{};
  async function draw(){
   const state=await call('snapshot').catch(()=>null);if(!current())return;
   const live=(state?.connections||[]).filter(connectionLive),rows=el('div','companion-settings-rows');
@@ -22,10 +25,10 @@ export async function showWorldletAccounts(target:HTMLElement,call:(action:strin
   for(const c of live.filter((c:any)=>c.provider!=='http')){
    const app=getApp(c.provider),google=c.transport!=='native'&&GOOGLE.includes(c.provider);
    const row=el('div','companion-settings-row'),text=el('div');row.dataset.account=c.provider;
-   text.append(el('strong','',app?.title||c.provider),el('span','',c.label||'Connected'));row.append(text);
+   text.append(el('strong','',app?.title||SERVICE_TITLES[c.provider]||c.provider),el('span','',c.label||'Connected'));row.append(text);
    // A token source is reconnected by pasting a new token where it connects (its Thing's connection), not from here.
    if(!Object.hasOwn(TOKEN_PROVIDERS,c.provider))row.append(action('Reconnect',async()=>{said.textContent='Opening sign-in…';try{await call('connect',{provider:c.provider});said.textContent='';}catch(e){said.textContent=(e as Error).message||'Could not reconnect.';}}));
-   if(DISCONNECTABLE.includes(c.provider))row.append(action(google?'Disconnect Google':'Disconnect',async()=>{try{await call('disconnectSource',{provider:c.provider});await draw();}catch(e){said.textContent=(e as Error).message||'Could not disconnect.';}}));
+   if(DISCONNECTABLE.includes(c.provider))row.append(action(google?'Disconnect Google':'Disconnect',async()=>{try{await call('disconnectSource',{provider:c.provider});await draw();await searchConsole();}catch(e){said.textContent=(e as Error).message||'Could not disconnect.';}}));
    rows.append(row);
   }
   own.replaceChildren(el('h5','companion-settings-subhead','In Worldlet'),rows,
@@ -35,6 +38,7 @@ export async function showWorldletAccounts(target:HTMLElement,call:(action:strin
  await draw();
  if(current())await showGithubApp(target,call,current);
  if(current())await showHttpJson(target,call,current);
+ if(current())searchConsole=await showSearchConsole(target,call,current,draw);
  if(current())await showServiceCollection(target,call,current);
  // The Agent's own tools and chat accounts, with Add and Remove through its own commands.
  if(current())await showAgentConnections(target,call,current);
@@ -123,4 +127,41 @@ export async function showHttpJson(target:HTMLElement,call:(action:string,body?:
  }
  target.append(box,said);
  await draw();
+}
+
+/** Google Search Console (core/applets/INTEGRATIONS.md#search-console-service), which has no Thing of its own: a Google
+ * service account's JSON key, pasted once. The host checks it with Google and keeps it only in the vault; the field is
+ * cleared before Google answers and the page never gets the key back. Disconnect is in the list above. Returns its
+ * redraw. */
+export async function showSearchConsole(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean,changed:()=>Promise<void>):Promise<()=>Promise<void>>{
+ const box=el('div','companion-settings-search-console'),said=el('p','companion-settings-status');said.setAttribute('role','status');
+ box.dataset.accounts='search-console';
+ async function draw(){
+  const state=await call('snapshot').catch(()=>null);if(!current())return;
+  const connected=(state?.connections||[]).some((c:any)=>c.provider==='search-console'&&connectionLive(c));
+  const row=el('div','companion-settings-row'),text=el('div');
+  if(connected){
+   text.append(el('strong','','Search Console'),el('span','','Connected. Fox, and the Agents you allow, read your sites\' Google Search clicks and impressions only when asked.'));
+   row.append(text);box.replaceChildren(el('h5','companion-settings-subhead','Search Console'),row);return;
+  }
+  const key=document.createElement('textarea');
+  key.className='companion-settings-input';key.rows=4;key.autocomplete='off';key.spellcheck=false;key.maxLength=8000;
+  key.setAttribute('aria-label','Service account key');key.placeholder='Service account key (the whole .json file)';
+  text.append(el('strong','','Search Console'),el('span','',TOKEN_PROVIDERS['search-console'].hint+' It stays on this computer and is only read from, never changed.'),key);
+  const connect=el('button','companion-info-action','Connect') as HTMLButtonElement;connect.type='button';
+  connect.onclick=async()=>{
+   if(connect.disabled)return;
+   const token=key.value.trim();if(!token){said.textContent=TOKEN_PROVIDERS['search-console'].hint;return;}
+   // The key leaves the page once: the field is cleared before Google answers.
+   key.value='';connect.disabled=true;said.textContent='Checking the key with Google…';
+   try{await call('connect',{provider:'search-console',token,region:'work'});said.textContent='Search Console connected.';await changed();await draw();}
+   catch(e){said.textContent=(e as Error).message||'Could not connect Search Console.';}
+   finally{if(connect.isConnected)connect.disabled=false;}
+  };
+  row.append(text,connect);
+  box.replaceChildren(el('h5','companion-settings-subhead','Search Console'),row);
+ }
+ target.append(box,said);
+ await draw();
+ return draw;
 }

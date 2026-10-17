@@ -1,7 +1,8 @@
 // Service presets (contracts/service-presets.ts, core/applets/INTEGRATIONS.md#service-presets): named, saved reads of a
 // Worldlet Service. Pure: hosts supply the stored presets and the clock, and save what comes back. Each read is checked
 // as its Service's reader would check it before anything is sent (a HogQL SELECT only, a GitHub search of up to 256
-// characters, one of Cloudflare's fixed reports, an HTTP JSON endpoint's name and path), so a preset that saves is
+// characters, one of Cloudflare's fixed reports, an HTTP JSON endpoint's name and path, a Search Console site and
+// query spec), so a preset that saves is
 // one that may run. Every refusal throws an Error whose message the person or the Agent is shown.
 import {SERVICE_ACTIONS,SERVICE_TITLES,type ServiceOperation,type ServiceRead} from '../../../contracts/services.ts';
 import {SERVICE_PRESET_LIMITS,SERVICE_PRESET_PROVIDERS,type ServicePreset,type ServicePresetRead,type ServicePresetSave} from '../../../contracts/service-presets.ts';
@@ -10,6 +11,7 @@ import {looksSecret,readAgentBoardRead} from '../../agent/index.ts';
 import {hogqlSelect,POSTHOG_LIMITS,POSTHOG_LISTS} from './posthog.ts';
 import {CLOUDFLARE_READS} from './cloudflare.ts';
 import {httpJsonName,httpJsonRequest} from './http-json.ts';
+import {searchConsoleSite,searchConsoleSpec} from './search-console.ts';
 import {GITHUB_LIMITS,githubRecordId,githubRepository} from '../mcp/github.ts';
 
 export const PRESET_REASONS=Object.freeze({
@@ -88,6 +90,9 @@ export function readServicePresetRead(provider:unknown,input:unknown):ServicePre
  }else if(provider==='http'){
   if(operation==='list')takes(false,false);
   if(operation==='read'){takes(true,true);read.id=checked(()=>httpJsonName(id));if(query){checked(()=>httpJsonRequest(query));read.query=query;}}
+ }else if(provider==='search-console'){
+  if(operation==='list')takes(false,false);
+  if(operation==='query'){takes(true,true);read.id=checked(()=>searchConsoleSite(id));if(query){checked(()=>searchConsoleSpec(query));read.query=query;}}
  }else if(provider==='notion'){
   takes(true,false);read.id=checked(()=>notionPageId(id));
  }else if(provider==='agents'){

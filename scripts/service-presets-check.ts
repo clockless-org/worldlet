@@ -19,6 +19,7 @@ assert.deepEqual(readServicePresetRead('github',{operation:'search',query:'repo:
 assert.deepEqual(readServicePresetRead('github',{operation:'read',id:'example/app#12'}),{operation:'read',id:'example/app#12'});
 assert.deepEqual(readServicePresetRead('github',{operation:'list'}),{operation:'list'});
 assert.deepEqual(readServicePresetRead('cloudflare',{operation:'read',id:'workers'}),{operation:'read',id:'workers'});
+assert.deepEqual(readServicePresetRead('search-console',{operation:'query',id:'https://www.example.com/',query:'{"days":7,"dimensions":["date"]}'}),{operation:'query',id:'https://www.example.com/',query:'{"days":7,"dimensions":["date"]}'});
 refused(()=>readServicePresetRead('posthog',{operation:'query',query:'DELETE FROM events'}),/read-only SELECT/);
 refused(()=>readServicePresetRead('posthog',{operation:'query',query:'SELECT 1 LIMIT 500'}),/at most 200 rows/);
 refused(()=>readServicePresetRead('posthog',{operation:'query',query:'SELECT 1',id:'dashboards'}),/takes a query/);
@@ -28,6 +29,7 @@ refused(()=>readServicePresetRead('github',{operation:'search',query:'x'.repeat(
 refused(()=>readServicePresetRead('github',{operation:'read',id:'not an id'}),/owner\/repo#123/);
 refused(()=>readServicePresetRead('github',{operation:'list',query:'is:open'}),/takes nothing else/);
 refused(()=>readServicePresetRead('cloudflare',{operation:'read',id:'graphql'}),/workers or zones/);
+refused(()=>readServicePresetRead('search-console',{operation:'query',id:'sc-domain:example.com',query:'{"dimensions":["searchAppearance"]}'}),/as JSON/);
 // HTTP JSON: an endpoint's name and a path under its address (or the read as a JSON object); its list takes nothing.
 assert.deepEqual(readServicePresetRead('http',{operation:'read',id:'status',query:'items?state=open'}),{operation:'read',id:'status',query:'items?state=open'});
 assert.deepEqual(readServicePresetRead('http',{operation:'read',id:'status'}),{operation:'read',id:'status'});

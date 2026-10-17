@@ -141,11 +141,12 @@ assert.deepEqual(serviceReadTargets('github'),['github/list','github/read','gith
 assert.deepEqual(serviceReadTargets('posthog'),['posthog/query','posthog/read']);
 assert.deepEqual(serviceReadTargets('cloudflare'),['cloudflare/read']);
 assert.deepEqual(serviceReadTargets('http'),['http/list','http/read']);
+assert.deepEqual(serviceReadTargets('search-console'),['search-console/list','search-console/query']);
 for(const name of ['gmail','*','github/*','__proto__','constructor','','toString'])assert.deepEqual(serviceReadTargets(name),[],'not a Service: '+name);
 assert.equal(serviceReadGrant('codex','*/*',now),null,'a page never names its own patterns');assert.equal(serviceReadGrant('Not An Id','github',now),null);
 const githubGrant=serviceReadGrant('codex','github',now)!;
 assert.deepEqual(githubGrant,{id:'codex-service-github',agentId:'codex',targets:['github/list','github/read','github/search','github/releases'],access:'read',duration:'standing',grantedAt:now});
-assert.ok(!defaults.concat(channelDefaultGrants('codex',earlier,actions)).some(g=>g.targets.some(t=>/^(github|posthog|cloudflare|http)\//.test(t))),'no Service in the default Grants');
+assert.ok(!defaults.concat(channelDefaultGrants('codex',earlier,actions)).some(g=>g.targets.some(t=>/^(github|posthog|cloudflare|http|search-console)\//.test(t))),'no Service in the default Grants');
 const codexDefaults=channelDefaultGrants('codex',earlier,actions);
 const serviceCall=(grants:Grant[],target:string,action:string,args:Record<string,unknown>)=>{
  const resolved=resolveAction(actions,target,action,args);

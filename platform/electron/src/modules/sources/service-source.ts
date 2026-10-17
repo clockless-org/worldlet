@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import dns from 'node:dns/promises';
 import net from 'node:net';
 import {WorldletError} from '../../files.ts';
-import {CLOUDFLARE_API,CLOUDFLARE_GATE,HTTP_JSON_GATE,HTTP_JSON_LIMITS,POSTHOG_GATE,checkCloudflare,checkHttpJson,checkPosthog,cloudflareSettings,httpJsonEndpoints,httpJsonSettings,posthogSettings,privateAddress,readCloudflare,readHttpJson,readPosthog,type HttpJsonSettings,type ServiceGate,type ServiceHttp} from '../../../../../core/accounts/index.ts';
+import {CLOUDFLARE_API,CLOUDFLARE_GATE,GOOGLE_TOKEN_URL,HTTP_JSON_GATE,HTTP_JSON_LIMITS,POSTHOG_GATE,SEARCH_CONSOLE_API,SEARCH_CONSOLE_GATE,checkCloudflare,checkHttpJson,checkPosthog,checkSearchConsole,cloudflareSettings,httpJsonEndpoints,httpJsonSettings,posthogSettings,privateAddress,readCloudflare,readHttpJson,readPosthog,readSearchConsole,searchConsoleAccessToken,searchConsoleAssertion,searchConsoleKey,searchConsoleSettings,type HttpJsonSettings,type ServiceGate,type ServiceHttp} from '../../../../../core/accounts/index.ts';
 import {SERVICE_ACTIONS} from '../../../../../contracts/services.ts';
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections,VaultService} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
@@ -16,7 +16,9 @@ import {ExecutionJournal} from '../agent-runtime/journal.ts';
  * person gave (PostHog's address and project, Cloudflare's account) and their key; for HTTP JSON, each named
  * endpoint's address and optional token. Each request goes only to that Service's one address, follows no redirect and
  * stops at its time and size limits (ServiceGate); the key is never logged, put in the World's state or an event, or
- * given to an Agent. */
+ * given to an Agent. Google Search Console's key is a service account's private key, which is never sent at all: it signs
+ * a short-lived assertion that only Google's token address receives, and the access token that comes back is kept in
+ * memory until a minute before it expires. */
 interface Definition<S> {
  gate:ServiceGate;
  /** What the person gave besides the key, checked (a ValueError says what is wrong in plain words). */
@@ -29,6 +31,8 @@ interface Definition<S> {
  /** One connection holds several named endpoints, each its own settings and optional key (HTTP JSON): connecting adds
   * or replaces one by name, `list` answers their names and addresses, and a read's `id` names the one it goes to. */
  named?:{name(settings:S):string;list(endpoints:{settings:S;token:boolean}[]):unknown};
+ /** The kept key is a Google service account's, exchanged for access tokens (Search Console). */
+ serviceAccount?:true;
 }
 const define=<S,>(definition:Definition<S>)=>definition as unknown as Definition<unknown>;
 const SERVICES:Readonly<Record<string,Definition<unknown>>>=Object.freeze({
@@ -36,6 +40,7 @@ const SERVICES:Readonly<Record<string,Definition<unknown>>>=Object.freeze({
  cloudflare:define({gate:CLOUDFLARE_GATE,settings:cloudflareSettings,origin:()=>CLOUDFLARE_API,check:(http,settings)=>checkCloudflare(http,settings),read:(http,settings,body)=>readCloudflare(http,settings,body)}),
  http:define<HttpJsonSettings>({gate:HTTP_JSON_GATE,settings:httpJsonSettings,origin:settings=>new URL(settings.url).origin,check:checkHttpJson,read:readHttpJson,
   named:{name:settings=>settings.name,list:httpJsonEndpoints}}),
+ 'search-console':define({gate:SEARCH_CONSOLE_GATE,settings:searchConsoleSettings,origin:()=>SEARCH_CONSOLE_API,check:http=>checkSearchConsole(http),read:(http,settings,body)=>readSearchConsole(http,settings,body),serviceAccount:true}),
 });
 /** The Services read here; the rest of `read_service` (GitHub) runs over MCP (mcp-source.ts). */
 export const DIRECT_SERVICES:readonly string[]=Object.freeze(Object.keys(SERVICES));
@@ -51,13 +56,18 @@ type Endpoint={settings:unknown;token:string};
 
 export interface ServiceSourceOptions {vault:VaultService;fetch?:typeof fetch;
  /** Every address a host name resolves to, for a gate that is `publicOnly` (the system resolver by default). */
- lookup?:(host:string)=>Promise<string[]>}
+ lookup?:(host:string)=>Promise<string[]>;
+ /** Milliseconds now, for when an access token expires (Date.now by default). */
+ clock?:()=>number}
 export class ServiceSource {
  private readonly vault:VaultService;
  private readonly fetch:typeof fetch;
  private readonly lookup:(host:string)=>Promise<string[]>;
+ private readonly clock:()=>number;
+ /** Access tokens exchanged for a service account key, by the key's hash: in memory only. */
+ private readonly access=new Map<string,{token:string;until:number}>();
  constructor(options:ServiceSourceOptions){
-  this.vault=options.vault;this.fetch=options.fetch??fetch;
+  this.vault=options.vault;this.fetch=options.fetch??fetch;this.clock=options.clock??Date.now;
   this.lookup=options.lookup??(async host=>(await dns.lookup(host,{all:true})).map(entry=>entry.address));
  }
  connected(provider:string){return this.endpoints(provider).length>0;}
@@ -73,6 +83,7 @@ export class ServiceSource {
     try{return typeof entry?.token==='string'?[{settings:service.settings(entry.settings),token:entry.token}]:[];}catch{return [];}
    });
    if(typeof value.token!=='string'||!value.token)return [];
+   if(service.serviceAccount)searchConsoleKey(value.token);
    return [{settings:service.settings(value.settings),token:value.token}];
   }catch{return [];}
  }
@@ -131,8 +142,13 @@ export class ServiceSource {
   if(!service)throw new WorldletError('Unsupported Service.');
   let chosen:unknown;
   try{chosen=service.settings(settings);}catch(error){throw new WorldletError((error as Error).message);}
-  const key=token.replace(/^\s*bearer\s+/i,'').trim();
-  if(!key&&!service.named||/\s/.test(key))throw new WorldletError(service.gate.refused);
+  let key:string;
+  // A pasted service account key is always checked with Google afresh, never with an access token already in memory.
+  if(service.serviceAccount){try{key=JSON.stringify(searchConsoleKey(token));}catch(error){throw new WorldletError((error as Error).message);}this.access.clear();}
+  else{
+   key=token.replace(/^\s*bearer\s+/i,'').trim();
+   if(!key&&!service.named||/\s/.test(key))throw new WorldletError(service.gate.refused);
+  }
   // A named endpoint joins those kept, replacing one of the same name, up to the limit.
   const named=service.named,others=named?this.endpoints(provider).filter(entry=>named.name(entry.settings)!==named.name(chosen)):[];
   if(named&&others.length>=HTTP_JSON_LIMITS.endpoints)throw new WorldletError(`${service.gate.title} keeps up to ${HTTP_JSON_LIMITS.endpoints} endpoints. Remove one first.`);
@@ -140,7 +156,41 @@ export class ServiceSource {
   catch(error){if(error instanceof ServiceUnauthorized)throw new WorldletError(service.gate.refused);throw error;}
   this.vault.set(vaultId(provider),JSON.stringify(named?{v:1,endpoints:[...others,{settings:chosen,token:key}]} satisfies KeptNamed:{v:1,settings:chosen,token:key} satisfies Kept));
  }
- disconnect(provider:string){if(definition(provider))this.vault.delete(vaultId(provider));}
+ disconnect(provider:string){if(definition(provider)){this.vault.delete(vaultId(provider));this.access.clear();}}
+ /** An access token for a kept service account key: the one in memory until a minute before it expires, otherwise a
+  * new one from Google's token address for an assertion the key signs (RS256). Only the assertion is sent; a key
+  * Google refuses is ServiceUnauthorized, and nothing Google says about it is repeated. */
+ private async accessToken(gate:ServiceGate,credential:string):Promise<string> {
+  const id=crypto.createHash('sha256').update(credential).digest('hex'),held=this.access.get(id);
+  if(held&&held.until>this.clock())return held.token;
+  const key=searchConsoleKey(credential),{header,claims}=searchConsoleAssertion(key,this.clock()/1000);
+  const part=(value:unknown)=>Buffer.from(JSON.stringify(value)).toString('base64url');
+  const data=part(header)+'.'+part(claims);
+  let assertion:string;
+  try{assertion=data+'.'+crypto.sign('sha256',Buffer.from(data),key.privateKey).toString('base64url');}catch{throw new ServiceUnauthorized();}
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),gate.timeoutSeconds*1000);
+  try{
+   let response:Response;
+   try{
+    response=await this.fetch(GOOGLE_TOKEN_URL,{method:'POST',redirect:'manual',signal:controller.signal,
+     headers:{accept:'application/json','content-type':'application/x-www-form-urlencoded'},
+     body:new URLSearchParams({grant_type:'urn:ietf:params:oauth:grant-type:jwt-bearer',assertion}).toString()});
+   }catch{throw new WorldletError(controller.signal.aborted?'Google took too long to answer. Try again.':`Could not reach Google to sign in to ${gate.title}. Check your internet connection.`);}
+   if(response.type==='opaqueredirect'||response.status>=300&&response.status<400){void response.body?.cancel().catch(()=>{});throw new WorldletError(`Google answered from another address. Worldlet signs in only at ${GOOGLE_TOKEN_URL}.`);}
+   const text=await bounded(response,gate,controller);
+   let value:unknown=null;try{value=JSON.parse(text);}catch{}
+   if(response.status===400||response.status===401){
+    const error=value&&typeof value==='object'?(value as Row).error:null;
+    if(response.status===401||['invalid_grant','invalid_client','unauthorized_client'].includes(String(error)))throw new ServiceUnauthorized();
+    throw new WorldletError(gate.invalid);
+   }
+   if(!response.ok)throw new WorldletError(`Google could not sign in to ${gate.title} right now (${response.status}). Try again later.`);
+   let access:{token:string;until:number};
+   try{access=searchConsoleAccessToken(value,this.clock());}catch(error){throw new WorldletError((error as Error).message);}
+   this.access.set(id,access);
+   return access.token;
+  }finally{clearTimeout(timer);}
+ }
  /** Requests to the connection's one origin, with its key, bounded in time and size. Paths are the reader's own. */
  private http(service:Definition<unknown>,settings:unknown,token:string):ServiceHttp {
   const {gate}=service,origin=service.origin(settings);
@@ -148,26 +198,28 @@ export class ServiceSource {
    if(!path.startsWith('/')||path.startsWith('//'))throw new WorldletError('Invalid Service request.');
    const url=new URL(path,origin);
    if(url.origin!==origin)throw new WorldletError(`${gate.title} is read only at the address you gave.`);
+   const authorization=service.serviceAccount?'Bearer '+await this.accessToken(gate,token):token?'Bearer '+token:'';
    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),gate.timeoutSeconds*1000);
    try{
     if(gate.publicOnly)await this.publicHost(gate,url.hostname);
     let response:Response;
     try{
      response=await this.fetch(url.href,{method,redirect:'manual',signal:controller.signal,
-      headers:{...token?{authorization:'Bearer '+token}:{},accept:'application/json',...body===undefined?{}:{'content-type':'application/json'}},
+      headers:{...authorization?{authorization}:{},accept:'application/json',...body===undefined?{}:{'content-type':'application/json'}},
       ...body===undefined?{}:{body:JSON.stringify(body)}});
     }catch{throw new WorldletError(controller.signal.aborted?`${gate.title} took too long to answer. Try a narrower read.`:`Could not reach ${gate.title} at ${origin}. Check the address and your internet connection.`);}
     const discard=()=>response.body?.cancel().catch(()=>{});
     if(response.type==='opaqueredirect'||response.status>=300&&response.status<400){void discard();throw new WorldletError(`${gate.title} answered from another address. Worldlet reads it only at ${origin}; check the address you gave.`);}
-    if(response.status===401){void discard();throw new ServiceUnauthorized();}
+    if(response.status===401){void discard();if(service.serviceAccount)this.access.clear();throw new ServiceUnauthorized();}
     const text=await bounded(response,gate,controller);
     if(!response.ok){
      if(response.status===403)throw new WorldletError(gate.forbidden);
      if(response.status===404)throw new WorldletError(gate.missing);
      if(response.status===429)throw new WorldletError(gate.busy);
      if(response.status===400){
-      // The service's own short reason (a HogQL error names the field it could not find): data, never the key.
-      let detail='';try{const value=JSON.parse(text);detail=typeof value?.detail==='string'?value.detail:'';}catch{}
+      // The service's own short reason (a HogQL error names the field it could not find; Google says what it could not
+      // take): data, never the key.
+      let detail='';try{const value=JSON.parse(text);detail=typeof value?.detail==='string'?value.detail:typeof value?.error?.message==='string'?value.error.message:'';}catch{}
       detail=[...detail.replace(/\s+/g,' ').trim()].slice(0,300).join('');
       throw new WorldletError(gate.invalid+(detail?` ${gate.title} said: ${detail}`:''));
      }

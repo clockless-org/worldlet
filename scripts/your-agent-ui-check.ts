@@ -15,7 +15,7 @@ try{
     {id:'hermes-channel-link',agentId:'hermes',targets:['world/link'],access:'write',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'},
     {id:'hermes-github-writes-example/app',agentId:'hermes',targets:['github-writes/run'],access:'write',duration:'standing',grantedAt:'2026-10-02T09:00:00.000Z',github:{repo:'example/app',writes:['issue.comment','labels.set'],labelPrefix:'state:'}}],
    audit:[{at:'2026-10-14T18:30:00.000Z',agentId:'hermes',target:'items',action:'update',decision:'denied',reason:'Only reading here.'},{at:'2026-10-14T18:29:30.000Z',agentId:'hermes',target:'github-writes',action:'write',decision:'allowed',grantId:'hermes-github-writes-example/app'},{at:'2026-10-14T18:29:00.000Z',agentId:'hermes',target:'items',action:'query',decision:'allowed',grantId:'hermes-channel-read'}],
-   services:[{provider:'github',title:'GitHub',granted:false},{provider:'posthog',title:'PostHog',granted:true}],asks:{ask:false,work:true},board:{read:true,define:false},githubDrafts:false,conversations:{add:false,search:true},links:{read:false,save:false},
+   services:[{provider:'github',title:'GitHub',granted:false},{provider:'posthog',title:'PostHog',granted:true},{provider:'search-console',title:'Search Console',granted:false}],asks:{ask:false,work:true},board:{read:true,define:false},githubDrafts:false,conversations:{add:false,search:true},links:{read:false,save:false},
    githubWrites:{add:true,grants:[{repo:'example/app',writes:['issue.comment','labels.set'],labelPrefix:'state:'}]},
    artifacts:{save:false,read:true},reports:{report:true,list:false},wake:[],liveness:'stale',report:{status:'working',summary:'Building the installer',work:[{title:'Fix the build'}],runs:[],reportedAt:new Date(Date.now()-25*60_000).toISOString()}}];
   w.rules=[{id:'rule-00000000000000a1',allows:'npm test',agent:'default',kind:'command',main:true,grantedAt:Date.UTC(2026,9,8,12),thread:'In Fox’s main conversation',inWorld:true},{id:'rule-00000000000000a2',allows:'github › search_issues',agent:'default',kind:'tool',main:true,note:'Any arguments'}];
@@ -63,6 +63,9 @@ try{
   if(b.action==='githubApp'&&b.operation==='status')return {connected:!!w.githubApp};
   if(b.action==='githubApp'&&b.operation==='connect'){if(b.appId!=='1001')throw new Error('The GitHub App is not valid: enter its App ID, its installation ID and its private key (a .pem file\'s whole text).');w.githubApp=true;return {ok:true,connected:true};}
   if(b.action==='githubApp'&&b.operation==='disconnect'){w.githubApp=false;return {ok:true,connected:false};}
+  // Search Console: the service account key goes to the host once, through connect; it never comes back.
+  if(b.action==='connect'&&b.provider==='search-console'){if(b.token.includes('refused'))throw new Error('Google did not accept this service account key. Check that it is the whole JSON key of a service account that has not been deleted or disabled, then paste it again.');w.searchConsole=true;return {ok:true,connected:true};}
+  if(b.action==='disconnectSource'&&b.provider==='search-console'){w.searchConsole=false;return {ok:true};}
   // HTTP JSON endpoints: connected through `connect` with the token once; listed without it.
   if(b.action==='httpJson'&&b.operation==='list')return {endpoints:w.endpoints??[]};
   if(b.action==='httpJson'&&b.operation==='remove'){w.endpoints=w.endpoints.filter(e=>e.name!==b.name);return {endpoints:w.endpoints};}
@@ -86,7 +89,7 @@ try{
    {harness:'claude-code',title:'Claude Code',revoke:null,note:'Claude Code keeps these in its settings.json. Change them with /permissions in Claude Code; rules for one project stay in that project’s .claude folder.',rules:[{id:'rule-00000000000000b1',allows:'pnpm test',agent:'*',kind:'command'}]}]};
   if(b.action==='harnessConnections')return {harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,changes:true,connections:[{id:'conn-00000000000000c1',kind:'mcp',name:'github',where:'https://tools.example.com/github/',enabled:true,sign:'token',agent:'default',main:true,removable:true}]},
    {harness:'claude-code',title:'Claude Code',changes:false,note:'Claude Code keeps these in its own settings. Change them in Claude Code itself.',connections:[{id:'conn-00000000000000d1',kind:'mcp',name:'linear',where:'https://tools.linear.example/sse',enabled:true,sign:'none',removable:false}]}]};
-  if(b.action==='snapshot')return {workspaceId:'your-agent-fixture',revision:0,sources:[],knowledge:[],worldItems:[],connections:[{provider:'gmail',status:'connected',label:'alex@example.com'}],onboarding:{completed:true},sampleEnabled:false,cloudConsent:true};
+  if(b.action==='snapshot')return {workspaceId:'your-agent-fixture',revision:0,sources:[],knowledge:[],worldItems:[],connections:[{provider:'gmail',status:'connected',label:'alex@example.com'},...w.searchConsole?[{provider:'search-console',status:'connected',transport:'hermes',connector:'service'}]:[]],onboarding:{completed:true},sampleEnabled:false,cloudConsent:true};
   if(b.action==='modelStatus')return {available:true,cloudAllowed:true};
   if(b.action==='modelSource')return w.source;
   if(b.action==='modelHealth'&&w.gateway?.active)return {agent:'remote-openclaw',available:true,lastReply:null,location:{kind:'remote',computer:w.gateway.host,direct:true},model:{name:'OpenClaw at '+w.gateway.host,id:'',provider:'remote-openclaw',source:null,ready:true,configured:false}};
@@ -245,6 +248,22 @@ try{
  assert.ok(!(await page.content()).includes('FIXTUREKEY'),'the key is nowhere in the page');
  await githubApp.getByRole('button',{name:'Disconnect',exact:true}).click();
  await githubApp.getByRole('textbox',{name:'App ID'}).waitFor();
+ // Search Console: a service account's JSON key, pasted once and cleared at once; a refusal is said, and once
+ // connected it is a row of its own with Disconnect, and nothing of the key comes back to the page.
+ const searchConsole=accounts.locator('[data-accounts=search-console]');
+ const scKey=(word:string)=>JSON.stringify({type:'service_account',client_email:'reader@example-project.iam.gserviceaccount.com',private_key:'-----BEGIN PRIVATE KEY-----\nSCFIXTURE'+word+'\n-----END PRIVATE KEY-----\n'},null,2);
+ await searchConsole.getByRole('textbox',{name:'Service account key'}).fill(scKey('refused'));
+ await searchConsole.getByRole('button',{name:'Connect',exact:true}).click();
+ await accounts.getByText(/^Google did not accept this service account key/).waitFor();
+ assert.equal(await searchConsole.getByRole('textbox',{name:'Service account key'}).inputValue(),'','the key is cleared as soon as it is sent');
+ await searchConsole.getByRole('textbox',{name:'Service account key'}).fill(scKey('accepted'));
+ await searchConsole.getByRole('button',{name:'Connect',exact:true}).click();
+ await searchConsole.getByText(/^Connected\. Fox, and the Agents you allow/).waitFor();
+ await accounts.locator('[data-account=search-console]').getByText('Search Console',{exact:true}).waitFor();
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='connect'&&c.provider==='search-console').map(c=>[c.region,c.token.includes('"type": "service_account"')])),[['work',true],['work',true]]);
+ assert.ok(!(await page.content()).includes('SCFIXTURE'),'the key is nowhere in the page');
+ await accounts.locator('[data-account=search-console]').getByRole('button',{name:'Disconnect',exact:true}).click();
+ await accounts.locator('[data-account=search-console]').waitFor({state:'detached'});
  // HTTP JSON: a name, an HTTPS base address and an optional token; the token field is cleared as soon as it is sent and
  // the token never comes back. Remove forgets one endpoint; the last one is disconnected.
  const httpJson=accounts.locator('[data-accounts=http]'),endpointToken='Fixture.'+'endpoint'.repeat(3);
@@ -268,7 +287,7 @@ try{
  await httpJson.locator('[data-endpoint=status]').waitFor({state:'detached'});
  await httpJson.locator('[data-endpoint=open]').getByRole('button',{name:'Disconnect',exact:true}).click();
  await httpJson.locator('[data-endpoint=open]').waitFor({state:'detached'});
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='connect'||c.action==='disconnectSource'||c.action==='httpJson'&&c.operation==='remove').map(c=>[c.action,c.settings?.name??c.name??c.provider,c.token?c.token.length:0])),
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.provider!=='search-console'&&(c.action==='connect'||c.action==='disconnectSource'||c.action==='httpJson'&&c.operation==='remove')).map(c=>[c.action,c.settings?.name??c.name??c.provider,c.token?c.token.length:0])),
   [['connect','status',endpointToken.length],['connect','status',endpointToken.length],['connect','open',0],['httpJson','status',0],['disconnectSource','http',0]],'the token goes to the host only with connect');
  const rule=permissions.locator('[data-rule=rule-00000000000000a1]');
  await rule.getByText('npm test',{exact:true}).waitFor();
@@ -298,6 +317,7 @@ try{
  assert.doesNotMatch(await accessPart.innerText(),/\bMCP\b|token|endpoint/i,'plain words only');
  // "Can read <Service>" for each connected Service: on and off at once, the page sending only the Agent and the Service.
  const github=hermesAccess.getByRole('checkbox',{name:'Can read GitHub',exact:true}),posthog=hermesAccess.getByRole('checkbox',{name:'Can read PostHog',exact:true});
+ assert.equal(await hermesAccess.getByRole('checkbox',{name:'Can read Search Console',exact:true}).isChecked(),false);
  assert.deepEqual([await github.isChecked(),await posthog.isChecked()],[false,true]);
  await github.click();
  await accessPart.getByText('Hermes Agent can now read GitHub.',{exact:true}).waitFor();
