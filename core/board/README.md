@@ -6,7 +6,7 @@ The shapes are in [`contracts/board.ts`](../../contracts/board.ts) and the rules
 
 ## A definition
 
-A definition has a title and 1 to 8 tabs. Each tab has an ID, a title and up to 16 blocks, with at most 48 blocks and 20 distinct presets on the whole board. IDs are lowercase letters, digits and `-`, and each tab and block has its own. A block has an ID, a title, a kind, the ID of the preset it shows, and only what its kind takes:
+A definition has a title and 1 to 8 tabs. Each tab has an ID, a title and up to 16 blocks, with at most 48 blocks and 32 distinct presets on the whole board. IDs are lowercase letters, digits and `-`, and each tab and block has its own. A block has an ID, a title, a kind, the ID of the preset it shows, and only what its kind takes:
 
 | Kind | Shows | Takes |
 | --- | --- | --- |

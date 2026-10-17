@@ -41,7 +41,7 @@ export interface BoardDefinition {title:string;tabs:BoardTab[]}
 export const BOARD_LIMITS=Object.freeze({
  tabs:8,blocksPerTab:16,blocks:48,
  /** Distinct presets one board reads. */
- presets:20,
+ presets:32,
  id:40,title:80,field:64,steps:8,fields:4,list:20,listDefault:10,points:200,
  /** Characters of a Service's error a block shows. */
  error:300,

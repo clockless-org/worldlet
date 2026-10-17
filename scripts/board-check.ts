@@ -63,7 +63,7 @@ refused(()=>readBoardDefinition({tabs:[{id:'a',title:'A',blocks:[{id:'b',title:'
 refused(()=>readBoardDefinition({tabs:[]}),BOARD_REASONS.size);
 refused(()=>readBoardDefinition({tabs:Array.from({length:9},(_,i)=>({id:'t'+i,title:'T',blocks:[]}))}),BOARD_REASONS.size);
 refused(()=>readBoardDefinition({tabs:[{id:'a',title:'A',blocks:Array.from({length:17},(_,i)=>({id:'b'+i,title:'B',kind:'number',preset:'p'}))}]}),BOARD_REASONS.size);
-refused(()=>readBoardDefinition({tabs:[{id:'a',title:'A',blocks:Array.from({length:16},(_,i)=>({id:'b'+i,title:'B',kind:'number',preset:'p'+i}))},{id:'c',title:'C',blocks:Array.from({length:5},(_,i)=>({id:'c'+i,title:'C',kind:'number',preset:'q'+i}))}]}),BOARD_REASONS.size);
+refused(()=>readBoardDefinition({tabs:[{id:'a',title:'A',blocks:Array.from({length:16},(_,i)=>({id:'b'+i,title:'B',kind:'number',preset:'p'+i}))},{id:'c',title:'C',blocks:Array.from({length:16},(_,i)=>({id:'c'+i,title:'C',kind:'number',preset:'q'+i}))},{id:'d',title:'D',blocks:[{id:'d0',title:'D',kind:'number',preset:'r0'}]}]}),BOARD_REASONS.size);
 refused(()=>readBoardDefinition({...definition,owner:'alex'}),BOARD_REASONS.invalid);
 
 // Collection-only presets cannot enter the live Service board, including unused inline saves.
