@@ -1,6 +1,6 @@
 // Bounded reads of the person's own GitHub work through GitHub's official remote MCP server: their open pull requests,
-// the reviews asked of them, the Issues assigned to them, one Issue or pull request with its newest comments, and a
-// search. No writes. Every answer is cut to a fixed size before it reaches an Agent (contracts/services.ts).
+// the reviews asked of them, the Issues assigned to them, one Issue or pull request with its newest comments, a search,
+// and one repository's newest releases. No writes. Every answer is cut to a fixed size before it reaches an Agent (contracts/services.ts).
 import type {McpGate,McpSession,McpToolResult} from './session.ts';
 import type {ServiceComment,ServiceRead,ServiceRecord,ServiceRecords} from '../../../contracts/services.ts';
 import {ValueError,isDict,dget} from './python.ts';
@@ -10,14 +10,16 @@ export const GITHUB_ENDPOINT='https://api.githubcopilot.com/mcp/';
 /** The official server, as Worldlet and as an Agent's own profile may name it (`/readonly` serves only read tools). */
 export const GITHUB_ENDPOINTS:readonly string[]=Object.freeze([GITHUB_ENDPOINT,'https://api.githubcopilot.com/mcp','https://api.githubcopilot.com/mcp/readonly']);
 /** The only tools the reader calls; each is a read on GitHub's server. */
-export const GITHUB_TOOLS:readonly string[]=Object.freeze(['search_issues','search_pull_requests','issue_read']);
+export const GITHUB_TOOLS:readonly string[]=Object.freeze(['search_issues','search_pull_requests','issue_read','list_releases']);
 /** GitHub's server takes a token (a fine-grained personal access token) as a Bearer header, as an Agent's own
  * profile saves it, or one made through Worldlet keeps it in the vault (`mcp:github`). */
 export const GITHUB_GATE:McpGate=Object.freeze({name:'github',urls:GITHUB_ENDPOINTS,connectMessage:'Connect GitHub first.',
  urlMessage:'Reconnect to GitHub\'s official MCP server.',disconnectedMessage:'GitHub is disconnected or its token has expired. Reconnect GitHub.',include:GITHUB_TOOLS,bearer:true,timeoutSeconds:60});
 
 /** Caps on what one read returns. */
-export const GITHUB_LIMITS=Object.freeze({listPerQuery:10,searchPage:20,searchPages:10,title:300,text:4000,comments:20,comment:1000,labels:8,query:256});
+export const GITHUB_LIMITS=Object.freeze({listPerQuery:10,searchPage:20,searchPages:10,title:300,text:4000,comments:20,comment:1000,labels:8,query:256,
+ /** `releases`: newest first, a page at a time, and the asset names each one lists. */
+ releasesPage:10,releasesPages:5,assets:20,asset:100});
 const TIMEOUT=30;
 /** `owner/repo#123`: an account name (letters, digits and hyphens) and a repository name that is not only dots. */
 const ID=/^([A-Za-z0-9-]{1,39})\/((?!\.+#)[A-Za-z0-9_.-]{1,100})#([1-9][0-9]{0,8})$/;
@@ -31,11 +33,20 @@ const LISTS=[
 const payload=(result:McpToolResult)=>mcpPayload(result,'GitHub could not answer this read. Reconnect GitHub or open the website.','GitHub returned an unsupported response.',['dict','list']);
 const cut=(value:unknown,limit:number)=>{const text=typeof value==='string'?value:'';return [...text].length>limit?[...text].slice(0,limit-1).join('')+'…':text;};
 
+/** `owner/repo`: the same account and repository names. */
+const REPOSITORY=/^([A-Za-z0-9-]{1,39})\/((?!\.+$)[A-Za-z0-9_.-]{1,100})$/;
+
 /** `owner/repo#123`, checked. */
 export function githubRecordId(value:unknown){
  const match=typeof value==='string'?ID.exec(value):null;
  if(!match)throw new ValueError('Invalid GitHub record ID. Use owner/repo#123 from a list or search.');
  return {owner:match[1],repo:match[2],number:Number(match[3])};
+}
+/** `owner/repo`, checked: the repository a `releases` read names. */
+export function githubRepository(value:unknown){
+ const match=typeof value==='string'?REPOSITORY.exec(value):null;
+ if(!match)throw new ValueError('Invalid GitHub repository. Use owner/repo.');
+ return {owner:match[1],repo:match[2]};
 }
 /** The repository an answer names: `repository_url` (REST), `repository.full_name`, or the record's web address. */
 function repository(row:Record<string,any>):string|null {
@@ -73,9 +84,27 @@ function record(row:unknown,reason?:string):ServiceRecord|null {
  return {id,title:cut(row.title,GITHUB_LIMITS.title),url,...updated?{updatedAt:updated}:{},fields};
 }
 function items(value:unknown):unknown[] {
- const rows=Array.isArray(value)?value:isDict(value)?['items','issues','pull_requests','results'].map(k=>dget(value,k)).find(Array.isArray):null;
+ const rows=Array.isArray(value)?value:isDict(value)?['items','issues','pull_requests','releases','results'].map(k=>dget(value,k)).find(Array.isArray):null;
  if(!Array.isArray(rows))throw new Error('GitHub did not return a list.');
  return rows;
+}
+/** One release as a record: its tag, name, when it was published, whether it is a prerelease or a draft, and its assets'
+ * names and count. Null when the answer is not one. */
+function release(row:unknown,repo:string):ServiceRecord|null {
+ if(!isDict(row))return null;
+ const tag=dget(row,'tag_name')??dget(row,'tagName');
+ if(typeof tag!=='string'||!tag.trim()||/[\u0000-\u001f\u007f]/.test(tag))return null;
+ const web=dget(row,'html_url')??dget(row,'url'),name=dget(row,'name');
+ const url=typeof web==='string'&&web.startsWith(`https://github.com/${repo}/releases/`)?web:`https://github.com/${repo}/releases/tag/${encodeURIComponent(tag)}`;
+ const assets=Array.isArray(dget(row,'assets'))?row.assets.map((a:unknown)=>isDict(a)&&typeof dget(a,'name')==='string'?a.name:'').filter(Boolean):[];
+ const published=dget(row,'published_at')??dget(row,'publishedAt'),created=dget(row,'created_at')??dget(row,'createdAt');
+ const fields:Record<string,string|number|boolean>={repository:repo,tag:cut(tag,GITHUB_LIMITS.title),name:cut(typeof name==='string'&&name.trim()?name:tag,GITHUB_LIMITS.title),
+  prerelease:dget(row,'prerelease')===true,draft:dget(row,'draft')===true,assetCount:assets.length};
+ if(typeof published==='string')fields.publishedAt=cut(published,40);
+ if(assets.length)fields.assets=assets.slice(0,GITHUB_LIMITS.assets).map((a:string)=>cut(a,GITHUB_LIMITS.asset)).join(', ');
+ const author=login(dget(row,'author'));if(author)fields.author=author;
+ const when=typeof published==='string'?published:typeof created==='string'?created:undefined;
+ return {id:`${repo}@${fields.tag}`,title:String(fields.name),url,...when?{updatedAt:cut(when,40)}:{},fields};
 }
 const newestFirst=(a:ServiceRecord,b:ServiceRecord)=>(b.updatedAt??'').localeCompare(a.updatedAt??'');
 
@@ -147,5 +176,17 @@ export async function readGithub(session:McpSession,body:ServiceRead|Record<stri
   found.comments=comments;
   return {provider:'github',operation,records:[found],scope:`One ${found.fields.kind} with its newest ${GITHUB_LIMITS.comments} comments at most · Read only`};
  }
- throw new ValueError('Unsupported GitHub read. Use list, read or search.');
+ if(operation==='releases'){
+  const {owner,repo}=githubRepository(dget(body,'id'));
+  if(dget(body,'query'))throw new ValueError('GitHub releases take only the repository, owner/repo.');
+  const cursor=dget(body,'cursor');
+  const page=cursor===undefined||cursor===null||cursor===''?1:/^[1-9][0-9]?$/.test(String(cursor))?Number(cursor):0;
+  if(page<1||page>GITHUB_LIMITS.releasesPages)throw new ValueError('Invalid GitHub releases cursor.');
+  // GitHub lists releases newest first; a server that sends more than it was asked for is cut to the page.
+  const rows=items(await call(session,'list_releases',{owner,repo,perPage:GITHUB_LIMITS.releasesPage,page})).slice(0,GITHUB_LIMITS.releasesPage);
+  const records=rows.flatMap(row=>{const found=release(row,`${owner}/${repo}`);return found?[found]:[];});
+  const more=rows.length>=GITHUB_LIMITS.releasesPage&&page<GITHUB_LIMITS.releasesPages;
+  return {provider:'github',operation,records,...more?{cursor:String(page+1)}:{},scope:`Releases of ${owner}/${repo}, newest first, page ${page} · Read only`};
+ }
+ throw new ValueError('Unsupported GitHub read. Use list, read, search or releases.');
 }

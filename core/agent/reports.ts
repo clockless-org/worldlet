@@ -1,5 +1,6 @@
-import {AGENT_LIVENESS,AGENT_REPORT_LIMITS,AGENT_REPORT_STATUSES,AGENT_RUN_STATUSES,type AgentListEntry,type AgentLiveness,type AgentReport,type AgentReportRun,type AgentReportStatus,type AgentReportWork,type AgentRunStatus} from '../../contracts/agent-reports.ts';
+import {AGENT_BOARD_FILTERS,AGENT_BOARD_LIMITS,AGENT_BOARD_LISTS,AGENT_LIVENESS,AGENT_REPORT_LIMITS,AGENT_REPORT_STATUSES,AGENT_RUN_STATUSES,type AgentBoardList,type AgentListEntry,type AgentLiveness,type AgentReport,type AgentReportRun,type AgentReportStatus,type AgentReportWork,type AgentRunStatus} from '../../contracts/agent-reports.ts';
 import {AGENT_ID_PATTERN,type AgentIdentity} from '../../contracts/agent-identity.ts';
+import type {ServiceRecords} from '../../contracts/services.ts';
 import {looksSecret} from './agent-profile.ts';
 import {agentRevoked} from './grants.ts';
 
@@ -112,6 +113,75 @@ export function listAgents(identities:readonly AgentIdentity[],reports:readonly 
   const report=reports.find(item=>item.agentId===identity.id);
   return {id:identity.id,name:identity.name,harness:identity.harness,kind:identity.kind,liveness:agentLiveness(report,now),...report?{report}:{}} as AgentListEntry;
  }).filter(entry=>value.liveness===undefined||entry.liveness===value.liveness).sort((a,b)=>at(b)-at(a));
+}
+
+export const AGENT_BOARD_REASONS=Object.freeze({
+ list:`An agents preset reads with list, its id one of ${AGENT_BOARD_LISTS.join(', ')}.`,
+ query:`Narrow an agents preset with one line of up to ${AGENT_BOARD_LIMITS.query} characters and ${AGENT_BOARD_LIMITS.terms} terms: ${AGENT_BOARD_FILTERS.map(key=>key+':').join(', ')} or words.`,
+ filter:`An agents preset's filters are ${AGENT_BOARD_FILTERS.map(key=>key+':').join(', ')}.`,
+});
+type AgentBoardFilter={list:AgentBoardList;query:string;filters:[string,string[]][];words:string[]};
+/** An `agents` preset's `id` and `query` (contracts/agent-reports.ts AgentBoardList), checked: each filter with values
+ * it can take, and the query with single spaces and filters in lower case. Throws the plain reason it cannot read. */
+function agentBoardFilter(id:unknown,query:unknown):AgentBoardFilter {
+ if(!AGENT_BOARD_LISTS.includes(id as AgentBoardList))fail(AGENT_BOARD_REASONS.list);
+ const list=id as AgentBoardList;
+ if(query!==undefined&&query!==null&&(typeof query!=='string'||[...query].length>AGENT_BOARD_LIMITS.query||CONTROL.test(query)||looksSecret(query)))fail(AGENT_BOARD_REASONS.query);
+ const terms=typeof query==='string'?query.trim().split(/\s+/).filter(Boolean):[];
+ if(terms.length>AGENT_BOARD_LIMITS.terms)fail(AGENT_BOARD_REASONS.query);
+ const statuses:readonly string[]=list==='agents'?AGENT_REPORT_STATUSES:AGENT_RUN_STATUSES;
+ const filters:[string,string[]][]=[],words:string[]=[],clean:string[]=[];
+ for(const term of terms){
+  const match=/^([A-Za-z]+):(.*)$/.exec(term);
+  if(!match){words.push(term.toLowerCase());clean.push(term);continue;}
+  const key=match[1].toLowerCase();
+  if(!AGENT_BOARD_FILTERS.includes(key))fail(AGENT_BOARD_REASONS.filter);
+  const values=match[2].toLowerCase().split(',');
+  const fits=(value:string)=>!!value&&(key==='liveness'?AGENT_LIVENESS.includes(value as AgentLiveness):key==='status'?statuses.includes(value)
+   :key==='agent'?AGENT_ID_PATTERN.test(value):[...value].length<=(key==='tag'?L.tag:L.role));
+  if(!values.every(fits))fail(key==='status'?`An agents preset's ${list} take status: ${statuses.join(', ')}.`:AGENT_BOARD_REASONS.query);
+  filters.push([key,values]);clean.push(key+':'+values.join(','));
+ }
+ return {list,query:clean.join(' '),filters,words};
+}
+/** An `agents` preset's read, checked (`list`, an `id` of AGENT_BOARD_LISTS, an optional `query`), as a preset keeps it. */
+export function readAgentBoardRead(input:unknown):{operation:'list';id:AgentBoardList;query?:string} {
+ const value=record(input);only(value,['operation','id','query']);
+ if(value.operation!=='list')fail(AGENT_BOARD_REASONS.list);
+ const filter=agentBoardFilter(value.id,value.query===''?undefined:value.query);
+ return {operation:'list',id:filter.list,...filter.query?{query:filter.query}:{}};
+}
+
+/** The board's `agents` source: what `agents/list` returns (`entries`, every Agent the person has not revoked, as
+ * listAgents gives them) as the records an `agents` preset reads, narrowed by its query (contracts/agent-reports.ts).
+ * No Service and no model: every field is what an Agent reported, or a count of it. Agent text is data, never
+ * instructions. */
+export function agentBoardRecords(entries:readonly AgentListEntry[],read:{id?:string;query?:string}):ServiceRecords {
+ const filter=agentBoardFilter(read.id,read.query);
+ const has=(key:string,value:string|undefined)=>filter.filters.filter(([k])=>k===key).every(([,values])=>value!==undefined&&values.includes(value));
+ const chosen=entries.filter(entry=>filter.filters.every(([key,values])=>key==='tag'?values.some(tag=>entry.report?.tags.includes(tag)):
+  key==='role'?values.includes(entry.report?.role??''):key==='agent'?values.includes(entry.id):key==='liveness'?values.includes(entry.liveness):true));
+ const words=(text:string)=>filter.words.every(word=>text.toLowerCase().includes(word));
+ const runs=chosen.flatMap(entry=>(entry.report?.runs??[]).map(run=>({entry,run}))).filter(({run})=>has('status',run.status)&&words(run.title))
+  .sort((a,b)=>Date.parse(b.run.startedAt??b.entry.report!.reportedAt)-Date.parse(a.run.startedAt??a.entry.report!.reportedAt));
+ const about=(entry:AgentListEntry)=>({...entry.report?.role?{role:entry.report.role}:{},...entry.report?.tags.length?{tags:entry.report.tags.join(', ')}:{}});
+ const counts=(list:readonly AgentReportRun[])=>Object.fromEntries(AGENT_RUN_STATUSES.map(status=>[status,list.filter(run=>run.status===status).length]));
+ const narrowed=filter.query?` · ${filter.query}`:'';
+ if(filter.list==='runs')return {provider:'agents',operation:'list',scope:`Runs the Agents in this World reported${narrowed} · Read only`,records:runs.map(({entry,run})=>({
+  id:`${entry.id}/${run.id}`,title:run.title,url:run.url??'',updatedAt:run.finishedAt??run.startedAt??entry.report!.reportedAt,
+  fields:{status:run.status,agent:entry.name,agentId:entry.id,liveness:entry.liveness,...about(entry),...run.startedAt?{startedAt:run.startedAt}:{},...run.finishedAt?{finishedAt:run.finishedAt}:{}}}))};
+ if(filter.list==='totals'){
+  const reported=chosen.map(entry=>entry.report?.status??'offline');
+  return {provider:'agents',operation:'list',scope:`Counts of the Agents in this World and their runs${narrowed} · Read only`,records:[{id:'totals',title:'Agents',url:'',
+   fields:{agents:chosen.length,...Object.fromEntries(AGENT_LIVENESS.map(liveness=>[liveness,chosen.filter(entry=>entry.liveness===liveness).length])),
+    ...Object.fromEntries((['working','idle','blocked'] as const).map(status=>[status,reported.filter(item=>item===status).length])),runs:runs.length,...counts(runs.map(({run})=>run))}}]};
+ }
+ return {provider:'agents',operation:'list',scope:`The Agents in this World and what they report${narrowed} · Read only`,
+  records:chosen.filter(entry=>has('status',entry.report?.status??'offline')&&words(`${entry.name} ${entry.report?.summary??''}`)).map(entry=>({
+   id:entry.id,title:entry.name,url:'',...entry.report?{updatedAt:entry.report.reportedAt}:{},
+   fields:{status:entry.report?.status??'offline',liveness:entry.liveness,harness:entry.harness,kind:entry.kind,...entry.report?.summary?{summary:entry.report.summary}:{},...about(entry),
+    runs:entry.report?.runs.length??0,...counts(entry.report?.runs??[]),...entry.report?.capacity?{slots:entry.report.capacity.slots,busy:entry.report.capacity.busy}:{},
+    ...entry.report?{reportedAt:entry.report.reportedAt}:{}}}))};
 }
 
 /** A stored report, checked; null when it is not one. */

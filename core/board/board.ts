@@ -1,9 +1,13 @@
 import {BOARD_BLOCK_KINDS,BOARD_DEFINE_PRESETS,BOARD_LIMITS,type BoardReadArgs,type BoardRecord,type BoardBlock,type BoardBlockKind,type BoardBlockView,type BoardDefinition,type BoardFunnelStep,type BoardFunnelStepView,type BoardListItem,type BoardPoint,type BoardTab,type BoardTone,type BoardView} from '../../contracts/board.ts';
-import type {ServicePreset} from '../../contracts/service-presets.ts';
+import {WORLD_PRESET_PROVIDERS,type ServicePreset} from '../../contracts/service-presets.ts';
 import {SERVICE_PROVIDERS,type ServiceRecords} from '../../contracts/services.ts';
 import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
 import {looksSecret} from '../agent/index.ts';
 import {saveServicePreset} from '../accounts/index.ts';
+
+/** What a board block may show: a Service's live read, or the World's own records (`agents`). A Notion preset is
+ * collected for the person, not read live, so the board refuses it. */
+export const BOARD_PROVIDERS:readonly string[]=Object.freeze([...SERVICE_PROVIDERS,...WORLD_PRESET_PROVIDERS]);
 
 /** The board (contracts/board.ts, core/board/README.md). Pure: the host supplies the definition, the saved presets and
  * each preset's Service read (or why it could not be read), and shows what comes back. No model is involved: every
@@ -204,11 +208,11 @@ export function defineBoard(current:BoardRecord|null,presets:readonly ServicePre
   if(!Array.isArray(value.presets)||value.presets.length>BOARD_DEFINE_PRESETS)fail(BOARD_REASONS.presets);
   for(const input of value.presets as unknown[]){
    const result=saveServicePreset(saved,input,now);
-   if(!SERVICE_PROVIDERS.includes(result.preset.provider))fail(BOARD_REASONS.collection);
+   if(!BOARD_PROVIDERS.includes(result.preset.provider))fail(BOARD_REASONS.collection);
    saved=result.presets;
   }
  }
- if(saved.some(preset=>boardPresetIds(definition).includes(preset.id)&&!SERVICE_PROVIDERS.includes(preset.provider)))fail(BOARD_REASONS.collection);
+ if(saved.some(preset=>boardPresetIds(definition).includes(preset.id)&&!BOARD_PROVIDERS.includes(preset.provider)))fail(BOARD_REASONS.collection);
  return {board:{definition,revision:(current?.revision??0)+1,updatedAt:now,...agentId?{agentId}:{}},presets:saved};
 }
 

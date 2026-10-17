@@ -169,6 +169,14 @@ export function serviceReadGrant(agentId:string,provider:string,grantedAt:string
  if(!targets.length||typeof agentId!=='string'||!AGENT_ID_PATTERN.test(agentId))return null;
  return {id:serviceGrantId(agentId,provider),agentId,targets,access:'read',duration:'standing',grantedAt};
 }
+/** A stored Grant as it counts today: a "Can read <Service>" Grant (by its ID, a standing read) names that Service's reads
+ * as they are now, so a read the Service gains later (GitHub's `releases`) is covered by the Grant the person gave and
+ * one it loses is not; its other terms (when given, expiry, revocation) are kept. Any other Grant is returned as it is. */
+export function currentServiceGrant(grant:Grant):Grant {
+ const provider=SERVICE_PROVIDERS.find(name=>grant.id===serviceGrantId(grant.agentId,name));
+ if(!provider||grant.access!=='read'||grant.duration!=='standing')return grant;
+ return {...grant,targets:serviceReadTargets(provider)};
+}
 /** Whether this Agent's "Can read <Service>" Grant is active. */
 export function serviceGranted(agentId:string,grants:readonly Grant[],provider:string,now:string):boolean {
  const id=serviceGrantId(agentId,provider);

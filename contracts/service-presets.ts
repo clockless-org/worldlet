@@ -7,8 +7,12 @@
 import type {ServiceOperation} from './services.ts';
 import {SERVICE_PROVIDERS} from './services.ts';
 
+/** Presets the World answers from its own records, with no Service and no network: `agents`, what the Agents in this
+ * World report (contracts/agent-reports.ts, `agents/list`). A board reads them as it reads a Service preset; they add
+ * no `read_service` operation and no "Can read <Service>" Grant. */
+export const WORLD_PRESET_PROVIDERS:readonly string[]=Object.freeze(['agents']);
 /** Owner collection presets include Notion pages. This does not add a live Agent Service tool or Grant. */
-export const SERVICE_PRESET_PROVIDERS:readonly string[]=Object.freeze([...SERVICE_PROVIDERS,'notion']);
+export const SERVICE_PRESET_PROVIDERS:readonly string[]=Object.freeze([...SERVICE_PROVIDERS,'notion',...WORLD_PRESET_PROVIDERS]);
 
 /** What to read: one operation of the Service's (SERVICE_ACTIONS) with the `id` or `query` it takes. Never a cursor:
  * a preset always reads the first page. */
@@ -19,7 +23,8 @@ export interface ServicePreset {
  id:string;
  /** What the person calls it ("Weekly signups"). */
  name:string;
- /** A provider in SERVICE_PRESET_PROVIDERS; Notion is collected by the World, not read live by an Agent. */
+ /** A provider in SERVICE_PRESET_PROVIDERS; Notion is collected by the World, not read live by an Agent; `agents` is
+  * the World's own (WORLD_PRESET_PROVIDERS). */
  provider:string;
  read:ServicePresetRead;
  /** One optional line on what it is for. */
