@@ -6,7 +6,8 @@
  * (core/board/README.md), "Can save conversations" and "Can search conversations"
  * (core/agent/GRANTS.md#conversation-archive), "Can see your tracked links" and "Can keep your tracked links"
  * (core/agent/GRANTS.md#tracked-links), and "Can report its work" and "Can see other Agents"
- * (core/agent/GRANTS.md#agent-reports), the same way; and what each Agent last reported it is doing. Plain words: the page names
+ * (core/agent/GRANTS.md#agent-reports), the same way; what each Agent last reported it is doing; and "Add an Agent for a
+ * script" (core/agent/GRANTS.md#agents-for-scripts), which sends only the name the person typed. Plain words: the page names
  * places in the World and what was allowed, never tokens, endpoints or MCP. */
 import {agentButton as button,agentEl as el} from './agent-change.ts';
 import {showRemoteAccess} from './remote-access.ts';
@@ -14,7 +15,9 @@ type Grant={id:string;targets:string[];access:'read'|'write';duration:'standing'
 type Audit={at:string;target:string;action:string;decision:'allowed'|'denied'|'asked';reason?:string};
 type Service={provider:string;title:string;granted:boolean};
 type Agent={id:string;name:string;harness:string;kind:'local'|'remote';createdAt:string;lastSeenAt?:string;revokedAt?:string;grants:Grant[];audit:Audit[];services?:Service[];asks?:{ask:boolean;work:boolean};board?:{read:boolean;define:boolean};githubDrafts?:boolean;conversations?:{add:boolean;search:boolean};links?:{read:boolean;save:boolean};
- reports?:{report:boolean;list:boolean};liveness?:'live'|'stale'|'offline';report?:Report};
+ reports?:{report:boolean;list:boolean};liveness?:'live'|'stale'|'offline';report?:Report;
+ /** An Agent for a script: the file its program reads its endpoint and token from. */
+ endpointFile?:string};
 type Report={status:'working'|'idle'|'blocked'|'offline';summary:string;work:{title:string;state?:string}[];runs:{title:string;status:string}[];reportedAt:string};
 /** "Can ask you" and "Can take work" (core askGrant): the page names only which, never targets. */
 const ASK_TOGGLES=[['ask','Can ask you','can now ask you things in Attention','can no longer ask you things'],['work','Can take work','can now take work left for Agents','can no longer take work']] as const;
@@ -82,7 +85,18 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
  // Remote access first: the connectors it lets in are listed below like any other Agent.
  const remote=el('div');target.append(remote);
  const box=el('div','companion-settings-approvals companion-settings-access'),said=el('p','companion-settings-status');said.setAttribute('role','status');
- target.append(box,said);
+ // A daemon or scheduled job on this computer that reaches the World as an Agent of its own.
+ const adder=el('div','companion-settings-access-add'),name=document.createElement('input');
+ name.type='text';name.maxLength=60;name.placeholder='Name, like Nightly build';name.setAttribute('aria-label','Name of the script');
+ adder.append(el('span','','Add an Agent for a script'),name,button('Add','add-script-agent',async()=>{
+  said.textContent='';
+  try{
+   const added=await call('agentAccess',{operation:'addScript',name:name.value});
+   name.value='';await draw();
+   said.textContent=`${added.name} can now reach your World from a script on this computer. Its key is in ${added.endpointFile}. Allow what it may do below.`;
+  }catch(e){said.textContent='Could not add it: '+((e as Error).message||'try again.');}
+ }));
+ target.append(box,adder,said);
  function confirmRevoke(row:HTMLElement,agent:Agent){
   for(const open of box.querySelectorAll?.('.companion-settings-confirm')??[])open.remove();
   said.textContent='';
@@ -106,6 +120,7 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
   for(const agent of agents){
    const row=el('div','companion-settings-row'),words=el('div');row.dataset.accessAgent=agent.id;
    words.append(el('strong','',agent.name),el('span','',accessLine(agent)));
+   if(agent.endpointFile)words.append(el('span','companion-settings-quiet',`For a script. Its key is in ${agent.endpointFile}.`));
    const reported=agent.revokedAt?'':reportLine(agent);
    if(reported){const line=el('span','companion-settings-access-report',reported);line.dataset.liveness=agent.liveness??'offline';words.append(line);}
    for(const grant of agent.grants.filter(g=>!g.revokedAt))words.append(el('span','companion-settings-quiet',grantLine(grant)));

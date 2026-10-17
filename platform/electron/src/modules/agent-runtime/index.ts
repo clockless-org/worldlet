@@ -11,11 +11,12 @@ import {installationRoot,type Profile} from '../../profile.ts';
 import {ExecutionJournal} from './journal.ts';
 import {attachedHermes,bindHermes,discoverOtherHermes,unbindHermes} from './hermes-files.ts';
 import {keepHermesResident} from './hermes-service.ts';
-import {openStandingWorldTools,type StandingWorldTools} from './world-tool-bridge.ts';
+import {openStandingWorldTools,standingEndpointFile,type StandingWorldTools} from './world-tool-bridge.ts';
 import {createAgentAccess} from './agent-access.ts';
 import {createAgentAsks,type AgentAsks} from './agent-asks.ts';
 import {createWorldBoard,type WorldBoard} from './board.ts';
 import {createAgentReports,type AgentReports} from './agent-reports.ts';
+import {createScriptAgents,mcpHome,type ScriptAgents} from './script-agents.ts';
 import {createGithubDrafts,type GithubDrafts} from './github-drafts.ts';
 import {createRemoteMcpHost,type RemoteMcpHost} from './remote-mcp.ts';
 import {createConversationArchive,type ConversationArchive} from './conversations.ts';
@@ -33,7 +34,7 @@ import {harnessConnections} from './harness-connections.ts';
 import {harnessScheduleControls} from './harness-schedule-controls.ts';
 import {harnessSkills} from './harness-skills.ts';
 import {harnessMemory} from './harness-memory.ts';
-import {AGENT_VERSIONS,agentRevoked,serviceGranted,askGranted,ASK_GRANT_KINDS,type AskGrantKind,boardGranted,BOARD_GRANT_KINDS,type BoardGrantKind,githubDraftGranted,conversationGranted,CONVERSATION_GRANT_KINDS,type ConversationGrantKind,linkGranted,LINK_GRANT_KINDS,type LinkGrantKind,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId,reportGranted,REPORT_GRANT_KINDS,type ReportGrantKind} from '../../../../../core/agent/index.ts';
+import {AGENT_VERSIONS,agentRevoked,serviceGranted,askGranted,ASK_GRANT_KINDS,type AskGrantKind,boardGranted,BOARD_GRANT_KINDS,type BoardGrantKind,githubDraftGranted,conversationGranted,CONVERSATION_GRANT_KINDS,type ConversationGrantKind,linkGranted,LINK_GRANT_KINDS,type LinkGrantKind,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId,reportGranted,REPORT_GRANT_KINDS,type ReportGrantKind,SCRIPT_HARNESS} from '../../../../../core/agent/index.ts';
 import {harnessTools} from './harness-services.ts';
 import {ongoingId} from '../../../../../core/tasks/index.ts';
 import {SERVICE_PROVIDERS,SERVICE_TITLES} from '../../../../../contracts/services.ts';
@@ -301,6 +302,10 @@ let conversationArchive:ConversationArchive|null=null;
 let trackedLinks:TrackedLinks|null=null;
 /** Agent reports (agent-reports.ts), made with agentAccess. */
 let agentReports:AgentReports|null=null;
+/** Agents for scripts (script-agents.ts), made with agentAccess. */
+let scriptAgents:ScriptAgents|null=null;
+/** Agents for scripts on this host: the Node host adds one from its command line (`worldlet register --script`). */
+export const scriptAgentService=()=>scriptAgents;
 /** How many of each Agent's newest audit entries Settings shows. */
 const AGENT_ACCESS_AUDIT=20;
 
@@ -580,6 +585,9 @@ export function installAgentRuntime(host:Host){
  // Asks need the person's own World with private context allowed, as a channel's reads do.
  agentAsks=createAgentAsks({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
   name:agentId=>agentAccess?.identity(agentId)?.name??agentId,changed:()=>host.store.worldChanged(),drafts:()=>githubDrafts});
+ // Agents for scripts (core/agent/GRANTS.md#agents-for-scripts): their endpoint files are written again each run.
+ scriptAgents=createScriptAgents({root:context.root,access:agentAccess,tools:()=>standingWorldTools()});
+ void scriptAgents.open().catch(error=>host.diagnostics.record(error,'scriptAgents'));
  // Agent reports (core/agent/GRANTS.md#agent-reports): in the person's own World with private context allowed, as asks are.
  agentReports=createAgentReports({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
   identities:()=>agentAccess?.list(0).map(entry=>entry.identity)??[]});
@@ -748,6 +756,11 @@ export function installAgentRuntime(host:Host){
    }else if(!access.ungrantGithubDrafts(id))throw new WorldletError('Could not change that.');
    return {ok:true};
   }
+  // A new Agent for a script, named by the person: the page sends only its name.
+  if(request.operation==='addScript'){
+   try{const added=await scriptAgents!.add(request.name);return {ok:true,id:added.id,name:added.name,endpointFile:added.endpointFile};}
+   catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not add it.');}
+  }
   if(request.operation==='grantReports'||request.operation==='ungrantReports'){
    const id=typeof request.id==='string'?request.id:'',kind=typeof request.kind==='string'?request.kind:'';
    const identity=access.identity(id);
@@ -770,6 +783,8 @@ export function installAgentRuntime(host:Host){
    // What it last reported and how that reads now (core/agent/GRANTS.md#agent-reports), with its two Grants.
    reports:{report:reportGranted(identity.id,grants,'report',now),list:reportGranted(identity.id,grants,'list',now)},
    ...agentRevoked(identity,now)?{}:agentReports?.state(identity.id)??{},
+   // An Agent for a script: where its program reads its endpoint and token.
+   ...identity.harness===SCRIPT_HARNESS&&!agentRevoked(identity,now)?{endpointFile:path.join(mcpHome(),standingEndpointFile(identity.id))}:{},
    // "Can draft GitHub changes", shown once a GitHub App can write them (or while the Grant is still on).
    ...!agentRevoked(identity,now)&&(githubApp||githubDraftGranted(identity.id,grants,now))?{githubDrafts:githubDraftGranted(identity.id,grants,now)}:{}}))};
  }});

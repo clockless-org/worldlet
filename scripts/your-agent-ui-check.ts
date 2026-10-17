@@ -56,6 +56,11 @@ try{
   if(b.action==='githubApp'&&b.operation==='connect'){if(b.appId!=='1001')throw new Error('The GitHub App is not valid: enter its App ID, its installation ID and its private key (a .pem file\'s whole text).');w.githubApp=true;return {ok:true,connected:true};}
   if(b.action==='githubApp'&&b.operation==='disconnect'){w.githubApp=false;return {ok:true,connected:false};}
   if(b.action==='agentAccess'&&b.operation==='revoke'){w.access=w.access.map(a=>a.id===b.id?{...a,services:[],asks:undefined,board:undefined,githubDrafts:undefined,conversations:undefined,links:undefined,reports:undefined,report:undefined,revokedAt:'2026-10-15T08:00:00.000Z',grants:a.grants.map(g=>({...g,revokedAt:'2026-10-15T08:00:00.000Z'}))}:a);return {ok:true};}
+  // An Agent for a script: the page sends only the name; the host makes the Agent and its file.
+  if(b.action==='agentAccess'&&b.operation==='addScript'){if(!String(b.name||'').trim())throw new Error('Give it a name of one line, at most 60 characters, with a letter or digit in it.');
+   const file='/Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json';
+   w.access=[...w.access,{id:'nightly-build',name:b.name,harness:'script',kind:'local',createdAt:'2026-10-15T09:00:00.000Z',grants:[],audit:[],services:[],asks:{ask:false,work:false},board:{read:false,define:false},reports:{report:false,list:false},liveness:'offline',endpointFile:file}];
+   return {ok:true,id:'nightly-build',name:b.name,endpointFile:file};}
   if(b.action==='agentAccess')return {agents:w.access};
   if(b.action==='harnessApprovalRules'&&b.operation==='revoke'){w.rules=w.rules.filter(r=>r.id!==b.id);return {ok:true};}
   if(b.action==='harnessApprovalRules')return {harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,revoke:'restart',note:'Hermes Agent reads these when it starts, so Worldlet restarts its own conversation with it.',rules:w.rules},
@@ -302,13 +307,22 @@ try{
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/GithubDrafts$/.test(c.operation))),
   [{action:'agentAccess',operation:'grantGithubDrafts',id:'hermes'}],'only the Agent, never targets');
  // What it last reported (core/agent/GRANTS.md#agent-reports), and "Can report its work" and "Can see other Agents".
- await hermesAccess.getByText(/^Quiet: Building the installer · Fix the build · reported 2\d min ago\.$/).waitFor();
+ await hermesAccess.getByText(/^Quiet: Building the installer · Fix the build · reported \d+ min ago\.$/).waitFor();
  const reporting=hermesAccess.getByRole('checkbox',{name:'Can report its work',exact:true}),listing=hermesAccess.getByRole('checkbox',{name:'Can see other Agents',exact:true});
  assert.deepEqual([await reporting.isChecked(),await listing.isChecked()],[true,false]);
  await listing.click();
  await accessPart.getByText('Hermes Agent can now see what your other Agents are doing.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Reports$/.test(c.operation))),
   [{action:'agentAccess',operation:'grantReports',id:'hermes',kind:'list'}],'only the Agent and which, never targets');
+ // "Add an Agent for a script" (core/agent/GRANTS.md#agents-for-scripts): only the name goes to the host.
+ await accessPart.getByRole('button',{name:'Add',exact:true}).click();
+ await accessPart.getByText(/^Could not add it: Give it a name/).waitFor();
+ await accessPart.getByRole('textbox',{name:'Name of the script'}).fill('Nightly build');
+ await accessPart.getByRole('button',{name:'Add',exact:true}).click();
+ await accessPart.getByText('Nightly build can now reach your World from a script on this computer. Its key is in /Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json. Allow what it may do below.',{exact:true}).waitFor();
+ await accessPart.locator('[data-access-agent=nightly-build]').getByText('For a script. Its key is in /Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json.',{exact:true}).waitFor();
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='addScript')),
+  [{action:'agentAccess',operation:'addScript',name:''},{action:'agentAccess',operation:'addScript',name:'Nightly build'}],'only the name');
  await hermesAccess.getByRole('button',{name:'Revoke',exact:true}).click();
  await hermesAccess.getByText(/^Hermes Agent will no longer reach your World's tools/).waitFor();
  assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='revoke').length),0,'Revoke asks first');

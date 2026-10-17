@@ -165,6 +165,8 @@
 .companion-settings-access-report{display:block;margin-top:2px;font-size:13px;color:#2f5d34}
 .companion-settings-access-report[data-liveness="stale"]{color:#8a6a1f}
 .companion-settings-access-report[data-liveness="offline"]{color:#6b7368}
+.companion-settings-access-add{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:10px;font-size:13px;color:#354132}
+.companion-settings-access-add input{flex:1 1 180px;min-width:0}
 .companion-settings-access-services{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:4px}
 .companion-settings-access-service{display:inline-flex;align-items:center;gap:6px;margin:0;font-size:13px;color:#354132;white-space:nowrap;cursor:pointer}
 .companion-settings-access-service input{flex:0 0 auto;width:auto;min-height:0;margin:0;padding:0}
