@@ -261,6 +261,13 @@ export function setsUpThisComputer(context:RuntimeContext):boolean {
  return profile.channel==='release'&&!profile.rcCheck&&!profile.smoke&&process.env.WORLDLET_AGENT_CONFIG===undefined&&path.resolve(context.root)===path.resolve(installationRoot(profile));
 }
 
+/** Remote access is on by default (core/agent/REMOTE-MCP.md) only in the library the installed app opens by default:
+ * never a development build, a release check, a smoke run or another library. */
+export function opensRemoteAccess(context:RuntimeContext):boolean {
+ const profile=context.profile;
+ return profile.channel==='release'&&!profile.rcCheck&&!profile.smoke&&path.resolve(context.root)===path.resolve(installationRoot(profile));
+}
+
 /** Someone without an Agent (Fox's own Hermes before, or one that is no longer installed) chooses one once (owner
  * decisions 2026-10-09: no built-in Hermes; no Agent → stock Hermes Agent, with what Fox's profile learned moved into it,
  * fox-move.ts). Only in the library this app opens by default, never a release check's, a smoke run's or a configured Agent's. */
@@ -596,7 +603,7 @@ export function installAgentRuntime(host:Host){
  agentAccess=createAgentAccess({root:context.root,vault,ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()?host.store.ledger():null;}catch{return null;}}});
  // Remote MCP (core/agent/REMOTE-MCP.md): cloud MCP clients reach the same World tools through the front, each
  // connection an Agent of its own, allowed on a consent card in Attention.
- remoteMcp=createRemoteMcpHost({vault,access:agentAccess,tools:()=>standingWorldTools(),relay:process.env.WORLDLET_PAIR_RELAY||undefined,changed:()=>host.store.worldChanged(),
+ remoteMcp=createRemoteMcpHost({vault,access:agentAccess,tools:()=>standingWorldTools(),relay:process.env.WORLDLET_PAIR_RELAY||undefined,onByDefault:opensRemoteAccess(context),changed:()=>host.store.worldChanged(),
   ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()?host.store.ledger():null;}catch{return null;}}});
  host.onQuit(()=>remoteMcp?.close());
  /** Remote access (Settings › Agent › Access): `status`, `enable`, `disable`, `renew` (a new address, every connection

@@ -18,7 +18,7 @@ await withTempDir('worldlet-agent-reports-',async dir=>{
  const now=()=>new Date(clock).toISOString();
  const secrets=new Map<string,string>();
  const vault={get:(id:string)=>secrets.get(id)??null,set:(id:string,value:string)=>{secrets.set(id,value);},delete:(id:string)=>{secrets.delete(id);},deleteAll:()=>secrets.clear()};
- const access=createAgentAccess({root:path.join(dir,'access'),vault,ledger:()=>ledger});
+ const access=createAgentAccess({root:path.join(dir,'access'),vault,ledger:()=>ledger,now});
  let own=true;
  const reports=createAgentReports({ledger:()=>own?ledger:null,identities:()=>access.list(0).map(entry=>entry.identity),now});
  const standing=await openStandingWorldTools({access,reports:(agentId,args)=>reports.call(agentId,args),channel:async()=>({error:'not here'})});

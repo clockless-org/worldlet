@@ -37,8 +37,8 @@ export interface RemoteMcpHost {
 }
 const PING_MS=30_000,MAX_BACKOFF_MS=60_000;
 
-export function createRemoteMcpHost({vault,access,tools,ledger,changed,relay=DEFAULT_PAIR_RELAY,front,WebSocket,now=()=>Date.now()}:
- {vault:VaultService;access:AgentAccess;tools:()=>Promise<StandingWorldTools>|null;ledger:()=>ConsentLedger|null;changed:()=>void;relay?:string;front?:string;WebSocket?:RemoteMcpSocketFactory;now?:()=>number}):RemoteMcpHost {
+export function createRemoteMcpHost({vault,access,tools,ledger,changed,relay=DEFAULT_PAIR_RELAY,front,WebSocket,now=()=>Date.now(),onByDefault=false}:
+ {vault:VaultService;access:AgentAccess;tools:()=>Promise<StandingWorldTools>|null;ledger:()=>ConsentLedger|null;changed:()=>void;relay?:string;front?:string;WebSocket?:RemoteMcpSocketFactory;now?:()=>number;onByDefault?:boolean}):RemoteMcpHost {
  const WS=WebSocket??(globalThis as unknown as {WebSocket:RemoteMcpSocketFactory}).WebSocket;
  // Off worldlet.ai (a development relay), the same Worker serves the front at `<relay>/mcp/<room>`.
  const frontOrigin=front??(relay.replace(/\/+$/,'')===DEFAULT_PAIR_RELAY?MCP_FRONT_ORIGIN:relay.replace(/\/+$/,'')+'/mcp');
@@ -118,6 +118,10 @@ export function createRemoteMcpHost({vault,access,tools,ledger,changed,relay=DEF
   for(const t of saved.state.tokens)if(!seen.has(t.agentId)&&active(t.agentId)){seen.add(t.agentId);connectors.push({id:t.agentId,name:access.identity(t.agentId)?.name??t.agentId,token:true});}
   return {enabled:saved.enabled,connected:saved.enabled&&connected,address:remoteMcpAddress(await remoteMcpRoom(saved.token),frontOrigin),connectors};
  }
+ // On by default (owner decision 2026-10-17) in the library the installed app opens: its first run makes the address
+ // and opens the room. Nothing gets in without a connection the person allows on a card or a token they make, and
+ // Turn off is kept across restarts. Development builds, checks and other libraries stay off until turned on.
+ try{if(onByDefault&&!vault.get(REMOTE_MCP_VAULT))write({enabled:true,token:newRemoteMcpToken(),state:emptyRemoteMcpState()});}catch{}
  if(read()?.enabled)void connect().catch(()=>schedule());
  return {
   status,
