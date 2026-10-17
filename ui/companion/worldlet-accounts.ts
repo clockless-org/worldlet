@@ -1,44 +1,38 @@
 import {connectionLive,getApp,TOKEN_PROVIDERS} from '../../core/applets/index.ts';
+import {CONNECTORS} from '../../core/accounts/index.ts';
 import {SERVICE_TITLES} from '../../contracts/services.ts';
 import {showServiceCollection} from './service-collection.ts';
 import {showAgentConnections} from './agent-connections.ts';
 import {agentEl as el} from './agent-change.ts';
 
-// Disconnect exists for these; Google's three share one sign-in.
-const DISCONNECTABLE=['gmail','google-calendar','notion','apple-notes','apple-reminders','todoist','google-drive','github','posthog','cloudflare','search-console'];
-const GOOGLE=['gmail','google-calendar','google-drive'];
+// Disconnect exists for these (Calendar here is the one read from this computer).
+const DISCONNECTABLE=['apple-notes','apple-reminders','google-calendar'];
 
-/** Settings › Agent › Connections (it was a section of its own, Accounts, until the Agent page took it
- * in): Worldlet's own signed-in accounts first, with Reconnect and Disconnect, then the tools and chat accounts in the
- * person's Agent (agent-connections.ts). */
+/** Settings › Agent › Connections (it was a section of its own, Accounts, until the Agent page took it in): what Worldlet
+ * reads that is not a service of Settings › Connectors (this computer's own apps), then the tools and chat accounts in
+ * the person's Agent (agent-connections.ts). The services themselves, and their keys under Advanced, are in
+ * Settings › Connectors (connectors-page.ts). */
 export async function showWorldletAccounts(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){
  const action=(label:string,run:()=>Promise<void>)=>{const b=el('button','companion-info-action',label) as HTMLButtonElement;b.type='button';b.onclick=async()=>{if(b.disabled)return;b.disabled=true;try{await run();}finally{if(b.isConnected)b.disabled=false;}};return b;};
  const own=el('div','companion-settings-worldlet-accounts'),said=el('p','companion-settings-status');said.setAttribute('role','status');
  own.dataset.accounts='worldlet';
- // Search Console's own box, below, shows Connect again once it is disconnected here.
- let searchConsole=async()=>{};
+ // The rows Settings › Connectors owns (connectorTiles) are not listed again here.
+ const services=new Set(['google',...CONNECTORS.flatMap(item=>item.providers)]);
  async function draw(){
   const state=await call('snapshot').catch(()=>null);if(!current())return;
-  const live=(state?.connections||[]).filter(connectionLive),rows=el('div','companion-settings-rows');
-  if(!live.some((c:any)=>c.provider!=='http'))rows.append(el('p','companion-info-note','No accounts are connected yet. Open a Thing in the world to connect it.'));
-  // HTTP JSON's endpoints have their own section below (showHttpJson).
-  for(const c of live.filter((c:any)=>c.provider!=='http')){
-   const app=getApp(c.provider),google=c.transport!=='native'&&GOOGLE.includes(c.provider);
+  const live=(state?.connections||[]).filter((c:any)=>connectionLive(c)&&!(services.has(c.provider)&&c.transport!=='native')),rows=el('div','companion-settings-rows');
+  for(const c of live){
+   const app=getApp(c.provider);
    const row=el('div','companion-settings-row'),text=el('div');row.dataset.account=c.provider;
    text.append(el('strong','',app?.title||SERVICE_TITLES[c.provider]||c.provider),el('span','',c.label||'Connected'));row.append(text);
-   // A token source is reconnected by pasting a new token where it connects (its Thing's connection), not from here.
-   if(!Object.hasOwn(TOKEN_PROVIDERS,c.provider))row.append(action('Reconnect',async()=>{said.textContent='Opening sign-in…';try{await call('connect',{provider:c.provider});said.textContent='';}catch(e){said.textContent=(e as Error).message||'Could not reconnect.';}}));
-   if(DISCONNECTABLE.includes(c.provider))row.append(action(google?'Disconnect Google':'Disconnect',async()=>{try{await call('disconnectSource',{provider:c.provider});await draw();await searchConsole();}catch(e){said.textContent=(e as Error).message||'Could not disconnect.';}}));
+   if(DISCONNECTABLE.includes(c.provider))row.append(action('Disconnect',async()=>{try{await call('disconnectSource',{provider:c.provider});await draw();}catch(e){said.textContent=(e as Error).message||'Could not disconnect.';}}));
    rows.append(row);
   }
-  own.replaceChildren(el('h5','companion-settings-subhead','In Worldlet'),rows,
-   ...live.some((c:any)=>c.transport!=='native'&&GOOGLE.includes(c.provider))?[el('p','companion-info-note','Disconnect Google signs out Mail, Calendar and Drive together. To use a different Google account, disconnect Google first. What was already saved is kept.')]:[]);
+  own.replaceChildren(el('h5','companion-settings-subhead','In Worldlet'),
+   el('p','companion-info-note','Services such as Google, Notion and GitHub are in Settings › Connectors.'),...live.length?[rows]:[]);
  }
  target.append(own,said);
  await draw();
- if(current())await showGithubApp(target,call,current);
- if(current())await showHttpJson(target,call,current);
- if(current())searchConsole=await showSearchConsole(target,call,current,draw);
  if(current())await showServiceCollection(target,call,current);
  // The Agent's own tools and chat accounts, with Add and Remove through its own commands.
  if(current())await showAgentConnections(target,call,current);

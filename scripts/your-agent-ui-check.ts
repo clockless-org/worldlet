@@ -227,19 +227,28 @@ try{
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='harnessSchedule'&&c.operation==='preview'&&['reschedule','create'].includes(c.change)).map(c=>[c.change,c.schedule??c.job])),
   [['reschedule',{daily:{hour:9,minute:30}}],['create',{name:'Plant water',prompt:'Remind me to water the plants.',schedule:{everyHours:3}}]],'what the person chose is what the Agent is asked');
  assert.doesNotMatch(await skillsPart.locator('[data-harness=hermes]').innerText()+'\n'+await routinesPart.innerText(),/\bcron\b|\bMCP\b|config\.yaml/i,'plain words; no commands');
- await accounts.locator('[data-account=gmail]').getByText('alex@example.com',{exact:true}).waitFor();
- await accounts.locator('[data-account=gmail]').getByRole('button',{name:'Disconnect Google',exact:true}).waitFor();
  await accounts.locator('[data-connection=conn-00000000000000c1]').getByText(/^Tool( · |$)/).waitFor();
+ // The services themselves moved to Settings › Connectors: Google is a tile there, and the keys, the GitHub App,
+ // Search Console and HTTP JSON are under its Advanced (connectors-ui-check.ts covers the tiles).
+ await accounts.getByText('Services such as Google, Notion and GitHub are in Settings › Connectors.',{exact:true}).waitFor();
+ assert.equal(await accounts.locator('[data-account=gmail]').count(),0,'Google is not listed twice');
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'connectors'}})));
+ await settingsPage.locator('[data-setting=connectors][aria-current=true]').waitFor();
+ const google=settingsPage.locator('[data-connector=google]');
+ await google.getByText('Connected as alex@example.com',{exact:true}).waitFor();
+ await google.getByRole('button',{name:'Disconnect',exact:true}).waitFor();
+ const advanced=settingsPage.locator('[data-advanced=connectors]');
+ await advanced.locator('summary').click();
  // GitHub writes: the App's ID, installation ID and private key go to the host once; the key field is cleared at once,
  // a refusal is said, and once connected only Disconnect is left: nothing of the App comes back to the page.
- const githubApp=accounts.locator('[data-accounts=github-app]');
+ const githubApp=advanced.locator('[data-accounts=github-app]');
  await githubApp.getByText('GitHub writes',{exact:true}).first().waitFor();
  const appKey='-----BEGIN RSA PRIVATE KEY-----\nFIXTUREKEYFIXTUREKEY\n-----END RSA PRIVATE KEY-----';
  await githubApp.getByRole('textbox',{name:'App ID'}).fill('9');
  await githubApp.getByRole('textbox',{name:'Installation ID'}).fill('4242');
  await githubApp.getByRole('textbox',{name:'Private key'}).fill(appKey);
  await githubApp.getByRole('button',{name:'Connect',exact:true}).click();
- await accounts.getByText(/^The GitHub App is not valid/).waitFor();
+ await advanced.getByText(/^The GitHub App is not valid/).waitFor();
  assert.equal(await githubApp.getByRole('textbox',{name:'Private key'}).inputValue(),'','the key is cleared as soon as it is sent');
  await githubApp.getByRole('textbox',{name:'App ID'}).fill('1001');
  await githubApp.getByRole('textbox',{name:'Private key'}).fill(appKey);
@@ -250,30 +259,33 @@ try{
  await githubApp.getByRole('button',{name:'Disconnect',exact:true}).click();
  await githubApp.getByRole('textbox',{name:'App ID'}).waitFor();
  // Search Console: a service account's JSON key, pasted once and cleared at once; a refusal is said, and once
- // connected it is a row of its own with Disconnect, and nothing of the key comes back to the page.
- const searchConsole=accounts.locator('[data-accounts=search-console]');
+ // connected it is a tile of its own with Disconnect, and nothing of the key comes back to the page.
+ const searchConsole=advanced.locator('[data-accounts=search-console]');
  const scKey=(word:string)=>JSON.stringify({type:'service_account',client_email:'reader@example-project.iam.gserviceaccount.com',private_key:'-----BEGIN PRIVATE KEY-----\nSCFIXTURE'+word+'\n-----END PRIVATE KEY-----\n'},null,2);
  await searchConsole.getByRole('textbox',{name:'Service account key'}).fill(scKey('refused'));
  await searchConsole.getByRole('button',{name:'Connect',exact:true}).click();
- await accounts.getByText(/^Google did not accept this service account key/).waitFor();
+ await advanced.getByText(/^Google did not accept this service account key/).waitFor();
  assert.equal(await searchConsole.getByRole('textbox',{name:'Service account key'}).inputValue(),'','the key is cleared as soon as it is sent');
  await searchConsole.getByRole('textbox',{name:'Service account key'}).fill(scKey('accepted'));
  await searchConsole.getByRole('button',{name:'Connect',exact:true}).click();
  await searchConsole.getByText(/^Connected\. Fox, and the Agents you allow/).waitFor();
- await accounts.locator('[data-account=search-console]').getByText('Search Console',{exact:true}).waitFor();
+ const scTile=settingsPage.locator('[data-connector=search-console]');
+ await scTile.getByText('Connected',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='connect'&&c.provider==='search-console').map(c=>[c.region,c.token.includes('"type": "service_account"')])),[['work',true],['work',true]]);
  assert.ok(!(await page.content()).includes('SCFIXTURE'),'the key is nowhere in the page');
- await accounts.locator('[data-account=search-console]').getByRole('button',{name:'Disconnect',exact:true}).click();
- await accounts.locator('[data-account=search-console]').waitFor({state:'detached'});
+ await scTile.getByRole('button',{name:'Disconnect',exact:true}).click();
+ await scTile.getByRole('group').getByRole('button',{name:'Disconnect',exact:true}).click();
+ await scTile.waitFor({state:'detached'});
+ await searchConsole.getByRole('textbox',{name:'Service account key'}).waitFor();
  // HTTP JSON: a name, an HTTPS base address and an optional token; the token field is cleared as soon as it is sent and
  // the token never comes back. Remove forgets one endpoint; the last one is disconnected.
- const httpJson=accounts.locator('[data-accounts=http]'),endpointToken='Fixture.'+'endpoint'.repeat(3);
+ const httpJson=advanced.locator('[data-accounts=http]'),endpointToken='Fixture.'+'endpoint'.repeat(3);
  await httpJson.getByText('JSON endpoints',{exact:true}).waitFor();
  await httpJson.getByRole('textbox',{name:'Endpoint name'}).fill('status');
  await httpJson.getByRole('textbox',{name:'Base address'}).fill('http://api.example.com/v1/');
  await httpJson.getByLabel('Token (optional)').fill(endpointToken);
  await httpJson.getByRole('button',{name:'Connect',exact:true}).click();
- await accounts.getByText(/^Use the endpoint's base address/).waitFor();
+ await advanced.getByText(/^Use the endpoint's base address/).waitFor();
  assert.equal(await httpJson.getByLabel('Token (optional)').inputValue(),'','the token is cleared as soon as it is sent');
  await httpJson.getByRole('textbox',{name:'Base address'}).fill('https://api.example.com/v1/');
  await httpJson.getByLabel('Token (optional)').fill(endpointToken);
@@ -290,6 +302,8 @@ try{
  await httpJson.locator('[data-endpoint=open]').waitFor({state:'detached'});
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.provider!=='search-console'&&(c.action==='connect'||c.action==='disconnectSource'||c.action==='httpJson'&&c.operation==='remove')).map(c=>[c.action,c.settings?.name??c.name??c.provider,c.token?c.token.length:0])),
   [['connect','status',endpointToken.length],['connect','status',endpointToken.length],['connect','open',0],['httpJson','status',0],['disconnectSource','http',0]],'the token goes to the host only with connect');
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'model'}})));
+ await settingsPage.locator('[data-setting=model][aria-current=true]').waitFor();
  const rule=permissions.locator('[data-rule=rule-00000000000000a1]');
  await rule.getByText('npm test',{exact:true}).waitFor();
  await rule.getByText(/^Allowed .*2026, in Fox’s main conversation\.$/).waitFor();
@@ -582,12 +596,11 @@ try{
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'model'}})));
  await settingsNow.locator('[data-part=routines]').getByText('pi has no routines of its own.',{exact:true}).waitFor();
  await page.evaluate(()=>{(window as any).current={harness:'hermes',title:'Hermes Agent'};});
- // Old entry points that open Accounts land on Agent, at Accounts.
+ // Old entry points that open Accounts land on Connectors.
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'integrations'}})));
- await settings.locator('[data-setting=model][aria-current=true]').waitFor();
- await settings.locator('.companion-settings-detail [data-part=accounts]').waitFor();
- await page.waitForFunction(()=>{const part=document.querySelector('#companionInfo .companion-settings-detail [data-part=accounts]'),pane=document.querySelector('#companionInfo .companion-settings-detail');if(!part||!pane)return false;const a=part.getBoundingClientRect(),b=pane.getBoundingClientRect();return a.top>=b.top-1&&a.top<b.bottom-40&&pane.scrollTop>0;});
+ await settings.locator('[data-setting=connectors][aria-current=true]').waitFor();
+ await settings.locator('.companion-settings-detail [data-connectors=page]').waitFor();
  await page.screenshot({path:'/tmp/your-agent-accounts.png'});
  assert.deepEqual(errors,[]);
- console.log('PASS Agent: no energy or battery anywhere; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model; seven named sections (Model, Memory, Skills, Routines, Permissions, Access, Connections) with one plain line each; Memory shows what each Agent remembers, read only, with one-tap Ask it to forget for the Agent in use; Claude Code’s skills, rules and tools read-only with where to change them; pi has no routines; the Agent\'s skills and routines change only after a plain-words ask, and a routine change refreshes the Task panel; Permissions lists the Agent\'s standing rules in plain words and revokes one after asking again; Access lists each Agent with its last use, Grants and newest decisions, gives or takes back each connected Service\'s read Grant at once and revokes it after asking; Accounts is the page\'s last part and old Accounts entry points land on it');
+ console.log('PASS Agent: no energy or battery anywhere; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model; seven named sections (Model, Memory, Skills, Routines, Permissions, Access, Connections) with one plain line each; Memory shows what each Agent remembers, read only, with one-tap Ask it to forget for the Agent in use; Claude Code’s skills, rules and tools read-only with where to change them; pi has no routines; the Agent\'s skills and routines change only after a plain-words ask, and a routine change refreshes the Task panel; Permissions lists the Agent\'s standing rules in plain words and revokes one after asking again; Access lists each Agent with its last use, Grants and newest decisions, gives or takes back each connected Service\'s read Grant at once and revokes it after asking; Connections is the page\'s last part; the services, with keys, the GitHub App, Search Console and HTTP JSON under Advanced, are in Connectors, where old Accounts entry points land');
 }finally{await browser.close();}
