@@ -260,6 +260,7 @@ export function installFox(host:Host){
   // turn never drafts a GitHub write.
   // The conversation archive is saved and searched by Agents the person allowed in Settings, under their own Grants
   // (agent-runtime/conversations.ts), never by a Fox turn.
+  if(name==='world_links')return {error:'Tracked links are kept by Agents the person allowed in Settings › Agent › Access, never by Fox.'};
   if(name==='world_conversations')return {error:'The conversation archive is for Agents the person allowed in Settings › Agent › Access. Search the person\'s conversations with Fox with read_companion_archive instead.'};
   if(name==='github_drafts')return {error:'GitHub drafts are for Agents the person allowed in Settings › Agent › Access. Tell the person here what you would change on GitHub instead.'};
   // The World's browser link (`world/link`) runs here, on the host, so it works with no World page (a login launch,

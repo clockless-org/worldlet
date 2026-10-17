@@ -59,6 +59,8 @@ Once a GitHub App is connected (Settings › Agent › Connections, [GitHub draf
 
 Under it, **Can ask you** and **Can take work** give or take back the Agent's ask Grants the same way (`agentAccess` `grantAsks` and `ungrantAsks` with the Agent and `ask` or `work`; the page sends no targets; [Agent asks](#agent-asks)). The page shows each change as "You allowed it" or "You turned it off", and an answer as "You answered its ask".
 
+**Can see your tracked links** and **Can keep your tracked links** give or take back the Agent's [tracked links](#tracked-links) Grants the same way (`agentAccess` `grantLinks` and `ungrantLinks` with the Agent and `read` or `save`).
+
 **Can save conversations** and **Can search conversations** give or take back the Agent's [conversation archive](#conversation-archive) Grants the same way (`agentAccess` `grantConversations` and `ungrantConversations` with the Agent and `add` or `search`).
 
 - **What it grants.** One standing `read` Grant, `<agentId>-service-<provider>`, naming exactly that Service's read targets from `SERVICE_ACTIONS` (`serviceReadTargets`): `github/list`, `github/read` and `github/search`; `posthog/query` and `posthog/read`; `cloudflare/read`. The page sends no targets. A name that is not a Service is refused, and so are an unknown or revoked Agent and a Service that is not connected. Off stamps `revokedAt` on that Grant. Revoking the Agent revokes it with the rest, and the default Grants written each run never touch it.
@@ -131,3 +133,17 @@ Conversations held outside Worldlet (a team chat, a project's threads, another A
   Both are `read` Grants: saving only adds to the archive the person's Agents search, and is not a guarded write. Fox's own turns get an error for `world_conversations`; Fox's conversations with the person stay in `read_companion_archive`.
 - **Storage.** `agent_conversations` in `world.sqlite` with a trigram search index, apart from Fox's own conversations ([storage](../items/STORAGE.md)), in the person's own World with private context allowed. The index is left out of backups and rebuilt when missing.
 - **Audit.** Every call's decision is one `agent.audit` entry for the calling Agent, as for any World tool. `node scripts/conversations-host-check.ts` checks all of this on a real `world.sqlite` through the standing server; `agent-grants-check` checks the Grants and `your-agent-ui-check` the checkboxes.
+
+## Tracked links
+
+The person's table of things they put out (a post, a thread, an article, a video), from draft to published: where it went, the link that counts its visitors and how many people saw it. The shapes are in [`contracts/tracked-links.ts`](../../contracts/tracked-links.ts); Core decides ([`tracked-links.ts`](tracked-links.ts)); the host keeps the rows (`agent-runtime/tracked-links.ts`).
+
+- **A row.** An `id` the Agent or person chooses (letters, digits and `-`, at most 64, also what a tracking link carries), a title, a summary, a `type` and `channel` in the person's words (kept in lower case), a `state` (`draft`, `ready`, `published`, `dropped`), the full text, up to 8 tags, the `url` where it was published and the `trackingUrl` people follow (both https), `publishedAt`, `views` with `viewsAt`, up to 8 `media` (https links or file names), the Agent that last changed it (host-stamped) and a revision each change raises by one. Control characters (line breaks outside the text and summary) and anything that looks like a password, token or key are refused, never stored. A World keeps at most 5,000 rows.
+- **Keeping.** The World tool `world_links`, as the gateway targets `links/save` and `links/read`, on the standing `worldlet` MCP server of the Electron and Node hosts alike. `save` creates or changes up to 50 rows by `id`, naming only the fields that change (a new row needs a title); `null` clears an optional field; publishing without `publishedAt` stamps it now. A row that changes nothing is left as it is. One bad row refuses the whole call, and nothing changes.
+- **Reading.** `read` returns rows newest first (by when published, else made): particular `ids`, or narrowed by `state`, `channel` and `since` (`limit` up to 100). The answer is marked as untrusted content.
+- **Grants.** None by default, and a Fox turn's `*/*` Grant never covers them (`OWN_GRANT_TARGETS`). Settings › Agent › Access gives two standing Grants (`linkGrant`), each change audited (`grant-read`, `ungrant-save`, …):
+  - "Can see your tracked links" (`<agentId>-links-read`): `links/read`.
+  - "Can keep your tracked links" (`<agentId>-links-save`): `links/save`. Keeping does not include seeing.
+  Both are `read` Grants: a row only changes the person's own table, which they can see and change back, and is not a guarded write. Fox's own turns get an error for `world_links`.
+- **Storage.** `state.tracked-links` in `world.sqlite`, all of one call's rows in one transaction ([storage](../items/STORAGE.md)), in the person's own World with private context allowed.
+- **Audit.** Every call's decision is one `agent.audit` entry for the calling Agent. `node scripts/tracked-links-host-check.ts` checks all of this on a real `world.sqlite` through the standing server; `agent-grants-check` checks the Grants and `your-agent-ui-check` the checkboxes.

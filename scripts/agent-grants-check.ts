@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {conversationGrant,conversationGrantAuditEntry,conversationGrantTargets,conversationGranted,githubDraftGrant,githubDraftGrantAuditEntry,githubDraftGranted,boardGrant,boardGrantAuditEntry,boardGrantTargets,boardGranted,askGrant,askGrantAuditEntry,askGrantTargets,askGranted,AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites} from '../core/agent/grants.ts';
+import {linkGrant,linkGrantAuditEntry,linkGrantTargets,linkGranted,conversationGrant,conversationGrantAuditEntry,conversationGrantTargets,conversationGranted,githubDraftGrant,githubDraftGrantAuditEntry,githubDraftGranted,boardGrant,boardGrantAuditEntry,boardGrantTargets,boardGranted,askGrant,askGrantAuditEntry,askGrantTargets,askGranted,AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites} from '../core/agent/grants.ts';
 import {HERMES_CHANNEL_READ_ONLY,hermesChannelToolAllowed} from '../core/agent/hermes-server.ts';
 import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
 import {turnWriteAdmission,writeDecision} from '../core/agent/turn-trust.ts';
@@ -125,7 +125,7 @@ assert.equal(worldCallWrites('start_applet_task'),true);assert.equal(worldCallWr
 // describe_world_tools: only granted targets outside a turn; everything while a Fox turn holds the server; none revoked.
 const listed=new Set(standingActions(actions,hermes,defaults,false,now).map(a=>a.target));
 assert.ok(listed.has('items')&&listed.has('world')&&!listed.has('content'));
-assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.filter(a=>!['asks','board','github-drafts','conversations'].includes(a.target)).length,'everything but asks, the board, GitHub drafts and the conversation archive, which only the Agent\'s own Grants name');
+assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.filter(a=>!['asks','board','github-drafts','conversations','links'].includes(a.target)).length,'everything but asks, the board, GitHub drafts, the conversation archive and tracked links, which only the Agent\'s own Grants name');
 assert.deepEqual(standingActions(actions,{...hermes,revokedAt:earlier},defaults,true,now),[]);
 // A resolved call maps back to its target and action (channelToolReply checks Grants by them).
 assert.deepEqual(worldActionOf(actions,'query_world_items',{}),{target:'items',action:'query'});
@@ -271,4 +271,28 @@ assert.deepEqual(standingActions(actions,codex,[...codexDefaults,searchingGrant]
 assert.equal(conversationGranted('codex',[savingGrant],'add',now),true);assert.equal(conversationGranted('codex',[savingGrant],'search',now),false);assert.equal(conversationGranted('hermes',[savingGrant],'add',now),false);
 assert.deepEqual(conversationGrantAuditEntry('codex','search',true,now),{at:now,agentId:'codex',target:'conversations',action:'grant-search',decision:'allowed',grantId:'codex-conversations-search',reason:'The person let this Agent search conversations in Settings.'});
 
-console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server, per-Service read Grants, ask Grants, board Grants, GitHub draft Grants, conversation archive Grants.');
+// "Can see your tracked links" and "Can keep your tracked links": exactly links/read and links/save, never default, never
+// given by a Fox turn, and not a guarded write.
+assert.deepEqual(linkGrantTargets('read'),['links/read']);assert.deepEqual(linkGrantTargets('save'),['links/save']);
+for(const name of ['*','links','all','__proto__','','add'])assert.deepEqual(linkGrantTargets(name),[],'not a link Grant: '+name);
+assert.equal(linkGrant('codex','*/*',now),null);assert.equal(linkGrant('Not An Id','read',now),null);
+const seeLinks=linkGrant('codex','read',now)!,keepLinks=linkGrant('codex','save',now)!;
+assert.deepEqual(keepLinks,{id:'codex-links-save',agentId:'codex',targets:['links/save'],access:'read',duration:'standing',grantedAt:now});
+assert.ok(!channelDefaultGrants('codex',earlier,actions).some(g=>g.targets.some(t=>t.startsWith('links/'))),'no tracked links in the default Grants');
+const linkCall=(grants:Grant[],action:string,args:Record<string,unknown>,foxTurn:{own:boolean}|null=null,identity=codex)=>{
+ const resolved=resolveAction(actions,'links',action,args);
+ assert.equal(resolved.name,'world_links');assert.equal(worldCallWrites(resolved.name,resolved.args),false,'keeping a tracked link is not a guarded write');
+ return standingCallDecision({identity,grants,target:'links',action,tool:resolved.name,args:resolved.args,foxTurn,now});
+};
+const keeping={rows:[{id:'a-1',title:'A post'}]};
+assert.equal(linkCall(codexDefaults,'save',keeping).decision,'denied','ungranted: refused');
+assert.deepEqual(linkCall([...codexDefaults,keepLinks],'save',keeping),{decision:'allowed',grantId:'codex-links-save'});
+assert.equal(linkCall([...codexDefaults,keepLinks],'read',{}).decision,'denied','keeping is not seeing');
+assert.deepEqual(linkCall([...codexDefaults,seeLinks],'read',{}),{decision:'allowed',grantId:'codex-links-read'});
+assert.equal(linkCall(defaults,'save',keeping,{own:true},hermes).decision,'denied','a Fox turn never keeps tracked links');
+assert.equal(linkCall(defaults,'read',{},{own:true},hermes).decision,'denied','nor sees them');
+assert.ok(!standingActions(actions,hermes,defaults,true,now).some(a=>a.target==='links'),'not listed in a Fox turn without a Grant');
+assert.equal(linkGranted('codex',[keepLinks],'save',now),true);assert.equal(linkGranted('codex',[keepLinks],'read',now),false);
+assert.deepEqual(linkGrantAuditEntry('codex','save',false,now),{at:now,agentId:'codex',target:'links',action:'ungrant-save',decision:'allowed',grantId:'codex-links-save',reason:'The person stopped this Agent being able to keep your tracked links in Settings.'});
+
+console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server, per-Service read Grants, ask Grants, board Grants, GitHub draft Grants, conversation archive Grants, tracked link Grants.');

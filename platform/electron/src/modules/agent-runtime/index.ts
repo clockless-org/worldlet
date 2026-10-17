@@ -17,6 +17,7 @@ import {createAgentAsks,type AgentAsks} from './agent-asks.ts';
 import {createWorldBoard,type WorldBoard} from './board.ts';
 import {createGithubDrafts,type GithubDrafts} from './github-drafts.ts';
 import {createConversationArchive,type ConversationArchive} from './conversations.ts';
+import {createTrackedLinks,type TrackedLinks} from './tracked-links.ts';
 import {moveFoxProfile} from './fox-move.ts';
 import {HERMES_WINDOW_DONE,endHermesInstall,hermesInstallWindow,hermesSessionModels,hermesStarts,installHermes,workingHermesAgent,installedHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
 import {UPDATED,backgroundSignIn,claudeCodeSignedIn,openSignIn} from './provider-sign-in.ts';
@@ -30,7 +31,7 @@ import {harnessConnections} from './harness-connections.ts';
 import {harnessScheduleControls} from './harness-schedule-controls.ts';
 import {harnessSkills} from './harness-skills.ts';
 import {harnessMemory} from './harness-memory.ts';
-import {AGENT_VERSIONS,agentRevoked,serviceGranted,askGranted,ASK_GRANT_KINDS,type AskGrantKind,boardGranted,BOARD_GRANT_KINDS,type BoardGrantKind,githubDraftGranted,conversationGranted,CONVERSATION_GRANT_KINDS,type ConversationGrantKind,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
+import {AGENT_VERSIONS,agentRevoked,serviceGranted,askGranted,ASK_GRANT_KINDS,type AskGrantKind,boardGranted,BOARD_GRANT_KINDS,type BoardGrantKind,githubDraftGranted,conversationGranted,CONVERSATION_GRANT_KINDS,type ConversationGrantKind,linkGranted,LINK_GRANT_KINDS,type LinkGrantKind,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {harnessTools} from './harness-services.ts';
 import {ongoingId} from '../../../../../core/tasks/index.ts';
 import {SERVICE_PROVIDERS,SERVICE_TITLES} from '../../../../../contracts/services.ts';
@@ -278,7 +279,8 @@ export function standingWorldTools():Promise<StandingWorldTools>|null {
  return standing??=openStandingWorldTools({access:agentAccess,asks:(agentId,args)=>agentAsks?agentAsks.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},
   board:(agentId,args,canRead)=>worldBoard?worldBoard.call(agentId,args,canRead):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),
   drafts:(agentId,args)=>githubDrafts?githubDrafts.call(agentId,args):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),
-  conversations:(agentId,args)=>conversationArchive?conversationArchive.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},channel:(name,args,agent)=>channelTool?channelTool(name,args,agent):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})});
+  conversations:(agentId,args)=>conversationArchive?conversationArchive.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},
+  links:(agentId,args)=>trackedLinks?trackedLinks.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},channel:(name,args,agent)=>channelTool?channelTool(name,args,agent):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})});
 }
 let channelTool:((name:string,args:Row,agent?:string)=>Promise<Row>)|null=null;
 /** Each Agent's identity, Grants and audit (agent-access.ts), made when the runtime is installed. */
@@ -291,6 +293,8 @@ let worldBoard:WorldBoard|null=null;
 let githubDrafts:GithubDrafts|null=null;
 /** The conversation archive (conversations.ts), made with agentAccess. */
 let conversationArchive:ConversationArchive|null=null;
+/** Tracked links (tracked-links.ts), made with agentAccess. */
+let trackedLinks:TrackedLinks|null=null;
 /** How many of each Agent's newest audit entries Settings shows. */
 const AGENT_ACCESS_AUDIT=20;
 
@@ -560,6 +564,9 @@ export function installAgentRuntime(host:Host){
  // The conversation archive (core/agent/GRANTS.md#conversation-archive): in the person's own World with private context
  // allowed, as asks are.
  conversationArchive=createConversationArchive({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}}});
+ // Tracked links (core/agent/GRANTS.md#tracked-links): the same way.
+ trackedLinks=createTrackedLinks({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
+  changed:()=>host.store.worldChanged()});
  // GitHub drafts (core/agent/GRANTS.md#github-drafts): in the person's own World with private context allowed, as asks are.
  githubDrafts=createGithubDrafts({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
   vault,name:agentId=>agentAccess?.identity(agentId)?.name??agentId,changed:()=>host.store.worldChanged(),userAgent:`Worldlet/${app.getVersion()}`});
@@ -689,6 +696,17 @@ export function installAgentRuntime(host:Host){
    }else if(!access.ungrantConversations(id,kind))throw new WorldletError('Could not change that.');
    return {ok:true};
   }
+  if(request.operation==='grantLinks'||request.operation==='ungrantLinks'){
+   const id=typeof request.id==='string'?request.id:'',kind=typeof request.kind==='string'?request.kind:'';
+   const identity=access.identity(id);
+   if(!identity)throw new WorldletError('That Agent is not known here.');
+   if(!LINK_GRANT_KINDS.includes(kind as LinkGrantKind))throw new WorldletError('That is not something an Agent can be allowed here.');
+   if(request.operation==='grantLinks'){
+    if(agentRevoked(identity,new Date().toISOString()))throw new WorldletError('This Agent was revoked.');
+    if(!access.grantLinks(id,kind))throw new WorldletError('Could not change that.');
+   }else if(!access.ungrantLinks(id,kind))throw new WorldletError('Could not change that.');
+   return {ok:true};
+  }
   if(request.operation==='grantGithubDrafts'||request.operation==='ungrantGithubDrafts'){
    const id=typeof request.id==='string'?request.id:'';
    const identity=access.identity(id);
@@ -707,6 +725,7 @@ export function installAgentRuntime(host:Host){
    asks:{ask:askGranted(identity.id,grants,'ask',now),work:askGranted(identity.id,grants,'work',now)},
    board:{read:boardGranted(identity.id,grants,'read',now),define:boardGranted(identity.id,grants,'define',now)},
    conversations:{add:conversationGranted(identity.id,grants,'add',now),search:conversationGranted(identity.id,grants,'search',now)},
+   links:{read:linkGranted(identity.id,grants,'read',now),save:linkGranted(identity.id,grants,'save',now)},
    // "Can draft GitHub changes", shown once a GitHub App can write them (or while the Grant is still on).
    ...!agentRevoked(identity,now)&&(githubApp||githubDraftGranted(identity.id,grants,now))?{githubDrafts:githubDraftGranted(identity.id,grants,now)}:{}}))};
  }});
