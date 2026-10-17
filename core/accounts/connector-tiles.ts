@@ -77,3 +77,21 @@ export function connectorFailure(name:string,message:unknown):string {
  if(text&&text.length<=200&&plainConnectorText(text))return text;
  return `Could not connect ${name}. Try again.`;
 }
+
+/** An Agent as "Who may use it" shows it: its name and whether it may read this service now. */
+export interface ConnectorReader {id:string;name:string;granted:boolean}
+/** The Agents that may read a connected service (`agentAccess` `serviceReaders`): the Agent Fox uses (`main`, read on by
+ * default when the service is connected) and every other Agent that has reached the World. */
+export interface ConnectorReaders {main:ConnectorReader|null;others:ConnectorReader[]}
+/** "Who may use it", the sentences under a connected service's tile (core/agent/GRANTS.md#settings--connectors). `main`:
+ * the switch for the Agent Fox uses; `fox` when there is none (Fox's own turns read it when the person asks). `changes`
+ * cannot be turned off: every change is a draft the person approves. `others` leads to Choose Agents, each a switch. */
+export function connectorWhoMayUse(name:string,readers:ConnectorReaders):{main:{id:string;text:string;on:boolean}|null;fox:string|null;changes:string;others:{text:string;choose:string;agents:{id:string;text:string;on:boolean}[]}|null} {
+ const main=readers.main?{id:readers.main.id,text:`Fox and ${readers.main.name} can look at your ${name}.`,on:readers.main.granted}:null;
+ const others=readers.others.filter(agent=>agent.id!==readers.main?.id);
+ const chosen=others.filter(agent=>agent.granted).map(agent=>agent.name);
+ return {main,fox:main?null:`Fox can look at your ${name} when you ask.`,changes:'Before anything is changed, Worldlet asks you.',
+  others:others.length?{text:chosen.length?`${listed(chosen)} can look too. Other Agents look only if you choose them.`:'Other Agents look only if you choose them.',choose:'Choose Agents',
+   agents:others.map(agent=>({id:agent.id,text:`${agent.name} can look at your ${name}`,on:agent.granted}))}:null};
+}
+const listed=(names:string[])=>names.length<3?names.join(' and '):`${names.slice(0,-1).join(', ')} and ${names.at(-1)}`;

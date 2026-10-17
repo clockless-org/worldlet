@@ -8,7 +8,7 @@ export {SEND_SCOPE,address as mailAddress,greeted,prepare as prepareMail,draftHa
 export {normalize as normalizeSource,sourceFailure} from './google/normalize.ts';
 export {mockGoogle,MOCK_GOOGLE_EMAIL} from './google/mock.ts';
 // The connectors a person connects, one entry each: name, purpose, how it signs in and its short scope lists.
-export {connectorTiles,connectorDisconnectQuestion,connectorFailure,type ConnectorTile,type ConnectorTileState} from './connector-tiles.ts';
+export {connectorTiles,connectorDisconnectQuestion,connectorFailure,connectorWhoMayUse,type ConnectorReader,type ConnectorReaders,type ConnectorTile,type ConnectorTileState} from './connector-tiles.ts';
 export {CONNECTORS,CONNECTOR_TECHNICAL_WORDS,connector,connectorScopes,plainConnectorText,type Connector,type ConnectorFallback,type ConnectorMechanism} from './connectors.ts';
 // MCP connectors (Notion, Todoist, Linear, PayPal, Supabase): the Platform gates the session (McpGate), Core reads.
 export type {McpContent,McpToolResult,McpTool,McpSession,McpGate} from './mcp/session.ts';
