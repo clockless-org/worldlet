@@ -1,0 +1,79 @@
+// Settings › Connectors (ui/companion/connectors-page.ts): one tile per service, its state and its words, decided here
+// from the World's connection rows so every host shows the same thing. Plain words only on this path
+// (CONNECTOR_TECHNICAL_WORDS); keys and addresses live under Advanced.
+import {CONNECTORS,plainConnectorText,type Connector} from './connectors.ts';
+
+/** `off`: not connected (Connect). `waiting`: sign-in open in the browser (Cancel). `connected` (Disconnect).
+ * `needs-you`: the service signed the person out (Sign in again). */
+export type ConnectorTileState='off'|'waiting'|'connected'|'needs-you';
+export interface ConnectorTile {
+ id:string;
+ name:string;
+ state:ConnectorTileState;
+ /** The one line under the name. */
+ line:string;
+ /** The source provider Connect, Sign in again and Disconnect name to the host. */
+ provider:string;
+ /** The World region its Thing lives in, so a connection made here lands where its Thing is. */
+ region?:string;
+ /** Connect and Sign in again open the service's own sign-in here. False for a service that connects with a key: it
+  * is connected under Advanced. */
+ signIn:boolean;
+}
+/** A connection row as the World snapshot carries it (`label` is the account it names) or as the host stores it (`target`). */
+interface ConnectionRow {provider?:unknown;connected?:unknown;failed?:unknown;status?:unknown;transport?:unknown;label?:unknown;target?:unknown;syncStatus?:unknown;syncError?:unknown;[key:string]:unknown}
+
+// What a read says when the service no longer accepts the sign-in (each McpGate's disconnectedMessage, an expired
+// or refused grant).
+const SIGNED_OUT=/disconnected|reconnect|sign(?:ed)?[ -]?(?:in|out)|authori[sz]|expired|revoked|not accepted|did not accept/i;
+const EMAIL=/^[^\s@]{1,64}@[^\s@]{1,190}$/;
+
+/** The rows of `connections` this connector owns. Google's sign-in owns Mail, Calendar and Drive, but not Calendar
+ * read from this computer (`native`). */
+function owned(item:Connector,connections:readonly ConnectionRow[]){
+ return connections.filter(row=>typeof row.provider==='string'&&(item.providers.includes(row.provider)||(item.id==='google'&&row.provider==='google'))&&!(item.mechanism==='google'&&row.transport==='native'));
+}
+/** Connected: the World snapshot says so (`connected`, core/applets connectionFacts), or a stored row's status does. */
+function live(row:ConnectionRow){
+ if(typeof row.connected==='boolean')return row.connected;
+ return ['connected','syncing','reading','attention','sync_error'].includes(String(row.status??row.syncStatus??''));
+}
+function failed(row:ConnectionRow){
+ return row.failed===true||['sync_error','error','expired','revoked'].includes(String(row.status??row.syncStatus??''));
+}
+function signedOut(row:ConnectionRow){
+ return failed(row)&&(['expired','revoked'].includes(String(row.syncStatus))||SIGNED_OUT.test(String(row.syncError??'')));
+}
+
+/** The tiles Settings › Connectors shows, in the registry's order: every `always` connector, and the others once
+ * they are connected. `waiting`: the connector whose sign-in is open now. */
+export function connectorTiles(connections:readonly ConnectionRow[]=[],waiting?:string|null):ConnectorTile[] {
+ const tiles:ConnectorTile[]=[];
+ for(const item of CONNECTORS){
+  if(item.shown==='advanced')continue;
+  const rows=owned(item,connections).filter(live);
+  const signIn=item.mechanism==='mcp-oauth'||item.mechanism==='google';
+  if(!rows.length&&item.shown!=='always'&&waiting!==item.id)continue;
+  const provider=rows[0]&&typeof rows[0].provider==='string'?rows[0].provider:item.providers[0];
+  const base={id:item.id,name:item.name,provider,signIn,...item.region?{region:item.region}:{}};
+  if(waiting===item.id){tiles.push({...base,state:'waiting',line:`Finish signing in on ${item.name}, then come back here.`});continue;}
+  if(!rows.length){tiles.push({...base,state:'off',line:item.purpose});continue;}
+  if(signIn&&rows.some(signedOut)){tiles.push({...base,state:'needs-you',line:`${item.name} signed you out. Sign in again to keep seeing it here.`});continue;}
+  const target=rows.map(row=>{const text=row.label??row.target;return typeof text==='string'?text.trim():'';}).find(text=>EMAIL.test(text));
+  tiles.push({...base,state:'connected',line:target&&plainConnectorText(target)?`Connected as ${target}`:'Connected'});
+ }
+ return tiles;
+}
+
+/** What Disconnect asks, once. */
+export function connectorDisconnectQuestion(name:string):string {
+ return `Worldlet will stop seeing your ${name}. What it already saved stays.`;
+}
+/** What the tile says when Connect did not finish: the host's own words when they are plain, else a plain line. */
+export function connectorFailure(name:string,message:unknown):string {
+ const text=typeof message==='string'?message.trim():'';
+ if(/cancel/i.test(text))return 'Sign-in was cancelled. Nothing changed.';
+ if(/timed out/i.test(text))return `Signing in to ${name} took too long. Try again.`;
+ if(text&&text.length<=200&&plainConnectorText(text))return text;
+ return `Could not connect ${name}. Try again.`;
+}

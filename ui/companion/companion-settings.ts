@@ -9,6 +9,7 @@ import {showAgentRoutines} from './agent-routines.ts';
 import {showAgentSkills} from './agent-skills.ts';
 import {showAgentMemory} from './agent-memory.ts';
 import {showWorldletAccounts} from './worldlet-accounts.ts';
+import {showConnectors} from './connectors-page.ts';
 import {agentEl as el} from './agent-change.ts';
 
 /** What the World view lends Settings: the sample world switch and which host features exist. */
@@ -21,7 +22,7 @@ const MODEL_EVENTS=['worldlet:model-changed','worldlet:model-refresh'];
 // Entry points that name a section Settings no longer has open the page that took it in, at its part: Accounts became
 // Agent's last part (owner plan 2026-10-11), and the standing rules Approvals listed are its Permissions part. `access`
 // names Agent's Access part (the board's empty state opens it).
-const MOVED:Record<string,{section:string;part:string}>={integrations:{section:'model',part:'accounts'},accounts:{section:'model',part:'accounts'},approvals:{section:'model',part:'permissions'},permissions:{section:'model',part:'permissions'},access:{section:'model',part:'access'}};
+const MOVED:Record<string,{section:string;part:string}>={integrations:{section:'connectors',part:''},accounts:{section:'connectors',part:''},approvals:{section:'model',part:'permissions'},permissions:{section:'model',part:'permissions'},access:{section:'model',part:'access'}};
 
 /** The whole companion panel is one settings window (owner request 2026-10-10): one list of sections on the left, the
  * chosen section's details on the right, no tabs. Everything finishes here; nothing hands off to Fox's speech bubble. */
@@ -315,7 +316,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   const permissions=part('permissions','Permissions','What your Agent may do without asking you first, from each time you chose Always on an approval card.');
   // Access: which Agents reach the World's tools on their own and what each may do (core/agent/GRANTS.md).
   const access=part('access','Access','Agents that reach your World on their own, from any chat: what each may do, when it last did, and Revoke.');
-  const accounts=part('accounts','Connections','The accounts Worldlet signed in to, then the tools and chat accounts set up in your Agent.');
+  const accounts=part('accounts','Connections','What Worldlet reads on this computer, then the tools and chat accounts set up in your Agent.');
   // A request for Fox (set up or change a routine, forget something) goes to its conversation with the panel closed.
   const ask=(text:string)=>{close();window.dispatchEvent(new CustomEvent('worldlet:fox-ask',{detail:{text}}));};
   model.append(now,fixes,guide.element,agents,said);
@@ -326,6 +327,8 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
  const items:Item[]=[
   {id:'fox',label:'Fox',hint:'Name, look and personality',page:true,show:target=>{target.append(pages.fox);}},
   {id:'model',label:'Agent',hint:'What it runs on and may use',show:modelSetting},
+  // The services Worldlet connects itself, one tile each, with keys folded under Advanced (connectors-page.ts).
+  {id:'connectors',label:'Connectors',hint:'Google, Notion, Linear and more',show:async target=>{const turn=ticket;await showConnectors(target,call,()=>turn===ticket&&target.isConnected);}},
   {id:'phone',label:'Phone',hint:'Attention and Fox on your phone',page:true,show:target=>{target.append(pages.phone);}},
   {id:'general',label:'General',hint:'Updates, start at login, default browser, usage counts',show:async target=>{
    target.append(subhead('Updates'));await updates(target);

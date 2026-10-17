@@ -266,6 +266,21 @@
 .companion-settings-detail.is-page>.companion-settings-body>*{flex:1 1 auto;min-height:0;margin:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .companion-settings-detail.is-page .companion-profile-page{display:block;max-width:420px;overflow-y:auto}
 @media(max-width:700px){.companion-settings-detail.is-page .companion-profile-page{display:block;overflow-y:auto}}
+/* Settings › Connectors: one tile per service (connectors-page.ts). */
+.companion-settings-connectors{display:flex;flex-direction:column;gap:10px;align-self:stretch}
+.companion-settings-connector-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.companion-settings-connector{display:flex;flex-direction:column;gap:8px;min-width:0;padding:10px 12px;border:1px solid #d9cbae80;border-radius:12px;background:#e6dbc438}
+.companion-settings-connector[data-state="connected"]{background:#dfe6cf5c}
+.companion-settings-connector[data-state="needs-you"]{border-color:#c98a5a99}
+.companion-settings-connector-words{display:flex;flex-direction:column;gap:2px;min-width:0}
+.companion-settings-connector-words strong{font-size:13px;color:#354132}
+.companion-settings-connector-words span{font-size:12px;color:#656651;overflow-wrap:anywhere}
+.companion-settings-connector[data-state="needs-you"] .companion-settings-connector-words span{color:#8a4b22}
+.companion-settings-connector-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+.companion-settings-connector>.companion-settings-confirm{gap:6px;font-size:12px}
+.companion-settings-connector>.companion-settings-confirm>span{flex:1 1 100%}
+.companion-settings-advanced .companion-settings-row{flex-wrap:wrap}
+.companion-settings-advanced .companion-settings-row>div{flex:1 1 240px;gap:4px}
 .companion-settings-elsewhere{align-self:stretch;margin-top:6px}
 .companion-settings-elsewhere>summary{cursor:pointer;font-size:13px;font-weight:600;color:#354132;padding:6px 0}
 .companion-settings-elsewhere[open]>summary{margin-bottom:8px}

@@ -29,8 +29,11 @@ export interface Connector {
  /** After sign-in, the one choice the person makes when the service has several (a project, an account). */
  readonly pick?:string;
  readonly fallback:readonly ConnectorFallback[];
- /** Only under Advanced: the person's own address, with nothing to sign in to. */
- readonly advanced?:boolean;
+ /** Where Settings › Connectors shows it: `always` a tile of its own; `connected` a tile only once connected (a
+  * service that connects with a key, under Advanced, or from its Thing); `advanced` only under Advanced. */
+ readonly shown:'always'|'connected'|'advanced';
+ /** The World region its Thing lives in (core/applets catalog), so a connection made in Settings lands there. */
+ readonly region?:string;
  /** Connects on a host with no screen (the Node host). A loopback sign-in needs a browser on the same machine. */
  readonly headless:boolean;
 }
@@ -42,25 +45,32 @@ const entry=(value:Connector):Connector=>Object.freeze({...value,providers:Objec
 /** Every connector, in the order the page shows them. Scope lists were read from each server's published metadata
  * (RFC 9728 `scopes_supported`) on 2026-10-17 and cut to what the World's readers use. */
 export const CONNECTORS:readonly Connector[]=Object.freeze([
- entry({id:'google',name:'Google',purpose:'See your mail, calendar and files in Google.',mechanism:'google',providers:['gmail','google-calendar','google-drive'],
+ entry({id:'google',name:'Google',purpose:'See your mail, calendar and files in Google.',mechanism:'google',providers:['gmail','google-calendar','google-drive'],shown:'always',region:'home',
   // Google's sign-in asks per service, in core/accounts/google and the host's Google account; not from this list.
   scopes:scopes([]),fallback:[],headless:false}),
  // Notion's server offers one scope, `default`.
- entry({id:'notion',name:'Notion',purpose:'See your pages and databases in Notion.',mechanism:'mcp-oauth',providers:['notion'],scopes:scopes(['default']),fallback:['agent'],headless:false}),
- entry({id:'linear',name:'Linear',purpose:'See your issues and projects in Linear.',mechanism:'mcp-oauth',providers:['linear'],scopes:scopes(['read'],['write']),fallback:['agent'],headless:false}),
+ entry({id:'notion',name:'Notion',purpose:'See your pages and databases in Notion.',mechanism:'mcp-oauth',providers:['notion'],shown:'always',region:'work',scopes:scopes(['default']),fallback:['agent'],headless:false}),
+ entry({id:'linear',name:'Linear',purpose:'See your issues and projects in Linear.',mechanism:'mcp-oauth',providers:['linear'],shown:'always',region:'work',scopes:scopes(['read'],['write']),fallback:['agent'],headless:false}),
  // Todoist's server offers only `data:read_write`; completing a task still needs the person's approval on its card.
- entry({id:'todoist',name:'Todoist',purpose:'See your tasks in Todoist.',mechanism:'mcp-oauth',providers:['todoist'],scopes:scopes(['data:read_write']),fallback:['agent'],headless:false}),
+ entry({id:'todoist',name:'Todoist',purpose:'See your tasks in Todoist.',mechanism:'mcp-oauth',providers:['todoist'],shown:'always',region:'work',scopes:scopes(['data:read_write']),fallback:['agent'],headless:false}),
  // The reader calls only `list_projects` and `get_project` on the read-only, account-only address.
- entry({id:'supabase',name:'Supabase',purpose:'See your projects in Supabase.',mechanism:'mcp-oauth',providers:['supabase'],scopes:scopes(['organizations:read','projects:read']),fallback:['agent'],headless:false}),
+ entry({id:'supabase',name:'Supabase',purpose:'See your projects in Supabase.',mechanism:'mcp-oauth',providers:['supabase'],shown:'always',region:'work',scopes:scopes(['organizations:read','projects:read']),fallback:['agent'],headless:false}),
  // PayPal's server names no scopes: its own default.
- entry({id:'paypal',name:'PayPal',purpose:'See your PayPal activity.',mechanism:'mcp-oauth',providers:['paypal'],scopes:scopes([]),fallback:['agent'],headless:false}),
+ entry({id:'paypal',name:'PayPal',purpose:'See your PayPal activity.',mechanism:'mcp-oauth',providers:['paypal'],shown:'connected',region:'money',scopes:scopes([]),fallback:['agent'],headless:false}),
  // GitHub offers no sign-in Worldlet can register for; until it has one, a pasted key or the Agent's own connection.
- entry({id:'github',name:'GitHub',purpose:'See your issues and pull requests on GitHub.',mechanism:'key',providers:['github'],scopes:scopes([]),fallback:['agent','key'],headless:true}),
- entry({id:'posthog',name:'PostHog',purpose:'See your product numbers and errors in PostHog.',mechanism:'key',providers:['posthog'],scopes:scopes([]),pick:'project',fallback:['key'],headless:true}),
- entry({id:'cloudflare',name:'Cloudflare',purpose:'See your site traffic in Cloudflare.',mechanism:'key',providers:['cloudflare'],scopes:scopes([]),pick:'account',fallback:['key'],headless:true}),
- entry({id:'search-console',name:'Search Console',purpose:'See how your sites do in Google Search.',mechanism:'key',providers:['search-console'],scopes:scopes([]),fallback:['service-account'],headless:true}),
- entry({id:'http',name:'HTTP JSON',purpose:'Read your own JSON address.',mechanism:'key',providers:['http'],scopes:scopes([]),fallback:['key'],advanced:true,headless:true}),
+ entry({id:'github',name:'GitHub',purpose:'See your issues and pull requests on GitHub.',mechanism:'key',providers:['github'],shown:'connected',region:'work',scopes:scopes([]),fallback:['agent','key'],headless:true}),
+ entry({id:'posthog',name:'PostHog',purpose:'See your product numbers and errors in PostHog.',mechanism:'key',providers:['posthog'],shown:'connected',region:'work',scopes:scopes([]),pick:'project',fallback:['key'],headless:true}),
+ entry({id:'cloudflare',name:'Cloudflare',purpose:'See your site traffic in Cloudflare.',mechanism:'key',providers:['cloudflare'],shown:'connected',region:'work',scopes:scopes([]),pick:'account',fallback:['key'],headless:true}),
+ entry({id:'search-console',name:'Search Console',purpose:'See how your sites do in Google Search.',mechanism:'key',providers:['search-console'],shown:'connected',region:'work',scopes:scopes([]),fallback:['service-account'],headless:true}),
+ entry({id:'http',name:'HTTP JSON',purpose:'Read your own JSON address.',mechanism:'key',providers:['http'],shown:'advanced',scopes:scopes([]),fallback:['key'],headless:true}),
 ]);
+
+/** Words the default path of Settings › Connectors never shows (they belong under Advanced): someone who knows nothing
+ * about computers connects a service without meeting them. `scripts/connectors-check.ts` and
+ * `scripts/connectors-ui-check.ts` fail when one appears. */
+export const CONNECTOR_TECHNICAL_WORDS=/\b(?:keys?|tokens?|scopes?|mcp|oauth|apis?|ids?|endpoints?|grants?|terminal)\b/i;
+/** True when `text` has none of CONNECTOR_TECHNICAL_WORDS. */
+export const plainConnectorText=(text:string)=>!CONNECTOR_TECHNICAL_WORDS.test(text);
 
 /** The connector named `id`, or null. */
 export function connector(id:string):Connector|null {
