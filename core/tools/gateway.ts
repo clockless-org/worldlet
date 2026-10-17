@@ -97,6 +97,14 @@ function buildWorldActions(sample:boolean):WorldAction[]{
  // GitHub drafts (core/agent/github-drafts.ts): each its own Grant target, which only "Can draft GitHub changes" names.
  operations('github-drafts','github_drafts');
  for(const action of actions.filter(a=>a.tool==='github_drafts'))action.parameters.required=action.action==='create'?['write','target']:[];
+ // The conversation archive (core/agent/conversations.ts): each its own Grant target, which only "Can save
+ // conversations" and "Can search conversations" name.
+ operations('conversations','world_conversations');
+ for(const action of actions.filter(a=>a.tool==='world_conversations'))action.parameters.required=action.action==='add'?['source','messages']:[];
+ // Tracked links (core/agent/tracked-links.ts): each its own Grant target, which only "Can see your tracked links" and
+ // "Can keep your tracked links" name.
+ operations('links','world_links');
+ for(const action of actions.filter(a=>a.tool==='world_links'))action.parameters.required=action.action==='save'?['rows']:[];
  operations('weather','manage_weather_location');
  for(const action of actions.filter(a=>a.tool==='manage_weather_location'))action.parameters.required=action.action==='search'?['query']:action.action==='select'?['choice']:[];
  operations('music','control_background_music');operations('local-music','control_local_music');operations('youtube','use_youtube');operations('stripe','use_stripe_crm');

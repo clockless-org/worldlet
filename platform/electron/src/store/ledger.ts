@@ -771,7 +771,7 @@ export class WorldLedger {
   const copy=new DatabaseSync(file);
   try{
    // Search indexes are rebuilt on open.
-   const indexes=(copy.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('companion_turns_search','companion_notes_search')").all() as Row[]).map(row=>String(row.name));
+   const indexes=(copy.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('companion_turns_search','companion_notes_search','agent_conversations_search')").all() as Row[]).map(row=>String(row.name));
    if(indexes.length){for(const name of indexes)copy.exec(`DROP TABLE ${name}`);copy.exec('VACUUM');}
   }finally{copy.close();}
  }
@@ -909,6 +909,70 @@ export class WorldLedger {
   for(const row of this.all('SELECT source,count(*) AS n FROM companion_turns GROUP BY source'))at(row.source).turns=Number(row.n);
   for(const row of this.all('SELECT source,count(*) AS n FROM companion_notes GROUP BY source'))at(row.source).notes=Number(row.n);
   return counts;
+ }
+
+ // The conversation archive (core/agent/conversations.ts, core/agent/GRANTS.md#conversation-archive) -------------
+ // Conversations held outside Worldlet that Agents save, one row per message, keyed by the source the Agent named and
+ // the message's own ID there (`seq` is only the search index's key). Apart from Fox's conversations (companion_turns) on purpose: what a team said in its
+ // project threads is not something Fox said with the person. A trigram index makes substring search fast in any
+ // language; it is derived, left out of backups and rebuilt when missing, and writes keep it current by hand.
+ private archiveReady=false;
+ private archiveSearchable=false;
+ private ensureArchive(){
+  if(this.archiveReady)return;
+  this.exec(`CREATE TABLE IF NOT EXISTS agent_conversations (seq INTEGER PRIMARY KEY AUTOINCREMENT, source TEXT NOT NULL, id TEXT NOT NULL, thread TEXT NOT NULL, thread_title TEXT NOT NULL DEFAULT '', author TEXT NOT NULL, author_name TEXT NOT NULL DEFAULT '', surface TEXT NOT NULL DEFAULT '', at TEXT NOT NULL, text TEXT NOT NULL, agent_id TEXT NOT NULL, saved_at TEXT NOT NULL, UNIQUE(source, id));
+   CREATE INDEX IF NOT EXISTS agent_conversations_at ON agent_conversations(at);
+   CREATE INDEX IF NOT EXISTS agent_conversations_thread ON agent_conversations(source, thread, at);`);
+  try{
+   if(!this.tableExists('agent_conversations_search'))this.transaction(()=>{
+    this.handle.exec(`CREATE VIRTUAL TABLE agent_conversations_search USING fts5(text, content='agent_conversations', content_rowid='seq', tokenize='trigram', detail='none');INSERT INTO agent_conversations_search(agent_conversations_search) VALUES('rebuild');`);
+   });
+   this.archiveSearchable=true;
+  }catch{this.archiveSearchable=false;}
+  this.archiveReady=true;
+ }
+ /** Saves cleaned messages (core readConversationAdd) under `source`: a new ID is added, a changed one replaced (a newly
+  * known thread title or author name kept when the new copy has none), the same one left alone. */
+ addArchivedMessages(source:string,messages:{id:string;thread:string;threadTitle?:string;author:string;authorName?:string;surface?:string;at:string;text:string}[],agentId:string,savedAt:string):{added:number;updated:number;unchanged:number} {
+  this.ensureArchive();
+  const counts={added:0,updated:0,unchanged:0};
+  const index=(id:string)=>{if(this.archiveSearchable)this.run('INSERT INTO agent_conversations_search(rowid,text) SELECT seq,text FROM agent_conversations WHERE source=? AND id=?',source,id);};
+  const unindex=(id:string)=>{if(this.archiveSearchable)this.run("INSERT INTO agent_conversations_search(agent_conversations_search,rowid,text) SELECT 'delete',seq,text FROM agent_conversations WHERE source=? AND id=?",source,id);};
+  try{
+   this.transaction(()=>{
+    for(const message of messages){
+     const before=this.all('SELECT thread,thread_title,author,author_name,surface,at,text FROM agent_conversations WHERE source=? AND id=?',source,message.id)[0];
+     const row=[message.thread,message.threadTitle||String(before?.thread_title??''),message.author,message.authorName||String(before?.author_name??''),message.surface||String(before?.surface??''),message.at,message.text];
+     if(!before){
+      this.run('INSERT INTO agent_conversations(source,id,thread,thread_title,author,author_name,surface,at,text,agent_id,saved_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)',source,message.id,...row,agentId,savedAt);
+      index(message.id);counts.added++;continue;
+     }
+     if(['thread','thread_title','author','author_name','surface','at','text'].every((column,i)=>String(before[column])===row[i])){counts.unchanged++;continue;}
+     unindex(message.id);
+     this.run('UPDATE agent_conversations SET thread=?,thread_title=?,author=?,author_name=?,surface=?,at=?,text=?,agent_id=?,saved_at=? WHERE source=? AND id=?',...row,agentId,savedAt,source,message.id);
+     index(message.id);counts.updated++;
+    }
+   });
+  }catch(error){if(error instanceof WorldletError)throw error;throw new WorldletError('Could not save the conversation.');}
+  return counts;
+ }
+ /** Messages matching a checked search (core readConversationSearch), newest first, and how many match in all. */
+ searchArchivedMessages(search:{q?:string;source?:string;thread?:string;author?:string;since?:string;until?:string;limit:number;offset:number}):{messages:Row[];total:number} {
+  this.ensureArchive();
+  const where:string[]=[],values:any[]=[];
+  if(search.q){
+   // The index answers substring LIKE (three characters or more); the exact check keeps any-case matching.
+   if(this.archiveSearchable&&[...search.q].length>=3&&!/[%_]/.test(search.q)){where.push('c.seq IN (SELECT rowid FROM agent_conversations_search WHERE text LIKE ?)');values.push('%'+search.q+'%');}
+   where.push('instr(lower(c.text),lower(?))>0');values.push(search.q);
+  }
+  for(const [column,value] of [['source',search.source],['thread',search.thread],['author',search.author]] as const)if(value!==undefined){where.push(`c.${column}=?`);values.push(value);}
+  if(search.since){where.push('c.at>=?');values.push(search.since);}
+  if(search.until){where.push('c.at<?');values.push(search.until);}
+  const filter=where.length?'WHERE '+where.join(' AND '):'';
+  const total=Number(this.all(`SELECT count(*) AS n FROM agent_conversations c ${filter}`,...values)[0]?.n??0);
+  const messages=this.all(`SELECT source,id,thread,thread_title AS threadTitle,author,author_name AS authorName,surface,at,text,agent_id AS agentId,saved_at AS savedAt FROM agent_conversations c ${filter} ORDER BY c.at DESC,c.seq DESC LIMIT ? OFFSET ?`,...values,search.limit,search.offset)
+   .map(row=>({...row}));
+  return {messages,total};
  }
 
  // History read continuously (fox/history-sync.ts) ------------------------------------------------------

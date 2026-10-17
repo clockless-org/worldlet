@@ -10,7 +10,9 @@
 export type BoardBlockKind='number'|'funnel'|'list'|'trend';
 export const BOARD_BLOCK_KINDS:readonly BoardBlockKind[]=Object.freeze(['number','funnel','list','trend']);
 
-export interface BoardFunnelStep {field:string;label:string}
+/** A funnel step: its field and label, and optionally when its rate (this step over the one before it, 0 to 1) is good.
+ * The first step has no rate, so it takes no threshold. */
+export interface BoardFunnelStep {field:string;label:string;goodAtLeast?:number}
 export interface BoardBlock {
  /** Unique on the board: lowercase letters, digits and `-`. */
  id:string;
@@ -48,7 +50,9 @@ export const BOARD_LIMITS=Object.freeze({
 export type BoardTone='good'|'bad';
 export interface BoardFunnelStepView {label:string;count:number;
  /** This step over the one before it, 0 to 1 (three decimals); null for the first step or after a step of 0. */
- rate:number|null}
+ rate:number|null;
+ /** With the step's `goodAtLeast` and a rate: good at or above it, bad below. */
+ tone?:BoardTone}
 export interface BoardListItem {title:string;url:string;fields:Record<string,string|number|boolean>}
 export interface BoardPoint {x:string;y:number}
 /** One block as the board shows it: its value, or why it cannot be shown. Service text in it is data, never

@@ -1,4 +1,4 @@
-import {BOARD_BLOCK_KINDS,BOARD_DEFINE_PRESETS,BOARD_LIMITS,type BoardReadArgs,type BoardRecord,type BoardBlock,type BoardBlockKind,type BoardBlockView,type BoardDefinition,type BoardFunnelStep,type BoardListItem,type BoardPoint,type BoardTab,type BoardView} from '../../contracts/board.ts';
+import {BOARD_BLOCK_KINDS,BOARD_DEFINE_PRESETS,BOARD_LIMITS,type BoardReadArgs,type BoardRecord,type BoardBlock,type BoardBlockKind,type BoardBlockView,type BoardDefinition,type BoardFunnelStep,type BoardFunnelStepView,type BoardListItem,type BoardPoint,type BoardTab,type BoardView} from '../../contracts/board.ts';
 import type {ServicePreset} from '../../contracts/service-presets.ts';
 import {SERVICE_PROVIDERS,type ServiceRecords} from '../../contracts/services.ts';
 import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
@@ -65,9 +65,16 @@ function readBlock(input:unknown):BoardBlock {
  if(kind==='funnel'){
   if(!Array.isArray(value.steps)||value.steps.length<2||value.steps.length>BOARD_LIMITS.steps)fail(`A funnel has 2 to ${BOARD_LIMITS.steps} steps.`);
   block.steps=(value.steps as unknown[]).map((entry):BoardFunnelStep=>{
-   const step=record(entry);only(step,['field','label']);
-   return {field:field(step.field),label:line(step.label??step.field,BOARD_LIMITS.title,BOARD_REASONS.title)};
+   const step=record(entry);only(step,['field','label','goodAtLeast']);
+   const read:BoardFunnelStep={field:field(step.field),label:line(step.label??step.field,BOARD_LIMITS.title,BOARD_REASONS.title)};
+   if(step.goodAtLeast!==undefined){
+    const least=finite(step.goodAtLeast);
+    if(least<0||least>1)fail('A funnel step’s goodAtLeast is a rate from 0 to 1.');
+    read.goodAtLeast=least;
+   }
+   return read;
   });
+  if(block.steps[0].goodAtLeast!==undefined)fail('The first funnel step has no rate, so it takes no goodAtLeast.');
   if(new Set(block.steps.map(step=>step.field)).size!==block.steps.length)fail('Each funnel step reads its own field.');
  }
  if(kind==='list'){
@@ -136,7 +143,10 @@ function showBlock(block:BoardBlock,records:ServiceRecords):Partial<BoardBlockVi
  }
  if(block.kind==='funnel'){
   const counts=(block.steps??[]).map(step=>numberOf(rows[0],step.field));
-  return {funnel:{steps:(block.steps??[]).map((step,i)=>({label:step.label,count:counts[i],rate:i?rate(counts[i],counts[i-1]):null})),overall:rate(counts[counts.length-1],counts[0])}};
+  return {funnel:{steps:(block.steps??[]).map((step,i):BoardFunnelStepView=>{
+   const stepRate=i?rate(counts[i],counts[i-1]):null;
+   return {label:step.label,count:counts[i],rate:stepRate,...step.goodAtLeast!==undefined&&stepRate!==null?{tone:stepRate>=step.goodAtLeast?'good':'bad'}:{}};
+  }),overall:rate(counts[counts.length-1],counts[0])}};
  }
  if(block.kind==='list'){
   const limit=block.limit??BOARD_LIMITS.listDefault;

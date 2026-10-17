@@ -50,6 +50,10 @@ refused(()=>readBoardDefinition(block({goodAtLeast:Infinity})),BOARD_REASONS.inv
 refused(()=>readBoardDefinition({tabs:[{id:'a',title:'A',blocks:[{id:'b',title:'B',kind:'funnel',preset:'p',steps:[{field:'a'}]}]}]}),/2 to 8 steps/);
 refused(()=>readBoardDefinition({tabs:[{id:'a',title:'A',blocks:[{id:'b',title:'B',kind:'funnel',preset:'p',steps:[{field:'a'},{field:'a'}]}]}]}),/its own field/);
 refused(()=>readBoardDefinition({tabs:[{id:'a',title:'A',blocks:[{id:'b',title:'B',kind:'list',preset:'p',limit:21}]}]}),/1 to 20/);
+const funnelBlock=(steps:object[])=>({tabs:[{id:'a',title:'A',blocks:[{id:'b',title:'B',kind:'funnel',preset:'p',steps}]}]});
+refused(()=>readBoardDefinition(funnelBlock([{field:'a',goodAtLeast:0.5},{field:'b'}])),/first funnel step/);
+refused(()=>readBoardDefinition(funnelBlock([{field:'a'},{field:'b',goodAtLeast:2}])),/rate from 0 to 1/);
+refused(()=>readBoardDefinition(funnelBlock([{field:'a'},{field:'b',goodAtLeast:'half'}])),BOARD_REASONS.invalid);
 refused(()=>readBoardDefinition({tabs:[{id:'a',title:'A',blocks:[{id:'b',title:'B',kind:'trend',preset:'p',x:'day'}]}]}),BOARD_REASONS.field);
 refused(()=>readBoardDefinition({tabs:[{id:'a',title:'A',blocks:[]},{id:'a',title:'Again',blocks:[]}]}),BOARD_REASONS.duplicate);
 refused(()=>readBoardDefinition({tabs:[{id:'a',title:'A',blocks:[{id:'b',title:'B',kind:'number',preset:'p'}]},{id:'c',title:'C',blocks:[{id:'b',title:'B',kind:'number',preset:'p'}]}]}),BOARD_REASONS.duplicate);
@@ -99,6 +103,9 @@ assert.equal(one({field:'x'},records('posthog',[])).error,'The read returned not
 assert.deepEqual(one({},records('posthog',[])).number,{value:0});
 assert.deepEqual(one({field:'x',goodAtLeast:10,goodAtMost:20},records('posthog',[row('r',{x:25})])).number,{value:25,tone:'bad'});
 assert.deepEqual(one({kind:'funnel',steps:[{field:'retained',label:'Retained'},{field:'installed',label:'Installed'}]},reads.funnel).funnel,{steps:[{label:'Retained',count:0,rate:null},{label:'Installed',count:120,rate:null}],overall:null});
+// A step's goodAtLeast colours its rate; a step with no rate (after a 0) has no tone.
+assert.deepEqual(one({kind:'funnel',steps:[{field:'a',label:'A'},{field:'b',label:'B',goodAtLeast:0.5},{field:'c',label:'C',goodAtLeast:0.5},{field:'d',label:'D',goodAtLeast:0.1}]},records('posthog',[row('r',{a:100,b:60,c:0,d:0})])).funnel,
+ {steps:[{label:'A',count:100,rate:null},{label:'B',count:60,rate:0.6,tone:'good'},{label:'C',count:0,rate:0,tone:'bad'},{label:'D',count:0,rate:null}],overall:0});
 assert.equal(one({kind:'trend',x:'day',y:'signups'},records('posthog',[row('r',{signups:3})])).error,'The read has no field “day”.');
 assert.deepEqual(one({kind:'trend',x:'day',y:'signups'},records('posthog',[row('r',{day:'2026-10-15',signups:3})])).trend,{points:[{x:'2026-10-15',y:3}],latest:3,change:null});
 assert.equal(one({kind:'trend',x:'day',y:'signups'},records('posthog',[])).error,'The read returned nothing.');

@@ -76,6 +76,7 @@ export function readServicePresetRead(provider:unknown,input:unknown):ServicePre
    takes(true,true);
    if(!POSTHOG_LISTS.includes(id))fail(`Read one PostHog list: ${POSTHOG_LISTS.join(', ')}.`);
    if([...query].length>POSTHOG_LIMITS.search||/[\r\n\t]/.test(query))fail(`Filter a PostHog list by a name of up to ${POSTHOG_LIMITS.search} characters.`);
+   if(id==='errors'&&query)fail('PostHog errors take no filter.');
    read.id=id;if(query)read.query=query;
   }
  }else if(provider==='cloudflare'){

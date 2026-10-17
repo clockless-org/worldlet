@@ -11,7 +11,7 @@ A definition has a title and 1 to 8 tabs. Each tab has an ID, a title and up to 
 | Kind | Shows | Takes |
 | --- | --- | --- |
 | `number` | One value: `field` of the first record, or without `field` how many records came back | `field`; `goodAtLeast` and `goodAtMost`, which make the value good inside them and bad outside |
-| `funnel` | Named steps, each a field of the first record, with each step's count over the one before it and the last over the first | `steps`: 2 to 8 `{field, label}` |
+| `funnel` | Named steps, each a field of the first record, with each step's count over the one before it and the last over the first | `steps`: 2 to 8 `{field, label}`, each but the first with an optional `goodAtLeast` (a rate from 0 to 1) that makes its rate good at or above it and bad below |
 | `list` | The records, each with its title, its link and up to four fields | `fields`; `limit` (1 to 20, 10 by default) |
 | `trend` | One point per record, `y` over `x`, in the order the read returned them, with the latest value and its change from the one before | `x`, `y` |
 

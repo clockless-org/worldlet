@@ -419,6 +419,14 @@ export interface AgentAccess {
  /** "Can draft GitHub changes" (github-drafts/create and read), the same way (core githubDraftGrant), each change audited. */
  grantGithubDrafts(agentId:string):boolean;
  ungrantGithubDrafts(agentId:string):boolean;
+ /** "Can save conversations" (`add`: conversations/add) and "Can search conversations" (`search`: conversations/search),
+  * the same way (core conversationGrant), each change audited. */
+ grantConversations(agentId:string,kind:string):boolean;
+ ungrantConversations(agentId:string,kind:string):boolean;
+ /** "Can see your tracked links" (`read`: links/read) and "Can keep your tracked links" (`save`: links/save), the same
+  * way (core linkGrant), each change audited. */
+ grantLinks(agentId:string,kind:string):boolean;
+ ungrantLinks(agentId:string,kind:string):boolean;
  onRevoke(listener:(agentId:string)=>void):void;
 }
 export interface VaultService {
