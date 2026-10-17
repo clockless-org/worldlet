@@ -95,4 +95,4 @@ export interface BoardReadArgs {tab?:string}
 /** `board/define`: the whole new definition, any presets to save with it (contracts/service-presets.ts), and the
  * revision it was read at (0 when there is no board yet); a stale revision is refused. */
 export interface BoardDefineArgs {definition:BoardDefinition;presets?:unknown[];expectedRevision:number}
-export const BOARD_DEFINE_PRESETS=20;
+export const BOARD_DEFINE_PRESETS=32;
