@@ -3,6 +3,7 @@ import {WORLD_WIDTH,WORLD_HEIGHT} from '../world-design.ts';
 import {createAppletEnchantments} from './applet-idle-motion.ts';
 import {createSceneAmbience} from './scene-ambience.ts';
 import {attachAppletLamp} from './village-lamp.ts';
+import {attachDeviceFigure} from './device-figure.ts';
 
 /** Reframe the painted support surface; only its independent instruments tighten horizontally. */
 function areaFrame(spec,width:number,height:number){
@@ -69,7 +70,8 @@ export async function createAreaScenery(payload,image){
    const effects=view.textures[key]?view.spec.deviceEffects?.[key]:{lamp:d.room.device?.lamp};
    const enchantment=createAppletEnchantments(sprite,d.room.key,effects?.idle),lamp=attachAppletLamp(sprite,effects?.lamp);
    const hit=new Rectangle(-sprite.width/2,-sprite.height,sprite.width,sprite.height);
-   const visual={body,sprite,enchantment,lamp,hit,width:sprite.width,height:sprite.height};cache.set(view.id,visual);return visual;
+   const figure=attachDeviceFigure(sprite,key);figure?.update(d.room.figure);
+   const visual={body,sprite,enchantment,lamp,figure,hit,width:sprite.width,height:sprite.height};cache.set(view.id,visual);return visual;
   },
   get active(){return selected;},
   get metrics(){return selected?{id:selected.id,authored:true,compact:selected.compact,settled:selected.group.alpha===1,slots:selected.spec.slots.length,ambience:selected.ambience.metrics}:null;},

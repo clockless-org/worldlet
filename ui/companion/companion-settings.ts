@@ -19,8 +19,9 @@ type Item={id:string;label:string;hint:string;page?:boolean;show:(detail:HTMLEle
 
 const MODEL_EVENTS=['worldlet:model-changed','worldlet:model-refresh'];
 // Entry points that name a section Settings no longer has open the page that took it in, at its part: Accounts became
-// Agent's last part (owner plan 2026-10-11), and the standing rules Approvals listed are its Permissions part.
-const MOVED:Record<string,{section:string;part:string}>={integrations:{section:'model',part:'accounts'},accounts:{section:'model',part:'accounts'},approvals:{section:'model',part:'permissions'},permissions:{section:'model',part:'permissions'}};
+// Agent's last part (owner plan 2026-10-11), and the standing rules Approvals listed are its Permissions part. `access`
+// names Agent's Access part (the board's empty state opens it).
+const MOVED:Record<string,{section:string;part:string}>={integrations:{section:'model',part:'accounts'},accounts:{section:'model',part:'accounts'},approvals:{section:'model',part:'permissions'},permissions:{section:'model',part:'permissions'},access:{section:'model',part:'access'}};
 
 /** The whole companion panel is one settings window (owner request 2026-10-10): one list of sections on the left, the
  * chosen section's details on the right, no tabs. Everything finishes here; nothing hands off to Fox's speech bubble. */

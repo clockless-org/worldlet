@@ -37,11 +37,12 @@ import fitbit from './definitions/fitbit.ts';
 import tripit from './definitions/tripit.ts';
 import browser from './definitions/browser.ts';
 import ongoing from './definitions/ongoing.ts';
+import board from './definitions/board.ts';
 import {GAME_APPLETS} from './definitions/games.ts';
 import {WEB_GAME_APPLETS} from './definitions/web-games.ts';
 
 // Data-only registry: importable by native/web compilers and Node checks without Three.js or DOM.
-export const APP_DEFINITIONS: readonly AppletDefinition[] = Object.freeze([gmail,google_calendar,apple_notes,apple_reminders,weather,meetings,github,codex,claude_code,notion,obsidian,voiceMemos,messages,plaid,stripe,paypal,todoist,linear,supabase,docker,drive,docs,sheets,slides,oura,strava,fitbit,google_maps,airbnb,tripit,x,youtube,tiktok,discord,browser,ongoing,doordash,...GAME_APPLETS,...WEB_GAME_APPLETS,...POPULAR_APPS]);
+export const APP_DEFINITIONS: readonly AppletDefinition[] = Object.freeze([gmail,google_calendar,apple_notes,apple_reminders,weather,meetings,github,codex,claude_code,notion,obsidian,voiceMemos,messages,plaid,stripe,paypal,todoist,linear,supabase,docker,drive,docs,sheets,slides,oura,strava,fitbit,google_maps,airbnb,tripit,x,youtube,tiktok,discord,browser,ongoing,board,doordash,...GAME_APPLETS,...WEB_GAME_APPLETS,...POPULAR_APPS]);
 // First definition whose key or id matches, as a linear find would return; looked up on every render and log row.
 const BY_NAME=new Map<unknown,AppletDefinition>();
 for(const app of APP_DEFINITIONS)for(const name of [app.key,app.id])if(!BY_NAME.has(name))BY_NAME.set(name,app);

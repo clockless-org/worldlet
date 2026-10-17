@@ -53,7 +53,8 @@ import {coreAppletItems} from '../world/index.ts';
 import {localCalendarItems} from '../applets/index.ts';
 import {alertAt,upcomingCalendarEvents} from '../../core/applets/index.ts';
 import type {World,WorldPage} from '../../contracts/world.ts';
-import {createAppletPanel} from '../applets/index.ts';
+import {createAppletPanel,BOARD_READ_EVENT} from '../applets/index.ts';
+import {boardNorthStar,formatBoardNumber} from '../../core/board/index.ts';
 import {createAppDevice} from './app-device.ts';
 import {createCodexApplet} from '../applets/index.ts';
 import {appLogoSource} from '../applets/index.ts';
@@ -788,7 +789,26 @@ export function mountNotionWorld(data: World, native: any) {
   function templateLibrary(){
     native.setup('sources',buildingFor(currentSpace)?.id.replace('building-','')||'home');
   }
-  buildScene();saveRegions();askForPictures();
+  // The board's north-star number on its device (ui/applets/board/applet.md): from every board read the panel makes,
+  // and one read when the World opens with the board placed. A read of another tab alone leaves the number as it was;
+  // no board, or an error on that block, leaves the device empty.
+  let boardFigure:{text:string;tone?:'good'|'bad'}|null=null,boardFigureAsked=false;
+  function applyBoardRead(read){
+    if(!read||typeof read!=='object')return;
+    const first=read.definition?.tabs?.[0]?.id;
+    if(read.definition&&!read.view?.tabs?.some(t=>t.id===first))return;
+    const star=boardNorthStar(read);
+    boardFigure=star?{text:formatBoardNumber(star.value,true),...(star.tone?{tone:star.tone}:{})}:null;
+    scene?.setDeviceFigure?.('app-board',boardFigure);
+  }
+  window.addEventListener(BOARD_READ_EVENT,e=>applyBoardRead((e as CustomEvent).detail));
+  function showBoardFigure(){
+    scene?.setDeviceFigure?.('app-board',boardFigure);
+    if(boardFigureAsked||data.sample||!native?.board||!root.appletLayout.has('app-board'))return;
+    boardFigureAsked=true;
+    void Promise.resolve(native.board({operation:'read'})).then(applyBoardRead).catch(()=>{boardFigureAsked=false;});
+  }
+  buildScene();saveRegions();askForPictures();showBoardFigure();
   const mailArrivals=createMailArrivalObserver();mailArrivals([]);
   const arrival=createMailArrival(()=>scene?.deliverMail()||false);
   const observeMail=(world)=>{const connection=world.moduleConnections?.find(c=>c.provider==='gmail');if(!connection?.records)return;deliverMail(connection.records);};
@@ -998,6 +1018,7 @@ export function mountNotionWorld(data: World, native: any) {
     if(data.sample&&workSelection?.r.key===r.key&&workSelection.item.session&&!content.hidden)return {context:{key:'practice-code:'+workSelection.item.id,title:r.title+' · '+workSelection.item.title,detail:'Fictional '+r.title+' session, '+workSelection.item.session.status+'. The user can review its prepared result; no CLI is running.'},actions:workSelection.item.session.status==='Completed'?[]:[{id:'practice:code-result',label:'Review result',icon:'code',kind:'navigation',placement:'contextual',run:completePracticeSession}]};
     if(workSelection&&workSelection.r.key===r.key&&!content.hidden&&content.dataset.template==='coding-session')return {context:{key:'work:'+r.key+':'+workSelection.item.id,title:r.title+' · '+workSelection.item.title,detail:r.key==='github'?'Selected GitHub repository: '+workSelection.item.repo.id+'. Repository reads use the local gh CLI.':'Selected saved Claude Code session: '+workSelection.item.session.sessionId+'. Project: '+(workSelection.item.session.cwd||'Unknown')+'. Messages to Fox in this view resume this exact Claude Code session. Tool permission requests appear in Fox.'},actions:[]};
     if(data.sample&&(current==='sample-japan-dinner'||appReader?.app.key===r.key&&appReader?.record.noteId==='sample-japan-dinner'&&!content.hidden))return {context:{key:'notion:sample-japan-dinner',title:'Notion · Dinner with Alex',detail:libraryReadContext||pages.get('sample-japan-dinner').text},actions:[{id:'practice:email-alex',label:'Email Alex',icon:'mail',placement:'contextual',kind:'navigation',run:()=>preparePracticeEmail({to:'alex@example.com',subject:'Dinner in Shimokitazawa',body:practiceDinnerEmail(pages.get('sample-japan-dinner').markdown),sourceIds:['sample-japan-dinner']})}]};
+    if(r.key==='board'&&!content.hidden&&content.dataset.template==='board')return appletPanels.get('board')?.context()||{actions:[]};
     if(r.key==='voice-memos'&&memoReader&&!content.hidden)return memoReader.context();
     if(r.key==='messages'&&messagesReader&&!content.hidden)return messagesReader.context();
     if(appReader?.app.key===r.key&&ORIGINAL_READERS.includes(r.key)&&!content.hidden&&content.dataset.template==='app-source')return {context:{key:r.key+':'+appReader.record.id,title:r.title+' · '+appReader.record.title,detail:libraryReadContext||'Selected original is loading. Do not infer its contents.'},actions:[]};
@@ -1913,7 +1934,12 @@ export function mountNotionWorld(data: World, native: any) {
     if(r.fullView?.kind==='game'){const game=createGameApplet(r.key,r.title);if(game){header(r.title,undefined,{applet:true});content.dataset.template='game';gameKey=r.key;appReader=null;scene?.setAppStage?.(r.moduleId,{connected:true,items:[]});content.append(game.element);sceneState();return;}}
     const show=new Map<string,(r:any)=>void>([...WORK_APPLETS.map(key=>[key,showWork] as const),['voice-memos',r=>showVoiceMemos(r)],['messages',r=>showMessages(r)],['obsidian',r=>showObsidian(r)],...CURATED_READERS.map(key=>[key,r=>showCuratedSource(r)] as const),...MONEY_READERS.map(key=>[key,r=>showMoney(r)] as const)]).get(r.key);if(show&&r.fullView?.kind!=='web'){show(r);return;}
 
-    const panelContext={native,content,notify,call:!data.sample&&native?.doorDash,ask:text=>voice?.ask(text),onChange:()=>scene?.refreshContent()};
+    const panelContext={native,content,notify,call:!data.sample&&native?.doorDash,ask:(text,options)=>voice?.ask(text,options),onChange:()=>scene?.refreshContent(),
+      // The board's panel (ui/applets/board): its empty state opens Settings › Agent › Access, a card of a Service that is
+      // not connected opens that Service's connection guide, list links take the World's usual link path, and its Fox
+      // actions follow what is selected.
+      settings:part=>voice?.openSettings?.(part),connect:provider=>{if(native?.setup&&!data.sample)native.setup('connection','work',provider);},
+      connected:provider=>{const link=data.moduleConnections?.find(c=>c.provider===provider);return link?connectionLive(link):false;},openLink:url=>openWorldURL(url),onContext:()=>voice?.sync()};
     // An Applet Fox made for a moment (core/artifacts/README.md): one panel shows whichever is opened.
     if(r.moment&&native){
       let applet=appletPanels.get('moment');if(!applet){applet=createAppletPanel('moment',panelContext);appletPanels.set('moment',applet);}
@@ -2340,7 +2366,7 @@ export function mountNotionWorld(data: World, native: any) {
     observeMail(next);data=next;askForPictures();buildings.splice(0,buildings.length,...(data.buildings||[]));areas.splice(0,areas.length,...(data.areas||[]));composites.splice(0,composites.length,...(data.viewObjects||[]));const nextSections=data.spaces.map(s=>({...s,virtual:true,kind:'space',parent:null,paths:[],text:'',markdown:''}));
     contentStore.replaceBase(data.pages,nextSections,true);memberOf.clear();for(const section of sections)for(const child of section.children)memberOf.set(child,section.id);
     byPath.clear();for(const p of pages.values())for(const path of p.paths||[])byPath.set(path,p.id);
-    if(rebuild){$('notionPins').replaceChildren();for(const k of Object.keys(pins))delete pins[k];}loadSampleLayout();if(rebuild)buildScene();else{scene?.setConnections?.(data.moduleConnections||[]);scene?.setAppletLayout?.(data.hiddenApplets,data.appletPositions);scene?.setUnlockedApplets?.(data.unlockedApplets);scene?.refreshContent();}saveRegions();
+    if(rebuild){$('notionPins').replaceChildren();for(const k of Object.keys(pins))delete pins[k];}loadSampleLayout();if(rebuild)buildScene();showBoardFigure();if(!rebuild){scene?.setConnections?.(data.moduleConnections||[]);scene?.setAppletLayout?.(data.hiddenApplets,data.appletPositions);scene?.setUnlockedApplets?.(data.unlockedApplets);scene?.refreshContent();}saveRegions();
     $('notionNext').onclick=()=>{if(depth==='overview'&&data.pages.length<=1){if(native)native.settings();}else nextLevel()};
     if(!rebuild&&previous.depth==='object'&&previous.id===current){
       // An open Thing shows what the update brought at once: findings that arrive while it is

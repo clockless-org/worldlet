@@ -9,7 +9,7 @@ import {importBuildTheme} from './build-theme-source.ts';
 const utilityKeys=new Set(['gmail','google-calendar','apple-notes','apple-reminders','weather','meetings','voice-memos','messages','browser']);
 const gameKeys=new Set(GAME_APPLETS.map(a=>a.key));
 // These remain runtime Applets; this is the curated art library, not an installation policy.
-const excludedKeys=new Set(['ongoing','sekai-rogue-ai-tic-tac-toe','sekai-mixing-colors','sekai-roller-coaster']);
+const excludedKeys=new Set(['ongoing','board','sekai-rogue-ai-tic-tac-toe','sekai-mixing-colors','sekai-roller-coaster']);
 const packagePath='ui/theme-packages/village';
 /** Art-library classification is independent of account providers and runtime installation. */
 export async function villageSceneLibrary(root:string){
@@ -26,7 +26,7 @@ export async function villageSceneLibrary(root:string){
  assert.equal(counts.branded,100,'Keep exactly 100 curated branded art groups; review additions explicitly');
  assert.equal(counts.core,24);assert.equal(counts.generic,16);
  assert.equal(new Set(entries.map(e=>e.id)).size,140,'Each art selection has a distinct key');
- const excluded=APP_DEFINITIONS.filter(a=>excludedKeys.has(a.key)).map(a=>({id:a.key,title:a.title,reason:a.key==='ongoing'?'Uses a generic scene for its actual subject':'Overlapping external mini-game; main Sekai entry retained'}));
+ const excluded=APP_DEFINITIONS.filter(a=>excludedKeys.has(a.key)).map(a=>({id:a.key,title:a.title,reason:a.key==='ongoing'?'Uses a generic scene for its actual subject':a.key==='board'?'A built-in board with drawn interim art; no curated scene yet':'Overlapping external mini-game; main Sekai entry retained'}));
  assert.equal(excluded.length,excludedKeys.size,'Review obsolete art exclusions');
  return {schemaVersion:1,counts,entries,excluded};
 }

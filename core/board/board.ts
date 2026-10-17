@@ -1,4 +1,4 @@
-import {BOARD_BLOCK_KINDS,BOARD_DEFINE_PRESETS,BOARD_LIMITS,type BoardReadArgs,type BoardRecord,type BoardBlock,type BoardBlockKind,type BoardBlockView,type BoardDefinition,type BoardFunnelStep,type BoardFunnelStepView,type BoardListItem,type BoardPoint,type BoardTab,type BoardView} from '../../contracts/board.ts';
+import {BOARD_BLOCK_KINDS,BOARD_DEFINE_PRESETS,BOARD_LIMITS,type BoardReadArgs,type BoardRecord,type BoardBlock,type BoardBlockKind,type BoardBlockView,type BoardDefinition,type BoardFunnelStep,type BoardFunnelStepView,type BoardListItem,type BoardPoint,type BoardTab,type BoardTone,type BoardView} from '../../contracts/board.ts';
 import type {ServicePreset} from '../../contracts/service-presets.ts';
 import {SERVICE_PROVIDERS,type ServiceRecords} from '../../contracts/services.ts';
 import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
@@ -221,3 +221,29 @@ export function readStoredBoard(value:unknown):BoardRecord|null {
    ...typeof v.agentId==='string'&&AGENT_ID_PATTERN.test(v.agentId)?{agentId:v.agentId}:{}};
  }catch{return null;}
 }
+
+/** The board's north-star number, which the World draws on the board's device: the first tab's first `number` block,
+ * when it shows a value. Null with no board, no number block on the first tab, a read of another tab only, or an error
+ * on that block (the device then stays empty, as with no board). */
+export function boardNorthStar(read:{definition?:BoardDefinition|null;view?:BoardView|null}|null|undefined):{title:string;value:number;tone?:BoardTone}|null {
+ const first=read?.definition?.tabs?.[0]?.id,tab=first===undefined?undefined:read?.view?.tabs?.find(item=>item.id===first);
+ const block=tab?.blocks.find(item=>item.kind==='number');
+ if(!block||block.status!=='ok'||!block.number||!Number.isFinite(block.number.value))return null;
+ return {title:block.title,value:block.number.value,...block.number.tone?{tone:block.number.tone}:{}};
+}
+
+/** A board number as people read it: grouped, at most two decimals; `compact` (the device) shortens it to 1.2K. */
+export function formatBoardNumber(value:number,compact=false):string {
+ if(!Number.isFinite(value))return '—';
+ return new Intl.NumberFormat('en-US',compact?{notation:'compact',maximumFractionDigits:1}:{maximumFractionDigits:2}).format(value);
+}
+
+/** A rate (0 to 1) as a percentage: whole under normal use, one decimal below 10%; a dash when there is none. */
+export function formatBoardRate(rate:number|null|undefined):string {
+ if(typeof rate!=='number'||!Number.isFinite(rate))return '—';
+ const percent=rate*100;
+ return (percent<10&&!Number.isInteger(percent)?percent.toFixed(1):String(Math.round(percent)))+'%';
+}
+
+/** How a number block's tone is said, never by colour alone. */
+export const BOARD_TONE_WORDS:Readonly<Record<BoardTone,string>>=Object.freeze({good:'On target',bad:'Off target'});

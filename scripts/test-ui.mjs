@@ -78,7 +78,7 @@ export const parallelChecks=available([
  'scripts/memory-edits-check.ts','scripts/applet-pipeline-check.ts','scripts/browser-outcome-check.ts',
  'scripts/slot-placement-check.ts','scripts/todoist-write-check.ts','scripts/world-layout-check.ts','scripts/browser-receipt-check.ts',
  'scripts/mail-review-recovery-check.ts','scripts/navigation-history-check.ts','scripts/google-oauth-windows-check.ts','scripts/agent-browser-policy-check.ts',
- 'scripts/applet-scale-check.ts','scripts/applet-lamp-check.ts','scripts/snapshot-inbox-check.ts','scripts/task-review-ui-check.ts','scripts/attention-task-review-check.ts','scripts/agent-ask-ui-check.ts','scripts/github-draft-ui-check.ts',
+ 'scripts/applet-scale-check.ts','scripts/applet-lamp-check.ts','scripts/snapshot-inbox-check.ts','scripts/task-review-ui-check.ts','scripts/attention-task-review-check.ts','scripts/agent-ask-ui-check.ts','scripts/github-draft-ui-check.ts','scripts/board-ui-check.ts','scripts/board-world-ui-check.ts',
  'scripts/website-matching-check.ts','scripts/tennis-demo-check.ts',
  // Browser checks no net ran until check-reach looked past scripts/*-check.{ts,mjs,py} (2026-10-04).
  'scripts/dev-build-ui-check.ts',
@@ -120,7 +120,7 @@ export const coreChecks=[
 // The RC in the two hours before each release slot runs the whole suite, and a release ships only a commit that passed
 // it (scripts/machine-candidate.mjs rcMode, scripts/release-verified.mjs).
 export const quickChecks=available([
- 'scripts/oauth-callback-ui-check.ts','scripts/service-collection-ui-check.ts',
+ 'scripts/oauth-callback-ui-check.ts','scripts/service-collection-ui-check.ts','scripts/board-ui-check.ts',
  'scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts',
  'scripts/startup-check.ts','scripts/startup-setup-check.ts','scripts/world-scene-check.ts','scripts/sample-world-check.ts',
  'scripts/world-tour-check.ts','scripts/feature-audit-check.ts','scripts/core-applet-content-check.ts','scripts/applet-focus-check.ts',
@@ -135,7 +135,7 @@ export const quickChecks=available([
 // the quick checks that finish in seconds on a GitHub Linux runner. Those that draw the World took 2 to 8 minutes there
 // on software WebGL, four at a time, and timed out clicking it (PR #125's first run), so they stay in Alpha.
 export const prChecks=quickChecks.filter(c=>[
- 'scripts/oauth-callback-ui-check.ts','scripts/service-collection-ui-check.ts',
+ 'scripts/oauth-callback-ui-check.ts','scripts/service-collection-ui-check.ts','scripts/board-ui-check.ts',
  'scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts',
  'scripts/startup-check.ts','scripts/applet-first-entry-check.ts','scripts/onboarding-first-value-check.ts',
  'scripts/browser-applet-check.ts','scripts/mail-open-check.ts','scripts/applet-scene-check.ts','scripts/web-record-check.ts',

@@ -1161,7 +1161,9 @@ export function createNativeChat(call){return function({button,input,status,exec
   /** Work Worldlet starts by itself (the day's plan and summary) in a background session beside the conversation
    * (owner Order 2026-10-07): no card, no reply line, and the person can talk to Fox meanwhile. */
   background:(text:string,{displayText}:{displayText?:string}={})=>call('background',{text,shown:displayText,context:{thread:FOX_MAIN_THREAD,key:context.key,location:context.title,state:context.detail,view:structuredClone(visibleContent()),...worldNow(root)}}),
-  openText:focusInput,sync:scheduleRender,submit,ask:(text: string,{origin='user',displayText,icon,quiet=false}: {origin?: 'user'|'system';displayText?:string;icon?:string;quiet?:boolean}={})=>submit(text,undefined,false,origin,displayText,icon,quiet)
+  openText:focusInput,sync:scheduleRender,
+  /** Settings, at a section or a part of one (companion-settings.ts), e.g. `access` from the board's empty state. */
+  openSettings:(setting?:string)=>companionInfo.open('Settings',setting),submit,ask:(text: string,{origin='user',displayText,icon,quiet=false}: {origin?: 'user'|'system';displayText?:string;icon?:string;quiet?:boolean}={})=>submit(text,undefined,false,origin,displayText,icon,quiet)
  };
  // On the desktop Fox stands with its message bar alone (owner request 2026-10-11): nothing beside Fox or the bar
  // (Settings, the dock's actions; right-click Fox, the Dock or tray icon goes back to the World).

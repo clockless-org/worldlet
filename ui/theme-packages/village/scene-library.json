@@ -1414,6 +1414,11 @@
       "reason": "Uses a generic scene for its actual subject"
     },
     {
+      "id": "board",
+      "title": "Board",
+      "reason": "A built-in board with drawn interim art; no curated scene yet"
+    },
+    {
       "id": "sekai-rogue-ai-tic-tac-toe",
       "title": "Rogue AI Tic-Tac-Toe",
       "reason": "Overlapping external mini-game; main Sekai entry retained"

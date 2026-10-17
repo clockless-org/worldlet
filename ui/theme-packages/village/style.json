@@ -532,6 +532,10 @@
       "peek": "resources/styles/builtin/assets/applets/ongoing/peek-logo-v3.png",
       "focus": "resources/styles/builtin/assets/applets/ongoing/immersive.webp"
     },
+    "board": {
+      "peek": "resources/styles/builtin/assets/applets/board/peek-logo-v1.png",
+      "focus": "resources/styles/builtin/assets/applets/board/immersive.webp"
+    },
     "breakout": {
       "peek": "resources/styles/builtin/assets/applets/breakout/peek-logo-v4.png"
     },

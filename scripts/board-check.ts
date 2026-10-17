@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {BOARD_LIMITS,type BoardDefinition} from '../contracts/board.ts';
 import type {ServiceRecords} from '../contracts/services.ts';
 import {saveServicePreset} from '../core/accounts/index.ts';
-import {BOARD_REASONS,defineBoard,boardNumber,boardPresetIds,readBoardDefinition,resolveBoard,type BoardRead} from '../core/board/index.ts';
+import {BOARD_REASONS,BOARD_TONE_WORDS,boardNorthStar,formatBoardNumber,formatBoardRate,defineBoard,boardNumber,boardPresetIds,readBoardDefinition,resolveBoard,type BoardRead} from '../core/board/index.ts';
 
 // The board (contracts/board.ts, core/board/board.ts): a definition of tabs and blocks that name Service presets,
 // checked; and the resolver that turns it and the presets' reads into what each block shows, with a plain error for
@@ -114,4 +114,16 @@ assert.equal(one({},{error:'x'.repeat(1000)}).error?.length,BOARD_LIMITS.error,'
 // Nothing but the definition, the presets and the reads goes in; the same in gives the same out.
 assert.deepEqual(resolveBoard(board,presets,reads,now),view);
 const typed:BoardDefinition=board;assert.ok(typed);
+// The north-star number the World draws on the board's device: the first tab's first number block, only when it shows a
+// value; a read of another tab alone, an error on it, or no board leaves the device empty.
+assert.deepEqual(boardNorthStar({definition:board,view}),{title:'Installs this week',value:120,tone:'good'});
+assert.equal(boardNorthStar({definition:board,view:resolveBoard(board,presets,reads,now,'health')}),null,'another tab alone says nothing about the first');
+assert.equal(boardNorthStar({definition:board,view:resolveBoard(board,presets,{},now)}),null,'an error on that block leaves the device empty');
+assert.equal(boardNorthStar({definition:null,view:null}),null);assert.equal(boardNorthStar(null),null);
+const untoned=readBoardDefinition({tabs:[{id:'a',title:'A',blocks:[{id:'l',title:'L',kind:'list',preset:'open-prs'},{id:'n',title:'Open',kind:'number',preset:'open-prs'}]}]});
+assert.deepEqual(boardNorthStar({definition:untoned,view:resolveBoard(untoned,presets,reads,now)}),{title:'Open',value:3},'no tone without a target; a list before it is passed over');
+// How numbers, rates and tones are said.
+assert.deepEqual([formatBoardNumber(1234.567),formatBoardNumber(12_345,true),formatBoardNumber(1_250_000,true),formatBoardNumber(-3),formatBoardNumber(NaN)],['1,234.57','12.3K','1.3M','-3','—']);
+assert.deepEqual([formatBoardRate(0.25),formatBoardRate(0.1),formatBoardRate(0.045),formatBoardRate(1),formatBoardRate(null)],['25%','10%','4.5%','100%','—']);
+assert.deepEqual(BOARD_TONE_WORDS,{good:'On target',bad:'Off target'});
 console.log('PASS board: definitions checked (kinds, IDs, sizes, no secrets), resolved from preset reads into numbers, funnels, lists and trends, with a plain error per block and no model.');

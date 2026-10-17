@@ -452,6 +452,17 @@
     768
    ]
   },
+  "board": {
+   "src": "devices/board.webp",
+   "box": [
+    68,
+    86,
+    714,
+    740,
+    768,
+    768
+   ]
+  },
   "doordash": {
    "src": "devices/doordash.webp",
    "box": [
@@ -1625,6 +1636,11 @@
    "image": "focus/ongoing.webp",
    "framing": "scene-fit",
    "subjectLeft": 0.59
+  },
+  "board": {
+   "image": "focus/board.webp",
+   "framing": "scene-fit",
+   "subjectLeft": 0.69
   },
   "doordash": {
    "image": "focus/doordash.webp",

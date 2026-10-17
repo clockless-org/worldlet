@@ -119,6 +119,7 @@
   "garden": 1,
   "moment": 1.078,
   "ongoing": 1.078,
+  "board": 1.014,
   "breakout": 1.2,
   "wordle": 1.2,
   "nyt-connections": 1.197,

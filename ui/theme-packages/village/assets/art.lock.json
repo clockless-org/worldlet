@@ -137,6 +137,12 @@
   "settings": "device:768:webp-92-100",
   "sha256": "90827c42187a0d623fc38a964a32e58cebf6e28fae5070acab75a7f3c66ad2b8"
  },
+ "devices/board.webp": {
+  "source": "resources/styles/builtin/assets/applets/board/peek-logo-v1.png",
+  "sourceSha256": "41854ae7ba43904ac36df8c2dc792fbebeb3e30b8d35ea3e9f8b40e19dcb6cf1",
+  "settings": "device:768:webp-92-100",
+  "sha256": "82f046a6890712e9e3000be02e3c32da3f978fb257bc1ef12b08740291f04b17"
+ },
  "devices/booking.webp": {
   "source": "resources/styles/builtin/assets/applets/booking/peek-logo-v3.png",
   "sourceSha256": "3ee07240a01c9ba085383ec8dcab4c54eb870bd252251bb9d64e3057c88fc1c6",
@@ -850,6 +856,12 @@
   "sourceSha256": "2f949395c3e9ccb9783cd452ad9fabc69c75c5ce149ae6fc2f9f8facecb978b7",
   "settings": "copy",
   "sha256": "2f949395c3e9ccb9783cd452ad9fabc69c75c5ce149ae6fc2f9f8facecb978b7"
+ },
+ "focus/board.webp": {
+  "source": "resources/styles/builtin/assets/applets/board/immersive.webp",
+  "sourceSha256": "225af4f93aff405754e8268cfd112e525d0cd294f662d9490a29ce9912ed4a5e",
+  "settings": "copy",
+  "sha256": "225af4f93aff405754e8268cfd112e525d0cd294f662d9490a29ce9912ed4a5e"
  },
  "focus/booking.webp": {
   "source": "resources/styles/builtin/assets/applets/booking/immersive.webp",
