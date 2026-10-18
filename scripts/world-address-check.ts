@@ -79,11 +79,14 @@ await withTempDir('worldlet-world-address-',async dir=>{
   for(const [n,k] of names)if(k===key)names.delete(n);
   names.set(name,key);return Response.json({name,address:`https://${name}.worldlet.ai`},{status:201});
  };
- let worldLinkSecret='s1',renewed=0;
+ // A long random stand-in for the World link's secret, so the ledger check below can only match the secret itself.
+ const linkSecret=()=>crypto.randomBytes(24).toString('base64url');
+ let worldLinkSecret=linkSecret(),renewed=0;
+ const firstLinkSecret=worldLinkSecret;
  const board={revision:1,definition:{title:'Team'},presets:[{id:'p',read:{query:'SELECT secret'}}],view:{title:'Team',tabs:[{id:'main',title:'Main',blocks:[{id:'n',title:'Users',kind:'number',preset:'p',status:'ok',number:{value:42}}]}],resolvedAt:'2026-10-18T12:00:00.000Z'}};
  const address=createWorldAddressHost({vault,remote,ledger:()=>ledger,changed:()=>{},fetch:site as any,now,
   worldLink:async()=>`https://worldlet.ai/world/2026.1018.4700/#v=1&s=${worldLinkSecret}&n=Studio+Mac&m=room`,
-  renewWorldLink:async()=>{renewed+=1;worldLinkSecret='s'+(renewed+1);},board:async()=>board});
+  renewWorldLink:async()=>{renewed+=1;worldLinkSecret=linkSecret();},board:async()=>board});
  try{
   // Names.
   for(const ok of ['kelvin','abc','team-board'])assert.ok(validAddressName(ok),ok);
@@ -174,7 +177,7 @@ await withTempDir('worldlet-world-address-',async dir=>{
   assert.equal(signed.status,200);
   let session=signed.json();
   assert.deepEqual(session.who,{kind:'owner',name:'Chrome on Mac'});
-  assert.deepEqual(session.world,{path:'/world/2026.1018.4700/',fragment:'v=1&s=s1&n=Studio+Mac&m=room'});
+  assert.deepEqual(session.world,{path:'/world/2026.1018.4700/',fragment:`v=1&s=${firstLinkSecret}&n=Studio+Mac&m=room`});
   assert.match(session.session,/^[A-Za-z0-9_-]{43}$/);
   status=await address.status();
   assert.deepEqual(status.devices.map(d=>d.name),['Chrome on Mac']);
@@ -280,7 +283,7 @@ await withTempDir('worldlet-world-address-',async dir=>{
   const kept=JSON.stringify(readWorldAddressState(JSON.parse(secrets.get(WORLD_ADDRESS_VAULT)!)));
   for(const secret of [session.session,samSession.session,fresh,token])assert.ok(!kept.includes(secret));
   const rows=JSON.stringify(ledger.remoteConsents())+JSON.stringify(ledger.value('items',remoteConsentItemId(request.id)));
-  for(const secret of [session.session,samSession.session,fresh,token,'s1'])assert.ok(!rows.includes(secret),'nothing reusable in the ledger');
+  for(const secret of [session.session,samSession.session,fresh,token,firstLinkSecret,worldLinkSecret])assert.ok(!rows.includes(secret),'nothing reusable in the ledger');
   assert.ok(!logged.join('\n').includes(session.session));
   say('PASS sessions and tokens are in no item, ledger row or log line; the vault keeps only public keys.');
  }finally{
