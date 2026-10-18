@@ -8,7 +8,13 @@ Platform-independent product behavior. Components, by [feature](../docs/UI-CORE-
 - Attention: attention
 - Tasks: tasks (work that runs without the person)
 - Artifacts & Journal: artifacts (everything work produces, kept by day)
-- Base: agent, accounts, tools, phone, items, context, onboarding, diagnostics, distribution
+- Agents & Gate: agent, tools (the Agents connected to the World, World tools, Grants, approvals and audit)
+- Context: context, items (everything the World knows; [storage and its four kinds](items/STORAGE.md#four-kinds))
+- Connectors: accounts (sign-in to Services, their reads and approved writes)
+- Windows: phone (the World in a web browser and on the phone)
+- Base: onboarding, diagnostics, distribution
+
+Two of the four [layers](../docs/UI-CORE-PLATFORM.md#see-do-know) live here: Do (Fox, Tasks, Asks, Agents and the Gate) and Know (Context and its Connectors). Which folder is in which: [folders by layer](../docs/UI-CORE-PLATFORM.md#folders-by-layer).
 
 See the [layer and dependency contract](../docs/UI-CORE-PLATFORM.md#repository-layers).
 

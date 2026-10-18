@@ -1,9 +1,9 @@
 // Service collection reuses the shared source-check schedule and failure policy. IO, timers and leases stay in Platform.
-import {configureSourceCheck,finishSourceCheck,startSourceCheck} from '../../tasks/index.ts';
-import {readStoredServicePreset,servicePresetRead} from './presets.ts';
-import type {ServicePreset} from '../../../contracts/service-presets.ts';
-import type {ServiceRead,ServiceRecords,ServiceRecord} from '../../../contracts/services.ts';
-import type {ServiceSyncJob,ServiceSyncCheckpoint,ServiceSyncSnapshot} from '../../../contracts/service-sync.ts';
+import {configureSourceCheck,finishSourceCheck,startSourceCheck} from '../tasks/index.ts';
+import {readStoredServicePreset,servicePresetRead} from '../accounts/index.ts';
+import type {ServicePreset} from '../../contracts/service-presets.ts';
+import type {ServiceRead,ServiceRecords,ServiceRecord} from '../../contracts/services.ts';
+import type {ServiceSyncJob,ServiceSyncCheckpoint,ServiceSyncSnapshot} from '../../contracts/service-sync.ts';
 
 export const SERVICE_SYNC_LIMITS=Object.freeze({pages:20,records:1000,characters:2_000_000,pageDelay:5,timeoutMs:240_000});
 const object=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Array.isArray(v);

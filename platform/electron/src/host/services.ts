@@ -176,7 +176,7 @@ export const WORLD_TOOLS='worldTools';
 export interface SourcesService {
  /** Persisted owner-collected Notion context. No live provider fallback. Caller keeps ordinary World Grants. */
  readNotionContext?(request:Row):Row;
- /** `context/search` and `context/read` (core/accounts/services/context.ts) over the World's saved Service context,
+ /** `context/search` and `context/read` (core/context/service-context.ts) over the World's saved Service context,
   * limited to the Services `canRead` allows. */
  serviceContext?(request:Row,canRead:(provider:string)=>boolean):Row;
  /** `world-item:` original reads (Gmail thread, Notion page, local source). */

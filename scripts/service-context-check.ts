@@ -1,4 +1,4 @@
-// The World's saved Service context (core/accounts/services/context.ts, core/applets/INTEGRATIONS.md#searching-saved-service-context):
+// The World's saved Service context (core/context/service-context.ts, core/applets/INTEGRATIONS.md#searching-saved-service-context):
 // one search and one read across what the World keeps up to date from each connected Service, through the standing
 // `worldlet` MCP server with each Agent's own token. "Can read <Service>" names both targets; an answer holds only the
 // Services that Agent may read; nothing asks a Service. Synthetic records, a real temporary SQLite ledger, no network.
@@ -10,7 +10,7 @@ import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/agent-access.ts';
 import {openStandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
 import {createServiceSync} from '../platform/electron/src/modules/sources/service-sync.ts';
-import {SERVICE_CONTEXT_REASONS,serviceContext} from '../core/accounts/index.ts';
+import {SERVICE_CONTEXT_REASONS,serviceContext} from '../core/context/index.ts';
 import type {ServiceRead} from '../contracts/services.ts';
 import type {ServiceSyncSnapshot} from '../contracts/service-sync.ts';
 

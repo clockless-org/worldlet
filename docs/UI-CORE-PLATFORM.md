@@ -17,23 +17,71 @@ See the [diagram](architecture.html).
 
 The product in four layers with their components: UI (`ui/`), Agent and Context (the two halves of `core/`: who does the work through the Gate, and everything the World knows) and Platform (`platform/`): [four-layers.svg](four-layers.svg) ([中文](four-layers.zh.svg)).
 
+<a id="see-do-know"></a>
+## Four layers: See, Do, Know, Host
+
+Inside the app there are four layers ([#677](https://github.com/clockless-org/worldlet/issues/677)). They sit on the code layers above: See is `ui/`, Do and Know are the two halves of `core/`, and Host is `platform/`.
+
+| # | Layer | What it is | Code |
+| --- | --- | --- | --- |
+| 1 | **See** | What a person sees and touches. Windows (the desktop window, the World in a browser at its own address, the phone: all show the same World), World, Applets, Fox's face and conversation panel, Attention, Journal, Settings (Connectors, Agents, Context, General), Onboarding | `ui/` |
+| 2 | **Do** | Who does the work. Fox (talks through the person's own Agent), Tasks (routines, checks, drafts, Applet jobs), Asks (handing work to someone and waking them; Agents' questions to the person), Agents (one list of local Agents, cloud Agents and scripts, each with its own identity, revocable). Its edge is the **Gate**, the only door: World tools, per-Agent Grants, approval and an audit of every call | `core/`, Do half (moving to `agent/`, [#681](https://github.com/clockless-org/worldlet/issues/681)) |
+| 3 | **Know** | Everything the World knows. Context store (one store, four kinds: Synced, Recorded, Made, Known; [#676](https://github.com/clockless-org/worldlet/issues/676)), Storage, Search, and **Connectors**, its intake: sign-in to Services, sync into Synced, and writes the person approved | `core/`, Know half (moving to `context/`, [#681](https://github.com/clockless-org/worldlet/issues/681)) |
+| 4 | **Host** | The machine: Electron (computers with a screen) or Node (no screen). OS permissions, SQLite and files, the keychain, processes, network, pairing and relay connections. It runs things and makes no product decisions | `platform/` |
+
+Someone asks in See (or an Agent asks directly) → Do runs it through the Gate, reading
+and writing Know → the result is a Made record (an Artifact) → shown in Attention and kept in the Journal (See).
+
+Rules:
+
+- Calls go downward only.
+- See only reads Know; to change anything it hands the work to Do.
+- Everyone in Do passes the Gate, Fox included. Agents reach Context only through World tools and their Grants.
+- Only Connectors write Synced.
+- Work results become Artifacts, reach the person through Attention and stay in the Journal.
+- Nothing reads storage except through Know's single entry.
+- Nothing is deleted automatically; only a retention period the person sets removes data.
+
+The common record envelope, the single read/write entry with Grants and audit, one search
+across all four kinds, and draft and pin state for Made records are next steps
+([core/items/STORAGE.md](../core/items/STORAGE.md#four-kinds)).
+
+<a id="folders-by-layer"></a>
+### Folders by layer
+
+Every folder of `ui/`, `core/` and `platform/` belongs to exactly one layer; each `core/` folder is in Do or Know,
+except the three whose files are split between them as they move ([#681](https://github.com/clockless-org/worldlet/issues/681)).
+`npm run check:docs` fails when a folder is missing or listed twice.
+
+| Layer | Folders |
+| --- | --- |
+| See | `ui/applets/` `ui/artifacts/` `ui/attention/` `ui/browser/` `ui/companion/` `ui/components/` `ui/distribution/` `ui/games/` `ui/hud/` `ui/onboarding/` `ui/practice/` `ui/shell/` `ui/theme-packages/` `ui/themes/` `ui/web/` `ui/world/` |
+| Do (to `agent/`) | `core/agent/` `core/tasks/` `core/companion/` `core/tools/` `core/attention/` `core/onboarding/` |
+| Know (to `context/`) | `core/context/` `core/items/` `core/artifacts/` `core/activity/` `core/accounts/` `core/applets/` `core/board/` `core/browser/` `core/games/` |
+| Do and Know, split per file | `core/phone/` `core/diagnostics/` `core/distribution/` |
+| Host | `platform/bridge/` `platform/browser/` `platform/distribution/` `platform/electron/` `platform/install/` `platform/local-tools/` `platform/node/` `platform/web-engine/` |
+
 <a id="features"></a>
-## Six features and the base
+## Features and the base
 
 Layers cut the product across; features cut it down. Each feature is a vertical
 slice with its own UI, Core and (when it needs one) Platform part. Every `ui/` and
 `core/` component and every Electron host module (`platform/electron/src/modules/`) belongs to exactly one row below; `npm run check:docs` fails when a
-component is missing or listed twice.
+component is missing or listed twice. Which layer each folder is in: [folders by layer](#folders-by-layer). The Node host runs the same Core and the same host modules without a window.
 
 | Feature | What it is | UI | Core | Platform |
 | --- | --- | --- | --- | --- |
 | World | The place everything sits in: areas, HUD, themes | `ui/world/` `ui/hud/` `ui/themes/` `ui/theme-packages/` | `core/activity/` | `platform/electron/src/modules/world.ts` `platform/electron/src/modules/world-audio/` |
-| Applets | Where the person's data and actions live, with the real website beside them | `ui/applets/` `ui/browser/` `ui/games/` `ui/practice/` | `core/applets/` `core/board/` `core/browser/` `core/games/` | `platform/electron/src/modules/applet-art/` `platform/electron/src/modules/applet-tools/` `platform/electron/src/modules/browser/` `platform/electron/src/modules/calendar/` `platform/electron/src/modules/games/` `platform/electron/src/modules/sources/` |
+| Applets | Where the person's data and actions live, with the real website beside them | `ui/applets/` `ui/browser/` `ui/games/` `ui/practice/` | `core/applets/` `core/board/` `core/browser/` `core/games/` | `platform/electron/src/modules/applet-art/` `platform/electron/src/modules/applet-tools/` `platform/electron/src/modules/browser/` `platform/electron/src/modules/calendar/` `platform/electron/src/modules/games/` |
 | Companion | Fox: the one conversation, voice, memory and what Fox is doing | `ui/companion/` | `core/companion/` | `platform/electron/src/modules/fox/` `platform/electron/src/modules/voice/` |
 | Attention | What needs the person now: ranked, at most nine, each waiting for Done, Send or Later | `ui/attention/` | `core/attention/` | `platform/electron/src/modules/attention/` |
 | Tasks | Work that runs without the person: routines, cron jobs, source checks, background drafts and Applet tasks. Fox starts some, Applets start others; the person's Agent does them | (no folder of its own: its status shows in Fox, on Applets and in the Ongoing Applet) | `core/tasks/` | `platform/electron/src/modules/tasks/` |
 | Artifacts & Journal | What work produces: one artifact for every card, draft, page and brief, shown wherever it is needed (Attention, Fox, Applets), and the Journal that keeps them by day | `ui/artifacts/` | `core/artifacts/` | `platform/electron/src/modules/artifacts/` |
-| Base | What every feature stands on: the connection to the person's Agent (adapters, World tools over the `worldlet` MCP server, phone and web pairing), local records, setup and the app shell | `ui/shell/` `ui/components/` `ui/onboarding/` `ui/distribution/` `ui/web/` (the page a web browser opens, [web](../core/phone/README.md#web)) | `core/agent/` `core/accounts/` `core/tools/` `core/phone/` `core/items/` `core/context/` `core/onboarding/` `core/diagnostics/` `core/distribution/` | `platform/electron/src/modules/agent-runtime/` `platform/electron/src/modules/phone/` `platform/electron/src/modules/shell/` `platform/electron/src/modules/media/` (the media surface the World's sound, Fox's voice and Voice Memos share), `contracts/` |
+| Agents & Gate | The Agents connected to the World and the one door they pass: the connection to the person's Agent (adapters), World tools over the `worldlet` MCP server (local and remote), per-Agent Grants, approvals and the audit | (no folder of its own: Allow cards show in Attention, Settings › Agents beside Fox) | `core/agent/` `core/tools/` | `platform/electron/src/modules/agent-runtime/` |
+| Context | Everything the World knows, kept on the person's computer: World items and history, conversation and execution journals, source context, and each connected Service's synced snapshots with the one search over them (`world_context`). Storage and kinds: [core/items/STORAGE.md](../core/items/STORAGE.md#four-kinds) | (no folder of its own: every feature reads it; Settings › Context beside Fox) | `core/context/` `core/items/` | (no host module of its own: `platform/electron/src/store/` persists it) |
+| Connectors | Context's intake: sign-in to Services (Google, Notion, GitHub, Linear, PostHog, Cloudflare and the rest) and this computer's own sources, their reads, and writes the person approved | (no folder of its own: Settings › Connectors beside Fox) | `core/accounts/` | `platform/electron/src/modules/sources/` |
+| Windows | The same World in another window: a web browser at the World's address and the phone, paired by QR code through the end-to-end encrypted relay | `ui/web/` (the page a web browser opens, [web](../core/phone/README.md#web)) | `core/phone/` | `platform/electron/src/modules/phone/` |
+| Base | Setup, the app shell, distribution and diagnostics | `ui/shell/` `ui/components/` `ui/onboarding/` `ui/distribution/` | `core/onboarding/` `core/diagnostics/` `core/distribution/` | `platform/electron/src/modules/shell/` `platform/electron/src/modules/media/` (the media surface the World's sound, Fox's voice and Voice Memos share), `contracts/` |
 
 Work flows Companion or Applets → Task → Artifact → Attention → Journal: Fox and
 Applets start tasks, each task's result is an artifact, an artifact that needs the
