@@ -10,7 +10,7 @@ export function installMeetingAudio(bindingName) {
   const send = globalThis[bindingName];
   try { delete globalThis[bindingName]; } catch {}
   const host = location.hostname.toLowerCase();
-  const meeting = host === 'meet.google.com' || host === 'zoom.us' || host.endsWith('.zoom.us') || host === 'teams.microsoft.com' || host === 'teams.live.com';
+  const meeting = host === 'meet.google.com' || host === 'zoom.us' || host.endsWith('.zoom.us') || host === 'teams.microsoft.com' || host === 'teams.live.com' || host === 'teams.cloud.microsoft';
   if (typeof send !== 'function' || !meeting || globalThis.__worldletMeetingAudio) return;
   const RATE = 16000;
   const tracks = {others: new Set(), you: new Set()};
