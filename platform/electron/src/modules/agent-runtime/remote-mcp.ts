@@ -31,14 +31,15 @@ export interface RemoteMcpHost {
  /** A token for an Agent that cannot open a browser (a script, a daemon on another computer): a new remote Agent named
   * `name`, or a new token for the remote Agent `id` (its old one stops working). Shown once; only its hash is kept. */
  token(name:unknown,id?:unknown):Promise<Row>;
- /** The person's Allow or Deny on a consent card. */
- decide(id:unknown,allow:boolean):Row;
+ /** The person's Allow or Deny on a consent card. `reads`: Allow also lets it read the connected Services. */
+ decide(id:unknown,allow:boolean,reads?:boolean):Row;
  close():void;
 }
 const PING_MS=30_000,MAX_BACKOFF_MS=60_000;
 
-export function createRemoteMcpHost({vault,access,tools,ledger,changed,relay=DEFAULT_PAIR_RELAY,front,WebSocket,now=()=>Date.now(),onByDefault=false}:
- {vault:VaultService;access:AgentAccess;tools:()=>Promise<StandingWorldTools>|null;ledger:()=>ConsentLedger|null;changed:()=>void;relay?:string;front?:string;WebSocket?:RemoteMcpSocketFactory;now?:()=>number;onByDefault?:boolean}):RemoteMcpHost {
+/** `services`: the Services connected now, by provider and name, which a consent card offers it to read. */
+export function createRemoteMcpHost({vault,access,tools,ledger,changed,services=()=>[],relay=DEFAULT_PAIR_RELAY,front,WebSocket,now=()=>Date.now(),onByDefault=false}:
+ {vault:VaultService;access:AgentAccess;tools:()=>Promise<StandingWorldTools>|null;ledger:()=>ConsentLedger|null;changed:()=>void;services?:()=>{provider:string;title:string}[];relay?:string;front?:string;WebSocket?:RemoteMcpSocketFactory;now?:()=>number;onByDefault?:boolean}):RemoteMcpHost {
  const WS=WebSocket??(globalThis as unknown as {WebSocket:RemoteMcpSocketFactory}).WebSocket;
  // Off worldlet.ai (a development relay), the same Worker serves the front at `<relay>/mcp/<room>`.
  const frontOrigin=front??(relay.replace(/\/+$/,'')===DEFAULT_PAIR_RELAY?MCP_FRONT_ORIGIN:relay.replace(/\/+$/,'')+'/mcp');
@@ -50,16 +51,25 @@ export function createRemoteMcpHost({vault,access,tools,ledger,changed,relay=DEF
  const active=(agentId:string)=>{const identity=access.identity(agentId);return !!identity&&!agentRevoked(identity,new Date(now()).toISOString());};
  function show(consent:RemoteMcpConsent,origin:'user'|'agent'='agent'){
   const db=ledger();if(!db)return false;
-  try{db.saveRemoteConsent(consent as unknown as Row,remoteConsentItem(consent) as unknown as Row,origin);changed();return true;}catch{return false;}
+  let named:string[]=[];try{named=services().map(service=>service.title);}catch{}
+  try{db.saveRemoteConsent(consent as unknown as Row,remoteConsentItem(consent,named) as unknown as Row,origin);changed();return true;}catch{return false;}
  }
  // A consent still waiting from an earlier run can no longer be answered: its page and its code are gone.
  try{const db=ledger();for(const row of db?.remoteConsents()??[])if(row.status==='pending')show({...row,status:'expired'} as unknown as RemoteMcpConsent);}catch{}
  let answering:'user'|'agent'='agent';
+ // Consents the person allowed with the connected Services: their Agent gets each one's read Grant once it is made.
+ const withReads=new Set<string>();
  const server:RemoteMcpServer=createRemoteMcpServer({
   load:()=>read()?.state??emptyRemoteMcpState(),
   save:state=>{const saved=read();if(saved)write({...saved,state});},
   show:consent=>show(consent,answering),
-  connect:consent=>{try{const agent=remoteMcpAgent(consent.client);access.ensure(agent);return agent.id;}catch{return null;}},
+  connect:consent=>{
+   try{
+    const agent=remoteMcpAgent(consent.client);access.ensure(agent);
+    if(withReads.delete(consent.id))for(const service of services())try{access.grantService(agent.id,service.provider);}catch{}
+    return agent.id;
+   }catch{return null;}
+  },
   active,
   tools:()=>worldToolList(),
   call:async(agentId,name,args)=>{
@@ -159,11 +169,13 @@ export function createRemoteMcpHost({vault,access,tools,ledger,changed,relay=DEF
    const token=await server.mint(agentId);changed();
    return {ok:true,token,address:(await status()).address,agent:{id:agentId,name:access.identity(agentId)?.name??agentId}};
   },
-  decide(id,allow){
+  decide(id,allow,reads=false){
    if(typeof id!=='string'||!id)return {ok:false,error:'That request is not known here.'};
    answering='user';
    try{
-    if(!server.decide(id,allow))return {ok:false,error:'This request is no longer waiting. Start connecting again from the connector.'};
+    if(allow&&reads)withReads.add(id);
+    if(!server.decide(id,allow)){withReads.delete(id);return {ok:false,error:'This request is no longer waiting. Start connecting again from the connector.'};}
+    if(!allow)withReads.delete(id);
     return {ok:true,status:server.consents().find(consent=>consent.id===id)?.status??(allow?'allowed':'denied')};
    }
    finally{answering='agent';}
