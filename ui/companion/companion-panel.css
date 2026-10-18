@@ -277,6 +277,8 @@
 .companion-settings-connector-words span{font-size:12px;color:#656651;overflow-wrap:anywhere}
 .companion-settings-connector[data-state="needs-you"] .companion-settings-connector-words span{color:#8a4b22}
 .companion-settings-connector-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+.companion-settings-sign-in-code{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.companion-settings-sign-in-code-value{font:600 28px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;user-select:all}
 .companion-settings-connector>.companion-settings-confirm{gap:6px;font-size:12px}
 .companion-settings-connector>.companion-settings-confirm>span{flex:1 1 100%}
 .companion-settings-connector-pick{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;color:#354132}

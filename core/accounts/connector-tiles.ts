@@ -52,11 +52,11 @@ export function connectorTiles(connections:readonly ConnectionRow[]=[],waiting?:
  for(const item of CONNECTORS){
   if(item.shown==='advanced')continue;
   const rows=owned(item,connections).filter(live);
-  const signIn=item.mechanism==='mcp-oauth'||item.mechanism==='google';
+  const signIn=item.mechanism==='mcp-oauth'||item.mechanism==='google'||item.mechanism==='github-device';
   if(!rows.length&&item.shown!=='always'&&waiting!==item.id)continue;
   const provider=rows[0]&&typeof rows[0].provider==='string'?rows[0].provider:item.providers[0];
   const base={id:item.id,name:item.name,provider,signIn,...item.region?{region:item.region}:{}};
-  if(waiting===item.id){tiles.push({...base,state:'waiting',line:`Finish signing in on ${item.name}, then come back here.`});continue;}
+  if(waiting===item.id){tiles.push({...base,state:'waiting',line:item.mechanism==='github-device'?`Paste the code on ${item.name}'s page and choose Authorize, then come back here.`:`Finish signing in on ${item.name}, then come back here.`});continue;}
   if(!rows.length){tiles.push({...base,state:'off',line:item.purpose});continue;}
   if(signIn&&rows.some(signedOut)){tiles.push({...base,state:'needs-you',line:`${item.name} signed you out. Sign in again to keep seeing it here.`});continue;}
   const target=rows.map(row=>{const text=row.label??row.target;return typeof text==='string'?text.trim():'';}).find(text=>EMAIL.test(text));

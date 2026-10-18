@@ -6,7 +6,9 @@
  *   public client (no secret) and waits on a loopback address (platform/electron/src/modules/sources/mcp-account.ts).
  * - `google`: Worldlet's own Google sign-in (Mail, Calendar, Drive; Search Console adds its own read permission).
  * - `key`: a pasted key or file (`TOKEN_PROVIDERS` in core/applets/sources.ts), until the service gets a sign-in.
- * - `github-device` and `local` are reserved for GitHub's sign-in and this computer's own apps. */
+ * - `github-device`: the official Worldlet GitHub App's device code (core/accounts/github-device.ts): the person types a
+ *   short code on github.com; only the App's public client ID is used, with no secret and no loopback address.
+ * - `local` is reserved for this computer's own apps. */
 export type ConnectorMechanism='mcp-oauth'|'github-device'|'google'|'key'|'local';
 /** What else connects this service when the default cannot: a pasted key, the Agent's own connection, or a Google
  * service account. Each is shown under Advanced only. */
@@ -57,8 +59,9 @@ export const CONNECTORS:readonly Connector[]=Object.freeze([
  entry({id:'supabase',name:'Supabase',purpose:'See your projects in Supabase.',mechanism:'mcp-oauth',providers:['supabase'],shown:'always',region:'work',scopes:scopes(['organizations:read','projects:read']),fallback:['agent'],headless:false}),
  // PayPal's server names no scopes: its own default.
  entry({id:'paypal',name:'PayPal',purpose:'See your PayPal activity.',mechanism:'mcp-oauth',providers:['paypal'],shown:'connected',region:'money',scopes:scopes([]),fallback:['agent'],headless:false}),
- // GitHub offers no sign-in Worldlet can register for; until it has one, a pasted key or the Agent's own connection.
- entry({id:'github',name:'GitHub',purpose:'See your issues and pull requests on GitHub.',mechanism:'key',providers:['github'],shown:'connected',region:'work',scopes:scopes([]),fallback:['agent','key'],headless:true}),
+ // GitHub offers no sign-in Worldlet can register for: the official Worldlet GitHub App's device code, which needs no
+ // secret and works with no screen. A GitHub App's user token carries the App's permissions, not scopes.
+ entry({id:'github',name:'GitHub',purpose:'See your issues and pull requests on GitHub.',mechanism:'github-device',providers:['github'],shown:'always',region:'work',scopes:scopes([]),fallback:['agent','key'],headless:true}),
  // Reading only at sign-in; the two writes a PostHog draft makes are asked for when the person first approves one.
  // `user:read` names the projects to choose from.
  entry({id:'posthog',name:'PostHog',purpose:'See your product numbers and errors in PostHog.',mechanism:'mcp-oauth',providers:['posthog'],shown:'always',region:'work',

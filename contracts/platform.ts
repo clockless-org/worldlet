@@ -105,6 +105,16 @@ export interface HostCapabilities {version:1;features:HostFeatures;browserBudget
  * `browser` may come as `{stage:'browser',url}` with the validated consent address, so the page can open
  * it again or copy it when no browser came up (owner meetings 2026-10-02/03). */
 export const GOOGLE_SIGN_IN_EVENT='worldlet:google-sign-in';
+/** Host → World page while a service signs in with a code the person types on the service's own page (GitHub's device
+ * flow, core/accounts/github-device.ts): `new CustomEvent(SIGN_IN_CODE_EVENT,{detail:{provider,code,url}})`. The code is
+ * meant to be shown; it is not a secret, and it works only with the request Worldlet holds. */
+export const SIGN_IN_CODE_EVENT='worldlet:sign-in-code';
+export type SignInCode={provider:string;code:string;url:string};
+export const signInCode=(detail:unknown):SignInCode|null=>{
+ const v=detail as SignInCode;
+ return v&&typeof v==='object'&&typeof v.provider==='string'&&/^[a-z][a-z0-9-]{0,31}$/.test(v.provider)&&typeof v.code==='string'&&/^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(v.code)
+  &&typeof v.url==='string'&&/^https:\/\/github\.com\/[A-Za-z0-9/_-]*$/.test(v.url)?{provider:v.provider,code:v.code,url:v.url}:null;
+};
 export const GOOGLE_SIGN_IN_STAGES=['browser','preparing','verifying'] as const;
 export type GoogleSignInStage=typeof GOOGLE_SIGN_IN_STAGES[number];
 export const googleSignInStage=(detail:unknown):GoogleSignInStage|undefined=>{

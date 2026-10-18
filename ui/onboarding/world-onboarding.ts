@@ -5,6 +5,7 @@ import {googleConsentActions,googleConsentUrl} from './google-consent.ts';
 import {connectionGuide} from '../applets/index.ts';
 import {WORLD_PRESETS} from '../world/index.ts';
 import {connectorTiles} from '../../core/accounts/index.ts';
+import {copyAndOpen,listenForSignInCode} from '../companion/index.ts';
 const el=(tag: string,text?: string,cls?: string): any=>Object.assign(document.createElement(tag),{...(text==null?{}:{textContent:text}),className:cls||''});
 const providerTitle=p=>getApp(p)?.title||{google:'Google','google-drive':'Google Drive',folder:'Local folder'}[p];
 const suggestions={home:[...HOME_NATIVE],work:[],library:['notion'],money:[],health:[],travel:[],people:[]};
@@ -29,7 +30,7 @@ export function mountWorldOnboarding({root,call,view,state:initial,toggleSample,
  async function run(fn){if(saving)return;saving=true;notice.textContent='';panel.setAttribute('aria-busy','true');disableButtons(true);try{await fn();}catch(e){notice.textContent=e.message;if(screen==='start')render(true);}finally{saving=false;panel.removeAttribute('aria-busy');disableButtons(false);}}
  function head(title,description){guideText='**'+title+'**\n\n'+description;panel.replaceChildren();}
  function checkSupport(provider){const support=appletSupport(provider,hostFeatures(state));if(support.supported)return true;view.revealGuide?.();view.setGuide({text:support.reason,takeover:true,actions:[]});return false;}
- function show(next,id=region,key=moduleKey){if(next==='closed')view.setGuide(null,{forget:true});if(['app','connection','key'].includes(next)&&!checkSupport(WORLD_APPS.find(a=>a.key===key)?.provider||key))return;const target=['app','connection'].includes(next)?WORLD_APPS.find(a=>a.key===key):null;if(next==='connection'&&target&&target.capability==='connect'&&target.connection?.flow!=='in-applet'&&!connectionLive(state.connections.find(c=>c.provider===target.provider))){screen='closed';render();void run(()=>connect(target.provider));return;}if(next==='app'&&target&&(target.connection?.flow==='in-applet'||['web','scene','launcher'].includes(target.fullView?.kind))){screen='closed';render();view.openApplet?.(target.id);return;}view.revealGuide?.();screen=next;moduleKey=key;region=WORLD_PRESETS.some(p=>p.id===id)?id:'home';notice.textContent='';render(true);}
+ function show(next,id=region,key=moduleKey){if(next==='closed')view.setGuide(null,{forget:true});if(['app','connection','key'].includes(next)&&!checkSupport(WORLD_APPS.find(a=>a.key===key)?.provider||key))return;const target=['app','connection'].includes(next)?WORLD_APPS.find(a=>a.key===key):null;if(next==='connection'&&target&&target.capability==='connect'&&target.connection?.flow!=='in-applet'&&!connectionLive(state.connections.find(c=>c.provider===target.provider))){screen='closed';if(WORLD_PRESETS.some(p=>p.id===id))region=id;render();void run(()=>connect(target.provider));return;}if(next==='app'&&target&&(target.connection?.flow==='in-applet'||['web','scene','launcher'].includes(target.fullView?.kind))){screen='closed';render();view.openApplet?.(target.id);return;}view.revealGuide?.();screen=next;moduleKey=key;region=WORLD_PRESETS.some(p=>p.id===id)?id:'home';notice.textContent='';render(true);}
  function markOnboarding(value){const next=String(value);if(root.dataset.onboarding===next)return;root.dataset.onboarding=next;root.dispatchEvent(new Event('worldlet:recommendations'));}
  async function explore(){if(!state.onboarding?.completed)await call('onboarding',{operation:'complete'});screen='closed';markOnboarding(false);render();view.showOverview();}
  // A source that connects only with a pasted token (TOKEN_PROVIDERS) gets one password field, plus a field for each
@@ -94,7 +95,16 @@ export function mountWorldOnboarding({root,call,view,state:initial,toggleSample,
    window.addEventListener(GOOGLE_SIGN_IN_EVENT,onStage);stopStages=()=>window.removeEventListener(GOOGLE_SIGN_IN_EVENT,onStage);
    guide(googleSignInStart(state));
   }
-  else view.setGuide({text:connecting+' '+(local?'Allow access when macOS asks.':token?'Checking the token with one read.':'Finish the sign-in, then come back here.'),actions:local||token?[]:[cancel],takeover:true});
+  else{
+   view.setGuide({text:connecting+' '+(local?'Allow access when macOS asks.':token?'Checking the token with one read.':'Finish the sign-in, then come back here.'),actions:local||token?[]:[cancel],takeover:true});
+   // A service that gives a code to type on its own page (GitHub): the code, large, and one button that copies it and
+   // opens the page (ui/companion/sign-in-code.ts).
+   if(!local&&!token)stopStages=listenForSignInCode(provider,code=>{
+    const title=providerTitle(provider)||provider,open=button('Copy and open '+title,()=>{});
+    open.onclick=()=>void copyAndOpen(call,code).then(text=>{open.textContent='Copied';view.setGuide({text:'**Your '+title+' code: '+code.code+'** '+text,actions:[open,cancel],takeover:true});},()=>{});
+    view.setGuide({text:'**Your '+title+' code: '+code.code+'** Copy it, paste it on '+title+'\'s page and choose Authorize. Then come back here.',actions:[open,cancel],takeover:true});
+   });
+  }
   try{const result=await call('connect',{provider,region,...(token?{token}:{}),...(token&&settings?{settings}:{})}).finally(stopStages);state=await call('snapshot');if(result.connected){screen='closed';
     if(googlePair){view.revealGuide?.();view.setGuide({text:'**Gmail and Calendar are connected.**'+(!hostFeatures(state).backgroundSourceChecks?' Open Mail or Calendar to read their originals. With private context enabled, Fox can read them and save findings when you ask. Google background checks are not available with this setup yet. Disconnecting either app disconnects both.':''),actions:!hostFeatures(state).backgroundSourceChecks?[button('Open Mail',()=>{show('closed');view.openApplet?.('app-gmail');}),button('Open Calendar',()=>{show('closed');view.openApplet?.('app-google-calendar');}),button('Done',()=>show('closed'))]:[],takeover:true});return {connected:true};}
     if(provider==='google-drive'){view.setGuide({text:'**Google Drive is connected.** With private context enabled, ask Fox to list recent files. The Drive Thing reads recent files and Google Docs text. Other formats remain in Web. Disconnecting Google signs out Gmail, Calendar and Drive in this profile.',actions:[button('Done',()=>show('closed'))],takeover:true});return result;}

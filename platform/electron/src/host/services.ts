@@ -25,7 +25,9 @@ export interface AgentSourceConnections {
  cancel():void;
  /** `onStage` is Google sign-in progress ('browser' only once consent was opened, with its validated address, then 'preparing'/'verifying').
   * `settings`: what a Service connected with a pasted key also needs (PostHog's address and project), checked by its owner. */
- connect(options:{provider:string,target:string,endpoint:string,token:string,settings?:Record<string,string>,home:string,mock?:boolean,onStage:(stage:string,url?:string)=>void,onConnected:(connection:AgentSourceConnection)=>void}):Promise<void>;
+ connect(options:{provider:string,target:string,endpoint:string,token:string,settings?:Record<string,string>,home:string,mock?:boolean,onStage:(stage:string,url?:string)=>void,
+  /** A code the person types on the service's own page (GitHub's device flow), shown on the World page (SIGN_IN_CODE_EVENT). */
+  onCode?:(code:{provider:string;code:string;url:string})=>void,onConnected:(connection:AgentSourceConnection)=>void}):Promise<void>;
  disconnect(connection:Row,home:string):Promise<string[]>;
  clientReady(provider:string,home:string):Promise<boolean>;
  configureClient(provider:string,file:string,home:string):Promise<void>;

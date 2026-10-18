@@ -96,10 +96,16 @@ export class McpSource {
  }
  /** Connects through Worldlet (host.py `mcp` configure): the official endpoint, a token or OAuth, then the test. A
   * token is tested before it is kept (McpAccounts.connect `verify`), so one the server refuses replaces nothing. */
- async connect(provider:string,url:string,token:string,cancelled:()=>boolean,opened:(url:string)=>void):Promise<Row> {
+ async connect(provider:string,url:string,token:string,cancelled:()=>boolean,opened:(url:string)=>void,code?:(code:{code:string;url:string})=>void):Promise<Row> {
   const endpoint=url||MCP_ENDPOINTS[provider]||'';
   mcpConfiguration(provider,endpoint);
   let tested:Row|null=null;
+  // GitHub offers no sign-in Worldlet can register for: it signs in with the official Worldlet GitHub App's device code
+  // (core/accounts/github-device.ts), checked with the server's tools before it is kept.
+  if(provider==='github'&&!token.trim()&&endpoint===MCP_ENDPOINTS.github){
+   await this.accounts.connectDevice(provider,endpoint,shown=>code?.(shown),cancelled,async connection=>{tested=await this.test(provider,connection);});
+   return tested??await this.test(provider);
+  }
   await this.accounts.connect(provider,endpoint,token,async address=>{
    try{await this.openExternal(address);}catch{throw new WorldletError('Could not open your browser. Try again.');}
    opened(address);
@@ -193,7 +199,7 @@ export class McpSourceConnections implements AgentSourceConnections {
  async connect(options:Parameters<AgentSourceConnections['connect']>[0]){
   if(!MCP_PROVIDERS.includes(options.provider))return this.other().connect(options);
   this.cancelled=false;
-  const result=await this.source.connect(options.provider,options.endpoint,options.token,()=>this.cancelled,url=>options.onStage('browser',url));
+  const result=await this.source.connect(options.provider,options.endpoint,options.token,()=>this.cancelled,url=>options.onStage('browser',url),code=>options.onCode?.({provider:options.provider,...code}));
   if(this.cancelled)throw new WorldletError('Sign-in was cancelled.');
   if(result?.ok!==true)throw new WorldletError('Authorization did not complete.');
   options.onConnected({provider:options.provider,target:options.target||TITLES[options.provider]||options.provider,transport:this.transport(),connector:'mcp'});

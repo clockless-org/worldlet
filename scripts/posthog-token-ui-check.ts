@@ -33,7 +33,7 @@ await withBrowser(async browser=>{
  // The Work step: the same tiles as Settings › Connectors, plain words, nothing to type outside Advanced.
  const tiles=page.locator('[data-connector]');
  await tiles.first().waitFor();
- assert.deepEqual(await tiles.evaluateAll(nodes=>nodes.map(node=>(node as HTMLElement).dataset.connector)),['notion','linear','todoist','supabase','posthog','cloudflare','search-console'],'sign-in services; GitHub, with a key, only under Advanced');
+ assert.deepEqual(await tiles.evaluateAll(nodes=>nodes.map(node=>(node as HTMLElement).dataset.connector)),['notion','linear','todoist','supabase','github','posthog','cloudflare','search-console'],'sign-in services, GitHub with its code');
  assert.equal(await page.locator('input:visible').count(),0,'nothing to type');
  const plain=await page.evaluate(()=>{
   const out:string[]=[];
