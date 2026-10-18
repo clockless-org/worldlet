@@ -15,6 +15,7 @@
  * places in the World and what was allowed, never tokens, endpoints or MCP. */
 import {agentButton as button,agentEl as el} from './agent-change.ts';
 import {showRemoteAccess} from './remote-access.ts';
+import {showWorldAddress} from './world-address.ts';
 type Scope={repo:string;writes:string[];labelPrefix?:string};
 type Grant={id:string;targets:string[];access:'read'|'write';duration:'standing'|'once';grantedAt:string;expiresAt?:string;revokedAt?:string;github?:Scope};
 type Audit={at:string;target:string;action:string;decision:'allowed'|'denied'|'asked';reason?:string};
@@ -110,7 +111,7 @@ export function auditLine(entry:Audit):string {
 
 export async function showAgentAccess(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){
  // Remote access first: the connectors it lets in are listed below like any other Agent.
- const remote=el('div');target.append(remote);
+ const remote=el('div'),address=el('div');target.append(remote,address);
  const box=el('div','companion-settings-approvals companion-settings-access'),said=el('p','companion-settings-status');said.setAttribute('role','status');
  // A daemon or scheduled job on this computer that reaches the World as an Agent of its own.
  const adder=el('div','companion-settings-access-add'),name=document.createElement('input');
@@ -264,5 +265,5 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
    rows.append(row);
   }
  }
- await Promise.all([draw(),showRemoteAccess(remote,call,current)]);
+ await Promise.all([draw(),showRemoteAccess(remote,call,current),showWorldAddress(address,call,current)]);
 }

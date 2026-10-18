@@ -82,6 +82,17 @@ try{
   if(b.action==='agentAccess'&&b.operation==='setWake'){if(!Array.isArray(b.command))throw new Error('A wake command is a list of words: the program, then each of its arguments.');
    if(b.command.length&&!b.command[0].startsWith('/'))throw new Error('A wake command starts with the full path of a program, like /usr/local/bin/wake-agent.');
    w.access=w.access.map(a=>a.id===b.id?{...a,wake:[...b.command],audit:[{at:'2026-10-15T08:30:00.000Z',agentId:a.id,target:'asks',action:b.command.length?'set-wake':'clear-wake',decision:'allowed'},...a.audit]}:a);return {ok:true};}
+  // Your World's address (core/agent/WORLD-ADDRESS.md): the page sends a name, a share choice or an ID, nothing else.
+  if(b.action==='worldAddress'){
+   const a=w.address??={name:null,reachable:false,remote:true,devices:[],visitors:[],shares:[]};
+   const out=()=>({...a,...a.name?{address:'https://'+a.name+'.worldlet.ai'}:{},shares:a.shares.map(s=>({...s,...a.name?{link:'https://'+a.name+'.worldlet.ai/s/'+s.id}:{}}))});
+   if(b.operation==='check')return {name:String(b.name).trim().toLowerCase(),valid:/^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/.test(String(b.name).trim().toLowerCase()),available:String(b.name).trim()!=='taken'};
+   if(b.operation==='claim'){a.name=String(b.name).trim().toLowerCase();a.reachable=true;a.devices=[{id:'pk1',name:'Chrome on Mac',addedAt:'2026-10-18T12:00:00.000Z'}];a.visitors=[{id:'v1',name:'Sam',sees:['Board'],seenAt:'2026-10-18T13:00:00.000Z'}];return out();}
+   if(b.operation==='share'){a.shares.push({id:'share'+a.shares.length+'AAAAAAAAAAAAAAA',title:'Board',open:b.open===true,people:0});return out();}
+   if(b.operation==='unshare'){a.shares=a.shares.filter(s=>s.id!==b.id);return out();}
+   if(b.operation==='remove'){a.devices=a.devices.filter(d=>d.id!==b.id);a.visitors=a.visitors.filter(v=>v.id!==b.id);return out();}
+   return out();
+  }
   if(b.action==='agentAccess')return {orders:w.orders??{},agents:w.access};
   if(b.action==='harnessApprovalRules'&&b.operation==='revoke'){w.rules=w.rules.filter(r=>r.id!==b.id);return {ok:true};}
   if(b.action==='harnessApprovalRules')return {harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,revoke:'restart',note:'Hermes Agent reads these when it starts, so Worldlet restarts its own conversation with it.',rules:w.rules},
@@ -417,6 +428,29 @@ try{
  await accessPart.locator('[data-access-agent=nightly-build]').getByText('For a script. Its key is in /Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='addScript')),
   [{action:'agentAccess',operation:'addScript',name:''},{action:'agentAccess',operation:'addScript',name:'Nightly build'}],'only the name');
+ // Your World's address (core/agent/WORLD-ADDRESS.md): a name, the browsers allowed, the board shared and the people
+ // who see it, each with its own way to end it; only names, share choices and IDs go to the host.
+ const addressPart=accessPart.locator('[data-world-address]');
+ await addressPart.getByText(/^Give your World its own web address, like alex\.worldlet\.ai/).waitFor();
+ await addressPart.getByRole('textbox',{name:'Name for your World\'s address'}).fill('taken');
+ await addressPart.getByRole('button',{name:'Choose',exact:true}).click();
+ await accessPart.getByText('taken.worldlet.ai is taken. Try another name.',{exact:true}).waitFor();
+ await addressPart.getByRole('textbox',{name:'Name for your World\'s address'}).fill('Alex');
+ await addressPart.getByText('Your address: https://alex.worldlet.ai',{exact:true}).waitFor();
+ await addressPart.getByRole('button',{name:'Choose',exact:true}).click();
+ await addressPart.locator('[data-world-address-link]').getByText('https://alex.worldlet.ai',{exact:true}).waitFor();
+ await addressPart.locator('[data-world-address-browsers]').getByText(/^Chrome on Mac · added /).waitFor();
+ await addressPart.getByRole('button',{name:'Share board with anyone who has the link',exact:true}).click();
+ await accessPart.getByText('Anyone with the link can now see your board, read only. Stop sharing whenever you like.',{exact:true}).waitFor();
+ await addressPart.locator('[data-world-address-shares]').getByText('Board · anyone with the link',{exact:true}).waitFor();
+ await addressPart.locator('[data-world-address-people]').getByText(/^Sam · sees Board · last looked /).waitFor();
+ await addressPart.locator('[data-world-address-people]').getByRole('button',{name:'Remove',exact:true}).click();
+ await accessPart.getByText('Sam can no longer see anything here.',{exact:true}).waitFor();
+ await addressPart.locator('[data-world-address-browsers]').getByRole('button',{name:'Sign out',exact:true}).click();
+ await accessPart.getByText(/^Chrome on Mac is signed out\./).waitFor();
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='worldAddress'&&c.operation!=='status')),
+  [{action:'worldAddress',operation:'check',name:'taken'},{action:'worldAddress',operation:'check',name:'Alex'},{action:'worldAddress',operation:'claim',name:'Alex'},
+   {action:'worldAddress',operation:'share',open:true},{action:'worldAddress',operation:'remove',id:'v1'},{action:'worldAddress',operation:'remove',id:'pk1'}],'only names, choices and IDs');
  // "Give new work to" and each Agent's wake command (core/agent/GRANTS.md#orders-and-waking-an-agent): the page sends
  // the Agent, and the command as a list of words, one per line as typed; the host's refusal shows in plain words.
  const target=accessPart.getByRole('combobox',{name:'Give new work to',exact:true});

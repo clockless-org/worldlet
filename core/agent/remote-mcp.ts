@@ -59,20 +59,22 @@ export function wellKnownAddress(base:string,kind:'oauth-protected-resource'|'oa
 }
 
 // What the front sends and takes back (its side is worker/mcp-front.ts in the operations repository).
-export type RemoteMcpRequest={id:string;method:string;base:string;path:string;query:string;headers:Record<string,string>;body:string};
+export type RemoteMcpRequest={id:string;method:string;base:string;path:string;query:string;headers:Record<string,string>;body:string;
+ /** `address`: a request from the page at this World's own address (world-address.ts), not from an MCP client. */
+ kind?:'address'};
 export type RemoteMcpResponse={status:number;headers:Record<string,string>;body:string};
 /** A request frame from the front, or null. */
 export function readRemoteMcpRequest(data:unknown):RemoteMcpRequest|null {
  if(typeof data!=='string'||data.length>REMOTE_MCP_LIMITS.body*2)return null;
  let v:any;try{v=JSON.parse(data);}catch{return null;}
  if(v?.t!=='req'||typeof v.id!=='string'||!v.id||v.id.length>100||typeof v.method!=='string'||!/^[A-Z]{3,7}$/.test(v.method))return null;
- if(typeof v.base!=='string'||v.base.length>300||!/^(https:\/\/[a-z0-9.-]+(:\d+)?|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?)\/[A-Za-z0-9/_-]*$/.test(v.base))return null;
+ if(typeof v.base!=='string'||v.base.length>300||!/^(https:\/\/[a-z0-9.-]+(:\d+)?|http:\/\/(localhost|127\.0\.0\.1|[a-z0-9-]+\.localhost)(:\d+)?)(\/[A-Za-z0-9/_-]*)?$/.test(v.base))return null;
  if(typeof v.path!=='string'||!v.path.startsWith('/')||v.path.length>500)return null;
  const query=typeof v.query==='string'&&v.query.length<=8000?v.query:'',body=typeof v.body==='string'?v.body:'';
  if(body.length>REMOTE_MCP_LIMITS.body)return null;
  const headers:Record<string,string>={};
  for(const name of FORWARDED_HEADERS){const value=v.headers?.[name];if(typeof value==='string'&&value.length<=8000)headers[name]=value;}
- return {id:v.id,method:v.method,base:v.base.replace(/\/+$/,''),path:v.path,query,headers,body};
+ return {id:v.id,method:v.method,base:v.base.replace(/\/+$/,''),path:v.path,query,headers,body,...v.kind==='address'?{kind:'address' as const}:{}};
 }
 export const remoteMcpResponseFrame=(id:string,response:RemoteMcpResponse)=>JSON.stringify({t:'res',id,...response});
 

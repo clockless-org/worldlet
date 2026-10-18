@@ -1,6 +1,6 @@
 import {DEFAULT_PAIR_RELAY} from '../../../../../core/phone/index.ts';
-import {MCP_FRONT_ORIGIN,REMOTE_MCP_LIMITS,agentRevoked,createRemoteMcpServer,emptyRemoteMcpState,newRemoteMcpToken,readRemoteMcpRequest,readRemoteMcpState,remoteConsentItem,
- remoteMcpAddress,remoteMcpAgent,remoteMcpHostEntry,remoteMcpResponseFrame,remoteMcpRoom,type RemoteMcpConsent,type RemoteMcpResponse,type RemoteMcpServer,type RemoteMcpState} from '../../../../../core/agent/index.ts';
+import {isWorldAddressRequest,MCP_FRONT_ORIGIN,REMOTE_MCP_LIMITS,agentRevoked,createRemoteMcpServer,emptyRemoteMcpState,newRemoteMcpToken,readRemoteMcpRequest,readRemoteMcpState,remoteConsentItem,
+ remoteMcpAddress,remoteMcpAgent,remoteMcpHostEntry,remoteMcpResponseFrame,remoteMcpRoom,type RemoteMcpConsent,type RemoteMcpRequest,type RemoteMcpResponse,type RemoteMcpServer,type RemoteMcpState} from '../../../../../core/agent/index.ts';
 import type {AgentAccess,VaultService} from '../../host/services.ts';
 import {toolText,worldToolList,type StandingWorldTools} from './world-tool-bridge.ts';
 import type {Row} from './types.ts';
@@ -33,6 +33,11 @@ export interface RemoteMcpHost {
  token(name:unknown,id?:unknown):Promise<Row>;
  /** The person's Allow or Deny on a consent card. `reads`: Allow also lets it read the connected Services. */
  decide(id:unknown,allow:boolean,reads?:boolean):Row;
+ /** The host token while remote access has one: the World's address (world-address.ts) is claimed with it. */
+ hostToken():string|null;
+ /** Requests from the page at this World's own address (`kind: 'address'`), answered by `handler`; and `renewed`,
+  * called with the old and new host token when New address replaces it. */
+ serveAddress(handler:{handle(request:RemoteMcpRequest):Promise<RemoteMcpResponse>;renewed(previous:string,next:string):Promise<void>}):void;
  close():void;
 }
 const PING_MS=30_000,MAX_BACKOFF_MS=60_000;
@@ -55,7 +60,7 @@ export function createRemoteMcpHost({vault,access,tools,ledger,changed,services=
   try{db.saveRemoteConsent(consent as unknown as Row,remoteConsentItem(consent,named) as unknown as Row,origin);changed();return true;}catch{return false;}
  }
  // A consent still waiting from an earlier run can no longer be answered: its page and its code are gone.
- try{const db=ledger();for(const row of db?.remoteConsents()??[])if(row.status==='pending')show({...row,status:'expired'} as unknown as RemoteMcpConsent);}catch{}
+ try{const db=ledger();for(const row of db?.remoteConsents()??[])if(row.status==='pending'&&!isWorldAddressRequest(row.id))show({...row,status:'expired'} as unknown as RemoteMcpConsent);}catch{}
  let answering:'user'|'agent'='agent';
  // Consents the person allowed with the connected Services: their Agent gets each one's read Grant once it is made.
  const withReads=new Set<string>();
@@ -81,6 +86,7 @@ export function createRemoteMcpHost({vault,access,tools,ledger,changed,services=
  });
  access.onRevoke(agentId=>server.forget(agentId));
 
+ let address:{handle(request:RemoteMcpRequest):Promise<RemoteMcpResponse>;renewed(previous:string,next:string):Promise<void>}|null=null;
  let socket:Socket|null=null,connected=false,timer:ReturnType<typeof setTimeout>|null=null,ping:ReturnType<typeof setInterval>|null=null,backoff=1000,closed=false;
  const send=(ws:Socket,id:string,response:RemoteMcpResponse)=>{
   const fitted=response.body.length>REMOTE_MCP_LIMITS.body?{status:502,headers:{'content-type':'application/json'},body:JSON.stringify({error:'The answer was too large to send.'})}:response;
@@ -99,7 +105,9 @@ export function createRemoteMcpHost({vault,access,tools,ledger,changed,services=
   };
   ws.onmessage=event=>{
    const request=readRemoteMcpRequest(event.data);if(!request)return;
-   void server.handle(request).then(response=>send(ws,request.id,response));
+   // The page at the World's own address goes only to its own server; an MCP client's only to this one.
+   const answer=request.kind==='address'?address?.handle(request)??Promise.resolve({status:404,headers:{'content-type':'application/json'},body:'{"error":"There is no World at this address."}'}):server.handle(request);
+   void answer.then(response=>send(ws,request.id,response));
   };
   ws.onclose=event=>{
    if(socket!==ws)return;
@@ -149,10 +157,16 @@ export function createRemoteMcpHost({vault,access,tools,ledger,changed,services=
   async renew(){
    const saved=read();
    server.reset();
-   write({enabled:saved?.enabled??false,token:newRemoteMcpToken(),state:emptyRemoteMcpState()});
-   hangUp();backoff=1000;await connect().catch(()=>schedule());changed();
+   const token=newRemoteMcpToken();
+   write({enabled:saved?.enabled??false,token,state:emptyRemoteMcpState()});
+   hangUp();backoff=1000;await connect().catch(()=>schedule());
+   // The World's address moves to the new token, so it keeps its name.
+   if(saved&&address)await address.renewed(saved.token,token).catch(()=>{});
+   changed();
    return status();
   },
+  hostToken(){return read()?.token??null;},
+  serveAddress(handler){address=handler;},
   async token(name,id){
    const saved=read();
    if(!saved?.enabled)return {ok:false,error:'Turn on remote access first.'};

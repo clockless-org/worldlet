@@ -1255,13 +1255,16 @@ export function mountNotionWorld(data: World, native: any) {
       const result=await native.remoteMcp(operation,consent.id);
       if(!result?.ok)throw Error(result?.error||'Could not do that.');
       await settleAttention(page,result.status==='allowed'?'done':'dismissed',null,{advance:true,hosted:true});
+      // A browser or a person at the World's own address (core/agent/WORLD-ADDRESS.md).
+      if(consent.asks){notify(result.status!=='allowed'?'Declined. Nothing was shared.':consent.asks==='owner'?`${consent.client} can now open your World. Sign it out in Settings › Agent › Access.`:`${consent.client} can now see your ${consent.share||'board'}. Remove them in Settings › Agent › Access.`);return;}
       notify(result.status!=='allowed'?'Declined. Nothing was connected.'
        :operation==='allow'&&named?`${consent.client} can now reach your World and read your ${named}. Change what it may do in Settings › Agent › Access.`
        :`${consent.client} can now reach your World. Choose what it may do in Settings › Agent › Access.`);
      }catch(e){notify(e.message);}finally{busy=false;}
     };
-    attentionPreview.setActions([{key:'allow',label:'Allow',primary:true,run:act('allow')},...named?[{key:'allow-basic',label:'Allow without them',run:act('allow-basic')}]:[],{key:'deny',label:'Deny',run:act('deny')}]);
-    attentionPreview.setReview({text:`${consent.client} · returns to ${consent.returnsTo}${named?` · Allow also lets it read your ${named}`:''}`,quote:`Code ${consent.code}`,choices:[]});
+    attentionPreview.setActions([{key:'allow',label:'Allow',primary:true,run:act('allow')},...named&&!consent.asks?[{key:'allow-basic',label:'Allow without them',run:act('allow-basic')}]:[],{key:'deny',label:'Deny',run:act('deny')}]);
+    attentionPreview.setReview({text:consent.asks==='owner'?`${consent.client} · at ${consent.returnsTo} · opens your whole World as you`:consent.asks==='visitor'?`${consent.client} · at ${consent.returnsTo} · may only read your ${consent.share||'board'}`
+     :`${consent.client} · returns to ${consent.returnsTo}${named?` · Allow also lets it read your ${named}`:''}`,quote:`Code ${consent.code}`,choices:[]});
     showDraftLine(page);voice?.setAttentionActions?.([]);
     return;
    }

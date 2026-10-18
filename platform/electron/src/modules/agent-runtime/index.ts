@@ -5,7 +5,7 @@ import os from 'node:os';
 import {app,shell} from 'electron';
 import {openInBrowser} from '../../system-browser.ts';
 import {WorldletError} from '../../files.ts';
-import {AGENT,ANALYTICS,ONGOING,SOURCES,VAULT,type AgentAccess,type AgentService,type AnalyticsService,type OngoingService,type SourcesService,type VaultService} from '../../host/services.ts';
+import {AGENT,ANALYTICS,ONGOING,PHONE,SOURCES,VAULT,type AgentAccess,type AgentService,type AnalyticsService,type OngoingService,type PhoneService,type SourcesService,type VaultService} from '../../host/services.ts';
 import type {Host} from '../../host/types.ts';
 import {installationRoot,type Profile} from '../../profile.ts';
 import {ExecutionJournal} from './journal.ts';
@@ -20,6 +20,7 @@ import {createAgentReports,type AgentReports} from './agent-reports.ts';
 import {createScriptAgents,mcpHome,type ScriptAgents} from './script-agents.ts';
 import {createGithubDrafts,type GithubDrafts} from './github-drafts.ts';
 import {createRemoteMcpHost,type RemoteMcpHost} from './remote-mcp.ts';
+import {createWorldAddressHost,type WorldAddressHost} from './world-address.ts';
 import {createAgentArtifacts,type AgentArtifacts} from './agent-artifacts.ts';
 import {createServiceDrafts,type ServiceDrafts} from './service-drafts.ts';
 import type {AskDrafts} from './agent-asks.ts';
@@ -324,6 +325,7 @@ let worldBoard:WorldBoard|null=null;
 let githubDrafts:GithubDrafts|null=null;
 /** Remote MCP (remote-mcp.ts), made with agentAccess. */
 let remoteMcp:RemoteMcpHost|null=null;
+let worldAddress:WorldAddressHost|null=null;
 /** Agent reports (agent-reports.ts), made with agentAccess. */
 let agentReports:AgentReports|null=null;
 /** Agents for scripts (script-agents.ts), made with agentAccess. */
@@ -614,10 +616,37 @@ export function installAgentRuntime(host:Host){
    if(request.operation==='disable')return await remote.disable();
    if(request.operation==='renew')return await remote.renew();
    // Allow also lets it read the connected Services the card names; "Allow without them" gives only the default Grants.
+   // A request to be let in at the World's own address goes on the same card (world-address.ts).
+   if((request.operation==='allow'||request.operation==='allow-basic'||request.operation==='deny')&&worldAddress?.owns(request.id))return worldAddress.decide(request.id,request.operation!=='deny');
    if(request.operation==='allow'||request.operation==='allow-basic'||request.operation==='deny')return remote.decide(request.id,request.operation!=='deny',request.operation==='allow');
    if(request.operation==='token')return await remote.token(request.name,request.id);
   }catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
   throw new WorldletError('Unknown remote access operation.');
+ }});
+ // This World's own address (core/agent/WORLD-ADDRESS.md): its name, claimed with remote access's host token, and the
+ // page there answered over remote access's connection. Signed-in owner browsers are handed the World's link for
+ // another device; a shared board is read as the person sees it.
+ const phone=()=>host.optional<PhoneService>(PHONE);
+ worldAddress=createWorldAddressHost({vault,remote:remoteMcp,relay:process.env.WORLDLET_PAIR_RELAY||undefined,changed:()=>host.store.worldChanged(),
+  ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()?host.store.ledger():null;}catch{return null;}},
+  worldLink:async()=>{const status=await phone()?.worldRoomLink?.();return typeof status?.link==='string'?status.link:null;},
+  renewWorldLink:async()=>{await phone()?.worldRoomRenew?.();},
+  board:async tab=>worldBoard?worldBoard.view({operation:'read',...tab?{tab}:{}}):null});
+ /** Your World's address (Settings › Agents): `status`, `check` and `claim` a `name`, `release`, `share` the board
+  * (`open`: anyone with the link), `unshare` and `remove` (a browser or a person) by `id`. Not in ROOM_ALLOWED: only
+  * this computer's pages change who may reach the World. */
+ host.register({worldAddress:async request=>{
+  const address=worldAddress!;
+  try{
+   if(request.operation==='status')return await address.status();
+   if(request.operation==='check')return await address.check(request.name);
+   if(request.operation==='claim')return await address.claim(request.name);
+   if(request.operation==='release')return await address.release();
+   if(request.operation==='share')return await address.share(request.open);
+   if(request.operation==='unshare')return await address.unshare(request.id);
+   if(request.operation==='remove')return await address.remove(request.id);
+  }catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
+  throw new WorldletError('Unknown address operation.');
  }});
  // Orders (core/agent/GRANTS.md#orders-and-waking-an-agent): which Agent new work goes to, and the program the person
  // set to wake each Agent, run here when work is posted for it.
