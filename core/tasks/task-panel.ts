@@ -9,7 +9,7 @@
 // own regular checks (Mail, Notes, Notion) and Worldlet's housekeeping are not the person's tasks and never show here;
 // what they find comes up as Artifacts. Names and schedules only, never prompts or source contents.
 import type {HarnessJob} from '../../contracts/harness-services.ts';
-import {worldLogApplet} from '../activity/index.ts';
+import {worldLogApplet} from '../../context/activity/index.ts';
 import {getApp} from '../applets/index.ts';
 import {nextCronRun} from './next-run.ts';
 import {DAILY_ROUTINE_NAMES} from '../artifacts/index.ts';
