@@ -46,7 +46,9 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  if(!disposable||path.resolve(disposable)!==path.resolve(store.root))throw Error('needs a disposable library: start with WORLDLET_PROFILE_ROOT (npm run test:onboarding)');
  if(store.state.onboarding?.completed===true||store.state.connections.length||store.sampleEnabled())throw Error('the library is not fresh: '+store.root);
  const agentId=host.optional<AgentService>(AGENT)?.id;
- if(agentId!=='local-codex')throw Error(`Fox's Agent is ${agentId??'missing'}, not the local Codex CLI the launcher chose: install the Codex CLI where Worldlet looks for it`);
+ // The launcher's choice (scripts/test-agent.ts): Codex, or Claude Code with WORLDLET_TEST_AGENT=claude-code.
+ const expectedAgent=process.env.WORLDLET_TEST_AGENT==='claude-code'?'local-claude-code':'local-codex';
+ if(agentId!==expectedAgent)throw Error(`Fox's Agent is ${agentId??'missing'}, not ${expectedAgent}, which the launcher chose: install it where Worldlet looks for it`);
  // A person is going through first run: synthetic input never resets the system idle clock, and an
  // unattended release host's own idle time must not hold Attention back.
  host.provide<UserActivityService>(USER_ACTIVITY,{idleSeconds:()=>0});
@@ -389,8 +391,19 @@ export function toolTrail(db:WorldLedger,since:number,limit=24){
 }
 function noRecordedFailures(host:CheckContext['host'],checkpoint:string){
  const found=recordedFailures(host.store.root,host.store.ledger(),host.diagnostics.recent?.()??[]);
- if(found.failures.length)throw Error(failureReport(checkpoint,found.failures));
+ if(found.failures.length)throw Error(failureReport(checkpoint,found.failures)+modelsUsed(host.store.ledger()));
  return found.repaired;
+}
+/** The models the Agent's turns named, from the runs' journals (model.requested), with how many turns each: a failure
+ * caused by the model the release host's Agent picked shows which one it was. */
+export function modelsUsed(db:WorldLedger):string {
+ const counts=new Map<string,number>();
+ for(const row of db.history({kind:'model.requested',limit:1000})){
+  const payload=db.queryWorldHistory({seq:row.seq}).events?.[0]?.payload;
+  const model=typeof payload?.payload?.model==='string'?payload.payload.model:typeof payload?.model==='string'?payload.model:null;
+  if(model)counts.set(model,(counts.get(model)??0)+1);
+ }
+ return counts.size?'\n  Models the Agent turns used: '+[...counts].sort((a,b)=>b[1]-a[1]).map(([model,count])=>`${model} ×${count}`).join(', '):'';
 }
 /** The report's first line is all a release host keeps of a failed gate (its Issue shows that line, cut at 240
  * characters; Alpha 4036 kept only "Background work failed (checked at world arrival):", #49), so it names how many
@@ -439,6 +452,12 @@ async function detectorCheck(){
   diagnostics.record(Error('Kept page released under memory pressure (appFootprint).'),'keptPageRelease');
   // An operation Core keeps no name for, whose text only the host's memory has (diagnostics.recent).
   diagnostics.record(Error('Detector history unreadable.'),'historySync');
+  // Each turn's model goes into its run's journal (agent-runtime/local-harness.ts); the report counts them.
+  for(const model of ['gpt-6-sol','gpt-6-sol','own default'])await ExecutionJournal.run({action:'chat',mode:'chat'},home('private'),undefined,async event=>{
+   await event({type:'trace',kind:'model.requested',payload:{harness:'codex',model}});
+   return {message:'Done.'};
+  });
+  if(modelsUsed(db)!=='\n  Models the Agent turns used: gpt-6-sol ×2, own default ×1')throw Error(`The failure report does not name the models used: ${JSON.stringify(modelsUsed(db))}`);
   const found=recordedFailures(root,db,diagnostics.recent());
   const report=found.failures.join('\n'),repaired=found.repaired.join('\n');
   if(report.includes('keptPageRelease'))throw Error(`The failure detector reported a kept-page release under memory pressure:\n${report}`);

@@ -515,6 +515,9 @@ export class LocalHarnessRuntime implements AgentRuntime {
   const {child,bridge}=harness;
   const invocation=localHarnessInvocation(id,turn,bridge?.server??null,{cwd:home,agent,model,resume});
   this.child=child;this.onActivity(this,true);
+  // Which model the turn named (or the Agent's own default) goes into the run's journal, so a failed check can say
+  // which model did the work (Mac Alpha 4512–4514, #668: the release host's model could not be read from its report).
+  try{await onEvent(agentEvent({type:'trace',kind:'model.requested',payload:{harness:id,model:model??'own default'}}));}catch{}
   // A conversation over stdin (Hermes Agent's ACP) keeps it open for the replies the stream asks for.
   if(invocation.acp)child.stdin!.write(invocation.stdin??'');
   else if(invocation.stdin!==null)child.stdin!.end(invocation.stdin);else child.stdin!.end();

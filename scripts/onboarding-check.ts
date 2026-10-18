@@ -2,7 +2,7 @@
 // Electron host's development check `--check onboarding-flow` (platform/electron/src/checks).
 // Builds the host (and the interface when missing), runs it on a disposable library with this
 // computer's Codex CLI as Fox's Agent (there is no built-in Agent, owner decisions 2026-10-09; test:agent:local runs
-// Fox on it too), and propagates the check's exit code.
+// Fox on it too; WORLDLET_TEST_AGENT=claude-code runs both on Claude Code), and propagates the check's exit code.
 // A failed run keeps its library for diagnosis (logs/diagnostics.jsonl, world.sqlite).
 import {spawn,spawnSync} from 'node:child_process';
 import {cpSync,createWriteStream,existsSync,mkdirSync,mkdtempSync,readdirSync,rmSync,writeFileSync} from 'node:fs';
@@ -13,6 +13,7 @@ import {fileURLToPath} from 'node:url';
 import {workspace} from './dev-workspace.ts';
 import {cachedAgentBrowser} from './package-agent-browser.ts';
 import {checkoutUv} from './checkout-uv.ts';
+import {testAgent} from './test-agent.ts';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 // A stand-in release host on the owner's own Mac skips this Codex-backed check (owner decision 2026-10-05; scripts/release-hosts.mjs codexGateSkip).
@@ -21,9 +22,9 @@ const electron=createRequire(import.meta.url)('electron') as unknown as string;
 const TIMEOUT_MS=Number(process.env.WORLDLET_ONBOARDING_TIMEOUT_MS||25*60_000);
 const fail=(text:string):never=>{console.error('FAIL onboarding flow: '+text);process.exit(1);};
 
-// Fox answers on this computer's Codex CLI and its sign-in.
-const codexHome=process.env.CODEX_HOME||path.join(os.homedir(),'.codex');
-if(!existsSync(path.join(codexHome,'auth.json')))fail(`missing the local Codex sign-in (${path.join(codexHome,'auth.json')}); sign in with the Codex app or CLI`);
+// Fox answers on this computer's Codex CLI and its sign-in, or its Claude Code (WORLDLET_TEST_AGENT, test-agent.ts).
+const agent=testAgent();
+if(agent.missing)fail(agent.missing);
 
 // Each phase's time is printed, so a slow gate run shows where its minutes went (#41).
 const began=Date.now(),seconds=(since:number)=>`${Math.round((Date.now()-since)/1000)}s`;
@@ -39,15 +40,15 @@ console.log(`Onboarding setup (builds, browser driver): ${seconds(began)}`);
 const profile=mkdtempSync(path.join(os.tmpdir(),'worldlet-onboarding-flow-'));
 // An empty preferences file: a disposable library never imports this Mac's Worldlet settings.
 writeFileSync(path.join(profile,'preferences.json'),'{}\n',{mode:0o600});
-// Codex as Fox's Agent, as setup saves a choice (platform/electron/src/store/agent-settings.ts).
+// The Agent as Fox's Agent, as setup saves a choice (platform/electron/src/store/agent-settings.ts).
 mkdirSync(path.join(profile,'agent'),{recursive:true});
-writeFileSync(path.join(profile,'agent','local-harness.json'),JSON.stringify({version:1,id:'codex'}),{mode:0o600});
+writeFileSync(path.join(profile,'agent','local-harness.json'),JSON.stringify({version:1,id:agent.id}),{mode:0o600});
 const logs=path.join(root,'.local/electron-checks');mkdirSync(logs,{recursive:true});
 const logFile=path.join(logs,'onboarding-flow.log'),log=createWriteStream(logFile);
 // RC 录像: pictures of the run for scripts/ui-review.ts (platform/electron/src/checks/index.ts).
 const env:NodeJS.ProcessEnv={...process.env,WORLDLET_UV:uv,WORLDLET_DEV:'1',WORLDLET_REPO_ROOT:root,WORLDLET_CHECK_FRAMES:path.join(logs,'onboarding-flow-frames'),WORLDLET_PROFILE_ROOT:profile};
 for(const key of ['ELECTRON_RUN_AS_NODE','WORLDLET_DEV_MODEL','WORLDLET_AGENT_CONFIG','WORLDLET_WORKTREE_PROFILE','WORLDLET_WEB_ROOT','WORLDLET_CAPTURE'])delete env[key];
-console.log(`Onboarding flow: library ${profile}, Codex home ${codexHome}, log ${path.relative(root,logFile)}`);
+console.log(`Onboarding flow: library ${profile}, ${agent.title} (${agent.home}), log ${path.relative(root,logFile)}`);
 const started=Date.now();
 const child=spawn(electron,[path.join(root,'dist/electron'),'--check','onboarding-flow'],{cwd:root,env,stdio:['ignore','pipe','pipe']});
 for(const [stream,out] of [[child.stdout,process.stdout],[child.stderr,process.stderr]] as const)stream.on('data',data=>{out.write(data);log.write(data);});

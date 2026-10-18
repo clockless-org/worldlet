@@ -27,14 +27,16 @@ export async function localAgentFlow({host,view}:CheckContext){
  const disposable=process.env.WORLDLET_PROFILE_ROOT;
  if(!disposable||path.resolve(disposable)!==path.resolve(store.root))throw Error('needs a disposable library: start with WORLDLET_PROFILE_ROOT (npm run test:agent:local)');
  const agent=host.use<AgentService>(AGENT);
- // The launcher saved Codex as the chosen Harness; Fox has no Agent when Codex is not installed here.
+ // The launcher saved Codex (or Claude Code, WORLDLET_TEST_AGENT=claude-code; scripts/test-agent.ts) as the chosen
+ // Harness; Fox has no Agent when it is not installed here.
  // Even a SKIP ends after the World has started: quitting while the page still boots crashes Electron on Windows (0xC0000005).
- if(agent.id!=='local-codex'){
+ const claude=process.env.WORLDLET_TEST_AGENT==='claude-code',expected=claude?'local-claude-code':'local-codex',title=claude?'Claude Code':'Codex';
+ if(agent.id!==expected){
   for(let i=0;i<450&&await view.webContents.executeJavaScript("!!document.querySelector('#notionWorld')?.sceneMetrics?.renderer",true).catch(()=>false)!==true;i++)await sleep(200);
-  console.log(`SKIP local agent flow: Fox's Agent is ${agent.id}, not the local Codex CLI (Codex is not installed where Worldlet looks for it)`);return;}
+  console.log(`SKIP local agent flow: Fox's Agent is ${agent.id}, not the local ${title} CLI (${title} is not installed where Worldlet looks for it)`);return;}
  if(!store.sampleEnabled())throw Error('the practice world is not open: the launcher sets worldlet.sampleEnabled');
  const status=await agent.status(agent.home('sample'));
- if(status.ready!==true)throw Error('the local Codex Agent is not ready: '+JSON.stringify(status));
+ if(status.ready!==true)throw Error(`the local ${title} Agent is not ready: `+JSON.stringify(status));
  const fox=host.use<FoxService>(FOX);
  const started=Date.now();
  const mark=(step:string)=>console.log(`  ${((Date.now()-started)/1000).toFixed(1).padStart(5)}s  ${step}`);
@@ -80,7 +82,7 @@ export async function localAgentFlow({host,view}:CheckContext){
    if(sent!==true)throw Error('could not type to Fox');
    let turn:Turn|undefined;
    for(let i=0;i<TURN_SECONDS*5;i++){turn=turns.slice(before).find(item=>item.text===text&&item.done);if(turn)return turn;await sleep(200);}
-   throw Error((turns.slice(before).some(item=>item.text===text)?`Codex did not finish within ${TURN_SECONDS}s`:'the message never reached the local Codex Agent')+`\n  screen: ${await seen()}\n  turns seen: ${JSON.stringify(turns.map(item=>item.text.slice(0,60)))}`);
+   throw Error((turns.slice(before).some(item=>item.text===text)?`${title} did not finish within ${TURN_SECONDS}s`:`the message never reached the local ${title} Agent`)+`\n  screen: ${await seen()}\n  turns seen: ${JSON.stringify(turns.map(item=>item.text.slice(0,60)))}`);
   };
 
   const scenarios:Scenario[]=[
@@ -127,5 +129,5 @@ export async function localAgentFlow({host,view}:CheckContext){
  const after:string=agent.id;
  if(after!=='none'||readSelection(store.root))throw Error(`Reset left the local Agent chosen: Fox's Agent is ${after}`);
  mark('PASS reset forgets the local Agent chosen at setup');
- console.log(`PASS local agent flow: Fox on the local Codex CLI talked, read practice mail, opened an Applet and drafted a reply through World tools (${Math.round((Date.now()-started)/1000)}s)`);
+ console.log(`PASS local agent flow: Fox on the local ${title} CLI talked, read practice mail, opened an Applet and drafted a reply through World tools (${Math.round((Date.now()-started)/1000)}s)`);
 }
