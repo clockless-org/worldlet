@@ -1246,17 +1246,22 @@ export function mountNotionWorld(data: World, native: any) {
    const consent=page.worldItemRemoteConsent&&page.worldItemRemoteConsent.status==='pending'&&!data.sample&&native?.remoteMcp?page.worldItemRemoteConsent:null;
    if(consent){
     let busy=false;
-    const act=(operation:'allow'|'deny')=>async()=>{
+    // With Services connected, Allow also lets it read them (named on the card); Allow without them keeps them private.
+    const services=Array.isArray(consent.services)?consent.services:[];
+    const named=services.length<2?services.join(''):`${services.slice(0,-1).join(', ')} and ${services.at(-1)}`;
+    const act=(operation:'allow'|'allow-basic'|'deny')=>async()=>{
      if(busy)return;busy=true;
      try{
       const result=await native.remoteMcp(operation,consent.id);
       if(!result?.ok)throw Error(result?.error||'Could not do that.');
       await settleAttention(page,result.status==='allowed'?'done':'dismissed',null,{advance:true,hosted:true});
-      notify(result.status==='allowed'?`${consent.client} can now reach your World. Choose what it may do in Settings › Agent › Access.`:'Declined. Nothing was connected.');
+      notify(result.status!=='allowed'?'Declined. Nothing was connected.'
+       :operation==='allow'&&named?`${consent.client} can now reach your World and read your ${named}. Change what it may do in Settings › Agent › Access.`
+       :`${consent.client} can now reach your World. Choose what it may do in Settings › Agent › Access.`);
      }catch(e){notify(e.message);}finally{busy=false;}
     };
-    attentionPreview.setActions([{key:'allow',label:'Allow',primary:true,run:act('allow')},{key:'deny',label:'Deny',run:act('deny')}]);
-    attentionPreview.setReview({text:`${consent.client} · returns to ${consent.returnsTo}`,quote:`Code ${consent.code}`,choices:[]});
+    attentionPreview.setActions([{key:'allow',label:'Allow',primary:true,run:act('allow')},...named?[{key:'allow-basic',label:'Allow without them',run:act('allow-basic')}]:[],{key:'deny',label:'Deny',run:act('deny')}]);
+    attentionPreview.setReview({text:`${consent.client} · returns to ${consent.returnsTo}${named?` · Allow also lets it read your ${named}`:''}`,quote:`Code ${consent.code}`,choices:[]});
     showDraftLine(page);voice?.setAttentionActions?.([]);
     return;
    }

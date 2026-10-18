@@ -6,6 +6,7 @@ import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/agent-access.ts';
 import {openStandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
 import {REMOTE_MCP_VAULT,createRemoteMcpHost} from '../platform/electron/src/modules/agent-runtime/remote-mcp.ts';
+import {serviceGranted} from '../core/agent/grants.ts';
 import {MCP_HOST_PROTOCOL,REMOTE_MCP_LIMITS,readRemoteMcpRequest,remoteConsentItemId,remoteMcpRoom,validRedirect,wellKnownAddress} from '../core/agent/remote-mcp.ts';
 import {roomDenied} from '../contracts/web-world.ts';
 import {projectWorldItems} from '../core/items/world-items.ts';
@@ -46,7 +47,9 @@ await withTempDir('worldlet-remote-mcp-',async dir=>{
  for(const name of ['log','error','warn'] as const)console[name]=(...args:unknown[])=>{logged.push(args.map(String).join(' '));};
  const standing=await openStandingWorldTools({access,channel:async()=>({error:'not here'})});
  let changes=0;
- const remote=createRemoteMcpHost({vault,access,tools:()=>Promise.resolve(standing),ledger:()=>ledger,changed:()=>{changes+=1;},WebSocket:FakeSocket as any,now,onByDefault:true});
+ // The Services connected now, which a consent card offers it to read.
+ let connectedServices:{provider:string;title:string}[]=[];
+ const remote=createRemoteMcpHost({vault,access,tools:()=>Promise.resolve(standing),ledger:()=>ledger,changed:()=>{changes+=1;},services:()=>connectedServices,WebSocket:FakeSocket as any,now,onByDefault:true});
  const issued:string[]=[];
  try{
   // A development build, a check or another library stays off until turned on.
@@ -167,6 +170,7 @@ await withTempDir('worldlet-remote-mcp-',async dir=>{
   issued.push(tokens.access_token,tokens.refresh_token);
   say('PASS token: a wrong verifier is refused and spends the code; the right one gets a bearer and a refresh token.');
 
+
   // MCP over the front, as the Agent the connection is.
   const init=(await rpc(tokens.access_token,{jsonrpc:'2.0',id:1,method:'initialize',params:{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'claude-ai',version:'1'}}})).json();
   assert.deepEqual([init.id,init.result.protocolVersion,init.result.serverInfo.name],[1,'2025-06-18','worldlet']);
@@ -255,6 +259,32 @@ await withTempDir('worldlet-remote-mcp-',async dir=>{
   assert.equal((await rpc(refreshed.access_token,{jsonrpc:'2.0',id:8,method:'ping'})).status,401);
   assert.equal((await tokenRequest({grant_type:'refresh_token',refresh_token:refreshed.refresh_token,client_id:client.client_id})).json().error,'invalid_grant');
   say('PASS revoking the Agent ends its connection.');
+  // With Services connected, the card offers reading them in plain words: Allow gives the new Agent each one's read
+  // Grant; Allow without them gives only the default Grants.
+  connectedServices=[{provider:'github',title:'GitHub'},{provider:'posthog',title:'PostHog'}];
+  const remoteAgents=()=>new Set(access.list().filter(entry=>entry.identity.kind==='remote').map(entry=>entry.identity.id));
+  const readsOf=(id:string)=>['github','posthog'].filter(provider=>serviceGranted(id,access.grants(id),provider,new Date(now()).toISOString()));
+  async function allowWith(reads:boolean){
+   const before=remoteAgents();
+   const shown=await front('GET','/authorize',{query:authorizeQuery({client_id:client.client_id})});
+   const id=/wait\?id=([A-Za-z0-9_-]+)/.exec(shown.body)![1];
+   const card=ledger.value('items',remoteConsentItemId(id))!;
+   assert.match(String(card.summary),/Allow also lets it read your GitHub and PostHog, so it can answer with them; it never changes anything there without asking you\. Choose Allow without them to keep them private\./);
+   const projectedCard={pages:[] as any[],roots:['root']};projectWorldItems(projectedCard,[card]);
+   assert.deepEqual(projectedCard.pages[0].worldItemRemoteConsent.services,['GitHub','PostHog']);
+   assert.deepEqual(remote.decide(id,true,reads),{ok:true,status:'allowed'});
+   const r=(await front('GET','/authorize/wait',{query:'id='+id})).json();
+   const c=new URL(r.redirect).searchParams.get('code')!;
+   const t=(await tokenRequest({grant_type:'authorization_code',code:c,code_verifier:verifier,redirect_uri:redirect,client_id:client.client_id})).json();
+   issued.push(t.access_token,t.refresh_token);
+   const made=[...remoteAgents()].filter(agentId=>!before.has(agentId));
+   assert.equal(made.length,1);
+   return made[0];
+  }
+  assert.deepEqual(readsOf(await allowWith(true)),['github','posthog'],'Allow: it may read the connected Services');
+  assert.deepEqual(readsOf(await allowWith(false)),[],'Allow without them: only the default Grants');
+  connectedServices=[];
+  say('PASS consent with Services: the card names the connected Services in plain words; Allow lets the new Agent read them, Allow without them does not.');
 
   // The front going away: the host reconnects by itself; a newer host on the same address is left alone for a while.
   ws.drop();

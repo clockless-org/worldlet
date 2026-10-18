@@ -116,15 +116,22 @@ export type RemoteMcpConsentStatus='pending'|'allowed'|'denied'|'expired';
 export type RemoteMcpConsent={id:string;client:string;returnsTo:string;code:string;createdAt:number;expiresAt:number;status:RemoteMcpConsentStatus};
 export const remoteConsentItemId=(id:string)=>'remote-mcp-consent:'+id;
 const CONSENT_ITEM_STATUS:Record<RemoteMcpConsentStatus,'open'|'done'|'dismissed'>={pending:'open',allowed:'done',denied:'dismissed',expired:'dismissed'};
-/** The consent's Attention card (provider `agents`): Allow or Deny on this computer only. */
-export function remoteConsentItem(consent:RemoteMcpConsent):WorldItem {
+/** The connected Services in a sentence: "GitHub", "GitHub and PostHog", "GitHub, PostHog and Cloudflare". */
+export function remoteConsentServicesWords(services:readonly string[]):string {
+ return services.length<2?services.join(''):`${services.slice(0,-1).join(', ')} and ${services.at(-1)}`;
+}
+/** The consent's Attention card (provider `agents`): Allow or Deny on this computer only. `services`: the connected
+ * Services by name, which Allow also lets it read (Allow without them gives it only the default Grants). */
+export function remoteConsentItem(consent:RemoteMcpConsent,services:readonly string[]=[]):WorldItem {
  const at=new Date(consent.createdAt).toISOString();
  const title=`${consent.client} wants to use your World`;
- const summary=`Allow only if you just started connecting ${consent.client} and its page shows the code ${consent.code}. It returns to ${consent.returnsTo}. It connects as an Agent of its own: you choose what it may do, and can revoke it, in Settings › Agent › Access.`;
+ const named=services.filter(name=>typeof name==='string'&&name).slice(0,10);
+ const reads=named.length?` Allow also lets it read your ${remoteConsentServicesWords(named)}, so it can answer with them; it never changes anything there without asking you. Choose Allow without them to keep them private.`:'';
+ const summary=`Allow only if you just started connecting ${consent.client} and its page shows the code ${consent.code}. It returns to ${consent.returnsTo}.${reads} It connects as an Agent of its own: you choose what it may do, and can revoke it, in Settings › Agent › Access.`;
  return {id:remoteConsentItemId(consent.id),provider:AGENT_ASK_PROVIDER,kind:'task',status:CONSENT_ITEM_STATUS[consent.status],title:[...title].slice(0,200).join(''),context:summary,summary,
   reason:'A connector asks to reach your World',attentionContentVersion:1,attentionReason:summary,
   sources:[{provider:AGENT_ASK_PROVIDER,id:consent.id,quote:title}],
-  remoteConsentId:consent.id,remoteConsentClient:consent.client,remoteConsentCode:consent.code,remoteConsentReturnsTo:consent.returnsTo,remoteConsentStatus:consent.status,
+  remoteConsentId:consent.id,remoteConsentClient:consent.client,remoteConsentCode:consent.code,remoteConsentReturnsTo:consent.returnsTo,remoteConsentStatus:consent.status,...named.length?{remoteConsentServices:named}:{},
   createdAt:at,updatedAt:at} as WorldItem;
 }
 /** The Agent an allowed connection becomes: its own ID, the client's name, kind `remote`. */

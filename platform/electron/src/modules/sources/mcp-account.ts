@@ -131,6 +131,12 @@ export class McpAccounts {
   try{return await this.authorization(connection,force);}
   catch(error){if(error instanceof McpUnauthorized)return null;throw error;}
  }
+ /** Whether the World's own connection `name` is a sign-in made with the public client `clientId` (GitHub's: the
+  * Worldlet GitHub App's device code, connectDevice), not a pasted key or another sign-in. */
+ signedInWith(name:string,clientId:string):boolean {
+  const grant=this.worldGrant(name);
+  return grant?.kind==='oauth'&&grant.client_id===clientId;
+ }
  /** The scopes the World's own sign-in `name` was granted, as the service said (empty when it did not say). */
  grantedScopes(name:string):string[] {
   const scope=this.worldGrant(name)?.scope;

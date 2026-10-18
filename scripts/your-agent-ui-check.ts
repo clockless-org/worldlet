@@ -239,10 +239,10 @@ try{
  await google.getByRole('button',{name:'Disconnect',exact:true}).waitFor();
  const advanced=settingsPage.locator('[data-advanced=connectors]');
  await advanced.locator('summary').click();
- // GitHub writes: the App's ID, installation ID and private key go to the host once; the key field is cleared at once,
+ // Your own GitHub App: the App's ID, installation ID and private key go to the host once; the key field is cleared at once,
  // a refusal is said, and once connected only Disconnect is left: nothing of the App comes back to the page.
  const githubApp=advanced.locator('[data-accounts=github-app]');
- await githubApp.getByText('GitHub writes',{exact:true}).first().waitFor();
+ await githubApp.getByText('Your own GitHub App',{exact:true}).first().waitFor();
  const appKey='-----BEGIN RSA PRIVATE KEY-----\nFIXTUREKEYFIXTUREKEY\n-----END RSA PRIVATE KEY-----';
  await githubApp.getByRole('textbox',{name:'App ID'}).fill('9');
  await githubApp.getByRole('textbox',{name:'Installation ID'}).fill('4242');
@@ -275,7 +275,8 @@ try{
  assert.ok(!(await page.content()).includes('SCFIXTURE'),'the key is nowhere in the page');
  await scTile.getByRole('button',{name:'Disconnect',exact:true}).click();
  await scTile.getByRole('group').getByRole('button',{name:'Disconnect',exact:true}).click();
- await scTile.waitFor({state:'detached'});
+ // Its tile stays, off again (Search Console is always shown: it can sign in with Google).
+ await settingsPage.locator('[data-connector=search-console][data-state=off]').waitFor();
  await searchConsole.getByRole('textbox',{name:'Service account key'}).waitFor();
  // HTTP JSON: a name, an HTTPS base address and an optional token; the token field is cleared as soon as it is sent and
  // the token never comes back. Remove forgets one endpoint; the last one is disconnected.

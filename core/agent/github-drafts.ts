@@ -201,11 +201,23 @@ export function githubLabelMoves(write:{labels?:string[];expectedLabels?:string[
  * transition adds before it removes, so one cut short leaves both labels, which the next transition's check refuses,
  * rather than none. */
 export type GithubWriteRequest={method:'POST'|'PATCH'|'DELETE';path:string;body?:Record<string,unknown>;accept:number[]};
-export function githubDraftRequests(draft:GithubDraft):{requests:GithubWriteRequest[];result:'response'|'target'} {
+/** The line a new Issue or comment ends with, naming the Agent that drafted it: "Drafted by Claude Code in Worldlet".
+ * The name is the Agent's own label, kept to plain words so it cannot add a link, a mention or formatting. */
+export function githubDraftSignature(agentName:string):string {
+ const name=[...String(agentName??'').replace(/[^\p{L}\p{N} .'-]+/gu,' ').replace(/\s+/g,' ').trim()].slice(0,60).join('').trim()||'an Agent';
+ return `Drafted by ${name} in Worldlet`;
+}
+/** A body with its signature line (githubDraftSignature) after it. */
+export function githubSignedBody(body:string|undefined,signature:string):string {
+ return signature?`${body?body.trimEnd()+'\n\n':''}_${signature}_`:body??'';
+}
+/** `signature`: the githubDraftSignature line a new Issue's or comment's body ends with. */
+export function githubDraftRequests(draft:GithubDraft,signature=''):{requests:GithubWriteRequest[];result:'response'|'target'} {
  const parts=githubDraftTargetParts(draft),repo=githubDraftReadPath('issue.create',parts),issue=`${repo}/issues/${draft.number}`;
+ const body=githubSignedBody(draft.body,signature);
  switch(draft.write){
-  case 'issue.create':return {requests:[{method:'POST',path:`${repo}/issues`,body:{title:draft.title,...draft.body?{body:draft.body}:{},...draft.labels?.length?{labels:draft.labels}:{}},accept:[201]}],result:'response'};
-  case 'issue.comment':return {requests:[{method:'POST',path:`${issue}/comments`,body:{body:draft.body},accept:[201]}],result:'response'};
+  case 'issue.create':return {requests:[{method:'POST',path:`${repo}/issues`,body:{title:draft.title,...body?{body}:{},...draft.labels?.length?{labels:draft.labels}:{}},accept:[201]}],result:'response'};
+  case 'issue.comment':return {requests:[{method:'POST',path:`${issue}/comments`,body:{body},accept:[201]}],result:'response'};
   case 'labels.add':return {requests:[{method:'POST',path:`${issue}/labels`,body:{labels:draft.labels},accept:[200]}],result:'target'};
   case 'labels.remove':return {requests:(draft.labels??[]).map(label=>({method:'DELETE' as const,path:`${issue}/labels/${encodeURIComponent(label)}`,accept:[200,204,404]})),result:'target'};
   case 'labels.set':{
@@ -251,14 +263,19 @@ export function githubDraftCreatedPath(draft:GithubDraft):string {
  const since=new Date(Date.parse(draft.writeStartedAt??draft.updatedAt)-60_000).toISOString();
  return `${githubDraftReadPath('issue.create',githubDraftTargetParts(draft))}/issues?state=all&sort=created&direction=desc&per_page=50&since=${encodeURIComponent(since)}`;
 }
+/** Who writes: the person's own GitHub App (`appId`, Settings › Connectors › Advanced), or the person through their
+ * GitHub sign-in with the Worldlet GitHub App (`clientId`, its public client ID, and `slug`). */
+export type GithubWriter={appId:string}|{clientId:string;slug:string};
 /** The link of the Issue a started create made, from GitHub's answer to githubDraftCreatedPath: one with exactly the
- * draft's title, made by the GitHub App `appId` within minutes of the write beginning; '' when there is none. */
-export function githubDraftCreatedUrl(draft:GithubDraft,answer:unknown,appId:string):string {
+ * draft's title, made through `by` within minutes of the write beginning; '' when there is none. */
+export function githubDraftCreatedUrl(draft:GithubDraft,answer:unknown,by:GithubWriter):string {
  const started=Date.parse(draft.writeStartedAt??''),prefix=`https://github.com/${draft.repo.toLowerCase()}/issues/`;
  if(!Number.isFinite(started)||!Array.isArray(answer))return '';
  for(const value of answer){
   const v=record(value),app=record(v.performed_via_github_app),user=record(v.user),made=Date.parse(String(v.created_at??''));
-  const byApp=v.performed_via_github_app?String(app.id)===appId:user.type==='Bot';
+  // A user token's write shows the person as its author and the Worldlet GitHub App as what made it.
+  const byApp='appId' in by?(v.performed_via_github_app?String(app.id)===by.appId:user.type==='Bot')
+   :!!v.performed_via_github_app&&(app.client_id===by.clientId||app.slug===by.slug);
   if(v.pull_request===undefined&&v.title===draft.title&&byApp&&made>=started-60_000&&made<=started+CREATED_WITHIN_MS
    &&typeof v.html_url==='string'&&v.html_url.toLowerCase().startsWith(prefix))return v.html_url;
  }
@@ -355,7 +372,8 @@ const ITEM_STATUS:Record<GithubDraftStatus,'open'|'done'|'dismissed'>={pending:'
 export function githubDraftAttentionItem(draft:GithubDraft,agentName:string):WorldItem {
  let name=draft.agentId;try{name=text(agentName,80)||draft.agentId;}catch{}
  const headline=githubDraftHeadline(draft),body=[...githubDraftText(draft)].slice(0,1200).join('');
- const summary=`${name} wants to write this on GitHub as your GitHub App. Nothing is written until you approve it.`;
+ const signed=draft.write==='issue.create'||draft.write==='issue.comment'?` It ends with the line “${githubDraftSignature(name)}”.`:'';
+ const summary=`${name} wants to write this on GitHub.${signed} Nothing is written until you approve it.`;
  return {id:githubDraftItemId(draft.id),provider:AGENT_ASK_PROVIDER,kind:'task',status:ITEM_STATUS[draft.status],title:headline,context:body,summary,
   reason:[...(name+' drafted a GitHub change')].slice(0,56).join(''),attentionContentVersion:1,
   attentionReason:[...summary].slice(0,600).join(''),
