@@ -492,6 +492,26 @@ try{
   desktop.stop();world.destroy();
   console.log('PASS run in background leaves no window, not even Fox, once onboarding is over');
  }
+ // A World page that never answers (one reloading mid-call) still lets closing the World put Fox on the desktop,
+ // and the next close still works (Mac Alpha 4496, #651: the window stayed open, Fox never came out).
+ {
+  const world=new BaseWindow({width:400,height:300,show:false}),view=new WebContentsView();
+  world.contentView.addChildView(view);view.setBounds({x:0,y:0,width:400,height:300});
+  const page={...host.page,ready:()=>true,call:()=>new Promise<undefined>(()=>{})} as Host['page'];
+  const desktop=new DesktopCompanion({...host,window:()=>world,worldView:()=>view,page},companionEntry(host,noop,'darwin'),{quit:()=>{},unfinished:()=>false,follows:false,hideApp:()=>{}});
+  desktop.attach();world.showInactive();
+  const leaves=async(what:string)=>{
+   assert(desktop.shouldKeepOpen(),what+' keeps the app');
+   for(let i=0;i<100&&!(desktop.isDesktop&&!world.isVisible());i++)await new Promise(resolve=>setTimeout(resolve,100));
+   assert(desktop.isDesktop&&!world.isVisible()&&desktop.panelBounds(),what+' puts Fox on the desktop although the page never answers');
+  };
+  await leaves('closing the World');
+  desktop.restoreWorld().catch(()=>{});world.showInactive();
+  assert(!desktop.isDesktop,'Back to World does not wait for the page');
+  await leaves('closing the World again');
+  desktop.stop();world.destroy();
+  console.log('PASS a World page that never answers still lets closing the World put Fox on the desktop');
+ }
  // The World closing (quit, restart) while the page answers leaves nothing to detach: once an unhandled
  // "Object has been destroyed" from detach on a Mac.
  {
