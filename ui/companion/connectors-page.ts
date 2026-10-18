@@ -1,5 +1,5 @@
 import {TOKEN_PROVIDERS} from '../../core/applets/index.ts';
-import {connector,connectorTiles,connectorDisconnectQuestion,connectorFailure,connectorWhoMayUse,type ConnectorReaders,type ConnectorTile} from '../../core/accounts/index.ts';
+import {SERVICE_SYNC_DEFAULTS,serviceSyncLine,connector,connectorTiles,connectorDisconnectQuestion,connectorFailure,connectorWhoMayUse,type ConnectorReaders,type ConnectorTile} from '../../core/accounts/index.ts';
 import {SERVICE_PROVIDERS} from '../../contracts/services.ts';
 import {agentButton as button,agentEl as el} from './agent-change.ts';
 import {showGithubApp,showHttpJson,showSearchConsole} from './worldlet-accounts.ts';
@@ -31,6 +31,8 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
  // Who may read a connected Service (agentAccess serviceReaders), by connector; the one whose Choose Agents is open.
  const readers=new Map<string,ConnectorReaders>();
  let choosing:string|null=null;
+ // Each connected Service's default sync (serviceSync list, `default`), by provider; the tiles whose details are open.
+ const syncs=new Map<string,any>(),syncOpen=new Set<string>();
  // Search Console's box under Advanced follows its tile: connected, or its field again once disconnected.
  let searchConsole=async()=>{};
  async function read(){const state=await call('snapshot').catch(()=>null);if(Array.isArray(state?.connections))connections=state.connections;}
@@ -49,6 +51,11 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
   for(const item of connectorTiles(connections))if(item.state==='connected'&&SERVICE_PROVIDERS.includes(item.provider)){
    const answer=await call('agentAccess',{operation:'serviceReaders',provider:item.provider}).catch(()=>null);
    if(answer&&Array.isArray(answer.others))readers.set(item.id,{main:answer.main??null,others:answer.others});
+  }
+  syncs.clear();
+  if(connectorTiles(connections).some(item=>item.state==='connected'&&SERVICE_SYNC_DEFAULTS[item.provider])){
+   const listed=await call('serviceSync',{operation:'list'}).catch(()=>null);
+   for(const job of Array.isArray(listed?.jobs)?listed.jobs:[])if(job?.default===true)syncs.set(job.provider,job);
   }
   if(current())render();
  }
@@ -81,6 +88,8 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
   }
   const who=item.state==='connected'&&asking!==item.id?readers.get(item.id):undefined;
   if(who)box.append(whoMayUse(item,who));
+  const sync=item.state==='connected'&&asking!==item.id?syncs.get(item.provider):undefined;
+  if(sync)box.append(keptFresh(item,sync));
   // Its buttons last, at the foot of the tile.
   box.append(actions);
   if(item.state==='connected'&&asking===item.id){
@@ -125,6 +134,24 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
     box.append(list);
    }
   }
+  return box;
+ }
+ /** "Updated 5 minutes ago" (core serviceSyncLine), and under it the switch that keeps the Service up to date in the
+  * World (`serviceSync` `configure`), on from the moment it connected. */
+ function keptFresh(item:ConnectorTile,job:any){
+  const box=el('details','companion-settings-connector-sync') as HTMLDetailsElement;box.dataset.sync=item.id;box.open=syncOpen.has(item.id);
+  box.ontoggle=()=>{if(box.open)syncOpen.add(item.id);else syncOpen.delete(item.id);};
+  const minutes=Number(job.check?.intervalMinutes)||60,every=minutes===60?'every hour':minutes%60===0?`every ${minutes/60} hours`:`every ${minutes} minutes`;
+  const label=el('label','companion-settings-connector-reader'),check=document.createElement('input');
+  check.type='checkbox';check.checked=job.check?.enabled===true;check.dataset.keepFresh=item.id;
+  check.onchange=async()=>{
+   const on=check.checked;check.disabled=true;said.textContent='';
+   try{await call('serviceSync',{operation:'configure',id:job.id,enabled:on});said.textContent=on?`${item.name} is kept up to date in your World again.`:`${item.name} is no longer kept up to date. What was saved stays.`;}
+   catch(e){said.textContent=connectorFailure(item.name,(e as Error).message).replace(/^Could not connect/,'Could not change updates for');}
+   await draw();
+  };
+  label.append(check,document.createTextNode(`Keep ${item.name} up to date in your World, ${every}`));
+  box.append(el('summary','',serviceSyncLine(job,Date.now()/1000)),label);
   return box;
  }
  async function signIn(item:ConnectorTile){
