@@ -2,8 +2,6 @@ import {AGENT_ID_PATTERN,type AgentAuditEntry,type AgentIdentity,type Grant} fro
 import {SERVICE_ACTIONS,SERVICE_CONTEXT_ACTIONS,SERVICE_CONTEXT_TARGET,SERVICE_PROVIDERS} from '../../contracts/services.ts';
 import {AGENT_ASK_ACTIONS,AGENT_ASK_TARGET} from '../../contracts/agent-asks.ts';
 import {BOARD_ACTIONS,BOARD_TARGET} from '../../contracts/board.ts';
-import {CONVERSATION_ACTIONS,CONVERSATION_TARGET} from '../../contracts/conversations.ts';
-import {TRACKED_LINK_ACTIONS,TRACKED_LINK_TARGET} from '../../contracts/tracked-links.ts';
 import {GITHUB_DRAFT_ACTIONS,GITHUB_DRAFT_TARGET,GITHUB_WRITE_ACTIONS,GITHUB_WRITE_TARGET,type GithubWrite,type GithubWriteScope} from '../../contracts/github-drafts.ts';
 import {githubWriteScope,githubWriteScopeCovers,readGithubWriteScope} from './github-drafts.ts';
 import {AGENT_REPORT_ACTIONS,AGENT_REPORT_TARGET} from '../../contracts/agent-reports.ts';
@@ -265,58 +263,6 @@ export function githubDraftGrantAuditEntry(agentId:string,granted:boolean,at:str
  return {at,agentId,target:GITHUB_DRAFT_TARGET,action:granted?'grant':'ungrant',decision:'allowed',grantId:githubDraftGrantId(agentId),
   reason:granted?'The person let this Agent draft GitHub changes in Settings.':'The person stopped this Agent drafting GitHub changes in Settings.'};
 }
-/** "Can save conversations" (`add`: conversations/add) and "Can search conversations" (`search`: conversations/search)
- * in Settings › Agent › Access (core/agent/GRANTS.md#conversation-archive). Never part of the default Grants, and never
- * given by a Fox turn. Access is `read`: saving only adds to the archive the person's Agents search, and changes nothing
- * the person sees or relies on. */
-export type ConversationGrantKind='add'|'search';
-export const CONVERSATION_GRANT_KINDS:readonly ConversationGrantKind[]=Object.freeze(['add','search']);
-export function conversationGrantTargets(kind:string):string[] {
- return kind==='add'?[CONVERSATION_ACTIONS.add]:kind==='search'?[CONVERSATION_ACTIONS.search]:[];
-}
-export const conversationGrantId=(agentId:string,kind:string)=>agentId+'-conversations-'+kind;
-/** The standing Grant for one of the two, or null for anything else. Hosts build it from the kind only. */
-export function conversationGrant(agentId:string,kind:string,grantedAt:string):Grant|null {
- const targets=conversationGrantTargets(kind);
- if(!targets.length||typeof agentId!=='string'||!AGENT_ID_PATTERN.test(agentId))return null;
- return {id:conversationGrantId(agentId,kind),agentId,targets,access:'read',duration:'standing',grantedAt};
-}
-export function conversationGranted(agentId:string,grants:readonly Grant[],kind:string,now:string):boolean {
- const id=conversationGrantId(agentId,kind);
- return conversationGrantTargets(kind).length>0&&grants.some(grant=>grant.id===id&&grant.agentId===agentId&&grantActive(grant,now));
-}
-/** The audit entry for the person turning "Can save conversations" or "Can search conversations" on or off in Settings. */
-export function conversationGrantAuditEntry(agentId:string,kind:string,granted:boolean,at:string):AgentAuditEntry {
- const what=kind==='add'?'save conversations':'search conversations';
- return {at,agentId,target:CONVERSATION_TARGET,action:(granted?'grant-':'ungrant-')+kind,decision:'allowed',grantId:conversationGrantId(agentId,kind),
-  reason:granted?`The person let this Agent ${what} in Settings.`:`The person stopped this Agent being able to ${what} in Settings.`};
-}
-/** "Can see your tracked links" (`read`: links/read) and "Can keep your tracked links" (`save`: links/save) in Settings ›
- * Agent › Access (core/agent/GRANTS.md#tracked-links). Never part of the default Grants, and never given by a Fox turn.
- * Access is `read`: a row only changes the person's own table, which they can see and change back, and is not a guarded
- * write. */
-export type LinkGrantKind='read'|'save';
-export const LINK_GRANT_KINDS:readonly LinkGrantKind[]=Object.freeze(['read','save']);
-export function linkGrantTargets(kind:string):string[] {
- return kind==='read'?[TRACKED_LINK_ACTIONS.read]:kind==='save'?[TRACKED_LINK_ACTIONS.save]:[];
-}
-export const linkGrantId=(agentId:string,kind:string)=>agentId+'-links-'+kind;
-/** The standing Grant for one of the two, or null for anything else. Hosts build it from the kind only. */
-export function linkGrant(agentId:string,kind:string,grantedAt:string):Grant|null {
- const targets=linkGrantTargets(kind);
- if(!targets.length||typeof agentId!=='string'||!AGENT_ID_PATTERN.test(agentId))return null;
- return {id:linkGrantId(agentId,kind),agentId,targets,access:'read',duration:'standing',grantedAt};
-}
-export function linkGranted(agentId:string,grants:readonly Grant[],kind:string,now:string):boolean {
- const id=linkGrantId(agentId,kind);
- return linkGrantTargets(kind).length>0&&grants.some(grant=>grant.id===id&&grant.agentId===agentId&&grantActive(grant,now));
-}
-/** The audit entry for the person turning "Can see your tracked links" or "Can keep your tracked links" on or off. */
-export function linkGrantAuditEntry(agentId:string,kind:string,granted:boolean,at:string):AgentAuditEntry {
- const what=kind==='save'?'keep your tracked links':'see your tracked links';
- return {at,agentId,target:TRACKED_LINK_TARGET,action:(granted?'grant-':'ungrant-')+kind,decision:'allowed',grantId:linkGrantId(agentId,kind),
-  reason:granted?`The person let this Agent ${what} in Settings.`:`The person stopped this Agent being able to ${what} in Settings.`};
-}
 /** "Can report its work" (`report`: agents/report) and "Can see other Agents" (`list`: agents/list) in Settings › Agent
  * › Access (core/agent/GRANTS.md#agent-reports). Never part of the default Grants, and never given by a Fox turn. Access
  * is `read`: a report only changes what the person and other Agents see of this Agent, and is not a guarded write. */
@@ -418,10 +364,10 @@ export function serviceDraftGrantAuditEntry(agentId:string,provider:ServiceDraft
   reason:granted?`The person let this Agent draft ${title} changes in Settings.`:`The person stopped this Agent drafting ${title} changes in Settings.`};
 }
 /** Targets only the calling Agent's own Grants decide: what it reaches is its own (its asks, its GitHub, PostHog and
- * Notion drafts and standing GitHub writes, its report, what it saved to the Journal) or the person's board,
- * conversation archive, tracked links, Agents and Journal artifacts, so a Fox turn's Grant, which covers everything
+ * Notion drafts and standing GitHub writes, its report, what it saved to the Journal) or the person's board, Agents
+ * and Journal artifacts, so a Fox turn's Grant, which covers everything
  * else, never covers them. */
-export const OWN_GRANT_TARGETS:readonly string[]=Object.freeze([AGENT_ASK_TARGET,BOARD_TARGET,SERVICE_CONTEXT_TARGET,GITHUB_DRAFT_TARGET,GITHUB_WRITE_TARGET,CONVERSATION_TARGET,TRACKED_LINK_TARGET,AGENT_REPORT_TARGET,AGENT_ARTIFACT_TARGET,...SERVICE_DRAFT_TARGETS]);
+export const OWN_GRANT_TARGETS:readonly string[]=Object.freeze([AGENT_ASK_TARGET,BOARD_TARGET,SERVICE_CONTEXT_TARGET,GITHUB_DRAFT_TARGET,GITHUB_WRITE_TARGET,AGENT_REPORT_TARGET,AGENT_ARTIFACT_TARGET,...SERVICE_DRAFT_TARGETS]);
 
 /** While a Fox turn holds the standing server, its Agent's calls go to that turn (world-tool-bridge.ts standingTurn), as
  * they did before Grants: a call the turn's own stream announced is Fox's and runs under the turn's trust; any other

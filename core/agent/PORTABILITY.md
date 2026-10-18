@@ -53,7 +53,7 @@ Cancellation belongs to the requesting turn. Tool execution stays in Worldlet's 
 
 ## Data ownership target
 
-Worldlet owns portable companion identity, personality, long-term memory, user-visible conversation archives, source citations, items and layout. Adapters own transient execution sessions, compression state and caches. Credentials are separate and excluded from portable exports. Hermes remains the live memory writer while selected. World automatically persists supported durable memory checkpoints and lets replacement external adapters read them without Hermes; these are not two independently mutable memory stores. See [World storage](../items/STORAGE.md) for domain ownership, checkpoint timing and remaining adapter limitations.
+Worldlet owns portable companion identity, personality, long-term memory, user-visible conversation history, source citations, items and layout. Adapters own transient execution sessions, compression state and caches. Credentials are separate and excluded from portable exports. Hermes remains the live memory writer while selected. World automatically persists supported durable memory checkpoints and lets replacement external adapters read them without Hermes; these are not two independently mutable memory stores. See [World storage](../items/STORAGE.md) for domain ownership, checkpoint timing and remaining adapter limitations.
 
 Use one open-source repository and one official composition. Separate repositories are optional for third-party adapters or future hosted billing/model services, not required for a signed desktop build.
 
@@ -435,7 +435,7 @@ Reset asks the selected adapter which paths to retain. Hermes preserves model co
 
 Diagnostic availability and local profile locations come from the selected adapter. Only the Hermes adapter declares Hermes configuration, credential and memory filenames. External adapters report no guessed file inventory. An unavailable external Agent is shown as unavailable, not as an active Apple fallback. Sanitized exports use `agentAvailable`, and neutral/legacy chat failures normalize to the `agent` area and `agentChat` operation; no raw failure text is persisted.
 
-## Local conversation archive
+## Local conversation history
 
 Agent turns archive user messages and final visible replies through host persistence (`platform/electron/src/modules/fox/companion.ts`). Private, Sample and setup scopes remain separate. The native self-check for persistence, scope isolation and archive round trips is not yet ported to Electron. The former Apple/Pi local loop has been removed.
 

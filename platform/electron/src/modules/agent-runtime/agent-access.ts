@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import {AGENT_AUDIT_KEEP,agentRevoked,channelDefaultGrants,currentServiceGrant,grantActive,readAgentIdentity,readGrant,askGrant,askGrantAuditEntry,artifactGrant,artifactGrantAuditEntry,boardGrant,boardGrantAuditEntry,conversationGrant,conversationGrantAuditEntry,linkGrant,linkGrantAuditEntry,githubDraftGrant,githubDraftGrantAuditEntry,githubWriteGrant,githubWriteGrantAuditEntry,githubWriteGrants,githubWriteGrantId,isServiceDraftProvider,serviceDraftGrant,serviceDraftGrantAuditEntry,serviceGrantAuditEntry,serviceReadGrant,reportGrant,reportGrantAuditEntry} from '../../../../../core/agent/index.ts';
+import {AGENT_AUDIT_KEEP,agentRevoked,channelDefaultGrants,currentServiceGrant,grantActive,readAgentIdentity,readGrant,askGrant,askGrantAuditEntry,artifactGrant,artifactGrantAuditEntry,boardGrant,boardGrantAuditEntry,githubDraftGrant,githubDraftGrantAuditEntry,githubWriteGrant,githubWriteGrantAuditEntry,githubWriteGrants,githubWriteGrantId,isServiceDraftProvider,serviceDraftGrant,serviceDraftGrantAuditEntry,serviceGrantAuditEntry,serviceReadGrant,reportGrant,reportGrantAuditEntry} from '../../../../../core/agent/index.ts';
 import {GITHUB_WRITE_LIMITS} from '../../../../../contracts/github-drafts.ts';
 import type {AgentAuditEntry,AgentIdentity,Grant} from '../../../../../contracts/agent-identity.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
@@ -98,10 +98,6 @@ export function createAgentAccess({root,vault,ledger,now=()=>new Date().toISOStr
   ungrantBoard(agentId,kind){return takeBack(agentId,boardGrant(agentId,kind,now()),at=>boardGrantAuditEntry(agentId,kind,false,at));},
   grantGithubDrafts(agentId){return give(agentId,githubDraftGrant(agentId,now()),at=>githubDraftGrantAuditEntry(agentId,true,at));},
   ungrantGithubDrafts(agentId){return takeBack(agentId,githubDraftGrant(agentId,now()),at=>githubDraftGrantAuditEntry(agentId,false,at));},
-  grantConversations(agentId,kind){return give(agentId,conversationGrant(agentId,kind,now()),at=>conversationGrantAuditEntry(agentId,kind,true,at));},
-  ungrantConversations(agentId,kind){return takeBack(agentId,conversationGrant(agentId,kind,now()),at=>conversationGrantAuditEntry(agentId,kind,false,at));},
-  grantLinks(agentId,kind){return give(agentId,linkGrant(agentId,kind,now()),at=>linkGrantAuditEntry(agentId,kind,true,at));},
-  ungrantLinks(agentId,kind){return takeBack(agentId,linkGrant(agentId,kind,now()),at=>linkGrantAuditEntry(agentId,kind,false,at));},
   grantReports(agentId,kind){return give(agentId,reportGrant(agentId,kind,now()),at=>reportGrantAuditEntry(agentId,kind,true,at));},
   ungrantReports(agentId,kind){return takeBack(agentId,reportGrant(agentId,kind,now()),at=>reportGrantAuditEntry(agentId,kind,false,at));},
   grantGithubWrites(agentId,repo,choice,labelPrefix){

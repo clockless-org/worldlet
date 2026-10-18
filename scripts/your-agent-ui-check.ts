@@ -15,7 +15,7 @@ try{
     {id:'hermes-channel-link',agentId:'hermes',targets:['world/link'],access:'write',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'},
     {id:'hermes-github-writes-example/app',agentId:'hermes',targets:['github-writes/run'],access:'write',duration:'standing',grantedAt:'2026-10-02T09:00:00.000Z',github:{repo:'example/app',writes:['issue.comment','labels.set'],labelPrefix:'state:'}}],
    audit:[{at:'2026-10-14T18:30:00.000Z',agentId:'hermes',target:'items',action:'update',decision:'denied',reason:'Only reading here.'},{at:'2026-10-14T18:29:30.000Z',agentId:'hermes',target:'github-writes',action:'write',decision:'allowed',grantId:'hermes-github-writes-example/app'},{at:'2026-10-14T18:29:00.000Z',agentId:'hermes',target:'items',action:'query',decision:'allowed',grantId:'hermes-channel-read'}],
-   services:[{provider:'github',title:'GitHub',granted:false},{provider:'posthog',title:'PostHog',granted:true},{provider:'search-console',title:'Search Console',granted:false}],asks:{ask:false,work:true},board:{read:true,define:false},githubDrafts:false,serviceDrafts:[{provider:'posthog',title:'PostHog',granted:false}],conversations:{add:false,search:true},links:{read:false,save:false},
+   services:[{provider:'github',title:'GitHub',granted:false},{provider:'posthog',title:'PostHog',granted:true},{provider:'search-console',title:'Search Console',granted:false}],asks:{ask:false,work:true},board:{read:true,define:false},githubDrafts:false,serviceDrafts:[{provider:'posthog',title:'PostHog',granted:false}],
    githubWrites:{add:true,grants:[{repo:'example/app',writes:['issue.comment','labels.set'],labelPrefix:'state:'}]},
    artifacts:{save:false,read:true},reports:{report:true,list:false},wake:[],liveness:'stale',report:{status:'working',summary:'Building the installer',work:[{title:'Fix the build'}],runs:[],reportedAt:new Date(Date.now()-25*60_000).toISOString()}}];
   w.rules=[{id:'rule-00000000000000a1',allows:'npm test',agent:'default',kind:'command',main:true,grantedAt:Date.UTC(2026,9,8,12),thread:'In Fox’s main conversation',inWorld:true},{id:'rule-00000000000000a2',allows:'github › search_issues',agent:'default',kind:'tool',main:true,note:'Any arguments'}];
@@ -49,8 +49,6 @@ try{
   if(b.action==='agentAccess'&&(b.operation==='grantService'||b.operation==='ungrantService')){w.access=w.access.map(a=>a.id===b.id?{...a,services:a.services.map(s=>s.provider===b.provider?{...s,granted:b.operation==='grantService'}:s)}:a);return {ok:true};}
   if(b.action==='agentAccess'&&(b.operation==='grantAsks'||b.operation==='ungrantAsks')){w.access=w.access.map(a=>a.id===b.id?{...a,asks:{...a.asks,[b.kind]:b.operation==='grantAsks'}}:a);return {ok:true};}
   if(b.action==='agentAccess'&&(b.operation==='grantBoard'||b.operation==='ungrantBoard')){w.access=w.access.map(a=>a.id===b.id?{...a,board:{...a.board,[b.kind]:b.operation==='grantBoard'}}:a);return {ok:true};}
-  if(b.action==='agentAccess'&&(b.operation==='grantLinks'||b.operation==='ungrantLinks')){w.access=w.access.map(a=>a.id===b.id?{...a,links:{...a.links,[b.kind]:b.operation==='grantLinks'}}:a);return {ok:true};}
-  if(b.action==='agentAccess'&&(b.operation==='grantConversations'||b.operation==='ungrantConversations')){w.access=w.access.map(a=>a.id===b.id?{...a,conversations:{...a.conversations,[b.kind]:b.operation==='grantConversations'}}:a);return {ok:true};}
   if(b.action==='agentAccess'&&(b.operation==='grantReports'||b.operation==='ungrantReports')){w.access=w.access.map(a=>a.id===b.id?{...a,reports:{...a.reports,[b.kind]:b.operation==='grantReports'}}:a);return {ok:true};}
   if(b.action==='agentAccess'&&(b.operation==='grantArtifacts'||b.operation==='ungrantArtifacts')){w.access=w.access.map(a=>a.id===b.id?{...a,artifacts:{...a.artifacts,[b.kind]:b.operation==='grantArtifacts'}}:a);return {ok:true};}
   if(b.action==='agentAccess'&&(b.operation==='grantServiceDrafts'||b.operation==='ungrantServiceDrafts')){w.access=w.access.map(a=>a.id===b.id?{...a,serviceDrafts:a.serviceDrafts.map(s=>s.provider===b.provider?{...s,granted:b.operation==='grantServiceDrafts'}:s)}:a);return {ok:true};}
@@ -72,7 +70,7 @@ try{
   if(b.action==='httpJson'&&b.operation==='remove'){w.endpoints=w.endpoints.filter(e=>e.name!==b.name);return {endpoints:w.endpoints};}
   if(b.action==='connect'&&b.provider==='http'){if(!b.settings.url.startsWith('https://'))throw new Error('Use the endpoint\'s base address, starting with https://.');w.endpoints=[...(w.endpoints??[]).filter(e=>e.name!==b.settings.name),{name:b.settings.name,url:b.settings.url,token:!!b.token}];return {ok:true,connected:true};}
   if(b.action==='disconnectSource'&&b.provider==='http'){w.endpoints=[];return {ok:true};}
-  if(b.action==='agentAccess'&&b.operation==='revoke'){w.access=w.access.map(a=>a.id===b.id?{...a,services:[],asks:undefined,wake:undefined,board:undefined,githubDrafts:undefined,githubWrites:undefined,serviceDrafts:undefined,conversations:undefined,links:undefined,reports:undefined,artifacts:undefined,report:undefined,revokedAt:'2026-10-15T08:00:00.000Z',grants:a.grants.map(g=>({...g,revokedAt:'2026-10-15T08:00:00.000Z'}))}:a);return {ok:true};}
+  if(b.action==='agentAccess'&&b.operation==='revoke'){w.access=w.access.map(a=>a.id===b.id?{...a,services:[],asks:undefined,wake:undefined,board:undefined,githubDrafts:undefined,githubWrites:undefined,serviceDrafts:undefined,reports:undefined,artifacts:undefined,report:undefined,revokedAt:'2026-10-15T08:00:00.000Z',grants:a.grants.map(g=>({...g,revokedAt:'2026-10-15T08:00:00.000Z'}))}:a);return {ok:true};}
   // An Agent for a script: the page sends only the name; the host makes the Agent and its file.
   if(b.action==='agentAccess'&&b.operation==='addScript'){if(!String(b.name||'').trim())throw new Error('Give it a name of one line, at most 60 characters, with a letter or digit in it.');
    const file='/Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json';
@@ -363,23 +361,6 @@ try{
  assert.deepEqual([await seeing.isChecked(),await defining.isChecked()],[false,true]);
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Board$/.test(c.operation))),
   [{action:'agentAccess',operation:'grantBoard',id:'hermes',kind:'define'},{action:'agentAccess',operation:'ungrantBoard',id:'hermes',kind:'read'}],'only the Agent and which, never targets');
- // "Can save conversations" and "Can search conversations" (core/agent/GRANTS.md#conversation-archive): the same way.
- const saving=hermesAccess.getByRole('checkbox',{name:'Can save conversations',exact:true}),searching=hermesAccess.getByRole('checkbox',{name:'Can search conversations',exact:true});
- assert.deepEqual([await saving.isChecked(),await searching.isChecked()],[false,true]);
- await saving.click();
- await accessPart.getByText('Hermes Agent can now save conversations to your World.',{exact:true}).waitFor();
- await searching.click();
- await accessPart.getByText('Hermes Agent can no longer search conversations.',{exact:true}).waitFor();
- assert.deepEqual([await saving.isChecked(),await searching.isChecked()],[true,false]);
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Conversations$/.test(c.operation))),
-  [{action:'agentAccess',operation:'grantConversations',id:'hermes',kind:'add'},{action:'agentAccess',operation:'ungrantConversations',id:'hermes',kind:'search'}],'only the Agent and which, never targets');
- // "Can see your tracked links" and "Can keep your tracked links" (core/agent/GRANTS.md#tracked-links): the same way.
- const keepingLinks=hermesAccess.getByRole('checkbox',{name:'Can keep your tracked links',exact:true});
- assert.equal(await keepingLinks.isChecked(),false);
- await keepingLinks.click();
- await accessPart.getByText('Hermes Agent can now keep your tracked links.',{exact:true}).waitFor();
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Links$/.test(c.operation))),
-  [{action:'agentAccess',operation:'grantLinks',id:'hermes',kind:'save'}],'only the Agent and which, never targets');
  // "Can save to your Journal" and "Can read Agents' Journal artifacts" (core/agent/GRANTS.md#agent-artifacts): the same way.
  const savingJournal=hermesAccess.getByRole('checkbox',{name:'Can save to your Journal',exact:true}),readingJournal=hermesAccess.getByRole('checkbox',{name:'Can read Agents\' Journal artifacts',exact:true});
  assert.deepEqual([await savingJournal.isChecked(),await readingJournal.isChecked()],[false,true]);

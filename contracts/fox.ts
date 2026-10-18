@@ -6,7 +6,7 @@ export interface FoxChatBody {
  history?:{role:'user'|'assistant';text:string}[];
  sample?:boolean;allowActions?:boolean;
  /** What the person saw as their side of the turn when Worldlet wrote the request (a button's label such as
-  * "Today’s plan"); the conversation archive keeps it instead of the long request. */
+  * "Today’s plan"); Fox's saved conversation keeps it instead of the long request. */
  shown?:string;
  /** Work Worldlet started by itself (the day's plan and summary): it runs in a background session of its own
   * beside the conversation, and only a line of its result joins the conversation (owner Order 2026-10-07). */

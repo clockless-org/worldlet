@@ -109,14 +109,6 @@ function buildWorldActions(sample:boolean):WorldAction[]{
  // GitHub drafts (core/agent/github-drafts.ts): each its own Grant target, which only "Can draft GitHub changes" names.
  operations('github-drafts','github_drafts');
  for(const action of actions.filter(a=>a.tool==='github_drafts'))action.parameters.required=action.action==='create'?['write','target']:[];
- // The conversation archive (core/agent/conversations.ts): each its own Grant target, which only "Can save
- // conversations" and "Can search conversations" name.
- operations('conversations','world_conversations');
- for(const action of actions.filter(a=>a.tool==='world_conversations'))action.parameters.required=action.action==='add'?['source','messages']:[];
- // Tracked links (core/agent/tracked-links.ts): each its own Grant target, which only "Can see your tracked links" and
- // "Can keep your tracked links" name.
- operations('links','world_links');
- for(const action of actions.filter(a=>a.tool==='world_links'))action.parameters.required=action.action==='save'?['rows']:[];
  // Standing GitHub writes (core/agent/GRANTS.md#standing-github-writes): their own Grant target, which only a standing
  // GitHub write Grant for one repository names.
  operations('github-writes','github_writes');

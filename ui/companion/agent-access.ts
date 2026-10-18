@@ -3,9 +3,7 @@
  * more in the page, then removes that Agent's key so it can no longer reach the World; and, for each connected
  * Service, "Can read <Service>", which gives or takes back that Service's read Grant at once; "Can ask you" and "Can
  * take work" (Agent asks, core/agent/GRANTS.md#agent-asks), "Can see your board" and "Can set up your board"
- * (core/board/README.md), "Can save conversations" and "Can search conversations"
- * (core/agent/GRANTS.md#conversation-archive), "Can see your tracked links" and "Can keep your tracked links"
- * (core/agent/GRANTS.md#tracked-links), and "Can report its work" and "Can see other Agents"
+ * (core/board/README.md), and "Can report its work" and "Can see other Agents"
  * (core/agent/GRANTS.md#agent-reports), and "Can save to your Journal" and "Can read Agents' Journal artifacts"
  * (core/agent/GRANTS.md#agent-artifacts), and "Can draft <Service> changes" for PostHog and Notion while connected
  * (core/agent/GRANTS.md#posthog-and-notion-drafts), the same way; once a GitHub App is connected, "Can update Issues in <repo>
@@ -21,7 +19,7 @@ type Scope={repo:string;writes:string[];labelPrefix?:string};
 type Grant={id:string;targets:string[];access:'read'|'write';duration:'standing'|'once';grantedAt:string;expiresAt?:string;revokedAt?:string;github?:Scope};
 type Audit={at:string;target:string;action:string;decision:'allowed'|'denied'|'asked';reason?:string};
 type Service={provider:string;title:string;granted:boolean};
-type Agent={id:string;name:string;harness:string;kind:'local'|'remote';createdAt:string;lastSeenAt?:string;revokedAt?:string;grants:Grant[];audit:Audit[];services?:Service[];asks?:{ask:boolean;work:boolean};board?:{read:boolean;define:boolean};githubDrafts?:boolean;githubWrites?:{add:boolean;grants:Scope[]};conversations?:{add:boolean;search:boolean};links?:{read:boolean;save:boolean};
+type Agent={id:string;name:string;harness:string;kind:'local'|'remote';createdAt:string;lastSeenAt?:string;revokedAt?:string;grants:Grant[];audit:Audit[];services?:Service[];asks?:{ask:boolean;work:boolean};board?:{read:boolean;define:boolean};githubDrafts?:boolean;githubWrites?:{add:boolean;grants:Scope[]};
  reports?:{report:boolean;list:boolean};artifacts?:{save:boolean;read:boolean};serviceDrafts?:Service[];
  /** Its wake command as the person typed it: the program's full path, then each argument. */
  wake?:string[];liveness?:'live'|'stale'|'offline';report?:Report;
@@ -32,10 +30,6 @@ type Report={status:'working'|'idle'|'blocked'|'offline';summary:string;work:{ti
 const ASK_TOGGLES=[['ask','Can ask you','can now ask you things in Attention','can no longer ask you things'],['work','Can take work','can now take work left for Agents','can no longer take work']] as const;
 /** "Can see your board" and "Can set up your board" (core boardGrant, core/board/README.md), the same way. */
 const BOARD_TOGGLES=[['read','Can see your board','can now see your board','can no longer see your board'],['define','Can set up your board','can now set up your board','can no longer set up your board']] as const;
-/** "Can save conversations" and "Can search conversations" (core conversationGrant, core/agent/GRANTS.md#conversation-archive), the same way. */
-/** "Can see your tracked links" and "Can keep your tracked links" (core linkGrant, core/agent/GRANTS.md#tracked-links), the same way. */
-const LINK_TOGGLES=[['read','Can see your tracked links','can now see your tracked links','can no longer see your tracked links'],['save','Can keep your tracked links','can now keep your tracked links','can no longer keep your tracked links']] as const;
-const CONVERSATION_TOGGLES=[['add','Can save conversations','can now save conversations to your World','can no longer save conversations'],['search','Can search conversations','can now search conversations saved in your World','can no longer search conversations']] as const;
 /** "Can save to your Journal" and "Can read Agents' Journal artifacts" (core artifactGrant,
  * core/agent/GRANTS.md#agent-artifacts), the same way. */
 const ARTIFACT_TOGGLES=[['save','Can save to your Journal','can now save to your Journal','can no longer save to your Journal'],['read','Can read Agents\' Journal artifacts','can now read what Agents saved to your Journal','can no longer read what other Agents saved to your Journal']] as const;
@@ -93,8 +87,6 @@ export function auditLine(entry:Audit):string {
  if(entry.target==='asks'&&/^(set|clear)-wake$/.test(entry.action))return `${time(entry.at)} · Waking it for new work · ${entry.action==='clear-wake'?'You removed it':'You set it'}`;
  if(entry.target==='asks'&&/^(clear-)?order-target$/.test(entry.action))return `${time(entry.at)} · Getting new work · ${entry.action.startsWith('clear')?'You turned it off':'You chose it'}`;
  if(entry.target==='asks'&&entry.action==='wake'){const how=(entry.reason??'').replace(/^Woken for work [^:]*: /,'').replace(/\.$/,'');return `${time(entry.at)} · Woken for new work${how?' · '+how[0].toUpperCase()+how.slice(1):''}`;}
- if(entry.target==='links'&&/^(un)?grant-(read|save)$/.test(entry.action))return `${time(entry.at)} · ${entry.action.endsWith('save')?'Keeping your tracked links':'Seeing your tracked links'} · ${entry.action.startsWith('un')?'You turned it off':'You allowed it'}`;
- if(entry.target==='conversations'&&/^(un)?grant-(add|search)$/.test(entry.action))return `${time(entry.at)} · ${entry.action.endsWith('add')?'Saving conversations':'Searching conversations'} · ${entry.action.startsWith('un')?'You turned it off':'You allowed it'}`;
  if(entry.target==='agents'&&/^(un)?grant-(report|list)$/.test(entry.action))return `${time(entry.at)} · ${entry.action.endsWith('list')?'Seeing other Agents':'Reporting its work'} · ${entry.action.startsWith('un')?'You turned it off':'You allowed it'}`;
  if(entry.target==='agents'&&entry.action==='report'&&entry.decision==='allowed')return `${time(entry.at)} · Reported its work`;
  if(entry.target==='board'&&/^(un)?grant-(read|define)$/.test(entry.action))return `${time(entry.at)} · ${entry.action.endsWith('define')?'Setting up your board':'Seeing your board'} · ${entry.action.startsWith('un')?'You turned it off':'You allowed it'}`;
@@ -197,7 +189,7 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
    }
    // "Can ask you" and "Can take work"; "Can see your board" and "Can set up your board": each gives or takes back one
    // Grant at once, naming only which.
-   const toggles=(granted:Record<string,boolean>|undefined,list:readonly (readonly [string,string,string,string])[],operation:'Asks'|'Board'|'GithubDrafts'|'Conversations'|'Links'|'Reports'|'Artifacts'|'ServiceDrafts',data:'asks'|'board'|'githubDrafts'|'conversations'|'links'|'reports'|'artifacts'|'serviceDrafts')=>{
+   const toggles=(granted:Record<string,boolean>|undefined,list:readonly (readonly [string,string,string,string])[],operation:'Asks'|'Board'|'GithubDrafts'|'Reports'|'Artifacts'|'ServiceDrafts',data:'asks'|'board'|'githubDrafts'|'reports'|'artifacts'|'serviceDrafts')=>{
     if(agent.revokedAt||!granted)return;
     const group=el('div','companion-settings-access-services');
     for(const [kind,title,on,off] of list){
@@ -215,8 +207,6 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
    };
    toggles(agent.asks,ASK_TOGGLES,'Asks','asks');
    toggles(agent.board,BOARD_TOGGLES,'Board','board');
-   toggles(agent.conversations,CONVERSATION_TOGGLES,'Conversations','conversations');
-   toggles(agent.links,LINK_TOGGLES,'Links','links');
    toggles(agent.reports,REPORT_TOGGLES,'Reports','reports');
    toggles(agent.artifacts,ARTIFACT_TOGGLES,'Artifacts','artifacts');
    toggles(agent.githubDrafts===undefined?undefined:{draft:agent.githubDrafts},DRAFT_TOGGLES,'GithubDrafts','githubDrafts');

@@ -26,7 +26,7 @@ Selected coding sessions use explicit routing, cleared when the user leaves them
 ## Portable records and explicit transfer
 
 Worldlet keeps portable identity, personality, durable memory checkpoints and visible
-conversation archives. Live Harness state is distinct and may use its own format.
+conversation history. Live Harness state is distinct and may use its own format.
 Import/export or profile attachment is explicit, previewed and scoped; never copy
 credentials or silently merge private histories. Replacing an adapter must preserve
 stable world IDs, provenance and user choices.

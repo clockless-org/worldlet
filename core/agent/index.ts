@@ -9,8 +9,6 @@ export * from './orders.ts';
 export * from './script-agents.ts';
 export * from './reports.ts';
 export * from './github-drafts.ts';
-export * from './conversations.ts';
-export * from './tracked-links.ts';
 export * from './agent-artifacts.ts';
 export * from './service-drafts.ts';
 export * from './auth-handoff.ts';
