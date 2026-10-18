@@ -3,7 +3,7 @@ import path from 'node:path';
 import {WorldletError,ensureDirectory,writeAtomic,digest} from '../../files.ts';
 import {curatedSourceRead} from '../../../../../core/applets/index.ts';
 import {GITHUB_GATE,LINEAR_GATE,NOTION_GATE,PAYPAL_GATE,SUPABASE_GATE,TODOIST_GATE,MCP_POLICY,enabledMcpTools,mcpConfiguration,notion,readGithub,readLinear,readPaypal,readSupabase,todoist,todoistTimeoutSeconds,
- collectNotionPage,type McpGate,type McpSession,type NotionReviewStore} from '../../../../../core/accounts/index.ts';
+ collectNotionPage,mcpServiceRecords,type McpGate,type McpSession,type NotionReviewStore} from '../../../../../core/accounts/index.ts';
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
 import type {McpAccounts,McpConnection} from './mcp-account.ts';
@@ -18,7 +18,7 @@ export const MCP_ENDPOINTS:Readonly<Record<string,string>>=Object.freeze({notion
 const TITLES:Readonly<Record<string,string>>=Object.freeze({notion:'Notion',github:'GitHub',linear:'Linear',paypal:'PayPal',todoist:'Todoist',supabase:'Supabase'});
 const GATES:Readonly<Record<string,McpGate>>=Object.freeze({github:GITHUB_GATE,notion:NOTION_GATE,todoist:TODOIST_GATE,linear:LINEAR_GATE,paypal:PAYPAL_GATE,supabase:SUPABASE_GATE});
 export const MCP_PROVIDERS=Object.freeze(Object.keys(MCP_ENDPOINTS));
-/** The Worldlet Services read over MCP (GitHub); PostHog and Cloudflare are read over their own APIs (service-source.ts). */
+/** The Worldlet Services read over MCP (GitHub, Linear, Todoist, Supabase); PostHog and Cloudflare are read over their own APIs (service-source.ts). */
 const MCP_SERVICES=Object.freeze(SERVICE_PROVIDERS.filter(provider=>MCP_PROVIDERS.includes(provider)));
 /** What the person reads when a pasted token is refused (401). */
 const TOKEN_REFUSED:Readonly<Record<string,string>>=Object.freeze({github:'GitHub did not accept this token. Check that it has not expired and has read access to Issues, Pull requests and Metadata, then paste it again.'});
@@ -178,10 +178,12 @@ export class McpSourceAccess implements AgentRuntime {
   return this.source.read(request.provider,request.body);
  }
  /** `read_service` for a Service read over MCP: validated, admitted by the turn (admitServiceRead), then one bounded
-  * read with no model. */
+  * read with no model. GitHub's reader answers in Service records; Linear's, Todoist's and Supabase's answer as their
+  * Applets read them, so the answer is made Service records here. */
  private async service(args:Row,onEvent:AgentEventHandler|undefined):Promise<Row> {
   const {provider,body}=await admitServiceRead(args,MCP_SERVICES,onEvent);
-  return this.source.read(provider,body);
+  const answer=await this.source.read(provider,body);
+  return provider==='github'?answer:mcpServiceRecords(provider,body.operation as 'list'|'read',answer) as unknown as Row;
  }
 }
 

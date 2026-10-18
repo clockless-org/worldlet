@@ -153,7 +153,8 @@ await withTempDir('worldlet-sync-recovery-',async dir=>{
  assert.equal(await sync.tick(),false);assert.equal(JSON.stringify(ledger.value('service-sync-snapshots','b')),kept,'snapshot write failure rolls back deletion and checkpoint changes');
  ledger.put=original;clock+=30;assert.equal(await sync.tick(),true);
  clock+=900;read=async()=>new Promise(()=>{});
- const keepAlive=setTimeout(()=>{},50);assert.equal(await sync.tick(),false);clearTimeout(keepAlive);
+ // The sync's own timeout timer is unref'd: hold the loop open until the tick settles, however slow the machine.
+ const keepAlive=setInterval(()=>{},1000);assert.equal(await sync.tick(),false);clearInterval(keepAlive);
  assert.equal(ledger.value('service-sync-jobs','b')!.check.errorCode,'timeout');
  // Owner restarts an expired pagination traversal without discarding the last-good snapshot.
  sync.handle({operation:'restart',id:'b'});read=async req=>page(req,['part'],'old-cursor');assert.equal(await sync.tick(),true);clock+=5;
