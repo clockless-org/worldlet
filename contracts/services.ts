@@ -29,6 +29,11 @@ export const SERVICE_ACTIONS:Readonly<Record<string,Readonly<Partial<Record<Serv
  * background reads: an Agent reads a Service only through `read_service` and a Grant naming it, never through
  * `read_world_source` (core/tools/gateway.ts). */
 export const SERVICE_PROVIDERS:readonly string[]=Object.freeze(Object.keys(SERVICE_ACTIONS));
+/** The World's saved Service context (core/accounts/services/context.ts): one search and one read across what the World
+ * keeps up to date from each connected Service, for an Agent that may read that Service. Every "Can read <Service>"
+ * Grant names both; each result is limited to the Services the calling Agent may read. */
+export const SERVICE_CONTEXT_TARGET='context';
+export const SERVICE_CONTEXT_ACTIONS=Object.freeze({search:'context/search',read:'context/read'} as const);
 /** Each Service's name as the person knows it (Settings › Agent › Access: "Can read GitHub"). */
 export const SERVICE_TITLES:Readonly<Record<string,string>>=Object.freeze({github:'GitHub',posthog:'PostHog',cloudflare:'Cloudflare',http:'HTTP JSON','search-console':'Search Console',linear:'Linear',todoist:'Todoist',supabase:'Supabase'});
 

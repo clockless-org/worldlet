@@ -126,7 +126,7 @@ assert.equal(worldCallWrites('start_applet_task'),true);assert.equal(worldCallWr
 // describe_world_tools: only granted targets outside a turn; everything while a Fox turn holds the server; none revoked.
 const listed=new Set(standingActions(actions,hermes,defaults,false,now).map(a=>a.target));
 assert.ok(listed.has('items')&&listed.has('world')&&!listed.has('content'));
-assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.filter(a=>!['asks','board','github-drafts','github-writes','conversations','links','agents','agent-artifacts','posthog-drafts','notion-drafts'].includes(a.target)).length,'everything but asks, the board, GitHub, PostHog and Notion drafts, GitHub writes, the conversation archive, tracked links, Agent reports and Journal artifacts, which only the Agent\'s own Grants name');
+assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.filter(a=>!['asks','board','context','github-drafts','github-writes','conversations','links','agents','agent-artifacts','posthog-drafts','notion-drafts'].includes(a.target)).length,'everything but asks, the board, the saved Service context, GitHub, PostHog and Notion drafts, GitHub writes, the conversation archive, tracked links, Agent reports and Journal artifacts, which only the Agent\'s own Grants name');
 assert.deepEqual(standingActions(actions,{...hermes,revokedAt:earlier},defaults,true,now),[]);
 // A resolved call maps back to its target and action (channelToolReply checks Grants by them).
 assert.deepEqual(worldActionOf(actions,'query_world_items',{}),{target:'items',action:'query'});
@@ -145,7 +145,7 @@ assert.deepEqual(serviceReadTargets('search-console'),['search-console/list','se
 for(const name of ['gmail','*','github/*','__proto__','constructor','','toString'])assert.deepEqual(serviceReadTargets(name),[],'not a Service: '+name);
 assert.equal(serviceReadGrant('codex','*/*',now),null,'a page never names its own patterns');assert.equal(serviceReadGrant('Not An Id','github',now),null);
 const githubGrant=serviceReadGrant('codex','github',now)!;
-assert.deepEqual(githubGrant,{id:'codex-service-github',agentId:'codex',targets:['github/list','github/read','github/search','github/releases'],access:'read',duration:'standing',grantedAt:now});
+assert.deepEqual(githubGrant,{id:'codex-service-github',agentId:'codex',targets:['github/list','github/read','github/search','github/releases','context/search','context/read'],access:'read',duration:'standing',grantedAt:now});
 assert.ok(!defaults.concat(channelDefaultGrants('codex',earlier,actions)).some(g=>g.targets.some(t=>/^(github|posthog|cloudflare|http|search-console)\//.test(t))),'no Service in the default Grants');
 const codexDefaults=channelDefaultGrants('codex',earlier,actions);
 const serviceCall=(grants:Grant[],target:string,action:string,args:Record<string,unknown>)=>{

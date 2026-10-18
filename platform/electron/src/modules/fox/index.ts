@@ -255,6 +255,9 @@ export function installFox(host:Host){
   if(name==='agent_asks')return {error:'Asks are for Agents reaching Worldlet on their own. Ask the person here in the conversation instead.'};
   // The board is read and set up by Agents the person allowed in Settings, under their own Grants (agent-runtime/board.ts),
   // never by a Fox turn.
+  // The World's saved Service context is for Agents reaching Worldlet on their own, under their own "Can read" Grants;
+  // a Fox turn reads the Service itself.
+  if(name==='world_context')return {error:'Saved Service context is for Agents the person allowed in Settings › Agent › Access. Read the Service with read_service instead.'};
   if(name==='world_board')return {error:'The board is for Agents the person allowed in Settings › Agent › Access. Read the Services it shows with read_service instead.'};
   // GitHub drafts are an Agent's own, on the standing server under its own Grants (agent-runtime/github-drafts.ts): a Fox
   // turn never drafts a GitHub write.

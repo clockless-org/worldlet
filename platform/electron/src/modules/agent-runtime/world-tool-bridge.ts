@@ -7,7 +7,7 @@ import {GRANT_REASONS,HERMES_WORLD_TOOLS_SHIM,agentAuditEntry,artifactGranted,st
 import type {AgentAccess} from '../../host/services.ts';
 import type {AgentIdentity,Grant} from '../../../../../contracts/agent-identity.ts';
 import {AGENT_REPORT_TARGET} from '../../../../../contracts/agent-reports.ts';
-import {SERVICE_PROVIDERS} from '../../../../../contracts/services.ts';
+import {SERVICE_ACTIONS,SERVICE_PROVIDERS} from '../../../../../contracts/services.ts';
 import {writeAtomic} from '../../files.ts';
 import {AGENT_ASK_LIMITS} from '../../../../../contracts/agent-asks.ts';
 import type {Row} from './types.ts';
@@ -96,6 +96,8 @@ const CALL_LIMIT=1_000_000,STANDING_CALL_LIMIT=Math.ceil(AGENT_ASK_LIMITS.attach
 const ASK_TOOL='agent_asks';
 /** The World tool behind `board/*` (core/tools/gateway.ts). */
 const BOARD_TOOL='world_board';
+/** The World tool behind `context/*` (core/tools/gateway.ts). */
+const CONTEXT_TOOL='world_context';
 /** The World tool behind `github-drafts/*` (core/tools/gateway.ts). */
 const DRAFT_TOOL='github_drafts';
 /** The World tool behind `conversations/*` (core/tools/gateway.ts). */
@@ -228,6 +230,9 @@ export const standingEndpointFile=(agentId:string)=>`worldlet-mcp-endpoint.${age
 /** `board`: a board call (`world_board`, core/board/README.md) by the Agent whose token made it, the same way: its own
  * Grants decide it, and `canRead` says whether they let it read a Service, so the board never shows an Agent a Service
  * its own `read_service` call would be refused, nor other Agents' reports its own `agents/list` call would be. */
+/** `context`: a search or read of the World's saved Service context (`world_context`, core/accounts/services/context.ts)
+ * by the Agent whose token made it, the same way: `canRead` says whether its own Grants let it read a Service, so an
+ * answer never holds a Service its own `read_service` call would be refused. */
 /** `drafts`: a GitHub draft call (`github_drafts`, core/agent/GRANTS.md#github-drafts) by the Agent whose token made it,
  * the same way: its own Grants decide it, never a Fox turn's. `serviceDrafts`: a PostHog or Notion draft call
  * (`service_drafts`, core/agent/GRANTS.md#posthog-and-notion-drafts), the same way. */
@@ -242,8 +247,8 @@ export const standingEndpointFile=(agentId:string)=>`worldlet-mcp-endpoint.${age
 /** `serviceRequest`: an Agent's `read_service` call was refused for a Service (not allowed to read it, or not connected):
  * the host may ask the person on an Attention card (core/agent/service-requests.ts) and answers what the refusal says
  * after its reason. */
-export async function openStandingWorldTools({channel,access,asks,board,drafts,writes,conversations,links,reports,artifacts,serviceDrafts,serviceRequest,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;
- board?:(agentId:string,args:Row,canRead:(provider:string,operation:string)=>boolean)=>Promise<Row>;drafts?:(agentId:string,args:Row)=>Promise<Row>;writes?:(agentId:string,args:Row,grants:Grant[])=>Promise<Row>;
+export async function openStandingWorldTools({channel,access,asks,board,context,drafts,writes,conversations,links,reports,artifacts,serviceDrafts,serviceRequest,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;
+ board?:(agentId:string,args:Row,canRead:(provider:string,operation:string)=>boolean)=>Promise<Row>;context?:(args:Row,canRead:(provider:string)=>boolean)=>Row;drafts?:(agentId:string,args:Row)=>Promise<Row>;writes?:(agentId:string,args:Row,grants:Grant[])=>Promise<Row>;
  conversations?:(agentId:string,args:Row)=>Row;links?:(agentId:string,args:Row)=>Row;reports?:(agentId:string,args:Row)=>Row;
  artifacts?:(agentId:string,args:Row,readsAll:boolean)=>Row;serviceDrafts?:(agentId:string,args:Row)=>Promise<Row>;serviceRequest?:(agent:{id:string;name:string},provider:string)=>string;runner?:string}):Promise<StandingWorldTools> {
  const route='/'+crypto.randomUUID();
@@ -262,6 +267,7 @@ export async function openStandingWorldTools({channel,access,asks,board,drafts,w
     :name===REPORT_TOOL?reports?.(identity.id,args)??{error:'Agent reports are not available in this build.'}
     :name===ARTIFACT_TOOL?artifacts?.(identity.id,args,artifactGranted(identity.id,grants,'read',now))??{error:'Saving to the Journal is not available in this build.'}
     :name===SERVICE_DRAFT_TOOL?await serviceDrafts?.(identity.id,args)??{error:'PostHog and Notion drafts are not available in this build.'}
+    :name===CONTEXT_TOOL?context?.(args,provider=>SERVICE_PROVIDERS.includes(provider)&&standingCallDecision({identity,grants,target:provider,action:Object.keys(SERVICE_ACTIONS[provider])[0],tool:'read_service',args:{provider,operation:Object.keys(SERVICE_ACTIONS[provider])[0]},foxTurn:null,now}).decision==='allowed')??{error:'Saved Service context is not available in this build.'}
     :name===BOARD_TOOL?board?.(identity.id,args,(provider,operation)=>standingCallDecision({identity,grants,target:provider,action:operation,tool:provider===AGENT_REPORT_TARGET?REPORT_TOOL:'read_service',args:provider===AGENT_REPORT_TARGET?{operation}:{provider,operation},foxTurn:null,now}).decision==='allowed')??{error:'The board is not available in this build.'}
     :turn?turn.dispatch(name,args,call):channel(name,args,identity.id),
    access:{

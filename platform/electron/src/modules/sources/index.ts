@@ -90,6 +90,7 @@ export function installSources(host:Host){
  const organizeSources=(body:Row)=>{host.optional<SpeechService>(SPEECH)?.cancelCapture();return organizer.organizeSources(body);};
  const service:SourcesService={
   readNotionContext:request=>sync.notionContext(request),
+  serviceContext:(request,canRead)=>sync.serviceContext(request,canRead),
   itemOriginal:id=>itemOriginal(ctx,id),
   receiveAppletEvent,describeApplet,finishAppletTurn,
   clearMailReviews:()=>reviews.clearMail(),

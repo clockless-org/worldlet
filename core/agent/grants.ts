@@ -1,5 +1,5 @@
 import {AGENT_ID_PATTERN,type AgentAuditEntry,type AgentIdentity,type Grant} from '../../contracts/agent-identity.ts';
-import {SERVICE_ACTIONS,SERVICE_PROVIDERS} from '../../contracts/services.ts';
+import {SERVICE_ACTIONS,SERVICE_CONTEXT_ACTIONS,SERVICE_CONTEXT_TARGET,SERVICE_PROVIDERS} from '../../contracts/services.ts';
 import {AGENT_ASK_ACTIONS,AGENT_ASK_TARGET} from '../../contracts/agent-asks.ts';
 import {BOARD_ACTIONS,BOARD_TARGET} from '../../contracts/board.ts';
 import {CONVERSATION_ACTIONS,CONVERSATION_TARGET} from '../../contracts/conversations.ts';
@@ -167,9 +167,15 @@ export const serviceGrantId=(agentId:string,provider:string)=>agentId+'-service-
 /** The standing read Grant for one Service, or null when `provider` is not a Service or the Agent ID is not one. Hosts
  * build it from the Service's name only: a page never supplies targets. Never part of the default Grants. */
 export function serviceReadGrant(agentId:string,provider:string,grantedAt:string):Grant|null {
- const targets=serviceReadTargets(provider);
+ const targets=serviceGrantTargets(provider);
  if(!targets.length||typeof agentId!=='string'||!AGENT_ID_PATTERN.test(agentId))return null;
  return {id:serviceGrantId(agentId,provider),agentId,targets,access:'read',duration:'standing',grantedAt};
+}
+/** What "Can read <Service>" names: the Service's reads, and the search and read of the World's saved context
+ * (SERVICE_CONTEXT_ACTIONS), whose answers hold only the Services the Agent may read. */
+export function serviceGrantTargets(provider:string):string[] {
+ const reads=serviceReadTargets(provider);
+ return reads.length?[...reads,SERVICE_CONTEXT_ACTIONS.search,SERVICE_CONTEXT_ACTIONS.read]:[];
 }
 /** A stored Grant as it counts today: a "Can read <Service>" Grant (by its ID, a standing read) names that Service's reads
  * as they are now, so a read the Service gains later (GitHub's `releases`) is covered by the Grant the person gave and
@@ -177,7 +183,7 @@ export function serviceReadGrant(agentId:string,provider:string,grantedAt:string
 export function currentServiceGrant(grant:Grant):Grant {
  const provider=SERVICE_PROVIDERS.find(name=>grant.id===serviceGrantId(grant.agentId,name));
  if(!provider||grant.access!=='read'||grant.duration!=='standing')return grant;
- return {...grant,targets:serviceReadTargets(provider)};
+ return {...grant,targets:serviceGrantTargets(provider)};
 }
 /** Whether this Agent's "Can read <Service>" Grant is active. */
 export function serviceGranted(agentId:string,grants:readonly Grant[],provider:string,now:string):boolean {
@@ -415,7 +421,7 @@ export function serviceDraftGrantAuditEntry(agentId:string,provider:ServiceDraft
  * Notion drafts and standing GitHub writes, its report, what it saved to the Journal) or the person's board,
  * conversation archive, tracked links, Agents and Journal artifacts, so a Fox turn's Grant, which covers everything
  * else, never covers them. */
-export const OWN_GRANT_TARGETS:readonly string[]=Object.freeze([AGENT_ASK_TARGET,BOARD_TARGET,GITHUB_DRAFT_TARGET,GITHUB_WRITE_TARGET,CONVERSATION_TARGET,TRACKED_LINK_TARGET,AGENT_REPORT_TARGET,AGENT_ARTIFACT_TARGET,...SERVICE_DRAFT_TARGETS]);
+export const OWN_GRANT_TARGETS:readonly string[]=Object.freeze([AGENT_ASK_TARGET,BOARD_TARGET,SERVICE_CONTEXT_TARGET,GITHUB_DRAFT_TARGET,GITHUB_WRITE_TARGET,CONVERSATION_TARGET,TRACKED_LINK_TARGET,AGENT_REPORT_TARGET,AGENT_ARTIFACT_TARGET,...SERVICE_DRAFT_TARGETS]);
 
 /** While a Fox turn holds the standing server, its Agent's calls go to that turn (world-tool-bridge.ts standingTurn), as
  * they did before Grants: a call the turn's own stream announced is Fox's and runs under the turn's trust; any other

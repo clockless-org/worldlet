@@ -20,6 +20,7 @@ export {jsonSchemaValid} from './mcp/json-schema.ts';
 export {READ_SHAPED,MCP_POLICY,fnmatchcase,mcpConfiguration,enabledMcpTools,type McpPolicy} from './mcp/policy.ts';
 export {NOTION_ENDPOINT,NOTION_GATE,NOTION_MAX_TEXT,notion,readNotion,notionPageId,notionPayload,notionPage,displayText as notionDisplayText,readableMentions as notionReadableMentions} from './mcp/notion.ts';
 export {collectNotionPage,readNotionContext} from './services/notion-context.ts';
+export {SERVICE_CONTEXT_LIMITS,SERVICE_CONTEXT_REASONS,serviceContext} from './services/context.ts';
 export {NOTION_WRITE_OPERATIONS,NOTION_REVIEW_FOLDER,handleNotionWrite,publicReview as notionPublicReview,notionFingerprint,notionWriteArgs,type NotionReviewStore,type NotionWriteOptions} from './mcp/notion-writes.ts';
 export {TODOIST_ENDPOINT,TODOIST_TOOLS,TODOIST_GATE,todoistTimeoutSeconds,todoistTaskId,todoist,readTodoist,reviewedTodoist} from './mcp/todoist.ts';
 export {LINEAR_ENDPOINT,LINEAR_TOOLS,LINEAR_GATE,linearIssueId,linearListArguments,readLinear} from './mcp/linear.ts';
