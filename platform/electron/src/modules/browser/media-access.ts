@@ -19,6 +19,22 @@ export async function blockedMediaDevices(devices:MediaDevice[],platform:string=
  return blocked;
 }
 
+/** Asks macOS ahead of a call page's own request for the devices it has never been asked about. The page's
+ * engine (Worldlet Web) only reads the system status, and while it reads "not determined" Chromium refuses the
+ * page itself, so the request never reaches Worldlet and macOS never shows its question (owner report
+ * 2026-10-17: no prompt, no camera). Returns the devices the person allowed just now and those still blocked. */
+export async function prepareMediaDevices(devices:MediaDevice[],platform:string=process.platform):Promise<{allowed:MediaDevice[];blocked:MediaDevice[]}> {
+ if(platform!=='darwin')return {allowed:[],blocked:await blockedMediaDevices(devices,platform)};
+ const allowed:MediaDevice[]=[],blocked:MediaDevice[]=[];
+ for(const device of devices){
+  const status=systemPreferences.getMediaAccessStatus(device);
+  if(status==='granted')continue;
+  if(status==='not-determined'&&await systemPreferences.askForMediaAccess(device))allowed.push(device);
+  else blocked.push(device);
+ }
+ return {allowed,blocked};
+}
+
 const SETTINGS:Record<string,Record<MediaDevice,string>>={
  darwin:{microphone:'x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone',camera:'x-apple.systempreferences:com.apple.preference.security?Privacy_Camera'},
  win32:{microphone:'ms-settings:privacy-microphone',camera:'ms-settings:privacy-webcam'}

@@ -23,7 +23,7 @@ import {BattleReviews} from './battle-review.ts';
 import {MeetingTranscriber} from './meeting-transcript.ts';
 import {transcriptLine} from '../../../../../core/applets/index.ts';
 import {Surface,websiteSession} from './surface.ts';
-import {blockedMediaDevices,explainBlockedMedia,mediaDevices,type MediaDevice} from './media-access.ts';
+import {blockedMediaDevices,explainBlockedMedia,mediaDevices,prepareMediaDevices,type MediaDevice} from './media-access.ts';
 import {HOMES,SIGN_IN_HOSTS,signInPage,isGoogleMaps,isNotion,isX,parse,publicPage,sameURL} from './rules.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {ANALYTICS,FOX,SPEECH,USER_ACTIVITY,type AnalyticsService,type FoxService,type SpeechService,type UserActivityService} from '../../host/services.ts';
@@ -45,7 +45,7 @@ const LOAD_WAIT_MS=8000;
 const PAGE_AFTER_MS=300;
 /** How long the same page goes before its text is read again for browsing history. */
 const HISTORY_REREAD_MS=30_000;
-const MEETING_HOSTS=['meet.google.com','zoom.us','teams.microsoft.com','teams.live.com'];
+const MEETING_HOSTS=['meet.google.com','zoom.us','teams.microsoft.com','teams.live.com','teams.cloud.microsoft'];
 /** Focus on website pages (core/browser/page-focus.ts): each site's choice is a record in the World. */
 const FOCUS_BUCKET='site-focus';
 /** Sites whose video needs H.264/AAC (core/browser/video-formats.ts): one record each in the World. */
@@ -115,6 +115,8 @@ export class BrowserDevice {
  // Camera and microphone the person allowed a meeting page, kept while it stays on that site.
  private mediaGrants=new WeakMap<WebPage,{host:string,media:number}>();
  private mediaAsking=new WeakMap<WebPage,Promise<boolean>>();
+ // Whether this run already asked the OS for a call's camera and microphone, or said where to turn them on.
+ private mediaPrepared=false;
  /** Brings the World window back (the desktop Companion's Back to World). */
  restoreWorld:()=>Promise<void>|void=()=>{};
  constructor(host:Host,agent:Omit<AgentBrowserEnvironment,'pointer'>){
@@ -403,6 +405,8 @@ export class BrowserDevice {
    if(this.transcript?.view===view)void view.meetingAudio(true);
    // A call page in Meetings can be heard now: the World starts its transcript (owner request 2026-10-06).
    else if(!this.transcript&&view instanceof CefPageView&&view.meetingAudioReady&&meetingPage(view.url)&&this.browser===view&&!view.hidden)this.emit({phase:'meeting-ready'});
+   // A call page gets the OS's camera and microphone question before it asks for them itself.
+   if(meetingPage(view.url)&&this.browser===view&&!view.hidden)void this.prepareMeetingMedia(view);
    // A new document in the window shows only its video again.
    if(this.pipPage?.view===view){void this.pictureInPicture(view,'enter');return;}
    if(!visible())return;
@@ -464,6 +468,18 @@ export class BrowserDevice {
   if(allowed)this.mediaGrants.set(view,{host,media:had|request.media});
   request.answer(allowed);
  }
+ /** Asks the OS for the camera and microphone when a call page opens (media-access.ts prepareMediaDevices), once a
+  * run; a page that loaded while they were undecided had them refused, so it loads again once they are allowed. */
+ private async prepareMeetingMedia(view:WebPage){
+  if(this.mediaPrepared)return;
+  this.mediaPrepared=true;
+  const host=parse(view.url)?.hostname;
+  const {allowed,blocked}=await this.prepareMedia(['microphone','camera']).catch(()=>({allowed:[],blocked:[]}));
+  if(blocked.length)void explainBlockedMedia(this.surface.window(),blocked);
+  if(allowed.length&&this.browser===view&&!view.hidden&&parse(view.url)?.hostname===host)view.reload();
+ }
+ /** Checks stand in for the OS. */
+ prepareMedia=prepareMediaDevices;
  /** Whether the OS lets Worldlet use the devices (media-access.ts), saying where to turn them on when
   * not; checks stand in for the OS. */
  systemMedia=async(devices:MediaDevice[])=>{
