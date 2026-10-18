@@ -17,6 +17,8 @@ await withBrowser(async browser=>{
  await page.evaluate(async()=>{
   const w=window as any;w.calls=[];w.connections=[{provider:'github',label:'GitHub',transport:'hermes',syncStatus:'connected',connected:true,failed:false}];
   w.pending=null;w.refuse=null;w.chosen='2';w.opened=[];w.copied=[];
+  // GitHub's default sync, on since it connected, last updated five minutes ago.
+  w.syncs=[{id:'github-updates',provider:'github',default:true,revision:1,available:true,check:{enabled:true,intervalMinutes:60,lastStatus:'complete'},snapshotAt:Date.now()/1000-300}];
   w.remote={enabled:false,connected:true,address:'https://mcp.worldlet.ai/'+'0'.repeat(32),connectors:[]};
   Object.defineProperty(navigator,'clipboard',{value:{writeText:async(text:string)=>{w.copied.push(text);}}});
   // The Agents that have reached the World, and which may read which Service ("<agent>:<provider>").
@@ -40,6 +42,8 @@ await withBrowser(async browser=>{
    if(action==='githubApp')return {connected:false};
    if(action==='openSystemBrowser'){w.opened.push(body.url);return {ok:true};}
    if(action==='httpJson')return {endpoints:[]};
+   if(action==='serviceSync'&&body.operation==='list')return {jobs:structuredClone(w.syncs)};
+   if(action==='serviceSync'&&body.operation==='configure'){const job=w.syncs.find((j:any)=>j.id===body.id);job.check.enabled=body.enabled;return {ok:true};}
    // Remote access, for "Use your World in Claude or ChatGPT": off at first.
    if(action==='remoteMcp'&&body.operation==='status')return structuredClone(w.remote);
    if(action==='remoteMcp'&&body.operation==='enable'){w.remote.enabled=true;return {ok:true};}
@@ -117,6 +121,20 @@ await withBrowser(async browser=>{
  await plain('who may use it');
  await tile('github').getByRole('button',{name:'Done',exact:true}).click();
  assert.equal(await tile('github').getByRole('checkbox').count(),1);
+ // Kept up to date: "Updated 5 minutes ago" on the tile, and the switch under its details, on by default.
+ const fresh=tile('github').locator('[data-sync=github]');
+ await fresh.getByText('Updated 5 minutes ago.',{exact:true}).waitFor();
+ await fresh.locator('summary').click();
+ const keep=fresh.getByRole('checkbox',{name:'Keep GitHub up to date in your World, every hour',exact:true});
+ assert.equal(await keep.isChecked(),true,'on by default');
+ await keep.uncheck();
+ await page.waitForFunction(()=>(window as any).calls.some((c:any)=>c.action==='serviceSync'&&c.operation==='configure'));
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='serviceSync'&&c.operation==='configure')),[{action:'serviceSync',operation:'configure',id:'github-updates',enabled:false}]);
+ await tile('github').locator('[data-sync=github]').getByText('Not kept up to date.',{exact:true}).waitFor();
+ assert.equal(await tile('github').locator('[data-sync=github]').evaluate(node=>(node as HTMLDetailsElement).open),true,'its details stay open');
+ await plain('kept up to date');
+ await tile('github').locator('[data-sync=github]').getByRole('checkbox').check();
+ await tile('github').locator('[data-sync=github]').getByText('Updated 5 minutes ago.',{exact:true}).waitFor();
  const screenshot=process.argv.includes('--screenshot')?process.argv[process.argv.indexOf('--screenshot')+1]:'';
 
  // Connect: waiting, with Cancel, then Connected; the request names the Thing's region.
@@ -226,4 +244,4 @@ await withBrowser(async browser=>{
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'narrow settings do not overflow horizontally');
  if(screenshot)await page.screenshot({path:screenshot.replace(/\.png$/,'-narrow.png'),fullPage:true});
 });
-console.log('PASS Settings › Connectors: using the World in Claude or ChatGPT (steps, Turn on, Copy address without showing it), GitHub\'s code with Copy and open GitHub and Choose projects, sign-in tiles with Connect, waiting and Cancel, Connected as, Disconnect asks once, plain words for a refusal and a sign-out, who may use it (the Agent in use on, Choose Agents), the PostHog project and Cloudflare account choices, Search Console signing in with Google, key services shown connected, keys and addresses only under Advanced, no technical word on the default path, narrow layout');
+console.log('PASS Settings › Connectors: using the World in Claude or ChatGPT (steps, Turn on, Copy address without showing it), GitHub\'s code with Copy and open GitHub and Choose projects, sign-in tiles with Connect, waiting and Cancel, Connected as, Disconnect asks once, plain words for a refusal and a sign-out, who may use it (the Agent in use on, Choose Agents), kept up to date ("Updated 5 minutes ago", the switch on by default), the PostHog project and Cloudflare account choices, Search Console signing in with Google, key services shown connected, keys and addresses only under Advanced, no technical word on the default path, narrow layout');

@@ -105,7 +105,8 @@ export function installSources(host:Host){
  host.provide('appleSources',{providers:APPLE_PROVIDERS,read:(provider:string,authorize:boolean,includeCancelled=false)=>readApple(ctx,provider,authorize,includeCancelled)});
 
  host.register({
-  connect:body=>connections.connect(body),
+  // A Service that connects starts keeping its default read fresh (core SERVICE_SYNC_DEFAULTS).
+  connect:async body=>{const answer=await connections.connect(body);sync.connected();return answer;},
   connectCancel:()=>{connections.connectCancel();return {ok:true};},
   agentIntegrations:body=>connections.agentIntegrations(body),
   disconnectSource:async body=>{await connections.disconnectSource(body);return {ok:true};},
