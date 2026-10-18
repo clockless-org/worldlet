@@ -79,7 +79,7 @@ export interface AgentListArgs {ids?:string[];liveness?:AgentLiveness}
 /** One Agent as `agents/list` and Settings › Agents show it. */
 export interface AgentListEntry {id:string;name:string;harness:string;kind:'local'|'remote';liveness:AgentLiveness;report?:AgentReport}
 
-/** The board's `agents` source (core/board/README.md#the-agents-source): a preset of provider `agents` (operation
+/** The board's `agents` source (context/board/README.md#the-agents-source): a preset of provider `agents` (operation
  * `list`) reads what `agents/list` returns, from this World's own records with no Service, as records a board block
  * shows. Its `id` names what each record is: `agents` (one per Agent), `runs` (one per run an Agent reported, newest
  * first) or `totals` (one record of counts). Its optional `query` narrows it: terms separated by spaces, every one of

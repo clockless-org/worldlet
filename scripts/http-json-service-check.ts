@@ -15,7 +15,7 @@ import type {AddressInfo} from 'node:net';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
 import type {ServiceRecords} from '../contracts/services.ts';
 import {HTTP_JSON_LIMITS,httpJsonBaseUrl,httpJsonRequest,privateAddress,readServicePresetRead,saveServicePreset,servicePresetRead} from '../core/accounts/index.ts';
-import {readBoardDefinition,resolveBoard} from '../core/board/index.ts';
+import {readBoardDefinition,resolveBoard} from '../context/board/index.ts';
 import {channelDefaultGrants,serviceReadTargets,standingActions,standingCallDecision} from '../core/agent/grants.ts';
 import {turnTrustObserve} from '../core/agent/turn-trust.ts';
 import {worldActionOf,worldActions} from '../core/tools/gateway.ts';

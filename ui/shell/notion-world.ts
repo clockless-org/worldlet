@@ -54,7 +54,7 @@ import {localCalendarItems} from '../applets/index.ts';
 import {alertAt,upcomingCalendarEvents} from '../../core/applets/index.ts';
 import type {World,WorldPage} from '../../contracts/world.ts';
 import {createAppletPanel,BOARD_READ_EVENT} from '../applets/index.ts';
-import {boardNorthStar,formatBoardNumber} from '../../core/board/index.ts';
+import {boardNorthStar,formatBoardNumber} from '../../context/board/index.ts';
 import {SERVICE_DRAFT_TITLES} from '../../contracts/service-drafts.ts';
 /** The Services a PostHog or Notion draft writes to, by provider, as the card names them. */
 const DRAFT_SERVICES:Record<string,string>=SERVICE_DRAFT_TITLES;

@@ -42,8 +42,8 @@ assert.throws(()=>assertComponentImport('website/main.ts','../ui/shell/notion-wo
 assertComponentImport('ui/companion/example.ts','../browser/index.ts');
 assertComponentImport('ui/browser/example.ts','./browser-device.ts');
 // The open-source export leaves out the hosted services (website, models, worker).
-assertComponentImport('core/board/board.ts','../../context/board/board.ts');
-assert.throws(()=>assertComponentImport('core/board/other.ts','../../context/board/board.ts'),/bypasses/);
+assertComponentImport('core/example/file.ts','../../context/example/file.ts');
+assert.throws(()=>assertComponentImport('core/example/other.ts','../../context/example/file.ts'),/bypasses/);
 for(const root of ['ui','agent','context','core','platform/bridge','website','models','worker'])if(existsSync(root))await scan(root);
 console.log('PASS Core/UI public component entry points, including type and dynamic imports; internal access stays within its owner.');
 

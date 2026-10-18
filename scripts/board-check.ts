@@ -5,9 +5,9 @@ import type {ServiceRecords} from '../contracts/services.ts';
 import {PRESET_REASONS,readServicePresetRead,saveServicePreset} from '../core/accounts/index.ts';
 import {AGENT_BOARD_REASONS,agentBoardRecords,listAgents,makeAgentReport} from '../core/agent/index.ts';
 import type {AgentIdentity} from '../contracts/agent-identity.ts';
-import {BOARD_REASONS,BOARD_TONE_WORDS,boardNorthStar,formatBoardNumber,formatBoardRate,defineBoard,boardNumber,boardPresetIds,readBoardDefinition,resolveBoard,type BoardRead} from '../core/board/index.ts';
+import {BOARD_REASONS,BOARD_TONE_WORDS,boardNorthStar,formatBoardNumber,formatBoardRate,defineBoard,boardNumber,boardPresetIds,readBoardDefinition,resolveBoard,type BoardRead} from '../context/board/index.ts';
 
-// The board (contracts/board.ts, core/board/board.ts): a definition of tabs and blocks that name Service presets,
+// The board (contracts/board.ts, context/board/board.ts): a definition of tabs and blocks that name Service presets,
 // checked; the resolver that turns it and the presets' reads into what each block shows, with a plain error for each
 // block that cannot be shown and no model; and the World's own `agents` source, read from what agents/list returns.
 const now='2026-10-15T12:00:00.000Z';
@@ -133,7 +133,7 @@ assert.deepEqual([formatBoardNumber(1234.567),formatBoardNumber(12_345,true),for
 assert.deepEqual([formatBoardRate(0.25),formatBoardRate(0.1),formatBoardRate(0.045),formatBoardRate(1),formatBoardRate(null)],['25%','10%','4.5%','100%','—']);
 assert.deepEqual(BOARD_TONE_WORDS,{good:'On target',bad:'Off target'});
 
-// The World's own `agents` source (core/board/README.md#the-agents-source): presets checked like any other, saved with
+// The World's own `agents` source (context/board/README.md#the-agents-source): presets checked like any other, saved with
 // a board, and read from what agents/list returns as runs, Agents or totals, narrowed by tag, role, agent, liveness,
 // status and words. Two release machines and a laptop; a revoked Agent never shows.
 assert.deepEqual(readServicePresetRead('agents',{operation:'list',id:'runs',query:'  Tag:Release   Beta '}),{operation:'list',id:'runs',query:'tag:release Beta'});
@@ -209,8 +209,8 @@ assert.deepEqual([releaseView[0].provider,releaseView[0].scope],['agents','Runs 
 assert.deepEqual(releaseView[1].number,{value:0,tone:'good'},'no Beta run is failing');
 assert.deepEqual(releaseView[2].number,{value:1,tone:'bad'},'one release machine has gone quiet');
 assert.deepEqual(releaseView[3].list?.items[0].fields,{tag:'v1.4.0',prerelease:false,publishedAt:'2026-10-14T09:00:00Z',assetCount:3});
-// The Releases board in core/board/README.md defines as it is written, and its first number is the north star.
-const documented=JSON.parse(fs.readFileSync(new URL('../core/board/README.md',import.meta.url),'utf8').match(/```json\n(\{"expectedRevision":0,[^`]*)```/)![1]);
+// The Releases board in context/board/README.md defines as it is written, and its first number is the north star.
+const documented=JSON.parse(fs.readFileSync(new URL('../context/board/README.md',import.meta.url),'utf8').match(/```json\n(\{"expectedRevision":0,[^`]*)```/)![1]);
 const documentedBoard=defineBoard(null,[],documented,null,now);
 assert.deepEqual(documentedBoard.presets.map(preset=>preset.provider).sort(),['agents','agents','agents','agents','agents','github']);
 const documentedReads=Object.fromEntries(documentedBoard.presets.map(preset=>[preset.id,preset.provider==='agents'?{records:agentBoardRecords(entries,preset.read)}:records('github',[])]));

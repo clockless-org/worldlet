@@ -1,6 +1,6 @@
 # The board
 
-The board shows numbers the person tracks: a north-star number, a funnel, the pull requests waiting, signups over time, the state of a release. It is laid out as tabs of blocks. Each block shows one preset: a [Service preset](../applets/INTEGRATIONS.md#service-presets), a saved read of GitHub, PostHog, Cloudflare or an HTTP JSON endpoint, or a saved read of the World's own records, [the Agents' reports](#the-agents-source). The board is general: anyone can define their own. A team's board and its presets are data in that person's own World, never code.
+The board shows numbers the person tracks: a north-star number, a funnel, the pull requests waiting, signups over time, the state of a release. It is laid out as tabs of blocks. Each block shows one preset: a [Service preset](../../core/applets/INTEGRATIONS.md#service-presets), a saved read of GitHub, PostHog, Cloudflare or an HTTP JSON endpoint, or a saved read of the World's own records, [the Agents' reports](#the-agents-source). The board is general: anyone can define their own. A team's board and its presets are data in that person's own World, never code.
 
 The shapes are in [`contracts/board.ts`](../../contracts/board.ts) and the rules in [`board.ts`](board.ts). `node scripts/board-check.ts` checks both.
 
@@ -28,17 +28,17 @@ For example, a funnel from one PostHog preset whose HogQL returns one row with t
 
 A preset names where its records come from (`provider`) and the one read it makes (`read`). Every source answers the same bounded records (an ID, a title, a link, plain fields), so any kind of block can show any of them.
 
-- **Services** (`github`, `posthog`, `cloudflare`): one of the Service's own reads, under its reader's rules and the calling Agent's own "Can read <Service>" ([Service presets](../applets/INTEGRATIONS.md#service-presets)).
+- **Services** (`github`, `posthog`, `cloudflare`): one of the Service's own reads, under its reader's rules and the calling Agent's own "Can read <Service>" ([Service presets](../../core/applets/INTEGRATIONS.md#service-presets)).
 - **The Agents' reports** (`agents`): the World's own records, read with no Service and no network ([below](#the-agents-source)).
 - A collected Notion page is a preset too, but it is not read live, so the board refuses it.
 
 ### GitHub releases
 
-`github` with `{"operation":"releases","id":"owner/repo"}` reads one repository's newest 10 releases, newest first, through the same GitHub reader and the same "Can read GitHub" Grant as GitHub's other reads ([GitHub as a Worldlet Service](../applets/INTEGRATIONS.md#github-as-a-worldlet-service)). Each record is `owner/repo@<tag>`, titled with the release's name (its tag when it has none), linked to the release on github.com, with the fields `repository`, `tag`, `name`, `publishedAt` (none for a draft), `prerelease`, `draft`, `assetCount`, `assets` (the first 20 asset names, separated by commas) and `author`. Release notes are not read.
+`github` with `{"operation":"releases","id":"owner/repo"}` reads one repository's newest 10 releases, newest first, through the same GitHub reader and the same "Can read GitHub" Grant as GitHub's other reads ([GitHub as a Worldlet Service](../../core/applets/INTEGRATIONS.md#github-as-a-worldlet-service)). Each record is `owner/repo@<tag>`, titled with the release's name (its tag when it has none), linked to the release on github.com, with the fields `repository`, `tag`, `name`, `publishedAt` (none for a draft), `prerelease`, `draft`, `assetCount`, `assets` (the first 20 asset names, separated by commas) and `author`. Release notes are not read.
 
 ### The agents source
 
-`agents` presets read what [`agents/list`](../agent/GRANTS.md#agent-reports) returns: every Agent the person has not revoked, its report and how it reads now. A release machine that reports its runs (`agents/report`, each run with its own ID, title, status and times) shows up on the board with no Service and no code. The read is `{"operation":"list","id":<what each record is>,"query":<optional filter>}` ([`contracts/agent-reports.ts`](../../contracts/agent-reports.ts), `agentBoardRecords` in [`core/agent/reports.ts`](../agent/reports.ts)):
+`agents` presets read what [`agents/list`](../../core/agent/GRANTS.md#agent-reports) returns: every Agent the person has not revoked, its report and how it reads now. A release machine that reports its runs (`agents/report`, each run with its own ID, title, status and times) shows up on the board with no Service and no code. The read is `{"operation":"list","id":<what each record is>,"query":<optional filter>}` ([`contracts/agent-reports.ts`](../../contracts/agent-reports.ts), `agentBoardRecords` in [`core/agent/reports.ts`](../../core/agent/reports.ts)):
 
 | `id` | One record per | Fields |
 | --- | --- | --- |
@@ -98,7 +98,7 @@ Each channel or platform is one more preset and block (`role:release alpha`, `ta
 
 ## On the host
 
-The board is kept in `world.sqlite` (`state.board`) beside its presets, in the person's own World with private context allowed. Agents reach it with `board/read` and `board/define` under their own Grants; no Agent has them by default and a Fox turn never does ([GRANTS.md](../agent/GRANTS.md#the-board)). The person's own view is the host action `board` (`read`). Each Service preset is read through the World's own Service reader (`read_service` with no Agent turn), at most four at once, and a read is reused for a minute. An `agents` preset is answered from the Agents' reports in the same `world.sqlite` each time it is read, as `agents/list` answers (`AgentReports.list`). `node scripts/board-host-check.ts` checks the host.
+The board is kept in `world.sqlite` (`state.board`) beside its presets, in the person's own World with private context allowed. Agents reach it with `board/read` and `board/define` under their own Grants; no Agent has them by default and a Fox turn never does ([GRANTS.md](../../core/agent/GRANTS.md#the-board)). The person's own view is the host action `board` (`read`). Each Service preset is read through the World's own Service reader (`read_service` with no Agent turn), at most four at once, and a read is reused for a minute. An `agents` preset is answered from the Agents' reports in the same `world.sqlite` each time it is read, as `agents/list` answers (`AgentReports.list`). `node scripts/board-host-check.ts` checks the host.
 
 A paired World page on another device can also request `board/read`, optionally with `tab`, through the existing encrypted room and host router. It gets the person's view of connected Services and the Agents' reports, including the saved definition and selected presets. Only this explicit operation is allowed: `board/define`, Service preset management, `agents/list` and Agent grants remain unavailable through the room. It is a read contract, not a public HTTP/MCP endpoint. `node scripts/world-room-check.ts` checks the room boundary, a fixture Service read and the built Node host reading a stored board.
 

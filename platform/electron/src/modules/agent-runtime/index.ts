@@ -761,7 +761,7 @@ export function installAgentRuntime(host:Host){
   return sources.readNotionContext(request);
  }));
  savedContext=(args,canRead)=>host.optional<SourcesService>(SOURCES)?.serviceContext?.(args,canRead);
- // The board (core/board/README.md): in the person's own World with private context allowed, as asks are. Each preset is
+ // The board (context/board/README.md): in the person's own World with private context allowed, as asks are. Each preset is
  // read through the World's own Service readers, as the Attention Center reads a source: no Agent, no turn, no model; an
  // `agents` preset from the Agents' own reports, as `agents/list` answers.
  worldBoard=createWorldBoard({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},

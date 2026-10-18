@@ -1,4 +1,4 @@
-import {BOARD_PROVIDERS,BOARD_REASONS,boardPresetIds,defineBoard,readBoardReadArgs,readStoredBoard,resolveBoard,type BoardRead} from '../../../../../core/board/index.ts';
+import {BOARD_PROVIDERS,BOARD_REASONS,boardPresetIds,defineBoard,readBoardReadArgs,readStoredBoard,resolveBoard,type BoardRead} from '../../../../../context/board/index.ts';
 import {servicePresetRead} from '../../../../../core/accounts/index.ts';
 import {agentBoardRecords} from '../../../../../core/agent/index.ts';
 import type {AgentListEntry} from '../../../../../contracts/agent-reports.ts';
@@ -8,7 +8,7 @@ import type {ServiceRead,ServiceRecords} from '../../../../../contracts/services
 import {loadServicePresets,storeServicePresets,type PresetLedger} from '../sources/service-presets.ts';
 import type {Row} from './types.ts';
 
-// The board (core/board/README.md). Core checks and resolves; this keeps the board in the World's ledger (`state.board`
+// The board (context/board/README.md). Core checks and resolves; this keeps the board in the World's ledger (`state.board`
 // in world.sqlite, beside the Service presets it names) and makes each preset's Service read, on this device, through
 // the World's own Service readers, under each Service's own limits. An `agents` preset is answered from the World's own
 // Agent reports (`agents/list`), with no Service and no network. No model is involved.
