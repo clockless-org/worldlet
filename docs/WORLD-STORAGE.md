@@ -36,7 +36,7 @@ one source preserves unrelated records and shared evidence. Task completion, ite
 suppression, memory deletion and whole-world reset have different scopes.
 
 Destructive changes are explicit and reviewed. Credentials stay out of Git, assets,
-portable conversation archives and diagnostics. Attached external Harness profiles
+portable conversation history and diagnostics. Attached external Harness profiles
 retain their own lifecycle; Worldlet reset must not erase an external installation.
 
 Backups and portable companion transfers are distinct. Document platform compatibility,

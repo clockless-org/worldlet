@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {serviceDraftGrant,serviceDraftGrantAuditEntry,serviceDraftGranted,artifactGrant,artifactGrantAuditEntry,artifactGrantTargets,artifactGranted,linkGrant,linkGrantAuditEntry,linkGrantTargets,linkGranted,conversationGrant,conversationGrantAuditEntry,conversationGrantTargets,conversationGranted,githubWriteGrant,githubWriteGrantAuditEntry,githubWriteGrantFor,githubWriteGrants,githubWriteScopeWords,OWN_GRANT_TARGETS,githubDraftGrant,githubDraftGrantAuditEntry,githubDraftGranted,boardGrant,boardGrantAuditEntry,boardGrantTargets,boardGranted,askGrant,askGrantAuditEntry,askGrantTargets,askGranted,AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites,reportGrant,reportGrantAuditEntry,reportGrantTargets,reportGranted} from '../core/agent/grants.ts';
+import {serviceDraftGrant,serviceDraftGrantAuditEntry,serviceDraftGranted,artifactGrant,artifactGrantAuditEntry,artifactGrantTargets,artifactGranted,githubWriteGrant,githubWriteGrantAuditEntry,githubWriteGrantFor,githubWriteGrants,githubWriteScopeWords,OWN_GRANT_TARGETS,githubDraftGrant,githubDraftGrantAuditEntry,githubDraftGranted,boardGrant,boardGrantAuditEntry,boardGrantTargets,boardGranted,askGrant,askGrantAuditEntry,askGrantTargets,askGranted,AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites,reportGrant,reportGrantAuditEntry,reportGrantTargets,reportGranted} from '../core/agent/grants.ts';
 import {HERMES_CHANNEL_READ_ONLY,hermesChannelToolAllowed} from '../core/agent/hermes-server.ts';
 import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
 import {turnWriteAdmission,writeDecision} from '../core/agent/turn-trust.ts';
@@ -126,7 +126,7 @@ assert.equal(worldCallWrites('start_applet_task'),true);assert.equal(worldCallWr
 // describe_world_tools: only granted targets outside a turn; everything while a Fox turn holds the server; none revoked.
 const listed=new Set(standingActions(actions,hermes,defaults,false,now).map(a=>a.target));
 assert.ok(listed.has('items')&&listed.has('world')&&!listed.has('content'));
-assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.filter(a=>!['asks','board','context','github-drafts','github-writes','conversations','links','agents','agent-artifacts','posthog-drafts','notion-drafts'].includes(a.target)).length,'everything but asks, the board, the saved Service context, GitHub, PostHog and Notion drafts, GitHub writes, the conversation archive, tracked links, Agent reports and Journal artifacts, which only the Agent\'s own Grants name');
+assert.equal(standingActions(actions,hermes,defaults,true,now).length,actions.filter(a=>!['asks','board','context','github-drafts','github-writes','agents','agent-artifacts','posthog-drafts','notion-drafts'].includes(a.target)).length,'everything but asks, the board, the saved Service context, GitHub, PostHog and Notion drafts, GitHub writes, Agent reports and Journal artifacts, which only the Agent\'s own Grants name');
 assert.deepEqual(standingActions(actions,{...hermes,revokedAt:earlier},defaults,true,now),[]);
 // A resolved call maps back to its target and action (channelToolReply checks Grants by them).
 assert.deepEqual(worldActionOf(actions,'query_world_items',{}),{target:'items',action:'query'});
@@ -251,57 +251,6 @@ assert.ok(!standingActions(actions,hermes,defaults,true,now).some(a=>a.target===
 assert.deepEqual(standingActions(actions,codex,[...codexDefaults,draftGrant],false,now).filter(a=>a.target==='github-drafts').map(a=>a.action),['create','read']);
 assert.equal(githubDraftGranted('codex',[draftGrant],now),true);assert.equal(githubDraftGranted('hermes',[draftGrant],now),false);
 assert.deepEqual(githubDraftGrantAuditEntry('codex',false,now),{at:now,agentId:'codex',target:'github-drafts',action:'ungrant',decision:'allowed',grantId:'codex-github-drafts',reason:'The person stopped this Agent drafting GitHub changes in Settings.'});
-
-// "Can save conversations" and "Can search conversations": exactly conversations/add and conversations/search, never
-// default, never given by a Fox turn, and not a guarded write.
-assert.deepEqual(conversationGrantTargets('add'),['conversations/add']);assert.deepEqual(conversationGrantTargets('search'),['conversations/search']);
-for(const name of ['*','conversations','all','__proto__','','read'])assert.deepEqual(conversationGrantTargets(name),[],'not a conversation Grant: '+name);
-assert.equal(conversationGrant('codex','*/*',now),null);assert.equal(conversationGrant('Not An Id','add',now),null);
-const savingGrant=conversationGrant('codex','add',now)!,searchingGrant=conversationGrant('codex','search',now)!;
-assert.deepEqual(savingGrant,{id:'codex-conversations-add',agentId:'codex',targets:['conversations/add'],access:'read',duration:'standing',grantedAt:now});
-assert.ok(!channelDefaultGrants('codex',earlier,actions).some(g=>g.targets.some(t=>t.startsWith('conversations/'))),'no conversation archive in the default Grants');
-const archiveCall=(grants:Grant[],action:string,args:Record<string,unknown>,foxTurn:{own:boolean}|null=null,identity=codex)=>{
- const resolved=resolveAction(actions,'conversations',action,args);
- assert.equal(resolved.name,'world_conversations');assert.equal(worldCallWrites(resolved.name,resolved.args),false,'saving to the archive is not a guarded write');
- return standingCallDecision({identity,grants,target:'conversations',action,tool:resolved.name,args:resolved.args,foxTurn,now});
-};
-const saving={source:'Team chat',messages:[{id:'m1',thread:'t1',author:'person',at:now,text:'Hello'}]};
-assert.equal(archiveCall(codexDefaults,'add',saving).decision,'denied','ungranted: refused');
-assert.deepEqual(archiveCall([...codexDefaults,savingGrant],'add',saving),{decision:'allowed',grantId:'codex-conversations-add'});
-assert.equal(archiveCall([...codexDefaults,savingGrant],'search',{q:'hello'}).decision,'denied','saving is not searching');
-assert.deepEqual(archiveCall([...codexDefaults,searchingGrant],'search',{q:'hello'}),{decision:'allowed',grantId:'codex-conversations-search'});
-assert.equal(archiveCall([...codexDefaults,{...searchingGrant,revokedAt:earlier}],'search',{}).decision,'denied','taken back: refused');
-assert.equal(archiveCall(defaults,'search',{},{own:true},hermes).decision,'denied','a Fox turn never searches the archive');
-assert.equal(archiveCall(defaults,'add',saving,{own:true},hermes).decision,'denied','nor saves to it');
-assert.equal(archiveCall([...defaults,conversationGrant('hermes','search',now)!],'search',{},{own:false},hermes).decision,'allowed','its own Grant does, in a turn too');
-assert.ok(!standingActions(actions,hermes,defaults,true,now).some(a=>a.target==='conversations'),'not listed in a Fox turn without a Grant');
-assert.deepEqual(standingActions(actions,codex,[...codexDefaults,searchingGrant],false,now).filter(a=>a.target==='conversations').map(a=>a.action),['search']);
-assert.equal(conversationGranted('codex',[savingGrant],'add',now),true);assert.equal(conversationGranted('codex',[savingGrant],'search',now),false);assert.equal(conversationGranted('hermes',[savingGrant],'add',now),false);
-assert.deepEqual(conversationGrantAuditEntry('codex','search',true,now),{at:now,agentId:'codex',target:'conversations',action:'grant-search',decision:'allowed',grantId:'codex-conversations-search',reason:'The person let this Agent search conversations in Settings.'});
-
-// "Can see your tracked links" and "Can keep your tracked links": exactly links/read and links/save, never default, never
-// given by a Fox turn, and not a guarded write.
-assert.deepEqual(linkGrantTargets('read'),['links/read']);assert.deepEqual(linkGrantTargets('save'),['links/save']);
-for(const name of ['*','links','all','__proto__','','add'])assert.deepEqual(linkGrantTargets(name),[],'not a link Grant: '+name);
-assert.equal(linkGrant('codex','*/*',now),null);assert.equal(linkGrant('Not An Id','read',now),null);
-const seeLinks=linkGrant('codex','read',now)!,keepLinks=linkGrant('codex','save',now)!;
-assert.deepEqual(keepLinks,{id:'codex-links-save',agentId:'codex',targets:['links/save'],access:'read',duration:'standing',grantedAt:now});
-assert.ok(!channelDefaultGrants('codex',earlier,actions).some(g=>g.targets.some(t=>t.startsWith('links/'))),'no tracked links in the default Grants');
-const linkCall=(grants:Grant[],action:string,args:Record<string,unknown>,foxTurn:{own:boolean}|null=null,identity=codex)=>{
- const resolved=resolveAction(actions,'links',action,args);
- assert.equal(resolved.name,'world_links');assert.equal(worldCallWrites(resolved.name,resolved.args),false,'keeping a tracked link is not a guarded write');
- return standingCallDecision({identity,grants,target:'links',action,tool:resolved.name,args:resolved.args,foxTurn,now});
-};
-const keeping={rows:[{id:'a-1',title:'A post'}]};
-assert.equal(linkCall(codexDefaults,'save',keeping).decision,'denied','ungranted: refused');
-assert.deepEqual(linkCall([...codexDefaults,keepLinks],'save',keeping),{decision:'allowed',grantId:'codex-links-save'});
-assert.equal(linkCall([...codexDefaults,keepLinks],'read',{}).decision,'denied','keeping is not seeing');
-assert.deepEqual(linkCall([...codexDefaults,seeLinks],'read',{}),{decision:'allowed',grantId:'codex-links-read'});
-assert.equal(linkCall(defaults,'save',keeping,{own:true},hermes).decision,'denied','a Fox turn never keeps tracked links');
-assert.equal(linkCall(defaults,'read',{},{own:true},hermes).decision,'denied','nor sees them');
-assert.ok(!standingActions(actions,hermes,defaults,true,now).some(a=>a.target==='links'),'not listed in a Fox turn without a Grant');
-assert.equal(linkGranted('codex',[keepLinks],'save',now),true);assert.equal(linkGranted('codex',[keepLinks],'read',now),false);
-assert.deepEqual(linkGrantAuditEntry('codex','save',false,now),{at:now,agentId:'codex',target:'links',action:'ungrant-save',decision:'allowed',grantId:'codex-links-save',reason:'The person stopped this Agent being able to keep your tracked links in Settings.'});
 
 // "Can report its work" and "Can see other Agents": exactly agents/report and agents/list, never default, never given by
 // a Fox turn, and not a guarded write.
@@ -443,4 +392,4 @@ assert.deepEqual(standingActions(actions,codex,[...codexDefaults,posthogDraft],f
 assert.equal(serviceDraftGranted('codex',[posthogDraft],'posthog',now),true);assert.equal(serviceDraftGranted('codex',[posthogDraft],'notion',now),false);
 assert.deepEqual(serviceDraftGrantAuditEntry('codex','notion',true,now),{at:now,agentId:'codex',target:'notion-drafts',action:'grant',decision:'allowed',grantId:'codex-notion-drafts',reason:'The person let this Agent draft Notion changes in Settings.'});
 
-console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server, per-Service read Grants, ask Grants, board Grants, report Grants, GitHub draft Grants, standing GitHub write Grants and their reach, conversation archive Grants, tracked link Grants, Journal artifact Grants, PostHog and Notion draft Grants.');
+console.log('PASS agent grants: patterns, read/write and standing/once Grants, turn rule first, audit kept per Agent, host-stamped agentId, default Grants equal the channel allowlist, Fox turn and channel calls on the standing server, per-Service read Grants, ask Grants, board Grants, report Grants, GitHub draft Grants, standing GitHub write Grants and their reach, Journal artifact Grants, PostHog and Notion draft Grants.');

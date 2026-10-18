@@ -69,10 +69,6 @@ function oldWorldActions({sample=false}={}):WorldAction[]{
  for(const action of actions.filter(a=>a.tool==='agent_artifacts'))action.parameters.required=action.action==='save'?['title','body']:[];
  operations('github-drafts','github_drafts');
  for(const action of actions.filter(a=>a.tool==='github_drafts'))action.parameters.required=action.action==='create'?['write','target']:[];
- operations('conversations','world_conversations');
- for(const action of actions.filter(a=>a.tool==='world_conversations'))action.parameters.required=action.action==='add'?['source','messages']:[];
- operations('links','world_links');
- for(const action of actions.filter(a=>a.tool==='world_links'))action.parameters.required=action.action==='save'?['rows']:[];
  operations('github-writes','github_writes');
  for(const action of actions.filter(a=>a.tool==='github_writes'))action.parameters.required=['write','target'];
  for(const provider of ['posthog','notion'])for(const operation of ['create','read'])add(provider+'-drafts',operation,'service_drafts',{provider,operation});

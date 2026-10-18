@@ -100,10 +100,6 @@ const BOARD_TOOL='world_board';
 const CONTEXT_TOOL='world_context';
 /** The World tool behind `github-drafts/*` (core/tools/gateway.ts). */
 const DRAFT_TOOL='github_drafts';
-/** The World tool behind `conversations/*` (core/tools/gateway.ts). */
-const CONVERSATIONS_TOOL='world_conversations';
-/** The World tool behind `links/*` (core/tools/gateway.ts). */
-const LINKS_TOOL='world_links';
 /** The World tool behind `agents/*` (core/tools/gateway.ts). */
 const REPORT_TOOL='agent_reports';
 /** The World tool behind `github-writes/*` (core/tools/gateway.ts). */
@@ -236,10 +232,7 @@ export const standingEndpointFile=(agentId:string)=>`worldlet-mcp-endpoint.${age
 /** `drafts`: a GitHub draft call (`github_drafts`, core/agent/GRANTS.md#github-drafts) by the Agent whose token made it,
  * the same way: its own Grants decide it, never a Fox turn's. `serviceDrafts`: a PostHog or Notion draft call
  * (`service_drafts`, core/agent/GRANTS.md#posthog-and-notion-drafts), the same way. */
-/** `conversations`: a conversation archive call (`world_conversations`, core/agent/GRANTS.md#conversation-archive) by
- * the Agent whose token made it, the same way. */
-/** `links`: a tracked links call (`world_links`, core/agent/GRANTS.md#tracked-links) by the Agent whose token made it,
- * the same way. `reports`: an Agent report call (`agent_reports`, core/agent/GRANTS.md#agent-reports), the same way. */
+/** `reports`: an Agent report call (`agent_reports`, core/agent/GRANTS.md#agent-reports), the same way. */
 /** `writes`: a standing GitHub write (`github_writes`, core/agent/GRANTS.md#standing-github-writes) by the Agent whose
  * token made it, the same way, with that Agent's own Grants, whose reach (repository, writes, label prefix) it checks. */
 /** `artifacts`: a Journal artifact call (`agent_artifacts`, core/agent/GRANTS.md#agent-artifacts) by the Agent whose token made it,
@@ -247,9 +240,9 @@ export const standingEndpointFile=(agentId:string)=>`worldlet-mcp-endpoint.${age
 /** `serviceRequest`: an Agent's `read_service` call was refused for a Service (not allowed to read it, or not connected):
  * the host may ask the person on an Attention card (core/agent/service-requests.ts) and answers what the refusal says
  * after its reason. */
-export async function openStandingWorldTools({channel,access,asks,board,context,drafts,writes,conversations,links,reports,artifacts,serviceDrafts,serviceRequest,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;
+export async function openStandingWorldTools({channel,access,asks,board,context,drafts,writes,reports,artifacts,serviceDrafts,serviceRequest,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;
  board?:(agentId:string,args:Row,canRead:(provider:string,operation:string)=>boolean)=>Promise<Row>;context?:(args:Row,canRead:(provider:string)=>boolean)=>Row;drafts?:(agentId:string,args:Row)=>Promise<Row>;writes?:(agentId:string,args:Row,grants:Grant[])=>Promise<Row>;
- conversations?:(agentId:string,args:Row)=>Row;links?:(agentId:string,args:Row)=>Row;reports?:(agentId:string,args:Row)=>Row;
+ reports?:(agentId:string,args:Row)=>Row;
  artifacts?:(agentId:string,args:Row,readsAll:boolean)=>Row;serviceDrafts?:(agentId:string,args:Row)=>Promise<Row>;serviceRequest?:(agent:{id:string;name:string},provider:string)=>string;runner?:string}):Promise<StandingWorldTools> {
  const route='/'+crypto.randomUUID();
  const call=(body:{name:unknown;arguments:unknown},identity:AgentIdentity)=>{
@@ -262,8 +255,6 @@ export async function openStandingWorldTools({channel,access,asks,board,context,
    dispatch:async(name,args)=>name===ASK_TOOL?asks?.(identity.id,args)??{error:'Asks are not available in this build.'}
     :name===DRAFT_TOOL?await drafts?.(identity.id,args)??{error:'GitHub drafts are not available in this build.'}
     :name===WRITE_TOOL?await writes?.(identity.id,args,grants)??{error:'GitHub writes are not available in this build.'}
-    :name===CONVERSATIONS_TOOL?conversations?.(identity.id,args)??{error:'The conversation archive is not available in this build.'}
-    :name===LINKS_TOOL?links?.(identity.id,args)??{error:'Tracked links are not available in this build.'}
     :name===REPORT_TOOL?reports?.(identity.id,args)??{error:'Agent reports are not available in this build.'}
     :name===ARTIFACT_TOOL?artifacts?.(identity.id,args,artifactGranted(identity.id,grants,'read',now))??{error:'Saving to the Journal is not available in this build.'}
     :name===SERVICE_DRAFT_TOOL?await serviceDrafts?.(identity.id,args)??{error:'PostHog and Notion drafts are not available in this build.'}

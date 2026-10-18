@@ -42,7 +42,7 @@ await withBrowser(fileAccess,async browser=>{
   w.webkit={messageHandlers:{worldlet:{async postMessage(b){w.calls.push(b);
    if(b.action==='snapshot')return {workspaceId:'chat-fold',revision:0,sources:[],knowledge:[],worldItems:[],connections:[],onboarding:{completed:true},sampleEnabled:false,cloudConsent:true};
    if(b.action==='modelStatus')return {available:true,cloudAllowed:true};
-   // The thread persists like the native conversation archive, so a reload restores it.
+   // The thread persists like Fox's saved conversation history, so a reload restores it.
    if(b.action==='conversationRecall'){if(Array.isArray(b.rows)){localStorage.setItem('fixture-recall',JSON.stringify(b.rows));return {ok:true};}return JSON.parse(localStorage.getItem('fixture-recall')||'[]');}
    // A message added while Fox works joins the running turn (Hermes steering); its reply answers both.
    if(b.action==='agentSteer'){w.steered=[...(w.steered||[]),b.text];return {accepted:true};}
