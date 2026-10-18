@@ -6,15 +6,18 @@ import ts from 'typescript';
 const root=process.cwd();
 const config=ts.readConfigFile('tsconfig.json',ts.sys.readFile);
 const options=ts.parseJsonConfigFileContent(config.config,ts.sys,root).options;
-const layers=['platform/bridge','ui','core','contracts','models','harness','platform','website','worker'];
+// core/ is moving into agent/ and context/ (#681): while it moves, each may still reach core/, and core/ keeps re-exports.
+const layers=['platform/bridge','ui','agent','context','core','contracts','models','harness','platform','website','worker'];
+const PURE=['agent','context','core','contracts'];
 const allowed:Record<string,string[]>={
- ui:['ui','core','contracts','platform/bridge','resources'],
- core:['core','contracts'], contracts:['contracts'],
- 'platform/bridge':['platform/bridge','core','contracts'],
- 'models':['models','contracts','core'],
- harness:['harness','contracts'], platform:['platform','platform/bridge','core','contracts'],
- website:['website','ui','core','contracts','resources','platform/bridge'],
- worker:['worker','core','contracts'],
+ ui:['ui','agent','context','core','contracts','platform/bridge','resources'],
+ agent:['agent','context','core','contracts'], context:['context','core','contracts'],
+ core:['core','agent','context','contracts'], contracts:['contracts'],
+ 'platform/bridge':['platform/bridge','agent','context','core','contracts'],
+ 'models':['models','contracts','agent','context','core'],
+ harness:['harness','contracts'], platform:['platform','platform/bridge','agent','context','core','contracts'],
+ website:['website','ui','agent','context','core','contracts','resources','platform/bridge'],
+ worker:['worker','agent','context','core','contracts'],
 };
 // Exact legacy edges, deliberately visible in review. No directory-wide exemption.
 const exceptions=new Map([
@@ -29,7 +32,9 @@ export function checkEdge(file:string,target:string){
  const edge=`${file} -> ${target}`;
  if(exceptions.has(edge)){used.add(edge);return;}
  assert(allowed[layer(file)]?.includes(layer(target)),`Forbidden layer dependency: ${edge}`);
- const component=/^(core|ui)\/([^/]+)\/(.+)$/.exec(target);
+ const component=/^(core|ui|agent|context)\/([^/]+)\/(.+)$/.exec(target);
+ // A file left at its old core/ path re-exports the same file at its new place.
+ if(file.startsWith('core/')&&/^(agent|context)\//.test(target)&&target.replace(/^(agent|context)\//,'core/')===file)return;
  if(component&&!file.startsWith(`${component[1]}/${component[2]}/`))
   assert.equal(component[3],'index.ts',`${file} bypasses public component entry: ${target}`);
 }
@@ -46,11 +51,11 @@ export function checkSource(file:string,source:string){
    checkEdge(file,target);return;
   }
   assert(!specifier.startsWith('.')&&!specifier.startsWith('/')&&!layers.some(x=>specifier.startsWith(x+'/')),`${file}: unresolved local dependency ${specifier}`);
-  assert(!['core','contracts'].includes(layer(file)),`${file}: pure layer cannot import external module ${specifier}`);
+  assert(!PURE.includes(layer(file)),`${file}: pure layer cannot import external module ${specifier}`);
  }
  assert.equal(ast.referencedFiles.length,0,`${file}: use explicit module imports instead of reference paths`);
  function visit(node:ts.Node){
-  if(['core','contracts'].includes(layer(file))&&ts.isIdentifier(node)&&['window','document','navigator','process','require'].includes(node.text))assert.fail(`${file}: pure layer cannot use host global ${node.text}`);
+  if(PURE.includes(layer(file))&&ts.isIdentifier(node)&&['window','document','navigator','process','require'].includes(node.text))assert.fail(`${file}: pure layer cannot use host global ${node.text}`);
   if((ts.isImportDeclaration(node)||ts.isExportDeclaration(node))&&node.moduleSpecifier&&ts.isStringLiteral(node.moduleSpecifier))dependency(node.moduleSpecifier.text);
   if(ts.isImportEqualsDeclaration(node))assert.fail(`${file}: import-equals is not allowed; use ESM`);
   if(ts.isIdentifier(node)&&node.text==='require')assert.fail(`${file}: require is not allowed; use ESM`);
@@ -72,6 +77,6 @@ function scan(dir:string){
 }
 export function checkRepository(){
  // The open-source export (scripts/oss-export.mjs) leaves out the hosted services, so a missing root is skipped.
- for(const dir of ['ui','core','contracts','platform/bridge','platform/electron','platform/node','website','models','worker','harness'])if(fs.existsSync(dir))scan(dir);
+ for(const dir of ['ui','agent','context','core','contracts','platform/bridge','platform/electron','platform/node','website','models','worker','harness'])if(fs.existsSync(dir))scan(dir);
  for(const edge of exceptions.keys())assert(used.has(edge)||!fs.existsSync(edge.split(' -> ')[0]),`Remove stale architecture exception: ${edge}`);
 }

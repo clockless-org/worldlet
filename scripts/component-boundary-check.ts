@@ -9,8 +9,10 @@ import ts from 'typescript';
 export function assertComponentImport(file:string,specifier:string) {
  if(!specifier.startsWith('.'))return;
  const target=path.posix.normalize(path.posix.join(path.posix.dirname(file),specifier));
- const match=/^(core|ui)\/([^/]+)\/(.+)$/.exec(target);
+ const match=/^(core|ui|agent|context)\/([^/]+)\/(.+)$/.exec(target);
  if(!match||file.startsWith(`${match[1]}/${match[2]}/`))return;
+ // A file left at its old core/ path while core/ moves into agent/ and context/ (#681) re-exports the same file.
+ if(file.startsWith('core/')&&/^(agent|context)\//.test(target)&&target.replace(/^(agent|context)\//,'core/')===file)return;
  assert.equal(match[3],'index.ts',`${file} bypasses ${match[1]}/${match[2]}'s public API: ${target}`);
 }
 async function scan(dir:string):Promise<void>{
@@ -40,7 +42,9 @@ assert.throws(()=>assertComponentImport('website/main.ts','../ui/shell/notion-wo
 assertComponentImport('ui/companion/example.ts','../browser/index.ts');
 assertComponentImport('ui/browser/example.ts','./browser-device.ts');
 // The open-source export leaves out the hosted services (website, models, worker).
-for(const root of ['ui','core','platform/bridge','website','models','worker'])if(existsSync(root))await scan(root);
+assertComponentImport('core/board/board.ts','../../context/board/board.ts');
+assert.throws(()=>assertComponentImport('core/board/other.ts','../../context/board/board.ts'),/bypasses/);
+for(const root of ['ui','agent','context','core','platform/bridge','website','models','worker'])if(existsSync(root))await scan(root);
 console.log('PASS Core/UI public component entry points, including type and dynamic imports; internal access stays within its owner.');
 
 // The Electron window coordinators dispatch domain operations; the World store owns persistence.

@@ -28,6 +28,8 @@
   },
   "include": [
     "ui",
+    "agent",
+    "context",
     "core",
     "contracts",
     "platform/bridge",

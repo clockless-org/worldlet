@@ -1,5 +1,5 @@
 import {WebContentsView} from 'electron';
-import {readMadeGameReport} from '../../../../../core/games/index.ts';
+import {readMadeGameReport} from '../../../../../context/games/index.ts';
 import {Surface} from '../browser/surface.ts';
 import {closeGameView,gameURL,gameWebPreferences,lockGameContents,placeGameView} from './trial.ts';
 import type {Row} from '../../host/types.ts';

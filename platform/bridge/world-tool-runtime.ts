@@ -76,7 +76,7 @@ export function createWorldToolRuntime({execute,call,codex,audio,backend,sample=
    if(!authority.trim())return {error:'The user did not ask for this task in their own words this turn. Ask them first.'};
    result=call?await call('appletTaskStart',{applet:args.applet,task:args.task,request:authority,parent:operationId}):{error:'Applet tasks are unavailable here. Do the work in this turn.'};
   }else if(name==='make_game'){
-   // The Game Factory works as an Applet task (core/games): only the person's own words start one.
+   // The Game Factory works as an Applet task (context/games): only the person's own words start one.
    if(appletTask)return {error:'This is already an Applet task. Finish it here.'};
    if(!authority.trim())return {error:'The person did not ask for a game in their own words this turn. Ask them first.'};
    result=call?await call('gameFactoryStart',{idea:args.idea,...args.replaces?{replaces:args.replaces}:{},request:authority,parent:operationId}):{error:'The Game Factory is unavailable here.'};
