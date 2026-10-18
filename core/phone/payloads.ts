@@ -53,9 +53,8 @@ export type PhoneConversation={v:1,at:string,busy:boolean,name:string,messages:P
  * with a PhoneMessage `approval`. */
 export type PhoneApproval={id:string,title:string,detail:string,choices:('once'|'always'|'deny')[]};
 export type PhoneLive={v:1,at:string,id:string,item?:string,applet?:string,user:string,steps:string[],text:string,done:boolean,approval?:PhoneApproval};
-/** `order` (optional, so an older phone ignores it) says this computer takes Orders, the team's spoken tasks for Claude
- * (core/distribution/order.ts): an Alpha or Dev app on a computer that can send them. Only then the phone shows its
- * Order button (owner request 2026-10-06). */
+/** `order` (optional) once said this computer took Orders, the team's spoken tasks for Claude; Orders were retired on
+ * 2026-10-18, so a computer never sends it and the phone apps hide their Order button. */
 /** `push` (optional, so an older phone ignores it) says this computer keeps the phone's notification token itself
  * (README.md#push): the phone then hands it over with a `push` message instead of registering it on the relay. */
 /** `room` (optional too) says this computer waits in the pairing room (README.md#room): a phone app that knows the room
@@ -71,8 +70,8 @@ export type PhoneWidgets={v:1,at:string,widgets:PhoneWidget[]};
 // `widget` carries the entries the person changed in a widget on the phone (core/artifacts mergeWidgetState).
 // A chat line with `applet` was said inside that Applet's page on the phone: the computer opens the Applet, so the line
 // joins its thread. `applet` with action `open` opens the Applet on the computer.
-// `order` is what the person said with the phone's Order button: it goes to Claude as an Order from this computer, never
-// to Fox as a chat line.
+// `order` was what the person said with the phone's Order button. Orders were retired on 2026-10-18: the computer drops
+// one an older phone still sends.
 // `web` is what happened on a website the phone opened in its own browser (owner request 2026-10-07): the observer's
 // reports (platform/bridge/web-record.js) with the phone's time, kept in the computer's World by the same rules as
 // the computer's browser (core/browser/web-record.ts).
@@ -228,10 +227,10 @@ export function phoneLive(turn:any,at:number):PhoneLive|null{
  return {v:1,at:new Date(at).toISOString(),id,...item?{item}:applet?{applet}:{},user:clip(turn.user,PHONE_LIMITS.field),steps,text:clip(turn.text,PHONE_LIMITS.turnText),done:turn.done===true,...approval&&turn.done!==true?{approval}:{}};
 }
 
-// The computer's own slot: its name and version, `order` only while it takes Orders, `push` (it keeps the phone's
-// notification token) and `room` (it waits in the pairing room).
-export function phoneDesktop({name,version,order}:{name:string,version:string,order:boolean},at:number):PhoneDesktop{
- return {v:1,at:new Date(at).toISOString(),name,version,...order?{order:true as const}:{},push:true,room:true};
+// The computer's own slot: its name and version, `push` (it keeps the phone's notification token) and `room` (it waits
+// in the pairing room). It never says `order` now that Orders are retired.
+export function phoneDesktop({name,version}:{name:string,version:string},at:number):PhoneDesktop{
+ return {v:1,at:new Date(at).toISOString(),name,version,push:true,room:true};
 }
 /** The platforms a phone registers its notification token for: `apns` (App Store and TestFlight), `apns-dev` (Apple's
  * sandbox, debug builds), `fcm` (Android). */

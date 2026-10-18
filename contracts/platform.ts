@@ -6,21 +6,15 @@ import type {BrowserOutcomeRequest,BrowserReceipt} from './browser-receipt.ts';
 
 /** Validated operation families. Expand this map as remaining native APIs migrate. */
 export interface DevBuildStatus {supported:boolean;online?:boolean;applying?:boolean;candidate?:{id:string;revision:string;committedAt?:string;pr?:number;behind?:number};error?:string}
-/** Order (core/distribution/order.ts): whether this copy shows the button, and what a sent task carried. */
-export interface OrderReply {available:boolean;ready?:boolean;reason?:string;sent?:{id:string;screenshots:number;logLines:number;woke?:boolean;
- /** Why the instant post into the project failed, when it did. */
- wakeError?:string}}
 export interface HostBodies extends FoxHostBodies,BrowserSurfaceBodies,ItemHostBodies,PresentationHostBodies {
  browserOutcomeAction:Omit<BrowserOutcomeRequest,'action'>;
  devBuildStatus:{};
  devBuildApply:{id:string};
- order:{operation:'status'}|{operation:'send';id:string;said:string;place?:string};
 }
 /** Stable reply shapes are independent of the native embedding engine. */
 export interface HostReplies {
  devBuildStatus:DevBuildStatus;
  devBuildApply:{accepted:true};
- order:OrderReply;
  saveOverlay:{ok:true};
  saveSampleUI:{ok:true};
  setTextScale:{ok:true};

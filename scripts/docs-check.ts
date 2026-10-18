@@ -2,7 +2,7 @@ import {execFileSync} from 'node:child_process';
 import {existsSync,readFileSync,statSync,writeFileSync} from 'node:fs';
 import path from 'node:path';
 const trackedFiles=[...new Set(execFileSync('git',['ls-files','--cached','--others','--exclude-standard','-z'],{encoding:'utf8'}).split('\0'))].filter(f=>f&&existsSync(f)&&statSync(f).isFile()).sort();
-const supportRoots=['docs/','resources/styles/builtin/references/','platform/distribution/','gatehouse/preview/'];
+const supportRoots=['docs/','resources/styles/builtin/references/','platform/distribution/'];
 const isSupport=(file:string)=>supportRoots.some(root=>file.startsWith(root))||file==='core/diagnostics/analytics-insights.json';
 const files=trackedFiles.filter(f=>f.endsWith('.md'));
 const errors:string[]=[];

@@ -163,15 +163,11 @@ body.ui-gallery:has([data-theme=night]){background:#233c34}
 #notionWorld.native-console .companion-text-entry[data-quiet=true] #notionSend{display:none}
 #notionWorld.native-console .companion-text-entry[data-quiet=true] #notionInput{text-align:center}
 #notionWorld.native-console .companion-controls{position:absolute;bottom:0;right:calc(50% + min(var(--companion-bar-width),calc(100vw - 32px)) / 2 + 6px);display:flex;align-items:center;gap:4px;height:44px;pointer-events:auto;transition:right .22s ease-out}
-/* The microphone and, when Orders can be sent, the bug stand inside the bar as plain icons like Send, in the World and
-   on the desktop alike (owner request 2026-10-11: "都融到那个 input box 里面"): the microphone at its right end, the bug at
-   its left (owner request 2026-10-11: "inputbox bug icon放左边"). native-chat.ts puts the bug in the microphone's group;
-   it stands out of the group's flow at the bar's left end. The bar rests small and opens wider for typing. */
-#notionWorld.native-console .companion-text-entry:has(>.companion-voice-controls>.companion-order-button:not([hidden])){--companion-bar-lead:40px}
+/* The microphone stands inside the bar as a plain icon like Send, in the World and on the desktop alike (owner request
+   2026-10-11: "都融到那个 input box 里面"), at its right end. The bar rests small and opens wider for typing. */
 #notionWorld.native-console .companion-text-entry #notionCommand{padding-right:calc(var(--companion-bar-tools) + 8px);padding-left:calc(var(--companion-bar-lead,0px) + 12px)}
 #notionWorld.native-console .companion-input-wave{padding-right:calc(var(--companion-bar-tools) + 12px);padding-left:calc(var(--companion-bar-lead,0px) + 16px)}
 #notionWorld.native-console .companion-controls.companion-voice-controls{left:auto;right:calc(50% - min(var(--companion-bar-width),calc(100vw - 32px)) / 2 + 4px);gap:2px;z-index:1;transition:right .22s ease-out}
-#notionWorld.native-console .companion-voice-controls>.companion-order-button{position:absolute;top:4px;right:calc(min(var(--companion-bar-width),calc(100vw - 32px)) - 44px);transition:right .22s ease-out}
 #notionWorld.native-console .companion-controls:empty{display:none}
 /* The microphone menu under the mic (#1228): long device names ellipsize; the current one is checked. */
 .companion-mic-menu{position:fixed;z-index:200;transform:translateX(-50%);display:flex;flex-direction:column;gap:2px;min-width:180px;max-width:min(320px,calc(100vw - 16px));padding:6px;box-sizing:border-box;border:1px solid var(--hud-scene-line,#ffffff40);border-radius:12px;background:#181b20e0;color:var(--hud-scene-ink,#fff);backdrop-filter:var(--hud-scene-blur,blur(12px));-webkit-backdrop-filter:var(--hud-scene-blur,blur(12px));pointer-events:auto}
@@ -267,12 +263,8 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 /* Order / Feedback: a round bug on its own just left of the message bar on every channel (owner 2026-10-06, kept there
    2026-10-07), the bar's own glass; while an Order listens it glows red, so capturing is always visible. The microphone
    is its twin on the bar's right (owner 2026-10-07). */
-#notionWorld.native-console .companion-controls>:is(.companion-order-button,.companion-speech-button){border:1px solid var(--system-glass-line);background:var(--system-glass-fill);color:var(--hud-scene-ink,#fffdf4);box-shadow:var(--system-glass-shadow);backdrop-filter:var(--system-glass-blur);-webkit-backdrop-filter:var(--system-glass-blur)}
-#notionWorld.native-console .companion-controls>.companion-order-button[hidden],#notionWorld.native-console:is([data-onboarding=true],[data-onboarding-locked=true],[data-tour-lock=true],[data-tour-spotlight=true]) .companion-order-button{display:none}
-#notionWorld.native-console .companion-controls>:is(.companion-order-button,.companion-speech-button):is(:hover,:focus-visible){background:var(--system-glass-hover)}
-#notionWorld.native-console[data-order] .companion-order-button.companion-order-button{background:#c2412ee6;border-color:#ffd2c8;color:#fff;box-shadow:0 0 0 4px #c2412e40,var(--system-glass-shadow)}
-#notionWorld.native-console[data-order=listening] .companion-order-button.companion-order-button{animation:order-listening 1.2s ease-in-out infinite}
-@keyframes order-listening{50%{box-shadow:0 0 0 9px #c2412e1a,var(--system-glass-shadow)}}
+#notionWorld.native-console .companion-controls>.companion-speech-button{border:1px solid var(--system-glass-line);background:var(--system-glass-fill);color:var(--hud-scene-ink,#fffdf4);box-shadow:var(--system-glass-shadow);backdrop-filter:var(--system-glass-blur);-webkit-backdrop-filter:var(--system-glass-blur)}
+#notionWorld.native-console .companion-controls>.companion-speech-button:is(:hover,:focus-visible){background:var(--system-glass-hover)}
 /* Talk with Fox (ui/companion/fox-talk.ts): while it is on, the microphone wears a lantern ring; it breathes while Fox
    speaks, when a click on it interrupts. The Talk item heads the microphone menu, above a thin line. */
 #notionWorld.native-console:is([data-talk=listening],[data-talk=thinking],[data-talk=speaking]) .companion-speech-button.companion-speech-button{border-color:#ffe3a3;box-shadow:0 0 0 4px #e3b04b59,var(--system-glass-shadow)}
@@ -282,13 +274,6 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 /* The wake word ("Hey Fox", platform modules/voice/wake.ts): while it listens, a small lantern light sits on the
    microphone's shoulder, beside the system's own microphone indicator. */
 .companion-mic-menu>[role=separator]{height:1px;margin:3px 6px;background:var(--hud-scene-line,#ffffff40)}
-@media (prefers-reduced-motion:reduce){#notionWorld.native-console[data-order=listening] .companion-order-button.companion-order-button{animation:none}}
-/* After the second click, the button alone shows the Order is being heard and sent: a ring turns in place of the bug. */
-#notionWorld.native-console[data-order=sending] .companion-order-button.companion-order-button{cursor:progress}
-#notionWorld.native-console[data-order=sending] .companion-order-button svg{opacity:0}
-#notionWorld.native-console[data-order=sending] .companion-order-button::after{content:'';position:absolute;inset:12px;border:2px solid #ffffff59;border-top-color:#fff;border-radius:50%;animation:order-sending .8s linear infinite}
-@keyframes order-sending{to{transform:rotate(1turn)}}
-@media (prefers-reduced-motion:reduce){#notionWorld.native-console[data-order=sending] .companion-order-button::after{animation-duration:2.4s}}
 #notionWorld.native-console :is(.companion-controls,.scene-control,.applet-mode-toggle) svg{filter:drop-shadow(0 1px 2px #14251b99)}
 #notionWorld.native-console .companion-controls>button{
  position:static;display:inline-flex;align-items:center;justify-content:center;flex:0 0 44px;
@@ -342,7 +327,6 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 /* While the microphone listens the bar gives way to a sound wave of the same size and glass (owner request 2026-10-09). */
 #notionWorld.native-console .companion-input-wave{position:absolute;inset:auto auto 0 50%;transform:translateX(-50%);box-sizing:border-box;width:min(var(--companion-bar-width),calc(100vw - 32px));height:44px;padding:0 16px;border:1px solid var(--system-glass-line);border-radius:22px;background:var(--system-glass-fill);box-shadow:var(--system-glass-shadow);backdrop-filter:var(--system-glass-blur);-webkit-backdrop-filter:var(--system-glass-blur);pointer-events:none}
 #notionWorld.native-console .companion-input-wave i{flex:0 0 3px;width:3px}
-#notionWorld.native-console[data-order=listening] .companion-input-wave{color:#ffd7cf}
 #notionWorld.native-console .companion-listening-state,#notionWorld.native-console .companion-gesture-hint{display:none}
 #notionWorld.native-console .companion-avatar{cursor:grab}
 #notionWorld.native-console.is-dragging-fox .companion-avatar{cursor:grabbing}
@@ -409,7 +393,7 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 #notionWorld.native-console .companion-text-entry #notionCommand,#notionWorld.native-console .companion-text-entry #notionCommand:focus-within{background:var(--system-glass-fill);border-color:var(--system-glass-line);box-shadow:var(--system-glass-shadow);backdrop-filter:var(--system-glass-blur);-webkit-backdrop-filter:var(--system-glass-blur)}
 @media(prefers-reduced-transparency:reduce){:root{--system-glass-fill:#33483b;--system-glass-hover:#263b2e;--system-glass-blur:none;--system-glass-shadow:none}}
 @supports not (backdrop-filter:blur(1px)){:root{--system-glass-fill:#33483b;--system-glass-hover:#263b2e;--system-glass-blur:none}}
-@media(forced-colors:active){#notionWorld.native-console :is(.companion-controls>button,.companion-order-button,.scene-control,.applet-mode-toggle){border:1px solid ButtonText;background:ButtonFace;color:ButtonText;text-shadow:none;box-shadow:none}}
+@media(forced-colors:active){#notionWorld.native-console :is(.companion-controls>button,.scene-control,.applet-mode-toggle){border:1px solid ButtonText;background:ButtonFace;color:ButtonText;text-shadow:none;box-shadow:none}}
 
 /* Imagegen country assets: decorative layers only; live content and hit targets stay above. */
 :is(.native-console,.ui-gallery) .mail-focus.ui-applet-surface,.mail-focus.ui-applet-surface{padding:40px;background:none;border:0;border-radius:12px;box-shadow:none}
@@ -426,9 +410,8 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 /* Inside the bar "+", the bug, the microphone, ✕ and Stop are one kind of button (owner Order 2026-10-12): a plain
    icon on the bar's glass, a light frost under the pointer, like Claude's; listening, talking and an Order still light up. */
 #notionWorld.native-console .companion-voice-controls>button{flex:0 0 36px;width:36px;height:36px;min-height:36px}
-#notionWorld.native-console:not([data-order]) .companion-voice-controls>.companion-order-button,#notionWorld.native-console:not([data-talk=listening],[data-talk=thinking],[data-talk=speaking]) .companion-voice-controls>.companion-speech-button{border-color:transparent;background:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
-#notionWorld.native-console:not([data-order]) .companion-voice-controls>.companion-order-button:is(:hover,:focus-visible),#notionWorld.native-console:not([data-talk=listening],[data-talk=thinking],[data-talk=speaking]) .companion-voice-controls>.companion-speech-button:is(:hover,:focus-visible){background:var(--system-glass-press)}
-#notionWorld.native-console[data-order=sending] .companion-voice-controls>.companion-order-button::after{inset:8px}
+#notionWorld.native-console:not([data-talk=listening],[data-talk=thinking],[data-talk=speaking]) .companion-voice-controls>.companion-speech-button{border-color:transparent;background:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+#notionWorld.native-console:not([data-talk=listening],[data-talk=thinking],[data-talk=speaking]) .companion-voice-controls>.companion-speech-button:is(:hover,:focus-visible){background:var(--system-glass-press)}
 @media(prefers-reduced-motion:reduce){#notionWorld.native-console .companion-controls.companion-voice-controls{transition:none}}
 /* ✕ and Stop are round like the bar's other buttons; Send keeps the theme's light circle (owner 2026-10-12: buttons keep
    the theme's colours), dimmed while there is nothing to send, as in Claude's bar. */
@@ -455,10 +438,8 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 #notionWorld.native-console .companion-text-entry[data-send=true] #notionCommand{padding-right:6px}
 #notionWorld.native-console .companion-text-entry[data-send=true] #notionSend{margin-left:calc(var(--companion-bar-tools) + 6px)}
 #notionWorld.native-console .companion-text-entry[data-send=true] .companion-voice-controls{right:calc(50% - min(var(--companion-bar-width),calc(100vw - 32px)) / 2 + 42px)}
-/* "+" at the open bar's far left, the bug after it (owner request 2026-10-12). */
+/* "+" at the open bar's far left (owner request 2026-10-12). */
 #notionWorld.native-console .companion-voice-controls>.companion-plus-button{position:absolute;top:4px;right:calc(min(var(--companion-bar-width),calc(100vw - 32px)) - 82px);display:grid;place-items:center;width:36px;height:36px;min-height:36px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--hud-scene-ink,#fffdf4);cursor:pointer;transition:right .22s ease-out}
 #notionWorld.native-console .companion-voice-controls>.companion-plus-button:is(:hover,:focus-visible){background:var(--system-glass-press)}
 #notionWorld.native-console .companion-voice-controls>.companion-plus-button[hidden]{display:none}
 #notionWorld.native-console .companion-text-entry[data-send=true]{--companion-bar-lead:40px}
-#notionWorld.native-console .companion-text-entry[data-send=true]:has(>.companion-voice-controls>.companion-order-button:not([hidden])){--companion-bar-lead:78px}
-#notionWorld.native-console .companion-text-entry[data-send=true] .companion-voice-controls>.companion-order-button.companion-order-button{right:calc(min(var(--companion-bar-width),calc(100vw - 32px)) - 120px)}

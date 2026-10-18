@@ -14,7 +14,7 @@ import {attentionSceneArt} from '../attention/index.ts';
 const LIVE_GAP=250;
 type Settle=(item:{worldItemId:string},status:string,snoozedUntil:string|null)=>Promise<unknown>;
 type Account={provider:string,title:string,action:string,run:()=>unknown};
-export function mountPhoneBridge({publish,publishLive=async()=>{},answer=()=>false,ask,askItem=(_id,text)=>ask(text),askApplet=(_key,text)=>ask(text),openApplet=()=>false,order=()=>false,world=()=>null,tasks=()=>null,journal=()=>null,choose=()=>false,itemFox=()=>null,settle,kindOf,ready=()=>true}:{
+export function mountPhoneBridge({publish,publishLive=async()=>{},answer=()=>false,ask,askItem=(_id,text)=>ask(text),askApplet=(_key,text)=>ask(text),openApplet=()=>false,world=()=>null,tasks=()=>null,journal=()=>null,choose=()=>false,itemFox=()=>null,settle,kindOf,ready=()=>true}:{
  publish:(value:unknown)=>Promise<unknown>,
  /** Sends the turn Fox is streaming (core/phone phoneLive). */
  publishLive?:(value:unknown)=>Promise<unknown>,
@@ -28,7 +28,6 @@ export function mountPhoneBridge({publish,publishLive=async()=>{},answer=()=>fal
  /** Open on the computer, asked from an Applet's page on the phone. */
  openApplet?:(key:string)=>unknown,
  /** What the person said with the phone's Order button: sent as an Order from this computer (ui/companion/native-chat.ts). */
- order?:(said:string)=>unknown,
  /** The Applet world (core/phone PhoneWorld), or null where there is none. */
  world?:()=>PhoneWorld|null,
  /** The Task panel's cards (core/tasks TaskPanel), for the phone's Tasks tab; null until the panel has read them. */
@@ -62,7 +61,6 @@ export function mountPhoneBridge({publish,publishLive=async()=>{},answer=()=>fal
   if(!ready())return false;
   if(message.type==='chat')void Promise.resolve(message.item?askItem(message.item,message.text):message.applet?askApplet(message.applet,message.text):ask(message.text)).catch(()=>{});
   else if(message.type==='applet')void Promise.resolve(openApplet(message.applet)).catch(()=>{});
-  else if(message.type==='order')void Promise.resolve(order(message.said)).catch(()=>{});
   else if(message.type==='option')void Promise.resolve(choose(message.item)).catch(()=>{});
   else if(message.type==='approval')void Promise.resolve(answer(message.approval,message.choice)).catch(()=>{});
   else if(message.type==='attention'){

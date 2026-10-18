@@ -16,7 +16,6 @@ try{
   if(b.action==='phonePair'&&b.kind==='agent'){if(b.operation==='start')w.agentPairing={state:'waiting',link:'worldlet://agent?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Studio+Mac'};if(b.operation==='end')w.agentPairing={state:'none'};return w.agentPairing;}
   if(b.action==='phonePair'){if(b.operation==='start')w.pairing={state:'waiting',link:'worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Studio+Mac'};if(b.operation==='end'){w.pairing={state:'none'};setTimeout(()=>w.dispatchEvent(new CustomEvent('worldlet:phone-status',{detail:w.pairing})));}return w.pairing;}
   if(b.action==='phonePublish')return {sent:true};
-  if(b.action==='order'&&b.operation==='send')return {available:true,ready:true,sent:{id:'order:order.x.'+b.id,screenshots:1,logLines:3,woke:true}};
   if(b.action==='agentChat'){w.worldletAgentEvent(b.id,{type:'progress',name:'read_mail'});w.worldletAgentEvent(b.id,{type:'delta',text:'Hello '});await new Promise(r=>setTimeout(r,400));w.worldletAgentEvent(b.id,{type:'delta',text:'from'});await new Promise(r=>setTimeout(r,400));return {message:'Hello from Fox.'};}
   return {ok:true};
  }}}};});
@@ -117,15 +116,11 @@ await web.getByText('Opened in Chrome on Mac · Active now').waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.findLast(c=>c.action==='phonePublish'&&c.slot==='attention').value.accounts),[{provider:'gmail',title:'Mail',action:'reconnect'}]);
  assert.equal(await page.evaluate(()=>(window as any).worldletPhoneMessage({type:'connect',id:'k1',provider:'gmail'})),true);
  assert.equal(await page.evaluate(()=>(window as any).connected),'gmail');
- // The phone's Order button (owner request 2026-10-06): what was said goes out as an Order from this computer, place
- // Phone, never as a chat line to Fox, and Fox says here that it was sent.
+ // Orders were retired (2026-10-18): one an older phone still sends is taken and does nothing, never a chat line.
  const chats=await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentChat').length);
  assert.equal(await page.evaluate(()=>(window as any).worldletPhoneMessage({type:'order',id:'r1',said:'The Mail lamp stays red'})),true);
- await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='order'&&c.operation==='send'));
- const sent=await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='order'&&c.operation==='send'));
- assert.equal(sent.length,1);assert.deepEqual([sent[0].said,sent[0].place],['The Mail lamp stays red','Phone']);assert.match(sent[0].id,/^[a-f0-9]{8}$/);
- await page.locator('#worldConversation').getByText('Order sent to Claude: “The Mail lamp stays red”',{exact:false}).waitFor();
- assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentChat').length),chats,'an Order is not a chat line');
+ await page.waitForTimeout(200);
+ assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentChat'||c.action==='order').length),chats,'an old Order is neither sent nor a chat line');
  assert.deepEqual(errors,[]);
- console.log('PASS Phone page pairs by QR code, shows the paired phone and unpairs, and pairs another computer by code; the Center and accounts go to the host; phone chat reaches Fox once and streams back; Connect opens sign-in on the computer; a phone Order goes out as an Order and Fox says so.');
+ console.log('PASS Phone page pairs by QR code, shows the paired phone and unpairs, and pairs another computer by code; the Center and accounts go to the host; phone chat reaches Fox once and streams back; Connect opens sign-in on the computer; an old phone’s Order does nothing.');
 }finally{await browser.close();}

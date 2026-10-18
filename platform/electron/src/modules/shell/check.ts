@@ -265,12 +265,6 @@ try{
   assert.equal(added.fox_proactive_asked.proactive_status,'spoke');assert.equal(added.page_load_timing.duration_bucket,'15_60s');
   assert.equal(added.page_load_timing.page_engine,'cef');assert.equal(added.update_applied.update_wait,'1_7d');assert.equal(added.update_failed.update_stage,'prepare');assert.equal(added.update_failed.update_error,'signature');
   assert.ok(!JSON.stringify(added).includes('private'),'no line, URL or error text');
-  // Orders: where one went and why one ended unsent, as buckets only.
-  analytics.recordProductEvent('order_sent','',{order_result:'stored',said:'private words'});analytics.recordProductEvent('order_stopped','',{order_stop:'left_app'});
-  analytics.recordProductEvent('order_stopped','',{order_stop:'private reason'});
-  await new Promise(resolve=>setTimeout(resolve,30));
-  assert.deepEqual(events.slice(-3).map(event=>[event.event,event.properties.order_result??event.properties.order_stop]),[['order_sent','stored'],['order_stopped','left_app'],['order_stopped','other']]);
-  assert.ok(!JSON.stringify(events.slice(-3)).includes('private'),'never the words or a free-text reason');
   // Focus-feature events (Attention, Journal, Routines, Phone, Settings › Agent): kinds and counts only;
   // attention_shown once a day, and nothing at all with sharing off.
   const before=events.length;

@@ -185,7 +185,7 @@ struct FoxDock: View {
         }
     }
 
-    /// Order (core/distribution/order.ts, owner request 2026-10-06): the team's own button, round with a bug, at the
+    /// Order (retired 2026-10-18: computers no longer offer it, so this stays hidden; owner request 2026-10-06): the team's own button, round with a bug, at the
     /// bar's left inside it (owner request 2026-10-12), only while the computer takes Orders (an Alpha or Dev app on a computer that can send them). One
     /// tap listens (the button turns red), a second sends what was heard to the team's Claude as an Order from the
     /// computer, never as a line for Fox. Voice only, as on the computer.

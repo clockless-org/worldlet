@@ -12,7 +12,7 @@ assert.deepEqual(selectChecks(null),all);
 assert.deepEqual(selectChecks([]),[]);
 assert.deepEqual(selectChecks(['README.md','docs/RELEASE-GUIDELINES.md']),[]);
 assert.deepEqual(selectChecks(['ui/companion/motion.ts']),trustChecks);
-for(const file of ['scripts/machine-capacity.mjs','scripts/dev-workspace.ts','gatehouse/auth.mjs',
+for(const file of ['scripts/machine-capacity.mjs','scripts/dev-workspace.ts',
  '.github/workflows/architecture.yml','package-lock.json','package.json','release.json','new-root/config',
  'platform/electron/distribution/mac/publish-release.py','scripts/release-label-check.ts','scripts/machine-health-check.ts']){
  assert.deepEqual(selectChecks([file]),all,file);
@@ -103,7 +103,7 @@ console.log('PASS PR selection: docs/product/control-plane, full fallback, two-p
  for(const f of loadModules)assert.ok(existsSync(new URL('../'+f,import.meta.url)),'load list names a real module: '+f);
  const calls=[];const ok=(bin,args)=>{calls.push(args);return {status:0};};
  const all=()=>true;
- assert.equal(loadSmoke(['scripts/x.mjs','docs/a.md','ui/y.ts'],ok,all),0);assert.deepEqual(calls[0],['--check','scripts/x.mjs'],'only changed JS under scripts/gatehouse/platform is parsed');
+ assert.equal(loadSmoke(['scripts/x.mjs','docs/a.md','ui/y.ts'],ok,all),0);assert.deepEqual(calls[0],['--check','scripts/x.mjs'],'only changed JS under scripts/platform is parsed');
  assert.equal(loadSmoke(['scripts/x.mjs'],(bin,args)=>({status:args[0]==='--check'?1:0}),all),1,'a script that does not parse fails the PR');
  assert.equal(loadSmoke(['scripts/deleted.mjs'],(bin,args)=>({status:args[0]==='--check'?1:0}),()=>false),0,'a deleted script is not parsed');
  if(loadModules.includes('scripts/machine-wakeup.mjs'))assert.equal(loadSmoke([],(bin,args)=>({status:String(args.at(-1)).includes('machine-wakeup.mjs')?1:0})),1,'a daemon module that does not load fails the PR');

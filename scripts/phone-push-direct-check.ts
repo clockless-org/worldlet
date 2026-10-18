@@ -14,7 +14,7 @@ assert.deepEqual(readPhoneMessage({type:'push',id:'p3',platform:'',token:''}),{t
 assert.equal(readPhoneMessage({type:'push',id:'p4',platform:'apns',token:'not hex'}),null);
 assert.equal(readPhoneMessage({type:'push',id:'p5',platform:'web',token:APNS}),null);
 assert.equal(readPhoneMessage({type:'push',id:'p6',platform:'fcm',token:''}),null);
-assert.equal(phoneDesktop({name:'Mac',version:'1',order:false},0).push,true,'the computer says it keeps the token');
+assert.equal(phoneDesktop({name:'Mac',version:'1'},0).push,true,'the computer says it keeps the token');
 
 const local=createLocalRelay();
 let direct=true,gone=false;

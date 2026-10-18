@@ -219,7 +219,7 @@ fun FoxDock(model: AppModel, item: AttentionItem?, applet: PhoneApplet? = null, 
         focusManager.clearFocus()
     }
 
-    /** Order (core/distribution/order.ts, owner request 2026-10-06): one tap listens, the next sends what was heard to the
+    /** Order (retired 2026-10-18: computers no longer offer it, so this stays hidden; owner request 2026-10-06): one tap listens, the next sends what was heard to the
      * team's Claude as an Order from the computer, never as a line for Fox. Voice only, as on the computer. */
     fun toggleOrder() {
         if (ordering) {
