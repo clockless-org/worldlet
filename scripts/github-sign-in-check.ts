@@ -10,7 +10,7 @@ import {McpAccounts} from '../platform/electron/src/modules/sources/mcp-account.
 
 // Core rules.
 assert.equal(GITHUB_APP.clientId,'Iv23liCU8TGiC1MCnBI6');
-assert.equal(GITHUB_INSTALL_URL,'https://github.com/apps/worldlet/installations/new');
+assert.equal(GITHUB_INSTALL_URL,'https://github.com/apps/worldlet-ai/installations/new');
 assert.deepEqual(readGithubDeviceStart({device_code:'d'.repeat(40),user_code:'WDJB-MJHT',verification_uri:'https://github.com/login/device',expires_in:899,interval:5}),
  {deviceCode:'d'.repeat(40),userCode:'WDJB-MJHT',verifyUrl:'https://github.com/login/device',expiresIn:899,interval:5});
 assert.equal(readGithubDeviceStart({device_code:'d'.repeat(40),user_code:'<script>',verification_uri:'https://github.com/login/device'}),null,'a code not shaped like GitHub\'s is refused');

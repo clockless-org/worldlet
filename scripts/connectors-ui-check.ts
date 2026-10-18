@@ -160,7 +160,7 @@ await withBrowser(async browser=>{
  await page.getByText('GitHub is connected.',{exact:true}).waitFor();
  assert.equal(await tile('github').locator('[data-sign-in-code]').count(),0,'the code goes once it is connected');
  await tile('github').getByRole('button',{name:'Choose projects',exact:true}).click();
- assert.equal(await page.evaluate(()=>(window as any).opened.at(-1)),'https://github.com/apps/worldlet/installations/new');
+ assert.equal(await page.evaluate(()=>(window as any).opened.at(-1)),'https://github.com/apps/worldlet-ai/installations/new');
  // Cancel ends the sign-in and says nothing changed.
  await tile('todoist').getByRole('button',{name:'Connect',exact:true}).click();
  await tile('todoist').getByRole('button',{name:'Cancel',exact:true}).click();
