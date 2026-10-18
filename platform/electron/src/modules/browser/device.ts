@@ -29,7 +29,7 @@ import type {Host,Row} from '../../host/types.ts';
 import {ANALYTICS,FOX,SPEECH,USER_ACTIVITY,type AnalyticsService,type FoxService,type SpeechService,type UserActivityService} from '../../host/services.ts';
 import {userIdle} from '../../../../../core/tasks/index.ts';
 import {timingBucket} from '../../../../../core/diagnostics/index.ts';
-import {GAME_REVIEW_APPLET} from '../../../../../core/games/index.ts';
+import {GAME_REVIEW_APPLET} from '../../../../../context/games/index.ts';
 import {busyWith} from '../../host/busy.ts';
 
 type Kept={view:WebPage;platform:string;requestedURL:URL|null};

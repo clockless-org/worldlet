@@ -343,6 +343,7 @@ Indexed: **284 Markdown documents** and **747 supporting documentation files**.
 <details><summary>Module and service documentation (38)</summary>
 
 - [android/README.md](../android/README.md)
+- [context/games/README.md](../context/games/README.md)
 - [contracts/COMPONENTS.md](../contracts/COMPONENTS.md)
 - [contracts/HARNESS.md](../contracts/HARNESS.md)
 - [contracts/README.md](../contracts/README.md)
@@ -358,7 +359,6 @@ Indexed: **284 Markdown documents** and **747 supporting documentation files**.
 - [core/attention/README.md](../core/attention/README.md)
 - [core/board/README.md](../core/board/README.md)
 - [core/diagnostics/ANALYTICS.md](../core/diagnostics/ANALYTICS.md)
-- [core/games/README.md](../core/games/README.md)
 - [core/items/STORAGE.md](../core/items/STORAGE.md)
 - [core/phone/README.md](../core/phone/README.md)
 - [core/tasks/README.md](../core/tasks/README.md)

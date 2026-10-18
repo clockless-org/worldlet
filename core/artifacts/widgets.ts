@@ -3,7 +3,7 @@
 // page, and Worldlet tries it, keeps it in this World and stands it in the World and on the paired phone as its own
 // Applet until its moment is over. These are the rules every host applies (core/artifacts/README.md). In code and
 // storage a made Applet's record is still called a widget.
-import {offlinePageProblems,madeGameTrialProblems,sandboxDocument,SANDBOX_POLICY} from '../games/index.ts';
+import {offlinePageProblems,madeGameTrialProblems,sandboxDocument,SANDBOX_POLICY} from '../../context/games/index.ts';
 
 /** The Applet task that makes moment Applets (MOMENT_MAKER in core/applets); it has no device of its own. */
 export const WIDGET_APPLET='app-moment-maker';

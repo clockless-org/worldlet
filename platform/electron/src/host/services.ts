@@ -316,11 +316,11 @@ export interface BrowserService {
  /** What a website page's recorder saved: kept in the World and followed for game reviews (the release-gate
   * game review check records Showdown battles through it). */
  recorded(visits:import('../modules/browser/recorder.ts').RecordedVisit[],records:(import('../../../../core/browser/index.ts').WebRecord&{visit:string})[]):void;
- /** Starts a proactive game review if one is due (core/games battleReviewDue); the games handed to Fox, if any. */
- reviewGamesNow():import('../../../../core/games/index.ts').FinishedBattle[]|null;
+ /** Starts a proactive game review if one is due (context/games battleReviewDue); the games handed to Fox, if any. */
+ reviewGamesNow():import('../../../../context/games/index.ts').FinishedBattle[]|null;
  /** The game on the page on screen, when it is one Worldlet can follow (a Showdown battle): what is being played now and
   * how the person's games there went today, for Fox's tips while they play. Null on any other page. */
- gameNow():({site:string}&ReturnType<typeof import('../../../../core/games/index.ts').battleNow>)|null;
+ gameNow():({site:string}&ReturnType<typeof import('../../../../context/games/index.ts').battleNow>)|null;
 }
 export const BROWSER='browser';
 

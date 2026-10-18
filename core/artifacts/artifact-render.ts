@@ -7,7 +7,7 @@
 //   content. The host checks it, tries it at the card's size and shows it isolated; until it is ready, and wherever it
 //   cannot show, the template card stands in.
 // These are the rules every host applies (core/artifacts/README.md#theme-driven-artifacts).
-import {offlinePageProblems,madeGameTrialProblems,sandboxDocument,SANDBOX_POLICY} from '../games/index.ts';
+import {offlinePageProblems,madeGameTrialProblems,sandboxDocument,SANDBOX_POLICY} from '../../context/games/index.ts';
 import {readArtifactActions,type Artifact,type ArtifactAction,type ArtifactSize} from './artifacts.ts';
 
 export type ArtifactRenderMode='template'|'page';

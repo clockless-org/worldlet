@@ -1,11 +1,11 @@
 import {BrowserWindow,session,type Session,type WebContents,type WebContentsView} from 'electron';
-import {madeGameTrialProblems,readMadeGameReport} from '../../../../../core/games/index.ts';
+import {madeGameTrialProblems,readMadeGameReport} from '../../../../../context/games/index.ts';
 import type {Surface} from '../browser/surface.ts';
 import type {Row} from '../../host/types.ts';
 
 const sleep=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms));
 let configured:Session|null=null;
-/** Made games run in a session of their own (core/games/README.md): in memory, no permissions, and every
+/** Made games run in a session of their own (context/games/README.md): in memory, no permissions, and every
  * request that is not the page itself (data:) or something it made (blob:) is cancelled, so a game can
  * reach neither the network nor anything of the World's. */
 export function gameSession():Session {
