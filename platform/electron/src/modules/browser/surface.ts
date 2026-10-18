@@ -1,6 +1,6 @@
 import {app,BaseWindow,dialog,session,type Rectangle,type Session,type View,type WebContents} from 'electron';
 import path from 'node:path';
-import {chromiumUserAgent,withClientHints} from '../../../../../core/browser/index.ts';
+import {chromiumUserAgent,withClientHints} from '../../../../../context/browser/index.ts';
 import {pageOf} from './page.ts';
 import {downloadPath} from './download-path.ts';
 import type {Host,Row} from '../../host/types.ts';
@@ -34,7 +34,7 @@ export class Surface {
 const configured=new Map<string,Session>();
 /** Website sessions present the Chromium the page actually runs on, consistently (#1089): the
  * reduced user agent without Electron or app tokens, and the default UA client hint headers that
- * Electron leaves out but Chromium browsers send (core/browser/client-hints.ts). */
+ * Electron leaves out but Chromium browsers send (context/browser/client-hints.ts). */
 export function presentEngine(value:Session){
  value.setUserAgent(chromiumUserAgent(value.getUserAgent()));
  const engine={chromium:process.versions.chrome??'',os:process.platform};

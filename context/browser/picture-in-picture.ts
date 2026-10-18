@@ -1,4 +1,4 @@
-import {getApp} from '../applets/index.ts';
+import {getApp} from '../../core/applets/index.ts';
 import {appletSite} from './page-resume.ts';
 import type {SurfaceRect} from '../../contracts/browser-surface.ts';
 

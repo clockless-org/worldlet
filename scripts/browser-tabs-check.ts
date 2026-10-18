@@ -1,6 +1,6 @@
-// The Browser's tabs (core/browser/browser-tabs.ts, owner request 2026-10-07).
+// The Browser's tabs (context/browser/browser-tabs.ts, owner request 2026-10-07).
 import assert from 'node:assert/strict';
-import {BROWSER_TABS,activeTab,addTab,browserTabsStart,closeTab,createBrowserTabs,isBrowserTab,noteTabPage,readBrowserTabs,selectTab,stepTab,tabApplet,tabLabel,pageAddress} from '../core/browser/index.ts';
+import {BROWSER_TABS,activeTab,addTab,browserTabsStart,closeTab,createBrowserTabs,isBrowserTab,noteTabPage,readBrowserTabs,selectTab,stepTab,tabApplet,tabLabel,pageAddress} from '../context/browser/index.ts';
 import {readBrowserSurfaceRequest} from '../contracts/browser-surface.ts';
 
 const home='https://www.google.com/',keys=(state:{tabs:{key:string}[]})=>state.tabs.map(tab=>tab.key);

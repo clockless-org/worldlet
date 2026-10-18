@@ -1,10 +1,10 @@
-// Focus on website pages (core/browser/page-focus.ts): the page script (platform/bridge/page-focus.ts) in a real
+// Focus on website pages (context/browser/page-focus.ts): the page script (platform/bridge/page-focus.ts) in a real
 // Chromium page, and the Focus switch in a website Applet's top bar (ui/browser/browser-device.ts). An article page
 // shows only its article over the page and gives the page back when Focus turns off; an app page keeps its page with
 // its distractions hidden; a page someone writes in is never an article; a single-page site's new address drops the
 // old article. The switch, after Back, is pressed while Focus is on, sends the person's choice, and brings Focus back after Fox.
 import assert from 'node:assert/strict';
-import {pageFocusPlan} from '../core/browser/index.ts';
+import {pageFocusPlan} from '../context/browser/index.ts';
 import {bundleScript,pageErrors,withBrowser} from './browser-test.ts';
 
 const focus=await bundleScript({entryPoints:['platform/bridge/page-focus.ts'],target:'es2022'});

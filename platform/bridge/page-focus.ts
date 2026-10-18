@@ -1,4 +1,4 @@
-// Focus on a website page (core/browser/page-focus.ts), in the page's isolated world. The build bundles it with
+// Focus on a website page (context/browser/page-focus.ts), in the page's isolated world. The build bundles it with
 // Readability into WorldletWeb/browser/page-focus.js; the host evaluates it on each page load and when the person
 // turns Focus on or off, as `worldletPageFocus(plan)`. The page's own DOM is never removed: hidden parts get a style
 // rule, and an article shows over the page in a closed shadow root that turning Focus off takes away again.

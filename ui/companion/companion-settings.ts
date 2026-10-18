@@ -1,5 +1,5 @@
 import {defaultBrowserText,displayReleaseVersion} from '../../core/distribution/index.ts';
-import {BROWSER_HOME,createBrowserHome} from '../../core/browser/index.ts';
+import {BROWSER_HOME,createBrowserHome} from '../../context/browser/index.ts';
 import {createFoxPreferences} from './fox-preferences.ts';
 import {createPanelGuide} from './panel-guide.ts';
 import {modelHealthView,type ModelFix} from './model-health.ts';
@@ -60,7 +60,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   return b;
  }
  const browserCommand=(operation:string,args:any={})=>call('browserCommand',{operation,args,agent:false});
- // Saved passwords of the built-in browser (core/browser/saved-logins.ts, owner request 2026-10-07): each site and
+ // Saved passwords of the built-in browser (context/browser/saved-logins.ts, owner request 2026-10-07): each site and
  // account, never the password, with Delete. A host that keeps none (the practice world, no keychain) leaves it out.
  async function savedLogins(target:HTMLElement){
   const turn=ticket,command=browserCommand;
@@ -80,7 +80,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   }
   target.append(box);await draw();
  }
- // What the built-in browser recorded (core/browser/web-record.ts): how many sites, and deleting one
+ // What the built-in browser recorded (context/browser/web-record.ts): how many sites, and deleting one
  // site's or all of them. Each delete asks again here, in the page; nothing is deleted until confirmed.
  // Hosts without recordings answer with an error and the section stays away.
  async function recordings(target:HTMLElement){

@@ -24,7 +24,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {BaseWindow,WebContentsView,screen,session} from 'electron';
 import {httpsUpgrade,opensAsTab,popupAllowed,publicPage} from '../rules.ts';
-import {TASK_PICTURE_IN_PICTURE,desktopTaskPictureInPicturePlacement,pageFrameRate,taskPictureInPictureAspect} from '../../../../../../core/browser/index.ts';
+import {TASK_PICTURE_IN_PICTURE,desktopTaskPictureInPicturePlacement,pageFrameRate,taskPictureInPictureAspect} from '../../../../../../context/browser/index.ts';
 import {BrowserDevice} from '../device.ts';
 import {Cancelled} from '../page.ts';
 import type {Host} from '../../../host/types.ts';
@@ -364,7 +364,7 @@ const result={supported,played,width:video.videoWidth,error:video.error?.code??n
    assert.ok(!media.supported&&!media.played,'the standard CEF build has no H.264/AAC: '+JSON.stringify(media));
    console.log('PASS the standard CEF build reports no H.264/AAC (Worldlet\'s own build is not pinned here yet, #1174)');
    // The page's document-start counts (video-formats.js) saw the refusal, so a page whose video
-   // needs H.264/AAC moves to Electron's views (core/browser/video-formats.ts).
+   // needs H.264/AAC moves to Electron's views (context/browser/video-formats.ts).
    const counts=await page.evaluate('return globalThis.__worldletVideoFormats?.()??null;',{},{isolated:false});
    assert.ok(counts&&counts.refused>0,'the page counted the missing H.264/AAC: '+JSON.stringify(counts));
    console.log('PASS the page counts the formats it was told are missing: '+JSON.stringify(counts));

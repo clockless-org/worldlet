@@ -150,7 +150,7 @@ assert.deepEqual(moved.unlockedApplets,['app-gmail','app-game-2048','app-random-
 assert.deepEqual(updateOnboarding({...firstFive,hiddenApplets:['app-breakout']},{operation:'offerGames'}).unlockedApplets,['app-gmail','app-game-2048'],'a removed Breakout keeps the Random game away too');
 console.log('PASS onboarding progress, placement, immutable inputs, Unicode notes, optional Applet roster and the one-time Games offer');
 
-import {recordBrowserVisit,searchBrowserHistory} from '../core/browser/browser-history.ts';
+import {recordBrowserVisit,searchBrowserHistory} from '../context/browser/browser-history.ts';
 const visits=[{url:'https://example.com/A',title:'Notebook',text:'paper',visitedAt:100},{url:'https://example.com/b',title:'Paper',text:'notebook',visitedAt:200}];
 assert.equal(recordBrowserVisit(visits,{...visits[0],visitedAt:250},[true,true]),null,'unchanged same-day snapshot is throttled');
 assert.equal(recordBrowserVisit(visits,{...visits[0],url:'https://example.com/a',visitedAt:250},[true,true]).length,3,'URL paths are case sensitive');

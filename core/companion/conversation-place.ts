@@ -36,7 +36,7 @@ export function recentBrowsing(visits:{id?:string;site:string;title:string;start
  }));
 }
 
-/** What the page on screen says, from its recording (core/browser/web-record.ts): the newest whole-page
+/** What the page on screen says, from its recording (context/browser/web-record.ts): the newest whole-page
  * text and what was added to the page after it, oldest first. A long page keeps its start (what the page
  * is) and its newest part (what just appeared, such as an opened post), at most PLACE.pageCharacters. */
 export function onScreenText(records:{kind:string;body:string}[],limit:number=PLACE.pageCharacters):string {
