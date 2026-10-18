@@ -12,10 +12,10 @@ Remote access is on by default (owner decision 2026-10-17): the installed app's 
    - **ChatGPT**: Settings › Connectors (Apps) › Create, with developer mode on where the plan asks for it. Paste the address as the MCP server URL and choose OAuth.
    - **Cursor**: add it to `~/.cursor/mcp.json` as `{"mcpServers":{"worldlet":{"url":"https://mcp.worldlet.ai/<room>"}}}`, then choose Connect in Cursor's MCP settings.
    - **Any other MCP client** that speaks Streamable HTTP and OAuth 2.1 with dynamic client registration works the same way.
-3. The client opens a page that shows a four-digit code and waits. In Worldlet, a card in Attention names the client, where it returns and the same code. Choose **Allow** only if the code matches.
+3. The client opens a page that shows a four-digit code and waits. In Worldlet, a card in Attention names the client, where it returns and the same code. Choose **Allow** only if the code matches. With Services connected, the card says so in plain words: **Allow** also lets it read them ("Allow also lets it read your GitHub and PostHog"), and **Allow without them** keeps them private.
 4. The client returns signed in. Its tools are `describe_world_tools` and `call_world_tool`, the same two a local Agent gets.
 
-What the new Agent may do starts with the default Grants: reads, drafts for your review and the browser link. Give it more under its name in Settings › Agent › Access, for example **Can read GitHub**, **Can ask you** or **Can see your board**. **Revoke** ends its connection at once, its refresh token included.
+What the new Agent may do starts with the default Grants: reads, drafts for your review and the browser link. **Allow** adds **Can read <Service>** for each Service connected when it signs in (the host's `services`, given when its code is redeemed), which also lets it search the World's saved context of those Services; **Allow without them** does not. Give it more under its name in Settings › Agent › Access, for example **Can read GitHub**, **Can ask you** or **Can see your board**. **Revoke** ends its connection at once, its refresh token included.
 
 ## A token for a script or another computer
 
@@ -33,7 +33,7 @@ The token makes an Agent of its own (kind `remote`, Harness `token`), listed in 
 - **On the computer** (`remote-mcp.ts` in core, `agent-runtime/remote-mcp.ts` in the host), the server answers:
   - OAuth discovery: protected resource metadata (RFC 9728) and authorization server metadata (RFC 8414), at `/.well-known/<kind>/<room>` as well as under the address itself.
   - Dynamic client registration (RFC 7591). Redirects must be https, this device's loopback, or an app's own scheme. Public clients use none for token authentication; a client that registered a secret must present it.
-  - `/authorize`, with PKCE S256 required. It shows the waiting page and puts the consent card in Attention (`remote-mcp-consents` in the ledger, provider `agents`). The page long-polls `/authorize/wait` until the person answers or ten minutes pass. Only this computer's pages can answer: `remoteMcp` is not in `ROOM_ALLOWED`.
+  - `/authorize`, with PKCE S256 required. It shows the waiting page and puts the consent card in Attention (`remote-mcp-consents` in the ledger, provider `agents`), naming the Services connected now (`remoteConsentItem`). The host action `remoteMcp` answers it with `allow` (with those Services' reads), `allow-basic` or `deny`. The page long-polls `/authorize/wait` until the person answers or ten minutes pass. Only this computer's pages can answer: `remoteMcp` is not in `ROOM_ALLOWED`.
   - `/token`. The authorization code works once and only with its verifier. Redeeming it makes the Agent (`remote-<client>-<random>`, kind `remote`). Access tokens last an hour, and each refresh token works once and is replaced.
   - MCP Streamable HTTP at the address itself: `initialize`, `ping`, `tools/list` and `tools/call`, single or batched, answered as JSON. Each call goes through the standing server's own call (`StandingWorldTools.call`), so it gets the same Grants, `describe_world_tools` filtering and audit.
 - **What is kept.** The host token, the registered clients and the SHA-256 hashes of each connection's tokens and of each script token are kept only in the vault (`remote-mcp`). A token itself only ever goes to the client that asked for it.

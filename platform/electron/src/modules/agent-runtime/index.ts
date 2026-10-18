@@ -603,7 +603,7 @@ export function installAgentRuntime(host:Host){
  agentAccess=createAgentAccess({root:context.root,vault,ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()?host.store.ledger():null;}catch{return null;}}});
  // Remote MCP (core/agent/REMOTE-MCP.md): cloud MCP clients reach the same World tools through the front, each
  // connection an Agent of its own, allowed on a consent card in Attention.
- remoteMcp=createRemoteMcpHost({vault,access:agentAccess,tools:()=>standingWorldTools(),relay:process.env.WORLDLET_PAIR_RELAY||undefined,onByDefault:opensRemoteAccess(context),changed:()=>host.store.worldChanged(),
+ remoteMcp=createRemoteMcpHost({vault,access:agentAccess,tools:()=>standingWorldTools(),services:()=>connectedServices().map(provider=>({provider,title:SERVICE_TITLES[provider]??provider})),relay:process.env.WORLDLET_PAIR_RELAY||undefined,onByDefault:opensRemoteAccess(context),changed:()=>host.store.worldChanged(),
   ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()?host.store.ledger():null;}catch{return null;}}});
  host.onQuit(()=>remoteMcp?.close());
  /** Remote access (Settings › Agent › Access): `status`, `enable`, `disable`, `renew` (a new address, every connection
@@ -617,7 +617,8 @@ export function installAgentRuntime(host:Host){
    if(request.operation==='enable')return await remote.enable();
    if(request.operation==='disable')return await remote.disable();
    if(request.operation==='renew')return await remote.renew();
-   if(request.operation==='allow'||request.operation==='deny')return remote.decide(request.id,request.operation==='allow');
+   // Allow also lets it read the connected Services the card names; "Allow without them" gives only the default Grants.
+   if(request.operation==='allow'||request.operation==='allow-basic'||request.operation==='deny')return remote.decide(request.id,request.operation!=='deny',request.operation==='allow');
    if(request.operation==='token')return await remote.token(request.name,request.id);
   }catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
   throw new WorldletError('Unknown remote access operation.');
