@@ -21,7 +21,9 @@ export function testAgent(env:NodeJS.ProcessEnv=process.env):TestAgent {
   const home=env.CLAUDE_CONFIG_DIR||os.homedir();
   const status=spawnSync('claude',CLAUDE_CODE_STATUS,{encoding:'utf8',timeout:30_000,shell:process.platform==='win32',windowsHide:true});
   const signedIn=status.status===0?claudeCodeLoggedIn(status.stdout):null;
-  const missing=status.error||signedIn===null&&status.status!==0?'the Claude Code command line is not installed here':signedIn===false?'Claude Code is not signed in here; run claude auth login':null;
+  // Only a plain "not signed in" stops the gate here: a daemon's short PATH may not find `claude`, which the app still
+  // finds in its usual folders (the check then fails plainly if it is not installed at all).
+  const missing=signedIn===false?'Claude Code is not signed in here; run claude auth login':null;
   return {id:'claude-code',title:'Claude Code',missing,home};
  }
  const home=env.CODEX_HOME||path.join(os.homedir(),'.codex');
