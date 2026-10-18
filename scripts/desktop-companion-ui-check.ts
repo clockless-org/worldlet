@@ -184,6 +184,7 @@ await withBrowser(fileAccess,async browser=>{
  await assertDesktopRow();
  // Orders were retired (2026-10-18): no bug button sits in the bar, in the World or on the desktop.
  assert.equal(await page.locator('.companion-order-button').count(),0);
+ await page.mouse.move(5,5);await page.waitForTimeout(400);await page.evaluate(()=>(window as any).worldletDesktopCompanion(false));await settle();
  await page.emulateMedia({reducedMotion:'no-preference'});
  // Focus and sample in one step so a slow runner cannot finish the .22s widening first. It widens from
  // the low-key resting bar (owner request 2026-10-05).
@@ -195,5 +196,5 @@ await withBrowser(fileAccess,async browser=>{
  await settle();
  await page.screenshot({path:'/tmp/worldlet-companion-desktop-bar.png',omitBackground:true,clip:await page.evaluate(()=>(window as any).worldletCompanionGeometry())});
  assert.deepEqual(errors,[]);
- console.log('PASS desktop Companion UI: Fox and its bar alone on the desktop, microphone and bug inside the bar, compact animated typing, microphone hold, reply, desktop context, native crop, responsive layouts and restoration');
+ console.log('PASS desktop Companion UI: Fox and its bar alone on the desktop, microphone inside the bar and no bug, compact animated typing, microphone hold, reply, desktop context, native crop, responsive layouts and restoration');
 });
