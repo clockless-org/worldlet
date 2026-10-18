@@ -7,6 +7,9 @@
 import {SERVICE_ACTIONS,SERVICE_TITLES,type ServiceOperation,type ServiceRead} from '../../../contracts/services.ts';
 import {SERVICE_PRESET_LIMITS,SERVICE_PRESET_PROVIDERS,type ServicePreset,type ServicePresetRead,type ServicePresetSave} from '../../../contracts/service-presets.ts';
 import {notionPageId} from '../mcp/notion.ts';
+import {linearIssueId} from '../mcp/linear.ts';
+import {todoistTaskId} from '../mcp/todoist.ts';
+import {supabaseProjectId} from '../mcp/supabase.ts';
 import {looksSecret,readAgentBoardRead} from '../../agent/index.ts';
 import {hogqlSelect,POSTHOG_LIMITS,POSTHOG_LISTS} from './posthog.ts';
 import {CLOUDFLARE_READS} from './cloudflare.ts';
@@ -93,6 +96,10 @@ export function readServicePresetRead(provider:unknown,input:unknown):ServicePre
  }else if(provider==='search-console'){
   if(operation==='list')takes(false,false);
   if(operation==='query'){takes(true,true);read.id=checked(()=>searchConsoleSite(id));if(query){checked(()=>searchConsoleSpec(query));read.query=query;}}
+ }else if(provider==='linear'||provider==='todoist'||provider==='supabase'){
+  // The first page of the list, or one issue, task or project by its ID.
+  if(operation==='list')takes(false,false);
+  if(operation==='read'){takes(true,false);read.id=checked(()=>(provider==='linear'?linearIssueId:provider==='todoist'?todoistTaskId:supabaseProjectId)(id));}
  }else if(provider==='notion'){
   takes(true,false);read.id=checked(()=>notionPageId(id));
  }else if(provider==='agents'){

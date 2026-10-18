@@ -12,20 +12,25 @@ export type ServiceOperation=typeof SERVICE_OPERATIONS[number];
  * fixed analytics reports. HTTP JSON (`http`): `list` (the endpoints the person connected) and `read` (`id` naming an
  * endpoint, `query` its path). Search Console: `list` (the sites its service account can see) and `query` (one Search
  * Analytics query of the site `id`, with an optional JSON `query` choosing the days, dimensions and rows;
- * core/accounts/services/search-console.ts). */
+ * core/accounts/services/search-console.ts). Linear, Todoist and Supabase: `list` (the person's issues, their active
+ * tasks, or their projects; Linear and Todoist page with `cursor`) and `read` (one by `id`), over their official MCP
+ * servers (core/accounts/mcp/service-records.ts). */
 export const SERVICE_ACTIONS:Readonly<Record<string,Readonly<Partial<Record<ServiceOperation,readonly string[]>>>>>=Object.freeze({
  github:Object.freeze({list:[],read:['id'],search:['query'],releases:['id']}),
  posthog:Object.freeze({query:['query'],read:['id']}),
  cloudflare:Object.freeze({read:['id']}),
  http:Object.freeze({list:[],read:['id']}),
  'search-console':Object.freeze({list:[],query:['id']}),
+ linear:Object.freeze({list:[],read:['id']}),
+ todoist:Object.freeze({list:[],read:['id']}),
+ supabase:Object.freeze({list:[],read:['id']}),
 });
 /** The Services `read_service` reads. A Service's Attention reads (its Applet's registration) are the World's own
  * background reads: an Agent reads a Service only through `read_service` and a Grant naming it, never through
  * `read_world_source` (core/tools/gateway.ts). */
 export const SERVICE_PROVIDERS:readonly string[]=Object.freeze(Object.keys(SERVICE_ACTIONS));
 /** Each Service's name as the person knows it (Settings › Agent › Access: "Can read GitHub"). */
-export const SERVICE_TITLES:Readonly<Record<string,string>>=Object.freeze({github:'GitHub',posthog:'PostHog',cloudflare:'Cloudflare',http:'HTTP JSON','search-console':'Search Console'});
+export const SERVICE_TITLES:Readonly<Record<string,string>>=Object.freeze({github:'GitHub',posthog:'PostHog',cloudflare:'Cloudflare',http:'HTTP JSON','search-console':'Search Console',linear:'Linear',todoist:'Todoist',supabase:'Supabase'});
 
 /** One read: an operation of the Service's (SERVICE_ACTIONS), with the `id` or `query` it takes. `cursor` continues a
  * list or search where the last page said it could. */
@@ -35,7 +40,7 @@ export interface ServiceComment {author:string;at?:string;text:string}
 export interface ServiceRecord {
  /** Stable within the Service (GitHub: `owner/repo#123`, what its `read` takes, or `owner/repo@v1.2.0` for a release;
   * PostHog: `insight/abc123`; Cloudflare: `worker/api`; HTTP JSON: `<endpoint>/<the record's own ID>`;
-  * Search Console: a site, or a row's dimension values). */
+  * Search Console: a site, or a row's dimension values; Linear: `ENG-123`; Todoist and Supabase: their own IDs). */
  id:string;
  title:string;
  /** The record on the Service's own website. */

@@ -773,6 +773,10 @@ The provider protocol/UI fixtures cover JSON and structured results, exact sourc
 identity, server errors, original links, disconnect and reauthorization. OAuth with
 a real organization remains unverified. [Official setup](https://supabase.com/docs/guides/ai-tools/mcp).
 
+### Linear, Todoist and Supabase as Worldlet Services
+
+An Agent reads Linear, Todoist and Supabase through the World tool `read_service`, like [GitHub](#github-as-a-worldlet-service), not through their Applets. Each has `list` (the issues assigned to the person, newest first; their active tasks, 20 a page; or their projects) and `read` (one issue by its key, such as `ENG-123`, one task, or one project's metadata, by `id`). Linear and Todoist page with `cursor`. The reads are the Applets' own readers above, on the same connection (`modules/sources/mcp-source.ts`); `core/accounts/mcp/service-records.ts` turns their answer into bounded Service records (`contracts/services.ts`): each detail becomes a field, a `read` carries the record's text cut to 4,000 characters, and nested values are left out. Supabase never returns keys or database contents. Each operation is its own Grant target (`linear/list`, `linear/read`, `todoist/list`…), in no Agent's default Grants: connecting one gives "Can read" to the Agent Fox uses, and the person chooses any other Agent ([GRANTS.md](../agent/GRANTS.md)). Service presets take a list or one ID the reader accepts. The Applets' own lists and Todoist's reviewed completion are unchanged. `node scripts/mcp-service-records-check.ts` checks this against fixtures of the three servers.
+
 ### Docker local containers
 
 Docker uses the installed local CLI with fixed `context show/inspect` and
