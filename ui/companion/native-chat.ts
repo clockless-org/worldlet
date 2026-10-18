@@ -39,7 +39,6 @@ import {mountMicrophonePicker} from './microphone-picker.ts';
 import {createFoxTalk} from './fox-talk.ts';
 import {mountCompanionPortrait} from './companion-portrait.ts';
 import {foxTrace} from './fox-performance.ts';
-import {ORDER,ORDER_FEEDBACK,ORDER_LOG} from '../../core/distribution/index.ts';
 import {harnessUsageLabel} from '../../core/agent/index.ts';
 
 /** A line Fox said on its own (fox-proactive.ts), as opposed to a reply, question or notice. */
@@ -103,51 +102,6 @@ export function createNativeChat(call){return function({button,input,status,exec
  const restack=()=>{if(!stackFrame)stackFrame=requestAnimationFrame(countStack);};
  new MutationObserver(restack).observe(hud,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']});
  new MutationObserver(restack).observe(root,{attributes:true,attributeFilter:['class','data-entry-expanded','data-depth','data-detail-open']});mountCompanionPortrait(avatar,{bust:root.classList.contains('fox-first-console')});
- // Order and Feedback (core/distribution/order.ts): one bug button inside Fox's message bar, beside the microphone
- // (owner request 2026-10-11), on every channel. In the Alpha and Dev apps on a computer
- // enrolled with the admin service it is Order: a click (or ⌘B / Ctrl+B) starts Fox's voice mode (the button turns red;
- // nothing is captured before the click); what is said then goes to the owner's Claude project as a task, with pictures
- // of the window and the recent operation log. A second click finishes early. Nothing else on screen changes while it
- // listens (owner Order 2026-10-07): the bar, Fox's card and its buttons stay as they were, and the button alone shows
- // listening, then a spinner until it is sent; Fox then says how it went. Everywhere else (Beta, Production, a computer
- // that cannot send Orders) it is hidden: Feedback is the button in the World's bottom-right corner (owner 2026-10-10).
- const orderButton=make('button','companion-order-button');orderButton.type='button';orderButton.innerHTML=uiIcon('bug');
- orderButton.addEventListener('pointerdown',e=>e.stopPropagation());
- let orderMode:'order'|'feedback'='feedback';
- const setOrderMode=(mode:'order'|'feedback')=>{orderMode=mode;orderButton.dataset.mode=mode;orderButton.title=mode==='order'?ORDER.hint:ORDER_FEEDBACK.hint;orderButton.setAttribute('aria-label',mode==='order'?ORDER.name:ORDER_FEEDBACK.name);orderButton.hidden=mode!=='order';};
- setOrderMode('feedback');
- let ordering=false;
- const orderStatus=()=>call('order',{operation:'status'}).then(r=>setOrderMode(r?.available&&r.ready?'order':'feedback'),()=>setOrderMode('feedback'));
- void orderStatus();window.addEventListener('worldlet:app-update',()=>void orderStatus());
- const endOrder=()=>{ordering=false;delete root.dataset.order;orderButton.removeAttribute('aria-pressed');orderButton.removeAttribute('aria-busy');};
- const orderSending=()=>{root.dataset.order='sending';orderButton.setAttribute('aria-busy','true');renderEntry();};
- orderButton.onclick=e=>{
-  e.stopPropagation();
-  if(orderMode==='feedback'&&!ordering){window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Feedback'}}));return;}
-  if(ordering){if(root.dataset.order==='listening'&&(recording||starting)){orderSending();void finishSpeech();}return;}
-  if(recording||starting||transcribing)return;
-  ordering=true;root.dataset.order='listening';orderButton.setAttribute('aria-pressed','true');
-  void beginSpeech(false,'order').then(()=>{if(ordering&&!recording&&!starting&&!transcribing)endOrder();});
- };
- // Why an Order ended without being sent, as one allowlisted bucket for product analytics (order_stopped); never the words.
- const orderStopped=(reason:string)=>{void call('order',{operation:'stopped',reason}).catch(()=>{});};
- const ORDER_STOPPED='The Order stopped before it was sent, so nothing reached Claude. Click the bug to try again.';
- async function sendOrder(said:string){
-  if(!said.trim()){endOrder();orderStopped('no_speech');say('I didn’t catch a task. Click the button to try again.');return;}
-  orderSending();
-  try{await placeOrder(said,[root.querySelector('.companion-context .companion-name')?.textContent?.trim(),decodeURIComponent(location.hash.slice(1))].filter(Boolean).join(' · '));}
-  finally{endOrder();}
- }
- // Sends one Order and has Fox say how it went; the paired phone's Order button (place `Phone`) comes here too.
- async function placeOrder(said:string,place:string){
-  const id=Array.from(crypto.getRandomValues(new Uint8Array(4)),b=>b.toString(16).padStart(2,'0')).join('');
-  // The pictures are taken now, before Fox answers over the window.
-  try{const r=await call('order',{operation:'send',id,said,place}),n=r?.sent?.screenshots||0;const words=`“${said.trim()}”`,extras=r?.sent?.id?` with ${n} screenshot${n===1?'':'s'} and the last ${ORDER_LOG.minutes} minutes of steps`:'';
-   // Never a quiet fallback: when the instant post failed, Fox says so and why (the hourly report still claims it).
-  // Fox repeats every word that was sent, so a long Order never reads as cut off (owner 2026-10-07: 「它会截断我的字数」).
-   say(r?.sent?.woke?`Order sent to Claude: ${words}${extras}.`:`Order NOT sent to Claude right away (${r?.sent?.wakeError||'Claude Code did not answer'}). It is saved in Gatehouse${extras}, so the hourly report will pick it up: ${words}`);}
-  catch(e){say(`${e.message||'The task did not reach Claude.'} What you said: “${said.trim()}”`);}
- }
  const sourceAlert=make('button','companion-source-alert','!');sourceAlert.type='button';sourceAlert.hidden=true;sourceAlert.setAttribute('aria-label','Connection needs your attention');pet.append(sourceAlert);
  let sourceIssues=[];
  root.addEventListener('worldlet:source-issues',(event:any)=>{sourceIssues=event.detail||[];sourceAlert.hidden=!sourceIssues.length;sourceAlert.title=sourceIssues.map(issue=>issue.title+': '+(issue.action==='permissions'?'Allow access':'Reconnect')).join(' · ');});
@@ -174,7 +128,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  voiceCancel.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
  voiceStop.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>';
  for(const button of [voiceCancel,voiceStop])button.addEventListener('pointerdown',e=>e.stopPropagation());
- voiceControls.append(plusButton,orderButton,voiceCancel,voiceStop,speechButton);entry.append(voiceControls);
+ voiceControls.append(plusButton,voiceCancel,voiceStop,speechButton);entry.append(voiceControls);
  // In one of Fox's other sessions the bar names it (“Message Fox · #diet”) and this ×, beside the microphone, goes back
  // to the main one.
  const sessionLeave=make('button','companion-session-leave');sessionLeave.type='button';sessionLeave.hidden=true;sessionLeave.setAttribute('aria-label','Back to the main conversation');
@@ -351,7 +305,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   changed:()=>{if(talk.on!==talkWasOn){talkWasOn=talk.on;void call('speechTalk',{active:talk.on}).catch(()=>{});}render();}});
  /** Opens the microphone while Fox speaks, without stopping the voice or saying anything when it cannot. */
  async function overhear(){
-  if(recording||starting||transcribing||ordering)return false;
+  if(recording||starting||transcribing)return false;
   starting=true;const turn=++speechGeneration;render();
   try{await call('speechStart',{purpose:'talk',barge:true});if(turn===speechGeneration&&starting){starting=false;recording=true;render();return true;}}
   catch{if(turn===speechGeneration){starting=false;render();}}
@@ -447,8 +401,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   rememberThreadPosition();
   renderPending=false;
   const wasVisible=!panel.hidden;
-  // An Order's capture is the button's alone: the card, the bar and Fox look as they did (owner Order 2026-10-07).
-  const listening=(recording||starting||transcribing)&&!ordering;
+  const listening=recording||starting||transcribing;
   // A quiet turn (the day's plan and summary) shows only Fox at work, never the card (owner Order 2026-10-07).
   const busy=active&&!quietTurn;
   // Opening any conversation surface must keep a meaningful reply visible.
@@ -701,23 +654,23 @@ export function createNativeChat(call){return function({button,input,status,exec
   api.setGuide({source:id,takeover:false,text:String(text),speech});api.revealGuide();
  }
  function renderEntry(){
-  const speech=(recording||starting||transcribing)&&!ordering,expanded=editing&&!speech;
+  const speech=recording||starting||transcribing,expanded=editing&&!speech;
   root.dataset.entryExpanded=String(expanded);
   // Pointing at Fox or at the bar opens it to its typing width without starting to type (owner request 2026-10-12).
   root.dataset.entryHover=String(!expanded&&!speech&&hoverInput);
-  // Once voice starts (Fox's microphone, a hold, Talk or an Order) the bar keeps the length it had until the voice ends
+  // Once voice starts (Fox's microphone, a hold or Talk) the bar keeps the length it had until the voice ends
   // (owner Order 2026-10-12): an open bar does not shrink because the pointer left it or speech took the field's place.
-  const voice=speech||!!ordering;
+  const voice=speech;
   if(!voice)voiceWide=expanded||root.dataset.entryHover==='true';
   root.dataset.entryHeld=String(voice&&voiceWide);
   // At rest the bar keeps low (owner request 2026-10-05): short, faint and only its name; pointing at it
   // or Fox brings back the hint, the microphone and Send, and a click opens it wide to type.
   const quiet=!expanded&&!speech&&!hoverInput&&!input.value.trim()&&!hoverNone.matches;
   entry.dataset.quiet=String(quiet);
-  // While the microphone listens, for Fox or for an Order, a sound wave stands where the bar was (owner request
+  // While the microphone listens, a sound wave stands where the bar was (owner request
   // 2026-10-09); the bar comes back once the words are being understood or sent. While Fox speaks in Talk the open
   // microphone only waits for an interruption, and the bar says how to interrupt.
-  const listening=(recording||starting)&&!(talk.on&&talk.phase!=='listening')&&root.dataset.order!=='sending';
+  const listening=(recording||starting)&&!(talk.on&&talk.phase!=='listening');
   entry.dataset.voice=String(listening);
   // Send stands at the bar's right end with the microphone just before it, as in Claude's (owner request 2026-10-12),
   // whenever it shows (controls.css hides it at rest with nothing typed).
@@ -725,7 +678,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   form.hidden=listening;form.inert=listening;fitInput(!expanded);inputState.hidden=true;
   if(listening&&waveform.hidden)clearWave();
   waveform.hidden=!listening;
-  const editable=listening&&!ordering&&!talk.on;
+  const editable=listening&&!talk.on;
   voiceCancel.hidden=voiceStop.hidden=!editable;entry.dataset.voiceEdit=String(editable);
   const icon=editable?'send':'microphone';if(speechButton.dataset.icon!==icon){speechButton.dataset.icon=icon;speechButton.innerHTML=editable?SEND_ICON:uiIcon('microphone');}
   state.textContent='';
@@ -875,21 +828,15 @@ export function createNativeChat(call){return function({button,input,status,exec
   animation.finished.catch(()=>{}).finally(()=>{flight.remove();if(!reduced)avatar.animate([{filter:'brightness(1)'},{filter:'brightness(1.2)'},{filter:'brightness(1)'}],{duration:240,easing:'ease-out'});});
  }
  function clearKeyPress(){clearTimeout(keyHoldTimer);keyHoldTimer=null;keyPress=null;root.classList.remove('is-pressing-fox');}
- function cancelSpeech(why?:unknown){speechToLine=false;if(why!=='talk')talk.stop();const order=ordering;if(ordering)endOrder();void companionInfo.feedback.cancelVoice();clearKeyPress();clearTimeout(finalTimer);clearAvatarPress();speechGeneration++;if(recording||starting||transcribing)call('speechCancel').catch(()=>{});recording=false;starting=false;transcribing=false;render();if(order){orderStopped(typeof why==='string'?why:'other');say(ORDER_STOPPED);}}
- // An Order is never dropped without a word (owner Order 2026-10-07: 「怎么发不了bug了」, after one Order ended when the
- // World's view settled and another when the window lost focus while its words were being recognised). Moving to
- // another view leaves it running; leaving the app while it listens stops the microphone and sends what was heard;
- // once it stopped listening, its words are recognised and sent wherever the person is.
- function leaveDuringOrder(){if(root.dataset.order==='listening'&&recording){orderSending();void finishSpeech();}else if(starting)cancelSpeech('left_app');}
+ function cancelSpeech(why?:unknown){speechToLine=false;if(why!=='talk')talk.stop();void companionInfo.feedback.cancelVoice();clearKeyPress();clearTimeout(finalTimer);clearAvatarPress();speechGeneration++;if(recording||starting||transcribing)call('speechCancel').catch(()=>{});recording=false;starting=false;transcribing=false;render();}
  function hidePreview(force=false){if(contextualDialogue()&&!force){render();return;}if(root.dataset.onboardingLocked==='true'||root.dataset.onboarding==='true')return;window.dispatchEvent(new Event("worldlet:fox-dismiss"));if(guide)dismissedGuide=guide;if(force||guide||reply||active||lastReply||dismissedGuide)dismissed=true;peeking=false;if(!input.value.trim())editing=false;expanded=false;input.blur();clearTimeout(recallTimer);preview=false;render();}
- function stop(){talk.stop();const order=ordering;if(ordering)endOrder();clearKeyPress();for(const queued of queuedTurns)queued.trace.finish({},'cancelled');queuedTurns=[];generation++;speechGeneration++;if(active)call('cancel').catch(()=>{});if(recording||starting||transcribing)call('speechCancel').catch(()=>{});const wasActive=active;active=false;recording=false;starting=false;transcribing=false;if(wasActive)say('Stopped.');else if(order){orderStopped('cancelled');say(ORDER_STOPPED);}else render();}
+ function stop(){talk.stop();clearKeyPress();for(const queued of queuedTurns)queued.trace.finish({},'cancelled');queuedTurns=[];generation++;speechGeneration++;if(active)call('cancel').catch(()=>{});if(recording||starting||transcribing)call('speechCancel').catch(()=>{});const wasActive=active;active=false;recording=false;starting=false;transcribing=false;if(wasActive)say('Stopped.');else render();}
  async function beginSpeech(hold=false,purpose=''){if(root.dataset.onboardingLocked==='true')return;
   // Pressing to talk while Fox reads its reply interrupts it (barge-in); a hold then records as usual.
   if(purpose!=='talk'&&talk.interrupt(!hold)&&!hold)return;
   if(companionInfo.feedbackActive){await companionInfo.feedback.startVoice();return;}
   if((active&&(!steering||chatRoute?.()))||starting||recording||transcribing)return;
-  // An Order leaves the card as it was; Fox's own voice mode opens it.
-  if(purpose!=='order'){noteInput();dismissed=false;peeking=false;expanded=false;preview=!!reply?.text;}starting=true;const turn=++speechGeneration;render();
+  noteInput();dismissed=false;peeking=false;expanded=false;preview=!!reply?.text;starting=true;const turn=++speechGeneration;render();
   try{await call('speechStart',{hold,...(purpose?{purpose}:{})});if(turn===speechGeneration&&starting){starting=false;recording=true;render();}}
   catch(e){if(turn===speechGeneration){starting=false;recording=false;say(e.message||'I could not start the microphone. Please try again.');}}
  }
@@ -1021,17 +968,17 @@ export function createNativeChat(call){return function({button,input,status,exec
  if(e.detail?.phase==='spoken'){talk.spoken();return;}
  if(!recording&&!starting&&!transcribing)return;
   const value=e.detail;
-  if(value.phase==='level'){const level=Math.max(0,Math.min(1,Number(value.text)||0));waveform.style.setProperty('--voice-level',String(level));pushWave(level);if(!ordering)talk.level(Number(value.text)||0);return;}
+  if(value.phase==='level'){const level=Math.max(0,Math.min(1,Number(value.text)||0));waveform.style.setProperty('--voice-level',String(level));pushWave(level);talk.level(Number(value.text)||0);return;}
   // Draft speech stays in the input line; only the final transcript executes.
   if(value.phase==='partial'){renderEntry();}
-  else if(value.phase==='processing'){recording=false;starting=false;transcribing=true;if(ordering)orderSending();render();}
+  else if(value.phase==='processing'){recording=false;starting=false;transcribing=true;render();}
   else if(value.phase==='final'){
-   recording=false;starting=false;transcribing=true;if(ordering)orderSending();render();
+   recording=false;starting=false;transcribing=true;render();
    const turn=speechGeneration;clearTimeout(finalTimer);finalTimer=setTimeout(()=>{if(turn!==speechGeneration)return;transcribing=false;
     // Stop: the words wait in the line to be read or changed, unsent.
-    if(speechToLine&&!ordering){speechToLine=false;const heard=String(value.text||'').trim();if(heard)input.value=input.value.trim()?input.value.trimEnd()+' '+heard:heard;editing=true;render();input.focus({preventScroll:true});fitInput();return;}
-    render();if(ordering)void sendOrder(value.text||'');else if(talk.heard(value.text||''))return;else if(value.text?.trim())submit(value.text);else say('I didn’t catch that. Use the microphone to try again.');},0);
-  }else if(value.phase==='error'){if(talk.on&&!ordering&&/did not hear|didn’t catch|did not catch/i.test(String(value.text||''))){cancelSpeech('talk');talk.missed();}else{cancelSpeech('speech_error');say(value.text||'I couldn’t hear you. Use the microphone to try again.');}}
+    if(speechToLine){speechToLine=false;const heard=String(value.text||'').trim();if(heard)input.value=input.value.trim()?input.value.trimEnd()+' '+heard:heard;editing=true;render();input.focus({preventScroll:true});fitInput();return;}
+    render();if(talk.heard(value.text||''))return;else if(value.text?.trim())submit(value.text);else say('I didn’t catch that. Use the microphone to try again.');},0);
+  }else if(value.phase==='error'){if(talk.on&&/did not hear|didn’t catch|did not catch/i.test(String(value.text||''))){cancelSpeech('talk');talk.missed();}else{cancelSpeech('speech_error');say(value.text||'I couldn’t hear you. Use the microphone to try again.');}}
  });
  // Global shortcuts apply only to the world canvas, never to forms, dialogs,
  // reader controls, browser fields, games (Space casts or pauses there), modifier
@@ -1048,14 +995,6 @@ export function createNativeChat(call){return function({button,input,status,exec
    keyPress={held:false};root.classList.add('is-pressing-fox');
    if(!active||(steering&&!chatRoute?.()))keyHoldTimer=setTimeout(()=>{if(!keyPress)return;keyPress.held=true;editing=false;input.blur();beginSpeech(true);},280);
   }
- },true);
- // ⌘B (Ctrl+B on Windows) presses the bug button, Order or Feedback (owner Order 2026-10-07), anywhere but a rich-text
- // field, where it means bold; a website page in Worldlet's browser keeps its own keys.
- const mac=/Mac|iPhone|iPad/i.test(navigator.platform);
- window.addEventListener('keydown',e=>{
-  if(e.code!==('KeyB')||!(mac?e.metaKey&&!e.ctrlKey:e.ctrlKey&&!e.metaKey)||e.altKey||e.shiftKey||e.repeat||e.isComposing||e.defaultPrevented)return;
-  if(orderButton.hidden||!orderButton.isConnected||root.dataset.onboardingLocked==='true'||root.dataset.onboarding==='true'||(e.target as Element)?.closest?.('[contenteditable]:not([contenteditable=false])'))return;
-  e.preventDefault();orderButton.click();
  },true);
  window.addEventListener('keyup',e=>{
   if(!holdToSpeak||e.code!=='Space'||!keyPress)return;
@@ -1080,10 +1019,10 @@ export function createNativeChat(call){return function({button,input,status,exec
   if(!e.target.closest('.companion-dialogue,.companion-pet,.companion-text-entry,.world-actions'))hidePreview(true);
  });
  // Native hosts publish deactivation even when Chromium misses window blur.
- window.addEventListener('worldlet:app-inactive',()=>{talk.stop();if(ordering)leaveDuringOrder();else cancelSpeech();});
+ window.addEventListener('worldlet:app-inactive',()=>{talk.stop();cancelSpeech();});
  window.addEventListener('pagehide',()=>cancelSpeech('page_closed'));
- document.addEventListener('visibilitychange',()=>{if(!document.hidden)return;talk.stop();if(ordering)leaveDuringOrder();else cancelSpeech();});
- window.addEventListener('blur',()=>{clearKeyPress();if(!input.value.trim())editing=false;input.blur();clearTimeout(recallTimer);clearInputFlights();clearAvatarPress();hoverInput=false;talk.stop();if(ordering)leaveDuringOrder();else if(recording||starting||transcribing)cancelSpeech();render();});
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)return;talk.stop();cancelSpeech();});
+ window.addEventListener('blur',()=>{clearKeyPress();if(!input.value.trim())editing=false;input.blur();clearTimeout(recallTimer);clearInputFlights();clearAvatarPress();hoverInput=false;talk.stop();if(recording||starting||transcribing)cancelSpeech();render();});
  mountMicrophonePicker({anchor:speechButton,list:()=>call('microphones'),talk:talkVoice&&holdToSpeak?{get active(){return talk.on;},toggle:()=>{if(root.dataset.onboardingLocked!=='true')talk.toggle();}}:null});
  window.addEventListener('worldlet:microphone-fallback',(e:any)=>setStatus(e.detail,{source:'microphone',speech:true}));
  const companionInfo=mountCompanionInfo({root,pet,call,getName:()=>companionName});
@@ -1147,7 +1086,7 @@ export function createNativeChat(call){return function({button,input,status,exec
     // and shows only there; the person's next message or Fox's next reply supersedes it.
     const keep=value=>value&&!value.source?.startsWith('focus:');
     if(!keep(guide))guide=null;if(!keep(dismissedGuide))dismissedGuide=null;
-    clearKeyPress();clearAvatarPress();if(!ordering&&(recording||starting||transcribing)){/* Talk keeps listening in the new place. */if(talk.phase==='listening'){cancelSpeech('talk');talk.missed();}else if(talk.overhearing){cancelSpeech('talk');talk.dropped();}else cancelSpeech();}if(!active){reply=null;preview=false;}
+    clearKeyPress();clearAvatarPress();if(recording||starting||transcribing){/* Talk keeps listening in the new place. */if(talk.phase==='listening'){cancelSpeech('talk');talk.missed();}else if(talk.overhearing){cancelSpeech('talk');talk.dropped();}else cancelSpeech();}if(!active){reply=null;preview=false;}
    }context=value;
    // Arriving back in the world, Fox stays quiet: the last line shows again only on hover or a click (owner Order 2026-10-07).
    scheduleRender();
@@ -1156,8 +1095,6 @@ export function createNativeChat(call){return function({button,input,status,exec
   contextSnapshot:()=>({thread:activeThread(),key:context.key,location:context.title,state:context.detail,recentActions:recentActions.slice(-4),view:visibleContent()}),
   recommendedActions,visibleActionIds,
   get guideSource(){return String(guide?.source||dismissedGuide?.source||'')},get lastReplyText(){return String(lastReply?.text||'')},get expanded(){return preview},beginDialogue:()=>{dismissed=false;preview=true;render();},get active(){return active||recording||starting||transcribing},cancel:stop,openVoice:()=>beginSpeech(),hidePreview,
-  /** An Order said on the paired phone (core/phone `order`): sent like the Order button's, from place `Phone`. */
-  order:(said:string)=>said.trim()?placeOrder(said,'Phone'):undefined,
   /** Work Worldlet starts by itself (the day's plan and summary) in a background session beside the conversation
    * (owner Order 2026-10-07): no card, no reply line, and the person can talk to Fox meanwhile. */
   background:(text:string,{displayText}:{displayText?:string}={})=>call('background',{text,shown:displayText,context:{thread:FOX_MAIN_THREAD,key:context.key,location:context.title,state:context.detail,view:structuredClone(visibleContent()),...worldNow(root)}}),

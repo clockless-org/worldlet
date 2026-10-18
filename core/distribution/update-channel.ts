@@ -1,5 +1,5 @@
 // Update channels (owner request 2026-10-04: pick in the app which stage an installed desktop app follows).
-// They are the release stages of gatehouse/public/stages.mjs, in order of stability:
+// They are the release stages, in order of stability:
 //  Dev         开发  every merge to main; only the development Mac runs it, from its checkout (scripts/dev-channel.ts)
 //  Alpha       内测  each release candidate whose full checks, package smoke and update acceptance passed on 01/02;
 //                    the same bytes a later release publishes, hours earlier (scripts/release-alpha.mjs)

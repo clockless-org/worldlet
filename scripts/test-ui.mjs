@@ -12,9 +12,8 @@ import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
-// The open-source export (scripts/oss-export.mjs) leaves out the hosted services, so their browser checks (gatehouse/)
-// are listed only where they exist.
-const available=files=>existsSync(path.join(root,'gatehouse'))?files:files.filter(file=>existsSync(path.join(root,file)));
+// A check is listed only where it exists.
+const available=files=>files.filter(file=>existsSync(path.join(root,file)));
 // Independent of one another: each builds its fixtures in memory, drives its own headless browser
 // (no OS window, focus or user defaults) over dist/WorldletWeb read-only or an ephemeral port, and
 // writes only a private temp directory or screenshot names no other check uses. The Python checks
@@ -25,10 +24,10 @@ export const parallelChecks=available([
  'scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts',
  // The slowest first (Mac RC 2026.1005.2887 times), so no lane is left running one alone at the end. The Attention Center's browser checks moved here from npm test (test:attention), where they ran one by one.
  'scripts/attention-no-refill-check.ts','scripts/attention-actions-check.ts',
- 'scripts/applet-focus-check.ts','gatehouse/board-browser-check.mjs','scripts/startup-setup-check.ts','scripts/world-tour-check.ts',
+ 'scripts/applet-focus-check.ts','scripts/startup-setup-check.ts','scripts/world-tour-check.ts',
  'scripts/attention-idle-check.ts','scripts/world-log-check.ts','scripts/your-agent-ui-check.ts','scripts/world-history-ui-check.ts','scripts/startup-check.ts','scripts/curated-source-applet-check.ts','scripts/browser-fox-glow-check.ts','scripts/demo-walkthrough-check.ts','scripts/applet-top-bar-check.ts','scripts/applet-shelf-ui-check.ts','scripts/text-reader-hud-check.ts',
  'scripts/world-readability-check.ts','scripts/feature-audit-check.ts','scripts/ongoing-ui-check.ts','scripts/phone-pairing-ui-check.ts','scripts/web-open-check.ts','scripts/desktop-companion-ui-check.ts','scripts/fox-mac-controls-check.ts','scripts/sample-world-check.ts','scripts/widgets-ui-check.ts',
- 'scripts/order-ui-check.ts','scripts/companion-entry-check.ts','scripts/attention-group-identity-check.ts','scripts/fox-name-tag-check.ts',
+ 'scripts/companion-entry-check.ts','scripts/attention-group-identity-check.ts','scripts/fox-name-tag-check.ts',
  // Entering and leaving an Applet zooms, and Back from an area's Applet returns to its panel (owner Order 2026-10-07).
  'scripts/world-level-zoom-check.ts',
  // Long checks from suites no net ran (test:applets, test:browser, test:world, test:render, test:companion, test:demo).
@@ -125,10 +124,10 @@ export const quickChecks=available([
  'scripts/startup-check.ts','scripts/startup-setup-check.ts','scripts/world-scene-check.ts','scripts/sample-world-check.ts',
  'scripts/world-tour-check.ts','scripts/feature-audit-check.ts','scripts/core-applet-content-check.ts','scripts/applet-focus-check.ts',
  'scripts/applet-first-entry-check.ts','scripts/library-applet-check.ts','scripts/work-applet-check.ts','scripts/immersive-background-check.ts',
- 'gatehouse/board-browser-check.mjs','scripts/attention-actions-check.ts','scripts/attention-no-refill-check.ts','scripts/attention-brief-markdown-check.ts',
+ 'scripts/attention-actions-check.ts','scripts/attention-no-refill-check.ts','scripts/attention-brief-markdown-check.ts',
  'scripts/fox-chat-fold-check.ts','scripts/fox-execution-check.ts','scripts/companion-entry-check.ts','scripts/onboarding-first-value-check.ts',
  'scripts/google-connection-check.ts','scripts/mail-open-check.ts','scripts/applet-scene-check.ts','scripts/browser-applet-check.ts','scripts/world-history-ui-check.ts',
- 'scripts/artifacts-ui-check.ts','scripts/order-ui-check.ts','scripts/sample-persona-check.ts','scripts/web-record-check.ts',
+ 'scripts/artifacts-ui-check.ts','scripts/sample-persona-check.ts','scripts/web-record-check.ts',
  'scripts/phone-pairing-ui-check.ts','scripts/meetings-check.ts','scripts/web-open-check.ts',
 ]);
 // The pull request set (`npm run test:ui:pr`, owner decision 2026-10-10: PR CI runs quick checks within five minutes):

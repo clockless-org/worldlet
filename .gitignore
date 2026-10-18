@@ -30,9 +30,6 @@ app/windows/bin/
 app/windows/obj/
 .worldlet-task/
 
-# Built from docs/ by gatehouse/build-diagrams.mjs at deploy.
-gatehouse/public/diagrams/
-
 # Signing keys, keystores and platform service files are never source.
 *.pem
 *.p8

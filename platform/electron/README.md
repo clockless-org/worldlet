@@ -129,11 +129,8 @@ other views are not in the pictures. `npm run test:ui:review` (`scripts/ui-revie
 gates) sends up to 16 of a fresh run's pictures (the one at each printed step, then evenly spaced) with the steps to
 this computer's Codex CLI (`codex exec --sandbox read-only --image … --output-schema`), prints the findings and saves
 them to `.local/electron-checks/ui-review.json`. Only a `blocker` (a blank or black World, an error dialog, the main UI
-missing or unreadable) fails the gate and so reaches the RC repair flow. `issue` findings (clear visible defects)
-go to Gatehouse's requirement inbox as one `rc-ui` item per
-run with the pictures they name (up to eight), at most once a day per check and host (`.local/ui-review-reported.json`
-beside the host's `.local/machine-service.json`), where the hourly report fixes the clear bugs; `nit` findings stay
-in the log. The Codex CLI takes images, not video, so these pictures stand in for a recording of the run.
+missing or unreadable) fails the gate and so reaches the RC repair flow. `issue` and `nit` findings stay in the log
+and the saved file. The Codex CLI takes images, not video, so these pictures stand in for a recording of the run.
 No pictures, no Codex sign-in or a Codex error is a SKIP. `node scripts/ui-review-check.ts` covers the selection, the
 answer shape and a run against a fake CLI.
 

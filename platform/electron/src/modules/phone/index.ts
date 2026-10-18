@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {app} from 'electron';
 import type {Host,Row} from '../../host/types.ts';
-import {AGENT,ANALYTICS,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,ORDER,PHONE,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,WIDGETS,WORLD_ROOM_PAGE,WORLD_WEB,type WorldRoomPageService,type WorldWebService,type AgentService,type RtcPageFactory,type DesktopCompanionService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
+import {AGENT,ANALYTICS,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,PHONE,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,WIDGETS,WORLD_ROOM_PAGE,WORLD_WEB,type WorldRoomPageService,type WorldWebService,type AgentService,type RtcPageFactory,type DesktopCompanionService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
 import {WorldletError} from '../../files.ts';
 import {withWorldLink,PHONE_LIMITS,hostAppletPlaces,threadPairs,readRemoteToHost,remoteHostInfo,phoneActionStatus,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,pairKeys,fromBase64url,sha256Hex,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../core/phone/index.ts';
 import {createPhoneRelay} from './relay.ts';
@@ -43,7 +43,6 @@ export function computerName(){return os.hostname().replace(/\.(local|lan|home)$
 
 export function installPhone(host:Host){
  const vault=host.use<VaultService>(VAULT);
- const orderReady=()=>host.optional<OrderService>(ORDER)?.ready()??Promise.resolve(false);
  const version=app.getVersion();
  const web=phoneWebRecording((visits,records)=>host.optional<BrowserService>(BROWSER)?.recorded(visits,records),{onError:error=>host.diagnostics.record(error,'phoneWebRecord')});
  // The last Attention snapshot sent while paired (to find new items), and lines said on the phone whose reply is due.
@@ -68,9 +67,8 @@ export function installPhone(host:Host){
    }
    // What happened on a website the phone opened is kept in the World by the host, like the computer's own browsing.
    if(message.type==='web'){lastActive=Date.now();web.record(message);return true;}
-   // An Order from the phone goes out as the computer's own (the page sends it and Fox says how it went); one this
-   // computer cannot send now (another channel, no Claude Code or enrolment) is dropped without a word.
-   if(message.type==='order'&&!await orderReady())return true;
+   // Orders were retired on 2026-10-18: one an older phone still sends is dropped without a word.
+   if(message.type==='order')return true;
    // A photo or file attached on the phone arrives in parts before its line; the whole file is saved on this computer.
    if(message.type==='file'){lastActive=Date.now();attachments.add(message);return true;}
    if(message.type==='chat'&&message.files?.length){
@@ -340,7 +338,7 @@ export function installPhone(host:Host){
     if(link.relay.paired&&link.relay!==worldRoom){
      if(link.phone)await hostCenter();
      if(link.phone)await publishConversation();
-     const desktop=phoneDesktop({name:computerName(),version,order:link.phone&&await orderReady()},Date.now());
+     const desktop=phoneDesktop({name:computerName(),version},Date.now());
      await link.relay.publish('desktop',link.phone?desktop:{...desktop,agent:await hostInfo()});
     }
    }catch(e){host.diagnostics.record(e,'phonePairing');}

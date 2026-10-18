@@ -3,21 +3,20 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {app,BaseWindow,dialog,Menu,powerMonitor,type MenuItemConstructorOptions} from 'electron';
 import {WorldletError,errorMessage,isoSeconds} from '../../files.ts';
-import {AGENT,ANALYTICS,APP_UPDATES,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,ORDER,PHONE,SOURCES,SPEECH,USER_ACTIVITY,WORLD_TOOLS,
- type AgentService,type BrowserService,type CompanionService,type FoxService,type OrderService,type PhoneService,type SourcesService,type SpeechService,type UserActivityService,type WorldToolsService} from '../../host/services.ts';
+import {AGENT,ANALYTICS,APP_UPDATES,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,PHONE,SOURCES,SPEECH,USER_ACTIVITY,WORLD_TOOLS,
+ type AgentService,type BrowserService,type CompanionService,type FoxService,type PhoneService,type SourcesService,type SpeechService,type UserActivityService,type WorldToolsService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {DesktopCompanion} from './companion.ts';
 import {companionMenu} from './companion-tray.ts';
 import {createUpdates,devBuildApply,devBuildStatus} from './updates.ts';
 import {UsageAnalytics} from './analytics.ts';
 import {minidumpCrash,nativeCrashes} from './native-crashes.ts';
-import {diagnostics,exportDiagnostics,recordFoxTiming,sendFeedback,showDebug,watchConsole} from './diagnostics.ts';
+import {diagnostics,exportDiagnostics,recordFoxTiming,sendFeedback,showDebug} from './diagnostics.ts';
 import {decode,dispose,exportTo,restore,type Archive} from './backup.ts';
 import {worldMenu,worldMenuState,type WorldMenuState} from './world-menu.ts';
 import {createLoginItem} from './login-item.ts';
 import {createDefaultBrowser} from './default-browser.ts';
 import {openInBrowser} from '../../system-browser.ts';
-import {order} from './order.ts';
 import {relaunchAfterQuit,wantsQuit} from '../../host/quit.ts';
 import {currentGraphics,graphicsCrashed} from '../../graphics.ts';
 import {busyWith,onStall,watchMainStalls} from '../../host/busy.ts';
@@ -34,7 +33,6 @@ export function installShell(host:Host){
  const analytics=host.provide(ANALYTICS,new UsageAnalytics(host));
  analytics.followChannel(()=>updates.channel);
  // Page console warnings and errors, kept in memory for an Order (diagnostics.ts).
- watchConsole();
  const loginItem=createLoginItem(host);
  const defaultBrowser=createDefaultBrowser(host);
  // System-wide input idle time (any app, not only Worldlet), shortened by an open paired phone. An unreadable
@@ -184,9 +182,6 @@ export function installShell(host:Host){
  host.onQuit(()=>{analytics.endActive();companion.stop();updates.quit();try{fs.rmSync(runMarker,{force:true});}catch{}});
 
  let pending:{id:string,archive:Archive}|null=null;
- const orders=order(host,()=>updates.channel);
- // The paired phone shows its Order button only while this answers true (modules/phone).
- host.provide<OrderService>(ORDER,{ready:()=>orders({operation:'status'}).then(r=>!!(r.available&&r.ready),()=>false)});
  host.register({
   // The World page's uncaught errors; Core keeps only type, failure code and sanitized frames.
   reportException:request=>{
@@ -236,8 +231,6 @@ export function installShell(host:Host){
   devBuildStatus:()=>devBuildStatus(host),
   devBuildApply:request=>devBuildApply(host,request),
   feedback:request=>sendFeedback(host,request),
-  // The team's spoken tasks for Claude, Alpha and Dev only (order.ts).
-  order:orders,
   showDebug:async()=>{await showDebug(host,sheet);return {ok:true};},
   diagnostics:()=>diagnostics(host),
   exportDiagnostics:()=>exportDiagnostics(host,host.window(),sheet),

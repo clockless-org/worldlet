@@ -9,7 +9,7 @@ import {timingBucket,updateWaitBucket} from '../../../../../core/diagnostics/ind
 import {demotedChannel,followedChannel,isUpdateChannel,pickUpdate,switchUpdateChannel,updateChannelOptions,updateChannelSwitchable,type UpdateChannel} from '../../../../../core/distribution/index.ts';
 import {outliveQuit,relaunchAfterQuit} from '../../host/quit.ts';
 import type {Host,Row} from '../../host/types.ts';
-import {machineCredential} from './machine-credential.ts';
+import {ownerComputer} from './owner-computer.ts';
 import {buildInfo,buildNumber,distribution,packagedRelease,releaseBuild,versionText} from './release.ts';
 import {acceptanceReportPath,updateAcceptance,type UpdateAcceptance} from './update-acceptance.ts';
 import {downloadWindowsInstaller,fetchWindowsRelease,readManifest,retryStalled,stallGuard,UPDATE_STALLED,updaterAgent,verifyWindowsInstaller,windowsUpdateTest,WINDOWS_ALPHA_MANIFEST_URL,WINDOWS_MANIFEST_URL,WINDOWS_ORIGIN,type WindowsRelease} from './windows-release.ts';
@@ -41,11 +41,11 @@ export abstract class Updates implements AppUpdatesService {
  protected show(state:string,label:string,detail=''){this.state=state;this.label=label;this.detail=detail;this.notify();}
  abstract snapshot():Row;
  abstract activate(request?:Row):Promise<Row>;
- /** The owner's computer (machine-credential.ts): only there can an installed copy switch channel or follow Alpha.
- * Read again at most once a minute, so enrolling or removing the credential takes effect without a restart. */
+ /** The owner's computer (owner-computer.ts): only there can an installed copy switch channel or follow Alpha.
+ * Read again at most once a minute, so adding or removing the mark takes effect without a restart. */
  protected get owner():boolean {
   const now=Date.now();
-  if(now-this.ownerAt>60_000){this.ownerAt=now;this.ownerSeen=!!machineCredential(this.host);}
+  if(now-this.ownerAt>60_000){this.ownerAt=now;this.ownerSeen=ownerComputer(this.host);}
   return this.ownerSeen;
  }
  private ownerAt=0;

@@ -5,14 +5,14 @@ import {spawnSync} from 'node:child_process';
 import {readFileSync,existsSync} from 'node:fs';
 import {pathToFileURL} from 'node:url';
 
-// The open-source export (scripts/oss-export.mjs) leaves out the operations repository's hosted services, host
-// automation and their checks; there only the checks and modules it contains run. Here every one must exist.
-const present=f=>existsSync(new URL('../'+f,import.meta.url)),operationsRepository=present('gatehouse');
-const available=files=>operationsRepository?files:files.filter(present);
+// The release hosts' automation and its checks live in the private operations repository; only the checks and
+// modules this repository contains run here.
+const present=f=>existsSync(new URL('../'+f,import.meta.url));
+const available=files=>files.filter(present);
 export const operationalChecks=available([
  'scripts/windows-installer-support-check.py',
  'scripts/release-mount-check.py','scripts/release-archive-check.py','scripts/release-notarize-check.py',
- 'gatehouse/release-history-check.mjs','gatehouse/release-history-backfill-check.mjs','gatehouse/release-progress-check.mjs','gatehouse/workflow-check.mjs','gatehouse/dependencies-check.mjs','scripts/machine-dependency-result-check.mjs',
+ 'scripts/machine-dependency-result-check.mjs',
  'scripts/machine-wakeup-check.mjs','scripts/machine-storage-check.mjs','scripts/machine-worktree-cleanup-check.mjs','scripts/machine-task-root-check.mjs','scripts/machine-build-root-check.mjs',
  'scripts/machine-recovery-check.mjs','scripts/release-job-check.mjs',
  'scripts/window-pixels-check.mjs','scripts/release-smoke-mac-check.mjs','scripts/release-permissions-mac-check.mjs','scripts/release-login-item-mac-check.mjs','scripts/release-fox-setup-mac-check.mjs','scripts/rc-update-acceptance-mac-check.mjs','scripts/onboarding-paths-check.ts','scripts/setup-fixtures-check.ts',
@@ -23,16 +23,11 @@ export const operationalChecks=available([
  // The test:ui runner decides the UI gate: a broken one could pass every release-candidate run.
  'scripts/test-ui-check.mjs','scripts/run-steps-check.mjs',
  'scripts/machine-prs-check.mjs',
- 'gatehouse/check.mjs','gatehouse/cloud-check.mjs','gatehouse/github-check.mjs','gatehouse/github-app-check.mjs','gatehouse/mcp-check.mjs','gatehouse/readers-check.mjs','gatehouse/funnel-check.mjs','gatehouse/oauth-check.mjs','gatehouse/data-sources-check.mjs','gatehouse/production-errors-check.mjs','gatehouse/recordings-check.mjs','gatehouse/inbox-check.mjs','gatehouse/vault-check.mjs','gatehouse/ui-build-check.mjs',
  // Capacity and truthful live state are part of the workflow, not optional UI polish.
  'scripts/machine-capacity-check.mjs','scripts/machine-awake-check.mjs',
  'scripts/machine-interactive-check.mjs','scripts/machine-interactive-cli-check.mjs','scripts/machine-live-check.mjs',
- 'scripts/machine-live-report-check.mjs','gatehouse/live-check.mjs',
+ 'scripts/machine-live-report-check.mjs',
  'scripts/cloud-session-report-check.mjs',
- // Agents on the hosts call the admin MCP endpoint through this helper with their machine credential.
- 'scripts/admin-mcp-check.mjs',
- // 对话: the project's messages into Gatehouse (gatehouse/conversations.mjs).
- 'scripts/conversation-sync-check.mjs',
  // PR CI time and spend, reported every hour (owner ask 2026-10-04).
  'scripts/ci-time-check.mjs',
  // The dashboard, reports and dispatch the hosts and the owner read, and release labels, storage and coordination:
@@ -42,9 +37,6 @@ export const operationalChecks=available([
  'scripts/machine-report-check.mjs','scripts/machine-sessions-check.mjs','scripts/machine-status-check.mjs',
  'scripts/release-label-check.ts','scripts/release-retention-check.mjs','scripts/release-storage-check.py','scripts/release-version-check.py','scripts/r2-object-check.mjs',
  'scripts/windows-release-coordination-check.mjs','scripts/windows-check-coordination-check.ts',
- // Admin live updates and the public release feed: only in test:machines, which no net runs (the admin board's
- // browser check is in test:ui: PR CI runs these when scripts change and has no browser).
- 'gatehouse/live-status-check.mjs','gatehouse/release-check.mjs',
 ]);
 export const trustChecks=['scripts/turn-trust-check.ts','scripts/agent-grants-check.ts'];
 // Product fixture/native-source changes do not exercise allocator, reporting or publication.
@@ -57,7 +49,7 @@ export function productPath(p){
 export function selectChecks(files){
  // Unknown paths and unavailable diffs run everything. Markdown alone does not change execution.
  const operational=files===null||files.some(p=>!p.endsWith('.md')&&!productPath(p)&&(
-  /^(scripts|gatehouse|\.github|platform)\//.test(p)||
+  /^(scripts|\.github|platform)\//.test(p)||
   !/^(ui|core|contracts|resources|harness|models|worker|website|migrations)\//.test(p)));
  const trust=files===null||files.some(p=>!p.endsWith('.md')&&/^(ui|core|contracts|platform|harness|scripts)\//.test(p))||operational;
  return [...(operational?operationalChecks:[]),...(trust?trustChecks:[])];
@@ -94,7 +86,7 @@ export function repairDeletions(eventName,event,run=spawnSync){
 export const loadModules=available(['scripts/machine-claim.mjs','scripts/machine-candidate.mjs','scripts/machine-release.mjs','scripts/release-job.mjs','scripts/machine-wakeup.mjs','scripts/machine-cloud-dispatch.mjs','scripts/machine-nightly.mjs','scripts/machine-labels.mjs','scripts/machine-rc-package.mjs','scripts/machine-rc-repair.mjs','scripts/machine-store-submit.mjs','scripts/machine-actions.mjs','scripts/machine-cloud-report.mjs','scripts/machine-metrics.mjs']);
 export function loadSmoke(files,run=spawnSync,exists=f=>existsSync(new URL('../'+f,import.meta.url))){
  // A deleted script is in the diff but has nothing to parse; the daemon module imports below catch dangling references.
- const changed=(files||[]).filter(f=>/\.(?:mjs|cjs|js)$/.test(f)&&/^(scripts|gatehouse|platform)\//.test(f)&&exists(f));
+ const changed=(files||[]).filter(f=>/\.(?:mjs|cjs|js)$/.test(f)&&/^(scripts|platform)\//.test(f)&&exists(f));
  for(const file of changed){const r=run(process.execPath,['--check',file],{stdio:'inherit'});if(r.error||r.status!==0){console.error('Does not parse: '+file);return 1;}}
  for(const file of loadModules){const r=run(process.execPath,['--input-type=module','-e',`await import(${JSON.stringify(new URL('../'+file,import.meta.url).href)})`],{stdio:'inherit'});if(r.error||r.status!==0){console.error('Does not load: '+file);return 1;}}
  const tick=!operationsRepository&&!present('scripts/machine-tick.ts')?{status:0}:run(process.execPath,['--input-type=module','-e',`await import(${JSON.stringify(new URL('../scripts/machine-tick.ts',import.meta.url).href)}).catch(e=>{if(!/Ticks run only under/.test(e.message))throw e;})`],{stdio:'inherit'});

@@ -2329,7 +2329,6 @@ export function mountNotionWorld(data: World, native: any) {
       }
       if(r&&root.appletLayout.has(r.moduleId))visitObject(r.moduleId);return voice?.ask(text,{origin:'user',displayText:text});},
      openApplet:key=>{const r=sections.find(s=>s.entity==='app'&&s.key===key);if(r&&root.appletLayout.has(r.moduleId))visitObject(r.moduleId);},
-     order:said=>voice?.order?.(said),
      world:()=>({places:sections.filter(r=>r.entity==='app'&&r.key&&!r.ongoing&&!r.moment&&root.appletLayout.has(r.moduleId)).sort((a,b)=>lastUse(b,regionLayout)-lastUse(a,regionLayout)).map(r=>{const status=appStatus(r,data.moduleConnections||[]),phase=status.phase;
        return {key:r.key,title:r.title,provider:r.provider||r.key,label:status.label,source:!['browser','local','unavailable','planned'].includes(phase),mine:myAppletKind(r)??undefined,url:phoneWebAddress(r),
         state:['reading','syncing'].includes(phase)?'busy':status.failed?'failed':status.connected||status.usableWithoutLogin||['browser','local'].includes(phase)?'ready':'off'};}),

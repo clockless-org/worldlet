@@ -35,7 +35,6 @@ export function installVoice(host:Host){
   void page.call('worldletShowControls',screen,null);
  };
  const appActive=()=>BaseWindow.getFocusedWindow()!==null;
- let orderCapture=false;
 
  host.register({
   speechStart:async request=>{
@@ -44,12 +43,10 @@ export function installVoice(host:Host){
    const barge=request.barge===true;
    if(!barge)spoken.stop();
    const microphone=request.microphone&&typeof request.microphone==='object'&&typeof (request.microphone as Row).id==='string'?{id:String((request.microphone as Row).id).slice(0,512),label:String((request.microphone as Row).label??'').slice(0,512)}:null;
-   // A spoken task for Claude may run longer than a message to Fox.
-   orderCapture=request.purpose==='order';
    // Whisper hears the World's names (core speechPrompt): Fox's, those the page shows, then the World's topics.
    const topics=sample()||!Array.isArray(store.state.knowledge)?[]:store.state.knowledge.map((k:Row)=>k?.topic);
    const prompt=speechPrompt(speechTerms([preferences.string('worldlet.companionName')||'Fox'],Array.isArray(request.vocabulary)?request.vocabulary.slice(0,SPEECH_VOCABULARY.terms):[],topics));
-   const started=await speech.start(typeof request.language==='string'?request.language:'multi',microphone,request.purpose==='order'?180:undefined,barge?TALK.bargePrerollMs/1000+0.4:0,prompt);
+   const started=await speech.start(typeof request.language==='string'?request.language:'multi',microphone,undefined,barge?TALK.bargePrerollMs/1000+0.4:0,prompt);
    return {ok:true,...started};
   },
   // The person talked over Fox (`preroll`, keeping their first words) or Fox finished: the capture is the utterance.
@@ -67,9 +64,8 @@ export function installVoice(host:Host){
   cloudCancel:request=>{if(typeof request.streamId==='string')cloud.cancel(request.streamId);return {ok:true};},
  });
 
- // Native capture cannot rely on a page blur event: leaving the app cancels voice input. An Order instead stops the
- // microphone and goes on with what was heard, and one already being recognised finishes (owner Order 2026-10-07).
- const leave=()=>{if(orderCapture)speech.finish();else speech.cancel();};
+ // Native capture cannot rely on a page blur event: leaving the app cancels voice input.
+ const leave=()=>{speech.cancel();};
  if(process.platform==='darwin')app.on('did-resign-active',leave);
  const watched=new WeakSet<BaseWindow>();
  host.onPageLoaded(()=>{

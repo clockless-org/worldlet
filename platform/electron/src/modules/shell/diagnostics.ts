@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import os from 'node:os';
-import {app,BrowserWindow,clipboard,dialog,type BaseWindow,type WebContents} from 'electron';
+import {app,BrowserWindow,clipboard,dialog,type BaseWindow} from 'electron';
 import {core} from '../../core.ts';
 import {canBuild} from '../../store/world-store.ts';
 import {ensureDirectory,isoSeconds,readJSON,writeAtomic,WorldletError} from '../../files.ts';
@@ -10,8 +9,6 @@ import {stableJSON} from '../../store/swift-json.ts';
 import {AGENT,FOX,WORLD_TOOLS,type AgentService,type FoxService,type WorldToolsService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {buildInfo,buildNumber,versionText} from './release.ts';
-import {engineMemoryMB,readMemory} from '../browser/memory.ts';
-import {orderErrors,orderTimings,ORDER_DIAGNOSTICS,type OrderDiagnostics} from '../../../../../core/distribution/index.ts';
 
 // Deliberate allowlist, not a redacted copy of application logs or user documents.
 const started=new Date();
@@ -41,75 +38,6 @@ export function recentFoxTimings(root:string):Row[] {
 function recentErrors(root:string){
  return ['diagnostics.previous','diagnostics'].flatMap(name=>lines(path.join(root,'logs',name+'.jsonl')))
   .filter(row=>typeof row.at==='string'&&Date.parse(row.at)>=started.getTime()-1000).slice(-50);
-}
-
-/** A text file's final `bytes`, starting at a whole line; empty when it is missing. */
-function tailText(file:string,bytes:number):string {
- try{
-  const fd=fs.openSync(file,'r');
-  try{const size=fs.fstatSync(fd).size,length=Math.min(size,bytes),buffer=Buffer.alloc(length);fs.readSync(fd,buffer,0,length,size-length);
-   const text=buffer.toString('utf8');return length<size?text.slice(text.indexOf('\n')+1):text;}
-  finally{fs.closeSync(fd);}
- }catch{return '';}
-}
-/** The last lines of a text file, reading at most its final 64 KB. */
-const tail=(file:string,count:number)=>tailText(file,65_536).split('\n').filter(l=>l.trim()).slice(-count);
-
-// Page console warnings and errors of every view (the World, website panels, Applets), newest CONSOLE_LINES kept in
-// memory for an Order (owner 2026-10-06). Website text stays on the computer unless an Order is sent.
-const CONSOLE_LINES=500,consoleLines:string[]=[];
-export function watchConsole(){
- const watch=(contents:WebContents)=>contents.on('console-message',details=>{
-  if(details.level!=='warning'&&details.level!=='error')return;
-  let site='';try{site=new URL(contents.getURL()).host;}catch{}
-  const source=String(details.sourceId||'').replace(/[?#].*$/,'').split('/').pop();
-  consoleLines.push(`${new Date().toISOString().slice(11,23)} ${details.level} ${site||'page'} ${String(details.message).replace(/\s+/g,' ').slice(0,2000)}${source?` (${source}:${details.lineNumber})`:''}`);
-  if(consoleLines.length>CONSOLE_LINES)consoleLines.splice(0,consoleLines.length-CONSOLE_LINES);
- });
- app.on('web-contents-created',(_event,contents)=>watch(contents));
-}
-/** Memory and CPU now: each Electron process, the website engine's processes, what the website panel manages
- * pages by (memory.ts) and the system. */
-function metrics(){
- const mb=(kb:number)=>Math.round(kb/1024),reading=readMemory();
- return {at:new Date().toISOString(),uptimeSeconds:Math.round(process.uptime()),
-  system:{platform:process.platform,arch:process.arch,version:process.getSystemVersion(),cpus:os.cpus().length,cpuModel:os.cpus()[0]?.model??'',loadAverage:os.loadavg(),totalMemoryMB:Math.round(os.totalmem()/1_048_576),freeMemoryMB:Math.round(os.freemem()/1_048_576)},
-  processes:app.getAppMetrics().map(m=>({type:m.type,name:m.name??m.serviceName??'',pid:m.pid,cpuPercent:Math.round(m.cpu.percentCPUUsage*10)/10,memoryMB:mb(m.memory.workingSetSize),peakMemoryMB:mb(m.memory.peakWorkingSetSize)})),
-  webEngineMemoryMB:engineMemoryMB(),
-  pages:reading?{availableMB:Math.round(reading.freeMB),appMB:Math.round(reading.appMB),pressure:reading.pressure??null}:null};
-}
-/** The whole local logs an Order sends as files (core/distribution/order.ts orderFiles bounds and redacts them): both
- * rotations of the error and Fox timing logs and of the main process's output, the private agent's own logs and
- * output (with the background lanes' errors and output), the Debug panel, the page console and memory and CPU. */
-export function orderLogFiles(host:Host):{name:string;text:string}[] {
- const root=host.profile.root,logs=path.join(root,'logs'),runtime=host.optional<AgentService>(AGENT),home=runtime?.home('private');
- const read=(file:string)=>tailText(file,1_000_000);
- // Background checks, Attention synthesis and Applet analysis run in their own Agent homes (AgentService.isolatedHome),
- // whose errors never reached an Order: 10-07's background `operationFailed` failures had no message to read. Their
- // newest lines follow the private agent's in the same file, so the Order keeps its file count (inbox MAX_FILES).
- const backgroundLanes=(name:string)=>runtime?['monitor','applet-analysis'].map(scope=>{
-  const text=tailText(path.join(root,'agent',scope,runtime.id,'logs',name),200_000);
-  return text.trim()?`\n===== background: ${scope} =====\n${text}`:'';
- }).join(''):'';
- const files=[
-  ...['diagnostics.previous.jsonl','diagnostics.jsonl','fox-timing.previous.jsonl','fox-timing.jsonl','main.previous.log','main.log'].map(name=>({name,text:read(path.join(logs,name))})),
-  ...(home?['agent.log','errors.log','host-stderr.log'].map(name=>({name:'hermes-'+name,text:read(path.join(home,'logs',name))+(name==='agent.log'?'':backgroundLanes(name))})):[]),
- ];
- let debug='';try{debug=debugText(sections(host,{},'Sent with an Order; live model status was not checked.'));}catch(error){debug='The Debug panel could not be read: '+(error as Error)?.message;}
- let tasks:unknown=null;try{tasks=host.optional<WorldToolsService>(WORLD_TOOLS)?.runtimeTaskReport()??null;}catch{}
- files.push({name:'debug.txt',text:debug+(tasks?'\n\nBackground tasks\n'+JSON.stringify(tasks,null,1):'')},
-  {name:'console.log',text:consoleLines.join('\n')},{name:'metrics.json',text:JSON.stringify(metrics(),null,1)});
- return files;
-}
-/** What an Order carries from this computer's own logs (core/distribution/order.ts ORDER_DIAGNOSTICS): the system,
- * the installation id, the last hour's classified errors (both rotations, not only this run), the last Fox timings
- * and the newest lines of the private agent's own error log. */
-export function orderDiagnostics(host:Host,installation:string,now=Date.now()):OrderDiagnostics {
- const root=host.profile.root,errors=['diagnostics.previous','diagnostics'].flatMap(name=>lines(path.join(root,'logs',name+'.jsonl')));
- const home=host.optional<AgentService>(AGENT)?.home('private');
- return {system:`${platformName()} ${process.getSystemVersion()}`,...(installation?{installation}:{}),
-  errors:orderErrors(errors,now/1000),timings:orderTimings(recentFoxTimings(root)),
-  agent:home?tail(path.join(home,'logs','errors.log'),ORDER_DIAGNOSTICS.agentLines):[]};
 }
 
 export function diagnosticReport(host:Host,timings:Row[]=[]):Row {

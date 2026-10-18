@@ -44,8 +44,8 @@ export function gateReach(gate){
  if(files.has('scripts/pr-checks.mjs'))for(const f of [...operationalChecks,...trustChecks])files.add(f);
  return files;
 }
-// Every check file, in scripts/ and the admin service (gatehouse/): until 2026-10-04 only scripts/*-check.{ts,mjs,py}
-// were looked at, and a .cjs check and three admin checks sat outside every net unnoticed.
-const checkDirs=['scripts','gatehouse'];
+// Every check file in scripts/, of every kind: until 2026-10-04 only scripts/*-check.{ts,mjs,py} were looked at, and a
+// .cjs check sat outside every net unnoticed.
+const checkDirs=['scripts'];
 export const allChecks=()=>checkDirs.flatMap(dir=>readdirSync(new URL('../'+dir+'/',import.meta.url)).filter(f=>/-check\.(?:ts|mts|mjs|cjs|js|py)$/.test(f)).map(f=>dir+'/'+f)).sort();
 export const unreachedChecks=()=>{const reached=reachedChecks();return allChecks().filter(f=>!reached.has(f));};

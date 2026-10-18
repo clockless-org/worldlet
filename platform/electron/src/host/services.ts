@@ -372,10 +372,6 @@ export const DESKTOP_COMPANION='desktopCompanion';
 export const RUN_IN_BACKGROUND='worldlet.runInBackground';
 export interface AppUpdatesService {snapshot():Row;activate():Promise<Row>}
 export const APP_UPDATES='appUpdates';
-/** Order (modules/shell/order.ts), for the paired phone: whether this computer takes Orders now (the `order` action's
- * status is available and ready). */
-export interface OrderService {ready():Promise<boolean>}
-export const ORDER='order';
 export interface AnalyticsService {
  recordProductEvent(name:string,duration:string,dimensions:Row):void;
  recordOnboardingCompleted():void;

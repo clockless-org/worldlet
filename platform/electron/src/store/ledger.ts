@@ -1724,7 +1724,7 @@ export class WorldLedger {
    else this.run('INSERT INTO coding_tasks(id,record,files) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET record=excluded.record,files=excluded.files',id,JSON.stringify(record),JSON.stringify(files));
   }catch{throw new WorldletError('Could not save the coding task.');}
  }
- /** Order submissions, newest first: the words, where they were said and what reached admin and the project. */
+ /** Order submissions from before Orders were retired (2026-10-18), newest first; kept for backups and restores. */
  orders(limit=100):Row[] {
   this.ensureKept();
   return this.all('SELECT record FROM orders ORDER BY at DESC LIMIT ?',Math.max(1,Math.min(1000,limit))).map(row=>JSON.parse(String(row.record)));
