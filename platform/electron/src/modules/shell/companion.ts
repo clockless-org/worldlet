@@ -7,6 +7,10 @@ import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
 import {backgroundLaunch,showInBackground} from '../../background-launch.ts';
 
 const WORLD_BACKGROUND='#20251d';
+/** How long Fox waits for the World page before leaving for the desktop without its answer. A call the page never
+ * answers (Electron drops one when the page reloads mid-call) kept every later close of the World doing nothing
+ * (Mac Alpha 4496, #651: the window stayed open and Fox never came out). */
+const PAGE_ANSWER_MS=3000;
 const CHECK_FLAGS=['--check','--window-capture','--host-contract-check','--smoke-check'];
 const personalLaunch=(host:Host)=>!backgroundLaunch()&&!host.profile.smoke&&!host.profile.rcCheck&&!process.argv.some(arg=>CHECK_FLAGS.includes(arg));
 interface Crop {x:number;y:number;width:number;height:number}
@@ -135,7 +139,7 @@ export class DesktopCompanion implements DesktopCompanionService {
   let value:unknown=null;
   // The World can close (quit, restart) while the page answers: its window and view are then destroyed.
   const closed=()=>world.isDestroyed()||view.webContents.isDestroyed();
-  try{value=await this.host.page.call('worldletCompanionGeometry',automatic);}catch{}
+  value=await this.answer('worldletCompanionGeometry',automatic);
   if(!this.detaching||generation!==this.generation)return;
   if(closed()||automatic&&!value){this.detaching=false;return;}
   const backdrop=hideWorld?null:await this.capture(view);
@@ -148,6 +152,10 @@ export class DesktopCompanion implements DesktopCompanionService {
   this.crop=this.validCrop(value)??{x:0,y:0,...this.viewport};
   this.detaching=false;
   await this.detach(world,frame,hideWorld,generation,backdrop);
+ }
+ /** The page's answer, or undefined when it fails or does not come within PAGE_ANSWER_MS. */
+ private answer(name:string,...args:unknown[]):Promise<unknown>{
+  return Promise.race([this.host.page.call(name,...args).catch(()=>undefined),new Promise(resolve=>setTimeout(resolve,PAGE_ANSWER_MS))]);
  }
  /** The World as it looks without Fox, for the window Fox leaves behind; empty if it could not be drawn. */
  private async capture(view:WebContentsView){
@@ -180,7 +188,7 @@ export class DesktopCompanion implements DesktopCompanionService {
   view.setBackgroundColor('#00000000');
   view.setBounds({x:0,y:0,width:this.viewport.width,height:this.viewport.height});
   panel.contentView.addChildView(view);
-  await this.host.page.call('worldletDesktopCompanion',true);
+  await this.answer('worldletDesktopCompanion',true);
   if(!this.desktop||this.generation!==generation||world.isDestroyed()||panel.isDestroyed())return;
   if(hideWorld){world.hide();this.entry?.show();}
   panel.showInactive();
