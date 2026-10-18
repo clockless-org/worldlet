@@ -1,5 +1,5 @@
 import {isPresentationAction,type PresentationRequest} from '../../contracts/presentation.ts';
-import {utf8Length} from '../companion/index.ts';
+import {utf8Length} from '../../core/companion/index.ts';
 import {validateOverlay} from './world-schema.ts';
 const sampleKeys=new Set(['dataset-version','kyoto-stay','decisions','items','aladdin-content-v1:sample']);
 /** One validation policy before native persistence. No files or preference APIs. */

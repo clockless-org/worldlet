@@ -1,4 +1,4 @@
-import {localPathName} from '../../../core/context/index.ts';
+import {localPathName} from '../../../context/context/index.ts';
 import {CODING_SESSIONS} from '../../../core/applets/index.ts';
 import {practiceJobSession,practiceJobDetail} from '../../practice/index.ts';
 // CLI records remain local UI data. Listing or reading never resumes an agent.

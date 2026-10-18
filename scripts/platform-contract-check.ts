@@ -7,7 +7,7 @@ import {hostFeatures,googleSignInStart} from '../platform/bridge/features.ts';
 import {GOOGLE_SIGN_IN_EVENT,googleSignInStage} from '../contracts/platform.ts';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
-import {sourceContextRows} from '../core/context/source-context.ts';
+import {sourceContextRows} from '../context/context/source-context.ts';
 import {googleAuthorizationUrl} from '../core/agent/auth-handoff.ts';
 const requests:any[]=[];
 const mac=resolveHost({webkit:{messageHandlers:{worldlet:{postMessage:async r=>{requests.push(r);return {ok:true};}}}}});

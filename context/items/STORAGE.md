@@ -11,7 +11,7 @@ The upper three layers own product logic and durable user data. Organize data by
 <a id="four-kinds"></a>
 ## Four kinds of Context
 
-Everything the World knows is Context, the third of the [four layers](../../docs/UI-CORE-PLATFORM.md#see-do-know). It comes in four kinds ([#676](https://github.com/clockless-org/worldlet/issues/676)). `core/context/` and `context/items/` hold its rules; the host's store (`platform/electron/src/store/`) persists it. Connections, Grants and preferences are configuration, not Context.
+Everything the World knows is Context, the third of the [four layers](../../docs/UI-CORE-PLATFORM.md#see-do-know). It comes in four kinds ([#676](https://github.com/clockless-org/worldlet/issues/676)). `context/context/` and `context/items/` hold its rules; the host's store (`platform/electron/src/store/`) persists it. Connections, Grants and preferences are configuration, not Context.
 
 | Kind | What it is | Who writes it | Today's storage (domains in the table below) |
 | --- | --- | --- | --- |
@@ -27,7 +27,7 @@ Nothing is deleted automatically; only a retention period the person sets remove
 **Next steps**, not built yet:
 
 1. **One envelope.** Every record carries the same envelope: source, author, time, version, derived-from and visibility.
-2. **One entry and one search.** A single read/write entry applies Grants and writes the audit, and one search covers all four kinds. Today `world_context` (`core/context/service-context.ts`) searches Synced Service snapshots only, and conversations and website recordings have their own indexes.
+2. **One entry and one search.** A single read/write entry applies Grants and writes the audit, and one search covers all four kinds. Today `world_context` (`context/context/service-context.ts`) searches Synced Service snapshots only, and conversations and website recordings have their own indexes.
 3. **Drafts and pins.** A new Made record starts as a draft until it is used or pinned. Drafts are not deleted on their own; the person may delete them.
 
 ## One durable copy, several appropriate formats
