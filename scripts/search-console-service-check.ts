@@ -15,7 +15,7 @@ import {GOOGLE_TOKEN_URL,SEARCH_CONSOLE_LIMITS,SEARCH_CONSOLE_SCOPE,readServiceP
 import {channelDefaultGrants,serviceReadTargets,standingActions,standingCallDecision} from '../core/agent/grants.ts';
 import {turnTrustObserve} from '../core/agent/turn-trust.ts';
 import {worldActionOf,worldActions} from '../core/tools/gateway.ts';
-import {SOURCE_PROVIDERS,TOKEN_PROVIDERS,connectSettings,connectToken} from '../core/applets/index.ts';
+import {SOURCE_PROVIDERS,TOKEN_PROVIDERS,connectSettings,connectToken} from '../context/applets/index.ts';
 import {resolveBoard,readBoardDefinition} from '../context/board/index.ts';
 import {SERVICE_TITLES,type ServiceRecords} from '../contracts/services.ts';
 import {ExecutionJournal} from '../platform/electron/src/modules/agent-runtime/journal.ts';

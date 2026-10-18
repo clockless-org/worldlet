@@ -21,7 +21,7 @@ import {ActivityRecorder} from './activity.ts';
 import {WebRecorder,manageRecordings,readRecordings,type RecordedVisit} from './recorder.ts';
 import {BattleReviews} from './battle-review.ts';
 import {MeetingTranscriber} from './meeting-transcript.ts';
-import {transcriptLine} from '../../../../../core/applets/index.ts';
+import {transcriptLine} from '../../../../../context/applets/index.ts';
 import {Surface,websiteSession} from './surface.ts';
 import {blockedMediaDevices,explainBlockedMedia,mediaDevices,prepareMediaDevices,type MediaDevice} from './media-access.ts';
 import {HOMES,SIGN_IN_HOSTS,signInPage,isGoogleMaps,isNotion,isX,parse,publicPage,sameURL} from './rules.ts';

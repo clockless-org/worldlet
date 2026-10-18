@@ -2,7 +2,7 @@
 
 Entertainment holds the TikTok browsing Applet and the YouTube Applet; Social holds the X and Discord browsing Applets. Website Applets fill the left two-thirds panel; the Applet model and Fox stay on the right. Navigation uses the website or Fox; World returns to the world. There is no permanent Worldlet toolbar over the page. A blocked sign-in shows a short explanation and an explicit external-browser action above the page.
 
-YouTube opens youtube.com in this panel; its player and queue are Fox's tooling, see [YouTube Applet](../../core/applets/INTEGRATIONS.md#youtube-applet). The [Google sign-in refusal](#google-sign-in-refusal) below applies to YouTube and any other website panel. Discord specifics are in [Discord Applet](INTEGRATION.md#discord).
+YouTube opens youtube.com in this panel; its player and queue are Fox's tooling, see [YouTube Applet](../../context/applets/INTEGRATIONS.md#youtube-applet). The [Google sign-in refusal](#google-sign-in-refusal) below applies to YouTube and any other website panel. Discord specifics are in [Discord Applet](INTEGRATION.md#discord).
 
 <a id="native-browser"></a>
 ## Website views
@@ -298,7 +298,7 @@ hides the page as before. The Browser panel (`ui/browser/browser-device.ts`) app
   device until the person opens the Applet (pressing the mark opens it). An exclamation over a device
   means something needs fixing, never done.
 - **Only browser work gets a screen.** Work without a page (reading mail, syncing) shows on the
-  device's lamp and in the History page ([Applet runtime](../../core/applets/RUNTIME.md)).
+  device's lamp and in the History page ([Applet runtime](../../context/applets/RUNTIME.md)).
 - **Fox's page, wherever the person is.** Fox's view guard refuses relative actions once the person
   changes views (`ui/companion/companion-ai.ts`). Fox's steps on its held page are exempt: the page
   out of sight, or the one the person took back into the panel during the turn (`foxPageHeld`).

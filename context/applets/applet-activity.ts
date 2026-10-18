@@ -1,6 +1,6 @@
 import type {AppletActivity} from '../../contracts/applet-activity.ts';
 import type {WorldItem} from '../../contracts/world-item.ts';
-import {characters} from '../companion/index.ts';
+import {characters} from '../../core/companion/index.ts';
 // Turns that read this app successfully and have not finished. A background analysis turn takes
 // over the activity while Fox's chat turn is still open; the chat turn may still describe what it read.
 const readTurns=(activity:AppletActivity|undefined)=>(activity?.readTurns??[]).slice(-8);

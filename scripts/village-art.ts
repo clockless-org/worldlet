@@ -38,8 +38,8 @@ const ext=(file:string)=>path.extname(file).toLowerCase();
 
 export async function encodeVillageArt(root:string){
  const out=path.join(root,VILLAGE_ART),entry=theme('village'),STYLE=entry.style.manifest,lock:Lock={};
- const {WORLD_APPS}=await import('../core/applets/catalog.ts');
- const {MOMENT_ART}=await import('../core/applets/moment.ts');
+ const {WORLD_APPS}=await import('../context/applets/catalog.ts');
+ const {MOMENT_ART}=await import('../context/applets/moment.ts');
  // Only remove files this encoder owns. Artifact materials and Applet presets have separate sources and locks.
  const previous:Lock=JSON.parse(await readFile(path.join(out,'art.lock.json'),'utf8').catch(()=>'{}'));
  for(const name of Object.keys(previous)){themeAssetPath('assets/'+name);await rm(path.join(out,name),{force:true});}

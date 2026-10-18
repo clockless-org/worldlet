@@ -1,4 +1,4 @@
-import {mailRemoteHostAllowed} from '../applets/index.ts';
+import {mailRemoteHostAllowed} from '../../context/applets/index.ts';
 // An email's own picture may replace the illustration on its Attention card (owner Order 2026-10-08).
 // The reader keeps one candidate per thread (`contentImage`, context/accounts/google/gmail.ts); this is the
 // address rule every later step repeats: HTTPS on the default port to a public host, no credentials, and no

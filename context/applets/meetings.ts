@@ -1,4 +1,4 @@
-import {ARTIFACT_ONE_CARD_RULE} from '../../context/artifacts/index.ts';
+import {ARTIFACT_ONE_CARD_RULE} from '../artifacts/index.ts';
 // Only recognized HTTPS meeting URLs can be offered (Join is always the user's click). Never execute
 // descriptions, custom protocol links, arbitrary URLs or a model-generated action.
 // `create` starts a new call on the service's own web page (Google Meet's /new makes an instant

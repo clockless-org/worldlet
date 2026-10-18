@@ -152,7 +152,7 @@ export class WorldLedger {
  /** One request and its Attention item, saved together, as a draft is: the item is the host's own (provider `agents`),
   * its status the request's, set by the person's answer (`user`) or by the refused call that asked (`agent`). */
  saveServiceRequest(request:Row,item:Row,origin:'user'|'agent'){this.saveDraft('service-requests',request,item,origin);}
- // Service presets (context/accounts/services/presets.ts, core/applets/INTEGRATIONS.md#service-presets) ---------------
+ // Service presets (context/accounts/services/presets.ts, context/applets/INTEGRATIONS.md#service-presets) ---------------
  /** Every saved Service preset (`state.service-presets`), by ID. */
  servicePresets():Row[]{return this.records('service-presets');}
  saveServicePreset(preset:Row){this.put('service-presets',preset.id,preset);}
@@ -1203,7 +1203,7 @@ export class WorldLedger {
  }
 
  // My Applets ---------------------------------------------------------------------------------------
- // The person's own Applets (core/applets/MY-APPLETS.md#one-table), one row each in one table: a website made into
+ // The person's own Applets (context/applets/MY-APPLETS.md#one-table), one row each in one table: a website made into
  // one (`site`), a page Fox made with its page and what was ticked (`page`), a brought conversation (`conversation`;
  // Fox's proposals wait here too until kept or declined), and the pictures painted for it. Before 2026-10-06 they
  // lived in the `widgets` and `ongoing` tables and the `site-applets` and `applet-art` buckets; those move in once
@@ -1336,7 +1336,7 @@ export class WorldLedger {
  }
 
  // Local calendar events ---------------------------------------------------------------------------
- // Events the person made in the Calendar Applet (core/applets/calendar-events.ts): one row each.
+ // Events the person made in the Calendar Applet (context/applets/calendar-events.ts): one row each.
  private calendarReady=false;
  private ensureCalendar(){
   if(this.calendarReady)return;

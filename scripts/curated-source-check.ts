@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {curatedSourceRead,getApp} from '../core/applets/index.ts';
+import {curatedSourceRead,getApp} from '../context/applets/index.ts';
 assert.deepEqual(curatedSourceRead({provider:'todoist',operation:'list',cursor:'next'}),{provider:'todoist',operation:'list',cursor:'next',connectionProvider:'todoist'});
 assert.equal(curatedSourceRead({provider:'todoist',operation:'read',id:'123abc'}).id,'123abc');
 for(const input of [{provider:'slack',operation:'list'},{provider:'todoist',operation:'delete'},{provider:'todoist',operation:'list',id:'x'},{provider:'todoist',operation:'read',id:'../x'},{provider:'todoist',operation:'read',id:'x',cursor:'next'},{provider:'todoist',operation:'list',url:'https://evil.test'}])assert.throws(()=>curatedSourceRead(input));

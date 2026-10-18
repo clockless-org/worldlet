@@ -14,8 +14,8 @@ import {channelDefaultGrants,standingActions,standingCallDecision} from '../core
 import {hermesChannelToolAllowed} from '../core/agent/hermes-server.ts';
 import {turnTrustObserve} from '../core/agent/turn-trust.ts';
 import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
-import {APP_DEFINITIONS,SOURCE_PROVIDERS,connectSettings,connectToken} from '../core/applets/index.ts';
-import {validateAppletRuntimes} from '../core/applets/runtime.ts';
+import {APP_DEFINITIONS,SOURCE_PROVIDERS,connectSettings,connectToken} from '../context/applets/index.ts';
+import {validateAppletRuntimes} from '../context/applets/runtime.ts';
 import {ExecutionJournal} from '../platform/electron/src/modules/agent-runtime/journal.ts';
 import {ServiceSource,ServiceSourceAccess,ServiceSourceConnections} from '../platform/electron/src/modules/sources/service-source.ts';
 import {withTempDir} from './test-temp.ts';

@@ -1,4 +1,4 @@
-import {getApp} from '../../core/applets/index.ts';
+import {getApp} from '../applets/index.ts';
 
 /**
  * Resume where the person left off in a website Applet.

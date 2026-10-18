@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {mkdir,writeFile,readFile} from 'node:fs/promises';
-import {WORLD_APPS} from '../core/applets/catalog.ts';
+import {WORLD_APPS} from '../context/applets/catalog.ts';
 import {withBrowser,fileAccess,pageErrors,worldUrl,leaveApplet} from './browser-test.ts';
 const evidence='output/immersive-v5/acceptance';await mkdir(evidence,{recursive:true});
 const manifest=JSON.parse(await readFile('ui/theme-packages/village/style.json','utf8'));

@@ -5,7 +5,7 @@
  * - `mcp-oauth`: the service's own sign-in page, opened from this device; Worldlet registers itself there as a
  *   public client (no secret) and waits on a loopback address (platform/electron/src/modules/sources/mcp-account.ts).
  * - `google`: Worldlet's own Google sign-in (Mail, Calendar, Drive; Search Console adds its own read permission).
- * - `key`: a pasted key or file (`TOKEN_PROVIDERS` in core/applets/sources.ts), until the service gets a sign-in.
+ * - `key`: a pasted key or file (`TOKEN_PROVIDERS` in context/applets/sources.ts), until the service gets a sign-in.
  * - `github-device`: the official Worldlet GitHub App's device code (context/accounts/github-device.ts): the person types a
  *   short code on github.com; only the App's public client ID is used, with no secret and no loopback address.
  * - `local` is reserved for this computer's own apps. */
@@ -34,7 +34,7 @@ export interface Connector {
  /** Where Settings › Connectors shows it: `always` a tile of its own; `connected` a tile only once connected (a
   * service that connects with a key, under Advanced, or from its Thing); `advanced` only under Advanced. */
  readonly shown:'always'|'connected'|'advanced';
- /** The World region its Thing lives in (core/applets catalog), so a connection made in Settings lands there. */
+ /** The World region its Thing lives in (context/applets catalog), so a connection made in Settings lands there. */
  readonly region?:string;
  /** Connects on a host with no screen (the Node host). A loopback sign-in needs a browser on the same machine. */
  readonly headless:boolean;

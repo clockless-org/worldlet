@@ -1,4 +1,4 @@
-import {APP_DEFINITIONS} from '../applets/index.ts';
+import {APP_DEFINITIONS} from '../../context/applets/index.ts';
 import {READY_APPLETS} from '../../context/artifacts/index.ts';
 /** Host capabilities are facts, not grants. Actual reads/writes remain authorized by the host. */
 export function conversationGuidance(input:{scope:string;localOriginals?:boolean;connectedSources?:string[];backgroundSources?:string[];routines?:boolean;driveMetadata?:boolean}):string {

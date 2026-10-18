@@ -297,7 +297,7 @@ try{
   upgraded.close();
   console.log('PASS conversations: Fox’s own and brought turns in one table with their thread, notes beside them, indexed search that backups leave out');
  }
- // The person's own Applets in one table (core/applets/MY-APPLETS.md#one-table): the earlier tables and buckets move
+ // The person's own Applets in one table (context/applets/MY-APPLETS.md#one-table): the earlier tables and buckets move
  // in once and stay as they were; pages, records, ticks and pictures come along; deleting takes the pictures too.
  {
   const home=path.join(scratch,'my-applets');fs.mkdirSync(home);

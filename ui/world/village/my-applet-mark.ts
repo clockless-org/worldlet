@@ -1,6 +1,6 @@
 import {Container,Graphics} from 'pixi.js';
 
-/** The small mark on the person's own Applets (core/applets/MY-APPLETS.md): a honey disc with a cream five-point star
+/** The small mark on the person's own Applets (context/applets/MY-APPLETS.md): a honey disc with a cream five-point star
  * at the device's lower right, sized to the device so it reads at every zoom without covering the painting. A star,
  * not a sparkle: a four-point sparkle this small reads as the areas' add buttons. */
 export function myAppletMark(deviceWidth:number):Container {

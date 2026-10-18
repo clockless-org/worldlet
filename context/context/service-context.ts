@@ -1,4 +1,4 @@
-// The World's saved Service context (core/applets/INTEGRATIONS.md#searching-saved-service-context): one search, and one
+// The World's saved Service context (context/applets/INTEGRATIONS.md#searching-saved-service-context): one search, and one
 // read, across what the World keeps up to date from each connected Service (service-sync snapshots), for an Agent that
 // may read that Service. Pure: the host supplies the snapshots and which Services the calling Agent may read; nothing
 // here asks a Service anything.

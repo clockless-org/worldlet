@@ -26,4 +26,4 @@ Opening this Applet loads its original website in Worldlet's isolated browser su
 
 Fixture-tested implementation, awaiting real-account acceptance.
 
-See [runtime](../../../core/applets/RUNTIME.md) and [integrations](../../../core/applets/INTEGRATIONS.md).
+See [runtime](../../../context/applets/RUNTIME.md) and [integrations](../../../context/applets/INTEGRATIONS.md).

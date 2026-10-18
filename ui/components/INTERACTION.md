@@ -21,7 +21,7 @@ This is the current specification. The UI system lives in code; this document ex
 | HUD, Fox actions and brand | [HUD and brand](INTERACTION.md#hud-and-brand), `ui/hud/native-hud.ts`, `resources/styles/builtin/assets/brand/mark.json` |
 | Content templates | `ui/components/templates.ts`, `ui/world/travel-experiment.ts` |
 | Current 2.5D style and shared lighting | [Style and lighting contract](../../resources/styles/builtin/STYLE.md), [Sprite world](../world/COMPOSITION.md) |
-| Regions and Applets | [Applet presentation](INTERACTION.md#applet-presentation), `core/applets/catalog.ts`, `ui/world/world-presets.ts` |
+| Regions and Applets | [Applet presentation](INTERACTION.md#applet-presentation), `context/applets/catalog.ts`, `ui/world/world-presets.ts` |
 | World data and Fox tools | [World interaction](../../context/items/STORAGE.md#world-interaction) |
 | Sky, weather and audio | [Sky and weather](../world/ENVIRONMENT.md#sky-and-weather), [Background music](../world/ENVIRONMENT.md#background-music) |
 | Acceptance | `scripts/village-camera-check.ts`, `scripts/world-scene-check.ts` (both in `npm run test:ui`), [runtime resource record](../../resources/styles/builtin/assets/world/README.md) |
@@ -241,7 +241,7 @@ Measures live in `ui/components/layout.css` (`--applet-bar-*`), the sides' style
 Owner request 2026-10-09: 「applet之间要可以丝滑切换，进入applet后，上方显示最近使用的applets，像一个一个tab，开新tab是进入browser，切换的时候，背景也丝滑切换」; 「当前 applet 要在中间」. Inside an Applet on a window wider than 800px, the recently used Applets stand on a shelf above it, a faint line fading at both ends rather than a plank (「下面那个 bar 太明显了」), each its World device with its name below, in place of the title:
 
 - **The open Applet stands in the middle**, largest and lit, its name on a cream label; the others grow smaller and fainter the further they stand from it.
-- **One ring.** The Applets keep one order around the open one, so picking one slides the shelf to bring it to the middle and both sides always hold Applets. A new Applet joins the ring; one already on it keeps its place. Rules in `core/applets/shelf.ts`.
+- **One ring.** The Applets keep one order around the open one, so picking one slides the shelf to bring it to the middle and both sides always hold Applets. A new Applet joins the ring; one already on it keeps its place. Rules in `context/applets/shelf.ts`.
 - **As many as fit** beside the middle on the Applet's side (three to six); the ones used longest ago wait behind **+N** at the left end, which lists them.
 - **Close** on the open Applet takes it off the shelf and opens its neighbour; closing the last returns to the World.
 - **+** at the right end opens a new page in the Browser with its address ready to type (a new tab when already there).
@@ -309,7 +309,7 @@ This is the main specification for Applet naming, display levels, interaction an
 
 The product term is **Applet** (plural **Applets**). "App" only refers to the external application or to the Worldlet Mac app itself. The repository directory is `ui/applets/`; `app.ts`, `entity: app` and the persistent `app-*` IDs stay as they are so renaming never breaks stored data.
 
-**One Applet can combine several integration paths.** CLI, API, MCP, plugins, native adapters and websites are not mutually exclusive; presentation, data and actions, and authentication are decided separately. MCP exposes tools without widening service permissions. An MCP server may additionally provide MCP Apps UI resources, but Worldlet must explicitly implement a compatible isolated host to render them. See the [backend-independent contract](../applets/IMPLEMENTATION-GUIDE.md#backend-independent-applet-contract). A site that refuses embedded sign-in can still be a useful Applet through its service interface plus a dedicated view. YouTube is the current example: an original website and a separate official player/queue adapter (see [YouTube Applet](../../core/applets/INTEGRATIONS.md#youtube-applet)).
+**One Applet can combine several integration paths.** CLI, API, MCP, plugins, native adapters and websites are not mutually exclusive; presentation, data and actions, and authentication are decided separately. MCP exposes tools without widening service permissions. An MCP server may additionally provide MCP Apps UI resources, but Worldlet must explicitly implement a compatible isolated host to render them. See the [backend-independent contract](../applets/IMPLEMENTATION-GUIDE.md#backend-independent-applet-contract). A site that refuses embedded sign-in can still be a useful Applet through its service interface plus a dedicated view. YouTube is the current example: an original website and a separate official player/queue adapter (see [YouTube Applet](../../context/applets/INTEGRATIONS.md#youtube-applet)).
 
 The model must express the function: a mail cabinet for Mail, a bookshelf for Notion, a tethered balloon for Airbnb, a workbench for Codex. Every Applet shows its complete model in every connection state; there are no boxes, crates or "open the box" steps. A visible model does not mean the account is connected, and idle ambient motion does not mean a task is running.
 
@@ -414,7 +414,7 @@ Applets that authorize inside their own view (YouTube, Stripe, DoorDash) also de
 
 ### Authoring contract
 
-`appletContract(key)` in `core/applets/catalog.ts` returns identity (`id`, `key`, `title`, `description`, `region`, `placement`), the model recipe and version, `fullView`, the logo module path, the connection declaration, the variant list and content slot names. The table below is the complete standard an Applet should document; fields that do not exist in the runtime are marked as such and must not be assumed to be recognized.
+`appletContract(key)` in `context/applets/catalog.ts` returns identity (`id`, `key`, `title`, `description`, `region`, `placement`), the model recipe and version, `fullView`, the logo module path, the connection declaration, the variant list and content slot names. The table below is the complete standard an Applet should document; fields that do not exist in the runtime are marked as such and must not be assumed to be recognized.
 
 | Item | Must state |
 | --- | --- |
@@ -436,7 +436,7 @@ Keep three dimensions apart:
 | Capability and runtime state | Website available, unauthorized, working, attention | A complete interactive Open view exists |
 | Support level | Planned, Building, Ready | Whether the user's account is online right now |
 
-The model variants `idle / open / working / attention` (`core/applets/presentation.ts`) stay compatible; `open` is the older name of the running look, not a navigation level. Working animation follows real tasks only; a failed, cancelled or abandoned task must not keep spinning.
+The model variants `idle / open / working / attention` (`context/applets/presentation.ts`) stay compatible; `open` is the older name of the running look, not a navigation level. Working animation follows real tasks only; a failed, cancelled or abandoned task must not keep spinning.
 
 ### Applet Factory (not implemented)
 
@@ -482,11 +482,11 @@ Destination references: [Apple Reminders](https://support.apple.com/en-nz/guide/
 
 ### Core content contract
 
-Mail, Calendar, Notes and Reminders now use authored Open installations. See [Core Applet content](../../core/applets/INTEGRATIONS.md#core-applet-content) for Fox-generated display fields, source identity, pagination, Focus surfaces and current animation limits. Native Focus retains the selected Open item above its parent Peek device, with Fox below; Previous/Next browse the same Applet.
+Mail, Calendar, Notes and Reminders now use authored Open installations. See [Core Applet content](../../context/applets/INTEGRATIONS.md#core-applet-content) for Fox-generated display fields, source identity, pagination, Focus surfaces and current animation limits. Native Focus retains the selected Open item above its parent Peek device, with Fox below; Previous/Next browse the same Applet.
 
 When native source Focus is visible, a click on exposed scenery—including background Region or device hit targets—acts as Back. It must not navigate directly to the background target. An Open → Focus journey returns to Open.
 
-The [Work Applet contract](../../core/applets/INTEGRATIONS.md#work-applets) covers brand-derived functional devices, CLI read scopes, observed versus saved session state, and the different continuation capabilities of Codex and Claude Code.
+The [Work Applet contract](../../context/applets/INTEGRATIONS.md#work-applets) covers brand-derived functional devices, CLI read scopes, observed versus saved session state, and the different continuation capabilities of Codex and Claude Code.
 
 <a id="applet-presentation-acceptance-contract"></a>
 ### Acceptance contract
@@ -519,4 +519,4 @@ and Applet logos must not be baked into environment paintings.
 Focus arrows exist only when an adjacent record exists and retain their side;
 unavailable controls are absent from keyboard navigation. Fox replies scroll
 independently. Support level (Ready/Building/Planned/Unavailable) and actual
-connection/runtime state are separate projections in `core/applets/status.ts`.
+connection/runtime state are separate projections in `context/applets/status.ts`.

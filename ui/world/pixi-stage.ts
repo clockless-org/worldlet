@@ -1,5 +1,5 @@
 import {renderHomeOpen,type HomeOpenState} from '../applets/index.ts';
-import {HOME_NATIVE,HOME_RECORDS,CODING_SESSIONS,ORIGINAL_READERS} from '../../core/applets/index.ts';
+import {HOME_NATIVE,HOME_RECORDS,CODING_SESSIONS,ORIGINAL_READERS} from '../../context/applets/index.ts';
 import {renderMailOpen,renderMeetingsOpen,renderSceneList,mountAppletScene,appletSceneKey,type AppletScene} from '../applets/index.ts';
 import {weatherGlyph} from './environment/weather-forecast.ts';
 import {attentionIcon} from '../attention/index.ts';

@@ -6,7 +6,7 @@
 // Real MediaRemote, the media transport controls and Automation for Music need a signed-in Mac or Windows PC;
 // these fixtures do not claim them.
 import assert from 'node:assert/strict';
-import {localMusicCommand,localMusicQuery,localPlayerName,nowPlayingLine,readNowPlaying,readPlaylists,readTracks,worldletPlayer} from '../core/applets/index.ts';
+import {localMusicCommand,localMusicQuery,localPlayerName,nowPlayingLine,readNowPlaying,readPlaylists,readTracks,worldletPlayer} from '../context/applets/index.ts';
 import {listWorldTools} from '../core/tools/catalog.ts';
 import {runLocalMusicTool} from '../ui/world/local-music.ts';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';

@@ -1,5 +1,5 @@
 import type {World} from '../../contracts/world.ts';
-import {connectionLive} from '../../core/applets/index.ts';
+import {connectionLive} from '../../context/applets/index.ts';
 import {WORLD_LAYOUT} from './world-layout.ts';
 // Stable places are organized by life domain. Sources are cross-domain inputs.
 export const WORLD_PRESETS = [

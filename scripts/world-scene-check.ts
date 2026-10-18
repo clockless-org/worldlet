@@ -6,7 +6,7 @@ import {launchTestBrowser} from './browser-test.ts';
 import {pathToFileURL} from 'node:url';
 import path from 'node:path';
 import {mkdir} from 'node:fs/promises';
-import {WORLD_APPS} from '../core/applets/catalog.ts';
+import {WORLD_APPS} from '../context/applets/catalog.ts';
 import {VILLAGE_SITES} from '../ui/world/village/village-sites.ts';
 import {appletStyle} from '../ui/components/style.ts';
 

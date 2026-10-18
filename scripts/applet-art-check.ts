@@ -1,8 +1,8 @@
-// Pictures for the person's own Applets (core/applets/MY-APPLETS.md#pictures) without a host or a painter: which
+// Pictures for the person's own Applets (context/applets/MY-APPLETS.md#pictures) without a host or a painter: which
 // Applets may be painted, what the painter is told, which kept records are trusted, which Applets are painted next,
 // and the World wearing a painted icon only on the person's own Applets.
 import assert from 'node:assert/strict';
-import {APPLET_ART_LIMITS,appletArtPrompt,artToPaint,codexArtTask,readAppletArt,readArtSubject,validArtApplet} from '../core/applets/index.ts';
+import {APPLET_ART_LIMITS,appletArtPrompt,artToPaint,codexArtTask,readAppletArt,readArtSubject,validArtApplet} from '../context/applets/index.ts';
 import {projectNativeWorld} from '../ui/world/world-projection.ts';
 
 for(const ok of ['app-site-0123456789ab','app-wgt-0123456789','app-job-0123456789ab'])assert.ok(validArtApplet(ok),ok);

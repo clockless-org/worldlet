@@ -1,5 +1,5 @@
 import type {SurfaceRect} from '../../contracts/browser-surface.ts';
-import {getApp} from '../../core/applets/index.ts';
+import {getApp} from '../../context/applets/index.ts';
 import {PICTURE_IN_PICTURE,pictureInPicturePlacement,pictureInPictureShare,pictureInPictureShows,tabApplet} from '../../context/browser/index.ts';
 import {appHudIcon} from '../applets/index.ts';
 import {node,uiIcon} from '../components/index.ts';

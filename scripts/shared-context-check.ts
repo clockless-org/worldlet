@@ -79,7 +79,7 @@ const unicode='你好🌎 e\u0301\n'.repeat(12000),chunks=contextChunks(unicode)
 assert.equal(chunks.join(''),unicode);assert.ok(chunks.every(s=>Buffer.byteLength(s)<=24000));
 assert.deepEqual(contextChunks('👨‍👩‍👧‍👦',1),['👨‍👩‍👧‍👦']);assert.deepEqual(contextChunks(''),[]);
 console.log('PASS context field validation, source coverage, layout limits and lossless Unicode chunking');
-const {receiveAppletActivity,describeAppletActivity,finishAppletActivity,appletActivitySnapshot}=await import('../core/applets/applet-activity.ts');
+const {receiveAppletActivity,describeAppletActivity,finishAppletActivity,appletActivitySnapshot}=await import('../context/applets/applet-activity.ts');
 let activity=receiveAppletActivity(undefined,{callId:'a',phase:'reading'},'turn')!;
 activity=receiveAppletActivity(activity,{callId:'b',phase:'reading'},'turn')!;
 activity=receiveAppletActivity(activity,{callId:'a',phase:'complete',count:2},'turn')!;
@@ -102,18 +102,18 @@ const projection=appletActivitySnapshot('gmail',true,'connected',[{provider:'gma
 assert.equal(projection.failed,true);assert.equal(projection.needsAttention,true);assert.equal(projection.running,true);
 assert.equal(appletActivitySnapshot('gmail',false,'reading',[],{lastStatus:'running'},activity).running,false);
 assert.equal(activity.calls.length,1);
-const {sourcesReading}=await import('../core/applets/status.ts');
+const {sourcesReading}=await import('../context/applets/status.ts');
 const synthesizing=appletActivitySnapshot('gmail',true,'connected',[],{lastStatus:'complete'},undefined,undefined,true);
 assert.deepEqual([synthesizing.running,synthesizing.synthesizing,sourcesReading([synthesizing])],[false,true,true],'read mail awaiting Attention synthesis is still being read');
 assert.equal(sourcesReading([appletActivitySnapshot('gmail',true,'connected',[],{lastStatus:'complete'},undefined)]),false);
-const {appletStatus,appletIndicator}=await import('../core/applets/status.ts');
+const {appletStatus,appletIndicator}=await import('../context/applets/status.ts');
 const wakes=Date.parse('2026-09-27T12:00:00Z'),snoozedLink=(now:number)=>[{provider:'gmail',...appletActivitySnapshot('gmail',true,'connected',[{provider:'gmail',status:'open',kind:'task',snoozedUntil:'2026-09-27T12:00:00Z'}],undefined,undefined,now)}];
 assert.deepEqual([appletStatus({provider:'gmail'},snoozedLink(wakes-1)).phase,appletStatus({provider:'gmail'},snoozedLink(wakes-1)).label],['connected','Connected · No saved items need attention'],'a snoozed item is quiet until its time');
 assert.deepEqual([appletStatus({provider:'gmail'},snoozedLink(wakes)).label,appletIndicator({provider:'gmail'},snoozedLink(wakes)).label],['Needs attention · 1 saved item needs attention','Needs attention']);
 console.log('PASS Applet concurrent reads, turn isolation, cancellation and persisted attention/error projection');
 
 import {updateOnboarding} from '../core/onboarding/onboarding.ts';
-import {APP_DEFINITIONS} from '../core/applets/catalog.ts';
+import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
 const initialSetup={version:1,presets:['home'],completed:false};
 const placed=updateOnboarding(initialSetup,{operation:'region',region:'work',sourceIds:['s','s'],connectionIds:['c']});
 assert.deepEqual(initialSetup,{version:1,presets:['home'],completed:false});

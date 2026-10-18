@@ -4,8 +4,8 @@
 // item within the contract, every Applet with something to show, dates that resolve.
 import assert from 'node:assert/strict';
 import dataset from '../ui/world/sample-persona.json' with {type:'json'};
-import {WORLD_APPS} from '../core/applets/catalog.ts';
-import {GAME_APPLETS,RANDOM_GAME_URL} from '../core/applets/definitions/games.ts';
+import {WORLD_APPS} from '../context/applets/catalog.ts';
+import {GAME_APPLETS,RANDOM_GAME_URL} from '../context/applets/definitions/games.ts';
 import {WORLD_PRESETS} from '../ui/world/world-presets.ts';
 import {makeSampleWorld} from '../ui/world/sample-data.ts';
 import {sampleItems} from '../ui/world/sample-persona.ts';

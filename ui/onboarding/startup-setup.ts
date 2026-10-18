@@ -1,5 +1,5 @@
 import {APPLET_OVERVIEW_WIDTH,APPLET_OPTICAL_SCALE,WORLD_WIDTH,WORLD_HEIGHT} from '../world/index.ts';
-import {seedAppletSelection,WORLD_APPS,appletSupport,connectionLive} from '../../core/applets/index.ts';
+import {seedAppletSelection,WORLD_APPS,appletSupport,connectionLive} from '../../context/applets/index.ts';
 import {xAppIcon,appLogoSource,AGENT_ICONS,CORE_APPLET_KINDS,coreAppletSource} from '../applets/index.ts';
 import {themeAppletIcon} from '../themes/index.ts';
 import {setupText,setInterfaceLanguage} from './setup-language.ts';
@@ -228,7 +228,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   try{const result=await call('agentIntegrations',{operation:'port',id});draft.integrations=Array.isArray(result?.integrations)?result.integrations.filter(item=>typeof item?.title==='string'&&typeof item?.outcome==='string').slice(0,20):[];}
   catch{draft.integrations=[];}
   finally{
-   // The apps the Agent brought join the World's selection (core/applets/regions.ts).
+   // The apps the Agent brought join the World's selection (context/applets/regions.ts).
    porting=false;clearInterval(chatterTimer);seed();if(!disposed&&!busy)render();
    // Counts and outcomes only, once the whole bring (history and integrations) is over.
    if(!draft.brought.failed)productEvent('agent_bring_completed',agentBringDimensions(id,draft.brought,draft.integrations),timingBucket(performance.now()-started));
@@ -832,7 +832,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  if(step===1)void prepareGoogleSources();
  // Setup selects what this computer already has, then four more Applets in every area (owner Order 2026-10-12): its
  // draft (Mail, Calendar, Browser), the apps found here, the apps the person's Agent brought or already connected, then
- // each area's starters (core/applets/regions.ts).
+ // each area's starters (context/applets/regions.ts).
  const brought=()=>new Set<string>([...(draft.integrations||[]).map((item:any)=>item?.provider),...(draft.profile?.applets||[]),...(state.connections||[]).filter((c:any)=>connectionLive(c)).map((c:any)=>c.provider)].filter((p:unknown):p is string=>typeof p==='string'));
  const seed=()=>{seedAppletSelection(WORLD_APPS.filter(a=>appletSupport(a.key,hostFeatures(state)).supported),detected,selected,touched,brought());persist();};
  if(hostFeatures(state).installedAppDetection){

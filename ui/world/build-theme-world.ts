@@ -6,7 +6,7 @@ import {createAppletImageLamps} from './applet-image-lamps.ts';
 import {createLampLabel,stackLampLabels} from './applet-lamp-label.ts';
 import {createLevelZoom} from './level-zoom.ts';
 import type {LampSignal} from './applet-lamp.ts';
-import {appletStatus,myAppletKind,CODING_SESSIONS,HOME_NATIVE} from '../../core/applets/index.ts';
+import {appletStatus,myAppletKind,CODING_SESSIONS,HOME_NATIVE} from '../../context/applets/index.ts';
 import {lastUse,regionId} from './region-layout.ts';
 import {weeklyQuota} from './weekly-allowance.ts';
 import {appletLamp,appletLampContent,lampDisplayState} from './applet-lamp.ts';

@@ -1,5 +1,5 @@
 // An artifact kept as an Applet (owner decision 2026-10-06, "artifact可以变成持久的applet"): the card Fox showed in
-// conversation becomes one of the person's own page Applets (core/applets/MY-APPLETS.md). The World page renders the
+// conversation becomes one of the person's own page Applets (context/applets/MY-APPLETS.md). The World page renders the
 // card's Markdown and chart as it showed them; this turns that fragment into one self-contained page that obeys the
 // same offline rules as any page Fox makes, keeping only plain reading markup.
 

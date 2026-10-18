@@ -1,4 +1,4 @@
-// The World's saved Service context (context/context/service-context.ts, core/applets/INTEGRATIONS.md#searching-saved-service-context):
+// The World's saved Service context (context/context/service-context.ts, context/applets/INTEGRATIONS.md#searching-saved-service-context):
 // one search and one read across what the World keeps up to date from each connected Service, through the standing
 // `worldlet` MCP server with each Agent's own token. "Can read <Service>" names both targets; an answer holds only the
 // Services that Agent may read; nothing asks a Service. Synthetic records, a real temporary SQLite ledger, no network.

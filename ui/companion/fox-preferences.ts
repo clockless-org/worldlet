@@ -2,8 +2,8 @@ import {hostFeatures,hostCopy} from '../../platform/bridge/features.ts';
 import {companionPersona} from '../../core/companion/index.ts';
 import {loginItemText} from '../../core/distribution/index.ts';
 
-import {connectionLive} from '../../core/applets/index.ts';
-import {getApp} from '../../core/applets/index.ts';
+import {connectionLive} from '../../context/applets/index.ts';
+import {getApp} from '../../context/applets/index.ts';
 // Preferences and credential setup stay in Fox’s existing bubble, or, `embedded`, in a Settings
 // page of the companion panel, where its own page list replaces Back and Done.
 export function createFoxPreferences({call,view,root,setup,toggleSample,embedded=false}:{call:any;view:any;root?:any;setup:any;toggleSample?:any;embedded?:boolean}){

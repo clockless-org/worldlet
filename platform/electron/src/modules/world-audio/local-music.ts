@@ -1,11 +1,11 @@
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
-import {LOCAL_MUSIC_LIMITS,MEDIA_REMOTE_COMMANDS,localMusicCommand,localMusicQuery,readNowPlaying,readPlaylists,readTracks,type LocalMusicState} from '../../../../../core/applets/index.ts';
+import {LOCAL_MUSIC_LIMITS,MEDIA_REMOTE_COMMANDS,localMusicCommand,localMusicQuery,readNowPlaying,readPlaylists,readTracks,type LocalMusicState} from '../../../../../context/applets/index.ts';
 import {WorldletError} from '../../files.ts';
 import type {Row} from '../../host/types.ts';
 import {WINDOWS_BASE,children,end,environment,jsonLines,run} from '../media/io.ts';
 
-// Local music players (core/applets/local-music.ts). A Mac says what is playing through MediaRemote, which
+// Local music players (context/applets/local-music.ts). A Mac says what is playing through MediaRemote, which
 // macOS 15.4 opened only to Apple's own programs, so an osascript (com.apple.osascript) helper asks it for
 // any player's track (MRNowPlayingRequest) and sends play, pause and skip (MRMediaRemoteSendCommand). Apple
 // Music's playlists and library search go through its own scripting, which asks once for Automation.

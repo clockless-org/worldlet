@@ -118,7 +118,7 @@ export interface World {
   unlockedApplets?: string[];
   /** The areas' saved presentation (onboarding.regionLayout; ui/world/region-layout.ts). */
   regionLayout?: Record<string, unknown>;
-  /** The person's own Applets (core/applets/MY-APPLETS.md: ongoingApplet, momentApplet, siteApplet), placed beside the catalog's. */
+  /** The person's own Applets (context/applets/MY-APPLETS.md: ongoingApplet, momentApplet, siteApplet), placed beside the catalog's. */
   dynamicApplets?: any[];
   hiddenApplets?: string[];
   /** Pending task reviews, shown on the Attention card of a task they may update (ui/attention/task-review.ts). */
@@ -142,7 +142,7 @@ export interface World {
  [key: string]: any;
 }
 
-/** What the Mac publishes about one account, as `core/applets/status.ts` reads it. */
+/** What the Mac publishes about one account, as `context/applets/status.ts` reads it. */
 export interface ConnectionFacts {
  provider: string;
  status?: string;
@@ -202,7 +202,7 @@ export interface AppletDefinition {
  support?: {level?: string; acceptance?: boolean};
  /** System service the host must offer; absent means no host restriction. */
  requiresHostFeature?: keyof HostFeatures;
- /** The person's own Applet, by where it came from (core/applets/MY-APPLETS.md); absent for a built-in one. */
+ /** The person's own Applet, by where it came from (context/applets/MY-APPLETS.md); absent for a built-in one. */
  mine?: 'site' | 'page' | 'conversation';
  [key: string]: any;
 }

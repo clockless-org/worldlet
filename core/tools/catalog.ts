@@ -10,7 +10,7 @@ import {widgetTools} from './widgets.ts';
 import {calendarTools} from './calendar.ts';
 import {GAME_MAKING_OPEN} from '../../context/games/index.ts';
 import services from './services.json' with {type:'json'};
-import {WORLD_APPS} from '../applets/index.ts';
+import {WORLD_APPS} from '../../context/applets/index.ts';
 import {worldModules} from './modules.ts';
 
 // Local-original owners are not connected Applets. Native hosts validate support and receipts.

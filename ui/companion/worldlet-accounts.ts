@@ -1,4 +1,4 @@
-import {connectionLive,getApp,TOKEN_PROVIDERS} from '../../core/applets/index.ts';
+import {connectionLive,getApp,TOKEN_PROVIDERS} from '../../context/applets/index.ts';
 import {CONNECTORS} from '../../context/accounts/index.ts';
 import {SERVICE_TITLES} from '../../contracts/services.ts';
 import {showServiceCollection} from './service-collection.ts';
@@ -77,7 +77,7 @@ export async function showGithubApp(target:HTMLElement,call:(action:string,body?
  await draw();
 }
 
-/** HTTP JSON (core/applets/INTEGRATIONS.md#http-json-service): JSON endpoints an Agent may read with "Can read HTTP JSON",
+/** HTTP JSON (context/applets/INTEGRATIONS.md#http-json-service): JSON endpoints an Agent may read with "Can read HTTP JSON",
  * each a name, an HTTPS base address and an optional token. Connect goes through `connect` (provider `http`), which
  * checks the endpoint with one read before keeping it; the token leaves the page once, its field cleared at once, and
  * never comes back (`httpJson` `list` says only whether an endpoint has one). Remove forgets one endpoint; the last
@@ -124,7 +124,7 @@ export async function showHttpJson(target:HTMLElement,call:(action:string,body?:
  await draw();
 }
 
-/** Google Search Console (core/applets/INTEGRATIONS.md#search-console-service), which has no Thing of its own: its tile
+/** Google Search Console (context/applets/INTEGRATIONS.md#search-console-service), which has no Thing of its own: its tile
  * signs in with Google; here, under Advanced, a Google service account's JSON key instead, pasted once. The host checks it with Google and keeps it only in the vault; the field is
  * cleared before Google answers and the page never gets the key back. Disconnect is in the list above. Returns its
  * redraw. */

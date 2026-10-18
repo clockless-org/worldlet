@@ -19,7 +19,7 @@ import {readBoardDefinition,resolveBoard} from '../context/board/index.ts';
 import {channelDefaultGrants,serviceReadTargets,standingActions,standingCallDecision} from '../core/agent/grants.ts';
 import {turnTrustObserve} from '../core/agent/turn-trust.ts';
 import {worldActionOf,worldActions} from '../core/tools/gateway.ts';
-import {SOURCE_PROVIDERS,TOKEN_PROVIDERS,connectSettings,connectToken} from '../core/applets/index.ts';
+import {SOURCE_PROVIDERS,TOKEN_PROVIDERS,connectSettings,connectToken} from '../context/applets/index.ts';
 import {ExecutionJournal} from '../platform/electron/src/modules/agent-runtime/journal.ts';
 import {ServiceSource,ServiceSourceAccess,ServiceSourceConnections} from '../platform/electron/src/modules/sources/service-source.ts';
 import {withTempDir} from './test-temp.ts';

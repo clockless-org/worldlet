@@ -1,6 +1,6 @@
 import {listWorldTools,publicWorldToolNames,WORLD_TOOL_VERSION} from './catalog.ts';
 import {worldModules} from './modules.ts';
-import {APP_DEFINITIONS} from '../applets/index.ts';
+import {APP_DEFINITIONS} from '../../context/applets/index.ts';
 import {CALENDAR_REQUIRED} from './calendar.ts';
 import {SERVICE_ACTIONS,SERVICE_PROVIDERS} from '../../contracts/services.ts';
 // Every Applet with a source-reader or calendar attention registration is readable through the gateway, except a

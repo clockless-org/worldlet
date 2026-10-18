@@ -1,4 +1,4 @@
-import {TOKEN_PROVIDERS} from '../../core/applets/index.ts';
+import {TOKEN_PROVIDERS} from '../../context/applets/index.ts';
 import {SERVICE_SYNC_DEFAULTS,serviceSyncLine} from '../../context/context/index.ts';
 import {connector,connectorTiles,connectorDisconnectQuestion,connectorFailure,connectorWhoMayUse,type ConnectorReaders,type ConnectorTile} from '../../context/accounts/index.ts';
 import {SERVICE_PROVIDERS} from '../../contracts/services.ts';
@@ -12,7 +12,7 @@ type Call=(action:string,body?:any)=>Promise<any>;
  * of their own there). */
 const KEYED=['github','posthog','cloudflare'];
 
-/** Settings › Connectors (core/applets/INTEGRATIONS.md#settings--connectors): one tile per service with Connect, Disconnect
+/** Settings › Connectors (context/applets/INTEGRATIONS.md#settings--connectors): one tile per service with Connect, Disconnect
  * and its state in plain words, decided in Core (connectorTiles). Connect opens the service's own sign-in in the browser
  * on this computer; nothing is typed and no server of ours is involved. Everything with a key, an address or a file is
  * under Advanced, folded away. The default path never shows CONNECTOR_TECHNICAL_WORDS (scripts/connectors-ui-check.ts). */

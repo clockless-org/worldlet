@@ -1,7 +1,7 @@
 // Pictures for the person's own Applets (owner request 2026-10-06: "可以用本地ImageGen的模型去生成这个Icon的图片，包括背景图"):
 // when one of their own Applets arrives, Worldlet asks the image model they already have on this computer (Codex's
 // image generation, through their Codex sign-in or API key) for its icon and its background, in Worldlet's style.
-// Nothing is painted without it, and Worldlet pays for no image (core/applets/MY-APPLETS.md#pictures).
+// Nothing is painted without it, and Worldlet pays for no image (context/applets/MY-APPLETS.md#pictures).
 import type {MyAppletKind} from './mine.ts';
 
 export const APPLET_ART_LIMITS=Object.freeze({

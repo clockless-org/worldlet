@@ -132,7 +132,7 @@ Checks: `node scripts/world-tool-runtime-check.ts` (navigation refusal without a
 
 ## Connections and on-demand reading
 
-Source collection, analysis and Attention publication follow the shared [Applet runtime](../../core/applets/RUNTIME.md); connection, launch and revision triggers belong there rather than a second fixed polling policy. Official tool lifecycle events produce Applet activity without content; after a successful read Hermes may call `update_applet_state` with a short summary. Transient state stays in memory; extracted items, source references and check records go to `world.sqlite`.
+Source collection, analysis and Attention publication follow the shared [Applet runtime](../../context/applets/RUNTIME.md); connection, launch and revision triggers belong there rather than a second fixed polling policy. Official tool lifecycle events produce Applet activity without content; after a successful read Hermes may call `update_applet_state` with a short summary. Transient state stays in memory; extracted items, source references and check records go to `world.sqlite`.
 
 | Source | Authorization and reading | Bound |
 | --- | --- | --- |

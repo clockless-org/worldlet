@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {getApp} from '../core/applets/index.ts';
+import {getApp} from '../context/applets/index.ts';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
 // Website routing keeps account readers available without mounting their old card UI; Docker remains native.
 type Case={applets:string[];provider:string;label:string;url:string;details:Record<string,unknown>;notice?:string;detailLine:RegExp;web:boolean;pass:string};

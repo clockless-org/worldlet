@@ -1,5 +1,5 @@
 import {firstValueCandidate} from '../../core/onboarding/index.ts';
-import {connectionLive,sourcesReading} from '../../core/applets/index.ts';
+import {connectionLive,sourcesReading} from '../../context/applets/index.ts';
 import {journalTarget} from '../../core/agent/index.ts';
 import {createCoachMark,createTourSpotlight,elementBox} from './tour-spotlight.ts';
 

@@ -1,6 +1,6 @@
 # Worldlet Applets
 
-This directory owns Applet presentation and interaction. Data-only definitions, provider identity and capability declarations live in `core/applets/`. Shared artwork, approved references and visual tokens live in the [built-in Style Pack](../../resources/styles/builtin/README.md). Read the product [README](../../README.md) first; for art, read the [Sprite world contract](../world/COMPOSITION.md) and the [2.5D production contract](../../resources/styles/builtin/PRODUCTION.md).
+This directory owns Applet presentation and interaction. Data-only definitions, provider identity and capability declarations live in `context/applets/`. Shared artwork, approved references and visual tokens live in the [built-in Style Pack](../../resources/styles/builtin/README.md). Read the product [README](../../README.md) first; for art, read the [Sprite world contract](../world/COMPOSITION.md) and the [2.5D production contract](../../resources/styles/builtin/PRODUCTION.md).
 
 **Design starts with the [Applet design guide](DESIGN-GUIDE.md).** It is the canonical handbook for device concepts, Peek / Open / Focus, Fox actions, sprite production and acceptance.
 
@@ -12,7 +12,7 @@ Authoring currently follows the design guide above. Use ordinary guidelines in `
 
 ## Directory layout
 
-- `core/applets/catalog.ts` and `core/applets/definitions/<key>.ts`: data-only identity, connection and legacy `fullView` declarations.
+- `context/applets/catalog.ts` and `context/applets/definitions/<key>.ts`: data-only identity, connection and legacy `fullView` declarations.
 - `visuals.ts`: original logos and generic Home function icons.
 - `panels.ts`: service-specific working panels.
 - `<key>/logo.ts` and optional panel/controller files: visual presentation only.
@@ -27,7 +27,7 @@ See [production classification and order](DESIGN-GUIDE.md) before producing new 
 
 ## Current Applets and connection state
 
-The [catalog](../../core/applets/catalog.ts) is the single roster; [acceptance criteria](../components/INTERACTION.md#applet-presentation-acceptance-contract) and each Applet's owning document record verification and gaps. Catalog presence is not real-account acceptance. The [area taxonomy](../world/ENVIRONMENT.md#area-taxonomy) defines the approved future layout separately from current persisted IDs.
+The [catalog](../../context/applets/catalog.ts) is the single roster; [acceptance criteria](../components/INTERACTION.md#applet-presentation-acceptance-contract) and each Applet's owning document record verification and gaps. Catalog presence is not real-account acceptance. The [area taxonomy](../world/ENVIRONMENT.md#area-taxonomy) defines the approved future layout separately from current persisted IDs.
 
 Home's function Applets are **Mail, Calendar, Notes, Reminders** and **Weather**, with generic function icons rather than a publisher's; **Browser** is the sixth. Weather has no connector at all: the forecast already runs, and the Applet gives it a body. They currently connect Gmail, Google Calendar, macOS Notes and Reminders; authorization copy names the real service and internal IDs and existing grants are unchanged.
 
@@ -39,7 +39,7 @@ There is no hidden-definition concept: `WORLD_APPS` is `APP_DEFINITIONS`, and a 
 
 The popular-app expansion adds 30 launch-only entries. These are opt-in for existing worlds; regions page through finite slots rather than overlapping devices.
 
-The catalog offers every Applet, website Applets included (owner decision 2026-10-11; `inAppletCatalog` in `core/applets/applet-support.ts`). That rule decides an Area's Recommended and All lists, the setup guide's per-Area list and the Browser's "Add to World" offer; the Area panel also leaves out Applets this computer does not support. A site with no Applet can still become the person's own Applet with Make Applet.
+The catalog offers every Applet, website Applets included (owner decision 2026-10-11; `inAppletCatalog` in `context/applets/applet-support.ts`). That rule decides an Area's Recommended and All lists, the setup guide's per-Area list and the Browser's "Add to World" offer; the Area panel also leaves out Applets this computer does not support. A site with no Applet can still become the person's own Applet with Make Applet.
 
 ## How data reaches the scene
 
@@ -76,9 +76,9 @@ flowchart TD
 
 - `harness/hermes/host.py` calls upstream MCP and Google clients. `HermesSources.swift` handles connection state; `SourceRecord.swift` converts originals and versions.
 - `ui/applets/` holds credential-free declarations; real connections live in native panels and the local Hermes profile. **Never put tokens, secrets or user originals here.**
-- Hermes keeps five source adapters (Drive hidden); Apple's two are native. Drive is metadata only; Notion is a bounded index with on-demand bodies. A successful read is not full incremental sync. Official conditions: [connector reference](../../core/applets/INTEGRATIONS.md).
+- Hermes keeps five source adapters (Drive hidden); Apple's two are native. Drive is metadata only; Notion is a bounded index with on-demand bodies. A successful read is not full incremental sync. Official conditions: [connector reference](../../context/applets/INTEGRATIONS.md).
 - An Applet's default Region is only its entry position; the same Gmail message can take part in Travel, Money or Home context.
-- All Applets are fully visible with no packaging or preview toggle. Authorization success, sync success and finished organization are different facts. Peek names have no extra logo or emoji; Open/Focus may use an existing identity icon; Fox and the opened Applet distinguish connecting, syncing, reading and needs attention (`core/applets/status.ts`).
+- All Applets are fully visible with no packaging or preview toggle. Authorization success, sync success and finished organization are different facts. Peek names have no extra logo or emoji; Open/Focus may use an existing identity icon; Fox and the opened Applet distinguish connecting, syncing, reading and needs attention (`context/applets/status.ts`).
 - Notion reads up to 20 recent pages with `notion-list-recent-pages`, bodies with `notion-fetch`, and database rows (up to 20) with read-only `notion-query-data-sources`; browsing uses the Notion website. Originals go to sources, reading cache to `app-content/notion`. No model call and no implicit private-content consent.
 
 ## Adding or finishing a connection
@@ -103,7 +103,7 @@ Branded Applets share the original-asset loader and keep ratio and color; nothin
 
 ## Entries independent of a Region
 
-DoorDash declares `region: null` and `placement.kind: 'world'`; the compiler leaves its `buildingId` null and `pixi-world.ts` puts it on its authored bridge anchor from `scripts/build-world-assets.ts`; Back returns to World. Like every Applet the delivery bicycle sprite is always visible and implies nothing about connection. The official CLI is called through the restricted `harness/hermes/doordash_cli.py`; see [DoorDash](../../core/applets/INTEGRATIONS.md#doordash).
+DoorDash declares `region: null` and `placement.kind: 'world'`; the compiler leaves its `buildingId` null and `pixi-world.ts` puts it on its authored bridge anchor from `scripts/build-world-assets.ts`; Back returns to World. Like every Applet the delivery bicycle sprite is always visible and implies nothing about connection. The official CLI is called through the restricted `harness/hermes/doordash_cli.py`; see [DoorDash](../../context/applets/INTEGRATIONS.md#doordash).
 
 ### Implementation routing (`fullView`)
 

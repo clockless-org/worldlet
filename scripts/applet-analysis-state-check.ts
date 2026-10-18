@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {appletAnalysisCommit,appletAnalysisPending,appletObservations,appletAnalysisItems,appletAnalysisRequest} from '../core/applets/index.ts';
+import {appletAnalysisCommit,appletAnalysisPending,appletObservations,appletAnalysisItems,appletAnalysisRequest} from '../context/applets/index.ts';
 const records=[{id:'one',text:'Original fixture',metadataOnly:false},{id:'two',text:'Other fixture',metadataOnly:false}];
 const base={provider:'gmail',records,latest:records,saved:{},items:[],processed:['one'],now:100};
 const saved=appletAnalysisCommit(base);
@@ -30,8 +30,8 @@ assert.deepEqual(appletAnalysisItems(records,[item,{...item,sources:[{id:'unrela
 assert.deepEqual(appletAnalysisItems(records,[{...item,sources:[...item.sources,{id:'earlier-batch'}]}])[0].sources,item.sources,'only this batch\'s records stay citable');
 
 {
- const {appletAnalysisFailed,appletAnalysisRetrying,appletAnalysisParked,appletAnalysisMaxFailures}=await import('../core/applets/analysis-state.ts');
- const {analysisBatch}=await import('../core/applets/analysis-candidates.ts');
+ const {appletAnalysisFailed,appletAnalysisRetrying,appletAnalysisParked,appletAnalysisMaxFailures}=await import('../context/applets/analysis-state.ts');
+ const {analysisBatch}=await import('../context/applets/analysis-candidates.ts');
  const rows=[{id:'poison',text:'Unparseable thread'},{id:'fresh-1',text:'New mail one'},{id:'fresh-2',text:'New mail two'}];
  let state:Record<string,any>={};
  state=appletAnalysisFailed({records:[rows[0]],saved:state,latest:rows});

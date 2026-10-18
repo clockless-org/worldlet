@@ -1,10 +1,10 @@
-import {APP_DEFINITIONS,appletStatus} from '../applets/index.ts';
+import {APP_DEFINITIONS,appletStatus} from '../../context/applets/index.ts';
 import {phoneWebAddress} from './phone-web.ts';
 
 /** The Applets in the World for a phone or browser's Applets page while the World page is not there
  * (core/phone/README.md#web), as the page lists them (ui/shell/notion-world.ts `world().places`): the catalog Applets the
  * person keeps (`onboarding.unlockedApplets`, less `hiddenApplets`; with no list, those installed by default), each with
- * its lamp from its connection (core/applets appletStatus). The page's own extras (the person's own sites, its order by
+ * its lamp from its connection (context/applets appletStatus). The page's own extras (the person's own sites, its order by
  * last use, what each Applet is doing this moment) wait for it. */
 export function hostAppletPlaces({onboarding,connections}:{onboarding?:{unlockedApplets?:string[],hiddenApplets?:string[]}|null,connections?:any[]}){
  const unlocked=Array.isArray(onboarding?.unlockedApplets)?onboarding.unlockedApplets:null,hidden=Array.isArray(onboarding?.hiddenApplets)?onboarding.hiddenApplets:[];

@@ -86,9 +86,9 @@ and [MCP Apps UI](https://developers.openai.com/plugins/build/chatgpt-ui).
 - `contracts/world.ts` already separates `scene`, `fullView` and `connection` in
   `AppletDefinition`; `connection` is currently a loose single declaration,
   **not** a typed multi-backend operation registry.
-- `core/applets/definitions/gmail.ts` combines a scene view with an original Web
+- `context/applets/definitions/gmail.ts` combines a scene view with an original Web
   route; its declared connection is separate from those views.
-- `core/applets/definitions/github.ts` and `apple-notes.ts` use different
+- `context/applets/definitions/github.ts` and `apple-notes.ts` use different
   connection/host requirements while both declare scene presentation.
 - Packaged `commands.json` comes from the existing World gateway (below). Extend
   that source of truth when adding operations, not a parallel executor/schema.
@@ -110,7 +110,7 @@ using the same shell, with live data and explicit unavailable/error states.
 
 | Concern | Starting points |
 | --- | --- |
-| Catalog and stable IDs | `core/applets/definitions/<key>.ts`, `core/applets/catalog.ts` |
+| Catalog and stable IDs | `context/applets/definitions/<key>.ts`, `context/applets/catalog.ts` |
 | Brand assets | `ui/applets/BRAND-ASSETS.md`, `ui/applets/brand-assets.json` |
 | Placement and world slots | `ui/world/world-layout.ts`, `ui/world/world-pack.ts`, `resources/worlds/`; retain compatible stored IDs |
 | Sprite rendering and Open items | `ui/world/village/pixi-world.ts`, `ui/world/pixi-stage.ts`, Applet-specific renderers |
@@ -133,7 +133,7 @@ An optional typed `attention` declaration registers a trusted source reader or o
 
 ## Autonomous work contract
 
-Every registered Applet needs `applet.md` and `runtime.json` beside its UI files. See [Applet runtime](../../core/applets/RUNTIME.md) for schedules, trusted adapters, source analysis, optional Attention subscription, durable state and lamp behavior. Website Applets declare on-demand behavior rather than fake background work. Run `node scripts/applet-runtime-check.ts` after changing this contract.
+Every registered Applet needs `applet.md` and `runtime.json` beside its UI files. See [Applet runtime](../../context/applets/RUNTIME.md) for schedules, trusted adapters, source analysis, optional Attention subscription, durable state and lamp behavior. Website Applets declare on-demand behavior rather than fake background work. Run `node scripts/applet-runtime-check.ts` after changing this contract.
 
 
 ### Packaged command discovery

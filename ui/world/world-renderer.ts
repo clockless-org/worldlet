@@ -8,7 +8,7 @@ export interface WorldApplet {id:string;key:string;title:string;region:string;vi
  /** The Applet's lamp as the host shows it. The World lights the lamps in its art; the host draws the lamp's label and action. */
  lamp?:WorldLampState;
  connected?:boolean;
- /** Set for the person's own Applets (core/applets/MY-APPLETS.md): which kind it is. */
+ /** Set for the person's own Applets (context/applets/MY-APPLETS.md): which kind it is. */
  mine?:string;
  /** A thing that is not an Applet (a trip, a parcel). It is shown only while it is open. */
  object?:boolean;

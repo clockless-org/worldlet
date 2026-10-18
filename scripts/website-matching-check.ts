@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {matchWebsiteApplets} from '../core/applets/website-matching.ts';
+import {matchWebsiteApplets} from '../context/applets/website-matching.ts';
 assert.deepEqual(matchWebsiteApplets(['https://dash.cloudflare.com/a','https://dash.cloudflare.com/b']),['app-cloudflare']);
 assert.deepEqual(matchWebsiteApplets(['https://us.posthog.com/project/123']),['app-posthog']);
 assert.deepEqual(matchWebsiteApplets(['https://dash.cloudflare.com.evil.test/','https://evil.test/?url=https://dash.cloudflare.com','javascript:alert(1)','file:///tmp/test','https://user:pass@dash.cloudflare.com/']),[]);
@@ -9,7 +9,7 @@ assert.ok(matchWebsiteApplets(['https://github.com/example/project']).includes('
 console.log('PASS: known destinations, exact hosts, shared-host paths, deduplication, unsafe URL rejection');
 assert.deepEqual(matchWebsiteApplets(['https://docs.google.com/spreadsheets/d/example/edit']),['app-google-sheets']);
 assert.deepEqual(matchWebsiteApplets(['https://mail.google.com/mail/u/0']),['app-gmail']);
-import {websiteAppletFor} from '../core/applets/website-matching.ts';
+import {websiteAppletFor} from '../context/applets/website-matching.ts';
 const world=[{id:'app-browser',web:true},{id:'app-posthog',web:true},{id:'app-gmail',web:false},{id:'app-site-example',web:true,siteHost:'www.example.org'}];
 assert.equal(websiteAppletFor('https://us.posthog.com/project/1/insights',world),'app-posthog');
 assert.equal(websiteAppletFor('https://example.org/a',world),'app-site-example');

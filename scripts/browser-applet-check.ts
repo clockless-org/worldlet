@@ -16,7 +16,7 @@ await withBrowser(async browser=>{
  await page.evaluate(()=>(window as any).panel.mount('gmail',{url:'https://mail.google.com',platform:'web'}));
  assert.equal(await page.locator('.browser-applet-offer:not(.browser-sign-in-offer)').isVisible(),false,'only generic Browser offers the switch');
  console.log('PASS website matching, one-click add/open, no duplicates, navigation clears offer.');
- // Make Applet at the top of the Browser (core/applets/site-applet.ts): any public site becomes an Applet; a made one opens.
+ // Make Applet at the top of the Browser (context/applets/site-applet.ts): any public site becomes an Applet; a made one opens.
  const made=await browser.newPage();await made.setContent('<main><dialog id="notionDialog"></dialog><section style="width:700px;height:600px"></section></main>');await made.addScriptTag({content:bundle});
  await made.evaluate(()=>{const w=window as any,root:any=document.querySelector('main'),content=document.querySelector('section');w.opened=[];w.made=[];w.notes=[];root.appletLayout={available:()=>true,has:()=>false,add:async()=>{}};
   w.panel=w.BrowserPanel.createBrowserPanel({root,content,native:{browser:{call:async()=>({})}},notify:m=>w.notes.push(m),openApplet:id=>w.opened.push(id),

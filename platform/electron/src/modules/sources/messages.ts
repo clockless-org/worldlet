@@ -2,14 +2,14 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {app,shell} from 'electron';
-import {MESSAGES_LIMITS,messagesConversation,messagesLine,messagesOutgoingText,messagesRecipient,messagesSendFailure,messagesSnippet,validSentMessageId,type MessagesConversation,type MessagesLine,type SentMessageRecord} from '../../../../../core/applets/index.ts';
+import {MESSAGES_LIMITS,messagesConversation,messagesLine,messagesOutgoingText,messagesRecipient,messagesSendFailure,messagesSnippet,validSentMessageId,type MessagesConversation,type MessagesLine,type SentMessageRecord} from '../../../../../context/applets/index.ts';
 import {WorldletError} from '../../files.ts';
 import {bundledResource} from '../../resources.ts';
 import {Imsg,ImsgError} from './imsg.ts';
 import type {SourcesContext} from './context.ts';
 import {relaunchAfterQuit} from '../../host/quit.ts';
 import type {Row} from '../../host/types.ts';
-// Messages (iMessage) on a Mac (core/applets/messages.ts holds the rules). Conversations are read and
+// Messages (iMessage) on a Mac (context/applets/messages.ts holds the rules). Conversations are read and
 // messages sent through the pinned imsg release over `imsg rpc` (./imsg.ts): it reads Apple's local
 // `~/Library/Messages/chat.db`, which macOS keeps behind Full Disk Access, and sends through the Messages
 // app (Automation permission for Messages), so a message goes out under the person's own Apple ID and never

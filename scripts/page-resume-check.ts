@@ -1,7 +1,7 @@
 // Shared "resume where I left off" rule for website Applets (context/browser/page-resume.ts).
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {APP_DEFINITIONS} from '../core/applets/index.ts';
+import {APP_DEFINITIONS} from '../context/applets/index.ts';
 import {BROWSER_HOME,appletHomeLanding,atAppletHome,browserHomePage,browserStartsHome,createBrowserHome} from '../context/browser/browser-home.ts';
 import {BROWSER_BUDGET,PAGE_MEMORY,PAGE_RESUME,appletSite,browserBudget,memoryPressure,createPageMemory,livePagePlan,readBrowserBudget,resumablePage,sitePage} from '../context/browser/index.ts';
 

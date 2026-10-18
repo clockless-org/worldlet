@@ -1,4 +1,4 @@
-import {appletStatus as appStatus} from '../../core/applets/index.ts';
+import {appletStatus as appStatus} from '../../context/applets/index.ts';
 
 // Shared Full View inventory. Selecting a record displays its original.
 export function createAppDevice({root,call,openRecord,onRecords}){

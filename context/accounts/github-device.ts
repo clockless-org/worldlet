@@ -1,4 +1,4 @@
-// GitHub sign-in with the official "Worldlet AI" GitHub App and GitHub's device flow (core/applets/INTEGRATIONS.md#github-sign-in):
+// GitHub sign-in with the official "Worldlet AI" GitHub App and GitHub's device flow (context/applets/INTEGRATIONS.md#github-sign-in):
 // Worldlet asks GitHub for a short code, the person pastes it on github.com/login/device and chooses Authorize, and
 // Worldlet, polling from this computer, receives the person's own user token. Only the App's client ID is used: it is
 // public by design. There is no client secret anywhere, no server of ours and no loopback address. The user token and

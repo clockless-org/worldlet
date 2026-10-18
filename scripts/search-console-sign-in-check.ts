@@ -1,4 +1,4 @@
-// Search Console through Worldlet's own Google sign-in (core/applets/INTEGRATIONS.md#search-console-service): its tile
+// Search Console through Worldlet's own Google sign-in (context/applets/INTEGRATIONS.md#search-console-service): its tile
 // connects with no key, adding only the read-only Search Console permission to the World's Google sign-in on a
 // loopback address with PKCE while keeping what that sign-in already allowed; the vault keeps only that it reads so,
 // never a token; reads go to the Search Console API with the Google sign-in's access token, renewed once after a 401;
@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {CONNECTOR_TECHNICAL_WORDS,SEARCH_CONSOLE_GATE,SEARCH_CONSOLE_SCOPE,connector,connectorTiles} from '../context/accounts/index.ts';
-import {TOKEN_PROVIDERS,connectToken} from '../core/applets/index.ts';
+import {TOKEN_PROVIDERS,connectToken} from '../context/applets/index.ts';
 import {GoogleAccount,GOOGLE_SCOPES} from '../platform/electron/src/modules/sources/google-account.ts';
 import {ServiceSource,ServiceSourceConnections} from '../platform/electron/src/modules/sources/service-source.ts';
 import {withTempDir} from './test-temp.ts';

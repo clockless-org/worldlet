@@ -1,8 +1,8 @@
-// Settings › Connectors in Core (context/accounts/connectors.ts, core/applets/connector-tiles.ts): which tiles show, each
+// Settings › Connectors in Core (context/accounts/connectors.ts, context/applets/connector-tiles.ts): which tiles show, each
 // one's state and words from the World's connection rows, and that nothing on the default path uses a technical word.
 import assert from 'node:assert/strict';
 import {CONNECTORS,CONNECTOR_TECHNICAL_WORDS,connectorTiles,connectorDisconnectQuestion,connectorFailure,plainConnectorText,type ConnectorTile} from '../context/accounts/index.ts';
-import {connectionLive,getApp} from '../core/applets/index.ts';
+import {connectionLive,getApp} from '../context/applets/index.ts';
 
 // The rule itself: each banned word, in any case, as a whole word only.
 for(const word of ['key','keys','token','Tokens','scope','MCP','OAuth','API','APIs','ID','endpoint','Grant','terminal'])assert.ok(!plainConnectorText(`Paste the ${word} here`),word);
@@ -75,6 +75,6 @@ for(const item of CONNECTORS){
  const app=getApp(item.providers[0]);
  if(app)assert.equal(item.region,app.region,item.id+' region');
 }
-// Connected means what the rest of the World means by it (core/applets connectionLive).
+// Connected means what the rest of the World means by it (context/applets connectionLive).
 for(const value of rows)assert.equal(connectorTiles([value]).some(tile=>tile.state!=='off'&&tile.provider===value.provider),connectionLive(value)&&value.provider!=='http'&&!(value.provider==='google-calendar'&&(value as {transport?:string}).transport==='native'),value.provider);
 console.log('PASS Connectors in Core: sign-in tiles always, key services once connected, HTTP JSON only under Advanced, connected/needs-you/waiting states, plain words on the default path');

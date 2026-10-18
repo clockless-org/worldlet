@@ -10,7 +10,7 @@
 // what they find comes up as Artifacts. Names and schedules only, never prompts or source contents.
 import type {HarnessJob} from '../../contracts/harness-services.ts';
 import {worldLogApplet} from '../../context/activity/index.ts';
-import {getApp} from '../applets/index.ts';
+import {getApp} from '../../context/applets/index.ts';
 import {nextCronRun} from './next-run.ts';
 import {DAILY_ROUTINE_NAMES} from '../../context/artifacts/index.ts';
 

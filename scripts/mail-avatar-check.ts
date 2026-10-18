@@ -2,7 +2,7 @@
 // may picture a sender (Core), and the reflow/quote rules the reader applies to every original.
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {mailSenderAddress,mailOrganizationDomain,mailAvatarPlan,gravatarURL,mailIconURL,bimiLogoURL,mailLogoURL,mailRemoteHostAllowed} from '../core/applets/index.ts';
+import {mailSenderAddress,mailOrganizationDomain,mailAvatarPlan,gravatarURL,mailIconURL,bimiLogoURL,mailLogoURL,mailRemoteHostAllowed} from '../context/applets/index.ts';
 import {readableMail,splitQuoted} from '../ui/applets/gmail/focus.ts';
 
 assert.equal(mailSenderAddress('Alice Chen <Alice.Chen@Acme.io>'),'alice.chen@acme.io');

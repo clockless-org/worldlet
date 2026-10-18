@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import {APP_DEFINITIONS} from '../core/applets/catalog.ts';
+import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
 import {setupText} from '../ui/onboarding/setup-language.ts';
-import {APPLET_REGION_TITLES,AREA_LAYOUT_VERSION,AREA_STARTER_COUNT,AREA_STARTERS,GAME_STARTERS,SETUP_SUGGESTIONS,migrateAreaLayout,seedAppletSelection,setupOffers} from '../core/applets/regions.ts';
+import {APPLET_REGION_TITLES,AREA_LAYOUT_VERSION,AREA_STARTER_COUNT,AREA_STARTERS,GAME_STARTERS,SETUP_SUGGESTIONS,migrateAreaLayout,seedAppletSelection,setupOffers} from '../context/applets/regions.ts';
 const keys=APP_DEFINITIONS.map(a=>a.key);
 assert.equal(new Set(keys).size,keys.length,'Each app has one definition');
 for(const app of APP_DEFINITIONS)assert.ok(Object.hasOwn(APPLET_REGION_TITLES,app.region||''),app.key+' definition names one of the six areas');

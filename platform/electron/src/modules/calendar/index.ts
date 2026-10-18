@@ -1,5 +1,5 @@
 import {Notification} from 'electron';
-import {calendarAlerts,mergeCalendarEvent,orderCalendarEvents,readCalendarEvent,validCalendarEventId,type CalendarOccurrence,type LocalCalendarEvent} from '../../../../../core/applets/index.ts';
+import {calendarAlerts,mergeCalendarEvent,orderCalendarEvents,readCalendarEvent,validCalendarEventId,type CalendarOccurrence,type LocalCalendarEvent} from '../../../../../context/applets/index.ts';
 import {WorldletError} from '../../files.ts';
 import type {Host} from '../../host/types.ts';
 

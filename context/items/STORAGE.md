@@ -40,8 +40,8 @@ SQLite is the business database. JSON is appropriate for small configuration and
 | Agent asks | `world.sqlite`: `state.agent-asks`, each with its Attention item `ask-<id>` in `state.items` (provider `agents`); the bytes of its screenshots and files in `agent_ask_attachments` (`ask_id`, `id`, `data` BLOB), saved with the ask in one transaction | What Agents asked the person or left as work, its claim, answer and resolution, and what describes each attachment (name, type, size, SHA-256) ([Agent asks](../../core/agent/GRANTS.md#agent-asks), [attachments](../../core/agent/GRANTS.md#ask-attachments)). Attachments stay as long as their ask, however it settles |
 | Orders and wake commands | `world.sqlite` `agent_settings` (`agent-orders`): `defaultFor` and `wake` (Agent ID → the program's path and its arguments) | Which Agent new work goes to when none is named, and the program the person set to wake each Agent ([Orders and waking an Agent](../../core/agent/GRANTS.md#orders-and-waking-an-agent)). Changed only in Settings › Agents; a revoked Agent's entries are removed. Follows the World and its backups |
 | Agent reports | `world.sqlite`: `state.agent-reports`, one per Agent | What each Agent last said it is doing, and when ([Agent reports](../../core/agent/GRANTS.md#agent-reports)) |
-| Service presets | `world.sqlite`: `state.service-presets` | Named, saved reads of a Worldlet Service, without keys ([Service presets](../../core/applets/INTEGRATIONS.md#service-presets)) |
-| Service sync | `world.sqlite`: `state.service-sync-jobs`, `state.service-sync-pages`, `state.service-sync-snapshots` | Opt-in schedules, resumable page checkpoints and last completed bounded snapshots; latest values only, no credentials ([scheduled collection](../../core/applets/INTEGRATIONS.md#scheduled-service-collection)) |
+| Service presets | `world.sqlite`: `state.service-presets` | Named, saved reads of a Worldlet Service, without keys ([Service presets](../applets/INTEGRATIONS.md#service-presets)) |
+| Service sync | `world.sqlite`: `state.service-sync-jobs`, `state.service-sync-pages`, `state.service-sync-snapshots` | Opt-in schedules, resumable page checkpoints and last completed bounded snapshots; latest values only, no credentials ([scheduled collection](../applets/INTEGRATIONS.md#scheduled-service-collection)) |
 | GitHub drafts | `world.sqlite`: `state.github-drafts`, each with its Attention item `ghd-<id>` in `state.items` (provider `agents`) | Changes on GitHub Agents drafted, the target as it was read, and whether the person approved (with the result's link) or dismissed them ([GitHub drafts](../../core/agent/GRANTS.md#github-drafts)); the GitHub App that writes them is in the vault (`github-app`) |
 | PostHog and Notion drafts | `world.sqlite`: `state.service-drafts`, each with its Attention item `svd-<id>` in `state.items` (provider `agents`) | Changes in PostHog or Notion Agents drafted, the target as it was read, and whether the person approved (with the result's link) or dismissed them ([PostHog and Notion drafts](../../core/agent/GRANTS.md#posthog-and-notion-drafts)); no key is kept with them |
 | Service requests | `world.sqlite`: `state.service-requests`, one per Agent and Service (`<agentId>.<provider>`), each with its Attention item `service-request:<id>` in `state.items` (provider `agents`) | An Agent's refused Service read the person was asked about, when it was asked, and whether they allowed it or said not now ([When an Agent first needs a Service](../../core/agent/GRANTS.md#when-an-agent-first-needs-a-service)) |
@@ -335,7 +335,7 @@ A date validation failure or any invalid entry rolls back the whole batch. A fai
 
 ### Periodic checks
 
-[Applet runtime](../../core/applets/RUNTIME.md) owns trigger policy, collection windows,
+[Applet runtime](../applets/RUNTIME.md) owns trigger policy, collection windows,
 claims, retries and checkpoints. [Attention Center](../../core/attention/README.md) owns
 synthesis and publication. Do not duplicate fixed tick/provider lists here.
 Authorization and private-processing consent remain separate. Failed reads do
@@ -347,7 +347,7 @@ Chat and background checks share `read_world_source`. Google and Notion reads ru
 
 Before a read, the host issues a per-turn ticket (`platform/electron/src/modules/attention/tools.ts`); the result is checked against the ticket, the source connection and current consent, evidence is recorded, and only then may a write proceed. Ticket methods are not registered as model tools. The old Apple read tools were removed; the legacy Google tool keeps only Drive metadata (not part of the item flow); Notion lists and pages go through the single entry rather than exposing the whole Notion MCP tool set.
 
-Applet status is a single projection (`core/applets/status.ts`): connection validity, running, failure and persistent attention are computed separately. Display priority is disconnected → reading → failed → needs attention → connected. A transient success or summary never clears a persistent to-do or a failed check. The number of read results and the number of saved items are separate.
+Applet status is a single projection (`context/applets/status.ts`): connection validity, running, failure and persistent attention are computed separately. Display priority is disconnected → reading → failed → needs attention → connected. A transient success or summary never clears a persistent to-do or a failed check. The number of read results and the number of saved items are separate.
 
 ### Item semantics and program boundaries
 

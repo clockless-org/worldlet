@@ -17,7 +17,7 @@ runtime stack remains **UI → Core → Platform → Harness → Models/Services
 | Layer | Components / directories | Public interface | Must not own |
 | --- | --- | --- | --- |
 | UI | `ui/world`, `ui/applets`, `ui/companion`, `ui/attention`, `ui/shell` | Versioned semantic World actions in `contracts/ui.ts`; component functions; host transport | OS branches, provider protocols, independent scheduling policy |
-| Core | `core/agent`, `core/applets`, `core/attention`, `core/tasks`, `core/companion`, `context/context`, `context/items`, `context/browser`, `core/tools`, `core/diagnostics`, `core/onboarding` | Each component's `index.ts`; serialized native entry in `core/index.ts` | DOM, filesystem, clocks, sockets, Electron/Node types, platform conditions |
+| Core | `core/agent`, `context/applets`, `core/attention`, `core/tasks`, `core/companion`, `context/context`, `context/items`, `context/browser`, `core/tools`, `core/diagnostics`, `core/onboarding` | Each component's `index.ts`; serialized native entry in `core/index.ts` | DOM, filesystem, clocks, sockets, Electron/Node types, platform conditions |
 | Platform | `platform/bridge`, `platform/electron`, `platform/browser`, `platform/local-tools` | `contracts/platform.ts`; shared Core requests/results; negotiated Harness contract | A second copy of onboarding, source processing, retry/priority or model-selection rules |
 | Harness | `harness/hermes` or an external adapter | `contracts/harness.ts`, capability discovery, tasks/events/cancellation | World UI implementation or ownership of portable user records |
 | Models/Services | `models` and provider APIs | Harness/provider protocols | UI navigation and OS permissions |
@@ -123,7 +123,7 @@ Directory ownership follows the [component table](#components-and-interfaces). E
 
 ### One component, one owner
 
-- **Applet definitions:** `core/applets/catalog.ts` and `core/applets/definitions/<key>.ts` own identity, capabilities and declared states. `ui/applets/<key>/` owns rendering, panels and logo presentation. Model context and tools can read the catalog without importing UI.
+- **Applet definitions:** `context/applets/catalog.ts` and `context/applets/definitions/<key>.ts` own identity, capabilities and declared states. `ui/applets/<key>/` owns rendering, panels and logo presentation. Model context and tools can read the catalog without importing UI.
 - **Companion:** `core/companion/` owns portable records, validation, recall and prompt rules; `ui/companion/` owns dialogue and animation. Host storage and credential operations remain in the Electron host (`modules/fox/companion.ts`, `src/vault.ts`).
 - **Schedules:** `core/tasks/` owns Worldlet source-check rules and settings policy. The platform supplies consent, app lifecycle and an awake clock. `harness/hermes/routines.py` claims due jobs, runs them and saves results. External backends must advertise and implement equivalent services.
 - **Host persistence:** `platform/electron/src/store/world-store.ts`, `store/ledger.ts` and the companion records in `modules/fox/companion.ts` belong to layer 3. Layer 2 owns the rules they apply. They are not listed as a second implementation in `core/`.
@@ -171,7 +171,7 @@ Validation: `check:source`, `check:style` and `test:core` enforce dependency bou
 
 ### Autonomous service target
 
-The [World runtime target design](../core/applets/RUNTIME.md#target-design-world-runtime-and-autonomous-services) specifies the common task/claim contract, independent resource pools, durable subscriptions and Companion command operations. It is a staged implementation target, not a claim of current host parity. World-owned Core defines scheduling policy and state transitions; the selected Harness executes admitted, leased jobs. The Platform host provides the clock, permissions and transactional storage. Do not introduce a second competing scheduler or move product policy into a Harness-specific prompt.
+The [World runtime target design](../context/applets/RUNTIME.md#target-design-world-runtime-and-autonomous-services) specifies the common task/claim contract, independent resource pools, durable subscriptions and Companion command operations. It is a staged implementation target, not a claim of current host parity. World-owned Core defines scheduling policy and state transitions; the selected Harness executes admitted, leased jobs. The Platform host provides the clock, permissions and transactional storage. Do not introduce a second competing scheduler or move product policy into a Harness-specific prompt.
 
 ### Host compatibility
 
@@ -197,7 +197,7 @@ Shared companion limits and timestamp/UUID policy live in
 | UI Applets | Catalog-driven routes and Peek/Open/Focus | Device presentation and content selection |
 | UI Attention | Item projections and explicit item actions | Render Coming Up, Do Something, Worth Knowing |
 | UI Companion | Conversation/activity events and Host requests | Dialogue, steering, progress and action presentation |
-| Core Applets | `core/applets/index.ts` | Catalog, runtime definitions, read plans, capabilities and device state |
+| Core Applets | `context/applets/index.ts` | Catalog, runtime definitions, read plans, capabilities and device state |
 | Core Scheduling | `core/tasks/index.ts` | Claims, leases, fencing, retries, pools, deliveries and operation outcomes |
 | Core Attention | `core/attention/index.ts` | Visibility, relevance inputs, suppression, synthesis budgets |
 | Core Activity | `context/activity/index.ts`, `contracts/activity.ts` | Local observation schemas, visit correlation, sampled foreground dwell, snapshot changes and redaction; no IO |

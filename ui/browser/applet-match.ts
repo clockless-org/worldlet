@@ -1,4 +1,4 @@
-import {WORLD_APPS} from '../../core/applets/index.ts';
+import {WORLD_APPS} from '../../context/applets/index.ts';
 // Match owned service hosts, never page titles, query parameters or suffix lookalikes.
 const extraHosts:Record<string,string[]>={github:['github.com'],'google-calendar':['calendar.google.com'],notion:['notion.so','notion.site','notion.com'],youtube:['youtu.be'],x:['twitter.com']};
 // A game is one page of a site it does not own (worldlet.ai, nytimes.com, poki.com), so only its own pages

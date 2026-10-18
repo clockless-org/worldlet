@@ -156,7 +156,7 @@ private fun AppletRow(model: AppModel, applet: PhoneApplet, details: () -> Unit,
 fun AppletGlyph(model: AppModel, applet: PhoneApplet, size: Dp, held: Int = 0) {
     Box(Modifier.alpha(if (applet.state == PhoneApplet.State.Off) 0.45f else 1f)) {
         AppletTile(model, applet, size)
-        // The person's own Applet carries the honey star its device has on the computer (core/applets/MY-APPLETS.md).
+        // The person's own Applet carries the honey star its device has on the computer (context/applets/MY-APPLETS.md).
         if (applet.mine != null) {
             Box(
                 Modifier.align(Alignment.BottomEnd).offset(x = 4.dp, y = 4.dp).size(15.dp)

@@ -1,4 +1,4 @@
-import {sourceReadAction} from '../applets/index.ts';
+import {sourceReadAction} from '../../context/applets/index.ts';
 import {attentionFailure} from '../attention/index.ts';
 const serviceCodes:Record<string,string>={service_paused:'worldlet_model_paused',service_credits:'worldlet_service_credits',update_required:'worldlet_update_required'};
 /** Error text is classification input only. Persist the code, never the text. */
@@ -9,7 +9,7 @@ export function runtimeFailure(input:{message?:string;cancelled?:boolean;madePro
  if(input.cancelled)return {code:'cancelled',waitReason:'retry_at',nextAt:now+5,failures:input.failures||0};
  // A newer revision of a record arrived mid-analysis: analyze that one soon; nothing failed.
  if(/Source changed during analysis/i.test(message))return {code:'source_changed',waitReason:'retry_at',nextAt:now+5,failures:input.failures||0};
- // The Agent's own model refused the turn (core/applets/analysis-state.ts): retrying soon only repeats the refusal
+ // The Agent's own model refused the turn (context/applets/analysis-state.ts): retrying soon only repeats the refusal
  // until the person picks another model, and the batch's records did nothing wrong.
  if(/agent model service is unavailable/i.test(message))return {code:'model_unavailable',waitReason:'model_budget',nextAt:now+3600,failures};
  // A persisted code is reclassified after restart, so it must map back to the same wait.

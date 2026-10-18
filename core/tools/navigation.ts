@@ -1,4 +1,4 @@
-import {WORLD_APPS} from '../applets/index.ts';
+import {WORLD_APPS} from '../../context/applets/index.ts';
 import {tool,string} from './schema.ts';
 // GPT-Live uses its own /v1/live/sessions protocol, not Realtime calls.
 export const worldTools = [

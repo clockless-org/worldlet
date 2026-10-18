@@ -54,7 +54,7 @@ export function finishServiceSyncPage(job:ServiceSyncJob,checkpoint:ServiceSyncC
  return {job:{...job,check},snapshot:{id:job.id,provider:page.provider,operation:page.operation,scope:page.scope,records:next.records,collectedAt:now,startedAt:next.startedAt,pages:next.pages,coverage:'bounded-reader'}};
 }
 
-// Sync on by default (core/applets/INTEGRATIONS.md#scheduled-service-collection): once a Service is connected, the World
+// Sync on by default (context/applets/INTEGRATIONS.md#scheduled-service-collection): once a Service is connected, the World
 // keeps one bounded read of it fresh on its own, so Agents find its context in the World without asking the Service
 // each time. The person turns it off on the Service's tile; off stays off, and a reconnect keeps their choice.
 

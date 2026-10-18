@@ -4,7 +4,7 @@ import path from 'node:path';
 import {tmpdir} from 'node:os';
 const platform=process.platform==='win32'?'windows':'macos';
 import {updateOnboarding} from '../core/onboarding/onboarding.ts';
-import {WORLD_APPS,seedAppletSelection} from '../core/applets/index.ts';
+import {WORLD_APPS,seedAppletSelection} from '../context/applets/index.ts';
 // Every app setup can offer says what it is for in one line (demo feedback 2026-10-03); a website Applet never claims account sync.
 for(const app of WORLD_APPS){
  assert.ok(typeof app.purpose==='string'&&app.purpose.trim().length>=10&&app.purpose.length<=90&&!app.purpose.includes('\n'),'one-line purpose for '+app.key);
