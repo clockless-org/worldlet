@@ -9,7 +9,7 @@
 export interface FoxTurnFailure {kind?:string|null;known?:string|null;elapsedMs:number;streamed:boolean;toolsRan:boolean;attempt:number}
 
 /** Fails at once and again: retrying cannot help, the person has to act (sign in, reinstall, choose another Agent). */
-const LASTING_KINDS=new Set(['signedOut','notInstalled','missing','permission','unsupported']);
+const LASTING_KINDS=new Set(['signedOut','notInstalled','missing','permission','unsupported','contextLength','badRequest','forbidden']);
 /** Provider answers that a second try in the same second would only repeat. `network` and `timeout` are not here: a
  * network blip passes, and a slow turn is past FAST_MS anyway. */
 const LASTING_KNOWN=new Set(['authentication','quota','model','no_local_model','update_required','paused','included_allowance','rate_limit']);

@@ -18,7 +18,8 @@ assert.equal(foxTurnRetry({...quick,kind:kind('socket hang up'),elapsedMs:FOX_RE
 assert.equal(foxTurnRetry({...quick,kind:kind('socket hang up'),streamed:true}),false,'text already shown');
 assert.equal(foxTurnRetry({...quick,kind:kind('socket hang up'),toolsRan:true}),false,'a World tool already ran');
 // What the person must fix is not retried.
-for(const message of ['Hermes Agent is not signed in','Claude Code is not installed','spawn hermes ENOENT','permission denied'])
+for(const message of ['Hermes Agent is not signed in','Claude Code is not installed','spawn hermes ENOENT','permission denied',
+ 'Error code: 400 - invalid request','Error code: 400 - This model\'s maximum context length is 128000 tokens','HTTP 403 forbidden'])
  assert.equal(foxTurnRetry({...quick,kind:kind(message)}),false,message);
 for(const known of ['authentication','quota','model','rate_limit','paused'])
  assert.equal(foxTurnRetry({...quick,known}),false,known);

@@ -100,6 +100,12 @@ const FAILURE_KINDS:[RegExp,string][]=[
  // The Agent started and said why it could not answer (its last stderr line, local-harness finishLocalHarness): the
  // words are its own and stay on the computer; the rule says only that it was the Agent's own error.
  [/could not answer: /,'agentError'],
+ // The model provider refused the request (a 4xx relayed through the Agent's stream, after the UI's own provider rules:
+ // quota, sign-in, model, rate limit). Beta 4494, 2026-10-17: one new Mac person's Fox turns failed 15 times in a row
+ // as httpClient across restarts; which refusal it was decides the fix, so the common ones get their own rule.
+ [/context(?:[_ ]length|[_ ]window)|maximum context|too many tokens|prompt is too long|\b(?:http|error code:?) 413\b/,'contextLength'],
+ [/\b(?:http|error code:?) 400\b/,'badRequest'],
+ [/\b(?:http|error code:?) 403\b/,'forbidden'],
  [/\b(?:http|error code:?) 4\d\d\b/,'httpClient'],
  [/unexpected token|in json|json at position|is not valid json/,'invalidData'],
  [/\beaddrinuse\b|\bebusy\b|already running|another worldlet window/,'busy'],
