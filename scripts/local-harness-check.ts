@@ -436,24 +436,36 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
    }finally{BUSY_RETRIES.splice(0,BUSY_RETRIES.length,...waits);}
   }
   // Codex's own default refused for a ChatGPT account (Alpha 4511, #668/#669): the same turn runs at once on the ChatGPT
-  // chat-tier model, and so do later turns; a model Worldlet named itself is not swapped for another.
+  // top-tier model, then its chat tier when that is refused too (Mac Alpha 4512/4513), and later turns name the one
+  // accepted; a model Worldlet named itself is not swapped for another.
   {
    const dir=path.join(scratch,'codex-refused');fs.mkdirSync(dir,{recursive:true});
-   const tries=path.join(dir,'tries.txt'),refused=path.join(dir,'refused.jsonl'),answer=path.join(dir,'answer.jsonl'),codexBin=path.join(dir,'codex');
-   const reason=JSON.stringify({type:'error',status:400,error:{type:'invalid_request_error',message:"The 'gpt-6.1-sol' model is not supported when using Codex with a ChatGPT account."}});
-   fs.writeFileSync(refused,[{type:'turn.started'},{type:'error',message:reason},{type:'turn.failed',error:{message:reason}}].map(line=>JSON.stringify(line)).join('\n')+'\n');
+   const tries=path.join(dir,'tries.txt'),answer=path.join(dir,'answer.jsonl');
+   const refused=(model:string)=>{
+    const file=path.join(dir,model+'.jsonl'),reason=JSON.stringify({type:'error',status:400,error:{type:'invalid_request_error',message:`The '${model}' model is not supported when using Codex with a ChatGPT account.`}});
+    fs.writeFileSync(file,[{type:'turn.started'},{type:'error',message:reason},{type:'turn.failed',error:{message:reason}}].map(line=>JSON.stringify(line)).join('\n')+'\n');
+    return file;
+   };
    fs.writeFileSync(answer,[{type:'turn.started'},{type:'item.completed',item:{id:'i1',type:'agent_message',text:'Hello from Codex'}},{type:'turn.completed',usage:{}}].map(line=>JSON.stringify(line)).join('\n')+'\n');
-   script(codexBin,`cat > /dev/null\necho "$*" >> "${tries}"\ncase " $* " in *" --model gpt-5.6-terra "*) cat "${answer}";; *) cat "${refused}"; exit 1;; esac\n`);
-   const codexInstall={id:'codex' as const,title:'Codex',command:codexBin,prefix:[],configured:true};
-   const turns=()=>fs.readFileSync(tries,'utf8').trim().split('\n');
-   await assert.rejects(new LocalHarnessRuntime(codexInstall,unix,undefined,null,null,null,()=>'gpt-6.1-sol').run({action:'chat',text:'Hi',_background:true},agentHome),/not supported when using Codex with a ChatGPT account/);
-   assert.equal(turns().length,1,'a model Worldlet named is not swapped');
-   fs.rmSync(tries);
-   assert.equal((await new LocalHarnessRuntime(codexInstall,unix).run({action:'chat',text:'Hi',_background:true},agentHome)).message,'Hello from Codex');
-   assert.deepEqual(turns().map(args=>args.includes('--model gpt-5.6-terra')),[false,true],'its own default once, then the ChatGPT chat-tier model: '+turns().join(' | '));
-   fs.rmSync(tries);
-   assert.equal((await new LocalHarnessRuntime(codexInstall,unix).run({action:'chat',text:'Hi'},agentHome,async()=>null)).message,'Hello from Codex');
-   assert.deepEqual(turns().map(args=>args.includes('--model gpt-5.6-terra')),[true],'later turns name it at once');
+   // A Codex whose account accepts only `accepted`; its own default is gpt-6.1-sol.
+   const codexAccepting=(accepted:string)=>{
+    const command=path.join(dir,'codex-'+accepted);
+    script(command,`cat > /dev/null\necho "$*" >> "${tries}"\ncase " $* " in *" --model ${accepted} "*) cat "${answer}";; *" --model gpt-6-sol "*) cat "${refused('gpt-6-sol')}"; exit 1;; *) cat "${refused('gpt-6.1-sol')}"; exit 1;; esac\n`);
+    return {id:'codex' as const,title:'Codex',command,prefix:[],configured:true};
+   };
+   const turns=()=>{const lines=fs.readFileSync(tries,'utf8').trim().split('\n');fs.rmSync(tries);return lines.map(args=>/--model (\S+)/.exec(args)?.[1]??'own');};
+   const sol=codexAccepting('gpt-6-sol');
+   await assert.rejects(new LocalHarnessRuntime(sol,unix,undefined,null,null,null,()=>'gpt-6.1-sol').run({action:'chat',text:'Hi',_background:true},agentHome),/not supported when using Codex with a ChatGPT account/);
+   assert.deepEqual(turns(),['gpt-6.1-sol'],'a model Worldlet named is not swapped');
+   assert.equal((await new LocalHarnessRuntime(sol,unix).run({action:'chat',text:'Hi',_background:true},agentHome)).message,'Hello from Codex');
+   assert.deepEqual(turns(),['own','gpt-6-sol'],'its own default once, then the ChatGPT top-tier model');
+   assert.equal((await new LocalHarnessRuntime(sol,unix).run({action:'chat',text:'Hi'},agentHome,async()=>null)).message,'Hello from Codex');
+   assert.deepEqual(turns(),['gpt-6-sol'],'later turns name it at once');
+   const terra=codexAccepting('gpt-5.6-terra');
+   assert.equal((await new LocalHarnessRuntime(terra,unix).run({action:'chat',text:'Hi'},agentHome,async()=>null)).message,'Hello from Codex');
+   assert.deepEqual(turns(),['own','gpt-6-sol','gpt-5.6-terra'],'the chat tier when the top tier is refused too');
+   assert.equal((await new LocalHarnessRuntime(terra,unix).run({action:'chat',text:'Hi',_background:true},agentHome)).message,'Hello from Codex');
+   assert.deepEqual(turns(),['gpt-5.6-terra']);
   }
   // A turn that stays silent until its deadline, nothing shown and no World tool called, runs once more on a new process
   // (Mac Alpha 4469, #623).
