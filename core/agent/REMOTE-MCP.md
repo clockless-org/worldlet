@@ -23,7 +23,7 @@ An Agent that cannot open a browser, such as a script, a daemon on another compu
 
 The token makes an Agent of its own (kind `remote`, Harness `token`), listed in Settings › Agents with the default Grants, its own audit and Revoke. It does not run out. Making a new token for the same Agent (`remoteMcp` `token` with its `id`) stops the old one, and Revoke ends it. Only its SHA-256 hash is kept, in the vault. Anyone who has the token can act as that Agent, so keep it as secret as a password.
 
-**New address** ends every connection and registration, and each client must be added again. **Turn off** stops the address answering but keeps it, so turning it on again needs no new connectors.
+**New address** ends every connection and registration, and each client must be added again. A World with [its own address](WORLD-ADDRESS.md) keeps its name, and `https://<name>.worldlet.ai/mcp` reaches the same server. **Turn off** stops the address answering but keeps it, so turning it on again needs no new connectors.
 
 ## How it works
 

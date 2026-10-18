@@ -270,6 +270,8 @@ export interface PhoneService {
  worldLink?():Promise<Row>;
  /** The full World's link for another device (`kind: 'world'`, core/phone/world-room.ts): the one there is, or a new one. */
  worldRoomLink?():Promise<Row>;
+ /** A new full World link in place of the old one, whose pages close (a browser signed out of the World's address). */
+ worldRoomRenew?():Promise<Row>;
  /** This computer's own server on 127.0.0.1 (modules/phone/local-relay.ts), started on first use on the port it used
   * last: a browser link on this computer, and the World page a host without a window serves there (platform/node). */
  localServer?():Promise<import('../modules/phone/local-relay.ts').LocalServer>;
