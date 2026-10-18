@@ -137,8 +137,8 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await bubble.getByRole('button',{name:'Back to world',exact:true}).count(),0,'setup spends a line on leaving');
  assert.doesNotMatch(await bubble.innerText(),/Connections use Hermes/,'setup explains its own plumbing');
  assert.doesNotMatch(await bubble.innerText(),/Bring .* to life/,'setup repeats the region already on screen');await checkTextActions();await page.screenshot({path:'output/fox-mac/source-actions.png'});await page.locator('#notionStage').click({position:{x:1320,y:120}});
- // Fox's model is the Agent's: the model screen is Settings › Agent, never a model guide in the bubble.
- await page.evaluate(()=>worldletShowControls('model'));await page.locator('#companionInfo [data-section=Settings] [data-setting=model][aria-current=true]').waitFor();
+ // Fox's model is the Agent's: the model screen is Settings › Agents, never a model guide in the bubble.
+ await page.evaluate(()=>worldletShowControls('model'));await page.locator('#companionInfo [data-section=Settings] [data-setting=agents][aria-current=true]').waitFor();await page.locator('#companionInfo [data-view=own-agent]').waitFor();
  assert.equal(await bubble.locator('.fox-model-catalog').count(),0,'no model guide in the bubble');assert.equal(await page.evaluate(()=>calls.some(c=>['modelCatalog','modelConfigure','modelLogin'].includes(c.action))),false);
  await page.screenshot({path:'output/fox-mac/model.png'});await page.keyboard.press('Escape');await page.locator('#companionInfo').waitFor({state:'hidden'});await page.screenshot({path:'output/fox-mac/actions.png'});
  // Background sync progress stays in Fox's pose; a job that needs the user is a line in Fox's one card.
@@ -165,7 +165,7 @@ await withBrowser(fileAccess,async browser=>{
  // Settings work like a settings window (owner feedback 2026-10-03, one list since 2026-10-10): the list on the left,
  // the chosen section's details on the right, and nothing hands off to Fox's speech bubble. No animation tools.
  assert.deepEqual(await panel.locator('.companion-settings-item strong').allTextContents(),
-  ['Fox','Agent','Connectors','Phone','General','Help']);
+  ['Connectors','Agents','Context','Fox','Phone','General','Help']);
  assert.equal(await panel.getByRole('button',{name:/Animation timing|Preview animation/}).count(),0);
  const detail=panel.locator('.companion-settings-detail');
  // The one privacy choice left is the usage counts switch in General (owner request 2026-10-10).
@@ -227,7 +227,8 @@ await withBrowser(fileAccess,async browser=>{
  await detail.getByText('For the Worldlet team',{exact:true}).click();
  await detail.getByRole('button',{name:'Open Debug',exact:true}).click();
  await page.waitForFunction(()=>calls.some(c=>c.action==='showDebug'));
- await openSettings();
+ // The last reply's problem offers Restart Fox on your own Agent's page (Settings › Agents › Your Agent).
+ await openSettings();await page.evaluate(()=>worldletShowControls('model'));await panel.locator('[data-view=own-agent]').waitFor();
  await page.getByRole('button',{name:'Restart Fox',exact:true}).click();
  await page.waitForFunction(()=>sessionStorage.getItem('fox-restarted')==='yes');
  await page.waitForFunction(()=>!document.body.textContent.includes('Could not restart.')&&!!document.querySelector('.companion-avatar')&&!document.querySelector<HTMLDialogElement>('#companionInfo')?.open);

@@ -8,7 +8,7 @@ import {createHarnessControls} from '../platform/electron/src/modules/fox/harnes
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {withTempDir} from './test-temp.ts';
 
-// Settings › Agent's controls for the Agent's own skills and scheduled tasks (owner plan 2026-10-11, PR 2;
+// Settings › Agents's controls for the Agent's own skills and scheduled tasks (owner plan 2026-10-11, PR 2;
 // core/agent/harness-controls.ts): every change is one of the Agent's own commands, checked against its source at the
 // oldest supported version, run only after the person confirmed the exact preview, and read back from the Agent's own
 // files. Fixture homes and fake `hermes` / `openclaw` commands that do what the real ones do to their files; no real

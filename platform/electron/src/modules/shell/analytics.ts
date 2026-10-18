@@ -105,7 +105,7 @@ const ALLOWED:Record<string,string[]>={
  approval_kind:['attention','agent_permission'],
  // routine_completed: whose scheduler ran it (Worldlet's own routines or the Agent's), how it ended, and whether it ran late.
  routine_source:['worldlet','agent'],routine_status:['ok','failed'],routine_late:['yes','no'],
- // agent_settings_changed: which part of Settings › Agent changed; never what it changed to.
+ // agent_settings_changed: which part of Settings › Agents changed; never what it changed to.
  agent_setting:['model','permission','account','routine','skill'],
  // owner 2026-10-11 20:21 PDT: Production metrics. phone_paired: the phone's system, from its notification platform, or
  // `web` for a web browser (core/phone/README.md#web).

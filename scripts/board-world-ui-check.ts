@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 // The Board Applet in the World (ui/applets/board/applet.md): with a board, its device carries the north-star number
 // (the first tab's first number block); the device opens straight into the panel (Peek → Focus), where Fox offers its
-// two actions; with no board the device is empty and the empty state opens Settings › Agent › Access. Faked bridge,
+// two actions; with no board the device is empty and the empty state opens Settings › Agents. Faked bridge,
 // fictional board. The panel itself: board-ui-check.ts.
 const tmp=process.env.TMPDIR||'/tmp';
 await withBrowser(fileAccess,async browser=>{
@@ -53,4 +53,4 @@ await withBrowser(fileAccess,async browser=>{
  assert.deepEqual([...new Set(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='board').map((c:any)=>c.operation)))],['read'],'only board/read');
  assert.deepEqual(errors,[]);
 });
-console.log('PASS Board in the World: the north-star number on its device, Peek → Focus into the panel with Fox\'s two actions, another tab leaves the number, no board empties it, Open Access opens Settings › Agent › Access');
+console.log('PASS Board in the World: the north-star number on its device, Peek → Focus into the panel with Fox\'s two actions, another tab leaves the number, no board empties it, Open Access opens Settings › Agents');

@@ -8,3 +8,4 @@ export * from './analysis-merge.ts';
 export * from './analysis-request.ts';
 export * from './source-snapshot.ts';
 export * from './presentation.ts';
+export * from './world-context.ts';

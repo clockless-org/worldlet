@@ -17,7 +17,7 @@ import {withTempDir} from './test-temp.ts';
 // the declared approval features, reading Hermes Agent's `command_allowlist` and OpenClaw's approvals document and
 // grants, the documents without one rule, the World's record of who said Always and where, the tracker that ties an
 // approval to its tool call, the host services against fixture `hermes` and `openclaw` commands (their own commands
-// change their files; Worldlet never writes them), the restart a revoked Hermes rule needs, Settings › Agent ›
+// change their files; Worldlet never writes them), the restart a revoked Hermes rule needs, Settings › Agents ›
 // Things it may do without asking, and the approval card's diff. scripts/harness-sessions-check.ts drives the trackers through the resident sessions.
 
 // Declarations ------------------------------------------------------------------------------------------------------
@@ -221,7 +221,7 @@ let stdin='';process.stdin.on('data',c=>stdin+=c);process.stdin.on('end',()=>{
  await assert.rejects(rules.revoke('hermes',outside.id),/your own world/);
  host.store.sampleEnabled=()=>false;
 
- // Settings › Agent › Permissions: a row per rule with its agent, when and where, and Revoke,
+ // Settings › Agents › Your Agent › Permissions: a row per rule with its agent, when and where, and Revoke,
  // which asks once more in the page before the Agent forgets it; an Agent that cannot revoke says how.
  const requests:any[]=[];
  let answer:any={harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,revoke:'restart',note:harnessApprovalFeatures('hermes').revokeNote,rules:[{id:granted.id,allows:'recursive delete',agent:'default',kind:'command',main:true,grantedAt:Date.UTC(2026,9,8,12),thread:'In the gmail Applet',inWorld:true},{id:outside.id,allows:'podman *',agent:'work',kind:'command'}]},
@@ -252,4 +252,4 @@ let stdin='';process.stdin.on('data',c=>stdin+=c);process.stdin.on('end',()=>{
 
 });
 delete (globalThis as any).document;
-console.log('PASS approval rules: declared features, Hermes Agent allowlist and OpenClaw approvals and grants read and revoked through their own commands (never written by Worldlet), the World\'s record of who said Always and where, the tracker that ties an approval to its tool call, the restart a revoked Hermes rule needs, Settings › Agent › Permissions and the approval card\'s diff');
+console.log('PASS approval rules: declared features, Hermes Agent allowlist and OpenClaw approvals and grants read and revoked through their own commands (never written by Worldlet), the World\'s record of who said Always and where, the tracker that ties an approval to its tool call, the restart a revoked Hermes rule needs, Settings › Agents › Your Agent › Permissions and the approval card\'s diff');

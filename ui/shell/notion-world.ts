@@ -1256,8 +1256,8 @@ export function mountNotionWorld(data: World, native: any) {
       if(!result?.ok)throw Error(result?.error||'Could not do that.');
       await settleAttention(page,result.status==='allowed'?'done':'dismissed',null,{advance:true,hosted:true});
       notify(result.status!=='allowed'?'Declined. Nothing was connected.'
-       :operation==='allow'&&named?`${consent.client} can now reach your World and read your ${named}. Change what it may do in Settings › Agent › Access.`
-       :`${consent.client} can now reach your World. Choose what it may do in Settings › Agent › Access.`);
+       :operation==='allow'&&named?`${consent.client} can now reach your World and read your ${named}. Change what it may do in Settings › Agents.`
+       :`${consent.client} can now reach your World. Choose what it may do in Settings › Agents.`);
      }catch(e){notify(e.message);}finally{busy=false;}
     };
     attentionPreview.setActions([{key:'allow',label:'Allow',primary:true,run:act('allow')},...named?[{key:'allow-basic',label:'Allow without them',run:act('allow-basic')}]:[],{key:'deny',label:'Deny',run:act('deny')}]);
@@ -1985,7 +1985,7 @@ export function mountNotionWorld(data: World, native: any) {
     const show=new Map<string,(r:any)=>void>([...WORK_APPLETS.map(key=>[key,showWork] as const),['voice-memos',r=>showVoiceMemos(r)],['messages',r=>showMessages(r)],['obsidian',r=>showObsidian(r)],...CURATED_READERS.map(key=>[key,r=>showCuratedSource(r)] as const),...MONEY_READERS.map(key=>[key,r=>showMoney(r)] as const)]).get(r.key);if(show&&r.fullView?.kind!=='web'){show(r);return;}
 
     const panelContext={native,content,notify,call:!data.sample&&native?.doorDash,ask:(text,options)=>voice?.ask(text,options),onChange:()=>scene?.refreshContent(),
-      // The board's panel (ui/applets/board): its empty state opens Settings › Agent › Access, a card of a Service that is
+      // The board's panel (ui/applets/board): its empty state opens Settings › Agents, a card of a Service that is
       // not connected opens that Service's connection guide, list links take the World's usual link path, and its Fox
       // actions follow what is selected.
       settings:part=>voice?.openSettings?.(part),connect:provider=>{if(native?.setup&&!data.sample)native.setup('connection','work',provider);},

@@ -15,7 +15,7 @@ export interface AgentReports {
  /** Every Agent the person has not revoked with its report, as `agents/list` answers, for the board's `agents` source
   * (core/board/README.md#the-agents-source): null outside the person's own World. */
  list():AgentListEntry[]|null;
- /** One Agent's report and how it reads now, for Settings › Agent: none outside the person's own World. */
+ /** One Agent's report and how it reads now, for Settings › Agents: none outside the person's own World. */
  state(agentId:string):{liveness:AgentLiveness;report?:AgentReport};
 }
 const NOT_READY='Worldlet is not ready for this yet: the person has not finished setting up their own World.';

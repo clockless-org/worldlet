@@ -70,7 +70,7 @@ await withTempDir('worldlet-agent-reports-',async dir=>{
   assert.deepEqual((await coordinator('list',{liveness:'offline'})).agents.map((entry:any)=>entry.id),['dev-windows','release-mac','coordinator']);
   assert.equal((await release('report',{status:'idle'})).ok,true);
   assert.deepEqual((await coordinator('list',{liveness:'live'})).agents.map((entry:any)=>entry.id),['release-mac']);
-  // Settings › Agent reads each Agent's state the same way.
+  // Settings › Agents reads each Agent's state the same way.
   assert.equal(reports.state('release-mac').liveness,'live');assert.equal(reports.state('release-mac').report?.status,'idle');
   assert.deepEqual(reports.state('coordinator'),{liveness:'offline'});
 

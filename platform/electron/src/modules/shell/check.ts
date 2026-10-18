@@ -265,7 +265,7 @@ try{
   assert.equal(added.fox_proactive_asked.proactive_status,'spoke');assert.equal(added.page_load_timing.duration_bucket,'15_60s');
   assert.equal(added.page_load_timing.page_engine,'cef');assert.equal(added.update_applied.update_wait,'1_7d');assert.equal(added.update_failed.update_stage,'prepare');assert.equal(added.update_failed.update_error,'signature');
   assert.ok(!JSON.stringify(added).includes('private'),'no line, URL or error text');
-  // Focus-feature events (Attention, Journal, Routines, Phone, Settings › Agent): kinds and counts only;
+  // Focus-feature events (Attention, Journal, Routines, Phone, Settings › Agents): kinds and counts only;
   // attention_shown once a day, and nothing at all with sharing off.
   const before=events.length;
   analytics.recordProductEvent('attention_shown','',{attention_count:'3',title:'private title'});analytics.recordProductEvent('attention_shown','',{attention_count:'4'});

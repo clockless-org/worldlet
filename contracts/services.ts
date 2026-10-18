@@ -34,7 +34,7 @@ export const SERVICE_PROVIDERS:readonly string[]=Object.freeze(Object.keys(SERVI
  * Grant names both; each result is limited to the Services the calling Agent may read. */
 export const SERVICE_CONTEXT_TARGET='context';
 export const SERVICE_CONTEXT_ACTIONS=Object.freeze({search:'context/search',read:'context/read'} as const);
-/** Each Service's name as the person knows it (Settings › Agent › Access: "Can read GitHub"). */
+/** Each Service's name as the person knows it (Settings › Agents: "Can read GitHub"). */
 export const SERVICE_TITLES:Readonly<Record<string,string>>=Object.freeze({github:'GitHub',posthog:'PostHog',cloudflare:'Cloudflare',http:'HTTP JSON','search-console':'Search Console',linear:'Linear',todoist:'Todoist',supabase:'Supabase'});
 
 /** One read: an operation of the Service's (SERVICE_ACTIONS), with the `id` or `query` it takes. `cursor` continues a

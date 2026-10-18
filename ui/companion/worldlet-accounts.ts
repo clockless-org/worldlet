@@ -8,7 +8,7 @@ import {agentEl as el} from './agent-change.ts';
 // Disconnect exists for these (Calendar here is the one read from this computer).
 const DISCONNECTABLE=['apple-notes','apple-reminders','google-calendar'];
 
-/** Settings › Agent › Connections (it was a section of its own, Accounts, until the Agent page took it in): what Worldlet
+/** Settings › Agents › Your Agent › Connections (it was a section of its own, Accounts, until the Agent page took it in): what Worldlet
  * reads that is not a service of Settings › Connectors (this computer's own apps), then the tools and chat accounts in
  * the person's Agent (agent-connections.ts). The services themselves, and their keys under Advanced, are in
  * Settings › Connectors (connectors-page.ts). */

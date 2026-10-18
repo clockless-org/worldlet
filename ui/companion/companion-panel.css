@@ -132,6 +132,11 @@
 .companion-settings-item:hover{background:#e6dbc438}
 .companion-settings-item[aria-current]{background:#efc77f60}
 .companion-settings-item:focus-visible{outline:2px solid #a38048;outline-offset:-2px}
+/* The three areas come first; Fox, Phone, General and Help sit under a line, smaller (issue #674). */
+.companion-settings-minor{margin:8px 12px 6px;border-top:1px solid #d9cbae80}
+.companion-info-panel .companion-settings-item.is-minor{padding:4px 12px}
+.companion-settings-item.is-minor strong{font-size:12px;font-weight:600;color:#56604f}
+.companion-settings-item.is-minor span{display:none}
 .companion-settings-side{display:flex;flex-direction:column;min-height:0}
 .companion-info-panel .companion-settings-version{margin:0;flex:none;border-right:1px solid #d9cbae80;padding:10px 12px 2px;font-size:11px;color:#77745e;user-select:text;font-variant-numeric:tabular-nums}
 .companion-settings-version:empty{display:none}
@@ -198,7 +203,7 @@
 .companion-settings-agent-routines code{font-size:12px;overflow-wrap:anywhere}
 .companion-settings-row>.companion-settings-actions{flex:0 0 auto;flex-direction:row;align-items:center;justify-content:flex-end}
 .companion-settings-row>.companion-settings-confirm{flex:1 1 100%;flex-direction:row}
-/* Settings › Agent › Routines: Change time and New routine open a small form in place. */
+/* Settings › Agents › Your Agent › Routines: Change time and New routine open a small form in place. */
 .companion-settings-form{display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:1 1 100%;margin-top:6px}
 .companion-settings-form>textarea.companion-settings-input{flex:1 1 100%;resize:vertical;font:inherit}
 .companion-settings-form>input.companion-settings-input{flex:1 1 100%}
@@ -300,6 +305,21 @@
 .companion-settings-elsewhere[open]>summary{margin-bottom:8px}
 .companion-settings-elsewhere>.companion-settings-row+.companion-settings-row{margin-top:8px}
 .companion-settings-use-in-claude{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+/* Agents: your own Agent first, what each may do in one line, its switches folded; your Agent's page has a way back. */
+.companion-settings-row.is-own{border-color:#c9a86a;background:#efc77f30}
+.companion-settings-row .companion-settings-access-may{margin-top:2px;color:#354132}
+.companion-settings-access-more{margin-top:6px}
+.companion-settings-access-more>summary{cursor:pointer;font-size:12px;font-weight:600;color:#56604f}
+.companion-settings-access-more[open]{display:flex;flex-direction:column;gap:2px}
+.companion-settings-own-head{display:flex;align-items:center;gap:12px;align-self:stretch}
+.companion-settings-own-title{margin:0;font-size:15px;color:#354132}
+.companion-settings-remote-access{border-top:1px solid #d9cbae80;padding-top:6px}
+/* Context: each kind with how much it holds. */
+.companion-settings-context{display:flex;flex-direction:column;gap:10px;align-self:stretch}
+.companion-settings-context .companion-settings-row{flex-wrap:wrap}
+.companion-settings-row .companion-settings-context-amount{font-weight:600;color:#354132}
+.companion-settings-context-services{margin:6px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+.companion-settings-context-services>li{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px}
 .companion-settings-use-in-claude .companion-info-note{margin:0}
 .companion-settings-steps{margin:0;padding-left:20px;font-size:13px;line-height:1.45}
 .companion-settings-steps>li+li{margin-top:4px}

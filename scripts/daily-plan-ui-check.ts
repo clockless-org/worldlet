@@ -178,7 +178,7 @@ await withBrowser(fileAccess,async browser=>{
   await page.waitForTimeout(33000);
   assert.equal(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='agentChat').length),0,'no brief in the afternoon');
   assert.deepEqual(await plannedTitles(page),['Wrap up today','Today’s prep'],'a day used: tonight’s wrap-up at 6, then tomorrow’s prep, are planned');
-  // Paused in Settings › Agent › Routines (the host says so with worldlet:daily-routines): it is no longer planned, and
+  // Paused in Settings › Agents › Your Agent › Routines (the host says so with worldlet:daily-routines): it is no longer planned, and
   // its card stays last, saying Paused, so it can be resumed there (owner request 2026-10-12).
   await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:daily-routines',{detail:{plan:false,summary:true}})));
   await page.waitForFunction(()=>[...document.querySelectorAll('.task-panel .task-group[data-group=routines] .task-when')].some(e=>e.textContent==='Paused'));

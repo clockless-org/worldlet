@@ -2,11 +2,11 @@
 
 Agents in the cloud can use a person's World the same way local Agents do: a ChatGPT, Claude or Cursor connector, or an Agent session running on another machine. They reach the `worldlet` MCP server on the person's own computer through an HTTPS front at `https://mcp.worldlet.ai/<room>`. The person allows each connection on a card in Attention, and from then on it is an Agent of its own, with its own Grants and audit ([GRANTS.md](GRANTS.md)).
 
-Remote access is on by default (owner decision 2026-10-17): the installed app's first run makes the address and keeps the room open, so the person only copies the address. Nothing gets in until the person allows a connection on a card or makes a token. **Turn off** in Settings › Agent › Access, or `worldlet remote off` on the [Node host](../../platform/node/README.md#the-worldlet-command), closes the room and stays off after restarts. Development builds, release checks and libraries other than the installed app's own stay off until turned on. Remote access works while the computer is on and Worldlet is running.
+Remote access is on by default (owner decision 2026-10-17): the installed app's first run makes the address and keeps the room open, so the person only copies the address. Nothing gets in until the person allows a connection on a card or makes a token. **Turn off** in Settings › Agents, or `worldlet remote off` on the [Node host](../../platform/node/README.md#the-worldlet-command), closes the room and stays off after restarts. Development builds, release checks and libraries other than the installed app's own stay off until turned on. Remote access works while the computer is on and Worldlet is running.
 
 ## Connect a connector
 
-1. In Worldlet, open Settings › Connectors and choose **Copy address** under **Use your World in Claude or ChatGPT** (**Turn on** first if it was turned off). The same address and Copy address are under Remote access in Settings › Agent › Access.
+1. In Worldlet, open Settings › Agents and choose **Copy address** under **Use your World in Claude or ChatGPT**, below the list of Agents (**Turn on** first if it was turned off). The same address and Copy address are under **Remote access**, folded below it.
 2. Add the address as a remote MCP server in the client:
    - **Claude** (claude.ai, the desktop app, and cloud sessions that use the account's connectors): Settings › Connectors › Add custom connector. Paste the address and leave the OAuth fields empty.
    - **ChatGPT**: Settings › Connectors (Apps) › Create, with developer mode on where the plan asks for it. Paste the address as the MCP server URL and choose OAuth.
@@ -15,13 +15,13 @@ Remote access is on by default (owner decision 2026-10-17): the installed app's 
 3. The client opens a page that shows a four-digit code and waits. In Worldlet, a card in Attention names the client, where it returns and the same code. Choose **Allow** only if the code matches. With Services connected, the card says so in plain words: **Allow** also lets it read them ("Allow also lets it read your GitHub and PostHog"), and **Allow without them** keeps them private.
 4. The client returns signed in. Its tools are `describe_world_tools` and `call_world_tool`, the same two a local Agent gets.
 
-What the new Agent may do starts with the default Grants: reads, drafts for your review and the browser link. **Allow** adds **Can read <Service>** for each Service connected when it signs in (the host's `services`, given when its code is redeemed), which also lets it search the World's saved context of those Services; **Allow without them** does not. Give it more under its name in Settings › Agent › Access, for example **Can read GitHub**, **Can ask you** or **Can see your board**. **Revoke** ends its connection at once, its refresh token included.
+What the new Agent may do starts with the default Grants: reads, drafts for your review and the browser link. **Allow** adds **Can read <Service>** for each Service connected when it signs in (the host's `services`, given when its code is redeemed), which also lets it search the World's saved context of those Services; **Allow without them** does not. Give it more under its name in Settings › Agents, for example **Can read GitHub**, **Can ask you** or **Can see your board**. **Revoke** ends its connection at once, its refresh token included.
 
 ## A token for a script or another computer
 
 An Agent that cannot open a browser, such as a script, a daemon on another computer or a scheduled job, uses a token instead. Under Remote access, open **For a script or another computer**, type the Agent's name and choose **New token**, or run `worldlet remote token "<name>"` on the Node host. The token is shown once. The Agent sends it as `Authorization: Bearer <token>` with MCP requests to the same address.
 
-The token makes an Agent of its own (kind `remote`, Harness `token`), listed in Settings › Agent › Access with the default Grants, its own audit and Revoke. It does not run out. Making a new token for the same Agent (`remoteMcp` `token` with its `id`) stops the old one, and Revoke ends it. Only its SHA-256 hash is kept, in the vault. Anyone who has the token can act as that Agent, so keep it as secret as a password.
+The token makes an Agent of its own (kind `remote`, Harness `token`), listed in Settings › Agents with the default Grants, its own audit and Revoke. It does not run out. Making a new token for the same Agent (`remoteMcp` `token` with its `id`) stops the old one, and Revoke ends it. Only its SHA-256 hash is kept, in the vault. Anyone who has the token can act as that Agent, so keep it as secret as a password.
 
 **New address** ends every connection and registration, and each client must be added again. **Turn off** stops the address answering but keeps it, so turning it on again needs no new connectors.
 

@@ -41,11 +41,11 @@ await withBrowser(fileAccess,async browser=>{
   const p=await page.locator('.companion-side .companion-phone-button').boundingBox();
   assert(p&&p.x+p.width<=f.x+f.width/2&&p.y>s.y+s.height-1&&Math.abs((p.x+p.width)-(s.x+s.width))<2,'Phone sits under Agent on Fox\'s left: '+JSON.stringify({p,s}));
   assert.equal((await page.locator('.companion-side .companion-phone-button').textContent()).trim(),'Phone');}
- // Settings opens Settings directly, on Agent, with no menu between (owner Order 2026-10-07). The
+ // Settings opens Settings directly, on Agents, with no menu between (owner Order 2026-10-07). The
  // tutorial's switch lives in the World's top-right corner instead.
  await page.locator(SETTINGS_BUTTON).click();await panel.waitFor();
  assert.equal(await page.getByRole('menuitem').count(),0,'no menu between Agent and Settings');
- assert.equal(await panel.locator('.companion-settings-list [data-setting=model]').getAttribute('aria-current'),'true','Settings lands on Agent');
+ assert.equal(await panel.locator('.companion-settings-list [data-setting=agents]').getAttribute('aria-current'),'true','Settings lands on Agents');
  assert.equal(await page.locator(SETTINGS_BUTTON).getAttribute('aria-haspopup'),null,'Agent opens no menu');
  // Phone opens Settings › Phone, where the phone is paired.
  await page.getByRole('button',{name:'Close companion panel'}).click();await panel.waitFor({state:'hidden'});
@@ -71,7 +71,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.deepEqual(await panel.locator('.companion-settings-subhead').evaluateAll(list=>list.slice(0,3).map(h=>h.textContent)),['Feedback','Tutorial','Restart Fox']);
  assert.equal(await panel.getByRole('button',{name:'Send feedback',exact:true}).count(),1);assert.equal(await panel.getByRole('button',{name:'Show the tutorial',exact:true}).count(),1);
  await page.screenshot({path:'/tmp/companion-settings.png'});
- await page.getByRole('button',{name:'Close companion panel'}).click();await page.locator(SETTINGS_BUTTON).click();await panel.locator('.companion-settings-list [data-setting=model][aria-current=true]').waitFor();await panel.getByRole('button',{name:'Send feedback',exact:true}).waitFor({state:'detached'});
+ await page.getByRole('button',{name:'Close companion panel'}).click();await page.locator(SETTINGS_BUTTON).click();await panel.locator('.companion-settings-list [data-setting=agents][aria-current=true]').waitFor();await panel.getByRole('button',{name:'Send feedback',exact:true}).waitFor({state:'detached'});
  await page.getByRole('button',{name:'Close companion panel'}).click();
  await type.click();assert(await typing());await page.locator('#notionInput').fill('Keep this draft');await page.keyboard.press('Escape');assert(!await typing());await type.click();assert.equal(await page.locator('#notionInput').inputValue(),'Keep this draft');
  // A long draft grows the field upward (six lines at most), Shift-Enter starts a line, and a stray click outside keeps the draft open.
@@ -112,5 +112,5 @@ await withBrowser(fileAccess,async browser=>{
  await page.screenshot({path:'/tmp/companion-bar.png'});
  await page.setViewportSize({width:390,height:844});await page.waitForTimeout(150);
  await type.click();const f=await form.boundingBox();assert(f.x>=0&&f.x+f.width<=390);await page.screenshot({path:'/tmp/companion-entry-narrow.png'});
- assert.deepEqual(errors,[]);console.log('PASS Companion: one message bar (click to type, hold to speak, Send) with the mic on its right, clicking Fox types, the top-right Journal corner opens the Journal, Fox’s side buttons Agent and Phone open Settings at Agent and at Phone (all hidden inside an Applet), hold-to-speak on Fox and the mic, retained draft, no bubble over Fox’s head, drag/reload/Applet persistence and narrow bounds. Mock speech only.');
+ assert.deepEqual(errors,[]);console.log('PASS Companion: one message bar (click to type, hold to speak, Send) with the mic on its right, clicking Fox types, the top-right Journal corner opens the Journal, Fox’s side buttons Agent and Phone open Settings at Agents and at Phone (all hidden inside an Applet), hold-to-speak on Fox and the mic, retained draft, no bubble over Fox’s head, drag/reload/Applet persistence and narrow bounds. Mock speech only.');
 });

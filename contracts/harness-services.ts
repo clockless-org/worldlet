@@ -64,7 +64,7 @@ export interface HarnessSchedule {
  /** Runs that start command as the Agent's own (only on the person's own Start in Settings), then reads `running`
   * again; rejects with the Agent's reason. */
  startScheduler?():Promise<void>;
- /** The newest finished run of each job, for Settings › Agent; absent: the World pages through `runs`. */
+ /** The newest finished run of each job, for Settings › Agents; absent: the World pages through `runs`. */
  latest?():Promise<HarnessJobRun[]>;
  /** The Agent's own command a change to one job runs, as the person sees it before confirming; absent with `change`:
   * its jobs are read-only here. */
@@ -84,7 +84,7 @@ export type HarnessJobAction='pause'|'resume'|'run'|'remove'|'reschedule'|'edit'
 export type RoutineSchedule={daily:{hour:number;minute:number}}|{everyHours:number};
 /** `edit` carries at least one of a new name, a new prompt and a new time; what it leaves out stays as it is. */
 export type HarnessJobChange={job:string;action:HarnessJobAction;schedule?:RoutineSchedule;name?:string;prompt?:string};
-/** A new job made in Settings › Agent › Routines: what to do, in the person's words, and when. */
+/** A new job made in Settings › Agents › Your Agent › Routines: what to do, in the person's words, and when. */
 export type HarnessJobCreate={name:string;prompt:string;schedule:RoutineSchedule};
 
 /** approvals: the Harness's own permission prompts (dangerous commands, tool policy), answered in the World. `rule` is

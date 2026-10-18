@@ -1,4 +1,4 @@
-/** Settings › Agent › Routines: the jobs each Agent on this computer runs on its own scheduler (host
+/** Settings › Agents › Your Agent › Routines: the jobs each Agent on this computer runs on its own scheduler (host
  * `harnessSchedule`, contracts/harness-services.ts HarnessSchedule): each with its plain time, where its results go,
  * its newest result and a Paused mark, and whether that scheduler runs now (and Start it, the Agent's own command). Pause or Resume, Run
  * now, Remove and Change time each run as the Agent's own command after the person confirmed it in plain words

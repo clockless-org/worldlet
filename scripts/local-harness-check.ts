@@ -194,7 +194,7 @@ assert.match(String((read('codex',[],1).outcome as {error:string}).error),/stopp
 }
 // Codex's sign-in and usage limit are told apart from its other failures.
 assert.equal(codexProblem('stream error: unexpected status 401 Unauthorized'),'Codex is not signed in. Open Terminal, run codex login, then try again.');
-assert.deepEqual(read('codex',[{type:'turn.failed',error:{message:'You\'ve hit your usage limit. Try again in 2 hours.'}}],1).outcome,{error:'Codex has reached its usage limit. Try again later, or switch its model in Settings › Agent.'});
+assert.deepEqual(read('codex',[{type:'turn.failed',error:{message:'You\'ve hit your usage limit. Try again in 2 hours.'}}],1).outcome,{error:'Codex has reached its usage limit. Try again later, or switch its model in Settings › Agents.'});
 assert.deepEqual(read('codex',[],1,'Error: Not logged in. Run codex login.').outcome,{error:codexProblem('not logged in')});
 assert.equal(codexProblem('stream disconnected before completion'),null);
 // A required World tool server that never started: Codex's own reason, not the last line of its stack trace.
@@ -205,7 +205,7 @@ assert.equal(codexWorldToolsFailed('Error: Not logged in. Run codex login.'),nul
 // A model busy for everyone is told apart from the person's own limits: the turn is worth another try (#416).
 assert.equal(modelAtCapacity('Selected model is at capacity. Please try a different model.'),true);
 assert.equal(modelAtCapacity('Claude Code could not answer: API Error: 529 {"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}'),true);
-assert.equal(modelAtCapacity('Codex has reached its usage limit. Try again later, or switch its model in Settings › Agent.'),false);
+assert.equal(modelAtCapacity('Codex has reached its usage limit. Try again later, or switch its model in Settings › Agents.'),false);
 assert.equal(modelAtCapacity('Codex is not signed in. Open Terminal, run codex login, then try again.'),false);
 
 // Host detection ----------------------------------------------------------------------------------
@@ -510,7 +510,7 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
    forgetNotStarting(found[0].command);
    script(path.join(bin,'claude'),runs+`cat > "$PWD/stdin.txt"\ncat "${fixture}"\n`);
    assert.equal((await new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi'},agentHome,async()=>null)).message,'Hello from Claude Code','chosen again, it is tried again');
-   assert.match(new AgentNotStarting({id:'hermes',title:'Hermes Agent'}).message,/Settings › Agent and choose Install again/);
+   assert.match(new AgentNotStarting({id:'hermes',title:'Hermes Agent'}).message,/Settings › Agents and choose Install again/);
   }
 
   // Hermes Agent over ACP, end to end: the session gets Worldlet's MCP server, the fixture Agent starts it and calls a
