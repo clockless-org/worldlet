@@ -26,6 +26,7 @@ export {LINEAR_ENDPOINT,LINEAR_TOOLS,LINEAR_GATE,linearIssueId,linearListArgumen
 export {PAYPAL_ENDPOINTS,PAYPAL_GATE,paypalPayload,readPaypal} from './mcp/paypal.ts';
 export {GITHUB_ENDPOINT,GITHUB_ENDPOINTS,GITHUB_TOOLS,GITHUB_GATE,GITHUB_LIMITS,githubRecordId,githubRepository,readGithub} from './mcp/github.ts';
 export {SUPABASE_ENDPOINT,SUPABASE_TOOLS,SUPABASE_GATE,supabaseProjectId,readSupabase} from './mcp/supabase.ts';
+export {MCP_SERVICE_RECORD_KINDS,MCP_SERVICE_RECORD_LIMITS,mcpServiceRecords} from './mcp/service-records.ts';
 // Worldlet Services read over their own API with a pasted key (PostHog, Cloudflare, Search Console): the Platform gates each request, Core reads.
 export {privateAddress,type ServiceGate,type ServiceHttp} from './services/http.ts';
 export {POSTHOG_GATE,POSTHOG_HOSTS,POSTHOG_SIGN_IN,POSTHOG_SIGN_IN_HOSTS,posthogProjects,type PosthogProject,POSTHOG_LIMITS,POSTHOG_LISTS,checkPosthog,hogqlSelect,posthogHost,posthogProject,posthogSettings,readPosthog,type PosthogSettings} from './services/posthog.ts';
@@ -37,6 +38,6 @@ export {DOORDASH_CLI_VERSION,DOORDASH_MUTATIONS,doordashArgs,cleanDoordash,valid
 // Service presets: named, saved reads of a Worldlet Service (a HogQL query, a GitHub search) that a board block names.
 export {PRESET_REASONS,SERVICE_PRESET_ID,readServicePresetRead,readServicePresetSave,readStoredServicePreset,removeServicePreset,saveServicePreset,servicePresetRead} from './services/presets.ts';
 
-export {SERVICE_SYNC_LIMITS,serviceSyncReadKey,configureServiceSync,serviceSyncStart,serviceSyncFailure,serviceSyncPage,finishServiceSyncPage} from './services/sync.ts';
+export {SERVICE_SYNC_LIMITS,SERVICE_SYNC_DEFAULTS,SERVICE_SYNC_DEFAULT_MINUTES,serviceSyncDefaultId,serviceSyncDefaultPreset,serviceSyncDefaultStep,serviceSyncLine,serviceSyncReadKey,configureServiceSync,serviceSyncStart,serviceSyncFailure,serviceSyncPage,finishServiceSyncPage} from './services/sync.ts';
 
 export {OAUTH_CALLBACK_SCRIPT,oauthCallbackPage,type OAuthCallbackStatus} from './oauth-callback.ts';

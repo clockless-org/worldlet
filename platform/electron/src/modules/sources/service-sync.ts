@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import {configureServiceSync,finishServiceSyncPage,readStoredServicePreset,readNotionContext,servicePresetRead,serviceSyncFailure,serviceSyncPage,serviceSyncReadKey,serviceSyncStart,SERVICE_SYNC_LIMITS} from '../../../../../core/accounts/index.ts';
+import {SERVICE_SYNC_DEFAULTS,SERVICE_SYNC_DEFAULT_MINUTES,serviceSyncDefaultId,serviceSyncDefaultPreset,serviceSyncDefaultStep,configureServiceSync,finishServiceSyncPage,readStoredServicePreset,readNotionContext,servicePresetRead,serviceSyncFailure,serviceSyncPage,serviceSyncReadKey,serviceSyncStart,SERVICE_SYNC_LIMITS} from '../../../../../core/accounts/index.ts';
 import {dueSourceCheck,nextSourceWake} from '../../../../../core/tasks/index.ts';
 import type {ServicePreset} from '../../../../../contracts/service-presets.ts';
 import type {ServiceRead} from '../../../../../contracts/services.ts';
@@ -8,7 +8,8 @@ import type {WorldLedger} from '../../store/ledger.ts';
 import type {Row} from '../../host/types.ts';
 
 // Timer/IO adapter only: shared Core owns scheduling, retries, page validation and checkpoint transitions.
-// Uses the existing World ledger and source-io claims. Nothing is scheduled by default.
+// Uses the existing World ledger and source-io claims. A connected Service's default read (core SERVICE_SYNC_DEFAULTS)
+// is scheduled on its own (`ensureDefaults`); the person turns it off on the Service's tile, and off stays off.
 export {SERVICE_SYNC_BUCKETS};
 const [JOBS,PAGES,SNAPSHOTS]=SERVICE_SYNC_BUCKETS;
 const owner=(id:string)=>'service-sync:'+id;
@@ -32,6 +33,7 @@ export function createServiceSync({ledger,authorize,read,changed=()=>{},now=()=>
  function handle(request:Row):Row {
   const store=db(),operation=request.operation;
   if(operation==='list')return {jobs:jobs(store).map(job=>({id:job.id,provider:job.provider,revision:job.revision,check:job.check,available:current(store,job),
+   ...job.id===serviceSyncDefaultId(job.provider)?{default:true}:{},
    snapshotAt:store.value(SNAPSHOTS,job.id)?.collectedAt??null,pendingPages:store.value(PAGES,job.id)?.pages??0}))};
   if(typeof request.id!=='string')throw Error('Choose a saved Service preset.');
   const previous=store.value(JOBS,request.id) as ServiceSyncJob|undefined;
@@ -113,7 +115,32 @@ export function createServiceSync({ledger,authorize,read,changed=()=>{},now=()=>
    if(active.get(job.id)===controller)active.delete(job.id);
   }
  }
+ /** Each connected Service's default sync: saved and turned on the first time, bound again to a new connection while it
+  * is on, left alone once the person turned it off. Answers whether anything changed. */
+ function ensureDefaults():boolean {
+  let store:WorldLedger|null=null;
+  try{store=ledger();}catch{}
+  if(!store||stopped)return false;
+  let changedAny=false;
+  for(const provider of Object.keys(SERVICE_SYNC_DEFAULTS)){
+   try{
+    const id=serviceSyncDefaultId(provider),saved=preset(store,id);
+    // A preset of the person's own under this name is theirs: not replaced.
+    if(saved&&saved.provider!==provider)continue;
+    const wanted=saved??serviceSyncDefaultPreset(provider,new Date(now()*1000).toISOString());
+    const permission=wanted&&authorize(wanted);
+    if(!wanted||!permission)continue;
+    const job=store.value(JOBS,id) as ServiceSyncJob|null;
+    if(serviceSyncDefaultStep(job,permission.binding)==='none')continue;
+    if(!saved)store.saveServicePreset(wanted as unknown as Row);
+    handle({operation:'configure',id,enabled:true,intervalMinutes:job?.check?.intervalMinutes??SERVICE_SYNC_DEFAULT_MINUTES});
+    changedAny=true;
+   }catch{/* One Service's default never stops another's. */}
+  }
+  return changedAny;
+ }
  async function wake(){
+  ensureDefaults();
   try{await tick();}catch{/* Next wake retries storage access; no provider text enters logs. */}
   if(stopped)return;
   let seconds=60;try{const store=ledger();if(store)seconds=nextSourceWake(jobs(store).map(job=>job.check),now());}catch{}
@@ -127,5 +154,10 @@ export function createServiceSync({ledger,authorize,read,changed=()=>{},now=()=>
   });
   return readNotionContext(snapshots,request);
  }
- return {handle,tick,notionContext,start(){if(timer)return;stopped=false;timer=setTimeout(()=>void wake(),0);timer.unref?.();},stop(){stopped=true;clearTimeout(timer);timer=undefined;for(const controller of active.values())controller.abort();}};
+ /** After a Service connects: its default sync now, and a run right away instead of at the next wake. */
+ function connected(){
+  if(!ensureDefaults()||stopped||!timer)return;
+  clearTimeout(timer);timer=setTimeout(()=>void wake(),0);timer.unref?.();
+ }
+ return {handle,tick,notionContext,ensureDefaults,connected,start(){if(timer)return;stopped=false;timer=setTimeout(()=>void wake(),0);timer.unref?.();},stop(){stopped=true;clearTimeout(timer);timer=undefined;for(const controller of active.values())controller.abort();}};
 }

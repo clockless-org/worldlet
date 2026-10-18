@@ -53,3 +53,50 @@ export function finishServiceSyncPage(job:ServiceSyncJob,checkpoint:ServiceSyncC
  const check=finishSourceCheck(job.check,job.check,'complete',now);check.nextAt=now+Number(check.intervalMinutes)*60;
  return {job:{...job,check},snapshot:{id:job.id,provider:page.provider,operation:page.operation,scope:page.scope,records:next.records,collectedAt:now,startedAt:next.startedAt,pages:next.pages,coverage:'bounded-reader'}};
 }
+
+// Sync on by default (core/applets/INTEGRATIONS.md#scheduled-service-collection): once a Service is connected, the World
+// keeps one bounded read of it fresh on its own, so Agents find its context in the World without asking the Service
+// each time. The person turns it off on the Service's tile; off stays off, and a reconnect keeps their choice.
+
+/** How often a default sync runs, in minutes. */
+export const SERVICE_SYNC_DEFAULT_MINUTES=60;
+/** The read each Service keeps fresh by default: what is waiting for the person on GitHub, PostHog's loudest errors,
+ * Cloudflare's Workers, the sites Search Console can see. Notion has none: its pages are chosen one by one. */
+export const SERVICE_SYNC_DEFAULTS:Readonly<Record<string,{name:string;read:{operation:ServiceRead['operation'];id?:string}}>>=Object.freeze({
+ github:{name:'GitHub: waiting for you',read:{operation:'list'}},
+ posthog:{name:'PostHog: errors',read:{operation:'read',id:'errors'}},
+ cloudflare:{name:'Cloudflare: Workers',read:{operation:'read',id:'workers'}},
+ 'search-console':{name:'Search Console: sites',read:{operation:'list'}},
+});
+/** The default sync's preset ID for a Service (`github-updates`). */
+export const serviceSyncDefaultId=(provider:string)=>`${provider}-updates`;
+/** The preset a default sync reads, as saved. */
+export function serviceSyncDefaultPreset(provider:string,at:string):ServicePreset|null {
+ const read=SERVICE_SYNC_DEFAULTS[provider];
+ return read?{id:serviceSyncDefaultId(provider),name:read.name,provider,read:{...read.read},note:'Kept up to date while the Service is connected.',createdAt:at,updatedAt:at}:null;
+}
+/** What to do about a connected Service's default sync: start it (never set up), bind it again (on, but made with an
+ * earlier connection), or nothing (on and current, or the person turned it off). */
+export function serviceSyncDefaultStep(job:ServiceSyncJob|null|undefined,binding:string):'start'|'rebind'|'none' {
+ if(!job)return 'start';
+ if(job.check?.enabled!==true)return 'none';
+ return job.binding===binding?'none':'rebind';
+}
+/** The tile's line about it, in plain words: "Updated 5 minutes ago", "Updating…", "Not updated yet", "Could not update
+ * just now. It tries again soon.", or "Not kept up to date" when off. `now` in seconds. */
+export function serviceSyncLine(job:{check:Record<string,any>;snapshotAt?:number|null}|null|undefined,now:number):string {
+ if(!job||job.check?.enabled!==true)return 'Not kept up to date.';
+ if(job.check.lastStatus==='running'||job.check.lastStatus==='partial')return 'Updating…';
+ const at=typeof job.snapshotAt==='number'?job.snapshotAt:null;
+ if(job.check.lastStatus==='error')return at?`Could not update just now; last updated ${ago(now-at)}. It tries again soon.`:'Could not update just now. It tries again soon.';
+ return at?`Updated ${ago(now-at)}.`:'Not updated yet.';
+}
+function ago(seconds:number):string {
+ const minutes=Math.max(0,Math.floor(seconds/60));
+ if(minutes<1)return 'just now';
+ if(minutes<60)return `${minutes} minute${minutes===1?'':'s'} ago`;
+ const hours=Math.floor(minutes/60);
+ if(hours<24)return `${hours} hour${hours===1?'':'s'} ago`;
+ const days=Math.floor(hours/24);
+ return `${days} day${days===1?'':'s'} ago`;
+}

@@ -47,10 +47,13 @@ recorded visits so the person can keep talking meanwhile, owner Order 2026-10-10
 
 ## Models and configuration
 
-Official builds prepare included Hermes model access. Optional provider selection,
-API keys and supported account login reuse Hermes's provider catalog and auth flows;
-Worldlet does not invent another provider registry. A saved key is not a successful
-first reply. Provider errors need bounded retry and a clear reconfiguration path.
+Worldlet has no model of its own: Fox talks through the person's Agent (Hermes Agent,
+OpenClaw, Claude Code, Codex or pi) and the model that Agent is set up with. For someone
+with no Agent, setup installs the standard Hermes Agent the official way, and the person
+signs in to ChatGPT in it or chooses another model with `hermes model`. Provider selection,
+API keys and account login stay the Agent's own; Worldlet does not invent another provider
+registry. A saved key is not a successful first reply. Provider errors need bounded retry
+and a clear reconfiguration path.
 
 No Apple/local-model fallback is offered. Private processing consent remains distinct
 from account connection and model access. Credentials never enter ordinary chat,

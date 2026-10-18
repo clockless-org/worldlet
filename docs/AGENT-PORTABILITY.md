@@ -1,8 +1,10 @@
 # Harness independence and data ownership
 
-Worldlet owns the user's world and companion relationship. The official build uses
-Hermes; another Harness can replace execution without becoming the owner of the UI
-or portable user records. This is an adapter boundary, not a license announcement.
+Worldlet owns the user's world and companion relationship. Execution belongs to the
+person's own Harness (Hermes Agent, OpenClaw, Claude Code, Codex or pi; the standard
+Hermes Agent when they have none), and switching Harnesses never makes the new one the
+owner of the UI or portable user records. This is an adapter boundary, not a license
+announcement.
 
 ## Division of ownership
 
@@ -13,7 +15,7 @@ or portable user records. This is an adapter boundary, not a license announcemen
 
 Worldlet does not implement a competing general-purpose planner. Contracts describe
 capabilities and data, not permission to access every resource. External adapters
-must advertise actual support; replacing Hermes does not imply connector parity.
+must advertise actual support; switching Harnesses does not imply connector parity.
 
 ## One companion conversation
 
