@@ -1,6 +1,6 @@
 import {themeArtifact} from '../themes/index.ts';
-import type {ArtifactPageSpec} from '../../core/artifacts/index.ts';
-// The theme's Artifact look as the host's generator reads it (core/artifacts/README.md#theme-driven-artifacts): the texts
+import type {ArtifactPageSpec} from '../../context/artifacts/index.ts';
+// The theme's Artifact look as the host's generator reads it (context/artifacts/README.md#theme-driven-artifacts): the texts
 // of its rules and prompt, its pictures' roles and colours, and its materials as data addresses a page may place. Read
 // once from the published theme; null when the theme leaves Artifacts to the host's card or its files cannot be read.
 let loading:Promise<{spec:ArtifactPageSpec;materials:Record<string,string>}|null>|null=null;

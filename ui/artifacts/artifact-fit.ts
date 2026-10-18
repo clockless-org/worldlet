@@ -1,5 +1,5 @@
-import type {ArtifactFitStep} from '../../core/artifacts/index.ts';
-/** An artifact never scrolls (owner Order 2026-10-09; core/artifacts/README.md#fits-its-card): a card draws the steps
+import type {ArtifactFitStep} from '../../context/artifacts/index.ts';
+/** An artifact never scrolls (owner Order 2026-10-09; context/artifacts/README.md#fits-its-card): a card draws the steps
  * `artifactFitSteps` lists, fullest first, and keeps the first one that fits `box` without overflowing. The last step
  * (the one-sentence brief) stays even when it does not fit, clipped rather than scrolled. `draw` fills the card for a
  * step; anything else it shows or hides for that step (a Show all button) must be in place before the card measures.

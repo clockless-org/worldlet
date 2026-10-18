@@ -1272,7 +1272,7 @@ export class WorldLedger {
   catch{throw new WorldletError('Could not keep the pictures.');}
  }
 
- // Pages Fox made (core/artifacts): `page` rows of the person's own Applets.
+ // Pages Fox made (context/artifacts): `page` rows of the person's own Applets.
  widgetRows():{record:Row;state:Row}[] {return this.myApplets('page').map(({record,state})=>({record,state}));}
  widgetPage(id:string):string|null {return this.myAppletPage(id);}
  /** Saves a page's record, and its page and state when given; a new page needs both. */
@@ -1283,7 +1283,7 @@ export class WorldLedger {
  deleteWidget(id:string){this.deleteMyApplets([id]);}
 
  // Artifacts ---------------------------------------------------------------------------------------
- // Every card Fox showed (core/artifacts): one row each, newest shown last in `at`.
+ // Every card Fox showed (context/artifacts): one row each, newest shown last in `at`.
  private artifactsReady=false;
  private ensureArtifacts(){
   if(this.artifactsReady)return;
@@ -1305,7 +1305,7 @@ export class WorldLedger {
   }catch{throw new WorldletError('Could not save the artifact.');}
  }
 
- // A page the Agent wrote for an artifact (core/artifacts/artifact-render.ts), kept apart from the record so listing
+ // A page the Agent wrote for an artifact (context/artifacts/artifact-render.ts), kept apart from the record so listing
  // artifacts never reads the documents.
  private artifactPagesReady=false;
  private ensureArtifactPages(){

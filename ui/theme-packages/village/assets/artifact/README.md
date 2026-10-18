@@ -24,7 +24,7 @@ flowchart LR
 
 ## Status
 
-Everything here is static: Markdown, pictures and the JSON section that names them. It is published with the theme's other assets, and the host reads it through `themeArtifact()` (`ui/themes/build-theme.ts`). How the host uses it, filling its own card or generating a whole page, is in [core/artifacts](../../../../../core/artifacts/README.md).
+Everything here is static: Markdown, pictures and the JSON section that names them. It is published with the theme's other assets, and the host reads it through `themeArtifact()` (`ui/themes/build-theme.ts`). How the host uses it, filling its own card or generating a whole page, is in [context/artifacts](../../../../../context/artifacts/README.md).
 
 The reference pictures are static concepts with sample content, not captures of working HTML. The materials in `materials/` (paper, a glasshouse and a soup bowl, the last two with transparent edges) may be reused by a generator; they are optional objects, not a fixed header slot.
 

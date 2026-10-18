@@ -5,7 +5,7 @@
  * without the person. These are the rules: which items qualify, how many and when, what Fox is asked, and the short
  * lines the World's top-right shows while Fox works and just after. The page only executes them
  * (`ui/shell/notion-world.ts`). */
-import {attentionArrivedAt} from '../attention/index.ts';
+import {attentionArrivedAt} from '../../core/attention/index.ts';
 import {dayKey,usedRecently,MORNING_BRIEF_REPLIES,DAILY_ROUTINE_NAMES,type DailyArtifactsState} from './daily.ts';
 
 /** At most this many replies prepared a day, the same budget as the morning brief's. */

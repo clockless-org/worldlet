@@ -1,10 +1,10 @@
-import {mergeArtifact,orderArtifacts,readArtifact,validArtifactId,type Artifact} from '../../../../../core/artifacts/index.ts';
+import {mergeArtifact,orderArtifacts,readArtifact,validArtifactId,type Artifact} from '../../../../../context/artifacts/index.ts';
 import {dailyScheduleFailure,dailyScheduleResult,type ScheduleResult} from '../../../../../core/agent/index.ts';
 import {WorldletError} from '../../files.ts';
 import {PHONE,type PhoneService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 
-/** Artifacts (core/artifacts/README.md). Every card Fox shows in this World, an Attention card or an explanation
+/** Artifacts (context/artifacts/README.md). Every card Fox shows in this World, an Attention card or an explanation
  * from the conversation, is kept in the `artifacts` table so the person finds it again in the Artifacts page of
  * Fox's panel and Fox can bring it back. The practice world keeps none. */
 export function installArtifacts(host:Host){

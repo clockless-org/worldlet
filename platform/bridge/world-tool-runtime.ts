@@ -84,7 +84,7 @@ export function createWorldToolRuntime({execute,call,codex,audio,backend,sample=
    if(!appletTask)return {error:'Only the Game Factory\'s own task can do this. Use make_game to ask it for a game.'};
    result=call?await call(name==='save_game'?'gameFactorySave':'madeGameSource',{...args,task:operationId}):{error:'The Game Factory is unavailable here.'};
   }else if(name==='make_applet'){
-   // Moment Applets are made by an Applet task (core/artifacts): only the person's own words start one.
+   // Moment Applets are made by an Applet task (context/artifacts): only the person's own words start one.
    if(appletTask)return {error:'This is already an Applet task. Finish it here.'};
    if(!authority.trim())return {error:'The person did not ask for a new Applet in their own words this turn. Ask them first.'};
    // A website made into an Applet is a record, not a page to write (core/applets/site-applet.ts): it is added at once.
@@ -96,7 +96,7 @@ export function createWorldToolRuntime({execute,call,codex,audio,backend,sample=
    if(!appletTask)return {error:'Only the Applet-making task can do this. Use make_applet to ask for a new Applet.'};
    result=call?await call(name==='save_applet'?'widgetSave':'widgetSource',{...args,task:operationId}):{error:'Making Applets is unavailable here.'};
   }else if(name==='read_artifact_brief'||name==='save_artifact_page'){
-   // Artifact pages are written by a task Worldlet starts itself (core/artifacts/artifact-render.ts); the host checks the task.
+   // Artifact pages are written by a task Worldlet starts itself (context/artifacts/artifact-render.ts); the host checks the task.
    if(!appletTask)return {error:'Only the Artifact page task can do this. Show a card with show_artifact instead.'};
    result=call?await call(name==='save_artifact_page'?'artifactPageSave':'artifactPageBrief',{...args,task:operationId}):{error:'Artifact pages are unavailable here.'};
   }else if(name==='manage_calendar'){

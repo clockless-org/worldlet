@@ -19,7 +19,7 @@ export function projectNativeWorld(state):World{
  world.taskReviews=Array.isArray(state.taskReviews)?state.taskReviews:[];
  // Conversations the person kept as ongoing things are Applets of their own (core/tasks/README.md).
  world.dynamicApplets=(Array.isArray(state.ongoing)?state.ongoing:[]).flatMap(row=>{const thing=readOngoing({...row,state:'kept'});return thing?[ongoingApplet(thing)]:[];});
- // So is each Applet Fox made for a moment that is now (core/artifacts/README.md).
+ // So is each Applet Fox made for a moment that is now (context/artifacts/README.md).
  world.dynamicApplets.push(...(Array.isArray(state.momentApplets)?state.momentApplets:[]).map(momentApplet));
  // And each website the person made an Applet of from the Browser (core/applets/site-applet.ts).
  world.dynamicApplets.push(...(Array.isArray(state.siteApplets)?state.siteApplets:[]).flatMap(row=>{const record=readSiteApplet(row);return record?[siteApplet(record)]:[];}));

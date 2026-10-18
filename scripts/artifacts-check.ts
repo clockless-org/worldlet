@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {artifactSizeFor,artifactFitSteps,artifactBrief,journalDays,journalOrigin,dailyNoteArtifacts,DAILY_NOTE_DAYS,ARTIFACT_CARD,ARTIFACT_ONE_CARD_RULE,artifactFitProblem,artifactWeight,dailyPlanRequest,dailySummaryRequest,ARTIFACT_LIMITS,madeArtifacts,readArtifactActions,artifactDays,artifactId,artifactInputProblem,attentionArtifactId,defaultArtifactSize,findArtifacts,mergeArtifact,orderArtifacts,readArtifact,validArtifactId,artifactFollowUpSent,artifactFollowUpRequest,type Artifact} from '../core/artifacts/index.ts';
-// The rules for artifacts (core/artifacts/README.md): IDs, what Fox may show, the default size, reading a stored
+import {artifactSizeFor,artifactFitSteps,artifactBrief,journalDays,journalOrigin,dailyNoteArtifacts,DAILY_NOTE_DAYS,ARTIFACT_CARD,ARTIFACT_ONE_CARD_RULE,artifactFitProblem,artifactWeight,dailyPlanRequest,dailySummaryRequest,ARTIFACT_LIMITS,madeArtifacts,readArtifactActions,artifactDays,artifactId,artifactInputProblem,attentionArtifactId,defaultArtifactSize,findArtifacts,mergeArtifact,orderArtifacts,readArtifact,validArtifactId,artifactFollowUpSent,artifactFollowUpRequest,type Artifact} from '../context/artifacts/index.ts';
+// The rules for artifacts (context/artifacts/README.md): IDs, what Fox may show, the default size, reading a stored
 // record, saving one again, the World's limit, the Artifacts page's days and what Fox finds.
 
 const id=artifactId(()=>0.5);
@@ -97,7 +97,7 @@ assert.deepEqual(madeArtifacts({}),[]);
 // before the person sits down (Today’s prep; 6 PM Wrap up today, owner decision 2026-10-11) for someone who used Worldlet in the last few days (owner Order 2026-10-07); the summary
 // only on a day they used it.
 {
- const {readDailyArtifactsState,markDailyUse,markDailyMade,dailyArtifactDue,dailyPlanRequest,dailySummaryRequest,dailyArtifactRequest,localISO,readMorningBrief,morningBriefWantsReplies,morningBriefWantsOvernight,dailyPlanned,MORNING_BRIEF_DEFAULT,MORNING_BRIEF_LIMIT,MORNING_BRIEF_REPLIES}=await import('../core/artifacts/index.ts');
+ const {readDailyArtifactsState,markDailyUse,markDailyMade,dailyArtifactDue,dailyPlanRequest,dailySummaryRequest,dailyArtifactRequest,localISO,readMorningBrief,morningBriefWantsReplies,morningBriefWantsOvernight,dailyPlanned,MORNING_BRIEF_DEFAULT,MORNING_BRIEF_LIMIT,MORNING_BRIEF_REPLIES}=await import('../context/artifacts/index.ts');
  const at=(d:number,h:number,m=0)=>new Date(2026,9,d,h,m);
  let state=readDailyArtifactsState({used:{'2026-10-06':'x',bad:1},plan:['2026-10-05',3],summary:null});
  assert.deepEqual(state,{used:{},plan:['2026-10-05'],summary:[]},'Stored state is read defensively');
@@ -139,7 +139,7 @@ assert.deepEqual(madeArtifacts({}),[]);
  }
   // The two default Routines can be paused (Settings › Agents › Your Agent › Routines) or left off at setup: a paused one is neither due nor planned.
  {
-  const {readDailyRoutines,DAILY_ROUTINE_NAMES}=await import('../core/artifacts/index.ts');
+  const {readDailyRoutines,DAILY_ROUTINE_NAMES}=await import('../context/artifacts/index.ts');
   assert.deepEqual(readDailyRoutines(null),{plan:true,summary:true},'On by default');
   assert.deepEqual(readDailyRoutines({plan:false,summary:'x'}),{plan:false,summary:true});
   assert.deepEqual(DAILY_ROUTINE_NAMES,{plan:'Today’s prep',summary:'Wrap up today'});
@@ -184,7 +184,7 @@ for(let d=1;d<=9;d++)closed=markDailyUse(closed,at(d,12));
  assert.equal(dailyArtifactRequest('summary','2026-10-06').displayText,'Wrap up today');
  // The first card (owner decision 2026-10-13): a new person's first Today's prep, whatever the hour, from what the brought
  // Agent knows; no overnight part and no mail drafting, so it is quick, and still titled as the day's plan.
- const {firstPrepRequest,FIRST_PREP_BRIEF}=await import('../core/artifacts/index.ts');
+ const {firstPrepRequest,FIRST_PREP_BRIEF}=await import('../context/artifacts/index.ts');
  const firstPrep=firstPrepRequest('2026-10-06');
  assert.ok(firstPrep.startsWith('I just set up Worldlet')&&!/Good morning/.test(firstPrep)&&firstPrep.includes('whatever the hour'),'The first card is made at once, not as a morning greeting');
  assert.ok(firstPrep.includes('read_companion_archive')&&firstPrep.includes(JSON.stringify(FIRST_PREP_BRIEF)),'It reads what the brought Agent knows');
@@ -201,7 +201,7 @@ for(let d=1;d<=9;d++)closed=markDailyUse(closed,at(d,12));
  const world=await readFile(new URL('../ui/shell/notion-world.ts',import.meta.url),'utf8');
  const poll=world.slice(world.indexOf("const dailyKey="),world.indexOf('const workPoll='));
  assert.match(poll,/event\.detail\?\.event!=='user_engaged'/,'Only the person\'s own use counts');
- // The one gate for work Fox starts by itself (core/artifacts/replies.ts backgroundBlocked, checked in fox-proactive-check).
+ // The one gate for work Fox starts by itself (context/artifacts/replies.ts backgroundBlocked, checked in fox-proactive-check).
  assert.match(poll,/backgroundBlocked\(\{sample:!!data\.sample,automated:!!navigator\.webdriver,onboarding:root\.dataset\.onboarding==='true'\|\|root\.dataset\.onboardingLocked==='true',tour:!!root\.dataset\.tourStep,firstRun:!!native\?\.firstRun\?\.\(\),asking:dailyAsking\|\|replyAsking\|\|followUpAsking\}\)/,'Never in the practice world, an automated browser, onboarding or the tour, one at a time');
  assert.match(poll,/if\(backgroundMoment\(\)\|\|foxArtifact\.visible\|\|\$\('notionDialog'\)\.open\|\|voice\?\.active\)return;/,'Never over a card, a dialog or a turn');
  assert.match(poll,/due\.kind==='summary'&&\(document\.hidden\|\|insideApplet\(\)\|\|inPageLayer\(\)\)\)return;/,'The summary waits for the World; the brief is made with the window hidden or an Applet open');
@@ -213,7 +213,7 @@ for(let d=1;d<=9;d++)closed=markDailyUse(closed,at(d,12));
  // Kept as a Journal card the host turns into an Attention item (docs/ATTENTION-CENTER.md#scheduled-results); the Journal never opens by itself.
  assert.match(poll,/native\?\.artifacts\?\.\(\{operation:'save',artifact,scheduled:due\.kind,day:due\.day\}\)/,'The brief is saved with its kind and day, for its Attention item');
  assert.ok(!/journal-open/.test(poll)&&!world.includes('openWaitingJournal'),'Nothing opens the Journal by itself');
- const {journalDays:pagesOf}=await import('../core/artifacts/index.ts'),t=at(7,6,5).getTime()/1000;
+ const {journalDays:pagesOf}=await import('../context/artifacts/index.ts'),t=at(7,6,5).getTime()/1000;
  assert.deepEqual(pagesOf([{id:'r1',kind:'reply',title:'Re: Q4',createdAt:t+60,updatedAt:t+60},{id:'p',kind:'answer',title:'Plan · Wed, Oct 7',size:'large',createdAt:t,updatedAt:t}],at(7,9))[0].entries.map(e=>[e.artifact.id,e.size]),[['p','large'],['r1','medium']],'A reply draft is a medium card after the brief');
  console.log('PASS daily artifacts: Today’s prep at 7 AM (or on waking, before noon) for someone who used Worldlet lately, holding the parts they asked for, reply drafts by default and only when mail is asked for, from any mail or calendar connection; Wrap up today from 6 PM or caught up the next day, from the conversation alone, never on a day nobody used; either can be paused');
 }
@@ -246,7 +246,7 @@ for(let d=1;d<=9;d++)closed=markDailyUse(closed,at(d,12));
 }
 // Blocks (owner Order 2026-10-08): Worldlet's own components on the card, checked; what the person ticks or sets is kept.
 {
- const {readArtifactBlocks,scaledAmount}=await import('../core/artifacts/index.ts');
+ const {readArtifactBlocks,scaledAmount}=await import('../context/artifacts/index.ts');
  const recipe={type:'scale',label:'Servings',unit:'guests',base:4,min:1,max:12,step:1,rows:[{label:'Flour',amount:250,unit:'g'},{label:'Eggs',amount:3,unit:''}]};
  const steps={type:'checklist',label:'Steps',items:['Preheat','Mix','Bake']};
  const bike={type:'parts',label:'Systems',parts:[{name:'Frame',detail:'Holds it together.'},{name:'Brakes',detail:'Stop it.'}]};
@@ -269,7 +269,7 @@ for(let d=1;d<=9;d++)closed=markDailyUse(closed,at(d,12));
 }
 // The card system (ui/artifacts/CARD-SYSTEM.md): tones, a picture, and the showing blocks.
 {
- const {readArtifactBlocks}=await import('../core/artifacts/index.ts');
+ const {readArtifactBlocks}=await import('../context/artifacts/index.ts');
  const callout={type:'callout',label:'Before you pay',text:'Run the self-scan first.',tone:'clay'};
  const stats={type:'stats',label:'At a glance',items:[{value:'$540',label:'Price',note:'lowest'},{value:'3 wks',label:'To a letter',note:''}]};
  const facts={type:'facts',label:'Trip',rows:[{icon:'time',text:'Fri 4:46 PM'},{icon:'place',text:'Gate B12'}]};

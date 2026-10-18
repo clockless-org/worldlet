@@ -1,5 +1,5 @@
 // What the desktop shows the paired phone, and what the phone may ask of the desktop (README.md in this folder).
-import {WIDGET_LIMITS,widgetDocument,readWidgetState,type Widget,type WidgetState} from '../artifacts/index.ts';
+import {WIDGET_LIMITS,widgetDocument,readWidgetState,type Widget,type WidgetState} from '../../context/artifacts/index.ts';
 import {worldLogApplet} from '../../context/activity/index.ts';
 import {httpsAddress} from './phone-web.ts';
 // The phone renders exactly these shapes (ios/Worldlet/Models.swift); bump PAIR_PROTOCOL in pairing.ts when one
@@ -38,7 +38,7 @@ export type PhoneApplet={key:string,title:string,section:'live'|'accounts'|'jobs
 export type PhoneTask={id:string,name:string,status:string,when:string,icon:string,progress?:number,applet?:string,every?:string,by?:string,lines?:string[]};
 /** Doing now (newest first) and Routines (soonest first), as the computer orders them. */
 export type PhoneTasks={now:PhoneTask[],routines:PhoneTask[]};
-/** One of today's cards in the Journal (core/artifacts), newest first: an answer Fox showed or an Attention card the
+/** One of today's cards in the Journal (context/artifacts), newest first: an answer Fox showed or an Attention card the
  * person closed. `text` is its one-sentence brief, else its body, clipped. */
 export type PhoneJournalEntry={id:string,title:string,kind:'answer'|'attention',at:string,text?:string,category?:string};
 // `applets`, `tasks` and `journal` are optional, so an older phone ignores them.
@@ -61,13 +61,13 @@ export type PhoneLive={v:1,at:string,id:string,item?:string,applet?:string,user:
  * moves the pairing there, and the relay keeps nothing more. */
 export type PhoneDesktop={v:1,at:string,name:string,version:string,order?:true,push?:true,room?:true};
 export type PhoneAction='done'|'later'|'remove';
-/** A widget for now (core/artifacts): `page` is the whole document with the widget prelude but no seed (the phone
+/** A widget for now (context/artifacts): `page` is the whole document with the widget prelude but no seed (the phone
  * injects its stored values); it is absent when the slot has no room for it, and the phone keeps the page it has. */
 export type PhoneWidget={id:string,title:string,blurb:string,color:string,endsAt:string,pinned:boolean,updatedAt:string,version:number,page?:string,state:WidgetState};
 export type PhoneWidgets={v:1,at:string,widgets:PhoneWidget[]};
 // A chat line with `item` was said with that item's card open and joins its conversation; `option` chooses the option
 // Fox offers on the item's card.
-// `widget` carries the entries the person changed in a widget on the phone (core/artifacts mergeWidgetState).
+// `widget` carries the entries the person changed in a widget on the phone (context/artifacts mergeWidgetState).
 // A chat line with `applet` was said inside that Applet's page on the phone: the computer opens the Applet, so the line
 // joins its thread. `applet` with action `open` opens the Applet on the computer.
 // `order` was what the person said with the phone's Order button. Orders were retired on 2026-10-18: the computer drops
@@ -143,7 +143,7 @@ export function phoneTasks(panel:any):PhoneTasks{
  return {now:group(panel?.now?.rows),routines:group(panel?.routines?.rows)};
 }
 
-/** Today's Journal cards (core/artifacts Artifact, `createdAt` in seconds), newest first: what the phone's Today tab
+/** Today's Journal cards (context/artifacts Artifact, `createdAt` in seconds), newest first: what the phone's Today tab
  * shows under the date. "Today" is the computer's own day. */
 export function phoneJournal(artifacts:any[],at:number):PhoneJournalEntry[]{
  const day=new Date(at);day.setHours(0,0,0,0);const start=day.getTime()/1000;

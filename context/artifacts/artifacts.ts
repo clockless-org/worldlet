@@ -1,7 +1,7 @@
 // Artifacts (owner decisions 2026-10-05 and 2026-10-06): every card Fox puts in front of the person is an artifact,
 // an information card with a size. An Attention card is one kind; an explanation Fox shows in conversation is another.
 // Each is kept in this World so the person can find it again in the Artifacts page of Fox's panel. These are the
-// rules every host applies (core/artifacts/README.md).
+// rules every host applies (context/artifacts/README.md).
 import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
 
 export type ArtifactKind='attention'|'answer';
@@ -38,12 +38,12 @@ export interface Artifact {
  id:string;kind:ArtifactKind;title:string;
  /** Markdown. An Attention card keeps the summary it showed; the World item stays the truth. */
  body:string;
- /** Answer only: the content at the card's other sizes (core/artifacts/README.md#fits-its-card): `brief` is the whole
+ /** Answer only: the content at the card's other sizes (context/artifacts/README.md#fits-its-card): `brief` is the whole
   * answer in one sentence for a card too small for the body, `detail` a fuller body for a card with room to spare. */
  brief?:string;detail?:string;chart:ArtifactChart|null;size:ArtifactSize;origin:ArtifactOrigin;
- /** Answer only: up to three next steps Fox offered (core/artifacts/README.md#actions). */
+ /** Answer only: up to three next steps Fox offered (context/artifacts/README.md#actions). */
  actions:ArtifactAction[];
- /** Answer only: up to two interactive blocks under the body (core/artifacts/README.md#blocks). */
+ /** Answer only: up to two interactive blocks under the body (context/artifacts/README.md#blocks). */
  blocks?:ArtifactBlock[];
  /** Answer only: the card's tone and its picture, a painted scene's ID or none; without one the card picks a scene that
   * matches its title, as an Attention card does. */

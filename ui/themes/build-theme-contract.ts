@@ -18,7 +18,7 @@ export interface ThemeSound {events:Partial<Record<ThemeSoundEvent,string>>}
 /** The colour roles an Artifact uses: paper, ink and brass, and one accent per tone (what a card is about). */
 export const THEME_ARTIFACT_COLORS=['paper','ink','brass','moss','teal','honey','sage','clay','plum'] as const;
 export type ThemeArtifactColor=typeof THEME_ARTIFACT_COLORS[number];
-/** How the theme's Artifacts look (core/artifacts/README.md#theme-driven-artifacts), as static files: the host's
+/** How the theme's Artifacts look (context/artifacts/README.md#theme-driven-artifacts), as static files: the host's
  * generator reads the rules and prompt, sees the reference pictures and may place the materials in a page it writes;
  * the host's own card fills its template with the same colours. Nothing here runs. */
 export interface ThemeArtifact {

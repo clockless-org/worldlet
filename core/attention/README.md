@@ -357,7 +357,7 @@ The HUD preview keeps facts in the card and proactive help beside Fox. The card 
 
 ### A reply Fox prepared
 
-A new Worth Doing item whose evidence is a Gmail thread (`sources` entry `thread:<id>`) can get a reply Fox prepares by itself (owner decision 2026-10-09, [replies Fox prepares](../artifacts/README.md#replies-fox-prepares)). The item is matched to its draft by that thread: the stored draft keeps the `threadId` it replies in (`emailAction` `list`), and while one waits the item's card shows "Fox drafted a reply · Review", which opens the Journal on it. Preparing never settles the item; the person still marks it Done.
+A new Worth Doing item whose evidence is a Gmail thread (`sources` entry `thread:<id>`) can get a reply Fox prepares by itself (owner decision 2026-10-09, [replies Fox prepares](../../context/artifacts/README.md#replies-fox-prepares)). The item is matched to its draft by that thread: the stored draft keeps the `threadId` it replies in (`emailAction` `list`), and while one waits the item's card shows "Fox drafted a reply · Review", which opens the Journal on it. Preparing never settles the item; the person still marks it Done.
 
 ### Which account is connected
 

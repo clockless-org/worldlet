@@ -230,7 +230,7 @@ export interface FoxService {
  /** The same, started by Worldlet itself when the person stops playing games in the browser (#1598):
   * no person's words are behind it, so it starts untrusted (reads and answers, no guarded writes). */
  reviewGames(request:{applet:string,task:string,request:string}):Row;
- /** The task that writes an Artifact page (core/artifacts/artifact-render.ts), started by Worldlet after a card is
+ /** The task that writes an Artifact page (context/artifacts/artifact-render.ts), started by Worldlet after a card is
   * shown: untrusted like a review, and quiet, so its result never joins the conversation. */
  makeArtifactPage(request:{task:string,request:string}):Row;
  /** The Applet ID of a running Applet task, or null once it has ended. */
@@ -288,7 +288,7 @@ export interface UserActivityService {
 }
 export const USER_ACTIVITY='userActivity';
 export interface WidgetsService {
- /** Merges what the person changed in a widget on the phone (core/artifacts mergeWidgetState). */
+ /** Merges what the person changed in a widget on the phone (context/artifacts mergeWidgetState). */
  applyPhoneState(widget:string,state:unknown):void;
 }
 export const WIDGETS='widgets';

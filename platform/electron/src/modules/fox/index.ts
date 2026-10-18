@@ -32,7 +32,7 @@ import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD
 import {worldLogKeeps} from '../../../../../context/activity/index.ts';
 import {worldActionOf,worldActions} from '../../../../../core/tools/index.ts';
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
-import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../core/artifacts/index.ts';
+import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../context/artifacts/index.ts';
 import {phoneApprovalPush,phoneFoxPush,phoneLive,worldLinkReply} from '../../../../../core/phone/index.ts';
 import {placeKey,placeKind,proactiveAsked,proactiveDue,proactiveCard,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../../core/companion/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
@@ -944,13 +944,13 @@ export function installFox(host:Host){
    }else if(setting==='companion_name'&&typeof value==='string'&&value.trim()&&characterCount(value)<=24){
     companion.update({name:value.trim()});preferences.set('worldlet.companionName',value.trim());
    }else if(setting==='morning_brief'&&typeof value==='string'){
-    // What the 6 AM brief holds, in the person's words (core/artifacts/daily.ts); empty or the default keeps the default.
+    // What the 6 AM brief holds, in the person's words (context/artifacts/daily.ts); empty or the default keeps the default.
     const brief=readMorningBrief(value);
     if(brief===MORNING_BRIEF_DEFAULT)preferences.remove('worldlet.morningBrief');else preferences.set('worldlet.morningBrief',brief);
     page.event('worldlet:morning-brief',{brief});
     return {ok:true,morningBrief:brief};
    }else if(setting==='daily_routines'&&(typeof value==='boolean'||value&&typeof value==='object')){
-    // The two default Routines, Today's prep and Wrap up today (core/artifacts/daily.ts): on unless turned off here,
+    // The two default Routines, Today's prep and Wrap up today (context/artifacts/daily.ts): on unless turned off here,
     // from setup's one row (a boolean, both) or Settings › Agents › Your Agent › Routines (one of them). Worldlet's own setting;
     // nothing is written into the Agent.
     const next=typeof value==='boolean'?{plan:value,summary:value}:{...dailyRoutines(),...readDailyRoutinesChange(value)};

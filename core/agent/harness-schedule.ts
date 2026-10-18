@@ -179,7 +179,7 @@ function cardLines(body:string){
  const lines=body.replace(/\r/g,'').split('\n').map(line=>line.trim()).filter(line=>line&&!/^(#|\||[-*_]{3,}$|```|\*\*[^*]+\*\*:?$)/.test(line));
  return lines.slice(0,8).join('\n');
 }
-/** The two default Routines' names, as core/artifacts/daily.ts `DAILY_ROUTINE_NAMES` has them (kept here too so
+/** The two default Routines' names, as context/artifacts/daily.ts `DAILY_ROUTINE_NAMES` has them (kept here too so
  * this file stays free of the artifacts module; scripts/harness-schedule-check.ts checks they match). */
 const DAILY_NAMES={plan:'Today’s prep',summary:'Wrap up today'} as const;
 /** A kept morning brief (`plan`, Today’s prep) or day summary (Wrap up today): Worth Knowing, opening the Journal on its card (source

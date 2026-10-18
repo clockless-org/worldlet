@@ -7,7 +7,7 @@ import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/
 import {agentArtifactId,createAgentArtifacts} from '../platform/electron/src/modules/agent-runtime/agent-artifacts.ts';
 import {openStandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
 import {STANDING_OUTSIDE_TURN} from '../core/agent/grants.ts';
-import {ARTIFACT_LIMITS,journalDays,readArtifact} from '../core/artifacts/index.ts';
+import {ARTIFACT_LIMITS,journalDays,readArtifact} from '../context/artifacts/index.ts';
 import {AGENT_ARTIFACT_REASONS} from '../core/agent/index.ts';
 import {AGENT_ARTIFACT_LIMITS} from '../contracts/agent-artifacts.ts';
 
