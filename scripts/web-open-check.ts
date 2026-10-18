@@ -176,7 +176,9 @@ const until=async(client:{poll(wait?:number):Promise<any>},ok:(view:any)=>boolea
  const seen=await until(tab,v=>!!v.attention&&!!v.desktop);
  assert.equal(seen.attention?.now[0].action,'Book the flight');
  assert.equal(tab.computer,'Studio Mac');
+ // The browser's name reaches the computer on one of its next polls (the room may still be relaying the hello).
  await mac.poll();
+ for(let i=0;i<50&&mac.status().phone?.name!=='Safari on iPhone';i++)await mac.poll(0.1);
  assert.equal(mac.status().state,'paired');assert.equal(mac.status().phone?.name,'Safari on iPhone');
  assert.equal(mac.status().link,made,'the link stays, so another browser can open it');
  assert(mac.open,'a browser is in the room');
