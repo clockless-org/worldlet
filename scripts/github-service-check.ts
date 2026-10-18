@@ -1,4 +1,4 @@
-// GitHub as a Worldlet Service (contracts/services.ts, core/accounts/mcp/github.ts, `read_service`): against a fixture
+// GitHub as a Worldlet Service (contracts/services.ts, context/accounts/mcp/github.ts, `read_service`): against a fixture
 // of GitHub's remote MCP server, a pasted token connects and is kept in the vault with only read tools enabled; list,
 // read, search and releases come back bounded and call only the reader's read tools; another server address, an expired
 // token and a refused turn stop the read; and the Grant targets github/list, github/read, github/search and
@@ -8,9 +8,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {GITHUB_LIMITS,GITHUB_TOOLS,readGithub} from '../core/accounts/index.ts';
+import {GITHUB_LIMITS,GITHUB_TOOLS,readGithub} from '../context/accounts/index.ts';
 import {channelDefaultGrants,currentServiceGrant,serviceReadGrant,standingActions,standingCallDecision} from '../core/agent/grants.ts';
-import {readServicePresetRead} from '../core/accounts/index.ts';
+import {readServicePresetRead} from '../context/accounts/index.ts';
 import {hermesChannelToolAllowed} from '../core/agent/hermes-server.ts';
 import {turnTrustObserve} from '../core/agent/turn-trust.ts';
 import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';

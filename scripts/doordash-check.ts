@@ -1,4 +1,4 @@
-// DoorDash through its official CLI in the Platform (core/accounts/doordash.ts, platform/electron/src/modules/sources/
+// DoorDash through its official CLI in the Platform (context/accounts/doordash.ts, platform/electron/src/modules/sources/
 // doordash.ts), with no Harness: a failed or timed-out cart change is uncertain and never retried, nothing like a
 // credential or the CLI's error output reaches Fox, payment is never an operation, checkout links are DoorDash's
 // own, a connection made in Fox's earlier Agent profile is kept, and Fox's use_doordash is admitted by its turn first.
@@ -6,7 +6,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {doordashArgs,doordashOutcome,validDoordashCheckout} from '../core/accounts/index.ts';
+import {doordashArgs,doordashOutcome,validDoordashCheckout} from '../context/accounts/index.ts';
 import {DoorDash,DoorDashSourceAccess} from '../platform/electron/src/modules/sources/doordash.ts';
 import {withTempDir} from './test-temp.ts';
 

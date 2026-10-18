@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {BOARD_LIMITS,type BoardDefinition} from '../contracts/board.ts';
 import type {ServiceRecords} from '../contracts/services.ts';
-import {PRESET_REASONS,readServicePresetRead,saveServicePreset} from '../core/accounts/index.ts';
+import {PRESET_REASONS,readServicePresetRead,saveServicePreset} from '../context/accounts/index.ts';
 import {AGENT_BOARD_REASONS,agentBoardRecords,listAgents,makeAgentReport} from '../core/agent/index.ts';
 import type {AgentIdentity} from '../contracts/agent-identity.ts';
 import {BOARD_REASONS,BOARD_TONE_WORDS,boardNorthStar,formatBoardNumber,formatBoardRate,defineBoard,boardNumber,boardPresetIds,readBoardDefinition,resolveBoard,type BoardRead} from '../context/board/index.ts';

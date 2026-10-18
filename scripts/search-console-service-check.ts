@@ -1,4 +1,4 @@
-// Google Search Console as a Worldlet Service, read only (contracts/services.ts, core/accounts/services/search-console.ts,
+// Google Search Console as a Worldlet Service, read only (contracts/services.ts, context/accounts/services/search-console.ts,
 // service-source.ts, `read_service`): against fixtures of Google's token address and the Search Console API, a pasted
 // service account key is checked before anything is sent and a refused one replaces nothing; the host signs an RS256
 // assertion with the read-only Search Console scope that verifies with the key's public half, sends it only to Google's
@@ -11,7 +11,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {GOOGLE_TOKEN_URL,SEARCH_CONSOLE_LIMITS,SEARCH_CONSOLE_SCOPE,readServicePresetRead,saveServicePreset,searchConsoleSpec} from '../core/accounts/index.ts';
+import {GOOGLE_TOKEN_URL,SEARCH_CONSOLE_LIMITS,SEARCH_CONSOLE_SCOPE,readServicePresetRead,saveServicePreset,searchConsoleSpec} from '../context/accounts/index.ts';
 import {channelDefaultGrants,serviceReadTargets,standingActions,standingCallDecision} from '../core/agent/grants.ts';
 import {turnTrustObserve} from '../core/agent/turn-trust.ts';
 import {worldActionOf,worldActions} from '../core/tools/gateway.ts';

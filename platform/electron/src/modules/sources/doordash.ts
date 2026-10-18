@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {WorldletError,ensureDirectory,writeAtomic} from '../../files.ts';
-import {DOORDASH_CLI_VERSION,doordashArgs,doordashOutcome,type DoordashRun} from '../../../../../core/accounts/index.ts';
+import {DOORDASH_CLI_VERSION,doordashArgs,doordashOutcome,type DoordashRun} from '../../../../../context/accounts/index.ts';
 import type {AgentEventHandler,AgentRuntime} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
 import {validateWorldTool} from './google-source.ts';

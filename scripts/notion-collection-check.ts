@@ -11,7 +11,7 @@ import {collectServicePage} from '../platform/electron/src/modules/sources/servi
 import {createServicePresets} from '../platform/electron/src/modules/sources/service-presets.ts';
 import {createServiceSync} from '../platform/electron/src/modules/sources/service-sync.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {readServicePresetRead} from '../core/accounts/index.ts';
+import {readServicePresetRead} from '../context/accounts/index.ts';
 import {SERVICE_PROVIDERS} from '../contracts/services.ts';
 
 const PAGE='0123456789abcdef0123456789abcdef',OTHER='1123456789abcdef0123456789abcdef';

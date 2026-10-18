@@ -4,7 +4,7 @@ import type {Row} from './types.ts';
 import type {HarnessApprovals,HarnessCalls,HarnessEvents,HarnessSend,HarnessSkills,HarnessTools,HarnessVoice} from '../../../../contracts/harness-services.ts';
 import type {PhonePushRequest} from '../../../../core/phone/index.ts';
 import type {AgentAuditEntry,AgentIdentity,Grant} from '../../../../contracts/agent-identity.ts';
-import type {McpSession,PosthogSettings} from '../../../../core/accounts/index.ts';
+import type {McpSession,PosthogSettings} from '../../../../context/accounts/index.ts';
 import type {PosthogRequest} from '../../../../core/agent/index.ts';
 // Cross-module service contracts inside the Electron host. A module provides one with
 // `host.provide(NAME, impl)` and others reach it with `host.use(NAME)` / `host.optional(NAME)`.

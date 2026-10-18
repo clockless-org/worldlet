@@ -7,7 +7,7 @@ import path from 'node:path';
 import {withTempDir} from './test-temp.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {contextAmount,contextServiceName,readWorldContextSizes,worldContextRows,worldContextServices} from '../context/context/index.ts';
-import {CONNECTOR_TECHNICAL_WORDS} from '../core/accounts/index.ts';
+import {CONNECTOR_TECHNICAL_WORDS} from '../context/accounts/index.ts';
 
 assert.deepEqual([0,-5,Number.NaN,1,1023,1024,1536,10_240,1_048_576,1_400_000,12*1024**3].map(contextAmount),
  ['Nothing yet','Nothing yet','Nothing yet','Under 1 KB','Under 1 KB','1 KB','2 KB','10 KB','1 MB','1.3 MB','12 GB']);

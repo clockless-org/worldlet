@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {answerServiceRequest,serviceGranted,serviceRequestDue,serviceRequestItem,serviceRequestRefusal,STANDING_OUTSIDE_TURN} from '../core/agent/index.ts';
-import {CONNECTOR_TECHNICAL_WORDS} from '../core/accounts/index.ts';
+import {CONNECTOR_TECHNICAL_WORDS} from '../context/accounts/index.ts';
 import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/agent-access.ts';
 import {createServiceRequests} from '../platform/electron/src/modules/agent-runtime/service-requests.ts';
 import {openStandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';

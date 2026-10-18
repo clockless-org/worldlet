@@ -3,7 +3,7 @@ import {WORLD_PRESET_PROVIDERS,type ServicePreset} from '../../contracts/service
 import {SERVICE_PROVIDERS,type ServiceRecords} from '../../contracts/services.ts';
 import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
 import {looksSecret} from '../../core/agent/index.ts';
-import {saveServicePreset} from '../../core/accounts/index.ts';
+import {saveServicePreset} from '../accounts/index.ts';
 
 /** What a board block may show: a Service's live read, or the World's own records (`agents`). A Notion preset is
  * collected for the person, not read live, so the board refuses it. */

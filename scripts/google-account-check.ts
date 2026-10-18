@@ -8,7 +8,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {GoogleAccount,GOOGLE_SCOPES} from '../platform/electron/src/modules/sources/google-account.ts';
-import {GoogleRestError} from '../core/accounts/google/rest.ts';
+import {GoogleRestError} from '../context/accounts/google/rest.ts';
 import {withTempDir} from './test-temp.ts';
 
 await withTempDir('worldlet-google-account-',async temp=>{

@@ -9,7 +9,7 @@
 // `--screenshot <file.png>` saves the Agents page, and `-own`, `-context` and `-narrow` beside it.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {CONNECTOR_TECHNICAL_WORDS} from '../core/accounts/index.ts';
+import {CONNECTOR_TECHNICAL_WORDS} from '../context/accounts/index.ts';
 import {withBrowser,bundleScript,pageErrors} from './browser-test.ts';
 
 const screenshot=process.argv.includes('--screenshot')?process.argv[process.argv.indexOf('--screenshot')+1]:'';

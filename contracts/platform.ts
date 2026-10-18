@@ -100,7 +100,7 @@ export interface HostCapabilities {version:1;features:HostFeatures;browserBudget
  * it again or copy it when no browser came up (owner meetings 2026-10-02/03). */
 export const GOOGLE_SIGN_IN_EVENT='worldlet:google-sign-in';
 /** Host → World page while a service signs in with a code the person types on the service's own page (GitHub's device
- * flow, core/accounts/github-device.ts): `new CustomEvent(SIGN_IN_CODE_EVENT,{detail:{provider,code,url}})`. The code is
+ * flow, context/accounts/github-device.ts): `new CustomEvent(SIGN_IN_CODE_EVENT,{detail:{provider,code,url}})`. The code is
  * meant to be shown; it is not a secret, and it works only with the request Worldlet holds. */
 export const SIGN_IN_CODE_EVENT='worldlet:sign-in-code';
 export type SignInCode={provider:string;code:string;url:string};
