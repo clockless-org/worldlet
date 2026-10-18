@@ -89,7 +89,7 @@ export function loadSmoke(files,run=spawnSync,exists=f=>existsSync(new URL('../'
  const changed=(files||[]).filter(f=>/\.(?:mjs|cjs|js)$/.test(f)&&/^(scripts|platform)\//.test(f)&&exists(f));
  for(const file of changed){const r=run(process.execPath,['--check',file],{stdio:'inherit'});if(r.error||r.status!==0){console.error('Does not parse: '+file);return 1;}}
  for(const file of loadModules){const r=run(process.execPath,['--input-type=module','-e',`await import(${JSON.stringify(new URL('../'+file,import.meta.url).href)})`],{stdio:'inherit'});if(r.error||r.status!==0){console.error('Does not load: '+file);return 1;}}
- const tick=!operationsRepository&&!present('scripts/machine-tick.ts')?{status:0}:run(process.execPath,['--input-type=module','-e',`await import(${JSON.stringify(new URL('../scripts/machine-tick.ts',import.meta.url).href)}).catch(e=>{if(!/Ticks run only under/.test(e.message))throw e;})`],{stdio:'inherit'});
+ const tick=!present('scripts/machine-tick.ts')?{status:0}:run(process.execPath,['--input-type=module','-e',`await import(${JSON.stringify(new URL('../scripts/machine-tick.ts',import.meta.url).href)}).catch(e=>{if(!/Ticks run only under/.test(e.message))throw e;})`],{stdio:'inherit'});
  if(tick.error||tick.status!==0){console.error('Does not load: scripts/machine-tick.ts');return 1;}
  console.log(`Load smoke: ${changed.length} changed scripts parse; ${loadModules.length+1} daemon modules load.`);
  return 0;
