@@ -1,18 +1,23 @@
 import crypto from 'node:crypto';
-import {AGENT_AUDIT_KEEP,GITHUB_DRAFT_REASONS,GITHUB_WRITE_REASONS,githubAppJwtClaims,githubDraftAttentionItem,githubDraftChange,githubDraftCreatedPath,githubDraftCreatedUrl,githubDraftHeadline,githubDraftItemId,githubDraftOutcome,githubDraftPending,githubDraftReadPath,githubDraftRequests,
- githubDraftResultUrl,githubDraftTarget,githubDraftTargetParts,githubWriteAuditEntry,githubWriteChange,githubWriteDraft,githubWriteGrantFor,makeGithubDraft,readGithubApp,readGithubDraftCreate,readGithubDrafts,readGithubWriteRun,readStoredGithubApp,readStoredGithubDraft,settleGithubDraft,startGithubDraftWrite,type GithubWriteRequest} from '../../../../../core/agent/index.ts';
+import {AGENT_AUDIT_KEEP,GITHUB_DRAFT_REASONS,GITHUB_WRITE_REASONS,githubAppJwtClaims,githubDraftAttentionItem,githubDraftChange,githubDraftCreatedPath,githubDraftCreatedUrl,githubDraftHeadline,githubDraftItemId,githubDraftOutcome,githubDraftPending,githubDraftReadPath,githubDraftRequests,githubDraftSignature,
+ githubDraftResultUrl,githubDraftTarget,githubDraftTargetParts,githubWriteAuditEntry,githubWriteChange,githubWriteDraft,githubWriteGrantFor,makeGithubDraft,readGithubApp,readGithubDraftCreate,readGithubDrafts,readGithubWriteRun,readStoredGithubApp,readStoredGithubDraft,settleGithubDraft,startGithubDraftWrite,type GithubWriteRequest,type GithubWriter} from '../../../../../core/agent/index.ts';
 import {GITHUB_DRAFT_TARGET,type GithubAppCredentials,type GithubDraft,type GithubWrite} from '../../../../../contracts/github-drafts.ts';
 import type {AgentAuditEntry,Grant} from '../../../../../contracts/agent-identity.ts';
 import type {VaultService} from '../../host/services.ts';
+import {GITHUB_APP} from '../../../../../core/accounts/index.ts';
 import type {Row} from './types.ts';
 
 // GitHub drafts (core/agent/GRANTS.md#github-drafts). Core decides; this keeps the records and talks to GitHub: each
 // draft in the World's ledger (`state.github-drafts` in world.sqlite) beside its Attention item (provider `agents`), and
-// each GitHub request over GitHub's REST API as the person's GitHub App. The App's ID, installation ID and private key
-// are kept only in the vault (`github-app`); they, the token the App signs and the installation token GitHub gives for
-// it never leave this module: not to a page, an Agent, an audit entry, a log or an event. Every error here is one of
-// this module's own sentences, never a message that could carry a request. A standing GitHub write
-// (core/agent/GRANTS.md#standing-github-writes) runs the same way, at once, with no draft kept.
+// each GitHub request over GitHub's REST API as the person, through their GitHub sign-in with the Worldlet GitHub App
+// (core/applets/INTEGRATIONS.md#github-sign-in; `userToken`), or, when they connected one under Settings › Connectors ›
+// Advanced, as their own GitHub App. That App's ID, installation ID and private key are kept only in the vault
+// (`github-app`); they, the token the App signs, the installation token GitHub gives for it and the sign-in's user token
+// never leave this module: not to a page, an Agent, an audit entry, a log or an event. Every error here is one of this
+// module's own sentences, never a message that could carry a request. A new Issue or comment ends with a line naming the
+// Agent that drafted it (core githubDraftSignature). A standing GitHub write (core/agent/GRANTS.md#standing-github-writes)
+// runs the same way, at once, with no draft kept, and only as the person's own GitHub App: through the sign-in every
+// write is a draft the person approves first.
 
 export const GITHUB_APP_VAULT_KEY='github-app';
 export const GITHUB_API='https://api.github.com';
@@ -40,30 +45,40 @@ export interface GithubDrafts {
   * refused unless one of its standing GitHub write Grants reaches this repository, write and label prefix; otherwise
   * the target is read again, refused when it is not as the Agent read it, and written once. Each is audited. */
  run(agentId:string,args:Row,grants:readonly Grant[]):Promise<Row>;
- /** The GitHub App as GitHub's write identity (`githubApp`): whether one is connected, connecting one (checked with
-  * GitHub before it is kept) and disconnecting it. None of them returns the App's settings. */
+ /** The person's own GitHub App as GitHub's write identity (`githubApp`): whether one is connected, connecting one
+  * (checked with GitHub before it is kept) and disconnecting it. None of them returns the App's settings. */
  app:{status():Row;connect(input:unknown):Promise<Row>;disconnect():Row};
+ /** Who writes approved drafts now: the person's own GitHub App, the person through their GitHub sign-in, or nobody
+  * (GitHub is not connected). */
+ writer():'app'|'person'|null;
 }
 const NOT_READY='Worldlet is not ready for this yet: the person has not finished setting up their own World.';
 export const GITHUB_DRAFT_MESSAGES=Object.freeze({
- noApp:'GitHub writes need a GitHub App. The person connects one in Settings › Agent › Connections.',
+ noApp:'GitHub writes need GitHub connected. The person connects it in Settings › Connectors.',
+ standingNeedsApp:'Changing GitHub without asking needs the person\'s own GitHub App, under Settings › Connectors › Advanced. Draft the change instead; the person approves it.',
+ signedOut:'GitHub no longer accepts the sign-in. The person connects GitHub again in Settings › Connectors.',
  keyRefused:'GitHub did not accept the GitHub App. Check its App ID and private key, then connect it again.',
  noInstallation:'GitHub does not know this installation of the GitHub App. Check the installation ID, then connect it again.',
  unreachable:'GitHub did not answer. Try again in a moment.',
- notFound:'The GitHub App cannot see this on GitHub. Check the name, and that the App is installed on that repository.',
+ notFound:'Worldlet cannot see this on GitHub. Check the name, and that Worldlet may see that repository (Choose projects on the GitHub tile in Settings › Connectors).',
  unreadable:'GitHub could not read this right now. Try again in a moment.',
  busy:'This draft is already being written.',
  lost:'GitHub did not answer the write, so it may or may not have been made. Check on GitHub before drafting it again.',
  createLost:'GitHub did not answer, so this Issue may or may not have been made. Choose Approve again to look for it on GitHub; it is not posted twice.',
- notFoundAfterStart:'Writing this Issue began but was not seen to finish, and GitHub shows no Issue with its title from the GitHub App, so it may or may not have been made. Check on GitHub before drafting it again.',
+ notFoundAfterStart:'Writing this Issue began but was not seen to finish, and GitHub shows no Issue with its title made through Worldlet, so it may or may not have been made. Check on GitHub before drafting it again.',
 });
 const TIMEOUT_MS=30_000;
 const error=(message:string):never=>{throw new Error(message);};
+/** How the audit names who wrote. */
+const as=(who:'app'|'person'|undefined)=>who==='person'?'as the person, through their GitHub sign-in':'as the GitHub App';
 const own=(value:unknown)=>value instanceof Error&&value.message?value.message:'Could not do that.';
 
-export function createGithubDrafts({ledger,vault,name,changed,fetch=globalThis.fetch as unknown as GithubFetch,api=GITHUB_API,userAgent='Worldlet',
+/** `userToken`: the person's GitHub sign-in with the Worldlet GitHub App (McpAccounts), its user token renewed when it
+ * has expired (`force`: also when GitHub just refused it); null when GitHub is not signed in that way. `signedIn`: whether
+ * it is, without asking GitHub. */
+export function createGithubDrafts({ledger,vault,name,changed,userToken=async()=>null,signedIn=()=>false,fetch=globalThis.fetch as unknown as GithubFetch,api=GITHUB_API,userAgent='Worldlet',
  now=()=>new Date().toISOString(),clock=()=>Date.now(),newId=()=>crypto.randomUUID()}:
- {ledger:()=>DraftLedger|null;vault:VaultService;name:(agentId:string)=>string;changed:()=>void;fetch?:GithubFetch;api?:string;userAgent?:string;now?:()=>string;clock?:()=>number;newId?:()=>string}):GithubDrafts {
+ {ledger:()=>DraftLedger|null;vault:VaultService;name:(agentId:string)=>string;changed:()=>void;userToken?:(force?:boolean)=>Promise<string|null>;signedIn?:()=>boolean;fetch?:GithubFetch;api?:string;userAgent?:string;now?:()=>string;clock?:()=>number;newId?:()=>string}):GithubDrafts {
  const load=(db:DraftLedger)=>db.githubDrafts().flatMap(row=>{const draft=readStoredGithubDraft(row);return draft?[draft]:[];});
  const save=(db:DraftLedger,draft:GithubDraft,origin:'user'|'agent')=>db.saveGithubDraft(draft as unknown as Row,githubDraftAttentionItem(draft,name(draft.agentId)) as Row,origin);
  const audit=(db:DraftLedger,draft:GithubDraft,action:string,decision:AgentAuditEntry['decision'],reason:string,at:string)=>{
@@ -108,17 +123,38 @@ export function createGithubDrafts({ledger,vault,name,changed,fetch=globalThis.f
   if(answer.status!==201||typeof value?.token!=='string'||!value.token)return error(GITHUB_DRAFT_MESSAGES.unreachable);
   return {token:value.token,until:(Number.isFinite(expires)?expires:clock()+600_000)-60_000};
  }
- async function token():Promise<string> {
-  if(installation&&installation.until>clock())return installation.token;
-  const app=readStoredGithubApp(vault.get(GITHUB_APP_VAULT_KEY));
-  if(!app)return error(GITHUB_DRAFT_MESSAGES.noApp);
-  installation=await exchange(app);
-  return installation.token;
+ const ownApp=()=>readStoredGithubApp(vault.get(GITHUB_APP_VAULT_KEY));
+ /** Who writes, and how GitHub shows what they made: the person's own App when one is connected, else the person
+  * through the sign-in. */
+ function writer():{as:'app';by:GithubWriter}|{as:'person';by:GithubWriter}|null {
+  const app=ownApp();
+  if(app)return {as:'app',by:{appId:app.appId}};
+  return signedIn()?{as:'person',by:{clientId:GITHUB_APP.clientId,slug:GITHUB_APP.slug}}:null;
  }
- /** The target as it is now, or null when it is gone (deleted, moved, or the App can no longer see it). */
+ async function token(force=false):Promise<string> {
+  const app=ownApp();
+  if(app){
+   if(!force&&installation&&installation.until>clock())return installation.token;
+   installation=await exchange(app);
+   return installation.token;
+  }
+  let user:string|null;
+  try{user=await userToken(force);}catch{return error(GITHUB_DRAFT_MESSAGES.unreachable);}
+  if(user)return user;
+  return error(signedIn()?GITHUB_DRAFT_MESSAGES.signedOut:GITHUB_DRAFT_MESSAGES.noApp);
+ }
+ /** GitHub refused the token: the own App's is asked for again next time; the sign-in's is renewed once, here. */
+ const refusedToken=async()=>{
+  if(ownApp()){installation=null;return error(GITHUB_DRAFT_MESSAGES.keyRefused);}
+  return token(true);
+ };
+ /** The target as it is now, or null when it is gone (deleted, moved, or Worldlet can no longer see it). */
  async function target(write:GithubWrite,parts:{owner:string;repo:string;number?:number}) {
-  const answer=await request('GET',githubDraftReadPath(write,parts),await token());
-  if(answer.status===401){installation=null;error(GITHUB_DRAFT_MESSAGES.keyRefused);}
+  let answer=await request('GET',githubDraftReadPath(write,parts),await token());
+  if(answer.status===401){
+   answer=await request('GET',githubDraftReadPath(write,parts),await refusedToken());
+   if(answer.status===401)error(GITHUB_DRAFT_MESSAGES.signedOut);
+  }
   if([301,302,307,308,404,410].includes(answer.status))return null;
   if(answer.status!==200)return error(GITHUB_DRAFT_MESSAGES.unreadable);
   return githubDraftTarget(write==='issue.create'?'repository':'issue',answer.json,parts);
@@ -180,24 +216,24 @@ export function createGithubDrafts({ledger,vault,name,changed,fetch=globalThis.f
     // A create that began before and was not seen to finish (Worldlet stopped mid-write): look for the Issue it made
     // instead of posting it again; if there is none, say it is unknown rather than risk a second Issue.
     if(draft.writeStartedAt){
-     const app=readStoredGithubApp(vault.get(GITHUB_APP_VAULT_KEY));
-     if(!app)error(GITHUB_DRAFT_MESSAGES.noApp);
+     const who=writer();
+     if(!who)error(GITHUB_DRAFT_MESSAGES.noApp);
      const listed=await request('GET',githubDraftCreatedPath(draft),await token());
-     if(listed.status===401)installation=null;
+     if(listed.status===401&&who!.as==='app')installation=null;
      if(listed.status!==200)error(GITHUB_DRAFT_MESSAGES.unreadable);
-     const url=githubDraftCreatedUrl(draft,listed.json,app!.appId),at=now();
+     const url=githubDraftCreatedUrl(draft,listed.json,who!.by),at=now();
      const next=url?settleGithubDraft(draft,'written',at,{resultUrl:url}):settleGithubDraft(draft,'unknown',at,{reason:GITHUB_DRAFT_MESSAGES.notFoundAfterStart});
-     save(db!,next,'user');audit(db!,next,'approve','allowed',url?'The person approved; found already written to GitHub as the GitHub App: '+url:'The person approved; '+GITHUB_DRAFT_MESSAGES.notFoundAfterStart,at);changed();
+     save(db!,next,'user');audit(db!,next,'approve','allowed',url?`The person approved; found already written to GitHub ${as(who!.as)}: ${url}`:'The person approved; '+GITHUB_DRAFT_MESSAGES.notFoundAfterStart,at);changed();
      return url?{ok:true,status:'written',url}:{ok:true,status:'unknown',reason:next.reason};
     }
-    // Read again, as the App, right before writing: anything not as it was refuses the whole draft.
+    // Read again, as the writer, right before writing: anything not as it was refuses the whole draft.
     const change=githubDraftChange(draft,await target(draft.write,githubDraftTargetParts(draft)));
     if(change){
      const at=now(),next=settleGithubDraft(draft,'stale',at,{reason:change});
      save(db!,next,'user');audit(db!,next,'approve','denied','The person approved, but the target changed on GitHub: '+change,at);changed();
      return {ok:true,status:'stale',reason:change};
     }
-    const {requests,result}=githubDraftRequests(draft);
+    const who=writer(),{requests,result}=githubDraftRequests(draft,githubDraftSignature(name(draft.agentId)));
     // A new Issue is the one write a later read cannot tell was made, so it is recorded as begun before GitHub is asked.
     let begun=draft;
     if(draft.write==='issue.create'){begun=startGithubDraftWrite(draft,now());save(db!,begun,'user');}
@@ -218,7 +254,7 @@ export function createGithubDrafts({ledger,vault,name,changed,fetch=globalThis.f
     }
     const url=result==='response'?githubDraftResultUrl(draft,answer):draft.target.url;
     const next=settleGithubDraft(begun,'written',at,{resultUrl:url,...outcome.reason?{reason:outcome.reason}:{}});
-    save(db!,next,'user');audit(db!,next,'approve','allowed','The person approved; written to GitHub as the GitHub App: '+url+(outcome.reason?' '+outcome.reason:''),at);changed();
+    save(db!,next,'user');audit(db!,next,'approve','allowed',`The person approved; written to GitHub ${as(who?.as)}: `+url+(outcome.reason?' '+outcome.reason:''),at);changed();
     return {ok:true,status:'written',url,...outcome.reason?{reason:outcome.reason}:{}};
    }finally{running.delete(key);}
   },
@@ -259,6 +295,8 @@ export function createGithubDrafts({ledger,vault,name,changed,fetch=globalThis.f
     key=`${run.owner}/${run.repoName}#${run.number}`.toLowerCase();
     if(writing.has(key)){key='';return {error:GITHUB_WRITE_REASONS.busy};}
     writing.add(key);
+    // Only as the person's own GitHub App: through the sign-in, every write is a draft the person approves first.
+    if(!ownApp()){record(githubWriteAuditEntry(agentId,grant.id,headline,{written:false,reason:GITHUB_DRAFT_MESSAGES.standingNeedsApp},at));return {error:GITHUB_DRAFT_MESSAGES.standingNeedsApp};}
     // Read as the App right before writing: anything not as the Agent read it refuses the whole write.
     const found=await target('issue.comment',parts),change=githubWriteChange(run,found);
     const current=found?{current:{state:found.state,updatedAt:found.updatedAt,title:found.title,url:found.url,...found.labels?{labels:found.labels}:{}}}:{};
@@ -266,7 +304,7 @@ export function createGithubDrafts({ledger,vault,name,changed,fetch=globalThis.f
      record(githubWriteAuditEntry(agentId,grant.id,headline,{written:false,reason:change},now()));
      return {error:change,status:'stale',...current,untrustedContent:true};
     }
-    const draft=githubWriteDraft(run,agentId,found!,at),{requests,result}=githubDraftRequests(draft),{refused,answer}=await write(requests);
+    const draft=githubWriteDraft(run,agentId,found!,at),{requests,result}=githubDraftRequests(draft,githubDraftSignature(name(agentId))),{refused,answer}=await write(requests);
     if(refused){
      record(githubWriteAuditEntry(agentId,grant.id,headline,{written:false,reason:refused},now()));
      return {error:refused,status:'failed',untrustedContent:true};
@@ -288,5 +326,6 @@ export function createGithubDrafts({ledger,vault,name,changed,fetch=globalThis.f
    },
    disconnect(){vault.delete(GITHUB_APP_VAULT_KEY);installation=null;return {ok:true,connected:false};},
   },
+  writer(){return writer()?.as??null;},
  };
 }

@@ -38,8 +38,9 @@ export async function showWorldletAccounts(target:HTMLElement,call:(action:strin
  if(current())await showAgentConnections(target,call,current);
 }
 
-/** GitHub writes (core/agent/GRANTS.md#github-drafts): the GitHub App that writes the GitHub drafts the person approves,
- * so writes show as that App. Its App ID, installation ID and private key go to the host once, are checked with GitHub
+/** Your own GitHub App (core/agent/GRANTS.md#github-drafts), under Settings › Connectors › Advanced: GitHub drafts the
+ * person approves are written through their GitHub sign-in by default; connecting their own App writes them as that App
+ * instead (and allows standing writes). Its App ID, installation ID and private key go to the host once, are checked with GitHub
  * and kept only in the vault; the page never gets them back and clears the fields at once. */
 export async function showGithubApp(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){
  const box=el('div','companion-settings-github-app'),said=el('p','companion-settings-status');said.setAttribute('role','status');
@@ -55,14 +56,14 @@ export async function showGithubApp(target:HTMLElement,call:(action:string,body?
   const status=await call('githubApp',{operation:'status'}).catch(()=>null);if(!current())return;
   const row=el('div','companion-settings-row'),text=el('div');
   if(status?.connected){
-   text.append(el('strong','','GitHub writes'),el('span','','A GitHub App writes what you approve. It shows on GitHub as that App.'));
+   text.append(el('strong','','Your own GitHub App'),el('span','','Your GitHub App writes what you approve. It shows on GitHub as that App.'));
    row.append(text,button('Disconnect',async()=>{try{await call('githubApp',{operation:'disconnect'});said.textContent='';await draw();}catch(e){said.textContent=(e as Error).message||'Could not disconnect.';}}));
-   box.replaceChildren(el('h5','companion-settings-subhead','GitHub writes'),row);
+   box.replaceChildren(el('h5','companion-settings-subhead','Your own GitHub App'),row);
    return;
   }
   const app=field('App ID'),installation=field('Installation ID'),key=field('Private key',true);
   key.placeholder='Private key (the whole .pem file)';
-  text.append(el('strong','','GitHub writes'),el('span','','Connect a GitHub App to write the GitHub changes your Agents draft, once you approve each one. Its key stays on this computer.'),app,installation,key);
+  text.append(el('strong','','Your own GitHub App'),el('span','','Changes you approve are written as you, through your GitHub sign-in. To write them as your own GitHub App instead, connect it here. Its key stays on this computer.'),app,installation,key);
   row.append(text,button('Connect',async()=>{
    const body={operation:'connect',appId:app.value.trim(),installationId:installation.value.trim(),privateKey:key.value};
    // The key leaves the page once: the field is cleared before GitHub answers.
@@ -70,7 +71,7 @@ export async function showGithubApp(target:HTMLElement,call:(action:string,body?
    try{await call('githubApp',body);said.textContent='GitHub App connected.';await draw();}
    catch(e){said.textContent=(e as Error).message||'Could not connect the GitHub App.';}
   }));
-  box.replaceChildren(el('h5','companion-settings-subhead','GitHub writes'),row);
+  box.replaceChildren(el('h5','companion-settings-subhead','Your own GitHub App'),row);
  }
  target.append(box,said);
  await draw();
