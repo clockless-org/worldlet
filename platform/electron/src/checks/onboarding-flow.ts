@@ -46,7 +46,9 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  if(!disposable||path.resolve(disposable)!==path.resolve(store.root))throw Error('needs a disposable library: start with WORLDLET_PROFILE_ROOT (npm run test:onboarding)');
  if(store.state.onboarding?.completed===true||store.state.connections.length||store.sampleEnabled())throw Error('the library is not fresh: '+store.root);
  const agentId=host.optional<AgentService>(AGENT)?.id;
- if(agentId!=='local-codex')throw Error(`Fox's Agent is ${agentId??'missing'}, not the local Codex CLI the launcher chose: install the Codex CLI where Worldlet looks for it`);
+ // The launcher's choice (scripts/test-agent.ts): Codex, or Claude Code with WORLDLET_TEST_AGENT=claude-code.
+ const expectedAgent=process.env.WORLDLET_TEST_AGENT==='claude-code'?'local-claude-code':'local-codex';
+ if(agentId!==expectedAgent)throw Error(`Fox's Agent is ${agentId??'missing'}, not ${expectedAgent}, which the launcher chose: install it where Worldlet looks for it`);
  // A person is going through first run: synthetic input never resets the system idle clock, and an
  // unattended release host's own idle time must not hold Attention back.
  host.provide<UserActivityService>(USER_ACTIVITY,{idleSeconds:()=>0});
