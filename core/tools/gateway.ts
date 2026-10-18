@@ -94,7 +94,7 @@ function buildWorldActions(sample:boolean):WorldAction[]{
  // board" name.
  operations('board','world_board');
  for(const action of actions.filter(a=>a.tool==='world_board'))action.parameters.required=action.action==='define'?['definition','expectedRevision']:[];
- // The World's saved Service context (core/accounts/services/context.ts): each its own Grant target, which every "Can
+ // The World's saved Service context (core/context/service-context.ts): each its own Grant target, which every "Can
  // read <Service>" names; an answer holds only the Services the Agent may read.
  operations('context','world_context');
  for(const action of actions.filter(a=>a.tool==='world_context'))action.parameters.required=action.action==='search'?['query']:['id'];

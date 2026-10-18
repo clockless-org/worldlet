@@ -2,8 +2,8 @@
 // read, across what the World keeps up to date from each connected Service (service-sync snapshots), for an Agent that
 // may read that Service. Pure: the host supplies the snapshots and which Services the calling Agent may read; nothing
 // here asks a Service anything.
-import type {ServiceSyncSnapshot} from '../../../contracts/service-sync.ts';
-import {SERVICE_PROVIDERS,SERVICE_TITLES} from '../../../contracts/services.ts';
+import type {ServiceSyncSnapshot} from '../../contracts/service-sync.ts';
+import {SERVICE_PROVIDERS,SERVICE_TITLES} from '../../contracts/services.ts';
 
 export const SERVICE_CONTEXT_LIMITS=Object.freeze({query:200,results:20,snippet:240,text:20_000});
 export const SERVICE_CONTEXT_REASONS=Object.freeze({

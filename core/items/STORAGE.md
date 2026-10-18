@@ -1,11 +1,34 @@
 # World-owned storage
 
 Chapters:
+- [Four kinds of Context](#four-kinds)
 - [World, Fox and Hermes: interaction and persistent items](#world-interaction)
 - [World tools](#world-tools)
 
 
 The upper three layers own product logic and durable user data. Organize data by **business domain**, not by Agent, Harness, model, or the Applet displaying it. Layer 02 defines rules and portable shapes; layer 03 performs local persistence. Harnesses execute requests and contribute results through contracts.
+
+<a id="four-kinds"></a>
+## Four kinds of Context
+
+Everything the World knows is Context, the center of Know in [See, Do, Know](../../docs/UI-CORE-PLATFORM.md#see-do-know). It comes in four kinds ([#676](https://github.com/clockless-org/worldlet/issues/676)). `core/context/` and `core/items/` hold its rules; the host's store (`platform/electron/src/store/`) persists it. Connections, Grants and preferences are configuration, not Context.
+
+| Kind | What it is | Who writes it | Today's storage (domains in the table below) |
+| --- | --- | --- | --- |
+| **Synced** | Bounded copies of Services and sources, with their cursors and when they were read. Can be cleared and synced again | Connectors only | Service sync (`state.service-sync-snapshots`, with `state.service-sync-jobs` and `state.service-sync-pages` as its bookkeeping); Source collection facts (`state.attention-context`); Sources (`sources` table and `sources/` files) |
+| **Recorded** | What happened and cannot be fetched again, tagged with who wrote it | Agents, the person, Fox | Conversations (`companion_turns`, `companion_notes`); Chat by place (`companion_cards`, `companion_views`); Execution journal and History (`entries`, `execution_payloads`); Execution (`state.runs`, `state.attention-budget`); Attention decisions (`state.reviews`); Agent asks (`state.agent-asks`, `agent_ask_attachments`); Agent reports; Service requests; Website recordings (`web_visits`, `web_records`); Browsing history (`browser_visits`); Brought Agents (`brought_skills`, `brought_routines`); YouTube queue; and the retired Orders (`orders`), Tracked links and Agent-saved conversations |
+| **Made** | Things created: versioned, like files | Agents under their Grants, the person, Fox | Artifacts (`artifacts`, `artifact_pages`); Moment Applets (`widgets`); Made games (`made_games`, `made_game_versions`); Ongoing things (`ongoing`); Board (`state.board`); Service presets (`state.service-presets`); drafts waiting for the person: GitHub drafts (`state.github-drafts`), PostHog and Notion drafts (`state.service-drafts`), Email drafts (`mail_reviews`); Codex coding tasks (`coding_tasks`) |
+| **Known** | Derived from the other three: memory, profile, summaries, findings. Can be rebuilt, and the person can edit it | Fox and Agents | Companion (`companion_profile`: identity and memory); Attention items (`state.items`: titles, reasons and summaries made from sources); Knowledge (`knowledge`); Derived cache (`cache/knowledge/`); the conversation and website search indexes |
+
+Configuration, not Context: Orders and wake commands and Fox's setup choices (`agent_settings`), World configuration and World preferences (`world_settings`), Source collection settings (`state.checks`), Host preferences (`preferences.json`) and credentials (`vault.json`). Built-in content ships with the app.
+
+Nothing is deleted automatically; only a retention period the person sets removes data. Known records stay when the evidence they came from is deleted. The bounds some records have today (website network records, artifact pages, execution receipts, expiring source facts, safety copies of moved files) are described with each domain below and are unchanged.
+
+**Next steps**, not built yet:
+
+1. **One envelope.** Every record carries the same envelope: source, author, time, version, derived-from and visibility.
+2. **One entry and one search.** A single read/write entry applies Grants and writes the audit, and one search covers all four kinds. Today `world_context` (`core/context/service-context.ts`) searches Synced Service snapshots only, and conversations and website recordings have their own indexes.
+3. **Drafts and pins.** A new Made record starts as a draft until it is used or pinned. Drafts are not deleted on their own; the person may delete them.
 
 ## One durable copy, several appropriate formats
 

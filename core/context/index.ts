@@ -9,3 +9,8 @@ export * from './analysis-request.ts';
 export * from './source-snapshot.ts';
 export * from './presentation.ts';
 export * from './world-context.ts';
+// The World's saved Service context: hourly sync of each connected Service into snapshots, the one search and read
+// across them (`world_context`) and the selected Notion pages. Connectors (core/accounts) sign in and read; Context keeps.
+export {SERVICE_SYNC_LIMITS,SERVICE_SYNC_DEFAULTS,SERVICE_SYNC_DEFAULT_MINUTES,serviceSyncDefaultId,serviceSyncDefaultPreset,serviceSyncDefaultStep,serviceSyncLine,serviceSyncReadKey,configureServiceSync,serviceSyncStart,serviceSyncFailure,serviceSyncPage,finishServiceSyncPage} from './service-sync.ts';
+export {SERVICE_CONTEXT_LIMITS,SERVICE_CONTEXT_REASONS,serviceContext} from './service-context.ts';
+export {collectNotionPage,readNotionContext} from './notion-context.ts';

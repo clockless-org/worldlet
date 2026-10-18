@@ -1,12 +1,15 @@
 // Every ui/ and core/ component, and every Electron host module, belongs to exactly one feature row in
-// docs/UI-CORE-PLATFORM.md#features (World, Applets, Companion, Attention, Tasks, Artifacts & Journal, Base).
+// docs/UI-CORE-PLATFORM.md#features (World, Applets, Companion, Attention, Tasks, Artifacts & Journal, Agents & Gate,
+// Context, Connectors, Windows, Base).
 import {readFileSync,readdirSync,statSync} from 'node:fs';
 import {join} from 'node:path';
+const FEATURES=['World','Applets','Companion','Attention','Tasks','Artifacts & Journal','Agents & Gate','Context','Connectors','Windows','Base'];
 const doc=readFileSync('docs/UI-CORE-PLATFORM.md','utf8');
-const start=doc.indexOf('## Six features and the base'),end=doc.indexOf('\n## ',start+1);
-if(start<0)throw Error('docs/UI-CORE-PLATFORM.md has no "Six features and the base" section.');
-const rows=doc.slice(start,end).split('\n').filter(line=>/^\| (World|Applets|Companion|Attention|Tasks|Artifacts & Journal|Base) \|/.test(line));
-if(rows.length!==7)throw Error(`Expected 7 feature rows, found ${rows.length}.`);
+const start=doc.indexOf('## Features and the base'),end=doc.indexOf('\n## ',start+1);
+if(start<0)throw Error('docs/UI-CORE-PLATFORM.md has no "Features and the base" section.');
+const rows=doc.slice(start,end).split('\n').filter(line=>FEATURES.some(feature=>line.startsWith(`| ${feature} |`)));
+const found=rows.map(row=>row.split('|')[1].trim());
+if(found.join('\n')!==FEATURES.join('\n'))throw Error(`Expected the feature rows ${FEATURES.join(', ')}; found ${found.join(', ')}.`);
 const owner=new Map<string,string>(),problems:string[]=[];
 for(const row of rows){
  const feature=row.split('|')[1].trim();
@@ -15,6 +18,7 @@ for(const row of rows){
   owner.set(dir,feature);
  }
 }
+const featureOf=new Map(owner);
 for(const layer of ['ui','core','platform/electron/src/modules'])for(const name of readdirSync(layer)){
  const dir=`${layer}/${name}`;
  if(layer!=='platform/electron/src/modules'&&!statSync(join(layer,name)).isDirectory())continue;
@@ -23,5 +27,45 @@ for(const layer of ['ui','core','platform/electron/src/modules'])for(const name 
  owner.delete(dir);
 }
 for(const dir of owner.keys())problems.push(`${dir} is listed in docs/UI-CORE-PLATFORM.md#features but does not exist.`);
+// The architecture diagram's lanes (docs/architecture.html) are the same features: every ui/ and core/ component sits in
+// exactly one diagram component, in the lane its feature names.
+const html=readFileSync('docs/architecture.html','utf8');
+const lanes=new Map([...html.matchAll(/^ (\w+):\{title:'([^']+)'/gm)].map(([,key,title])=>[key,title]));
+if([...lanes.values()].join('\n')!==FEATURES.join('\n'))problems.push(`docs/architecture.html lanes are ${[...lanes.values()].join(', ')}, not ${FEATURES.join(', ')}.`);
+const drawn=new Map<string,string>();
+for(const [,id,folders,lane] of html.matchAll(/^ (\w+):\['[^']*','[^']*','([^']*)',.*,'(\w+)'\],?$/gm)){
+ const feature=lanes.get(lane);
+ if(!feature){problems.push(`docs/architecture.html component ${id} names no lane (${lane}).`);continue;}
+ for(const [,dir] of folders.matchAll(/(?<![\w/])((?:ui|core)\/[a-z-]+)\//g)){
+  if(drawn.has(dir))problems.push(`${dir} is drawn twice in docs/architecture.html.`);
+  drawn.set(dir,feature);
+  if(featureOf.get(dir)!==feature)problems.push(`docs/architecture.html draws ${dir} in the ${feature} lane; docs/UI-CORE-PLATFORM.md#features lists it under ${featureOf.get(dir)??'no feature'}.`);
+ }
+}
+for(const [dir] of featureOf)if(!dir.startsWith('platform/')&&!drawn.has(dir))problems.push(`${dir} is not drawn in docs/architecture.html.`);
+// Every ui/, core/ and platform/ folder belongs to one of the four layers (docs/UI-CORE-PLATFORM.md#folders-by-layer):
+// ui/ is See, platform/ is Host, and each core/ folder is Do (moving to agent/) or Know (moving to context/), or one of
+// the folders split between them file by file (#681).
+const LAYERS:Record<string,{label:RegExp,root:string}>={See:{label:/^See$/,root:'ui'},Do:{label:/^Do\b/,root:'core'},Know:{label:/^Know\b/,root:'core'},Split:{label:/^Do and Know\b/,root:'core'},Host:{label:/^Host$/,root:'platform'}};
+const layerStart=doc.indexOf('### Folders by layer'),layerEnd=doc.indexOf('\n## ',layerStart+1);
+if(layerStart<0)problems.push('docs/UI-CORE-PLATFORM.md has no "Folders by layer" section.');
+const layerOf=new Map<string,string>();
+for(const line of doc.slice(layerStart,layerEnd).split('\n').filter(line=>/^\| [A-Z]/.test(line)&&!line.startsWith('| Layer |'))){
+ const label=line.split('|')[1].trim();
+ const layer=Object.entries(LAYERS).filter(([,rule])=>rule.label.test(label)).sort(([a],[b])=>b.length-a.length)[0]?.[0];
+ if(!layer){problems.push(`Folders by layer: "${label}" is not See, Do, Know or Host.`);continue;}
+ for(const [,dir] of line.matchAll(/`((?:ui|core|platform)\/[a-z-]+)\/`/g)){
+  if(layerOf.has(dir))problems.push(`${dir} is in two layers (${layerOf.get(dir)} and ${layer}).`);
+  else if(!dir.startsWith(LAYERS[layer].root+'/'))problems.push(`${dir} cannot be in ${layer}: that layer is ${LAYERS[layer].root}/.`);
+  layerOf.set(dir,layer);
+ }
+}
+for(const root of ['ui','core','platform'])for(const name of readdirSync(root)){
+ const dir=`${root}/${name}`;
+ if(!statSync(dir).isDirectory())continue;
+ if(!layerOf.has(dir))problems.push(`${dir} is in no layer in docs/UI-CORE-PLATFORM.md#folders-by-layer.`);
+ layerOf.delete(dir);
+}
+for(const dir of layerOf.keys())problems.push(`${dir} is in docs/UI-CORE-PLATFORM.md#folders-by-layer but does not exist.`);
 if(problems.length){console.error(problems.join('\n'));process.exit(1);}
-console.log('Feature map: every ui/ and core/ component and Electron host module belongs to one feature.');
+console.log(`Feature map: every ui/ and core/ component and Electron host module belongs to one of ${FEATURES.length} features, drawn in its lane in docs/architecture.html, and every ui/, core/ and platform/ folder is in one layer.`);

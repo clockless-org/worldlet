@@ -10,7 +10,11 @@ Shared rendering and interaction. Components, by [feature](../docs/UI-CORE-PLATF
 - Attention: attention (the Attention Center)
 - Artifacts & Journal: artifacts (the card system and the Journal book)
 - Tasks has no UI folder: its status shows in Fox and on Applets
+- Windows: web (the page a web browser opens)
+- Agents & Gate, Context and Connectors have no UI folder: their pages are in Settings beside Fox
 - Base: shell, components, onboarding, distribution
+
+This is See, the top of the four [layers](../docs/UI-CORE-PLATFORM.md#see-do-know).
 
 See the [layer and dependency contract](../docs/UI-CORE-PLATFORM.md#repository-layers).
 
