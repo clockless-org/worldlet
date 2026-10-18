@@ -44,16 +44,16 @@ for(const [,id,folders,lane] of html.matchAll(/^ (\w+):\['[^']*','[^']*','([^']*
 }
 for(const [dir] of featureOf)if(!dir.startsWith('platform/')&&!drawn.has(dir))problems.push(`${dir} is not drawn in docs/architecture.html.`);
 // Every ui/, core/ and platform/ folder belongs to one of the four layers (docs/UI-CORE-PLATFORM.md#folders-by-layer):
-// ui/ is See, platform/ is Host, and each core/ folder is Do (moving to agent/) or Know (moving to context/), or one of
+// ui/ is UI, platform/ is Platform, and each core/ folder is Agent (moving to agent/) or Context (moving to context/), or one of
 // the folders split between them file by file (#681).
-const LAYERS:Record<string,{label:RegExp,root:string}>={See:{label:/^See$/,root:'ui'},Do:{label:/^Do\b/,root:'core'},Know:{label:/^Know\b/,root:'core'},Split:{label:/^Do and Know\b/,root:'core'},Host:{label:/^Host$/,root:'platform'}};
+const LAYERS:Record<string,{label:RegExp,root:string}>={UI:{label:/^UI$/,root:'ui'},Agent:{label:/^Agent\b/,root:'core'},Context:{label:/^Context\b/,root:'core'},Split:{label:/^Agent and Context\b/,root:'core'},Platform:{label:/^Platform$/,root:'platform'}};
 const layerStart=doc.indexOf('### Folders by layer'),layerEnd=doc.indexOf('\n## ',layerStart+1);
 if(layerStart<0)problems.push('docs/UI-CORE-PLATFORM.md has no "Folders by layer" section.');
 const layerOf=new Map<string,string>();
 for(const line of doc.slice(layerStart,layerEnd).split('\n').filter(line=>/^\| [A-Z]/.test(line)&&!line.startsWith('| Layer |'))){
  const label=line.split('|')[1].trim();
- const layer=Object.entries(LAYERS).filter(([,rule])=>rule.label.test(label)).sort(([a],[b])=>b.length-a.length)[0]?.[0];
- if(!layer){problems.push(`Folders by layer: "${label}" is not See, Do, Know or Host.`);continue;}
+ const layer=LAYERS.Split.label.test(label)?'Split':Object.entries(LAYERS).find(([,rule])=>rule.label.test(label))?.[0];
+ if(!layer){problems.push(`Folders by layer: "${label}" is not UI, Agent, Context or Platform.`);continue;}
  for(const [,dir] of line.matchAll(/`((?:ui|core|platform)\/[a-z-]+)\/`/g)){
   if(layerOf.has(dir))problems.push(`${dir} is in two layers (${layerOf.get(dir)} and ${layer}).`);
   else if(!dir.startsWith(LAYERS[layer].root+'/'))problems.push(`${dir} cannot be in ${layer}: that layer is ${LAYERS[layer].root}/.`);
