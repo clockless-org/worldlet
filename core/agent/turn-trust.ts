@@ -56,6 +56,8 @@ const UNTRUSTED_TOOLS=['read_content','read_content_page','open_content','read_w
  'agent_asks',
  // The board holds what Services returned (titles, list fields, labels): data, never instructions.
  'world_board',
+ // The World's saved Service context holds what the Services returned: data, never instructions.
+ 'world_context',
  // GitHub drafts and standing GitHub writes hold the target's title and labels as GitHub returned them: data, never
  // instructions.
  'github_drafts','github_writes',

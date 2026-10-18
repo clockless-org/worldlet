@@ -268,7 +268,7 @@ for(const operation of ['list','read','search','releases'])assert.equal(decide([
 assert.equal(decide([...defaults,listOnly],'releases'),'denied');
 // "Can read GitHub" covers releases, including a Grant the person gave before GitHub had them.
 const canRead=serviceReadGrant(agent.id,'github',now)!;
-assert.deepEqual(canRead.targets,['github/list','github/read','github/search','github/releases']);
+assert.deepEqual(canRead.targets,['github/list','github/read','github/search','github/releases','context/search','context/read'],'and the saved context\'s search and read');
 const earlier={...canRead,targets:['github/list','github/read','github/search']};
 assert.equal(decide([earlier],'releases'),'denied');
 assert.equal(decide([currentServiceGrant(earlier)],'releases'),'allowed');

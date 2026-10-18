@@ -48,7 +48,7 @@ const defaults=channelDefaultGrants(agent.id,now);
 for(const provider of NEW){
  assert.ok(!defaults.some(g=>g.targets.some(t=>t.startsWith(provider+'/'))),provider+' is not a default');
  const grant=serviceReadGrant(agent.id,provider,now)!;
- assert.deepEqual(grant.targets,[provider+'/list',provider+'/read']);
+ assert.deepEqual(grant.targets,[provider+'/list',provider+'/read','context/search','context/read'],'its reads, and its saved context in the World');
  for(const operation of ['list','read']){
   const decide=(grants:Grant[])=>standingCallDecision({identity:agent,grants,target:provider,action:operation,tool:'read_service',args:{provider,operation},foxTurn:null,now}).decision;
   assert.notEqual(decide(defaults),'allowed',`${provider}/${operation} needs its Grant`);

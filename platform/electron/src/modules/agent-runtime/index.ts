@@ -300,6 +300,7 @@ let standing:Promise<StandingWorldTools>|null=null;
 export function standingWorldTools():Promise<StandingWorldTools>|null {
  if(!agentAccess)return null;
  return standing??=openStandingWorldTools({access:agentAccess,asks:(agentId,args)=>agentAsks?agentAsks.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},
+  context:(args,canRead)=>savedContext?.(args,canRead)??{error:'Worldlet is still starting. Try again in a moment.'},
   board:(agentId,args,canRead)=>worldBoard?worldBoard.call(agentId,args,canRead):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),
   drafts:(agentId,args)=>githubDrafts?githubDrafts.call(agentId,args):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),
   artifacts:(agentId,args,readsAll)=>agentArtifacts?agentArtifacts.call(agentId,args,readsAll):{error:'Worldlet is still starting. Try again in a moment.'},
@@ -310,6 +311,8 @@ export function standingWorldTools():Promise<StandingWorldTools>|null {
   writes:(agentId,args,grants)=>githubDrafts?githubDrafts.run(agentId,args,grants):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),channel:(name,args,agent)=>channelTool?channelTool(name,args,agent):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})});
 }
 let channelTool:((name:string,args:Row,agent?:string)=>Promise<Row>)|null=null;
+/** The World's saved Service context (`context/*`), read through the sources module once the runtime is installed. */
+let savedContext:((args:Row,canRead:(provider:string)=>boolean)=>Row|undefined)|null=null;
 /** Agents' first need of a Service (service-requests.ts), made with agentAccess. */
 let serviceRequests:ServiceRequests|null=null;
 /** Each Agent's identity, Grants and audit (agent-access.ts), made when the runtime is installed. */
@@ -741,6 +744,7 @@ export function installAgentRuntime(host:Host){
   if(!sources?.readNotionContext)throw new WorldletError('Saved Notion context is unavailable.');
   return sources.readNotionContext(request);
  }));
+ savedContext=(args,canRead)=>host.optional<SourcesService>(SOURCES)?.serviceContext?.(args,canRead);
  // The board (core/board/README.md): in the person's own World with private context allowed, as asks are. Each preset is
  // read through the World's own Service readers, as the Attention Center reads a source: no Agent, no turn, no model; an
  // `agents` preset from the Agents' own reports, as `agents/list` answers.

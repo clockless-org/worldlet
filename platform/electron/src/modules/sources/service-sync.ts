@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import {SERVICE_SYNC_DEFAULTS,SERVICE_SYNC_DEFAULT_MINUTES,serviceSyncDefaultId,serviceSyncDefaultPreset,serviceSyncDefaultStep,configureServiceSync,finishServiceSyncPage,readStoredServicePreset,readNotionContext,servicePresetRead,serviceSyncFailure,serviceSyncPage,serviceSyncReadKey,serviceSyncStart,SERVICE_SYNC_LIMITS} from '../../../../../core/accounts/index.ts';
+import {SERVICE_SYNC_DEFAULTS,SERVICE_SYNC_DEFAULT_MINUTES,serviceSyncDefaultId,serviceSyncDefaultPreset,serviceSyncDefaultStep,configureServiceSync,finishServiceSyncPage,readStoredServicePreset,readNotionContext,serviceContext as searchServiceContext,servicePresetRead,serviceSyncFailure,serviceSyncPage,serviceSyncReadKey,serviceSyncStart,SERVICE_SYNC_LIMITS} from '../../../../../core/accounts/index.ts';
 import {dueSourceCheck,nextSourceWake} from '../../../../../core/tasks/index.ts';
 import type {ServicePreset} from '../../../../../contracts/service-presets.ts';
 import type {ServiceRead} from '../../../../../contracts/services.ts';
@@ -154,10 +154,22 @@ export function createServiceSync({ledger,authorize,read,changed=()=>{},now=()=>
   });
   return readNotionContext(snapshots,request);
  }
+ /** The saved context of every Service sync that is current (its connection and preset as configured, on), for
+  * `context/search` and `context/read`; only Services `canRead` allows. Errors are core's own plain sentences. */
+ function serviceContext(request:Row,canRead:(provider:string)=>boolean):Row {
+  try{
+   const store=db();
+   const snapshots=jobs(store).filter(job=>job.provider!=='notion'&&current(store,job)).flatMap(job=>{
+    const snapshot=store.value(SNAPSHOTS,job.id) as ServiceSyncSnapshot|null;
+    return snapshot?[snapshot]:[];
+   });
+   return searchServiceContext(snapshots,request,canRead);
+  }catch(error){return {error:error instanceof Error&&error.message?error.message:'Could not search the saved context.'};}
+ }
  /** After a Service connects: its default sync now, and a run right away instead of at the next wake. */
  function connected(){
   if(!ensureDefaults()||stopped||!timer)return;
   clearTimeout(timer);timer=setTimeout(()=>void wake(),0);timer.unref?.();
  }
- return {handle,tick,notionContext,ensureDefaults,connected,start(){if(timer)return;stopped=false;timer=setTimeout(()=>void wake(),0);timer.unref?.();},stop(){stopped=true;clearTimeout(timer);timer=undefined;for(const controller of active.values())controller.abort();}};
+ return {handle,tick,notionContext,serviceContext,ensureDefaults,connected,start(){if(timer)return;stopped=false;timer=setTimeout(()=>void wake(),0);timer.unref?.();},stop(){stopped=true;clearTimeout(timer);timer=undefined;for(const controller of active.values())controller.abort();}};
 }
