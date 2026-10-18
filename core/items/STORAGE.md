@@ -11,7 +11,7 @@ The upper three layers own product logic and durable user data. Organize data by
 <a id="four-kinds"></a>
 ## Four kinds of Context
 
-Everything the World knows is Context, the center of Know in [See, Do, Know](../../docs/UI-CORE-PLATFORM.md#see-do-know). It comes in four kinds ([#676](https://github.com/clockless-org/worldlet/issues/676)). `core/context/` and `core/items/` hold its rules; the host's store (`platform/electron/src/store/`) persists it. Connections, Grants and preferences are configuration, not Context.
+Everything the World knows is Context, the third of the [four layers](../../docs/UI-CORE-PLATFORM.md#see-do-know). It comes in four kinds ([#676](https://github.com/clockless-org/worldlet/issues/676)). `core/context/` and `core/items/` hold its rules; the host's store (`platform/electron/src/store/`) persists it. Connections, Grants and preferences are configuration, not Context.
 
 | Kind | What it is | Who writes it | Today's storage (domains in the table below) |
 | --- | --- | --- | --- |
