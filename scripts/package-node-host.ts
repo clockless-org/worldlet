@@ -1,10 +1,15 @@
 // Packages the Node host (platform/node) for Linux: `worldlet-server-<label>-linux-<arch>.tar.gz` for x64 and arm64,
-// each holding the program (worldlet.cjs), the interface build it serves (WorldletWeb), a pinned Node for that
+// each holding the program (worldlet.cjs), the interface build it serves (WorldletWeb), Worldlet's Google Desktop OAuth
+// registration (GoogleOAuthClient.json, app identity only: scripts/google-oauth-windows.ts), a pinned Node for that
 // architecture, the `bin/worldlet` command and SHA256SUMS of every file. Beside them: each tarball's `.sha256`, the
 // record `worldlet-server-<label>-linux.json` and `release.json` (the identity), as `ci-release.mjs publish --platform
 // linux` reads them. install.sh unpacks one into ~/.worldlet/<label> (platform/install/README.md#linux).
 //
 //   node scripts/package-node-host.ts [--out dist/ci/linux] [--arch x64,arm64] [--reuse-web]
+//
+// The Google registration comes from WORLDLET_GOOGLE_CLIENT_FILE or .local/google-oauth-client.json. A release (with
+// WORLDLET_RELEASE_MANIFEST, as the release machine builds it) refuses to package without one, so Google sign-in never
+// says it is not configured on an installed service; a local try packages without it and says so.
 //
 // --reuse-web packages the dist/WorldletWeb already built instead of building it again (a local try; a release builds
 // it fresh). The Node tarballs are downloaded once into dist/node-cache and must match the hashes pinned here.
@@ -16,6 +21,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {buildInfo} from './build-info.ts';
 import {labelOf} from './ci-release.mjs';
+import {stageGoogleRegistration} from './google-oauth-windows.ts';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 /** The Node every Linux package carries: the version CI tests with, and nodejs.org's SHASUMS256.txt for it. */
@@ -56,6 +62,11 @@ try{
   fs.mkdirSync(path.join(stage,'bin'),{recursive:true});
   fs.copyFileSync(path.join(program,'worldlet.cjs'),path.join(stage,'worldlet.cjs'));
   fs.cpSync(web,path.join(stage,'WorldletWeb'),{recursive:true,filter:source=>path.basename(source)!=='.dev-reload'});
+  // Beside worldlet.cjs, where the host looks for it (platform/node main.ts sets resourcesPath to the program's folder).
+  if(!stageGoogleRegistration(root,stage)){
+   if(process.env.WORLDLET_RELEASE_MANIFEST)throw Error('A release of the Linux service needs Worldlet\'s Google registration: set WORLDLET_GOOGLE_CLIENT_FILE, or place it at .local/google-oauth-client.json.');
+   console.log('No Google registration: this package\'s Google sign-in will say it is not configured.');
+  }
   const unpacked=path.join(work,'node-'+arch);fs.mkdirSync(unpacked);
   run('tar',['-xzf',node,'-C',unpacked]);
   const top=path.join(unpacked,`node-v${NODE_VERSION}-linux-${arch}`);

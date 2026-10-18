@@ -378,8 +378,9 @@ ARM64 Windows builds are not produced.
   and Microsoft Edge for the Playwright download-page check.
 - **Google registration:** packaging bundles `GoogleOAuthClient.json` from
   `WORLDLET_GOOGLE_CLIENT_FILE` or `.local/google-oauth-client.json` (the release job
-  defaults to the latter). The MSIX and Steam generators refuse a payload without it;
-  the EXE installer builder does not check for it.
+  defaults to the latter). The EXE installer, MSIX and Steam generators each refuse a
+  payload without it, so an installed copy never says Google sign-in is not configured
+  (`scripts/google-client-release-check.ts`).
 - The Windows Build is the commit's Build, the same as the Mac one (4000 + its position on
   `main`, [build-info.ts](../../scripts/build-info.ts)).
 

@@ -14,6 +14,9 @@ const payload=realpathSync(value('--payload')||path.join(root,'dist/packages/Wor
 const identity=JSON.parse(readFileSync(path.join(payload,'build-identity.json'),'utf8'));
 if(identity.platform!=='windows'||identity.architecture!=='x64'||!/^\d+\.\d+\.\d+$/.test(identity.version)||!Number.isInteger(identity.build)||identity.build<1||identity.build>65535)throw Error('Expected a Windows x64 package identity.');
 for(const file of ['Worldlet.exe','Worldlet.ico','resources/app.asar','resources/WorldletWeb/index.html','resources/HermesBootstrap/uv.exe','resources/agent-browser.exe'])if(!existsSync(path.join(payload,file)))throw Error('Incomplete Windows package: '+file);
+// Worldlet's Google registration, as the MSIX and Steam packages require it: without it Google sign-in says it is not
+// configured. package-electron.ts stages it from WORLDLET_GOOGLE_CLIENT_FILE or .local/google-oauth-client.json.
+if(!existsSync(path.join(payload,'resources/GoogleOAuthClient.json')))throw Error('Incomplete Windows package: resources/GoogleOAuthClient.json. Set WORLDLET_GOOGLE_CLIENT_FILE, or place the registration at .local/google-oauth-client.json, and package again.');
 const compiler=process.env.WORLDLET_MAKENSIS||path.join(root,'.local/tools/nsis-3.12/makensis.exe');
 const run=(exe:string,args:string[])=>{const result=spawnSync(exe,args,{cwd:root,stdio:'inherit'});if(result.error)throw result.error;if(result.status!==0)throw Error(`${path.basename(exe)} failed (${result.status}).`);};
 const version=spawnSync(compiler,['/VERSION'],{encoding:'utf8'});
