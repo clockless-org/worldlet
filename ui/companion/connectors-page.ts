@@ -4,6 +4,8 @@ import {SERVICE_PROVIDERS} from '../../contracts/services.ts';
 import {agentButton as button,agentEl as el} from './agent-change.ts';
 import {showGithubApp,showHttpJson,showSearchConsole} from './worldlet-accounts.ts';
 import {showUseInClaude} from './remote-access.ts';
+import {chooseProjectsButton,listenForSignInCode,signInCodeBox} from './sign-in-code.ts';
+import type {SignInCode} from '../../contracts/platform.ts';
 
 type Call=(action:string,body?:any)=>Promise<any>;
 /** The services that connect with a key, under Advanced › Connect with a key (Search Console and HTTP JSON have boxes
@@ -21,6 +23,8 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
  // The connector whose sign-in is open now; the one asking "Disconnect?"; what a tile last said after Connect failed.
  let waiting:string|null=null,asking:string|null=null;
  const notes=new Map<string,string>();
+ // The code a sign-in gave to type on the service's own page (GitHub), while it waits.
+ let code:SignInCode|null=null;
  let connections:any[]=[];
  // What a signed-in service lets the person choose (PostHog's projects), by connector.
  const picks=new Map<string,{choices:{id:string;name:string}[];chosen:string|null}>();
@@ -57,7 +61,10 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
   else if(item.state==='off'&&item.signIn)actions.append(button('Connect','connect',()=>signIn(item),true));
   else if(item.state==='needs-you')actions.append(button('Sign in again','sign-in-again',()=>signIn(item),true));
   else if(item.state==='connected'&&asking!==item.id)actions.append(button('Disconnect','disconnect',()=>{asking=item.id;notes.delete(item.id);render();}));
+  // GitHub shows only the projects the person chose on GitHub's own page.
+  if(item.state==='connected'&&item.id==='github'&&asking!==item.id)actions.prepend(chooseProjectsButton(call,text=>{said.textContent=text;}));
   box.append(words);
+  if(item.state==='waiting'&&code)box.append(signInCodeBox(call,code,item.name,text=>{said.textContent=text;}));
   const pick=item.state==='connected'?picks.get(item.id):undefined;
   if(pick&&asking!==item.id){
    const kind=connector(item.id)?.pick??'one';
@@ -122,12 +129,13 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
  }
  async function signIn(item:ConnectorTile){
   if(waiting)return;
-  waiting=item.id;asking=null;notes.delete(item.id);said.textContent='';render();
+  waiting=item.id;asking=null;notes.delete(item.id);said.textContent='';code=null;render();
+  const stop=listenForSignInCode(item.provider,shown=>{code=shown;if(waiting===item.id)render();});
   try{
    await call('connect',{provider:item.provider,...item.region?{region:item.region}:{}});
    said.textContent=`${item.name} is connected.`;
   }catch(e){notes.set(item.id,connectorFailure(item.name,(e as Error).message));}
-  finally{waiting=null;}
+  finally{waiting=null;code=null;stop();}
   await draw();await searchConsole();
  }
  page.append(grid,

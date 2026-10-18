@@ -20,3 +20,4 @@ export {helpNarration,narrateHelp} from './help-narration.ts';
 export {mountPhoneBridge} from './phone-bridge.ts';
 export {pairingQR} from './companion-phone.ts';
 export {routineTimePicker,routineWhenLine,scheduleWhen} from './agent-routines.ts';
+export {copyAndOpen,listenForSignInCode} from './sign-in-code.ts';

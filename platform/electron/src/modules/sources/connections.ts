@@ -8,6 +8,7 @@ import {referenceDate} from '../../store/world-store.ts';
 import {APPLE_PROVIDERS,connectApple} from './apple.ts';
 import {nativeFirst} from './content.ts';
 import {GOOGLE_SIGN_IN,SOURCE_PROVIDERS,WORLD_APPS,connectSettings,connectToken} from '../../../../../core/applets/index.ts';
+import {SIGN_IN_CODE_EVENT} from '../../../../../contracts/platform.ts';
 import {isMigrationSource} from '../../../../../core/agent/index.ts';
 import {agentIntegrationPlans} from '../agent-runtime/agent-integrations.ts';
 import {IMPORT_REGIONS} from './context.ts';
@@ -76,6 +77,7 @@ export function createConnections(ctx:SourcesContext){
    await ctx.sourceConnections().connect({provider,target:'',endpoint:'',token,...pasted?{settings}:{},home:ctx.home(),mock,
     // Sign-in stages reach the page as they happen (contracts/platform.ts GOOGLE_SIGN_IN_EVENT).
     onStage:(stage,url)=>host.page.event('worldlet:google-sign-in',url?{stage,url}:stage),
+    onCode:code=>host.page.event(SIGN_IN_CODE_EVENT,code),
     onConnected:receipt=>acceptAgentConnection({id:typeof (receipt as Row).id==='string'?(receipt as Row).id:`${ctx.accountsId()}-${receipt.provider}`,provider:receipt.provider,target:receipt.target,status:'connected',connector:receipt.connector},region)});
    connected=true;store.status='Connected. Ask Fox to find or read your information.';
    if(GOOGLE_SIGN_IN.includes(provider)&&store.state.cloudConsent&&ctx.agent().supportsBackgroundChecks)checking=startOnboardingMailCheck();

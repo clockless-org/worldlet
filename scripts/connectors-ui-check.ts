@@ -16,7 +16,7 @@ await withBrowser(async browser=>{
  await page.addScriptTag({content:await bundleScript({entryPoints:['ui/companion/connectors-page.ts'],globalName:'ConnectorsPage'})});
  await page.evaluate(async()=>{
   const w=window as any;w.calls=[];w.connections=[{provider:'github',label:'GitHub',transport:'hermes',syncStatus:'connected',connected:true,failed:false}];
-  w.pending=null;w.refuse=null;w.chosen='2';w.copied=[];
+  w.pending=null;w.refuse=null;w.chosen='2';w.opened=[];w.copied=[];
   w.remote={enabled:false,connected:true,address:'https://mcp.worldlet.ai/'+'0'.repeat(32),connectors:[]};
   Object.defineProperty(navigator,'clipboard',{value:{writeText:async(text:string)=>{w.copied.push(text);}}});
   // The Agents that have reached the World, and which may read which Service ("<agent>:<provider>").
@@ -38,6 +38,7 @@ await withBrowser(async browser=>{
    if(action==='connectCancel'){w.pending?.reject(Error('Sign-in was cancelled.'));w.pending=null;return {ok:true};}
    if(action==='disconnectSource'){w.connections=w.connections.filter((c:any)=>c.provider!==body.provider);return {ok:true};}
    if(action==='githubApp')return {connected:false};
+   if(action==='openSystemBrowser'){w.opened.push(body.url);return {ok:true};}
    if(action==='httpJson')return {endpoints:[]};
    // Remote access, for "Use your World in Claude or ChatGPT": off at first.
    if(action==='remoteMcp'&&body.operation==='status')return structuredClone(w.remote);
@@ -126,6 +127,22 @@ await withBrowser(async browser=>{
  await page.evaluate(()=>(window as any).pending.resolve());
  await tile('notion').getByText('Connected',{exact:true}).waitFor();
  await page.getByText('Notion is connected.',{exact:true}).waitFor();
+ // GitHub signs in with its code: the code in large type, Copy and open GitHub copies it and opens GitHub's page; once
+ // connected, Choose projects opens GitHub's page for which projects Worldlet may see.
+ await page.evaluate(()=>{const w=window as any;w.connections=w.connections.filter((c:any)=>c.provider!=='github');return w.draw();});
+ await tile('github').getByRole('button',{name:'Connect',exact:true}).click();
+ await tile('github').getByText("Paste the code on GitHub's page and choose Authorize, then come back here.",{exact:true}).waitFor();
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:sign-in-code',{detail:{provider:'github',code:'WDJB-MJHT',url:'https://github.com/login/device'}})));
+ await tile('github').getByText('WDJB-MJHT',{exact:true}).waitFor();
+ await tile('github').getByRole('button',{name:'Copy and open GitHub',exact:true}).click();
+ await page.getByText('Copied WDJB-MJHT. Paste it on the page that opened and choose Authorize.',{exact:true}).waitFor();
+ assert.deepEqual(await page.evaluate(()=>[(window as any).copied.slice(-1),(window as any).opened]),[['WDJB-MJHT'],['https://github.com/login/device']]);
+ await plain('GitHub code');
+ await page.evaluate(()=>(window as any).pending.resolve());
+ await page.getByText('GitHub is connected.',{exact:true}).waitFor();
+ assert.equal(await tile('github').locator('[data-sign-in-code]').count(),0,'the code goes once it is connected');
+ await tile('github').getByRole('button',{name:'Choose projects',exact:true}).click();
+ assert.equal(await page.evaluate(()=>(window as any).opened.at(-1)),'https://github.com/apps/worldlet/installations/new');
  // Cancel ends the sign-in and says nothing changed.
  await tile('todoist').getByRole('button',{name:'Connect',exact:true}).click();
  await tile('todoist').getByRole('button',{name:'Cancel',exact:true}).click();
@@ -209,4 +226,4 @@ await withBrowser(async browser=>{
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'narrow settings do not overflow horizontally');
  if(screenshot)await page.screenshot({path:screenshot.replace(/\.png$/,'-narrow.png'),fullPage:true});
 });
-console.log('PASS Settings › Connectors: using the World in Claude or ChatGPT (steps, Turn on, Copy address without showing it), sign-in tiles with Connect, waiting and Cancel, Connected as, Disconnect asks once, plain words for a refusal and a sign-out, who may use it (the Agent in use on, Choose Agents), the PostHog project and Cloudflare account choices, Search Console signing in with Google, key services shown connected, keys and addresses only under Advanced, no technical word on the default path, narrow layout');
+console.log('PASS Settings › Connectors: using the World in Claude or ChatGPT (steps, Turn on, Copy address without showing it), GitHub\'s code with Copy and open GitHub and Choose projects, sign-in tiles with Connect, waiting and Cancel, Connected as, Disconnect asks once, plain words for a refusal and a sign-out, who may use it (the Agent in use on, Choose Agents), the PostHog project and Cloudflare account choices, Search Console signing in with Google, key services shown connected, keys and addresses only under Advanced, no technical word on the default path, narrow layout');

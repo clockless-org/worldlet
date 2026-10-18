@@ -12,7 +12,7 @@ const plain=(tiles:ConnectorTile[])=>{for(const tile of tiles)for(const text of 
 
 // Nothing connected: the sign-in services, each with its purpose and Connect; key services and HTTP JSON stay away.
 const empty=connectorTiles([]);
-assert.deepEqual(empty.map(tile=>tile.id),['google','notion','linear','todoist','supabase','posthog','cloudflare','search-console']);
+assert.deepEqual(empty.map(tile=>tile.id),['google','notion','linear','todoist','supabase','github','posthog','cloudflare','search-console']);
 assert.ok(empty.every(tile=>tile.state==='off'&&tile.signIn));
 assert.equal(empty.find(tile=>tile.id==='google')!.provider,'gmail');
 assert.equal(empty.find(tile=>tile.id==='notion')!.region,'work');
@@ -39,7 +39,7 @@ assert.deepEqual([by('google').state,by('google').line],['connected','Connected 
 assert.deepEqual([by('notion').state,by('notion').line],['connected','Connected'],'a target that is only the service\'s name says Connected');
 assert.deepEqual([by('linear').state,by('linear').line],['needs-you','Linear signed you out. Sign in again to keep seeing it here.']);
 assert.equal(by('todoist').state,'connected','a slow read is not a sign-out');
-assert.deepEqual([by('github').state,by('github').signIn],['connected',false]);
+assert.deepEqual([by('github').state,by('github').signIn],['connected',true],'GitHub signs in with its code; a key under Advanced shows the same tile');
 assert.deepEqual([by('posthog').state,by('posthog').signIn],['connected',true],'PostHog signs in; a key under Advanced shows the same tile');
 assert.equal(by('posthog').state,'connected');
 assert.deepEqual([by('cloudflare').state,by('cloudflare').signIn],['off',true],'Cloudflare signs in too');
@@ -51,8 +51,13 @@ assert.equal(connectorTiles([row('google-calendar','alex@example.com')]).find(ti
 // Waiting: the tile whose sign-in is open says where to finish.
 const waiting=connectorTiles([],'linear').find(tile=>tile.id==='linear')!;
 assert.deepEqual([waiting.state,waiting.line],['waiting','Finish signing in on Linear, then come back here.']);
-// A key service never asks again: GitHub signed out stays Connected (its key is replaced under Advanced).
-assert.equal(connectorTiles([row('github','GitHub',{syncStatus:'sync_error',failed:true,syncError:'GitHub is disconnected. Reconnect.'})]).find(tile=>tile.id==='github')!.state,'connected');
+// GitHub signed out asks to sign in again, with its code; GitHub is a tile before it is connected, and its waiting line
+// says where the code goes.
+assert.equal(connectorTiles([row('github','GitHub',{syncStatus:'sync_error',failed:true,syncError:'GitHub is disconnected. Reconnect.'})]).find(tile=>tile.id==='github')!.state,'needs-you');
+assert.deepEqual(connectorTiles([]).map(tile=>tile.id),['google','notion','linear','todoist','supabase','github','posthog','cloudflare','search-console']);
+assert.equal(connectorTiles([],'github').find(tile=>tile.id==='github')!.line,'Paste the code on GitHub\'s page and choose Authorize, then come back here.');
+// A key service never asks again: HTTP JSON has no tile, and PayPal from its Thing stays Connected.
+assert.equal(connectorTiles([row('paypal','PayPal',{syncStatus:'sync_error',failed:true,syncError:'PayPal is disconnected. Reconnect.'})]).find(tile=>tile.id==='paypal')!.state,'needs-you');
 
 // Plain words for Disconnect and a failed Connect; the host's own words only when they are plain.
 assert.equal(connectorDisconnectQuestion('Notion'),'Worldlet will stop seeing your Notion. What it already saved stays.');

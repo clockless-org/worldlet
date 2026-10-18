@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import {hermesConfigValues} from '../../../../../core/agent/index.ts';
-import {connectorScopes} from '../../../../../core/accounts/index.ts';
+import {connectorScopes,githubDevicePollForm,githubDeviceStartForm,readGithubDevicePoll,readGithubDeviceStart,GITHUB_APP} from '../../../../../core/accounts/index.ts';
 import {WorldletError,writeAtomic} from '../../files.ts';
 import type {VaultService} from '../../host/services.ts';
 import {McpHttpClient,McpUnauthorized} from './mcp-client.ts';
@@ -20,6 +20,8 @@ export interface McpAccountOptions {
  agentHomes:()=>string[];
  fetch?:typeof fetch;
  now?:()=>number;
+ /** Waits between device-flow polls (checks pass one that does not wait). */
+ sleep?:(ms:number)=>Promise<void>;
 }
 /** A public client already registered for this exact authorization server and loopback callback. No token or secret. */
 export interface McpPublicClient {client_id:string;issuer:string;redirect_uri:string}
@@ -41,8 +43,47 @@ export class McpAccounts {
  private readonly agentHomes:()=>string[];
  private readonly fetch:typeof fetch;
  private readonly now:()=>number;
+ private readonly sleep:(ms:number)=>Promise<void>;
  constructor(options:McpAccountOptions){
   this.vault=options.vault;this.agentHomes=options.agentHomes;this.fetch=options.fetch??fetch;this.now=options.now??Date.now;
+  this.sleep=options.sleep??(ms=>new Promise(resolve=>setTimeout(resolve,ms)));
+ }
+ /** Signs in to GitHub with the official Worldlet GitHub App's device flow (core/accounts/github-device.ts): GitHub
+  * gives a short code, `show` puts it in front of the person, and this polls GitHub from this computer until they
+  * choose Authorize on github.com, cancel, or the code runs out. The user token and its refresh token are kept in the
+  * vault as the connection `name` to `url` (GitHub's MCP server); they are renewed with the public client ID alone.
+  * `verify` checks the connection before it is kept, so a refused one replaces nothing. */
+ async connectDevice(name:string,url:string,show:(code:{code:string;url:string})=>void,cancelled:()=>boolean=()=>false,verify?:(connection:McpConnection)=>Promise<void>):Promise<McpConnection> {
+  if(!NAME.test(name))throw new WorldletError('Invalid connection name.');
+  const parsed=safeUrl(url);
+  if(!parsed)throw new WorldletError('Use an HTTPS service endpoint.');
+  const started=await this.post(GITHUB_APP.deviceCodeUrl,githubDeviceStartForm());
+  const start=started.ok?readGithubDeviceStart(started.value):null;
+  if(!start)throw new WorldletError(started.value?.error==='device_flow_disabled'?'GitHub sign-in is not available right now. Try again later.':'GitHub did not start the sign-in. Try again.');
+  show({code:start.userCode,url:start.verifyUrl});
+  const until=this.now()+start.expiresIn*1000;
+  let interval=start.interval;
+  for(;;){
+   // Waits in short steps, so Cancel is noticed at once.
+   for(let waited=0;waited<interval*1000;waited+=500){if(cancelled())throw new WorldletError('Sign-in was cancelled.');await this.sleep(Math.min(500,interval*1000-waited));}
+   if(cancelled())throw new WorldletError('Sign-in was cancelled.');
+   if(this.now()>until)throw new WorldletError('The GitHub code ran out before it was used. Try again.');
+   const answer=await this.post(GITHUB_APP.tokenUrl,githubDevicePollForm(start.deviceCode));
+   const poll=readGithubDevicePoll(answer.value,interval);
+   if(poll.kind==='wait'){interval=poll.interval;continue;}
+   if(poll.kind==='stop')throw new WorldletError(poll.reason);
+   const grant:WorldGrant={v:1,url:parsed,kind:'oauth',access_token:poll.accessToken,...poll.refreshToken?{refresh_token:poll.refreshToken}:{},
+    ...poll.expiresIn?{expires_at:this.now()+poll.expiresIn*1000}:{},...poll.scope?{scope:poll.scope}:{},client_id:GITHUB_APP.clientId,token_endpoint:GITHUB_APP.tokenUrl,generation:crypto.randomUUID()};
+   const connection:McpConnection={source:'world',name,url:parsed,grant};
+   // Kept while it is checked (a session reads the vault); a refused one puts back what was there.
+   const before=this.vault.get(vaultId(name));
+   this.vault.set(vaultId(name),JSON.stringify(grant));
+   if(verify){
+    try{await verify(connection);}
+    catch(error){if(before===null)this.vault.delete(vaultId(name));else this.vault.set(vaultId(name),before);throw error;}
+   }
+   return connection;
+  }
  }
  /** The World's own connection first, else the first Agent profile with this server enabled and signed in. */
  connection(name:string):McpConnection|null {
@@ -145,7 +186,7 @@ export class McpAccounts {
   const form=new URLSearchParams({grant_type:'refresh_token',refresh_token:refresh,client_id:client,...secret?{client_secret:secret}:{},...resource?{resource}:{}});
   const answer=await this.post(endpoint,form);
   if(!answer.ok||typeof answer.value.access_token!=='string'){
-   if(answer.value?.error==='invalid_grant'||answer.status===400||answer.status===401)throw new McpUnauthorized('');
+   if(['invalid_grant','bad_refresh_token'].includes(answer.value?.error)||answer.status===400||answer.status===401)throw new McpUnauthorized('');
    throw new WorldletError('The service could not renew its sign-in right now. Try again later.');
   }
   return answer.value as {access_token:string;refresh_token?:string;expires_in?:number;scope?:string};

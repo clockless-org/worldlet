@@ -96,7 +96,7 @@ await withTempDir('worldlet-http-json-service-',async temp=>{
   await failing(read({operation:'read',id:'status'}),/Connect an HTTP JSON endpoint first/);
   // The token is optional, settings are exactly a name and an address, and both are checked before anything is sent.
   assert.equal(connectToken('http',''),'');assert.equal(connectToken('http',undefined),'');assert.equal(connectToken('http',' '+TOKEN+' '),TOKEN);
-  assert.throws(()=>connectToken('http','short'),/does not look like a token/);assert.throws(()=>connectToken('github',''),/fine-grained token/);
+  assert.throws(()=>connectToken('http','short'),/does not look like a token/);assert.equal(connectToken('github',''),'','GitHub signs in with a code when no key is given');assert.throws(()=>connectToken('github','short'),/fine-grained token/);
   assert.deepEqual(connectSettings('http',{name:' status ',url:'https://api.example.com/v1'}),{name:'status',url:'https://api.example.com/v1'});
   assert.throws(()=>connectSettings('http',{name:'status',url:'https://api.example.com/',method:'POST'}),/does not take these settings/);
   assert.ok(SOURCE_PROVIDERS.includes('http'));assert.equal(TOKEN_PROVIDERS.http.optional,true);

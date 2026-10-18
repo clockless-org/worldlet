@@ -9,6 +9,8 @@ export {normalize as normalizeSource,sourceFailure} from './google/normalize.ts'
 export {mockGoogle,MOCK_GOOGLE_EMAIL} from './google/mock.ts';
 // The connectors a person connects, one entry each: name, purpose, how it signs in and its short scope lists.
 export {connectorTiles,connectorDisconnectQuestion,connectorFailure,connectorWhoMayUse,type ConnectorReader,type ConnectorReaders,type ConnectorTile,type ConnectorTileState} from './connector-tiles.ts';
+// GitHub's sign-in with the official Worldlet GitHub App, by device code (no secret).
+export {GITHUB_APP,GITHUB_INSTALL_URL,GITHUB_DEVICE_GRANT,GITHUB_DEVICE_REASONS,readGithubDeviceStart,readGithubDevicePoll,githubDeviceStartForm,githubDevicePollForm,type GithubDeviceStart,type GithubDevicePoll} from './github-device.ts';
 export {CONNECTORS,CONNECTOR_TECHNICAL_WORDS,connector,connectorScopes,plainConnectorText,type Connector,type ConnectorFallback,type ConnectorMechanism} from './connectors.ts';
 // MCP connectors (Notion, Todoist, Linear, PayPal, Supabase): the Platform gates the session (McpGate), Core reads.
 export type {McpContent,McpToolResult,McpTool,McpSession,McpGate} from './mcp/session.ts';

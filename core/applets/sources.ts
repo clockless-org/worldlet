@@ -12,7 +12,8 @@ export interface TokenField {key:string;label:string;hint?:string;value?:string;
 /** `signIn`: the source also connects with no token, through its own sign-in (core/accounts/connectors.ts); its
  * settings may then be partly given (a project chosen after signing in). */
 export const TOKEN_PROVIDERS:Readonly<Record<string,{hint:string;token:RegExp;label?:string;optional?:boolean;signIn?:boolean;fields?:readonly TokenField[];wrong?:{token:RegExp;message:string}}>>=Object.freeze({
- github:{hint:'Paste a fine-grained token with read-only access to Issues, Pull requests and Metadata.',token:/^[A-Za-z0-9_]{20,255}$/},
+ // With no token, GitHub signs in with the official Worldlet GitHub App's device code (core/accounts/github-device.ts).
+ github:{hint:'Paste a fine-grained token with read-only access to Issues, Pull requests and Metadata.',token:/^[A-Za-z0-9_]{20,255}$/,signIn:true},
  posthog:{hint:'Paste a personal API key with read access to Project, Query, Insight, Dashboard, Feature flag and Annotation.',token:/^[A-Za-z0-9_-]{20,255}$/,label:'personal API key',signIn:true,
   fields:Object.freeze([
    {key:'host',label:'PostHog address',value:'https://us.posthog.com',hint:'US Cloud is https://us.posthog.com and EU Cloud https://eu.posthog.com; a self-hosted PostHog uses its own address.',maxLength:200},

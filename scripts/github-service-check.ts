@@ -107,7 +107,9 @@ await withTempDir('worldlet-github-service-',async temp=>{
  // What the host's `connect` accepts as a token: only for a token source, required there, shaped like one.
  assert.equal(connectToken('github','  github_pat_'+'A1'.repeat(20)+'  '),'github_pat_'+'A1'.repeat(20));
  assert.equal(connectToken('notion',undefined),'');
- for(const [provider,value,pattern] of [['github','',/read-only access to Issues, Pull requests and Metadata/],['github',undefined,/Paste a fine-grained token/],['github','secret value!',/does not look like a token/],['github','x'.repeat(256),/does not look like a token/],['notion','secretvaluesecretvalue1',/does not connect with a token/]] as const){
+ // With no token, GitHub signs in with its code instead.
+ assert.equal(connectToken('github',''),'');assert.equal(connectToken('github',undefined),'');
+ for(const [provider,value,pattern] of [['github','secret value!',/does not look like a token/],['github','x'.repeat(256),/does not look like a token/],['notion','secretvaluesecretvalue1',/does not connect with a token/]] as const){
   const error=(()=>{try{connectToken(provider,value);return null;}catch(error){return error as Error;}})();
   assert.match(error!.message,pattern,String(value));
   if(value)assert.ok(!error!.message.includes(value),'the error does not repeat what was pasted');
