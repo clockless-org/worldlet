@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
-import {claudeCodeNeedsSignIn,LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,PROVIDER_SETTING,backgroundModel,chosenModel,hermesConfigValues,LOCAL_HARNESS_SPARE,modelAtCapacity,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessOriginId,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
+import {claudeCodeNeedsSignIn,LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,PROVIDER_SETTING,backgroundModel,chosenModel,hermesConfigValues,LOCAL_HARNESS_SPARE,modelAtCapacity,modelRefusedByAccount,providerModel,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessOriginId,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
  readWorldSince,HERMES_CHANNEL_READ_ONLY,HERMES_STANDING_WRITE_DECLINED,HermesOwnCalls,hermesStandingWriteApproval,type LocalHarnessId} from '../../../../../core/agent/index.ts';
 import {WorldletError,writeAtomic} from '../../files.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
@@ -32,6 +32,13 @@ class ModelBusy extends WorldletError {}
  * so it runs once more on a new process (Mac Alpha 4469, #623: a Codex turn sent no output for 120 s while three other
  * Codex turns answered, and the same message answered in 14 s when sent again). */
 class SilentTurn extends WorldletError {}
+/** A turn on the Agent's own default model that the provider refused for this account (Codex's default on a ChatGPT
+ * plan that does not include it, Alpha 4511, #668/#669). */
+class ModelRefused extends WorldletError {}
+/** Per Agent command, the model its turns name instead of its own default once the account refused that default: the
+ * ChatGPT provider's chat-tier model (model-providers.ts), which every ChatGPT plan accepts. Kept until Worldlet quits;
+ * the Agent's own settings are never changed. */
+const refusedDefaults=new Map<string,string>();
 /** Waits before each new try of a turn whose model was busy: a busy model is usually free again within seconds
  * (Mac Alpha 4312's onboarding mail conversation failed on Codex's "Selected model is at capacity", #416). */
 export const BUSY_RETRIES=[4000,15000];
@@ -412,7 +419,9 @@ export class LocalHarnessRuntime implements AgentRuntime {
  private model(body:Row,agent:string|null):string|null {
   if(isHarnessModelId(body.harnessModel))return body.harnessModel;
   if(agent)return null;
-  try{return this.route();}catch{return null;}
+  let chosen:string|null=null;
+  try{chosen=this.route();}catch{}
+  return chosen??refusedDefaults.get(this.install.command)??null;
  }
  /** `harnessWorld`: a turn another Worldlet sent (core/phone remoteTurnBody) keeps its threads apart from this World's. */
  private world(body:Row){return body.sample!==true&&typeof body.harnessWorld==='string'&&/^remote:[A-Za-z0-9._-]{1,60}$/.test(body.harnessWorld)?body.harnessWorld:body.sample===true?'sample':'private';}
@@ -427,6 +436,10 @@ export class LocalHarnessRuntime implements AgentRuntime {
    try{return await this.attempt(body,home,onEvent);}
    catch(error){
     if(error instanceof SilentTurn&&!silent&&!this.cancelled){silent=true;tried--;continue;}
+    // Its own default refused for this account: the same turn runs at once on the provider's chat-tier model, and so
+    // do its later turns.
+    const fallback=error instanceof ModelRefused&&!this.cancelled&&!refusedDefaults.has(this.install.command)?providerModel(this.install.id,'chatgpt'):null;
+    if(fallback){refusedDefaults.set(this.install.command,fallback);tried--;continue;}
     if(!(error instanceof ModelBusy)||tried>=BUSY_RETRIES.length||this.cancelled)throw error;
     if(body._background!==true)await onEvent(agentEvent({type:'progress',name:`${this.install.title}'s model is busy right now. Trying again…`}));
     await sleep(BUSY_RETRIES[tried]);
@@ -554,6 +567,7 @@ export class LocalHarnessRuntime implements AgentRuntime {
     // analysis, the Attention check) is a bounded pass that reads, then saves items by their IDs, with no one watching:
     // it runs again also when the model turned busy mid-pass, after its reads (Mac Alpha 4320, #429).
     if((body._background===true||(!started&&calls===0))&&modelAtCapacity(outcome.error))throw new ModelBusy(outcome.error);
+    if(model===null&&(body._background===true||(!started&&calls===0))&&modelRefusedByAccount(outcome.error))throw new ModelRefused(outcome.error);
     throw new WorldletError(outcome.error);
    }
    if(!started&&outcome.message)await say(outcome.message);
