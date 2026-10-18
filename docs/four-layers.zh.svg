@@ -3,8 +3,8 @@
 <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#57606A"/></marker>
 </defs>
 <rect width="1200" height="780" rx="18" fill="#FFFFFF"/><rect x="0.5" y="0.5" width="1199" height="779" rx="18" fill="none" stroke="#D8DDE4"/>
-<text x="40" y="54" font-size="26" font-weight="700" fill="#1F2328">Worldlet 三层架构</text>
-<text x="40" y="80" font-size="15" fill="#57606A">看：看到什么 · 做：谁来干活 · 知：World 知道的一切</text>
+<text x="40" y="54" font-size="26" font-weight="700" fill="#1F2328">Worldlet 四层架构</text>
+<text x="40" y="80" font-size="15" fill="#57606A">看 · 做 · 知 · 平台。Core 分成「做」和「知」两层。</text>
 
 <!-- See -->
 <rect x="40" y="100" width="820" height="150" rx="14" fill="#EEF4FF" stroke="#B6CCFE"/>
@@ -20,6 +20,7 @@
 <rect x="364" y="198" width="292" height="40" rx="8" fill="#FFFFFF" stroke="#B6CCFE"/><text x="510" y="223">手机 · World 的网址</text>
 </g>
 
+<text x="840" y="132" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A" text-anchor="end">ui/</text>
 <!-- Do -->
 <rect x="40" y="290" width="820" height="180" rx="14" fill="#F1F8F3" stroke="#A9D8B8"/>
 <text x="60" y="322" font-size="20" font-weight="800" fill="#1A7F37">2 · 做</text>
@@ -30,6 +31,7 @@
 <rect x="444" y="340" width="180" height="40" rx="8" fill="#FFFFFF" stroke="#A9D8B8"/><text x="534" y="365">派活 · 提问</text>
 <rect x="636" y="340" width="204" height="40" rx="8" fill="#FFFFFF" stroke="#A9D8B8"/><text x="738" y="365">Agents · 身份 · 撤销</text>
 </g>
+<text x="840" y="322" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A" text-anchor="end">core/ · work</text>
 <rect x="60" y="396" width="780" height="56" rx="10" fill="#1F2328"/>
 <text x="80" y="420" font-size="15" font-weight="800" fill="#FFFFFF">门禁</text>
 <text x="80" y="441" font-size="13" fill="#D0D7DE">进出 World 的唯一入口：World tools · 权限 · 草稿等你批准 · 每次调用都有记录</text>
@@ -38,6 +40,7 @@
 <rect x="40" y="510" width="820" height="180" rx="14" fill="#FFF8EC" stroke="#F0CF8E"/>
 <text x="60" y="542" font-size="20" font-weight="800" fill="#9A6700">3 · 知</text>
 <text x="160" y="542" font-size="14" fill="#57606A">World 知道的一切，存在一个地方</text>
+<text x="840" y="542" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A" text-anchor="end">core/ · context</text>
 <rect x="60" y="558" width="560" height="116" rx="10" fill="#FFFFFF" stroke="#F0CF8E"/>
 <text x="76" y="582" font-size="14" font-weight="700" fill="#1F2328">Context</text>
 <text x="146" y="582" font-size="12" fill="#57606A">每条记录：从哪来 · 时间 · 版本 · 由什么生成 · 谁能读</text>
@@ -58,9 +61,10 @@
 </g>
 
 <!-- Host -->
-<rect x="40" y="710" width="820" height="46" rx="10" fill="#F6F8FA" stroke="#D0D7DE"/>
-<text x="60" y="739" font-size="14" fill="#57606A"><tspan font-weight="700" fill="#1F2328">底下是宿主</tspan>  Electron 或 Node · 系统权限 · 文件 · 进程 · 网络 · 中转。只负责运行，不做产品决定。</text>
+<rect x="40" y="706" width="820" height="56" rx="14" fill="#F6F8FA" stroke="#D0D7DE"/>
+<text x="60" y="740" font-size="14" fill="#57606A"><tspan font-size="20" font-weight="800" fill="#1F2328">4 · 平台</tspan>   Electron 或 Node · 系统权限 · 存储 · 进程 · 网络 · 中转。运行上面三层，不做产品决定。</text>
 
+<text x="840" y="740" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A" text-anchor="end">platform/</text>
 <!-- Flow arrows between layers -->
 <g stroke="#57606A" stroke-width="2" fill="none">
 <line x1="300" y1="250" x2="300" y2="288" marker-end="url(#ar)"/>
