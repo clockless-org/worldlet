@@ -218,7 +218,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    draft.brought.model=['chatgpt','own','none'].includes(model?.source)?model.source:'';
    // An Agent Fox talks through directly keeps its own model; the one it brought only runs background work.
    if(adopted?.model?.ok&&!draft.connected)notice=agentText('Fox now runs on the model you brought from {agent}.',draft.agentName||id);
-   else if(draft.brought.model==='none')notice=agentText('{agent} signs in with its own account, which Fox can’t use. After setup, choose a model in Settings, under Agent.',draft.agentName||id);
+   else if(draft.brought.model==='none')notice=agentText('{agent} signs in with its own account, which Fox can’t use. After setup, choose a model in Settings, under Agents.',draft.agentName||id);
   }catch(e){
    productEvent('agent_bring_failed',{local_agent:id,error_code:failureCode(e)},timingBucket(performance.now()-started));
    draft.brought={conversations:0,notes:0,skills:0,routines:0,list:[],model:false,modelName:'',name:null,kinds:[],memory:false,failed:true,summary:{}};

@@ -76,7 +76,7 @@ export const AGENT_REPORT_ACTIONS=Object.freeze({report:'agents/report',list:'ag
 export interface AgentReportPost {status:AgentReportStatus;summary?:string;work?:AgentReportWork[];runs?:AgentReportRun[];capacity?:{slots:number;busy:number};role?:string;tags?:string[];ttlMinutes?:number;observedAt?:string}
 /** `agents/list`: every Agent in the World, or those it names, or those that read one way now. */
 export interface AgentListArgs {ids?:string[];liveness?:AgentLiveness}
-/** One Agent as `agents/list` and Settings › Agent show it. */
+/** One Agent as `agents/list` and Settings › Agents show it. */
 export interface AgentListEntry {id:string;name:string;harness:string;kind:'local'|'remote';liveness:AgentLiveness;report?:AgentReport}
 
 /** The board's `agents` source (core/board/README.md#the-agents-source): a preset of provider `agents` (operation

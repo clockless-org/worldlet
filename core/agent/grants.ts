@@ -155,7 +155,7 @@ export function channelDefaultGrants(agentId:string,grantedAt:string,actions:Wor
  ];
 }
 /** A Worldlet Service's read targets (contracts/services.ts SERVICE_ACTIONS: `github/list`, `github/read`…): all that
- * "Can read <Service>" in Settings › Agent › Access grants. Empty for anything that is not a Service. */
+ * "Can read <Service>" in Settings › Agents grants. Empty for anything that is not a Service. */
 export function serviceReadTargets(provider:string):string[] {
  if(typeof provider!=='string'||!SERVICE_PROVIDERS.includes(provider))return [];
  return Object.keys(SERVICE_ACTIONS[provider]).map(operation=>provider+'/'+operation);
@@ -194,7 +194,7 @@ export function serviceGrantAuditEntry(agentId:string,provider:string,granted:bo
   reason:granted?'The person let this Agent read this Service in Settings.':'The person stopped this Agent reading this Service in Settings.'};
 }
 /** "Can ask you" (`ask`: post and read its own asks) and "Can take work" (`work`: claim and resolve input asks) in
- * Settings › Agent › Access (contracts/agent-asks.ts). Never part of the default Grants, and never given by a Fox turn. */
+ * Settings › Agents (contracts/agent-asks.ts). Never part of the default Grants, and never given by a Fox turn. */
 export type AskGrantKind='ask'|'work';
 export const ASK_GRANT_KINDS:readonly AskGrantKind[]=Object.freeze(['ask','work']);
 export function askGrantTargets(kind:string):string[] {
@@ -220,7 +220,7 @@ export function askGrantAuditEntry(agentId:string,kind:string,granted:boolean,at
   reason:granted?`The person let this Agent ${what} in Settings.`:`The person stopped this Agent being able to ${what} in Settings.`};
 }
 
-/** "Can see your board" (`read`: board/read) and "Can set up your board" (`define`: board/define) in Settings › Agent ›
+/** "Can see your board" (`read`: board/read) and "Can set up your board" (`define`: board/define) in Settings › Agents ›
  * Access (core/board/README.md). Never part of the default Grants, and never given by a Fox turn. */
 export type BoardGrantKind='read'|'define';
 export const BOARD_GRANT_KINDS:readonly BoardGrantKind[]=Object.freeze(['read','define']);
@@ -245,7 +245,7 @@ export function boardGrantAuditEntry(agentId:string,kind:string,granted:boolean,
  return {at,agentId,target:BOARD_TARGET,action:(granted?'grant-':'ungrant-')+kind,decision:'allowed',grantId:boardGrantId(agentId,kind),
   reason:granted?`The person let this Agent ${what} in Settings.`:`The person stopped this Agent being able to ${what} in Settings.`};
 }
-/** "Can draft GitHub changes" in Settings › Agent › Access (core/agent/GRANTS.md#github-drafts): `github-drafts/create`
+/** "Can draft GitHub changes" in Settings › Agents (core/agent/GRANTS.md#github-drafts): `github-drafts/create`
  * and `github-drafts/read`. Never part of the default Grants, and never given by a Fox turn. Access is `read`: a draft
  * only shows the person a change, and nothing is written to GitHub until they approve it on its card. */
 export const githubDraftGrantTargets=():string[]=>[GITHUB_DRAFT_ACTIONS.create,GITHUB_DRAFT_ACTIONS.read];
@@ -263,7 +263,7 @@ export function githubDraftGrantAuditEntry(agentId:string,granted:boolean,at:str
  return {at,agentId,target:GITHUB_DRAFT_TARGET,action:granted?'grant':'ungrant',decision:'allowed',grantId:githubDraftGrantId(agentId),
   reason:granted?'The person let this Agent draft GitHub changes in Settings.':'The person stopped this Agent drafting GitHub changes in Settings.'};
 }
-/** "Can report its work" (`report`: agents/report) and "Can see other Agents" (`list`: agents/list) in Settings › Agent
+/** "Can report its work" (`report`: agents/report) and "Can see other Agents" (`list`: agents/list) in Settings › Agents
  * › Access (core/agent/GRANTS.md#agent-reports). Never part of the default Grants, and never given by a Fox turn. Access
  * is `read`: a report only changes what the person and other Agents see of this Agent, and is not a guarded write. */
 export type ReportGrantKind='report'|'list';
@@ -287,7 +287,7 @@ export function reportGrantAuditEntry(agentId:string,kind:string,granted:boolean
  return {at,agentId,target:AGENT_REPORT_TARGET,action:(granted?'grant-':'ungrant-')+kind,decision:'allowed',grantId:reportGrantId(agentId,kind),
   reason:granted?`The person let this Agent ${what} in Settings.`:`The person stopped this Agent being able to ${what} in Settings.`};
 }
-/** "Can update Issues in <repo> without asking" in Settings › Agent › Access (core/agent/GRANTS.md#standing-github-writes):
+/** "Can update Issues in <repo> without asking" in Settings › Agents (core/agent/GRANTS.md#standing-github-writes):
  * `github-writes/run` on one repository, only the writes the person chose (a comment, labels under one prefix, or both).
  * Never part of the default Grants, never given by a Fox turn. Access is `write`, standing: each call writes to GitHub
  * without a card, so a `read` Grant never covers it. The page sends only the Agent, the repository and the choice (with
@@ -318,7 +318,7 @@ export function githubWriteGrantAuditEntry(agentId:string,scope:GithubWriteScope
   reason:granted?`The person let this Agent ${githubWriteScopeWords(scope)} on ${scope.repo} without asking, in Settings.`:`The person stopped this Agent changing ${scope.repo} without asking, in Settings.`};
 }
 /** "Can save to your Journal" (`save`: agent-artifacts/save, and agent-artifacts/read of what it saved) and
- * "Can read Agents' Journal artifacts" (`read`: agent-artifacts/read of every Agent's) in Settings › Agent › Access
+ * "Can read Agents' Journal artifacts" (`read`: agent-artifacts/read of every Agent's) in Settings › Agents
  * (core/agent/GRANTS.md#agent-artifacts). Never part of the default Grants, and never given by a Fox turn. */
 export type ArtifactGrantKind='save'|'read';
 export const ARTIFACT_GRANT_KINDS:readonly ArtifactGrantKind[]=Object.freeze(['save','read']);
@@ -343,7 +343,7 @@ export function artifactGrantAuditEntry(agentId:string,kind:string,granted:boole
  return {at,agentId,target:AGENT_ARTIFACT_TARGET,action:(granted?'grant-':'ungrant-')+kind,decision:'allowed',grantId:artifactGrantId(agentId,kind),
   reason:granted?`The person let this Agent ${what} in Settings.`:`The person stopped this Agent being able to ${what} in Settings.`};
 }
-/** "Can draft PostHog changes" and "Can draft Notion changes" in Settings › Agent › Access
+/** "Can draft PostHog changes" and "Can draft Notion changes" in Settings › Agents
  * (core/agent/GRANTS.md#posthog-and-notion-drafts): `<provider>-drafts/create` and `read`, the same way as GitHub
  * drafts. Never part of the default Grants, never given by a Fox turn, and not given by reading the Service. */
 export const isServiceDraftProvider=(value:unknown):value is ServiceDraftProvider=>SERVICE_DRAFT_PROVIDERS.includes(value as ServiceDraftProvider);

@@ -46,7 +46,7 @@ export function createServiceRequests({ledger,access,connected,title,changed,now
    const next=answerServiceRequest(found,outcome,found?connected(found.provider):false,now());
    if(outcome==='allow'){
     const agents=access();
-    // The same Grant as "Can read" in Settings › Agent › Access, audited the same way.
+    // The same Grant as "Can read" in Settings › Agents, audited the same way.
     if(!agents||!agents.grantService(next.agentId,next.provider))throw new Error('Could not change that. The Agent may have been revoked.');
    }
    save(db,next,'user');changed();

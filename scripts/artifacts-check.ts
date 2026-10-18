@@ -137,7 +137,7 @@ assert.deepEqual(madeArtifacts({}),[]);
   assert.deepEqual(dailyPlanned(used,at(6,18,30)).map(p=>p.kind),['plan'],'A summary due now is not planned');
   assert.deepEqual(dailyPlanned(markDailyUse(readDailyArtifactsState(null),at(1,9)),at(4,10)),[],'Not used for days: no brief planned');
  }
-  // The two default Routines can be paused (Settings › Agent › Routines) or left off at setup: a paused one is neither due nor planned.
+  // The two default Routines can be paused (Settings › Agents › Your Agent › Routines) or left off at setup: a paused one is neither due nor planned.
  {
   const {readDailyRoutines,DAILY_ROUTINE_NAMES}=await import('../core/artifacts/index.ts');
   assert.deepEqual(readDailyRoutines(null),{plan:true,summary:true},'On by default');

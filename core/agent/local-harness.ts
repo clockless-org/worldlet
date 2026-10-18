@@ -247,7 +247,7 @@ export const claudeCodeNeedsSignIn=(error:string)=>error===CLAUDE_CODE_SIGN_IN_E
 /** Codex's own sign-in or usage limit, told apart from its other failures (Mac Beta 4261, 2026-10-11: a turn that
  * failed for another reason read "finish signing in" while Codex was signed in). Null when the text is neither. */
 export function codexProblem(text:string):string|null {
- if(/usage limit|insufficient_quota|quota|rate.?limit|\b429\b/i.test(text))return 'Codex has reached its usage limit. Try again later, or switch its model in Settings › Agent.';
+ if(/usage limit|insufficient_quota|quota|rate.?limit|\b429\b/i.test(text))return 'Codex has reached its usage limit. Try again later, or switch its model in Settings › Agents.';
  if(/not (?:logged|signed) in|\b401\b|unauthori[sz]ed|refresh token|token (?:has )?expired|codex login/i.test(text))return 'Codex is not signed in. Open Terminal, run codex login, then try again.';
  return null;
 }

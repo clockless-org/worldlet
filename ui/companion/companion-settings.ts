@@ -4,7 +4,9 @@ import {createFoxPreferences} from './fox-preferences.ts';
 import {createPanelGuide} from './panel-guide.ts';
 import {modelHealthView,type ModelFix} from './model-health.ts';
 import {showAgentPermissions} from './agent-permissions.ts';
-import {showAgentAccess} from './agent-access.ts';
+import {showAgentAccess,type OwnAgent} from './agent-access.ts';
+import {showRemoteAccess,showUseInClaude} from './remote-access.ts';
+import {showWorldContext} from './world-context-page.ts';
 import {showAgentRoutines} from './agent-routines.ts';
 import {showAgentSkills} from './agent-skills.ts';
 import {showAgentMemory} from './agent-memory.ts';
@@ -15,14 +17,20 @@ import {agentEl as el} from './agent-change.ts';
 /** What the World view lends Settings: the sample world switch and which host features exist. */
 export type CompanionSettingsHost={toggleSample?:()=>Promise<unknown>;sample:()=>boolean;localDataDeletion:()=>boolean};
 /** The companion pages that are sections of their own in the one list: Fox's profile and Phone. */
-export type CompanionSettingsPages={fox:HTMLElement;phone:HTMLElement;/** What Fox itself knows, shown first in Agent › Memory. */knows:HTMLElement};
-type Item={id:string;label:string;hint:string;page?:boolean;show:(detail:HTMLElement)=>void|Promise<void>};
+export type CompanionSettingsPages={fox:HTMLElement;phone:HTMLElement;/** What Fox itself knows, shown first in Context › Memory. */knows:HTMLElement};
+/** `minor`: below the three areas, smaller. `show` gets the part to open, if one was named. */
+type Item={id:string;label:string;hint:string;page?:boolean;minor?:boolean;show:(detail:HTMLElement,part:string)=>void|Promise<void>};
 
 const MODEL_EVENTS=['worldlet:model-changed','worldlet:model-refresh'];
-// Entry points that name a section Settings no longer has open the page that took it in, at its part: Accounts became
-// Agent's last part (owner plan 2026-10-11), and the standing rules Approvals listed are its Permissions part. `access`
-// names Agent's Access part (the board's empty state opens it).
-const MOVED:Record<string,{section:string;part:string}>={integrations:{section:'connectors',part:''},accounts:{section:'connectors',part:''},approvals:{section:'model',part:'permissions'},permissions:{section:'model',part:'permissions'},access:{section:'model',part:'access'}};
+// Settings is three areas, Connectors, Agents and Context, with Fox, Phone, General and Help below them (issue #674).
+// Entry points that name a section or part Settings no longer has open the area that took it in, at its part: `model`
+// (what Fox runs on) and the standing rules (`approvals`, `permissions`) are parts of your own Agent's page under Agents;
+// `access` (the board's empty state opens it) is the list of Agents; `memory` is in Context; Accounts became Connectors.
+const MOVED:Record<string,{section:string;part:string}>={integrations:{section:'connectors',part:''},accounts:{section:'connectors',part:''},
+ model:{section:'agents',part:'model'},approvals:{section:'agents',part:'permissions'},permissions:{section:'agents',part:'permissions'},
+ access:{section:'agents',part:'access'},memory:{section:'context',part:'memory'}};
+/** The parts of your own Agent's page (Agents › Your Agent); any other part of Agents is on its list. */
+const OWN_PARTS=['model','skills','routines','permissions','accounts'];
 
 /** The whole companion panel is one settings window (owner request 2026-10-10): one list of sections on the left, the
  * chosen section's details on the right, no tabs. Everything finishes here; nothing hands off to Fox's speech bubble. */
@@ -152,7 +160,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
  // on its own sign-in with the provider chosen below.
  // This is the one place to connect it and to see and fix what is wrong with it (owner request 2026-10-06):
  // which path is in use, its model, the last reply's problem in plain words, and the fix for it.
- async function modelSetting(target:HTMLElement){
+ async function ownAgentPage(target:HTMLElement){
   let showElsewhere=false;
   const turn=ticket,said=status(),now=el('div','companion-settings-row companion-settings-model-now'),words=el('div'),fixes=el('div','companion-settings-actions'),agents=el('div','companion-settings-rows'),providers=el('div','companion-settings-rows');
   now.append(words);
@@ -301,36 +309,69 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   // The connection steps open under the buttons; a new connection redraws what Fox runs on.
   const changed=()=>{if(turn!==ticket||!target.isConnected){for(const name of MODEL_EVENTS)window.removeEventListener(name,changed);return;}void draw();};
   for(const name of MODEL_EVENTS)window.addEventListener(name,changed);
-  // The page is seven named sections in this order, each with one plain line (owner decision 2026-10-11): Model (what
-  // Fox runs on), then what lives in the Agent and Worldlet only shows and changes its way: its Memory (read only), Skills, Routines (the
-  // same jobs as the Task panel's Routines), Permissions (its standing rules), Access (each Agent's Grants and what it
-  // last did) and, last, Accounts (Worldlet's own, then
-  // the Agent's tools and chat accounts).
+  // Your Agent's page is five named parts in this order, each with one plain line (owner decision 2026-10-11, issue #674):
+  // Model (what Fox runs on), then what lives in the Agent and Worldlet only shows and changes its way: Skills, Routines
+  // (the same jobs as the Task panel's Routines), Permissions (its standing rules) and, last, Connections (Worldlet's own,
+  // then the Agent's tools and chat accounts). What it remembers is in Context; what each Agent may do is on Agents' list.
   const live=()=>turn===ticket&&target.isConnected;
-  const part=(id:string,heading:string,line:string)=>{const box=el('section','companion-settings-part');box.dataset.part=id;box.append(el('h5','companion-settings-parthead',heading),el('p','companion-info-note companion-settings-partnote',line));return box;};
   const model=part('model','Model','The Agent Fox thinks with, on its own sign-in, and the provider it answers with.');
-  const memory=part('memory','Memory','What Fox and your Agent remember about you and your work. Your Agent’s memory lives in your Agent; Worldlet only shows it.');
-  memory.append(pages.knows);
   const skills=part('skills','Skills','Steps your Agent follows for tasks it knows how to do. They live in your Agent; Worldlet changes them only with its own commands.');
   const routines=part('routines','Scheduled','What your Agent does on its own schedule, the same Scheduled tasks as in the Task panel. Worldlet changes them only with its own commands.');
   const permissions=part('permissions','Permissions','What your Agent may do without asking you first, from each time you chose Always on an approval card.');
-  // Access: which Agents reach the World's tools on their own and what each may do (core/agent/GRANTS.md).
-  const access=part('access','Access','Agents that reach your World on their own, from any chat: what each may do, when it last did, and Revoke.');
   const accounts=part('accounts','Connections','What Worldlet reads on this computer, then the tools and chat accounts set up in your Agent.');
   // A request for Fox (set up or change a routine, forget something) goes to its conversation with the panel closed.
   const ask=(text:string)=>{close();window.dispatchEvent(new CustomEvent('worldlet:fox-ask',{detail:{text}}));};
   model.append(now,fixes,guide.element,agents,said);
-  target.append(model,memory,skills,routines,permissions,access,accounts);
-  await Promise.all([draw(),showAgentMemory(memory,call,live,{ask}),showAgentSkills(skills,call,live),showAgentRoutines(routines,call,live,{ask}),showAgentPermissions(permissions,call,live),showAgentAccess(access,call,live),showWorldletAccounts(accounts,call,live)]);
+  // Back to every Agent, then the page: its name is what the header says once it is known.
+  const back=action('‹ All Agents',()=>void show('agents'),{id:'agents-back'}),title=el('h5','companion-settings-own-title','Your Agent');
+  const header=el('div','companion-settings-own-head');header.dataset.view='own-agent';header.append(back,title);
+  void ownAgent().then(own=>{if(live())title.textContent=own.title;});
+  target.append(header,model,skills,routines,permissions,accounts);
+  await Promise.all([draw(),showAgentSkills(skills,call,live),showAgentRoutines(routines,call,live,{ask}),showAgentPermissions(permissions,call,live),showWorldletAccounts(accounts,call,live)]);
  }
- // One list, in the order a person looks for things (owner request 2026-10-10: no tabs, nothing technical).
+ const part=(id:string,heading:string,line:string)=>{const box=el('section','companion-settings-part');box.dataset.part=id;box.append(el('h5','companion-settings-parthead',heading),el('p','companion-info-note companion-settings-partnote',line));return box;};
+ // The Agent Fox works through, as Agents' list names it (agent-access.ts OwnAgent): the one chosen on this computer,
+ // the paired computer's or Gateway's, else Fox's own Hermes Agent; with how it is doing, in plain words.
+ async function ownAgent():Promise<Omit<OwnAgent,'open'>>{
+  const [health,found]=await Promise.all([call('modelHealth').catch(()=>null),call('agentHarness',{operation:'detect'}).catch(()=>null)]);
+  const list=Array.isArray(found?.agents)?found.agents:[],selected=typeof found?.selected==='string'?found.selected:null;
+  const chosen=list.find((a:any)=>a?.id===selected),view=modelHealthView(health,typeof chosen?.title==='string'?chosen.title:null);
+  const away=health?.location?.kind==='remote'&&typeof health.location.computer==='string'?health.location.computer:null;
+  const title=typeof chosen?.title==='string'?chosen.title:away?`Your Agent on ${away}`:health?.agent==='hermes'?'Hermes Agent':'Your Agent';
+  return {harness:selected??(away?null:typeof health?.agent==='string'?health.agent:null),title,
+   line:view.state==='ok'?'Fox works through it. It may do what you ask Fox, and asks you before it changes anything.':view.title+'.'};
+ }
+ // Agents (issue #674): every Agent that reaches this World in one list, your own Agent first with Open for its page;
+ // then using the World in Claude or ChatGPT, and Remote access (its address, Turn off and tokens) folded below.
+ async function agentsSetting(target:HTMLElement,at:string){
+  if(OWN_PARTS.includes(at))return ownAgentPage(target);
+  const turn=ticket,live=()=>turn===ticket&&target.isConnected;
+  const list=part('access','Connected to your World','Your own Agent and every other Agent that reaches your World: what each may do, what it did lately, and Revoke.');
+  const remote=el('details','companion-settings-elsewhere companion-settings-remote-access') as HTMLDetailsElement;remote.dataset.part='remote';
+  remote.append(el('summary','','Remote access'));
+  const claude=el('div');claude.dataset.part='use-in-claude';
+  target.append(list,claude,remote);
+  const own=await ownAgent();if(!live())return;
+  await Promise.all([showAgentAccess(list,call,live,{own:{...own,open:()=>void show('agents','model')}}),showUseInClaude(claude,call,live),showRemoteAccess(remote,call,live)]);
+ }
+ // One list, in the order a person looks for things (owner request 2026-10-10: no tabs, nothing technical): the three
+ // areas first (issue #674), connectors on one side, Agents on the other, and everything the World keeps in one place;
+ // then, smaller, Fox, Phone, General and Help.
  const items:Item[]=[
-  {id:'fox',label:'Fox',hint:'Name, look and personality',page:true,show:target=>{target.append(pages.fox);}},
-  {id:'model',label:'Agent',hint:'What it runs on and may use',show:modelSetting},
   // The services Worldlet connects itself, one tile each, with keys folded under Advanced (connectors-page.ts).
-  {id:'connectors',label:'Connectors',hint:'Google, Notion, Linear and more',show:async target=>{const turn=ticket;await showConnectors(target,call,()=>turn===ticket&&target.isConnected);}},
-  {id:'phone',label:'Phone',hint:'Attention and Fox on your phone',page:true,show:target=>{target.append(pages.phone);}},
-  {id:'general',label:'General',hint:'Updates, start at login, default browser, usage counts',show:async target=>{
+  {id:'connectors',label:'Connectors',hint:'The services your World reads',show:async target=>{const turn=ticket;await showConnectors(target,call,()=>turn===ticket&&target.isConnected);}},
+  {id:'agents',label:'Agents',hint:'Who uses your World, and what each may do',show:agentsSetting},
+  // Everything the World keeps (world-context-page.ts), with what each Agent and Fox remember.
+  {id:'context',label:'Context',hint:'Everything your World keeps',show:async target=>{const turn=ticket,live=()=>turn===ticket&&target.isConnected;
+   const memory=part('memory','Memory','What Fox and your Agent remember about you and your work. Your Agent’s memory lives in your Agent; Worldlet only shows it.');
+   memory.append(pages.knows);
+   await showWorldContext(target,call,live,{memory,localDeletion:()=>!!host()?.localDataDeletion(),sample:()=>!!host()?.sample(),
+    openJournal:()=>{close();window.dispatchEvent(new CustomEvent('worldlet:journal-open',{detail:{}}));}});
+   await showAgentMemory(memory,call,live,{ask:text=>{close();window.dispatchEvent(new CustomEvent('worldlet:fox-ask',{detail:{text}}));}});
+  }},
+  {id:'fox',label:'Fox',hint:'Name, look and personality',page:true,minor:true,show:target=>{target.append(pages.fox);}},
+  {id:'phone',label:'Phone',hint:'Attention and Fox on your phone',page:true,minor:true,show:target=>{target.append(pages.phone);}},
+  {id:'general',label:'General',hint:'Updates, start at login, default browser, usage counts',minor:true,show:async target=>{
    target.append(subhead('Updates'));await updates(target);
    // The one privacy choice left after the Privacy section went (owner request 2026-10-10): the website's privacy page
    // promises that usage counts can be turned off, and off stops all reporting.
@@ -387,7 +428,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     target.append(note(on?'You are in the sample world. Turn it off to return to your own world.':'Look around a made-up world with sample mail, events and tasks. Your own world and accounts stay as they are.'),toggle,said);
    }
   }},
-  {id:'help',label:'Help',hint:'Feedback, restart, reset',show:target=>{
+  {id:'help',label:'Help',hint:'Feedback, restart, reset',minor:true,show:target=>{
    const said=status();
    // The Debug window and every recorded event are for the Worldlet team: folded away (owner request 2026-10-10).
    const team=el('details','companion-settings-elsewhere') as HTMLDetailsElement;
@@ -420,19 +461,22 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
  }
  // Only while the line shows: an update event must not become an extra request in the background; open() reads it again.
  window.addEventListener('worldlet:app-update',()=>{if(version.offsetParent)void showVersion();});
+ // The three areas, then a line, then the rest in smaller type.
  for(const item of items){
-  const b=el('button','companion-settings-item') as HTMLButtonElement;b.type='button';b.dataset.setting=item.id;
+  if(item.minor&&!list.querySelector('.companion-settings-minor'))list.append(el('div','companion-settings-minor'));
+  const b=el('button','companion-settings-item'+(item.minor?' is-minor':'')) as HTMLButtonElement;b.type='button';b.dataset.setting=item.id;
   b.append(el('strong','',item.label),el('span','',item.hint));b.onclick=()=>void show(item.id);list.append(b);
  }
- async function show(id:string){
-  const moved=MOVED[id],part=moved?.part??'';
+ /** Shows section `id` (or the area an old name moved to) at `at`, one of its parts. */
+ async function show(id:string,at=''){
+  const moved=MOVED[id],part=at||moved?.part||'';
   const item=items.find(i=>i.id===(moved?.section??id))??items[0];selected=item.id;const turn=++ticket;
   for(const leave of leaving.splice(0))leave();
   for(const b of list.querySelectorAll<HTMLElement>('button'))if(b.dataset.setting===selected)b.setAttribute('aria-current','true');else b.removeAttribute('aria-current');
   guide.view.setGuide(null);onShow(item.id);
   // A companion page brings its own heading.
   const body=el('div','companion-settings-body');detail.replaceChildren(...item.page?[]:[el('h4','',item.label)],body);detail.classList.toggle('is-page',!!item.page);
-  try{await item.show(body);}catch(e){if(turn===ticket)body.append(note((e as Error).message||'This setting is unavailable right now.'));}
+  try{await item.show(body,part);}catch(e){if(turn===ticket)body.append(note((e as Error).message||'This setting is unavailable right now.'));}
   if(part&&turn===ticket)body.querySelector<HTMLElement>(`[data-part="${part}"]`)?.scrollIntoView({block:'start'});
  }
  return {element,

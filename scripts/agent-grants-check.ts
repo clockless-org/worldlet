@@ -134,7 +134,7 @@ assert.deepEqual(worldActionOf(actions,'share_world_link',{}),{target:'world',ac
 assert.deepEqual(worldActionOf(actions,'read_world_source',{provider:'gmail'}),{target:'gmail',action:'read'});
 assert.equal(worldActionOf(actions,'_source_begin',{}),null);
 
-// "Can read <Service>" (Settings › Agent › Access): exactly that Service's read targets, as a standing read Grant; nothing
+// "Can read <Service>" (Settings › Agents): exactly that Service's read targets, as a standing read Grant; nothing
 // for a name that is not a Service; never in the default Grants. A granted Agent's read_service call passes outside a
 // Fox turn, an ungranted one (or another Service's) is refused, and taking it back refuses it again.
 assert.deepEqual(serviceReadTargets('github'),['github/list','github/read','github/search','github/releases']);

@@ -14,7 +14,7 @@
 //   it), or, while Fox drives a web page, the page itself. A routine opens a popover saying when, how often and who
 //   runs it, with its own controls (owner request 2026-10-12, "左边的 routines 要可以删除可以重启可以修改"): an Agent's job
 //   can Run now, Pause or Resume, Edit (its name, what it does and when) and Remove, each the Agent's own command (host
-//   `harnessSchedule`, as in Settings › Agent › Routines) after one plain question in the popover; Worldlet's two daily
+//   `harnessSchedule`, as in Settings › Agents › Your Agent › Routines) after one plain question in the popover; Worldlet's two daily
 //   Routines Pause or Resume (Worldlet's own setting, never the Agent). A paused one stays as a Paused card to resume.
 // It reads the host's `taskPanel` every 30 seconds and after work starts or ends (`worldlet:routines`, `worldlet:job`,
 // `worldlet:applet-task`, `worldlet:fox-status`). Hidden while there is nothing to show; the stylesheet hides it in a

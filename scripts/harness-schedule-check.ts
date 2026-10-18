@@ -86,7 +86,7 @@ assert.equal(many.results[0].item.title,'Scheduled job');assert.equal(many.resul
 assert.equal(scheduleStep({harness,state:{version:1,since:0},jobs:[],runs:[{...ok,at:NOW-13*3600_000}],running:null,now:NOW}).results[0].push,null,'an old result is in the World, not pushed');
 const stopped=scheduleStep({harness,state:{version:1,since:0},jobs:[job,{...job,id:'off',name:'Off',paused:true}],runs:[],running:false,start:'openclaw gateway install',now:NOW});
 assert.equal(stopped.state.stoppedNoted,true);assert.equal(stopped.stopped?.item.kind,'task');
-assert.match(String(stopped.stopped?.item.summary),/^Morning news run on OpenClaw's own scheduler, which is not running\. Start it in Settings › Agent › Routines\./);
+assert.match(String(stopped.stopped?.item.summary),/^Morning news run on OpenClaw's own scheduler, which is not running\. Start it in Settings › Agents › Your Agent › Routines\./);
 assert.equal(scheduleStep({harness,state:stopped.state,jobs:[job],runs:[],running:false,now:NOW}).stopped,null,'noted once');
 assert.equal(scheduleStep({harness,state:stopped.state,jobs:[job],runs:[],running:true,now:NOW}).state.stoppedNoted,undefined,'noted again after it runs and stops');
 assert.equal(scheduleStep({harness,state:{version:1,since:0},jobs:[{...job,paused:true}],runs:[],running:false,now:NOW}).stopped,null,'nothing waiting');
@@ -220,7 +220,7 @@ try{
  // A default Routine that made no card says so plainly, as Worth Doing (owner decision 2026-10-11: never fail silently).
  const missed=dailyScheduleFailure({kind:'plan',day:'2026-10-11',reason:'Fox needs an Agent',at,now})!;
  assert.equal(missed.item.kind,'task');assert.equal(missed.item.title,'Today’s prep · Oct 11');assert.equal(missed.item.attentionContentVersion,1);
- assert.match(String(missed.item.summary),/^It did not finish: Fox needs an Agent\n\nAsk Fox to make it again, or pause it in Settings › Agent › Routines\.$/);
+ assert.match(String(missed.item.summary),/^It did not finish: Fox needs an Agent\n\nAsk Fox to make it again, or pause it in Settings › Agents › Your Agent › Routines\.$/);
  assert.equal(journalTarget(missed.item.sources),null,'No card to open');
  assert.deepEqual(missed.push,{kind:'routine',title:'Today’s prep · Oct 11',body:'Did not finish: Fox needs an Agent',collapse:'daily-plan'});
  assert.match(String(dailyScheduleFailure({kind:'summary',day:'2026-10-11',at,now})!.item.summary),/your Agent did not say why/);

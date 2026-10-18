@@ -1,4 +1,4 @@
-/** Settings › Agent › Access: each Agent that reaches this World's tools on its own (core/agent/GRANTS.md, host
+/** Settings › Agents, its list (issue #674): your own Agent first, with Open for its page (`own`), then each Agent that reaches this World's tools on its own (core/agent/GRANTS.md, host
  * `agentAccess`), with when it was last used, what it may do and what it last asked for, and Revoke, which asks once
  * more in the page, then removes that Agent's key so it can no longer reach the World; and, for each connected
  * Service, "Can read <Service>", which gives or takes back that Service's read Grant at once; "Can ask you" and "Can
@@ -14,7 +14,9 @@
  * (core/agent/GRANTS.md#orders-and-waking-an-agent). Plain words: the page names
  * places in the World and what was allowed, never tokens, endpoints or MCP. */
 import {agentButton as button,agentEl as el} from './agent-change.ts';
-import {showRemoteAccess} from './remote-access.ts';
+/** The Agent Fox works through (companion-settings.ts): first in the list, with Open for its own page. `harness` names
+ * the listed Agent that is it, when it reaches the World too; `line` says how it is doing. */
+export type OwnAgent={harness:string|null;title:string;line:string;open:()=>void};
 type Scope={repo:string;writes:string[];labelPrefix?:string};
 type Grant={id:string;targets:string[];access:'read'|'write';duration:'standing'|'once';grantedAt:string;expiresAt?:string;revokedAt?:string;github?:Scope};
 type Audit={at:string;target:string;action:string;decision:'allowed'|'denied'|'asked';reason?:string};
@@ -77,6 +79,23 @@ export function grantLine(grant:Grant):string {
  const one=grant.targets.length===1&&!all?` (${grant.targets[0].split('/')[1]})`:'';
  return `${verb}: ${named}${one}.`;
 }
+/** What the Agent may do, in one sentence anyone reads: "It may look at your World, read PostHog, take work and see your
+ * board." Only what it was allowed; the switches under Change what it may do say the rest. */
+export function mayLine(agent:Agent):string {
+ if(agent.revokedAt)return '';
+ const live=agent.grants.filter(g=>!g.revokedAt&&!g.github),may:string[]=[];
+ if(live.some(g=>g.access==='write'))may.push('look at and change things in your World');
+ else if(live.length)may.push('look at your World');
+ const read=(agent.services??[]).filter(s=>s.granted).map(s=>s.title);
+ if(read.length)may.push('read '+words(read));
+ const on:[boolean|undefined,string][]=[[agent.asks?.ask,'ask you things'],[agent.asks?.work,'take work'],[agent.board?.read,'see your board'],[agent.board?.define,'set up your board'],
+  [agent.reports?.report,'report its work'],[agent.reports?.list,'see your other Agents'],[agent.artifacts?.save,'save to your Journal'],[agent.artifacts?.read,'read what Agents saved'],[agent.githubDrafts,'draft GitHub changes']];
+ for(const [allowed,what] of on)if(allowed)may.push(what);
+ for(const s of agent.serviceDrafts??[])if(s.granted)may.push(`draft ${s.title} changes`);
+ for(const scope of agent.githubWrites?.grants??[])may.push(`update Issues in ${scope.repo} without asking`);
+ return may.length?`It may ${words(may)}.`:'It may not do anything in your World yet.';
+}
+const words=(list:string[])=>list.length<2?list.join(''):list.slice(0,-1).join(', ')+' and '+list[list.length-1];
 const DECISION:Record<Audit['decision'],string>={allowed:'Allowed',denied:'Refused',asked:'Asked you'};
 export function auditLine(entry:Audit):string {
  // The person's own change in Settings (core serviceGrantAuditEntry), not a call.
@@ -108,11 +127,12 @@ export function auditLine(entry:Audit):string {
  return `${time(entry.at)} · ${entry.target} ${entry.action} · ${DECISION[entry.decision]??entry.decision}`;
 }
 
-export async function showAgentAccess(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){
- // Remote access first: the connectors it lets in are listed below like any other Agent.
- const remote=el('div');target.append(remote);
+export async function showAgentAccess(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean,{own}:{own?:OwnAgent}={}){
  const box=el('div','companion-settings-approvals companion-settings-access'),said=el('p','companion-settings-status');said.setAttribute('role','status');
- // A daemon or scheduled job on this computer that reaches the World as an Agent of its own.
+ // Each Agent whose switches are open (they stay open as the list is drawn again).
+ const opened=new Set<string>();
+ // A daemon or scheduled job on this computer that reaches the World as an Agent of its own, folded away.
+ const scripts=el('details','companion-settings-elsewhere') as HTMLDetailsElement;scripts.dataset.scriptAgents='';
  const adder=el('div','companion-settings-access-add'),name=document.createElement('input');
  name.type='text';name.maxLength=60;name.placeholder='Name, like Nightly build';name.setAttribute('aria-label','Name of the script');
  adder.append(el('span','','Add an Agent for a script'),name,button('Add','add-script-agent',async()=>{
@@ -123,7 +143,8 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
    said.textContent=`${added.name} can now reach your World from a script on this computer. Its key is in ${added.endpointFile}. Allow what it may do below.`;
   }catch(e){said.textContent='Could not add it: '+((e as Error).message||'try again.');}
  }));
- target.append(box,adder,said);
+ scripts.append(el('summary','','Add an Agent for a script'),adder);
+ target.append(box,said,scripts);
  function confirmRevoke(row:HTMLElement,agent:Agent){
   for(const open of box.querySelectorAll?.('.companion-settings-confirm')??[])open.remove();
   said.textContent='';
@@ -141,8 +162,18 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
   if(!current())return;
   box.replaceChildren();
   if(listed?.error){box.append(el('p','companion-info-note',listed.error));return;}
-  const agents:Agent[]=Array.isArray(listed?.agents)?listed.agents:[];
-  if(!agents.length){box.append(el('p','companion-info-note','No Agent has reached your World on its own yet.'));return;}
+  const all:Agent[]=Array.isArray(listed?.agents)?listed.agents:[];
+  // Your own Agent first: the listed one that is it, or a row of its own when it has not reached the World by itself.
+  const mine=own?.harness?all.find(a=>a.harness===own.harness&&a.kind==='local'&&!a.revokedAt):undefined;
+  const agents=mine?[mine,...all.filter(a=>a!==mine)]:all;
+  const ownRow=()=>{
+   const row=el('div','companion-settings-row is-own'),words=el('div');row.dataset.ownAgent='';
+   const name=el('strong','',own!.title);name.append(' ',el('span','companion-settings-tag','Your Agent'));
+   words.append(name,el('span','',own!.line));
+   row.append(words,button('Open','open-own-agent',()=>own!.open()));
+   return row;
+  };
+  if(!agents.length){box.append(...own?[ownRow()]:[],el('p','companion-info-note','No other Agent has reached your World yet.'));return;}
   // "Give new work to": the Agent work goes to when whoever posts it names none.
   const order=el('label','companion-settings-access-order'),target=document.createElement('select'),chosen=typeof listed?.orders?.defaultFor==='string'?listed.orders.defaultFor:'';
   target.className='companion-settings-select';target.setAttribute('aria-label','Give new work to');target.dataset.orderTarget='';
@@ -156,20 +187,32 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
   };
   order.append(el('span','','Give new work to:'),target);box.append(order);
   const rows=el('div','companion-settings-rows');box.append(rows);
+  if(own&&!mine)rows.append(ownRow());
   for(const agent of agents){
-   const row=el('div','companion-settings-row'),words=el('div');row.dataset.accessAgent=agent.id;
-   words.append(el('strong','',agent.name),el('span','',accessLine(agent)));
-   if(agent.endpointFile)words.append(el('span','companion-settings-quiet',`For a script. Its key is in ${agent.endpointFile}.`));
+   const row=el('div','companion-settings-row'+(agent===mine?' is-own':'')),words=el('div');row.dataset.accessAgent=agent.id;
+   const name=el('strong','',agent.name);
+   if(agent===mine)name.append(' ',el('span','companion-settings-tag','Your Agent'));
+   words.append(name,...agent===mine?[el('span','',own!.line)]:[],el('span','',accessLine(agent)));
    const reported=agent.revokedAt?'':reportLine(agent);
    if(reported){const line=el('span','companion-settings-access-report',reported);line.dataset.liveness=agent.liveness??'offline';words.append(line);}
-   // Standing GitHub writes are listed below with their Remove.
-   for(const grant of agent.grants.filter(g=>!g.revokedAt&&!g.github))words.append(el('span','companion-settings-quiet',grantLine(grant)));
+   const may=mayLine(agent);
+   if(may)words.append(el('span','companion-settings-access-may',may));
    const recent=agent.audit.slice(0,SHOWN_AUDIT);
    if(recent.length){
     const log=el('ul','companion-settings-quiet companion-settings-access-audit');log.setAttribute('aria-label',`What ${agent.name} last asked for`);
     for(const entry of recent)log.append(el('li','',auditLine(entry)));
     words.append(log);
    }
+   // Its Grants, switches, standing GitHub writes and wake command: folded under Change what it may do.
+   const more=el('details','companion-settings-access-more') as HTMLDetailsElement;more.dataset.accessMore=agent.id;more.open=opened.has(agent.id);
+   more.ontoggle=()=>{if(more.open)opened.add(agent.id);else opened.delete(agent.id);};
+   more.append(el('summary','','Change what it may do'));
+   const outer=words;
+   {
+   const words=more;
+   if(agent.endpointFile)words.append(el('span','companion-settings-quiet',`For a script. Its key is in ${agent.endpointFile}.`));
+   // Standing GitHub writes are listed below with their Remove.
+   for(const grant of agent.grants.filter(g=>!g.revokedAt&&!g.github))words.append(el('span','companion-settings-quiet',grantLine(grant)));
    if(!agent.revokedAt&&agent.services?.length){
     const services=el('div','companion-settings-access-services');
     for(const service of agent.services){
@@ -259,10 +302,13 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
     if(agent.wake.length)group.append(button('Remove','remove-wake',()=>send([])));
     words.append(group);
    }
-   row.append(words);
+   }
+   if(!agent.revokedAt&&more.childElementCount>1)outer.append(more);
+   row.append(outer);
+   if(agent===mine)row.append(button('Open','open-own-agent',()=>own!.open()));
    if(!agent.revokedAt)row.append(button('Revoke','revoke-agent',()=>confirmRevoke(row,agent)));
    rows.append(row);
   }
  }
- await Promise.all([draw(),showRemoteAccess(remote,call,current)]);
+ await draw();
 }

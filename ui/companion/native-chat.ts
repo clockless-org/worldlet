@@ -75,7 +75,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   b.onclick=(e:Event)=>{e.stopPropagation();if(root.dataset.tourLock!=='true'&&root.dataset.tourSpotlight!=='true')openPanel(setting);};
   return b;
  };
- const panelButton=sideButton('companion-panel-button','settings','Agent','model'),phoneButton=sideButton('companion-phone-button','phone','Phone','phone');
+ const panelButton=sideButton('companion-panel-button','settings','Agent','agents'),phoneButton=sideButton('companion-phone-button','phone','Phone','phone');
  side.append(panelButton,phoneButton);pet.append(side);hud.append(pet);
  // On the desktop a small hide button shows at Fox's shoulder while the pointer is on Fox (owner Order 2026-10-12);
  // Fox stays away until the person opens the World again (modules/shell/companion.ts hide).
@@ -962,7 +962,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   finally{if(taskShown)window.dispatchEvent(new CustomEvent(FOX_STATUS_EVENT,{detail:{source:TURN_TASK_SOURCE,text:''}}));/* A turn superseded before it answered (the early returns above) never stays working. */if(entryId&&thread.find(x=>x.id===entryId)?.status==='working'){const interrupted='This reply was interrupted. You can try again.';thread=threadInterrupt(thread,entryId,interrupted);saveRecall();live(interrupted,true);}trace.finish(turnResult,outcome);/* What Fox said at the turn's end, for the page's finished status card (browser-device.ts). */window.dispatchEvent(new CustomEvent('worldlet:fox-reply',{detail:{outcome,message:outcome==='complete'?String((turnResult as any).message||''):failureMessage}}));if(turn===generation){turnEntry='';quietTurn=false;life.finish(outcome==='complete',{blocked:outcome==='error'});active=false;streamingReply=false;const followup=queuedTurns.shift();render();if(followup){if(followup.session&&followup.session!==recallKey(context.key,contentIdentity())){const drafts=[followup,...queuedTurns,...(input.value.trim()?[{text:input.value.trim(),origin:'user'}]:[])];input.value=drafts.map(t=>t.displayText||t.text).join('\n\n');queuedDraft={text:input.value,turns:drafts};for(const queued of [followup,...queuedTurns])queued.trace.finish({},'cancelled');queuedTurns=[];editing=true;say('Your queued messages are kept as a draft because the view changed.');}else void submit(followup.text,followup.trace,false,followup.origin,followup.displayText,followup.icon);}else window.dispatchEvent(new Event('worldlet:fox-idle'));}/* Talk reads the reply, then listens again; a queued follow-up answers first. */if(!quiet&&!invitation&&!active&&talk.phase==='thinking')void talk.replied(outcome==='complete'?String((turnResult as any).message||''):outcome==='error'?failureMessage:'');}
   return {outcome,...(guided?{candidateId:(turnResult as any).candidateId}:{}),...(outcome==='complete'?{text:(turnResult as any).message||''}:{}),...(failureMessage?{message:failureMessage}:{})};
  }
- // Settings › Agent asks Fox for something only the conversation can do (a new or changed scheduled task).
+ // Settings › Agents asks Fox for something only the conversation can do (a new or changed scheduled task).
  window.addEventListener('worldlet:fox-ask',(e:any)=>{const text=typeof e.detail?.text==='string'?e.detail.text.trim():'';if(text)void submit(text);});
  window.addEventListener('worldlet:speech',(e: any)=>{
  if(e.detail?.phase==='spoken'){talk.spoken();return;}
@@ -1029,7 +1029,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  // The settings button beside Fox is the way into the panel; the panel's own entry button stays out of the World.
  companionInfo.entry.remove();
  const modelWatch=watchModelNeeded({call,needed:text=>{
-  // No Agent on this computer: Fox points to Settings › Agent, where it is chosen (owner request 2026-10-05).
+  // No Agent on this computer: Fox points to Settings › Agents, where it is chosen (owner request 2026-10-05).
   if(guide||root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true'||root.classList.contains('companion-info-open'))return false;
   const choose=make('button','','Choose an Agent'),later=make('button','','Not now');choose.type=later.type='button';
   choose.onclick=async()=>{api.setGuide(null,{only:'model-needed'});try{if(isDesktopCompanion())await requireWorldSurface(call);await companionInfo.open('Settings','model');}catch(error){setStatus(error.message||'Could not reopen World. Try again.');}};

@@ -1,4 +1,4 @@
-/** Settings › Agent › Permissions: the standing rules an Always on an approval card left in
+/** Settings › Agents › Your Agent › Permissions: the standing rules an Always on an approval card left in
  * each Agent on this computer (host `harnessApprovalRules`, contracts/harness-services.ts HarnessStandingRules): what it
  * allows, which agent, when and in which Fox conversation it was granted, when it was last used, and Revoke, which asks
  * once more in the page and then makes that Agent forget it its own way. An Agent that cannot have a rule revoked from

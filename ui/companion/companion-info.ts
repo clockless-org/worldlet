@@ -18,7 +18,7 @@ export function mountCompanionInfo({root,pet,call,getName}){
  const desktop=isDesktopCompanion;
  function syncEntry(){badge.innerHTML=uiIcon('companion');badge.title='Open companion panel';badge.setAttribute('aria-label',badge.title);badge.setAttribute('aria-haspopup','dialog');badge.setAttribute('aria-expanded',String(panel.open));badge.setAttribute('aria-controls',panel.id);}
  const panel=el('dialog','companion-info-panel ui-hud-panel');panel.id='companionInfo';panel.setAttribute('aria-label','Your companion');badge.setAttribute('aria-controls',panel.id);root.append(panel);
- // Agent beside Fox lands on Settings › Agent (owner Order 2026-10-07); the badge on Fox's profile.
+ // Agent beside Fox lands on Settings › Agents (owner Order 2026-10-07); the badge on Fox's profile.
  // With `setting` (Fox's Agent and Phone buttons) it opens that section, and closes only when it is already showing.
  async function toggle(section='Profile',setting?:string){if(desktop()){badge.disabled=true;try{await requireWorldSurface(call);await open(section,setting);}catch(error){badge.title=error.message||'Could not reopen World. Try again.';}finally{badge.disabled=false;}return;}if(panel.open&&(!setting||settings.selected===setting))dismiss(true);else await open(section,setting);}
  badge.onclick=e=>{e.stopPropagation();void toggle();};
@@ -60,7 +60,7 @@ export function mountCompanionInfo({root,pet,call,getName}){
  // The panel is one settings window (owner request 2026-10-10): Fox's profile and Phone are sections in its one list
  // beside the settings, and Help opens Feedback and the tutorial; the World view lends the sample switch and host features.
  const profileHost=el('div','companion-profile-host');
- // What Fox knows shows in Settings › Agent › Memory, beside what the Agent keeps (owner request 2026-10-11: one place for memory).
+ // What Fox knows shows in Settings › Context, beside what the Agent keeps (owner request 2026-10-11: one place for memory).
  const knowsHost=el('div','companion-settings-fox-knows');
  const PAGE_SECTION={fox:'Profile',phone:'Mobile'};
  const settings=createCompanionSettings({call,host:()=>root.companionSettingsHost,pages:{fox:profileHost,phone:phone.element,knows:knowsHost},records,close:()=>dismiss(),
@@ -78,7 +78,7 @@ export function mountCompanionInfo({root,pet,call,getName}){
  }
  // Old section names still open their section: the old Energy page is Agent now, the Journal is a book of its own (owner request
  // 2026-10-08) and Feedback a panel of its own; History, Sounds and Privacy are gone (owner request 2026-10-10). Accounts and
- // the standing rules Approvals listed are parts of Settings › Agent now: Settings opens it at that part (companion-settings.ts MOVED).
+ // the standing rules Approvals listed are parts of Settings › Agents now: Settings opens it at that part (companion-settings.ts MOVED).
  const SECTION_ID:Record<string,string>={Profile:'fox',Energy:'model',Mobile:'phone',iPhone:'phone',Phone:'phone',Accounts:'integrations',Integrations:'integrations',Approvals:'approvals'};
  let model:any=null,snapshot:any=null,profile:Partial<CompanionProfile>={},error='',busy=false,generation=0;
  const openGroups=new Set<string>(['user']);
@@ -165,13 +165,13 @@ export function mountCompanionInfo({root,pet,call,getName}){
    if(!snapshot?.sampleEnabled){const edit=button('Edit memory',()=>{dismiss();window.dispatchEvent(new Event('worldlet:memory-manager'));});edit.classList.add('companion-knowledge-edit');block.append(edit);}
    if(knowledge.conversations)block.append(el('p','companion-knowledge-line',name+'’s own conversation: '+plural(knowledge.conversations,'message')));
    // What other Agents' conversations and notes Fox can look through. Their skills and scheduled tasks are the Agent's
-   // own and are listed only in Settings › Agent (owner decision 2026-10-11), where they can be changed.
+   // own and are listed only in Settings › Agents (owner decision 2026-10-11), where they can be changed.
    for(const agent of knowledge.brought){
     const parts=[[agent.conversations,'message'],[agent.notes,'daily note']].filter(([n])=>Number(n)>0).map(([n,word])=>plural(Number(n),String(word)));
     if(!parts.length)continue;
     group('from:'+agent.source,'From '+agent.title,parts.join(' · '),body=>body.append(el('p','companion-knowledge-line',name+' can look through these conversations and daily notes when you ask.'+(agent.source==='openclaw'&&Number(agent.notes)>0?' Each day’s note is also that day’s page in your Journal.':''))));
    }
-   // Fox's offers to save a task it keeps repeating, answered right here; the skills themselves are in Settings › Agent.
+   // Fox's offers to save a task it keeps repeating, answered right here; the skills themselves are in Settings › Agents.
    if(skills&&!snapshot?.sampleEnabled){
     const state=skills;
     block.append(...skillOffers(state,{el,button,name,act:(operation,id)=>run(async()=>{const result=await call('foxSkills',{operation,id});skills=readFoxSkills(result)??skills;skillNote=typeof result?.note==='string'?result.note:'';})}));
@@ -179,13 +179,13 @@ export function mountCompanionInfo({root,pet,call,getName}){
    }
    return block;
   }
-  // Fox's page is who Fox is; what it knows is in Settings › Agent › Memory, and the example cards of what it can do went
+  // Fox's page is who Fox is; what it knows is in Settings › Context, and the example cards of what it can do went
   // (owner request 2026-10-11: Settings has too much; the tutorial shows that).
   knowsHost.replaceChildren(...profile.knowledge?[knowledgeBlock(profile.knowledge)]:[]);
   page.append(side);
   profileHost.replaceChildren(page);
  }
- async function open(section='Profile',setting?:string){if(root.dataset.onboardingLocked==='true'&&root.dataset.onboardingAddApplet!=='true')return;if(section==='Journal'||section==='Artifacts'){await openJournal();return;}if(section==='Feedback'){await openFeedback();return;}journal.close();closeFeedback();delete root.dataset.onboardingFinish;const id=section==='Settings'?setting||settings.selected||'model':SECTION_ID[section]||'fox';records.start();void phone.refresh();void loadSkills();settings.open(id);if(panel.open){render();return;}const ticket=++generation;render();panel.show();anchorKey='';cancelAnimationFrame(anchorFrame);anchorPanel();root.classList.add('companion-info-open');badge.setAttribute('aria-expanded','true');root.dispatchEvent(new Event('worldlet:companion-info-opened'));const results=await Promise.allSettled([call('modelStatus'),call('snapshot'),call('companionProfile').then(readCompanionProfile)]);if(!panel.open||ticket!==generation)return;model=results[0].status==='fulfilled'?results[0].value:null;snapshot=results[1].status==='fulfilled'?results[1].value:null;profile=results[2].status==='fulfilled'?results[2].value:profile;if(results.some(r=>r.status==='rejected'))error='Some status information is unavailable. Try reopening the panel.';render();}
+ async function open(section='Profile',setting?:string){if(root.dataset.onboardingLocked==='true'&&root.dataset.onboardingAddApplet!=='true')return;if(section==='Journal'||section==='Artifacts'){await openJournal();return;}if(section==='Feedback'){await openFeedback();return;}journal.close();closeFeedback();delete root.dataset.onboardingFinish;const id=section==='Settings'?setting||settings.selected||'agents':SECTION_ID[section]||'fox';records.start();void phone.refresh();void loadSkills();settings.open(id);if(panel.open){render();return;}const ticket=++generation;render();panel.show();anchorKey='';cancelAnimationFrame(anchorFrame);anchorPanel();root.classList.add('companion-info-open');badge.setAttribute('aria-expanded','true');root.dispatchEvent(new Event('worldlet:companion-info-opened'));const results=await Promise.allSettled([call('modelStatus'),call('snapshot'),call('companionProfile').then(readCompanionProfile)]);if(!panel.open||ticket!==generation)return;model=results[0].status==='fulfilled'?results[0].value:null;snapshot=results[1].status==='fulfilled'?results[1].value:null;profile=results[2].status==='fulfilled'?results[2].value:profile;if(results.some(r=>r.status==='rejected'))error='Some status information is unavailable. Try reopening the panel.';render();}
  root.addEventListener('worldlet:onboarding-applet-added',()=>dismiss());
  window.addEventListener('worldlet:companion-info',e=>void open((e as CustomEvent).detail?.tab||'Profile',(e as CustomEvent).detail?.setting));
  // The World opens the book on a day: the morning brief and the day's summary (owner request 2026-10-08).

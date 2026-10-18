@@ -13,7 +13,7 @@ import {ValueError,isDict} from '../mcp/python.ts';
  * characters per key, value and title, keys in a JSON path, and the request (`query`) as a whole. */
 export const HTTP_JSON_LIMITS=Object.freeze({endpoints:10,name:32,url:300,path:1000,records:50,fields:30,key:60,cell:300,title:200,depth:8,query:2000});
 export const HTTP_JSON_GATE:ServiceGate=Object.freeze({name:'http',title:'HTTP JSON',timeoutSeconds:15,maxBytes:1_000_000,publicOnly:true,
- connectMessage:'Connect an HTTP JSON endpoint first, in Settings › Agent › Connections.',
+ connectMessage:'Connect an HTTP JSON endpoint first, in Settings › Connectors.',
  refused:'This endpoint did not accept the token. Check the token (Worldlet sends it as a Bearer header), then paste it again.',
  disconnected:'This HTTP JSON endpoint no longer accepts its token. Connect it again under the same name with a new token.',
  forbidden:'This endpoint refused that read (403). Check the path and what the token may read.',

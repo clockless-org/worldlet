@@ -97,7 +97,7 @@ export function installFox(host:Host){
  const sources=()=>host.optional<SourcesService>(SOURCES);
  const speech=()=>host.optional<SpeechService>(SPEECH);
  const analytics=()=>host.optional<AnalyticsService>(ANALYTICS);
- /** A change in Settings › Agent went through (a failed one throws first): which part, never what it became. */
+ /** A change in Settings › Agents went through (a failed one throws first): which part, never what it became. */
  const settingChanged=<T,>(setting:'model'|'permission'|'account'|'routine'|'skill',result?:T)=>{analytics()?.recordProductEvent('agent_settings_changed','',{agent_setting:setting});return result as T;};
  const browser=()=>host.optional<BrowserService>(BROWSER);
 
@@ -257,20 +257,20 @@ export function installFox(host:Host){
   // never by a Fox turn.
   // The World's saved Service context is for Agents reaching Worldlet on their own, under their own "Can read" Grants;
   // a Fox turn reads the Service itself.
-  if(name==='world_context')return {error:'Saved Service context is for Agents the person allowed in Settings › Agent › Access. Read the Service with read_service instead.'};
-  if(name==='world_board')return {error:'The board is for Agents the person allowed in Settings › Agent › Access. Read the Services it shows with read_service instead.'};
+  if(name==='world_context')return {error:'Saved Service context is for Agents the person allowed in Settings › Agents. Read the Service with read_service instead.'};
+  if(name==='world_board')return {error:'The board is for Agents the person allowed in Settings › Agents. Read the Services it shows with read_service instead.'};
   // GitHub drafts are an Agent's own, on the standing server under its own Grants (agent-runtime/github-drafts.ts): a Fox
   // turn never drafts a GitHub write.
-  if(name==='github_drafts')return {error:'GitHub drafts are for Agents the person allowed in Settings › Agent › Access. Tell the person here what you would change on GitHub instead.'};
+  if(name==='github_drafts')return {error:'GitHub drafts are for Agents the person allowed in Settings › Agents. Tell the person here what you would change on GitHub instead.'};
   // Agent reports are each Agent's own, on the standing server under its own Grants (agent-runtime/agent-reports.ts).
-  if(name==='agent_reports')return {error:'Agent reports are for Agents reaching Worldlet on their own, under the Grants the person gave them in Settings › Agent › Access.'};
+  if(name==='agent_reports')return {error:'Agent reports are for Agents reaching Worldlet on their own, under the Grants the person gave them in Settings › Agents.'};
   // Nor does it run a standing GitHub write: those are an Agent's own, on one repository the person named for it.
-  if(name==='github_writes')return {error:'GitHub writes without asking are for Agents the person allowed on one repository in Settings › Agent › Access. Tell the person here what you would change on GitHub instead.'};
+  if(name==='github_writes')return {error:'GitHub writes without asking are for Agents the person allowed on one repository in Settings › Agents. Tell the person here what you would change on GitHub instead.'};
   // Agents' Journal artifacts are saved and read by Agents the person allowed in Settings, under their own Grants
   // (agent-runtime/agent-artifacts.ts), never by a Fox turn: Fox shows its own with show_artifact.
-  if(name==='agent_artifacts')return {error:'Saving to the Journal is for Agents the person allowed in Settings › Agent › Access. Show your own with show_artifact, and find earlier ones with list_artifacts.'};
+  if(name==='agent_artifacts')return {error:'Saving to the Journal is for Agents the person allowed in Settings › Agents. Show your own with show_artifact, and find earlier ones with list_artifacts.'};
   // PostHog and Notion drafts likewise (agent-runtime/service-drafts.ts): a Fox turn never drafts a write there.
-  if(name==='service_drafts')return {error:'PostHog and Notion drafts are for Agents the person allowed in Settings › Agent › Access. Tell the person here what you would change instead.'};
+  if(name==='service_drafts')return {error:'PostHog and Notion drafts are for Agents the person allowed in Settings › Agents. Tell the person here what you would change instead.'};
   // The World's browser link (`world/link`) runs here, on the host, so it works with no World page (a login launch,
   // Run in background); the guarded-write rule has already admitted it under the turn's trust.
   if(name==='share_world_link'){
@@ -713,7 +713,7 @@ export function installFox(host:Host){
  function proactiveCancel(){if(proactiveRun){proactiveRun.cancelled=true;proactiveRun.runtime.cancel();proactiveRun=null;}}
 
  // Chat --------------------------------------------------------------------------------------
- // How Fox's last reply ended, for Settings › Agent (owner request 2026-10-06: see and fix every model
+ // How Fox's last reply ended, for Settings › Agents (owner request 2026-10-06: see and fix every model
  // connection problem there). In memory for this run; addresses are dropped, and Agent errors carry no keys.
  let lastReply:{ok:boolean,at:number,error?:string}|null=null;
  const replyEnded=(error?:unknown)=>{lastReply=error===undefined?{ok:true,at:Date.now()}:{ok:false,at:Date.now(),error:characterPrefix(String((error as Error)?.message||error||'').replace(/https?:\/\/\S+/g,'[address]'),500)};};
@@ -891,7 +891,7 @@ export function installFox(host:Host){
   // computer and reads them there.
   foxChooseFiles:async()=>{const parent=window(),options:OpenDialogOptions={properties:['openFile','multiSelections'],message:'Choose files for Fox'};const result=parent?await dialog.showOpenDialog(parent,options):await dialog.showOpenDialog(options);return {paths:result.canceled?[]:result.filePaths.slice(0,10)};},
   modelStatus:()=>foxModelStatus(),
-  // Settings › Agent: the Agent in use, the model it is set to, whether its sign-in or key is there, and how
+  // Settings › Agents: the Agent in use, the model it is set to, whether its sign-in or key is there, and how
   // the last reply ended. Reading it starts nothing new.
   modelHealth:async()=>{
    const runtime=agent();let model:Row={},error='';
@@ -951,7 +951,7 @@ export function installFox(host:Host){
     return {ok:true,morningBrief:brief};
    }else if(setting==='daily_routines'&&(typeof value==='boolean'||value&&typeof value==='object')){
     // The two default Routines, Today's prep and Wrap up today (core/artifacts/daily.ts): on unless turned off here,
-    // from setup's one row (a boolean, both) or Settings › Agent › Routines (one of them). Worldlet's own setting;
+    // from setup's one row (a boolean, both) or Settings › Agents › Your Agent › Routines (one of them). Worldlet's own setting;
     // nothing is written into the Agent.
     const next=typeof value==='boolean'?{plan:value,summary:value}:{...dailyRoutines(),...readDailyRoutinesChange(value)};
     for(const [kind,key] of DAILY_ROUTINE_PREFS)if(next[kind])preferences.remove(key);else preferences.set(key,false);
@@ -1101,14 +1101,14 @@ export function installFox(host:Host){
   agentWarm:async request=>({warm:await warmThread(typeof request.thread==='string'?request.thread:'fox-main')}),
   /** Every standing rule an Always left in a Harness here (`list`), or one revoked (`revoke`). */
   harnessApprovalRules:async request=>request.operation==='revoke'?settingChanged('permission',await approvalRules.revoke(request.harness,request.id)):approvalRules.list(),
-  /** Settings › Agent › Connections: the MCP servers and chat accounts in each Agent here (`list`), the exact command a change
+  /** Settings › Agents › Your Agent › Connections: the MCP servers and chat accounts in each Agent here (`list`), the exact command a change
    * would run with its confirmation (`preview`), or that confirmed change run (`change`). */
   harnessConnections:async request=>request.operation==='preview'?agentConnections.preview(request.harness,request):request.operation==='change'?settingChanged('account',await agentConnections.change(request.confirm)):agentConnections.list(),
-  /** Settings › Agent › Routines and Skills: each Agent's own jobs or skills here (`list`), the exact command
+  /** Settings › Agents › Your Agent › Routines and Skills: each Agent's own jobs or skills here (`list`), the exact command
    * a change would run with its confirmation (`preview`), or that confirmed change run (`change`). */
   harnessSchedule:async request=>request.operation==='change'?settingChanged('routine',await agentControls.scheduleRequest(request)):agentControls.scheduleRequest(request),
   harnessSkills:async request=>request.operation==='change'?settingChanged('skill',await agentControls.skillRequest(request)):agentControls.skillRequest(request),
-  /** Settings › Agent › Memory: what each Agent here remembers, read only. */
+  /** Settings › Context: what each Agent here remembers, read only. */
   harnessMemory:()=>agentControls.memoryRequest(),
   harnessApproval:async request=>{await answerApproval(request.id,request.choice);return {ok:true};},
   worldWriteUndo:request=>{

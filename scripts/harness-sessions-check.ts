@@ -510,7 +510,7 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
      assert.deepEqual(channel.map(([name,,agent])=>[name,agent]),[['query_world_items','codex']]);
      assert.ok(!JSON.parse(JSON.stringify(await ask('describe_world_tools',{}))).targets.includes('content'),'and it lists only its own targets');
      assert.deepEqual(toTurn,[],'nothing went to Fox\'s turn');
-     // "Can read GitHub" (Settings › Agent › Access): only that Service's read targets, taken from its name; the next
+     // "Can read GitHub" (Settings › Agents): only that Service's read targets, taken from its name; the next
      // call sees it (no restart) and every change is audited.
      channel.length=0;
      const github={target:'github',action:'list',arguments:'{}'};

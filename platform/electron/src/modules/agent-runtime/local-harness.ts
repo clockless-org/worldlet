@@ -74,7 +74,7 @@ export function localHarnessStarts(install:LocalHarnessInstall,environment:Harne
 export class AgentNotStarting extends WorldletError {
  readonly repeat:boolean;
  constructor(install:Pick<LocalHarnessInstall,'id'|'title'>,repeat=false){
-  super(install.id==='hermes'?`${install.title} does not start on this computer. Open Settings › Agent and choose Install again.`:`${install.title} does not start on this computer. Open it once in Terminal to check it, or choose another Agent in Settings › Agent.`);
+  super(install.id==='hermes'?`${install.title} does not start on this computer. Open Settings › Agents and choose Install again.`:`${install.title} does not start on this computer. Open it once in Terminal to check it, or choose another Agent in Settings › Agents.`);
   this.name='AgentNotStarting';this.repeat=repeat;
  }
  /** Already reported once; the host records it locally but sends it nowhere again (modules/shell). */
@@ -759,7 +759,7 @@ export class LocalHarnessAdapter extends PortableAdapter implements Adapter {
   if(!running&&!this.running.size&&this.restartWhenIdle){this.restartWhenIdle=false;this.conversation?.shutdown();}
  },this.spares,this.resident(),this.turnApprovals,this.route,{origin:this.context.origin});}
  makeLane():AgentRuntime {return new LocalHarnessRuntime(this.install,this.environment,(runtime,running)=>{if(running)this.lanes.add(runtime);else this.lanes.delete(runtime);},null,null,null,this.laneRoute);}
- /** The provider chosen for this Agent in Settings › Agent (model-providers.ts): its chat-tier model, read per turn. */
+ /** The provider chosen for this Agent in Settings › Agents (model-providers.ts): its chat-tier model, read per turn. */
  private readonly route=()=>chosenModel(readAgentSetting(this.context.root,PROVIDER_SETTING),this.install.id);
  /** Background lanes: the chosen provider's model, else the chat-tier model of the provider Hermes Agent's own default
   * uses (its config.yaml `model.provider`, read per turn, never written). */
@@ -777,7 +777,7 @@ export class LocalHarnessAdapter extends PortableAdapter implements Adapter {
   if(background===this)return ()=>this.makeLane();
   return background?.makeTask?()=>background.makeTask!():undefined;
  }
- /** Its models are its own: Worldlet chooses or signs in to none (Settings › Agent, a quick browser step). */
+ /** Its models are its own: Worldlet chooses or signs in to none (Settings › Agents, a quick browser step). */
  makeModelAccess():AgentRuntime {return new UnsupportedRuntime(`Fox uses ${this.install.title} on this computer. Manage its models and accounts in ${this.install.title}.`);}
  makeSourceAccess():AgentRuntime {return new UnsupportedRuntime(`${this.install.title} does not read connected accounts for Worldlet.`);}
  /** Its scheduled jobs run on its own scheduler (`schedule`); Worldlet runs none of its own for it. */

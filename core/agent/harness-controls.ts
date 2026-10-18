@@ -1,4 +1,4 @@
-// Settings › Agent's controls for the Agent's own scheduled jobs and skills (owner plan 2026-10-11, PR 2): each
+// Settings › Agents's controls for the Agent's own scheduled jobs and skills (owner plan 2026-10-11, PR 2): each
 // change is one of the Agent's own commands, shown to the person before it runs, never an edit Worldlet makes to the
 // Agent's files. Every command here was checked against the Agent's own source and documentation at the oldest version
 // Worldlet supports (core/agent/agent-versions.ts) and at its current release:
