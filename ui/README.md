@@ -14,7 +14,7 @@ Shared rendering and interaction. Components, by [feature](../docs/UI-CORE-PLATF
 - Agents & Gate, Context and Connectors have no UI folder: their pages are in Settings beside Fox
 - Base: shell, components, onboarding, distribution
 
-This is See, the top of the four [layers](../docs/UI-CORE-PLATFORM.md#see-do-know).
+This is UI, the top of the four [layers](../docs/UI-CORE-PLATFORM.md#see-do-know).
 
 See the [layer and dependency contract](../docs/UI-CORE-PLATFORM.md#repository-layers).
 

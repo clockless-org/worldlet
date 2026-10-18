@@ -19,8 +19,8 @@ button{font:inherit;color:inherit;cursor:pointer}button:focus-visible,a:focus-vi
 </style>
 </head>
 <body><main>
-<header><div><h1>Worldlet architecture</h1><p class="subtitle">Five layers across, ten features and their base down. The product’s four layers are See (UI), Do and Know (the two halves of Core) and Host (Platform). Select a component or a feature. Details appear below the diagram.</p></div><div class="legend"><span><i class="dot"></i>Worldlet-owned</span><span><i class="dot replace"></i>Replaceable backend</span></div></header>
-<section class="architecture-section" aria-labelledby="architecture-heading"><div class="section-heading"><div><h2 id="architecture-heading">Architecture</h2><p>Five layers · ten features (World, Applets, Companion, Attention, Tasks, Artifacts &amp; Journal, Agents &amp; Gate, Context, Connectors, Windows) and the base · <a href="UI-CORE-PLATFORM.md#see-do-know">See, Do, Know, Host</a></p></div></div><div class="diagram" aria-label="Five-layer architecture with a vertical lane per feature"><div class="grid" id="grid"></div></div></section>
+<header><div><h1>Worldlet architecture</h1><p class="subtitle">Five layers across, ten features and their base down. The product’s four layers are UI, Agent and Context (the two halves of Core) and Platform. Select a component or a feature. Details appear below the diagram.</p></div><div class="legend"><span><i class="dot"></i>Worldlet-owned</span><span><i class="dot replace"></i>Replaceable backend</span></div></header>
+<section class="architecture-section" aria-labelledby="architecture-heading"><div class="section-heading"><div><h2 id="architecture-heading">Architecture</h2><p>Five layers · ten features (World, Applets, Companion, Attention, Tasks, Artifacts &amp; Journal, Agents &amp; Gate, Context, Connectors, Windows) and the base · <a href="UI-CORE-PLATFORM.md#see-do-know">UI, Agent, Context, Platform</a></p></div></div><div class="diagram" aria-label="Five-layer architecture with a vertical lane per feature"><div class="grid" id="grid"></div></div></section>
 <section class="harness-section" id="harness-contract" aria-labelledby="harness-heading"><div class="section-heading"><div><h2 id="harness-heading">Harness contract</h2><p>Layer 3 ↔ Layer 4 · <a href="../contracts/harness-services.ts">contracts/harness-services.ts</a> (services v2) over <a href="../contracts/harness.ts">contracts/harness.ts</a> (wire v1) · one contract, one adapter per Harness · declarations in <a href="../core/agent/harness-services.ts">core/agent/harness-services.ts</a></p></div></div>
 <div class="hc"><div class="hc-grid" id="hc-grid"></div></div>
 <div class="hc-legend"><span><b style="background:#e7f1ea;border-color:#a9c7b2"></b>native · the Harness's own long-running interface</span><span><b style="background:#eef2f8;border-color:#b9c6da"></b>files · its own folder, read-only</span><span><b style="background:#f7f0e3;border-color:#dcc79f"></b>worldlet · Worldlet stands in</span><span><b style="border-style:dashed;border-color:#aab8ae"></b>being built (parity plan, 2026-10-08)</span><span>— not provided; the World says so instead of faking it</span></div>
@@ -62,9 +62,9 @@ const components={
  model:['The person’s model','Inference · access · usage','Their provider, through their Agent','Provide inference, access limits and usage accounting.','Provider APIs, reached only through the person’s Agent','Worldlet provides no model and does not charge for one. Model services do not own World history.','base']
 };
 const layers=[
- ['01','UI · See','ui/',['worldui','appletui','foxui','attentionui','artifactui','webui','shellui']],
- ['02','Core · Do & Know','core/',['worldrules','appletrules','foxrules','attentionrules','taskrules','artifactrules','agentrules','records','connectorrules','phonerules','setup']],
- ['03','Platform · Host','platform/',['chromium','storage','host','agenthost','sourcehost','phonehost']],
+ ['01','UI','ui/',['worldui','appletui','foxui','attentionui','artifactui','webui','shellui']],
+ ['02','Core · Agent & Context','core/',['worldrules','appletrules','foxrules','attentionrules','taskrules','artifactrules','agentrules','records','connectorrules','phonerules','setup']],
+ ['03','Platform','platform/',['chromium','storage','host','agenthost','sourcehost','phonehost']],
  ['04','Harness','the person’s Agent',['agent']],
  ['05','Models / services','the person’s provider',['model']]
 ];

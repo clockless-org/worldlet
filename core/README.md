@@ -14,7 +14,7 @@ Platform-independent product behavior. Components, by [feature](../docs/UI-CORE-
 - Windows: phone (the World in a web browser and on the phone)
 - Base: onboarding, diagnostics, distribution
 
-Two of the four [layers](../docs/UI-CORE-PLATFORM.md#see-do-know) live here: Do (Fox, Tasks, Asks, Agents and the Gate) and Know (Context and its Connectors). Which folder is in which: [folders by layer](../docs/UI-CORE-PLATFORM.md#folders-by-layer).
+Two of the four [layers](../docs/UI-CORE-PLATFORM.md#see-do-know) live here, moving to their own folders: Agent (Fox, Tasks, Asks, Agents and the Gate) and Context (the Context store and its Connectors). Which folder is in which: [folders by layer](../docs/UI-CORE-PLATFORM.md#folders-by-layer).
 
 See the [layer and dependency contract](../docs/UI-CORE-PLATFORM.md#repository-layers).
 
