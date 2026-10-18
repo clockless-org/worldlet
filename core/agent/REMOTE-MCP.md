@@ -6,7 +6,7 @@ Remote access is on by default (owner decision 2026-10-17): the installed app's 
 
 ## Connect a connector
 
-1. In Worldlet, open Settings › Agent › Access and choose **Copy address** under Remote access (**Turn on** first if it was turned off).
+1. In Worldlet, open Settings › Connectors and choose **Copy address** under **Use your World in Claude or ChatGPT** (**Turn on** first if it was turned off). The same address and Copy address are under Remote access in Settings › Agent › Access.
 2. Add the address as a remote MCP server in the client:
    - **Claude** (claude.ai, the desktop app, and cloud sessions that use the account's connectors): Settings › Connectors › Add custom connector. Paste the address and leave the OAuth fields empty.
    - **ChatGPT**: Settings › Connectors (Apps) › Create, with developer mode on where the plan asks for it. Paste the address as the MCP server URL and choose OAuth.
@@ -19,7 +19,7 @@ What the new Agent may do starts with the default Grants: reads, drafts for your
 
 ## A token for a script or another computer
 
-An Agent that cannot open a browser, such as a script, a daemon on another computer or a scheduled job, uses a token instead. Under Remote access, type the Agent's name and choose **New token**, or run `worldlet remote token "<name>"` on the Node host. The token is shown once. The Agent sends it as `Authorization: Bearer <token>` with MCP requests to the same address.
+An Agent that cannot open a browser, such as a script, a daemon on another computer or a scheduled job, uses a token instead. Under Remote access, open **For a script or another computer**, type the Agent's name and choose **New token**, or run `worldlet remote token "<name>"` on the Node host. The token is shown once. The Agent sends it as `Authorization: Bearer <token>` with MCP requests to the same address.
 
 The token makes an Agent of its own (kind `remote`, Harness `token`), listed in Settings › Agent › Access with the default Grants, its own audit and Revoke. It does not run out. Making a new token for the same Agent (`remoteMcp` `token` with its `id`) stops the old one, and Revoke ends it. Only its SHA-256 hash is kept, in the vault. Anyone who has the token can act as that Agent, so keep it as secret as a password.
 
