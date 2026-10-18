@@ -381,6 +381,7 @@ export function installPhone(host:Host){
   worldLink:async()=>{await worldRoom.ensure();const status=await browser.ensure();links[2].schedule(QUICK);links[4].schedule(QUICK);return webStatus(status);},
   localServer:serveLocal,
   worldRoomLink:async()=>{const status=await worldRoom.ensure();links[4].schedule(QUICK);return status;},
+  worldRoomRenew:async()=>{const status=await worldRoom.start();links[4].schedule(QUICK);host.page.event('worldlet:web-pair-status',webStatus(browser.status()));return status;},
  });
  host.register({
   // `kind: 'agent'` is the pairing with another Worldlet, `kind: 'web'` a browser's through the relay (another device),

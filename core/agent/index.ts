@@ -40,4 +40,5 @@ export * from './harness-controls.ts';
 export * from './harness-memory.ts';
 export * from './agent-profile.ts';
 export * from './remote-mcp.ts';
+export * from './world-address.ts';
 export * from './service-requests.ts';

@@ -130,6 +130,7 @@ Fox 是你用文字或语音对话的伙伴。它通过你的 Agent 干活，把
 - **[Connectors（连接器）](core/applets/INTEGRATIONS.md#settings--connectors)**：在 设置 › Connectors 里，用各服务自己的登录连接 Google、Notion、Linear、PostHog、Cloudflare 等，Search Console 用你的 Google 登录连接，GitHub 则在 GitHub 自己的页面上粘贴一个短码连接（不需要密钥，也没有 secret）。已连接服务的最新内容每小时同步到你的 World（可以在它的卡片上关掉），你允许的 Agent 可以在一个地方搜索全部内容。Fox 和它用的 Agent 能读取已连接的服务，其他 Agent 只有你选了才能读，任何改动都会先问你：Agent 起草的 GitHub Issue 或评论要你批准后才以你的身份发出，并带一行“Drafted by”说明。
 - **[Board（看板）](core/board/README.md)**：一个 Thing，放你关注的数字，比如北极星指标、漏斗或一次发布，数据来自 GitHub、PostHog、Cloudflare、JSON 接口或你的 Agent 的汇报。
 - **[云端 Agent](core/agent/REMOTE-MCP.md)**：在 设置 › Agents › **Use your World in Claude or ChatGPT** 复制你的 World 地址（Remote access，默认已打开），那里也写明该粘贴到哪里；ChatGPT、Claude 或 Cursor 的连接器，或云端的 Agent，就能通过 `mcp.worldlet.ai` 使用你的 World；每个连接都要你在这台电脑上允许，选 Allow 时它还能读取你已连接的服务（也可以选 Allow without them 不给）。
+- **[你的 World 地址](core/agent/WORLD-ADDRESS.md)**：在 设置 › Agents › Your World's address 给你的 World 起一个自己的网址，比如 `alex.worldlet.ai`，在任何设备上打开它。新的浏览器要先申请，你在 Attention 的卡片上允许；之后用通行密钥（passkey）登录。你也可以在那里只读地分享你的看板，给你允许的人，或给任何拿到链接的人。除此之外别人什么都看不到，World 一直留在你的电脑上。
 - **[另一台电脑上的 Agent](core/agent/PORTABILITY.md#an-agent-on-another-computer)**：和一直开着、跑着你 Agent 的那台电脑配对，在这个 World 里和它对话。
 - **[本地优先](docs/WORLD-STORAGE.md)**：你的记录留在你电脑上的 `world.sqlite` 里。
 - **[设置](core/agent/GRANTS.md#settings--agents)** 分三块：**Connectors**（你的 World 读取的服务）、**Agents**（每个使用你 World 的 Agent，你自己的排在最前，各自写明能做什么、最近做了什么，并可 Revoke）和 **Context**（你的 World 保存的一切、各占多少，可以 Save a copy 和删除）。Fox、Phone、General 和 Help 排在它们下面。

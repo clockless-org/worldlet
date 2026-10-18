@@ -6,6 +6,7 @@ import {modelHealthView,type ModelFix} from './model-health.ts';
 import {showAgentPermissions} from './agent-permissions.ts';
 import {showAgentAccess,type OwnAgent} from './agent-access.ts';
 import {showRemoteAccess,showUseInClaude} from './remote-access.ts';
+import {showWorldAddress} from './world-address.ts';
 import {showWorldContext} from './world-context-page.ts';
 import {showAgentRoutines} from './agent-routines.ts';
 import {showAgentSkills} from './agent-skills.ts';
@@ -342,7 +343,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    line:view.state==='ok'?'Fox works through it. It may do what you ask Fox, and asks you before it changes anything.':view.title+'.'};
  }
  // Agents (issue #674): every Agent that reaches this World in one list, your own Agent first with Open for its page;
- // then using the World in Claude or ChatGPT, and Remote access (its address, Turn off and tokens) folded below.
+ // then using the World in Claude or ChatGPT, Your World's address, and Remote access (its address, Turn off and tokens) folded below.
  async function agentsSetting(target:HTMLElement,at:string){
   if(OWN_PARTS.includes(at))return ownAgentPage(target);
   const turn=ticket,live=()=>turn===ticket&&target.isConnected;
@@ -350,9 +351,11 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   const remote=el('details','companion-settings-elsewhere companion-settings-remote-access') as HTMLDetailsElement;remote.dataset.part='remote';
   remote.append(el('summary','','Remote access'));
   const claude=el('div');claude.dataset.part='use-in-claude';
-  target.append(list,claude,remote);
+  // Your World's address (core/agent/WORLD-ADDRESS.md): its own web page, the browsers allowed there and what is shared.
+  const address=el('div');address.dataset.part='world-address';
+  target.append(list,claude,address,remote);
   const own=await ownAgent();if(!live())return;
-  await Promise.all([showAgentAccess(list,call,live,{own:{...own,open:()=>void show('agents','model')}}),showUseInClaude(claude,call,live),showRemoteAccess(remote,call,live)]);
+  await Promise.all([showAgentAccess(list,call,live,{own:{...own,open:()=>void show('agents','model')}}),showUseInClaude(claude,call,live),showWorldAddress(address,call,live),showRemoteAccess(remote,call,live)]);
  }
  // One list, in the order a person looks for things (owner request 2026-10-10: no tabs, nothing technical): the three
  // areas first (issue #674), connectors on one side, Agents on the other, and everything the World keeps in one place;
