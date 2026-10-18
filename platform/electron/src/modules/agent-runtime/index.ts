@@ -25,7 +25,7 @@ import {createTrackedLinks,type TrackedLinks} from './tracked-links.ts';
 import {createAgentArtifacts,type AgentArtifacts} from './agent-artifacts.ts';
 import {createServiceDrafts,type ServiceDrafts} from './service-drafts.ts';
 import type {AskDrafts} from './agent-asks.ts';
-import type {PosthogSettings} from '../../../../../core/accounts/index.ts';
+import {GITHUB_APP,type PosthogSettings} from '../../../../../core/accounts/index.ts';
 import {moveFoxProfile} from './fox-move.ts';
 import {HERMES_WINDOW_DONE,endHermesInstall,hermesInstallWindow,hermesSessionModels,hermesStarts,installHermes,workingHermesAgent,installedHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
 import {UPDATED,backgroundSignIn,claudeCodeSignedIn,openSignIn} from './provider-sign-in.ts';
@@ -664,8 +664,14 @@ export function installAgentRuntime(host:Host){
  trackedLinks=createTrackedLinks({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
   changed:()=>host.store.worldChanged()});
  // GitHub drafts (core/agent/GRANTS.md#github-drafts): in the person's own World with private context allowed, as asks are.
+ // GitHub's sign-in, read from the vault as the GitHub tile keeps it (one McpAccounts per vault entry is safe: each
+ // renewal is checked against the entry it read).
+ const githubSignIn=new McpAccounts({vault,agentHomes:()=>[]});
  githubDrafts=createGithubDrafts({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
-  vault,name:agentId=>agentAccess?.identity(agentId)?.name??agentId,changed:()=>host.store.worldChanged(),userAgent:`Worldlet/${app.getVersion()}`});
+  vault,name:agentId=>agentAccess?.identity(agentId)?.name??agentId,changed:()=>host.store.worldChanged(),userAgent:`Worldlet/${app.getVersion()}`,
+  // Writes as the person through their GitHub sign-in (Settings › Connectors), when no own GitHub App is connected.
+  signedIn:()=>githubSignIn.signedInWith('github',GITHUB_APP.clientId),
+  userToken:async force=>githubSignIn.signedInWith('github',GITHUB_APP.clientId)?(await githubSignIn.bearer('github',force))?.replace(/^Bearer /,'')??null:null});
  // What Agents save to the Journal (core/agent/GRANTS.md#agent-artifacts): in the person's own World with private context allowed, as asks
  // are, kept with every other artifact so the Journal lists them.
  agentArtifacts=createAgentArtifacts({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
@@ -869,7 +875,7 @@ export function installAgentRuntime(host:Host){
    if(!identity)throw new WorldletError('That Agent is not known here.');
    if(request.operation==='grantGithubDrafts'){
     if(agentRevoked(identity,new Date().toISOString()))throw new WorldletError('This Agent was revoked.');
-    if(!githubDrafts?.app.status().connected)throw new WorldletError('Connect a GitHub App in Settings › Agent › Connections first.');
+    if(!githubDrafts?.writer())throw new WorldletError('Connect GitHub in Settings › Connectors first.');
     if(!access.grantGithubDrafts(id))throw new WorldletError('Could not change that.');
    }else if(!access.ungrantGithubDrafts(id))throw new WorldletError('Could not change that.');
    return {ok:true};
@@ -898,7 +904,7 @@ export function installAgentRuntime(host:Host){
    if(!identity)throw new WorldletError('That Agent is not known here.');
    if(request.operation==='grantGithubWrites'){
     if(agentRevoked(identity,new Date().toISOString()))throw new WorldletError('This Agent was revoked.');
-    if(!githubDrafts?.app.status().connected)throw new WorldletError('Connect a GitHub App in Settings › Agent › Connections first.');
+    if(!githubDrafts?.app.status().connected)throw new WorldletError('Changing GitHub without asking needs your own GitHub App, under Settings › Connectors › Advanced.');
     if(!access.grantGithubWrites(id,request.repo,request.choice,request.labelPrefix))throw new WorldletError(`Could not allow that. Name the repository as owner/repo, and a label prefix such as state: for labels; one Agent can have this on at most ${GITHUB_WRITE_LIMITS.grantsPerAgent} repositories.`);
    }else if(!access.ungrantGithubWrites(id,request.repo))throw new WorldletError('Could not change that.');
    return {ok:true};
@@ -928,7 +934,7 @@ export function installAgentRuntime(host:Host){
    return {ok:true};
   }
   const services=connectedServices(),drafting=draftServices(),now=new Date().toISOString(),orders=agentOrders?.read()??{wake:{}};
-  const githubApp=githubDrafts?.app.status().connected===true;
+  const githubApp=githubDrafts?.app.status().connected===true,githubWriter=!!githubDrafts?.writer();
   return {orders:{...orders.defaultFor?{defaultFor:orders.defaultFor}:{}},agents:access.list(AGENT_ACCESS_AUDIT).map(({identity,grants,audit})=>({...identity,grants,audit,
    // Its wake command, as the person typed it (shown only to this computer's pages, as all of this action is).
    ...agentRevoked(identity,now)?{}:{wake:orders.wake[identity.id]??[]},
@@ -943,8 +949,8 @@ export function installAgentRuntime(host:Host){
    // An Agent for a script: where its program reads its endpoint and token.
    ...identity.harness===SCRIPT_HARNESS&&!agentRevoked(identity,now)?{endpointFile:path.join(mcpHome(),standingEndpointFile(identity.id))}:{},
    artifacts:{save:artifactGranted(identity.id,grants,'save',now),read:artifactGranted(identity.id,grants,'read',now)},
-   // "Can draft GitHub changes", shown once a GitHub App can write them (or while the Grant is still on).
-   ...!agentRevoked(identity,now)&&(githubApp||githubDraftGranted(identity.id,grants,now))?{githubDrafts:githubDraftGranted(identity.id,grants,now)}:{},
+   // "Can draft GitHub changes", shown once GitHub is connected to write them (or while the Grant is still on).
+   ...!agentRevoked(identity,now)&&(githubWriter||githubDraftGranted(identity.id,grants,now))?{githubDrafts:githubDraftGranted(identity.id,grants,now)}:{},
    // Its standing GitHub write Grants, each with its repository, and whether another can be given (a GitHub App is connected).
    ...!agentRevoked(identity,now)&&(githubApp||githubWriteGrants(identity.id,grants,now).length)?{githubWrites:{add:githubApp,
     grants:githubWriteGrants(identity.id,grants,now).map(grant=>({repo:grant.github!.repo,writes:grant.github!.writes,...grant.github!.labelPrefix?{labelPrefix:grant.github!.labelPrefix}:{}}))}}:{},

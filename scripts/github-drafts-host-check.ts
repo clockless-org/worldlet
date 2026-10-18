@@ -11,14 +11,17 @@ import {createAgentAsks} from '../platform/electron/src/modules/agent-runtime/ag
 import {ASK_REASONS,askItemId} from '../core/agent/asks.ts';
 import {roomDenied} from '../contracts/web-world.ts';
 import {STANDING_OUTSIDE_TURN} from '../core/agent/grants.ts';
-import {GITHUB_DRAFT_REASONS,GITHUB_DRAFT_STALE,GITHUB_WRITE_REASONS,GITHUB_WRITE_STALE,githubDraftItemId} from '../core/agent/github-drafts.ts';
+import {GITHUB_DRAFT_REASONS,GITHUB_DRAFT_STALE,GITHUB_WRITE_REASONS,GITHUB_WRITE_STALE,githubDraftCreatedUrl,githubDraftItemId,githubDraftSignature} from '../core/agent/github-drafts.ts';
+import {GITHUB_APP} from '../core/accounts/index.ts';
 
 // GitHub drafts on the host (core/agent/GRANTS.md#github-drafts), the same modules the Electron and Node hosts run,
 // against a stubbed GitHub: an Agent drafts only under its own "Can draft GitHub changes" Grant; the draft keeps the
 // target as read; Approve reads it again and refuses when its state or updatedAt changed or it is gone, and otherwise
 // writes once as the GitHub App (a JWT it signs, exchanged for an installation token) and keeps the result's link;
 // Dismiss writes nothing; everything is audited. The App's private key, its signed token and the installation token
-// appear in no answer, item, audit entry, stored row or log line. A label transition (`labels.set`) is drafted and
+// appear in no answer, item, audit entry, stored row or log line. Through the person's GitHub sign-in (no own App),
+// approved drafts are written as the person with the sign-in's user token, renewed once when GitHub refuses it, each new
+// Issue or comment ending with "Drafted by <Agent> in Worldlet", and standing writes are refused. A label transition (`labels.set`) is drafted and
 // approved against the labels the Agent read. Standing GitHub writes (core/agent/GRANTS.md#standing-github-writes) run
 // at once, without a card, only within the reach of the Agent's own Grant for that repository, each read again and
 // refused when not as the Agent read it, each audited.
@@ -38,6 +41,9 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
  const pem=privateKey.export({type:'pkcs1',format:'pem'}).toString();
  const otherPem=crypto.generateKeyPairSync('rsa',{modulusLength:2048}).privateKey.export({type:'pkcs8',format:'pem'}).toString();
  const INSTALLATION_TOKEN='ghs_'+'F1xture'.repeat(6);
+ // The GitHub sign-in's user tokens (McpAccounts.bearer): the next one each time it is renewed.
+ const USER_TOKENS=['ghu_'+'U1xture'.repeat(6),'ghu_'+'U2xture'.repeat(6)];
+ let signedIn=false,userToken=0,renewed=0,refuseUser=false;
  // Stubbed GitHub: an Issue, a pull request and a repository, each with its state and updated_at; every request kept.
  const issues=new Map<string,any>([
   ['example/app#12',{number:12,title:'Build fails on Windows',state:'open',updated_at:'2026-10-15T10:00:00Z',html_url:'https://github.com/example/app/issues/12'}],
@@ -68,7 +74,8 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
    return answer(201,{token:INSTALLATION_TOKEN,expires_at:new Date(clock+3600_000).toISOString()});
   }
   if(u.pathname.startsWith('/app/'))return answer(404,{message:'Not Found'});
-  assert.equal(auth,INSTALLATION_TOKEN,'everything else is asked as the App\'s installation');
+  assert.equal(auth,signedIn&&!secrets.has(GITHUB_APP_VAULT_KEY)?USER_TOKENS[userToken]:INSTALLATION_TOKEN,'everything else is asked as the App\'s installation, or as the person through the sign-in');
+  if(auth.startsWith('ghu_')&&refuseUser){refuseUser=false;return answer(401,{message:'Bad credentials'});}
   const issue=/^\/repos\/([^/]+)\/([^/]+)\/issues\/(\d+)(\/.*)?$/.exec(u.pathname),repo=/^\/repos\/([^/]+)\/([^/]+)(\/issues)?$/.exec(u.pathname);
   if(issue){
    const key=`${issue[1]}/${issue[2]}#${issue[3]}`,found=issues.get(key);
@@ -94,7 +101,8 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
    if(!found)return answer(404,{message:'Not Found'});
    if(!repo[3]&&init.method==='GET')return answer(200,found);
    if(repo[3]&&init.method==='POST'){
-    const number=99+madeIssues.length,made={number,title:body.title,created_at:now(),html_url:`https://github.com/example/app/issues/${number}`,user:{login:'worldlet-test[bot]',type:'Bot'},performed_via_github_app:{id:1001}};
+    const number=99+madeIssues.length,made={number,title:body.title,body:body.body,created_at:now(),html_url:`https://github.com/example/app/issues/${number}`,
+     ...auth.startsWith('ghu_')?{user:{login:'alex',type:'User'},performed_via_github_app:{id:777,slug:GITHUB_APP.slug,client_id:GITHUB_APP.clientId}}:{user:{login:'worldlet-test[bot]',type:'Bot'},performed_via_github_app:{id:1001}}};
     madeIssues.push(made);return answer(201,made);
    }
    if(repo[3]&&init.method==='GET'){assert.equal(u.searchParams.get('state'),'all');return answer(200,[...madeIssues].reverse());}
@@ -102,7 +110,8 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
   return answer(500,{message:'unexpected'});
  };
  let changes=0;
- const drafts=createGithubDrafts({ledger:()=>ledger,vault,name:agentId=>access.identity(agentId)?.name??agentId,changed:()=>{changes+=1;},fetch:github,now,clock:()=>clock});
+ const drafts=createGithubDrafts({ledger:()=>ledger,vault,name:agentId=>access.identity(agentId)?.name??agentId,changed:()=>{changes+=1;},fetch:github,now,clock:()=>clock,
+  signedIn:()=>signedIn,userToken:async force=>{if(!signedIn)return null;if(force){renewed+=1;userToken=Math.min(userToken+1,USER_TOKENS.length-1);}return USER_TOKENS[userToken];}});
  const asks=createAgentAsks({ledger:()=>ledger,name:agentId=>access.identity(agentId)?.name??agentId,changed:()=>{},drafts:()=>drafts,now});
  const standing=await openStandingWorldTools({access,drafts:(agentId,args)=>drafts.call(agentId,args),writes:(agentId,args,grants)=>drafts.run(agentId,args,grants),asks:(agentId,args)=>asks.call(agentId,args),channel:async()=>({error:'not here'})});
  const said:string[]=[];
@@ -188,7 +197,7 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
   clock+=60_000;
   assert.deepEqual(keep(await drafts.approve(third.draft.id)),{ok:true,status:'written',url:'https://github.com/example/app/issues/12#issuecomment-901'});
   assert.equal(writes(),1);assert.equal(comments,1);
-  assert.deepEqual(requests.find(r=>r.path.endsWith('/comments'))!.body,{body:comment.body},'exactly the drafted text');
+  assert.deepEqual(requests.find(r=>r.path.endsWith('/comments'))!.body,{body:comment.body+'\n\n_Drafted by Codex in Worldlet_'},'exactly the drafted text, with the line naming the Agent');
   assert.equal(await refused(()=>drafts.approve(third.draft.id)),GITHUB_DRAFT_REASONS.settled);
   assert.equal(writes(),1);
   const read=await codex('read',{ids:[third.draft.id]});
@@ -204,7 +213,7 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
   clock+=2*3600_000;
   assert.deepEqual((await drafts.approve(created.draft.id)),{ok:true,status:'written',url:'https://github.com/example/app/issues/99'},'a repository\'s updatedAt is not compared');
   assert.equal(jwts.length,3,'an expired installation token is exchanged again');
-  assert.deepEqual(requests.at(-1)!.body,{title:'Crash on start',body:'Steps: open the app.',labels:['bug']});
+  assert.deepEqual(requests.at(-1)!.body,{title:'Crash on start',body:'Steps: open the app.\n\n_Drafted by Codex in Worldlet_',labels:['bug']});
   issues.set('example/app#16',{number:16,title:'Docs typo',state:'open',updated_at:'2026-10-15T10:00:00Z',html_url:'https://github.com/example/app/issues/16'});
   const label=await codex('create',{write:'labels.remove',target:'example/app#16',labels:['triage','wontfix']});
   assert.equal((await drafts.approve(label.draft.id)).status,'written','a label that is already gone counts as removed');
@@ -352,7 +361,7 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
   const commented=await write(codex,{...comment20,expectedState:'open'});
   assert.deepEqual([commented.ok,commented.status,commented.untrustedContent],[true,'written',true]);
   assert.match(commented.url,/^https:\/\/github\.com\/example\/app\/issues\/20#issuecomment-\d+$/);
-  assert.deepEqual(requests.at(-1),{method:'POST',path:'/repos/example/app/issues/20/comments',auth:INSTALLATION_TOKEN,body:{body:'Started on this.'}});
+  assert.deepEqual(requests.at(-1),{method:'POST',path:'/repos/example/app/issues/20/comments',auth:INSTALLATION_TOKEN,body:{body:'Started on this.\n\n_Drafted by Codex in Worldlet_'}});
   const stepped=await write(codex,step);
   assert.deepEqual([stepped.status,stepped.url],['written','https://github.com/example/app/issues/20']);
   assert.deepEqual(issues.get('example/app#20').labels.map((l:any)=>l.name),['bug','state:review']);
@@ -396,15 +405,53 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
   drafts.app.disconnect();
   assert.equal(vault.get(GITHUB_APP_VAULT_KEY),null);
   assert.equal((await codex('create',comment)).error,GITHUB_DRAFT_MESSAGES.noApp);
+  assert.equal(drafts.writer(),null);
+
+  // Through the GitHub sign-in (Settings › Connectors), with no own App: the person writes what they approve, with the
+  // sign-in's user token; a token GitHub refuses is renewed once; the Agent's line ends each new Issue and comment.
+  signedIn=true;
+  assert.equal(drafts.writer(),'person');
+  assert.ok(access.grantGithubDrafts('claude-code'));
+  issues.set('example/app#30',{number:30,title:'Slow start',state:'open',updated_at:'2026-10-15T10:00:00Z',html_url:'https://github.com/example/app/issues/30'});
+  refuseUser=true;
+  const asPerson=await claude('create',{write:'issue.comment',target:'example/app#30',body:'Looking into it.'});
+  assert.deepEqual([asPerson.draft.status,renewed,userToken],['pending',1,1],'a refused user token is renewed once and the read made again');
+  const viaSignIn=await drafts.approve(asPerson.draft.id);
+  assert.equal(viaSignIn.status,'written');
+  assert.deepEqual(requests.at(-1),{method:'POST',path:'/repos/example/app/issues/30/comments',auth:USER_TOKENS[1],body:{body:'Looking into it.\n\n_Drafted by Claude Code in Worldlet_'}});
+  const personAudit=ledger.agentAudit('claude-code',500).find(e=>e.target==='github-drafts'&&e.action==='approve')!;
+  assert.match(String(personAudit.reason),/written to GitHub as the person, through their GitHub sign-in: https:\/\/github\.com\/example\/app\/issues\/30#issuecomment-\d+$/);
+  // A new Issue begun but not seen to finish is found by the Worldlet GitHub App that made it for the person.
+  const newIssue=await claude('create',{write:'issue.create',target:'example/app',title:'Signed-in issue'});
+  const madeBefore=madeIssues.length;
+  await drafts.approve(newIssue.draft.id);
+  const madeByPerson=madeIssues[madeBefore];
+  assert.deepEqual([madeByPerson.user.login,madeByPerson.body],['alex','_Drafted by Claude Code in Worldlet_']);
+  const begunByPerson={...newIssue.draft,writeStartedAt:madeByPerson.created_at};
+  assert.equal(githubDraftCreatedUrl(begunByPerson,[madeByPerson],{clientId:GITHUB_APP.clientId,slug:GITHUB_APP.slug}),madeByPerson.html_url);
+  assert.equal(githubDraftCreatedUrl(begunByPerson,[{...madeByPerson,performed_via_github_app:{id:5,slug:'other',client_id:'Iv1.other'}}],{clientId:GITHUB_APP.clientId,slug:GITHUB_APP.slug}),'','another App\'s Issue is not it');
+  assert.equal(githubDraftCreatedUrl(begunByPerson,[madeByPerson],{appId:'1001'}),'','nor is it the own App\'s');
+  // The Agent's name is kept to plain words: no link, mention or formatting.
+  assert.equal(githubDraftSignature('Evil [x](https://example.com) @alex _b_'),'Drafted by Evil x https example.com alex b in Worldlet');
+  assert.equal(githubDraftSignature(''),'Drafted by an Agent in Worldlet');
+  // Through the sign-in nothing is written without asking: a standing write is refused, audited, and GitHub is not asked.
+  assert.ok(access.grantGithubWrites('codex','example/app','comment',''));
+  const beforeStanding=requests.length;
+  assert.equal((await write(codex,comment20)).error,GITHUB_DRAFT_MESSAGES.standingNeedsApp);
+  assert.equal(requests.length,beforeStanding);
+  assert.ok(access.ungrantGithubWrites('codex','example/app'));
+  // Signed out: drafting says to connect GitHub again.
+  signedIn=false;
+  assert.equal((await claude('create',{write:'issue.comment',target:'example/app#30',body:'Again.'})).error,GITHUB_DRAFT_MESSAGES.noApp);
 
   // The key never leaves the vault: not in an answer, item, stored row, audit entry or log line, and neither are the
   // App's signed tokens or the installation token.
   const stored=JSON.stringify([ledger.githubDrafts(),ledger.agentAudit('codex',500),ledger.agentAudit('claude-code',500),ledger.records('items'),ledger.history({limit:1000})]);
   const body=pem.split('\n').slice(1,-2).join('');
-  for(const text of [...said,stored,...logged])for(const secret of [pem.trim(),body.slice(0,64),body.slice(-64),INSTALLATION_TOKEN,...jwts]){
+  for(const text of [...said,stored,...logged])for(const secret of [pem.trim(),body.slice(0,64),body.slice(-64),INSTALLATION_TOKEN,...USER_TOKENS,...jwts]){
    assert.ok(!text.includes(secret),'a credential leaked');
   }
   assert.deepEqual(logged.filter(line=>!line.includes('ExperimentalWarning')),[],'nothing is logged');
  }finally{standing.close();ledger.close();Object.assign(console,original);}
 });
-console.log('PASS GitHub drafts on the host: own Grant only, drafted against the target as read, Approve re-reads and refuses a changed, closed or deleted target, writes once as the GitHub App and keeps the link, reports labels removed in part, looks for a new Issue begun but not seen to finish instead of posting it twice, Dismiss and a phone settle write nothing, every Approve and Dismiss audited, an ask carrying drafts runs them only on this computer’s Approve and the Agent reads the results, a label transition checked against the labels read, standing GitHub writes run at once only within their Grant’s repository, writes and label prefix, refused when stale and audited, and the App key and tokens appear nowhere');
+console.log('PASS GitHub drafts on the host: own Grant only, drafted against the target as read, Approve re-reads and refuses a changed, closed or deleted target, writes once as the GitHub App and keeps the link, reports labels removed in part, looks for a new Issue begun but not seen to finish instead of posting it twice, Dismiss and a phone settle write nothing, every Approve and Dismiss audited, an ask carrying drafts runs them only on this computer’s Approve and the Agent reads the results, a label transition checked against the labels read, standing GitHub writes run at once only within their Grant’s repository, writes and label prefix, refused when stale and audited, through the GitHub sign-in writes as the person with its user token (renewed once when refused), each new Issue and comment ending with the drafting Agent\'s line, no standing write, and the App key and tokens appear nowhere');

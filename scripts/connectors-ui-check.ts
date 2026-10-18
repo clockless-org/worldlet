@@ -207,7 +207,7 @@ await withBrowser(async browser=>{
  await tile('notion').getByRole('button',{name:'Connect',exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='disconnectSource')),[{action:'disconnectSource',provider:'notion'}]);
 
- // Advanced: the keys, GitHub writes, Search Console and HTTP JSON. A key leaves the page once.
+ // Advanced: the keys, your own GitHub App, Search Console and HTTP JSON. A key leaves the page once.
  await page.getByText('Advanced',{exact:true}).click();
  for(const key of ['github','posthog','cloudflare'])await page.locator(`[data-advanced] [data-key="${key}"]`).waitFor();
  for(const box of ['github-app','search-console','http'])await page.locator(`[data-advanced] [data-accounts="${box}"]`).waitFor();

@@ -127,7 +127,7 @@ Fox 是你用文字或语音对话的伙伴。它通过你的 Agent 干活，把
 - **[手机伴侣](ios/README.md)**：iPhone 和 [Android](android/README.md) 上的 Attention Center 和 Fox，扫码配对，经端到端加密中继连到电脑。
 - **[Journal](ui/artifacts/CARD-SYSTEM.md)**：Fox 做的卡片按天留存。
 - **[Scheduled（定时任务）](core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**：说一次（“每天早上 8 点告诉我天气和第一个会”），Fox 就一直做；你的 Agent 原有的定时任务也一起带过来。安装后默认有两个，可以关掉：[早上 7 点的“今日准备”和傍晚 6 点的“今日收尾”](core/artifacts/README.md#the-days-plan-and-summary)，各是一张 Attention 卡片。
-- **[Connectors（连接器）](core/applets/INTEGRATIONS.md#settings--connectors)**：在 设置 › Connectors 里，用各服务自己的登录连接 Google、Notion、Linear、PostHog、Cloudflare 等，Search Console 用你的 Google 登录连接，GitHub 则在 GitHub 自己的页面上粘贴一个短码连接（不需要密钥，也没有 secret）。Fox 和它用的 Agent 能读取已连接的服务，其他 Agent 只有你选了才能读，任何改动都会先问你。
+- **[Connectors（连接器）](core/applets/INTEGRATIONS.md#settings--connectors)**：在 设置 › Connectors 里，用各服务自己的登录连接 Google、Notion、Linear、PostHog、Cloudflare 等，Search Console 用你的 Google 登录连接，GitHub 则在 GitHub 自己的页面上粘贴一个短码连接（不需要密钥，也没有 secret）。Fox 和它用的 Agent 能读取已连接的服务，其他 Agent 只有你选了才能读，任何改动都会先问你：Agent 起草的 GitHub Issue 或评论要你批准后才以你的身份发出，并带一行“Drafted by”说明。
 - **[Board（看板）](core/board/README.md)**：一个 Thing，放你关注的数字，比如北极星指标、漏斗或一次发布，数据来自 GitHub、PostHog、Cloudflare、JSON 接口或你的 Agent 的汇报。
 - **[云端 Agent](core/agent/REMOTE-MCP.md)**：在 设置 › Connectors › **Use your World in Claude or ChatGPT** 复制你的 World 地址（Remote access，默认已打开），那里也写明该粘贴到哪里；ChatGPT、Claude 或 Cursor 的连接器，或云端的 Agent，就能通过 `mcp.worldlet.ai` 使用你的 World；每个连接都要你在这台电脑上允许。
 - **[另一台电脑上的 Agent](core/agent/PORTABILITY.md#an-agent-on-another-computer)**：和一直开着、跑着你 Agent 的那台电脑配对，在这个 World 里和它对话。

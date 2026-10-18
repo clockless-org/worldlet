@@ -39,8 +39,8 @@ const CONVERSATION_TOGGLES=[['add','Can save conversations','can now save conver
 /** "Can save to your Journal" and "Can read Agents' Journal artifacts" (core artifactGrant,
  * core/agent/GRANTS.md#agent-artifacts), the same way. */
 const ARTIFACT_TOGGLES=[['save','Can save to your Journal','can now save to your Journal','can no longer save to your Journal'],['read','Can read Agents\' Journal artifacts','can now read what Agents saved to your Journal','can no longer read what other Agents saved to your Journal']] as const;
-/** "Can draft GitHub changes" (core githubDraftGrant, core/agent/GRANTS.md#github-drafts): shown once a GitHub App can
- * write what the person approves. */
+/** "Can draft GitHub changes" (core githubDraftGrant, core/agent/GRANTS.md#github-drafts): shown once GitHub is
+ * connected (the sign-in, or the person's own GitHub App) to write what the person approves. */
 const DRAFT_TOGGLES=[['draft','Can draft GitHub changes','can now draft GitHub changes for you to approve','can no longer draft GitHub changes']] as const;
 /** "Can report its work" and "Can see other Agents" (core reportGrant), the same way. */
 const REPORT_TOGGLES=[['report','Can report its work','can now report what it is doing','can no longer report what it is doing'],['list','Can see other Agents','can now see what your other Agents are doing','can no longer see your other Agents']] as const;

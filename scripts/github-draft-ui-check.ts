@@ -11,7 +11,7 @@ await withBrowser(fileAccess,async browser=>{
   const w=window as any;w.calls=[];w.opened=[];
   const text='Fixed on main in **#20**.\nPlease retry <b>now</b>.';
   const draft=(id:string,title:string)=>({id:'ghd-'+id,provider:'agents',kind:'task',title,reason:'Codex drafted a GitHub change',context:text,
-   summary:'Codex wants to write this on GitHub as your GitHub App. Nothing is written until you approve it.',attentionReason:'Codex wants to write this on GitHub as your GitHub App. Nothing is written until you approve it.',
+   summary:'Codex wants to write this on GitHub. It ends with the line “Drafted by Codex in Worldlet”. Nothing is written until you approve it.',attentionReason:'Codex wants to write this on GitHub. It ends with the line “Drafted by Codex in Worldlet”. Nothing is written until you approve it.',
    attentionContentVersion:1,status:'open',statusOrigin:'agent',policyVersion:2,sources:[{provider:'agents',id,quote:'Build fails on Windows',url:'https://github.com/example/app/issues/12'}],
    agentId:'codex',agentName:'Codex',githubDraftId:id,githubDraftStatus:'pending',githubDraftRepo:'example/app',githubDraftWrite:'issue.comment',githubDraftUrl:'https://github.com/example/app/issues/12',githubDraftText:text});
   w.fixture={workspaceId:'github-draft',revision:0,sources:[],knowledge:[],onboarding:{completed:true},sampleEnabled:false,cloudConsent:true,connections:[],
