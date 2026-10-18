@@ -15,6 +15,8 @@ Platform host thin; the Harness and model service are replaceable through explic
 an extra execution hop. Resources contain assets and declarations, not product logic.
 See the [diagram](architecture.html).
 
+Seen from what runs, the product has three layers, See, Do and Know, with their components: [three-layers.svg](three-layers.svg) ([中文](three-layers.zh.svg)).
+
 <a id="features"></a>
 ## Six features and the base
 

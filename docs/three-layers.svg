@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="780" viewBox="0 0 1200 780" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+<defs>
+<marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#57606A"/></marker>
+</defs>
+<rect width="1200" height="780" rx="18" fill="#FFFFFF"/><rect x="0.5" y="0.5" width="1199" height="779" rx="18" fill="none" stroke="#D8DDE4"/>
+<text x="40" y="54" font-size="26" font-weight="700" fill="#1F2328">Worldlet in three layers</text>
+<text x="40" y="80" font-size="15" fill="#57606A">See what is there · Do the work · Know everything the World keeps</text>
+
+<!-- See -->
+<rect x="40" y="100" width="820" height="150" rx="14" fill="#EEF4FF" stroke="#B6CCFE"/>
+<text x="60" y="132" font-size="20" font-weight="800" fill="#1F4BB8">1 · See</text>
+<text x="160" y="132" font-size="14" fill="#57606A">what a person sees and touches</text>
+<g font-size="14" fill="#1F2328" text-anchor="middle">
+<rect x="60" y="150" width="140" height="40" rx="8" fill="#FFFFFF" stroke="#B6CCFE"/><text x="130" y="175">World · scenes</text>
+<rect x="212" y="150" width="140" height="40" rx="8" fill="#FFFFFF" stroke="#B6CCFE"/><text x="282" y="175">Applets · board</text>
+<rect x="364" y="150" width="140" height="40" rx="8" fill="#FFFFFF" stroke="#B6CCFE"/><text x="434" y="175">Fox conversation</text>
+<rect x="516" y="150" width="140" height="40" rx="8" fill="#FFFFFF" stroke="#B6CCFE"/><text x="586" y="175">Attention</text>
+<rect x="668" y="150" width="172" height="40" rx="8" fill="#FFFFFF" stroke="#B6CCFE"/><text x="754" y="175">Journal</text>
+<rect x="60" y="198" width="292" height="40" rx="8" fill="#FFFFFF" stroke="#B6CCFE"/><text x="206" y="223">Settings: Connectors · Agents · Context</text>
+<rect x="364" y="198" width="292" height="40" rx="8" fill="#FFFFFF" stroke="#B6CCFE"/><text x="510" y="223">Phone · the World's web address</text>
+</g>
+
+<!-- Do -->
+<rect x="40" y="290" width="820" height="180" rx="14" fill="#F1F8F3" stroke="#A9D8B8"/>
+<text x="60" y="322" font-size="20" font-weight="800" fill="#1A7F37">2 · Do</text>
+<text x="146" y="322" font-size="14" fill="#57606A">who does the work</text>
+<g font-size="14" fill="#1F2328" text-anchor="middle">
+<rect x="60" y="340" width="180" height="40" rx="8" fill="#FFFFFF" stroke="#A9D8B8"/><text x="150" y="365">Fox</text>
+<rect x="252" y="340" width="180" height="40" rx="8" fill="#FFFFFF" stroke="#A9D8B8"/><text x="342" y="365">Tasks · routines · checks</text>
+<rect x="444" y="340" width="180" height="40" rx="8" fill="#FFFFFF" stroke="#A9D8B8"/><text x="534" y="365">Asks · handing out work</text>
+<rect x="636" y="340" width="204" height="40" rx="8" fill="#FFFFFF" stroke="#A9D8B8"/><text x="738" y="365">Agents · identity · Revoke</text>
+</g>
+<rect x="60" y="396" width="780" height="56" rx="10" fill="#1F2328"/>
+<text x="80" y="420" font-size="15" font-weight="800" fill="#FFFFFF">Gate</text>
+<text x="80" y="441" font-size="13" fill="#D0D7DE">the only way in or out: World tools · Grants · drafts wait for approval · every call audited</text>
+
+<!-- Know -->
+<rect x="40" y="510" width="820" height="180" rx="14" fill="#FFF8EC" stroke="#F0CF8E"/>
+<text x="60" y="542" font-size="20" font-weight="800" fill="#9A6700">3 · Know</text>
+<text x="160" y="542" font-size="14" fill="#57606A">everything the World knows, in one store</text>
+<rect x="60" y="558" width="560" height="116" rx="10" fill="#FFFFFF" stroke="#F0CF8E"/>
+<text x="76" y="582" font-size="14" font-weight="700" fill="#1F2328">Context</text>
+<text x="146" y="582" font-size="12" fill="#57606A">each record: origin · time · revision · made from · who may read</text>
+<g font-size="13" fill="#1F2328" text-anchor="middle">
+<rect x="76" y="594" width="126" height="34" rx="7" fill="#FFF8EC" stroke="#F0CF8E"/><text x="139" y="616">Synced</text>
+<rect x="210" y="594" width="126" height="34" rx="7" fill="#FFF8EC" stroke="#F0CF8E"/><text x="273" y="616">Recorded</text>
+<rect x="344" y="594" width="126" height="34" rx="7" fill="#FFF8EC" stroke="#F0CF8E"/><text x="407" y="616">Made</text>
+<rect x="478" y="594" width="126" height="34" rx="7" fill="#FFF8EC" stroke="#F0CF8E"/><text x="541" y="616">Known</text>
+<text x="139" y="652" font-size="11" fill="#57606A">from Services</text>
+<text x="273" y="652" font-size="11" fill="#57606A">what happened</text>
+<text x="407" y="652" font-size="11" fill="#57606A">Artifacts · Applets</text>
+<text x="541" y="652" font-size="11" fill="#57606A">memory · summaries</text>
+</g>
+<g font-size="14" fill="#1F2328" text-anchor="middle">
+<rect x="636" y="558" width="204" height="34" rx="8" fill="#FFFFFF" stroke="#F0CF8E"/><text x="738" y="580">Search across all</text>
+<rect x="636" y="598" width="204" height="34" rx="8" fill="#FFFFFF" stroke="#F0CF8E"/><text x="738" y="620">Files by content hash</text>
+<rect x="636" y="638" width="204" height="36" rx="8" fill="#9A6700"/><text x="738" y="661" fill="#FFFFFF" font-weight="700">Connectors</text>
+</g>
+
+<!-- Host -->
+<rect x="40" y="710" width="820" height="46" rx="10" fill="#F6F8FA" stroke="#D0D7DE"/>
+<text x="60" y="739" font-size="14" fill="#57606A"><tspan font-weight="700" fill="#1F2328">Host underneath</tspan>  Electron or Node · OS permissions · files · processes · network · relay. Runs all three, decides nothing.</text>
+
+<!-- Flow arrows between layers -->
+<g stroke="#57606A" stroke-width="2" fill="none">
+<line x1="300" y1="250" x2="300" y2="288" marker-end="url(#ar)"/>
+<line x1="600" y1="288" x2="600" y2="252" marker-end="url(#ar)"/>
+<line x1="450" y1="452" x2="450" y2="508" marker-start="url(#ar)" marker-end="url(#ar)"/>
+</g>
+<g font-size="12" fill="#57606A">
+<text x="308" y="274">asks</text>
+<text x="608" y="274">results as Artifacts → Attention, Journal</text>
+<text x="458" y="485">read · write</text>
+</g>
+
+<!-- Outside -->
+<text x="900" y="122" font-size="13" font-weight="700" fill="#57606A">OUTSIDE THE WORLD</text>
+<rect x="900" y="140" width="260" height="70" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="916" y="168" font-size="16" font-weight="700" fill="#1F2328">The person</text>
+<text x="916" y="190" font-size="13" fill="#57606A">on the computer, phone or web</text>
+<line x1="898" y1="175" x2="862" y2="175" stroke="#57606A" stroke-width="2" marker-end="url(#ar)"/>
+
+<rect x="900" y="300" width="260" height="150" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="916" y="328" font-size="16" font-weight="700" fill="#1F2328">The person's Agents</text>
+<text x="916" y="352" font-size="13" fill="#57606A">On this computer, local MCP:</text>
+<text x="916" y="370" font-size="13" fill="#1F2328">Claude Code · Codex · Hermes · scripts</text>
+<text x="916" y="396" font-size="13" fill="#57606A">In the cloud, remote MCP:</text>
+<text x="916" y="414" font-size="13" fill="#1F2328">claude.ai · ChatGPT · Cursor · tokens</text>
+<text x="916" y="438" font-size="12" fill="#57606A">their own models; Worldlet has none</text>
+<line x1="898" y1="424" x2="842" y2="424" stroke="#57606A" stroke-width="2" marker-end="url(#ar)"/>
+
+<rect x="900" y="600" width="260" height="90" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="916" y="628" font-size="16" font-weight="700" fill="#1F2328">Services</text>
+<text x="916" y="652" font-size="13" fill="#1F2328">GitHub · PostHog · Google · Notion</text>
+<text x="916" y="672" font-size="13" fill="#1F2328">Cloudflare · Search Console · JSON</text>
+<line x1="898" y1="656" x2="842" y2="656" stroke="#57606A" stroke-width="2" marker-start="url(#ar)" marker-end="url(#ar)"/>
+</svg>
