@@ -170,12 +170,12 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
    const rules=standingRules(install,currentEnvironment());
    return rules?[{harness:install.id,title:install.title,rules:{list:()=>rules.list(),revoke:async(id:string)=>{await rules.revoke(id);current().forgetApprovals?.(install.id);}}}]:[];
   }),
-  // The same Harnesses' connections (Settings › Agent › Connections); Fox's own Hermes profile is not the person's Hermes Agent.
+  // The same Harnesses' connections (Settings › Connectors); Fox's own Hermes profile is not the person's Hermes Agent.
   harnessConnections:()=>personsHarnesses().flatMap(install=>{
    const connections=harnessConnections(install,currentEnvironment());
    return connections?[{harness:install.id,title:install.title,connections}]:[];
   }),
-  // The same Harnesses' own scheduled jobs and skills (Settings › Agent), each changed only by its own command.
+  // The same Harnesses' own scheduled jobs and skills (Settings › Agents), each changed only by its own command.
   harnessSchedules:()=>personsHarnesses().flatMap(install=>{
    const schedule=harnessScheduleControls(install,currentEnvironment());
    return schedule?[{harness:install.id,title:install.title,schedule}]:[];
@@ -428,7 +428,7 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
     const model=!!memory?.model;
     return {id,title,configured,model,worldTools:localHarness(id).worldTools,...memory||brings?{memory:{name:memory?.name??null,user:!!memory?.user,longTerm:!!memory?.longTerm,model:!!memory?.model,...brings?{history:brings}:{}}}:{}};
    });
-   // What each can do beyond World tools (its `tools` service), as one quiet line in Settings › Agent.
+   // What each can do beyond World tools (its `tools` service), as one quiet line in Settings › Agents.
    for(const agent of agents as Row[]){const summary=harnessToolsSummary(await harnessTools(agent.id)?.list()??[]);if(summary)agent.canAlso=summary;}
    // Its version against the oldest Worldlet works with (core/agent/agent-versions.ts), so a too-old one says so before it
    // is chosen; `fresh` reads it again, after the person updated it.
@@ -604,7 +604,7 @@ export function installAgentRuntime(host:Host){
  remoteMcp=createRemoteMcpHost({vault,access:agentAccess,tools:()=>standingWorldTools(),services:()=>connectedServices().map(provider=>({provider,title:SERVICE_TITLES[provider]??provider})),relay:process.env.WORLDLET_PAIR_RELAY||undefined,onByDefault:opensRemoteAccess(context),changed:()=>host.store.worldChanged(),
   ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()?host.store.ledger():null;}catch{return null;}}});
  host.onQuit(()=>remoteMcp?.close());
- /** Remote access (Settings › Agent › Access): `status`, `enable`, `disable`, `renew` (a new address, every connection
+ /** Remote access (Settings › Agents): `status`, `enable`, `disable`, `renew` (a new address, every connection
   * ends) and the person's answer on a consent card (`allow`, `deny` with its ID). Not in ROOM_ALLOWED: only this
   * computer's pages may let a connector in. `token` (a `name`, or a remote Agent's `id`) makes a token for an Agent that
   * cannot open a browser; it is answered once and never shown again. */
@@ -720,7 +720,7 @@ export function installAgentRuntime(host:Host){
   }catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
   throw new WorldletError('Unknown draft operation.');
  }});
- /** The GitHub App that writes approved drafts (Settings › Agent › Connections): `status`, `connect` (its App ID,
+ /** The GitHub App that writes approved drafts (Settings › Connectors): `status`, `connect` (its App ID,
   * installation ID and private key, checked with GitHub before they are kept in the vault) and `disconnect`. None
   * answers with the App's settings. Not in ROOM_ALLOWED. */
  host.register({githubApp:async request=>{
@@ -731,7 +731,7 @@ export function installAgentRuntime(host:Host){
   }catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
   throw new WorldletError('Unknown GitHub App operation.');
  }});
- /** HTTP JSON's endpoints (Settings › Agent › Connections): `list` (each one's name, address and whether it has a token,
+ /** HTTP JSON's endpoints (Settings › Connectors): `list` (each one's name, address and whether it has a token,
   * never the token) and `remove` (one by `name`; the last goes with Disconnect). Connecting one is `connect` with
   * provider `http`. Not in ROOM_ALLOWED. */
  host.register({httpJson:async request=>{
@@ -790,7 +790,7 @@ export function installAgentRuntime(host:Host){
  // forward); first-run setup reads it once (`requested`) and decides (core connectRequestPlan).
  let requested=connectArgument(process.argv);
  app.on('second-instance',(_event,argv)=>{const id=connectArgument(argv);if(!id)return;requested=id;host.page.event('worldlet:connect-agent');});
- /** Settings › Agent › Access (core/agent/GRANTS.md): each Agent with its last use, Grants, newest audit entries and,
+ /** Settings › Agents (core/agent/GRANTS.md): each Agent with its last use, Grants, newest audit entries and,
   * unless revoked, "Can read <Service>" for each connected Service (`list`); one revoked (`revoke`: its token and
   * endpoint files go, revokedAt is stamped); or one Service's read Grant given or taken back (`grantService`,
   * `ungrantService`). The page names only the Service: the targets are that Service's own reads (core serviceReadGrant),

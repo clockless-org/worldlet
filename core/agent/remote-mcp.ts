@@ -129,7 +129,7 @@ export function remoteConsentItem(consent:RemoteMcpConsent,services:readonly str
  const title=`${consent.client} wants to use your World`;
  const named=services.filter(name=>typeof name==='string'&&name).slice(0,10);
  const reads=named.length?` Allow also lets it read your ${remoteConsentServicesWords(named)}, so it can answer with them; it never changes anything there without asking you. Choose Allow without them to keep them private.`:'';
- const summary=`Allow only if you just started connecting ${consent.client} and its page shows the code ${consent.code}. It returns to ${consent.returnsTo}.${reads} It connects as an Agent of its own: you choose what it may do, and can revoke it, in Settings › Agent › Access.`;
+ const summary=`Allow only if you just started connecting ${consent.client} and its page shows the code ${consent.code}. It returns to ${consent.returnsTo}.${reads} It connects as an Agent of its own: you choose what it may do, and can revoke it, in Settings › Agents.`;
  return {id:remoteConsentItemId(consent.id),provider:AGENT_ASK_PROVIDER,kind:'task',status:CONSENT_ITEM_STATUS[consent.status],title:[...title].slice(0,200).join(''),context:summary,summary,
   reason:'A connector asks to reach your World',attentionContentVersion:1,attentionReason:summary,
   sources:[{provider:AGENT_ASK_PROVIDER,id:consent.id,quote:title}],

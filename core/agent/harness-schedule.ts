@@ -152,7 +152,7 @@ export function scheduleStep(input:{harness:ScheduleHarness;state:ScheduleState|
  else if(input.running===false&&waiting.length&&!state.stoppedNoted){
   state.stoppedNoted=true;
   const names=waiting.slice(0,5).map(job=>job.name).join(', ')+(waiting.length>5?` and ${waiting.length-5} more`:'');
-  const how=input.start?' Start it in Settings › Agent › Routines.':'';
+  const how=input.start?' Start it in Settings › Agents › Your Agent › Routines.':'';
   stopped={item:itemFor(harness,{kind:'task',title:`Start ${harness.title}'s scheduler`,reason:'Its scheduled jobs are not running',
    summary:`${names} run on ${harness.title}'s own scheduler, which is not running.${how} Worldlet does not run them itself, so they never run twice; each result shows here and on your phone once it runs.`,
    source:'scheduler-stopped:'+now,quote:`${harness.title}'s scheduler is not running`,at:now}),
@@ -200,7 +200,7 @@ export function dailyScheduleFailure(input:{kind:'plan'|'summary';day:string;rea
  const {kind,day,at,now}=input;
  if(kind!=='plan'&&kind!=='summary'||!DAY.test(day)||!Number.isFinite(at))return null;
  const name=DAILY_NAMES[kind]+' · '+dayLabel(day),why=clip(text(input.reason).replace(/\s+/g,' '),300);
- const summary=(why?'It did not finish: '+why:'It did not finish, and your Agent did not say why.')+'\n\nAsk Fox to make it again, or pause it in Settings › Agent › Routines.';
+ const summary=(why?'It did not finish: '+why:'It did not finish, and your Agent did not say why.')+'\n\nAsk Fox to make it again, or pause it in Settings › Agents › Your Agent › Routines.';
  const item=worldletItem({kind:'task',title:name,reason:'Your routine did not finish',summary,source:'daily:'+kind+':'+day,quote:name,at});
  return {item,push:now-at<=SCHEDULE_PUSH_FRESH_MS?{kind:'routine',title:name,body:clip('Did not finish'+(why?': '+why:'.'),240),collapse:'daily-'+kind}:null};
 }

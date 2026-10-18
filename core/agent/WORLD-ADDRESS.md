@@ -4,7 +4,7 @@ Every World can have its own web address, `https://<name>.worldlet.ai`. Open it 
 
 ## Choose a name
 
-In Settings › Agent › Access, under **Your World's address**, type a name and choose **Choose**. A name is 3 to 32 lowercase letters or digits, with single hyphens between them. Some names are kept for Worldlet itself (`www`, `mcp`, `api`, `admin` and others). Names are first come, first served, and each World holds one.
+In Settings › Agents, under **Your World's address**, type a name and choose **Choose**. A name is 3 to 32 lowercase letters or digits, with single hyphens between them. Some names are kept for Worldlet itself (`www`, `mcp`, `api`, `admin` and others). Names are first come, first served, and each World holds one.
 
 - **Change** picks another name. The old one is freed at once. Browsers and people you allowed must ask again at the new address, because their passkeys belong to the old one.
 - **Give up this address** frees the name for anyone.

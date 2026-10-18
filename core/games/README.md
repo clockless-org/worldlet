@@ -37,7 +37,7 @@ Before 2026-10-05 each game was a folder, `games/<id>/` (`game.html`, `game.json
 
 ## Model
 
-Making a game takes many model tokens, so it needs an Agent that answers on the person's own sign-in: a ChatGPT plan (Codex sign-in) or their own API key, Anthropic or OpenAI, chosen in Settings › Agent (`gameFactoryModel`). With neither (Worldlet provides no model of its own, owner decision 2026-10-05), `make_game` returns the reason and Fox offers to open Settings › Agent. A claude.ai subscription sign-in cannot be used by other apps, so Claude means an Anthropic API key. Playing a made game needs nothing. The Agent must support Applet tasks (the built-in Hermes Harness does).
+Making a game takes many model tokens, so it needs an Agent that answers on the person's own sign-in: a ChatGPT plan (Codex sign-in) or their own API key, Anthropic or OpenAI, chosen in Settings › Agents (`gameFactoryModel`). With neither (Worldlet provides no model of its own, owner decision 2026-10-05), `make_game` returns the reason and Fox offers to open Settings › Agents. A claude.ai subscription sign-in cannot be used by other apps, so Claude means an Anthropic API key. Playing a made game needs nothing. The Agent must support Applet tasks (the built-in Hermes Harness does).
 
 ## Checks
 

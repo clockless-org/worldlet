@@ -24,9 +24,9 @@ const OUTPUT=4_000_000;
 const ms=(value:unknown)=>{const n=typeof value==='string'&&!/^\d+(\.\d+)?$/.test(value.trim())?Date.parse(value):Number(value);return Number.isFinite(n)&&n>0?n>1e12?n:n*1000:0;};
 /** How many of the newest messages are searched for a tool's last use. A long-used Hermes Agent keeps many
  * gigabytes of messages, and every row read is read in full: searching all of them held the app for seconds each
- * time Settings › Agent opened. */
+ * time Settings › Agents opened. */
 const RECENT_MESSAGES=20_000;
-/** The same answer for this long, so going back to Settings › Agent reads nothing again. */
+/** The same answer for this long, so going back to Settings › Agents reads nothing again. */
 const USES_MS=5*60_000;
 const usesCache=new Map<string,{at:number;uses:ConnectionUse[]}>();
 function hermesUses(root:string):ConnectionUse[] {

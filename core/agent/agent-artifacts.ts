@@ -14,7 +14,7 @@ export const AGENT_ARTIFACT_REASONS=Object.freeze({
  control:'An artifact may not hold control characters.',
  taken:'Another artifact already uses this key. Choose another key.',
  read:`Read with an optional agent (an Agent's ID), query (words in the title, up to ${AGENT_ARTIFACT_LIMITS.query} characters) and limit (1 to ${AGENT_ARTIFACT_LIMITS.readMax}).`,
- own:'This Agent may read only its own artifacts. The person can allow it to read what other Agents saved in Settings › Agent › Access.',
+ own:'This Agent may read only its own artifacts. The person can allow it to read what other Agents saved in Settings › Agents.',
 });
 
 // C0 controls (except tab and line breaks, allowed in the body only), DEL, C1 controls, and the bidirectional overrides

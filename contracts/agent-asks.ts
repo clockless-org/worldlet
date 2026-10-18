@@ -139,7 +139,7 @@ export interface AgentAskReply {id:string;outcome:'answered'|'done'|'skipped';ch
 export interface AgentAskDraft {id:string;status:string;resultUrl?:string;reason?:string}
 
 /** Orders and waking an Agent (core/agent/GRANTS.md#orders-and-waking-an-agent): the World's own setting, kept with the
- * Agents' Grants in world.sqlite (`agent_settings`, `agent-orders`), changed only in Settings › Agent › Access. */
+ * Agents' Grants in world.sqlite (`agent_settings`, `agent-orders`), changed only in Settings › Agents. */
 export interface AgentOrders {
  /** "Give new work to": the Agent that `input` work posted without `for` is for. */
  defaultFor?:string;

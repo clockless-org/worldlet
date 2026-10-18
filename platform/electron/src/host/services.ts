@@ -82,10 +82,10 @@ export interface AgentService {
   * change runs that Harness's own command. */
  harnessConnections?():{harness:string;title:string;connections:import('../../../../contracts/harness-services.ts').HarnessConnections}[];
  /** The scheduled jobs and skills in each Harness on this computer that declares `schedule` or `skills`, Fox's or not
-  * (Settings › Agent); a change runs that Harness's own command. */
+  * (Settings › Agents); a change runs that Harness's own command. */
  harnessSchedules?():{harness:string;title:string;schedule:import('../../../../contracts/harness-services.ts').HarnessSchedule}[];
  harnessSkillSets?():{harness:string;title:string;skills:HarnessSkills}[];
- /** The same Agents' memory (Settings › Agent › Memory), read only. */
+ /** The same Agents' memory (Settings › Context), read only. */
  harnessMemories?():{harness:string;title:string;memory:import('../../../../contracts/harness-services.ts').HarnessMemory}[];
  /** The person's Harness's `events`, `calls` and `tools` services (contracts/harness-services.ts), null when it provides none. */
  harnessEvents?():HarnessEvents|null;
@@ -412,7 +412,7 @@ export interface AgentAccess {
  list(auditLimit?:number):{identity:AgentIdentity;grants:Grant[];audit:AgentAuditEntry[]}[];
  /** Stamps revokedAt, removes its token and tells listeners (its endpoint files go). */
  revoke(agentId:string):void;
- /** "Can read <Service>" (Settings › Agent › Access): a standing read Grant naming only that Service's read targets
+ /** "Can read <Service>" (Settings › Agents): a standing read Grant naming only that Service's read targets
   * (core serviceReadGrant), or that Grant revoked. Each change is audited. False for an unknown or revoked Agent or a
   * name that is not a Service; the Agent's next call sees the change. */
  grantService(agentId:string,provider:string):boolean;

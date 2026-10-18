@@ -209,15 +209,15 @@ async function answer(request:ControlRequest):Promise<ControlReply> {
   if(!scripts)throw Error('The Agent runtime is not installed.');
   const added=await scripts.add(request.script);
   return {lines:[`${added.name} is an Agent for a script on this computer (${added.id}).`,`Its endpoint and token are in ${added.endpointFile}, written again each time Worldlet starts.`,
-   'Allow what it may do in Settings › Agent › Access in the World.']};
+   'Allow what it may do in Settings › Agents in the World.']};
  }
  if(request.command==='register')return {lines:await registerAgent(request.agent!)};
- // Remote access (core/agent/REMOTE-MCP.md), the same as Settings › Agent › Access: each connector still asks the
+ // Remote access (core/agent/REMOTE-MCP.md), the same as Settings › Agents: each connector still asks the
  // person on a card in Attention.
  if(request.command==='remote'&&request.remote==='token'){
   const made=await router.dispatch({action:'remoteMcp',operation:'token',name:request.name}) as {ok:boolean;error?:string;token?:string;address?:string;agent?:{name:string}};
   if(!made.ok)throw Error(made.error||'Could not make a token.');
-  return {lines:[`Address: ${made.address}`,`Token for ${made.agent?.name}: ${made.token}`,'Send it as "Authorization: Bearer <token>" to the address. It is shown only now; worldlet remote token again replaces it with a new Agent, and Revoke in Settings › Agent › Access ends it.']};
+  return {lines:[`Address: ${made.address}`,`Token for ${made.agent?.name}: ${made.token}`,'Send it as "Authorization: Bearer <token>" to the address. It is shown only now; worldlet remote token again replaces it with a new Agent, and Revoke in Settings › Agents ends it.']};
  }
  if(request.command==='remote'){
   const operation=request.remote==='on'?'enable':request.remote==='off'?'disable':'status';

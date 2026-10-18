@@ -89,7 +89,7 @@ export const GITHUB_DRAFT_ACTIONS=Object.freeze({create:'github-drafts/create',r
 export interface GithubDraftCreate {write:GithubWrite;target:string;title?:string;body?:string;labels?:string[];prefix?:string;expected?:string[];set?:string[]}
 
 /** Standing GitHub writes (core/agent/GRANTS.md#standing-github-writes): writes one Agent may run on one repository
- * without a card, under a Grant the person gives it in Settings › Agent › Access. Only a comment and a label transition
+ * without a card, under a Grant the person gives it in Settings › Agents. Only a comment and a label transition
  * under one prefix: never a new Issue, closing or reopening. */
 export type GithubStandingWrite='issue.comment'|'labels.set';
 export const GITHUB_STANDING_WRITES:readonly GithubStandingWrite[]=Object.freeze(['issue.comment','labels.set']);

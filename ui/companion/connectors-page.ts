@@ -3,7 +3,6 @@ import {SERVICE_SYNC_DEFAULTS,serviceSyncLine,connector,connectorTiles,connector
 import {SERVICE_PROVIDERS} from '../../contracts/services.ts';
 import {agentButton as button,agentEl as el} from './agent-change.ts';
 import {showGithubApp,showHttpJson,showSearchConsole} from './worldlet-accounts.ts';
-import {showUseInClaude} from './remote-access.ts';
 import {chooseProjectsButton,listenForSignInCode,signInCodeBox} from './sign-in-code.ts';
 import type {SignInCode} from '../../contracts/platform.ts';
 
@@ -171,9 +170,7 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
  target.append(page);
  await draw();
  if(!current())return;
- // This World in Claude or ChatGPT: the last step of connecting, in the same place (core/agent/REMOTE-MCP.md).
- await showUseInClaude(target,call,current);
- if(!current())return;
+ // Using this World in Claude or ChatGPT is under Settings › Agents now (issue #674): they are Agents, not Services.
  // Advanced: keys, addresses and files, for people who have them (and teams that write as their own GitHub App).
  const advanced=el('details','companion-settings-elsewhere companion-settings-advanced') as HTMLDetailsElement;advanced.dataset.advanced='connectors';
  advanced.append(el('summary','','Advanced'),

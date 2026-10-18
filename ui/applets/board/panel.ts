@@ -48,7 +48,7 @@ export function createBoardApplet({native,ask=(_text:string,_options?:any)=>{},s
   chrome();body.replaceChildren();
   if(!read){if(!busy&&loaded)body.append(empty('Your board could not be read.','Refresh to try again.'));return;}
   if(!read.definition){
-   const box=empty('No board yet.','A board shows the numbers you track from GitHub, PostHog and Cloudflare. An Agent you allow sets it up: turn on “Can set up your board” for it in Settings › Agent › Access, then ask that Agent for the numbers you want here.');
+   const box=empty('No board yet.','A board shows the numbers you track from GitHub, PostHog and Cloudflare. An Agent you allow sets it up: turn on “Can set up your board” for it in Settings › Agents, then ask that Agent for the numbers you want here.');
    box.append(button('Open Access',()=>settings('access'),'board-primary'));
    body.append(box);footer.textContent='Read-only · Nothing is read until a board is set up';onContext();return;
   }

@@ -4,7 +4,7 @@
 // Journal). The panel only draws; every decision is here: which rows, in which group and order, and each card's text.
 //
 // Only what the person set going shows (owner rule 2026-10-11): their own Routines (jobs on their Agent's scheduler,
-// paused ones last, and Worldlet's two daily Routines, which they can pause in Settings › Agent) and the work they or
+// paused ones last, and Worldlet's two daily Routines, which they can pause in Settings › Agents) and the work they or
 // their Agent's Routines started (a page Fox drives, Fox's background work, an Applet working on a task Fox handed it). An Applet's
 // own regular checks (Mail, Notes, Notion) and Worldlet's housekeeping are not the person's tasks and never show here;
 // what they find comes up as Artifacts. Names and schedules only, never prompts or source contents.

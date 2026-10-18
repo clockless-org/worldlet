@@ -45,14 +45,14 @@ export function createWorldBoard({ledger,read,agents=()=>null,now=()=>new Date()
    if(!BOARD_PROVIDERS.includes(preset.provider)){out[preset.id]={error:BOARD_REASONS.collection};return;}
    if(preset.provider==='agents'){
     // The World's own records: read each time (nothing to reuse), and only for a caller that may see other Agents.
-    if(!canRead('agents','list')){out[preset.id]={error:'This Agent may not see other Agents. The person can allow it in Settings › Agent › Access.'};return;}
+    if(!canRead('agents','list')){out[preset.id]={error:'This Agent may not see other Agents. The person can allow it in Settings › Agents.'};return;}
     try{
      const entries=agents();
      out[preset.id]=entries?{records:agentBoardRecords(entries,preset.read)}:{error:'The Agents\' reports are kept in the person\'s own World, which is not ready.'};
     }catch(error){out[preset.id]={error:error instanceof Error&&error.message?error.message:'The Agents\' reports could not be read.'};}
     return;
    }
-   if(!canRead(preset.provider,preset.read.operation)){out[preset.id]={error:'This Agent may not read this Service. The person can allow it in Settings › Agent › Access.'};return;}
+   if(!canRead(preset.provider,preset.read.operation)){out[preset.id]={error:'This Agent may not read this Service. The person can allow it in Settings › Agents.'};return;}
    const request=servicePresetRead(preset),key=JSON.stringify(request),hit=reused.get(key);
    if(hit&&clock()-hit.at<BOARD_READ_REUSE_MS){out[preset.id]={records:hit.records};return;}
    try{

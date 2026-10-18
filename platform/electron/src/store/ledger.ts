@@ -997,6 +997,33 @@ export class WorldLedger {
  companionSession(id:string):string|null {this.ensureCompanion();const row=this.all('SELECT session FROM companion_turns WHERE id=?',id)[0];return row?String(row.session):null;}
  /** The text `source` keeps, in bytes. */
  companionBytes(source:string):number {this.ensureCompanion();return Number(this.all('SELECT coalesce(sum(length(CAST(text AS BLOB))),0) AS n FROM companion_turns WHERE source=?',source)[0]?.n??0);}
+ /** How much each kind of context this World keeps holds, for Settings › Context (core/context/world-context.ts): the
+  * past conversations (how many, and their text), each Service's synced context, the Journal's cards and what Agents
+  * saved there (with their pages), and the board's definition. Bytes of what is kept now, not of older revisions. */
+ contextSizes():{conversations:{count:number;bytes:number};services:{provider:string;bytes:number}[];journal:{bytes:number};agentOutputs:{bytes:number};board:{bytes:number}} {
+  this.ensureCompanion();this.ensureArtifacts();this.ensureArtifactPages();
+  const bytes=(value:unknown)=>value==null?0:Buffer.byteLength(typeof value==='string'?value:JSON.stringify(value));
+  const turns=this.all("SELECT count(DISTINCT source||char(31)||session) AS n,coalesce(sum(length(CAST(text AS BLOB))),0) AS b FROM companion_turns")[0];
+  const notes=Number(this.all('SELECT coalesce(sum(length(CAST(text AS BLOB))),0) AS b FROM companion_notes')[0]?.b??0);
+  const [jobs,pages,snapshots]=SERVICE_SYNC_BUCKETS;
+  const providerOf=new Map(this.records(jobs).map(job=>[String(job.id),String(job.provider??'')]));
+  const services=new Map<string,number>();
+  for(const bucket of [pages,snapshots]){
+   const kind='state.'+bucket;
+   for(const row of this.all('SELECT key,length(CAST(body AS BLOB)) AS b FROM entries WHERE kind=? AND seq IN (SELECT MAX(seq) FROM entries WHERE kind=? GROUP BY key)',kind,kind)){
+    const provider=providerOf.get(String(row.key));
+    if(provider)services.set(provider,(services.get(provider)??0)+Number(row.b));
+   }
+  }
+  let journal=0,agentOutputs=0;
+  for(const row of this.all('SELECT a.record AS record,coalesce((SELECT length(CAST(p.record AS BLOB)) FROM artifact_pages p WHERE p.id=a.id),0) AS page FROM artifacts a')){
+   let agent=false;try{agent=typeof JSON.parse(String(row.record))?.agentId==='string';}catch{}
+   const size=bytes(String(row.record))+Number(row.page);
+   if(agent)agentOutputs+=size;else journal+=size;
+  }
+  return {conversations:{count:Number(turns?.n??0),bytes:Number(turns?.b??0)+notes},services:[...services].map(([provider,size])=>({provider,bytes:size})),
+   journal:{bytes:journal},agentOutputs:{bytes:agentOutputs},board:{bytes:bytes(this.board())}};
+ }
 
  // What Fox's chat shows, place by place -----------------------------------------------------------
  // The chat keeps one card per turn (the question, Fox's steps, the answer) and, for each place,

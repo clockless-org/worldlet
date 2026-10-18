@@ -132,8 +132,8 @@ export function worldAddressRequestItem(request:WorldAddressRequest,address:stri
  const at=new Date(request.createdAt).toISOString();
  const title=request.asks==='owner'?`Allow ${request.client} to open your World?`:`${request.client} wants to see your ${request.share?.title??'board'}`;
  const summary=request.asks==='owner'
-  ?`A browser called ${request.client} asks to open your whole World at ${address}, as you. Allow only if you are using it right now and it shows the code ${request.code}. It keeps a passkey for this World; sign it out in Settings › Agent › Access.`
-  :`Someone who gave the name ${request.client} asked to see ${request.share?.title??'your board'} at ${address}. They can only read it. Allow only if you meant to share it with them; you can ask them for the code ${request.code}. Remove them in Settings › Agent › Access.`;
+  ?`A browser called ${request.client} asks to open your whole World at ${address}, as you. Allow only if you are using it right now and it shows the code ${request.code}. It keeps a passkey for this World; sign it out in Settings › Agents.`
+  :`Someone who gave the name ${request.client} asked to see ${request.share?.title??'your board'} at ${address}. They can only read it. Allow only if you meant to share it with them; you can ask them for the code ${request.code}. Remove them in Settings › Agents.`;
  return {id:'remote-mcp-consent:'+request.id,provider:AGENT_ASK_PROVIDER,kind:'task',status:ITEM_STATUS[request.status],title:[...title].slice(0,200).join(''),context:summary,summary,
   reason:request.asks==='owner'?'A browser asks to open your World':'Someone asks to see what you shared',attentionContentVersion:1,attentionReason:summary,
   sources:[{provider:AGENT_ASK_PROVIDER,id:request.id,quote:title}],

@@ -234,6 +234,9 @@ export function installShell(host:Host){
   showDebug:async()=>{await showDebug(host,sheet);return {ok:true};},
   diagnostics:()=>diagnostics(host),
   exportDiagnostics:()=>exportDiagnostics(host,host.window(),sheet),
+  // Settings › Context: how much each kind of context the World keeps holds (store/ledger.ts contextSizes). The practice
+  // world keeps none of the person's own; Save a copy is the backup below (`dataBackup` export).
+  worldContext:()=>!store.writable||store.sampleEnabled()?{available:false}:{available:true,...store.ledger().contextSizes()},
   dataBackup:async request=>{
    if(!store.writable||store.sampleEnabled())throw new WorldletError('Switch to your personal world to manage its backup.');
    const operation=typeof request.operation==='string'?request.operation:'';

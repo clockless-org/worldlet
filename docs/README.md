@@ -56,7 +56,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **284 Markdown documents** and **745 supporting documentation files**.
+Indexed: **283 Markdown documents** and **747 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -65,9 +65,9 @@ Indexed: **284 Markdown documents** and **745 supporting documentation files**.
 | Applet runtime descriptions | 120 |
 | UI and Applet authoring references | 30 |
 | Resource and artwork records | 74 |
-| Module and service documentation | 38 |
+| Module and service documentation | 37 |
 | Website documentation and articles | 0 |
-| Documentation diagrams, previews and evidence | 745 |
+| Documentation diagrams, previews and evidence | 747 |
 
 <details><summary>Root entry points (6)</summary>
 
@@ -340,7 +340,7 @@ Indexed: **284 Markdown documents** and **745 supporting documentation files**.
 
 </details>
 
-<details><summary>Module and service documentation (38)</summary>
+<details><summary>Module and service documentation (37)</summary>
 
 - [android/README.md](../android/README.md)
 - [contracts/COMPONENTS.md](../contracts/COMPONENTS.md)
@@ -350,7 +350,6 @@ Indexed: **284 Markdown documents** and **745 supporting documentation files**.
 - [core/agent/GRANTS.md](../core/agent/GRANTS.md)
 - [core/agent/PORTABILITY.md](../core/agent/PORTABILITY.md)
 - [core/agent/REMOTE-MCP.md](../core/agent/REMOTE-MCP.md)
-- [core/agent/WORLD-ADDRESS.md](../core/agent/WORLD-ADDRESS.md)
 - [core/applets/INTEGRATIONS.md](../core/applets/INTEGRATIONS.md)
 - [core/applets/MY-APPLETS.md](../core/applets/MY-APPLETS.md)
 - [core/applets/RUNTIME.md](../core/applets/RUNTIME.md)
@@ -388,7 +387,7 @@ Indexed: **284 Markdown documents** and **745 supporting documentation files**.
 
 </details>
 
-<details><summary>Documentation diagrams, previews and evidence (745)</summary>
+<details><summary>Documentation diagrams, previews and evidence (747)</summary>
 
 - [core/diagnostics/analytics-insights.json](../core/diagnostics/analytics-insights.json)
 - [docs/architecture.html](architecture.html)
@@ -398,6 +397,8 @@ Indexed: **284 Markdown documents** and **745 supporting documentation files**.
 - [docs/assets/readme/world.jpg](assets/readme/world.jpg)
 - [docs/stack-in-computer-terms.svg](stack-in-computer-terms.svg)
 - [docs/stack-in-computer-terms.zh.svg](stack-in-computer-terms.zh.svg)
+- [docs/three-layers.svg](three-layers.svg)
+- [docs/three-layers.zh.svg](three-layers.zh.svg)
 - [platform/distribution/index.html](../platform/distribution/index.html)
 - [resources/styles/builtin/references/brand/preview.html](../resources/styles/builtin/references/brand/preview.html)
 - [resources/styles/builtin/references/brand/system.html](../resources/styles/builtin/references/brand/system.html)

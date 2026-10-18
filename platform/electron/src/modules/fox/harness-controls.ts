@@ -5,7 +5,7 @@ import {WorldletError} from '../../files.ts';
 import {harnessReadOnlyNote,readJobChange,readJobCreate,readSkillChange,skillLastRuns} from '../../../../../core/agent/index.ts';
 import type {HarnessJobChange,HarnessJobCreate,HarnessJobRun,HarnessSkillChange} from '../../../../../contracts/harness-services.ts';
 
-// Settings › Agent › Skills and Routines (owner plan 2026-10-11, PR 2; “做”): each Agent on this computer
+// Settings › Agents › Your Agent › Skills and Routines (owner plan 2026-10-11, PR 2; “做”): each Agent on this computer
 // that declares `skills` or `schedule`, Fox's or not, with what it keeps (each job's plain time, where its results go
 // and its newest result; each skill with when it last ran), and a change run only as that Agent's own command
 // (agent-runtime/harness-schedule-controls.ts, harness-skills.ts). A change is two steps, like connections: `preview`

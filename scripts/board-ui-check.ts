@@ -24,7 +24,7 @@ await withBrowser(async browser=>{
   const health={id:'health',title:'Health',blocks:[{id:'pr-count',title:'Pull requests open',kind:'number',preset:'open-prs',provider:'github',scope:'example/app',status:'ok',number:{value:5,tone:'bad'}},
    {id:'runs',title:'Beta runs',kind:'list',preset:'beta-runs',provider:'agents',scope:'Runs the Agents in this World reported · beta · Read only',status:'ok',list:{items:[
     {title:'Beta 1234 · macOS',url:'https://ci.example.com/runs/1',fields:{status:'passed',agent:'Release Mac'}},{title:'Beta 1234 · Windows',url:'',fields:{status:'running',agent:'Release PC'}}],more:false}},
-   {id:'machines',title:'Release machines',kind:'number',preset:'machines',provider:'agents',status:'error',error:'This Agent may not see other Agents. The person can allow it in Settings › Agent › Access.'}]};
+   {id:'machines',title:'Release machines',kind:'number',preset:'machines',provider:'agents',status:'error',error:'This Agent may not see other Agents. The person can allow it in Settings › Agents.'}]};
   const presets=[{id:'funnel',provider:'posthog',read:{operation:'query',query:'SELECT secret_sauce FROM events'}}];
   const native={async board(body:any){w.calls.push({action:'board',...body});
    if(w.board==='none')return {revision:0,definition:null,presets:[],view:null};
@@ -99,7 +99,7 @@ await withBrowser(async browser=>{
  await page.evaluate(()=>{(window as any).board='none';});
  await root.getByRole('button',{name:'Refresh'}).click();
  await root.locator('.board-empty h2',{hasText:'No board yet.'}).waitFor();
- assert.match(await root.locator('.board-empty p').textContent()||'',/“Can set up your board” for it in Settings › Agent › Access/);
+ assert.match(await root.locator('.board-empty p').textContent()||'',/“Can set up your board” for it in Settings › Agents/);
  assert.equal(await root.locator('.board-tabs').isVisible(),false);
  await root.getByRole('button',{name:'Open Access'}).click();
  assert.deepEqual(await page.evaluate(()=>(window as any).panel.context()),{actions:[]});

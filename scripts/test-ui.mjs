@@ -20,7 +20,7 @@ const available=files=>files.filter(file=>existsSync(path.join(root,file)));
 // keep their state in a private temp HERMES_HOME or CLAUDE_CONFIG_DIR. Longest first, so the pool's
 // lanes finish together.
 export const parallelChecks=available([
- 'scripts/oauth-callback-ui-check.ts','scripts/service-collection-ui-check.ts','scripts/connectors-ui-check.ts',
+ 'scripts/oauth-callback-ui-check.ts','scripts/service-collection-ui-check.ts','scripts/connectors-ui-check.ts','scripts/settings-areas-ui-check.ts',
  'scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts',
  // The slowest first (Mac RC 2026.1005.2887 times), so no lane is left running one alone at the end. The Attention Center's browser checks moved here from npm test (test:attention), where they ran one by one.
  'scripts/attention-no-refill-check.ts','scripts/attention-actions-check.ts',
@@ -119,7 +119,7 @@ export const coreChecks=[
 // The RC in the two hours before each release slot runs the whole suite, and a release ships only a commit that passed
 // it (scripts/machine-candidate.mjs rcMode, scripts/release-verified.mjs).
 export const quickChecks=available([
- 'scripts/oauth-callback-ui-check.ts','scripts/service-collection-ui-check.ts','scripts/connectors-ui-check.ts','scripts/board-ui-check.ts',
+ 'scripts/oauth-callback-ui-check.ts','scripts/service-collection-ui-check.ts','scripts/connectors-ui-check.ts','scripts/settings-areas-ui-check.ts','scripts/board-ui-check.ts',
  'scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts',
  'scripts/startup-check.ts','scripts/startup-setup-check.ts','scripts/world-scene-check.ts','scripts/sample-world-check.ts',
  'scripts/world-tour-check.ts','scripts/feature-audit-check.ts','scripts/core-applet-content-check.ts','scripts/applet-focus-check.ts',
@@ -136,7 +136,7 @@ export const quickChecks=available([
 // github-draft-ui-check is one of those: its Attention card needs the whole World started (about 45 s locally, where
 // board-ui-check mounts its panel alone in 2 s), so it runs with the full suite only.
 export const prChecks=quickChecks.filter(c=>[
- 'scripts/oauth-callback-ui-check.ts','scripts/service-collection-ui-check.ts','scripts/connectors-ui-check.ts','scripts/board-ui-check.ts',
+ 'scripts/oauth-callback-ui-check.ts','scripts/service-collection-ui-check.ts','scripts/connectors-ui-check.ts','scripts/settings-areas-ui-check.ts','scripts/board-ui-check.ts',
  'scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts',
  'scripts/startup-check.ts','scripts/applet-first-entry-check.ts','scripts/onboarding-first-value-check.ts',
  'scripts/browser-applet-check.ts','scripts/mail-open-check.ts','scripts/applet-scene-check.ts','scripts/web-record-check.ts',

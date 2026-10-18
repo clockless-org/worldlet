@@ -1,7 +1,9 @@
-// Settings › Agent: what Fox runs on, the Agents on this computer and elsewhere, the provider, and the last reply's
-// problem with its fix; then the Agent's own skills and routines (each change its own command, asked once more
-// in plain words, the Task panel read again after a schedule change), what it may do without asking (with Revoke, asked
-// once more) and, last, the accounts and tools that were the Accounts section, which old entry points now open. There is no energy, charge or battery anywhere (owner request 2026-10-10).
+// Settings › Agents (issue #674): the list of Agents, your own first with Open for its page, which says what Fox runs on,
+// the Agents on this computer and elsewhere, the provider, and the last reply's problem with its fix; then the Agent's
+// own skills and routines (each change its own command, asked once more in plain words, the Task panel read again after a
+// schedule change), what it may do without asking (with Revoke, asked once more) and, last, the accounts and tools that
+// were the Accounts section, which old entry points now open. What each Agent remembers is in Settings › Context; what
+// each Agent may do is on the list. There is no energy, charge or battery anywhere (owner request 2026-10-10).
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {pageErrors,worldUrl,waitForWorld,SETTINGS_BUTTON} from './browser-test.ts';
@@ -9,7 +11,7 @@ const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try{
  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'}),errors=pageErrors(page);
  await page.addInitScript(()=>{const w=window as any;w.calls=[];w.source={source:'own',ready:true,name:'claude-sonnet',provider:'anthropic'};
-  // Settings › Agent › Access (core/agent/GRANTS.md): one Agent with its default Grants and newest decisions.
+  // Settings › Agents (core/agent/GRANTS.md): one Agent with its default Grants and newest decisions.
   w.access=[{id:'hermes',name:'Hermes Agent',harness:'hermes',kind:'local',createdAt:'2026-10-01T09:00:00.000Z',lastSeenAt:'2026-10-14T18:30:00.000Z',
    grants:[{id:'hermes-channel-read',agentId:'hermes',targets:['items/query','history/query','companion/recall','meetings/decisions','gmail/draft','gmail/read','google-calendar/read','apple-notes/read','todoist/read','applet:mail/read'],access:'read',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'},
     {id:'hermes-channel-link',agentId:'hermes',targets:['world/link'],access:'write',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'},
@@ -124,19 +126,26 @@ try{
  await page.waitForTimeout(500);assert.doesNotMatch(await page.locator('body').innerText(),/energy|Charge/i,'no energy or charge anywhere');
  await page.locator(SETTINGS_BUTTON).click();
  const settingsPage=page.locator('#companionInfo [data-section=Settings]');await settingsPage.waitFor();
- assert.equal(await settingsPage.locator('[data-setting=model]').getAttribute('aria-current'),'true','Settings opens on Agent');
+ assert.equal(await settingsPage.locator('[data-setting=agents]').getAttribute('aria-current'),'true','Settings opens on Agents');
  assert.equal(await page.locator('#companionInfo [data-section=Energy]').count(),0,'no Energy page');
  const local=settingsPage.locator('.companion-settings-detail');
+ // Your own Agent is first on the list; Open shows its own page.
+ await local.locator('[data-part=access] [data-access-agent]').first().waitFor();
+ assert.equal(await local.locator('[data-part=access] [data-access-agent]').first().getAttribute('data-access-agent'),'hermes','your own Agent first');
+ await local.locator('[data-access-agent=hermes]').getByRole('button',{name:'Open',exact:true}).click();
+ await local.locator('[data-view=own-agent]').waitFor();
  await local.getByText('Fox’s model is connected',{exact:true}).waitFor();
  // The Accounts section is part of this page now: Settings lists no section of its own for it.
  assert.equal(await settingsPage.locator('[data-setting=integrations]').count(),0,'no Accounts section');
  const permissions=local.locator('[data-part=permissions]'),accounts=local.locator('[data-part=accounts]');
- // Seven named sections in the owner's order (2026-10-11), each a heading and one plain line.
- assert.deepEqual(await local.locator('[data-part]').evaluateAll(parts=>parts.map(p=>(p as HTMLElement).dataset.part)),['model','memory','skills','routines','permissions','access','accounts'],'Model, Memory, Skills, Routines, Permissions, Access, then Accounts last');
- assert.deepEqual(await local.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Model','Memory','Skills','Scheduled','Permissions','Access','Connections']);
+ // Five named parts in the owner's order (2026-10-11, issue #674), each a heading and one plain line.
+ assert.deepEqual(await local.locator('[data-part]').evaluateAll(parts=>parts.map(p=>(p as HTMLElement).dataset.part)),['model','skills','routines','permissions','accounts'],'Model, Skills, Routines, Permissions, then Accounts last');
+ assert.deepEqual(await local.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Model','Skills','Scheduled','Permissions','Connections']);
  for(const line of await local.locator('[data-part] > .companion-settings-partnote').allTextContents())assert.ok(line.length>20&&line.length<160&&!line.includes('\n'),'one plain line: '+line);
- assert.equal(await local.locator('[data-part] > .companion-settings-partnote').count(),7,'each section has its line');
- // Memory: what each Agent remembers, About you first, the first few with Show all; read only.
+ assert.equal(await local.locator('[data-part] > .companion-settings-partnote').count(),5,'each part has its line');
+ // Memory, in Context: what each Agent remembers, About you first, the first few with Show all; read only.
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'memory'}})));
+ await settingsPage.locator('[data-setting=context][aria-current=true]').waitFor();
  const memoryPart=local.locator('[data-part=memory]'),hermesMemory=memoryPart.locator('[data-harness=hermes]');
  await hermesMemory.getByText('About you · 6',{exact:true}).waitFor();
  assert.equal(await hermesMemory.locator('[data-memory=user] [data-entry]').count(),4,'the first few');
@@ -151,6 +160,8 @@ try{
  await ccMemory.getByText('Use pnpm, never npm.',{exact:true}).waitFor();
  assert.equal(await ccMemory.getByRole('button',{name:'Ask it to forget'}).count(),0,'another Agent is asked in its own chat');
  await ccMemory.getByText('Worldlet only shows this. To have Claude Code forget something, ask it in its own chat.',{exact:true}).waitFor();
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'model'}})));
+ await local.locator('[data-view=own-agent]').waitFor();
  // Claude Code: its skills, rules and tools shown read-only, each with where to change them.
  const ccSkills=local.locator('[data-part=skills] [data-harness=claude-code]');
  await ccSkills.getByText('release-notes').waitFor();
@@ -313,7 +324,7 @@ try{
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.provider!=='search-console'&&(c.action==='connect'||c.action==='disconnectSource'||c.action==='httpJson'&&c.operation==='remove')).map(c=>[c.action,c.settings?.name??c.name??c.provider,c.token?c.token.length:0])),
   [['connect','status',endpointToken.length],['connect','status',endpointToken.length],['connect','open',0],['httpJson','status',0],['disconnectSource','http',0]],'the token goes to the host only with connect');
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'model'}})));
- await settingsPage.locator('[data-setting=model][aria-current=true]').waitFor();
+ await settingsPage.locator('[data-setting=agents][aria-current=true]').waitFor();
  const rule=permissions.locator('[data-rule=rule-00000000000000a1]');
  await rule.getByText('npm test',{exact:true}).waitFor();
  await rule.getByText(/^Allowed .*2026, in Fox’s main conversation\.$/).waitFor();
@@ -330,10 +341,14 @@ try{
  await rule.waitFor({state:'detached'});
  await permissions.getByText(/^Hermes Agent will ask again before: npm test/).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='harnessApprovalRules'&&c.operation==='revoke').map(c=>[c.harness,c.id])),[['hermes','rule-00000000000000a1']]);
- // Access: each Agent with its last use, its Grants in plain words, its newest decisions, and Revoke after asking.
+ // Agents' list: each Agent with its last use, what it may do in one line, its newest decisions and Revoke after asking;
+ // its Grants and switches folded under Change what it may do.
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'access'}})));
  const accessPart=local.locator('[data-part=access]'),hermesAccess=accessPart.locator('[data-access-agent=hermes]');
- await hermesAccess.getByText('Hermes Agent',{exact:true}).waitFor();
+ await hermesAccess.getByText(/^Hermes Agent/).first().waitFor();
  await hermesAccess.getByText(/^On this computer\. Last used .*2026\.$/).waitFor();
+ await hermesAccess.getByText('It may look at and change things in your World, read PostHog, take work, see your board, report its work, read what Agents saved and update Issues in example/app without asking.',{exact:true}).waitFor();
+ await hermesAccess.locator('[data-access-more] > summary').click();
  await hermesAccess.getByText('Read: items, history, companion, meetings, gmail, google-calendar and 2 more.',{exact:true}).waitFor();
  await hermesAccess.getByText('Read and change: world (link).',{exact:true}).waitFor();
  assert.equal(await hermesAccess.locator('.companion-settings-access-audit li').count(),3);
@@ -419,35 +434,37 @@ try{
  await accessPart.getByText('Hermes Agent can now see what your other Agents are doing.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Reports$/.test(c.operation))),
   [{action:'agentAccess',operation:'grantReports',id:'hermes',kind:'list'}],'only the Agent and which, never targets');
- // "Add an Agent for a script" (core/agent/GRANTS.md#agents-for-scripts): only the name goes to the host.
+ // "Add an Agent for a script" (core/agent/GRANTS.md#agents-for-scripts), folded: only the name goes to the host.
+ await accessPart.locator('[data-script-agents] > summary').click();
  await accessPart.getByRole('button',{name:'Add',exact:true}).click();
  await accessPart.getByText(/^Could not add it: Give it a name/).waitFor();
  await accessPart.getByRole('textbox',{name:'Name of the script'}).fill('Nightly build');
  await accessPart.getByRole('button',{name:'Add',exact:true}).click();
  await accessPart.getByText('Nightly build can now reach your World from a script on this computer. Its key is in /Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json. Allow what it may do below.',{exact:true}).waitFor();
+ await accessPart.locator('[data-access-agent=nightly-build] [data-access-more] > summary').click();
  await accessPart.locator('[data-access-agent=nightly-build]').getByText('For a script. Its key is in /Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='addScript')),
   [{action:'agentAccess',operation:'addScript',name:''},{action:'agentAccess',operation:'addScript',name:'Nightly build'}],'only the name');
  // Your World's address (core/agent/WORLD-ADDRESS.md): a name, the browsers allowed, the board shared and the people
  // who see it, each with its own way to end it; only names, share choices and IDs go to the host.
- const addressPart=accessPart.locator('[data-world-address]');
+ const addressRoot=local.locator('[data-part=world-address]'),addressPart=addressRoot.locator('[data-world-address]');
  await addressPart.getByText(/^Give your World its own web address, like alex\.worldlet\.ai/).waitFor();
  await addressPart.getByRole('textbox',{name:'Name for your World\'s address'}).fill('taken');
  await addressPart.getByRole('button',{name:'Choose',exact:true}).click();
- await accessPart.getByText('taken.worldlet.ai is taken. Try another name.',{exact:true}).waitFor();
+ await addressRoot.getByText('taken.worldlet.ai is taken. Try another name.',{exact:true}).waitFor();
  await addressPart.getByRole('textbox',{name:'Name for your World\'s address'}).fill('Alex');
  await addressPart.getByText('Your address: https://alex.worldlet.ai',{exact:true}).waitFor();
  await addressPart.getByRole('button',{name:'Choose',exact:true}).click();
  await addressPart.locator('[data-world-address-link]').getByText('https://alex.worldlet.ai',{exact:true}).waitFor();
  await addressPart.locator('[data-world-address-browsers]').getByText(/^Chrome on Mac · added /).waitFor();
  await addressPart.getByRole('button',{name:'Share board with anyone who has the link',exact:true}).click();
- await accessPart.getByText('Anyone with the link can now see your board, read only. Stop sharing whenever you like.',{exact:true}).waitFor();
+ await addressRoot.getByText('Anyone with the link can now see your board, read only. Stop sharing whenever you like.',{exact:true}).waitFor();
  await addressPart.locator('[data-world-address-shares]').getByText('Board · anyone with the link',{exact:true}).waitFor();
  await addressPart.locator('[data-world-address-people]').getByText(/^Sam · sees Board · last looked /).waitFor();
  await addressPart.locator('[data-world-address-people]').getByRole('button',{name:'Remove',exact:true}).click();
- await accessPart.getByText('Sam can no longer see anything here.',{exact:true}).waitFor();
+ await addressRoot.getByText('Sam can no longer see anything here.',{exact:true}).waitFor();
  await addressPart.locator('[data-world-address-browsers]').getByRole('button',{name:'Sign out',exact:true}).click();
- await accessPart.getByText(/^Chrome on Mac is signed out\./).waitFor();
+ await addressRoot.getByText(/^Chrome on Mac is signed out\./).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='worldAddress'&&c.operation!=='status')),
   [{action:'worldAddress',operation:'check',name:'taken'},{action:'worldAddress',operation:'check',name:'Alex'},{action:'worldAddress',operation:'claim',name:'Alex'},
    {action:'worldAddress',operation:'share',open:true},{action:'worldAddress',operation:'remove',id:'v1'},{action:'worldAddress',operation:'remove',id:'pk1'}],'only names, choices and IDs');
@@ -499,6 +516,9 @@ try{
  assert.equal(await hermesAccess.getByRole('button',{name:'Revoke'}).count(),0,'nothing left to revoke');
  assert.equal(await hermesAccess.getByRole('checkbox').count(),0,'a revoked Agent has no Service to read');
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='revoke').map(c=>c.id)),['hermes']);
+ // Revoked, it is no longer your Agent's row on the list: your Agent has a row of its own, with Open.
+ await accessPart.locator('[data-own-agent]').getByRole('button',{name:'Open',exact:true}).click();
+ await local.locator('[data-view=own-agent]').waitFor();
  await local.locator('[data-agent=claude-code]').getByRole('button',{name:'Use',exact:true}).click();
  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='localAgent'&&c.operation==='adopt'&&c.id==='claude-code'));
  await local.getByText('Claude Code on this computer answers for Fox.').waitFor();
@@ -565,10 +585,11 @@ try{
  await page.evaluate(()=>{const w=window as any;w.source={source:'none',ready:false,name:'',provider:'openai-codex'};window.dispatchEvent(new Event('worldlet:model-changed'));});
  // No model connected (owner request 2026-10-05): Fox says so once and points to Settings, Model, where one is chosen.
  await page.keyboard.press('Escape');
- await page.getByText('I need an AI Agent to answer. Choose one and sign it in to a provider in Settings, under Agent.').waitFor();
+ await page.getByText('I need an AI Agent to answer. Choose one and sign it in to a provider in Settings, under Agents.').waitFor();
  await page.getByRole('button',{name:'Choose an Agent',exact:true}).click();
  const settings=page.locator('#companionInfo [data-section=Settings]');await settings.waitFor();
- assert.equal(await settings.locator('[data-setting=model]').getAttribute('aria-current'),'true','Settings opens on Model');
+ assert.equal(await settings.locator('[data-setting=agents]').getAttribute('aria-current'),'true','Settings opens on your Agent');
+ await settings.locator('.companion-settings-detail [data-view=own-agent]').waitFor();
  const model=settings.locator('.companion-settings-detail');
  await model.getByText('No model connected',{exact:true}).waitFor();
  await model.locator('[data-agent=claude-code]').getByText('Answers for Fox on its own sign-in.',{exact:true}).waitFor();
@@ -600,7 +621,7 @@ try{
  await model.locator('[data-provider=own]').getByText('Hermes Agent’s own setting · In use',{exact:true}).waitFor();
  // Ask it to forget: one tap closes Settings and asks the Agent in Fox's conversation, in plain words.
  const settingsNow=page.locator('#companionInfo [data-section=Settings]');
- await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'model'}})));
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'memory'}})));
  const forget=settingsNow.locator('[data-part=memory] [data-harness=hermes] [data-entry]').first();
  await forget.getByRole('button',{name:'Ask it to forget',exact:true}).click();
  await page.waitForFunction(()=>(window as any).asked.length>0);
@@ -618,5 +639,5 @@ try{
  await settings.locator('.companion-settings-detail [data-connectors=page]').waitFor();
  await page.screenshot({path:'/tmp/your-agent-accounts.png'});
  assert.deepEqual(errors,[]);
- console.log('PASS Agent: no energy or battery anywhere; Settings, Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model; seven named sections (Model, Memory, Skills, Routines, Permissions, Access, Connections) with one plain line each; Memory shows what each Agent remembers, read only, with one-tap Ask it to forget for the Agent in use; Claude Code’s skills, rules and tools read-only with where to change them; pi has no routines; the Agent\'s skills and routines change only after a plain-words ask, and a routine change refreshes the Task panel; Permissions lists the Agent\'s standing rules in plain words and revokes one after asking again; Access lists each Agent with its last use, Grants and newest decisions, gives or takes back each connected Service\'s read Grant at once and revokes it after asking; Connections is the page\'s last part; the services, with keys, the GitHub App, Search Console and HTTP JSON under Advanced, are in Connectors, where old Accounts entry points land');
+ console.log('PASS Agents: no energy or battery anywhere; the list starts with your own Agent, whose page\'s Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model; five named parts (Model, Skills, Routines, Permissions, Connections) with one plain line each; Context › Memory shows what each Agent remembers, read only, with one-tap Ask it to forget for the Agent in use; Claude Code’s skills, rules and tools read-only with where to change them; pi has no routines; the Agent\'s skills and routines change only after a plain-words ask, and a routine change refreshes the Task panel; Permissions lists the Agent\'s standing rules in plain words and revokes one after asking again; the list of Agents shows each with its last use, what it may do in one line and newest decisions, its Grants folded, gives or takes back each connected Service\'s read Grant at once and revokes it after asking; Connections is the page\'s last part; the services, with keys, the GitHub App, Search Console and HTTP JSON under Advanced, are in Connectors, where old Accounts entry points land');
 }finally{await browser.close();}
