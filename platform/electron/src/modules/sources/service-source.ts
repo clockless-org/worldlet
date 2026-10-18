@@ -36,7 +36,7 @@ interface Definition<S> {
  origin(settings:S):string;
  /** One read that proves the key works for those settings, before it is kept. */
  check(http:ServiceHttp,settings:S):Promise<unknown>;
- read(http:ServiceHttp,settings:S,body:Row):Promise<unknown>;
+ read(http:ServiceHttp,settings:S,body:Row,now:number):Promise<unknown>;
  /** One connection holds several named endpoints, each its own settings and optional key (HTTP JSON): connecting adds
   * or replaces one by name, `list` answers their names and addresses, and a read's `id` names the one it goes to. */
  named?:{name(settings:S):string;list(endpoints:{settings:S;token:boolean}[]):unknown};
@@ -59,7 +59,7 @@ const SERVICES:Readonly<Record<string,Definition<unknown>>>=Object.freeze({
   signIn:{url:CLOUDFLARE_SIGN_IN,pick:'account',locate:locateCloudflare,mcp:{url:CLOUDFLARE_SIGN_IN_READS,tool:CLOUDFLARE_EXECUTE,request:cloudflareExecute,answer:cloudflareExecuteAnswer}}}),
  http:define<HttpJsonSettings>({gate:HTTP_JSON_GATE,settings:httpJsonSettings,origin:settings=>new URL(settings.url).origin,check:checkHttpJson,read:readHttpJson,
   named:{name:settings=>settings.name,list:httpJsonEndpoints}}),
- 'search-console':define({gate:SEARCH_CONSOLE_GATE,settings:searchConsoleSettings,origin:()=>SEARCH_CONSOLE_API,check:http=>checkSearchConsole(http),read:(http,settings,body)=>readSearchConsole(http,settings,body),serviceAccount:true,google:true}),
+ 'search-console':define({gate:SEARCH_CONSOLE_GATE,settings:searchConsoleSettings,origin:()=>SEARCH_CONSOLE_API,check:http=>checkSearchConsole(http),read:(http,settings,body,now)=>readSearchConsole(http,settings,body,now),serviceAccount:true,google:true}),
 });
 /** The Services read here; the rest of `read_service` (GitHub) runs over MCP (mcp-source.ts). */
 export const DIRECT_SERVICES:readonly string[]=Object.freeze(Object.keys(SERVICES));
@@ -165,7 +165,7 @@ export class ServiceSource {
    return service.named.list(kept.map(entry=>({settings:entry.settings,token:!!entry.token}))) as Row;
   }
   const kept=this.endpoint(service,provider,body);
-  try{return await service.read(this.http(service,kept.settings,kept.token,kept.signIn),kept.settings,body) as Row;}
+  try{return await service.read(this.http(service,kept.settings,kept.token,kept.signIn),kept.settings,body,this.clock()) as Row;}
   catch(error){if(error instanceof ServiceUnauthorized)throw new WorldletError(unauthorized(service,kept));throw error;}
  }
  /** The connection still works: the same one read connecting made, for each endpoint. */
