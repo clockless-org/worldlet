@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="780" viewBox="0 0 1200 780" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+<defs>
+<marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#57606A"/></marker>
+</defs>
+<rect width="1200" height="780" rx="18" fill="#FFFFFF"/><rect x="0.5" y="0.5" width="1199" height="779" rx="18" fill="none" stroke="#D8DDE4"/>
+<text x="40" y="54" font-size="26" font-weight="700" fill="#1F2328">Worldlet 三层架构</text>
+<text x="40" y="80" font-size="15" fill="#57606A">看：看到什么 · 做：谁来干活 · 知：World 知道的一切</text>
+
+<!-- See -->
+<rect x="40" y="100" width="820" height="150" rx="14" fill="#EEF4FF" stroke="#B6CCFE"/>
+<text x="60" y="132" font-size="20" font-weight="800" fill="#1F4BB8">1 · 看</text>
+<text x="160" y="132" font-size="14" fill="#57606A">人看到、碰到的东西</text>
+<g font-size="14" fill="#1F2328" text-anchor="middle">
+<rect x="60" y="150" width="140" height="40" rx="8" fill="#FFFFFF" stroke="#B6CCFE"/><text x="130" y="175">World · 场景</text>
+<rect x="212" y="150" width="140" height="40" rx="8" fill="#FFFFFF" stroke="#B6CCFE"/><text x="282" y="175">Applet · 看板</text>
+<rect x="364" y="150" width="140" height="40" rx="8" fill="#FFFFFF" stroke="#B6CCFE"/><text x="434" y="175">Fox 对话</text>
+<rect x="516" y="150" width="140" height="40" rx="8" fill="#FFFFFF" stroke="#B6CCFE"/><text x="586" y="175">Attention</text>
+<rect x="668" y="150" width="172" height="40" rx="8" fill="#FFFFFF" stroke="#B6CCFE"/><text x="754" y="175">Journal</text>
+<rect x="60" y="198" width="292" height="40" rx="8" fill="#FFFFFF" stroke="#B6CCFE"/><text x="206" y="223">设置：Connectors · Agents · Context</text>
+<rect x="364" y="198" width="292" height="40" rx="8" fill="#FFFFFF" stroke="#B6CCFE"/><text x="510" y="223">手机 · World 的网址</text>
+</g>
+
+<!-- Do -->
+<rect x="40" y="290" width="820" height="180" rx="14" fill="#F1F8F3" stroke="#A9D8B8"/>
+<text x="60" y="322" font-size="20" font-weight="800" fill="#1A7F37">2 · 做</text>
+<text x="146" y="322" font-size="14" fill="#57606A">谁来干活</text>
+<g font-size="14" fill="#1F2328" text-anchor="middle">
+<rect x="60" y="340" width="180" height="40" rx="8" fill="#FFFFFF" stroke="#A9D8B8"/><text x="150" y="365">Fox</text>
+<rect x="252" y="340" width="180" height="40" rx="8" fill="#FFFFFF" stroke="#A9D8B8"/><text x="342" y="365">后台任务 · 定时 · 检查</text>
+<rect x="444" y="340" width="180" height="40" rx="8" fill="#FFFFFF" stroke="#A9D8B8"/><text x="534" y="365">派活 · 提问</text>
+<rect x="636" y="340" width="204" height="40" rx="8" fill="#FFFFFF" stroke="#A9D8B8"/><text x="738" y="365">Agents · 身份 · 撤销</text>
+</g>
+<rect x="60" y="396" width="780" height="56" rx="10" fill="#1F2328"/>
+<text x="80" y="420" font-size="15" font-weight="800" fill="#FFFFFF">门禁</text>
+<text x="80" y="441" font-size="13" fill="#D0D7DE">进出 World 的唯一入口：World tools · 权限 · 草稿等你批准 · 每次调用都有记录</text>
+
+<!-- Know -->
+<rect x="40" y="510" width="820" height="180" rx="14" fill="#FFF8EC" stroke="#F0CF8E"/>
+<text x="60" y="542" font-size="20" font-weight="800" fill="#9A6700">3 · 知</text>
+<text x="160" y="542" font-size="14" fill="#57606A">World 知道的一切，存在一个地方</text>
+<rect x="60" y="558" width="560" height="116" rx="10" fill="#FFFFFF" stroke="#F0CF8E"/>
+<text x="76" y="582" font-size="14" font-weight="700" fill="#1F2328">Context</text>
+<text x="146" y="582" font-size="12" fill="#57606A">每条记录：从哪来 · 时间 · 版本 · 由什么生成 · 谁能读</text>
+<g font-size="13" fill="#1F2328" text-anchor="middle">
+<rect x="76" y="594" width="126" height="34" rx="7" fill="#FFF8EC" stroke="#F0CF8E"/><text x="139" y="616">同步来的</text>
+<rect x="210" y="594" width="126" height="34" rx="7" fill="#FFF8EC" stroke="#F0CF8E"/><text x="273" y="616">发生过的</text>
+<rect x="344" y="594" width="126" height="34" rx="7" fill="#FFF8EC" stroke="#F0CF8E"/><text x="407" y="616">做出来的</text>
+<rect x="478" y="594" width="126" height="34" rx="7" fill="#FFF8EC" stroke="#F0CF8E"/><text x="541" y="616">提炼出来的</text>
+<text x="139" y="652" font-size="11" fill="#57606A">来自各个服务</text>
+<text x="273" y="652" font-size="11" fill="#57606A">对话 · 汇报 · 决定</text>
+<text x="407" y="652" font-size="11" fill="#57606A">Artifact · Applet</text>
+<text x="541" y="652" font-size="11" fill="#57606A">记忆 · 摘要</text>
+</g>
+<g font-size="14" fill="#1F2328" text-anchor="middle">
+<rect x="636" y="558" width="204" height="34" rx="8" fill="#FFFFFF" stroke="#F0CF8E"/><text x="738" y="580">统一搜索</text>
+<rect x="636" y="598" width="204" height="34" rx="8" fill="#FFFFFF" stroke="#F0CF8E"/><text x="738" y="620">文件区（按内容哈希）</text>
+<rect x="636" y="638" width="204" height="36" rx="8" fill="#9A6700"/><text x="738" y="661" fill="#FFFFFF" font-weight="700">Connectors</text>
+</g>
+
+<!-- Host -->
+<rect x="40" y="710" width="820" height="46" rx="10" fill="#F6F8FA" stroke="#D0D7DE"/>
+<text x="60" y="739" font-size="14" fill="#57606A"><tspan font-weight="700" fill="#1F2328">底下是宿主</tspan>  Electron 或 Node · 系统权限 · 文件 · 进程 · 网络 · 中转。只负责运行，不做产品决定。</text>
+
+<!-- Flow arrows between layers -->
+<g stroke="#57606A" stroke-width="2" fill="none">
+<line x1="300" y1="250" x2="300" y2="288" marker-end="url(#ar)"/>
+<line x1="600" y1="288" x2="600" y2="252" marker-end="url(#ar)"/>
+<line x1="450" y1="452" x2="450" y2="508" marker-start="url(#ar)" marker-end="url(#ar)"/>
+</g>
+<g font-size="12" fill="#57606A">
+<text x="308" y="274">提出要求</text>
+<text x="608" y="274">结果存成 Artifact → Attention、Journal</text>
+<text x="458" y="485">读 · 写</text>
+</g>
+
+<!-- Outside -->
+<text x="900" y="122" font-size="13" font-weight="700" fill="#57606A">World 之外</text>
+<rect x="900" y="140" width="260" height="70" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="916" y="168" font-size="16" font-weight="700" fill="#1F2328">人</text>
+<text x="916" y="190" font-size="13" fill="#57606A">在电脑、手机或网页上</text>
+<line x1="898" y1="175" x2="862" y2="175" stroke="#57606A" stroke-width="2" marker-end="url(#ar)"/>
+
+<rect x="900" y="300" width="260" height="150" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="916" y="328" font-size="16" font-weight="700" fill="#1F2328">用户自己的 Agents</text>
+<text x="916" y="352" font-size="13" fill="#57606A">本机，走本地 MCP：</text>
+<text x="916" y="370" font-size="13" fill="#1F2328">Claude Code · Codex · Hermes · scripts</text>
+<text x="916" y="396" font-size="13" fill="#57606A">云端，走远程 MCP：</text>
+<text x="916" y="414" font-size="13" fill="#1F2328">claude.ai · ChatGPT · Cursor · tokens</text>
+<text x="916" y="438" font-size="12" fill="#57606A">模型是它们自己的，Worldlet 不提供</text>
+<line x1="898" y1="424" x2="842" y2="424" stroke="#57606A" stroke-width="2" marker-end="url(#ar)"/>
+
+<rect x="900" y="600" width="260" height="90" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="916" y="628" font-size="16" font-weight="700" fill="#1F2328">外部服务</text>
+<text x="916" y="652" font-size="13" fill="#1F2328">GitHub · PostHog · Google · Notion</text>
+<text x="916" y="672" font-size="13" fill="#1F2328">Cloudflare · Search Console · JSON</text>
+<line x1="898" y1="656" x2="842" y2="656" stroke="#57606A" stroke-width="2" marker-start="url(#ar)" marker-end="url(#ar)"/>
+</svg>

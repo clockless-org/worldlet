@@ -56,7 +56,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **283 Markdown documents** and **745 supporting documentation files**.
+Indexed: **283 Markdown documents** and **747 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -67,7 +67,7 @@ Indexed: **283 Markdown documents** and **745 supporting documentation files**.
 | Resource and artwork records | 74 |
 | Module and service documentation | 37 |
 | Website documentation and articles | 0 |
-| Documentation diagrams, previews and evidence | 745 |
+| Documentation diagrams, previews and evidence | 747 |
 
 <details><summary>Root entry points (6)</summary>
 
@@ -387,7 +387,7 @@ Indexed: **283 Markdown documents** and **745 supporting documentation files**.
 
 </details>
 
-<details><summary>Documentation diagrams, previews and evidence (745)</summary>
+<details><summary>Documentation diagrams, previews and evidence (747)</summary>
 
 - [core/diagnostics/analytics-insights.json](../core/diagnostics/analytics-insights.json)
 - [docs/architecture.html](architecture.html)
@@ -397,6 +397,8 @@ Indexed: **283 Markdown documents** and **745 supporting documentation files**.
 - [docs/assets/readme/world.jpg](assets/readme/world.jpg)
 - [docs/stack-in-computer-terms.svg](stack-in-computer-terms.svg)
 - [docs/stack-in-computer-terms.zh.svg](stack-in-computer-terms.zh.svg)
+- [docs/three-layers.svg](three-layers.svg)
+- [docs/three-layers.zh.svg](three-layers.zh.svg)
 - [platform/distribution/index.html](../platform/distribution/index.html)
 - [resources/styles/builtin/references/brand/preview.html](../resources/styles/builtin/references/brand/preview.html)
 - [resources/styles/builtin/references/brand/system.html](../resources/styles/builtin/references/brand/system.html)
