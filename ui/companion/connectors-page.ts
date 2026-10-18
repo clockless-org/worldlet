@@ -3,6 +3,7 @@ import {connector,connectorTiles,connectorDisconnectQuestion,connectorFailure,co
 import {SERVICE_PROVIDERS} from '../../contracts/services.ts';
 import {agentButton as button,agentEl as el} from './agent-change.ts';
 import {showGithubApp,showHttpJson,showSearchConsole} from './worldlet-accounts.ts';
+import {showUseInClaude} from './remote-access.ts';
 
 type Call=(action:string,body?:any)=>Promise<any>;
 /** The services that connect with a key, under Advanced › Connect with a key (Search Console and HTTP JSON have boxes
@@ -134,6 +135,9 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
   said);
  target.append(page);
  await draw();
+ if(!current())return;
+ // This World in Claude or ChatGPT: the last step of connecting, in the same place (core/agent/REMOTE-MCP.md).
+ await showUseInClaude(target,call,current);
  if(!current())return;
  // Advanced: keys, addresses and files, for people who have them (and teams that write as their own GitHub App).
  const advanced=el('details','companion-settings-elsewhere companion-settings-advanced') as HTMLDetailsElement;advanced.dataset.advanced='connectors';

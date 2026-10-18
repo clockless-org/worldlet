@@ -16,7 +16,9 @@ await withBrowser(async browser=>{
  await page.addScriptTag({content:await bundleScript({entryPoints:['ui/companion/connectors-page.ts'],globalName:'ConnectorsPage'})});
  await page.evaluate(async()=>{
   const w=window as any;w.calls=[];w.connections=[{provider:'github',label:'GitHub',transport:'hermes',syncStatus:'connected',connected:true,failed:false}];
-  w.pending=null;w.refuse=null;w.chosen='2';
+  w.pending=null;w.refuse=null;w.chosen='2';w.copied=[];
+  w.remote={enabled:false,connected:true,address:'https://mcp.worldlet.ai/'+'0'.repeat(32),connectors:[]};
+  Object.defineProperty(navigator,'clipboard',{value:{writeText:async(text:string)=>{w.copied.push(text);}}});
   // The Agents that have reached the World, and which may read which Service ("<agent>:<provider>").
   w.agents=[{id:'claude-code',name:'Claude Code'},{id:'codex',name:'Codex'}];w.granted=new Set(['claude-code:github']);
   const call=async(action:string,body:any={})=>{
@@ -37,6 +39,9 @@ await withBrowser(async browser=>{
    if(action==='disconnectSource'){w.connections=w.connections.filter((c:any)=>c.provider!==body.provider);return {ok:true};}
    if(action==='githubApp')return {connected:false};
    if(action==='httpJson')return {endpoints:[]};
+   // Remote access, for "Use your World in Claude or ChatGPT": off at first.
+   if(action==='remoteMcp'&&body.operation==='status')return structuredClone(w.remote);
+   if(action==='remoteMcp'&&body.operation==='enable'){w.remote.enabled=true;return {ok:true};}
    if(action==='agentAccess'&&body.operation==='serviceReaders'){
     const of=(agent:any)=>({...agent,granted:w.granted.has(agent.id+':'+body.provider)});
     return {main:of(w.agents[0]),others:w.agents.slice(1).map(of)};
@@ -76,6 +81,22 @@ await withBrowser(async browser=>{
  assert.equal(await page.locator('[data-advanced]').evaluate(node=>(node as HTMLDetailsElement).open),false,'Advanced starts folded');
  assert.equal(await page.locator('input:visible:not([type="checkbox"]),textarea:visible').count(),0,'nothing to type on the default path');
  await plain('opened');
+ // This World in Claude or ChatGPT: the steps in plain words, Turn on when it is off, then Copy address; the address
+ // itself is never shown on this page.
+ const claude=page.locator('[data-use-in-claude]');
+ await claude.getByText('Use your World in Claude or ChatGPT',{exact:true}).waitFor();
+ assert.match(await claude.innerText(),/In Claude: Settings › Connectors › Add custom connector\. Name it Worldlet and paste the address\./);
+ assert.match(await claude.innerText(),/In ChatGPT: Settings › Apps & Connectors › Create\./);
+ assert.match(await claude.innerText(),/four-digit code\. Choose Allow if it matches/);
+ assert.equal(await claude.getByRole('button',{name:'Copy address',exact:true}).count(),0,'nothing to copy while it is off');
+ await claude.getByRole('button',{name:'Turn on',exact:true}).click();
+ await claude.getByRole('button',{name:'Copy address',exact:true}).click();
+ await page.getByText('Copied. Now paste it in Claude or ChatGPT.',{exact:true}).waitFor();
+ await claude.getByRole('button',{name:'Address copied',exact:true}).waitFor();
+ assert.deepEqual(await page.evaluate(()=>(window as any).copied),['https://mcp.worldlet.ai/'+'0'.repeat(32)]);
+ assert.doesNotMatch(await page.locator('#settings').innerText(),/mcp\.worldlet\.ai/,'the address is copied, not shown');
+ assert.ok(await claude.getByText('It works while this computer is on and Worldlet is running.',{exact:false}).count());
+ await plain('Claude and ChatGPT');
  // Who may use it: the Agent Fox uses is on, changes always ask, the other Agents behind Choose Agents.
  const who=tile('github').locator('[data-who]');
  const main=who.getByRole('checkbox',{name:'Fox and Claude Code can look at your GitHub.',exact:true});
@@ -188,4 +209,4 @@ await withBrowser(async browser=>{
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'narrow settings do not overflow horizontally');
  if(screenshot)await page.screenshot({path:screenshot.replace(/\.png$/,'-narrow.png'),fullPage:true});
 });
-console.log('PASS Settings › Connectors: sign-in tiles with Connect, waiting and Cancel, Connected as, Disconnect asks once, plain words for a refusal and a sign-out, who may use it (the Agent in use on, Choose Agents), the PostHog project and Cloudflare account choices, Search Console signing in with Google, key services shown connected, keys and addresses only under Advanced, no technical word on the default path, narrow layout');
+console.log('PASS Settings › Connectors: using the World in Claude or ChatGPT (steps, Turn on, Copy address without showing it), sign-in tiles with Connect, waiting and Cancel, Connected as, Disconnect asks once, plain words for a refusal and a sign-out, who may use it (the Agent in use on, Choose Agents), the PostHog project and Cloudflare account choices, Search Console signing in with Google, key services shown connected, keys and addresses only under Advanced, no technical word on the default path, narrow layout');
