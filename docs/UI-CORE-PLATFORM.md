@@ -15,7 +15,7 @@ Platform host thin; the Harness and model service are replaceable through explic
 an extra execution hop. Resources contain assets and declarations, not product logic.
 See the [diagram](architecture.html).
 
-The product in four layers with their components: See (`ui/`), Do and Know (the two halves of `core/`: work, and the context it keeps) and Platform (`platform/`): [four-layers.svg](four-layers.svg) ([中文](four-layers.zh.svg)).
+The product in four layers with their components: UI (`ui/`), Agent and Context (the two halves of `core/`: who does the work through the Gate, and everything the World knows) and Platform (`platform/`): [four-layers.svg](four-layers.svg) ([中文](four-layers.zh.svg)).
 
 <a id="features"></a>
 ## Six features and the base

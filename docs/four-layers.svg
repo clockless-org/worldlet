@@ -4,12 +4,12 @@
 </defs>
 <rect width="1200" height="780" rx="18" fill="#FFFFFF"/><rect x="0.5" y="0.5" width="1199" height="779" rx="18" fill="none" stroke="#D8DDE4"/>
 <text x="40" y="54" font-size="26" font-weight="700" fill="#1F2328">Worldlet in four layers</text>
-<text x="40" y="80" font-size="15" fill="#57606A">See · Do · Know · Platform. Core is Do and Know.</text>
+<text x="40" y="80" font-size="15" fill="#57606A">UI · Agent · Context · Platform. Core splits into Agent and Context.</text>
 
 <!-- See -->
 <rect x="40" y="100" width="820" height="150" rx="14" fill="#EEF4FF" stroke="#B6CCFE"/>
-<text x="60" y="132" font-size="20" font-weight="800" fill="#1F4BB8">1 · See</text>
-<text x="160" y="132" font-size="14" fill="#57606A">what a person sees and touches</text>
+<text x="60" y="132" font-size="20" font-weight="800" fill="#1F4BB8">1 · UI</text>
+<text x="132" y="132" font-size="14" fill="#57606A">what a person sees and touches</text>
 <g font-size="14" fill="#1F2328" text-anchor="middle">
 <rect x="60" y="150" width="140" height="40" rx="8" fill="#FFFFFF" stroke="#B6CCFE"/><text x="130" y="175">World · scenes</text>
 <rect x="212" y="150" width="140" height="40" rx="8" fill="#FFFFFF" stroke="#B6CCFE"/><text x="282" y="175">Applets · board</text>
@@ -23,23 +23,23 @@
 <text x="840" y="132" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A" text-anchor="end">ui/</text>
 <!-- Do -->
 <rect x="40" y="290" width="820" height="180" rx="14" fill="#F1F8F3" stroke="#A9D8B8"/>
-<text x="60" y="322" font-size="20" font-weight="800" fill="#1A7F37">2 · Do</text>
-<text x="146" y="322" font-size="14" fill="#57606A">who does the work</text>
+<text x="60" y="322" font-size="20" font-weight="800" fill="#1A7F37">2 · Agent</text>
+<text x="176" y="322" font-size="14" fill="#57606A">who does the work</text>
 <g font-size="14" fill="#1F2328" text-anchor="middle">
 <rect x="60" y="340" width="180" height="40" rx="8" fill="#FFFFFF" stroke="#A9D8B8"/><text x="150" y="365">Fox</text>
 <rect x="252" y="340" width="180" height="40" rx="8" fill="#FFFFFF" stroke="#A9D8B8"/><text x="342" y="365">Tasks · routines · checks</text>
 <rect x="444" y="340" width="180" height="40" rx="8" fill="#FFFFFF" stroke="#A9D8B8"/><text x="534" y="365">Asks · handing out work</text>
 <rect x="636" y="340" width="204" height="40" rx="8" fill="#FFFFFF" stroke="#A9D8B8"/><text x="738" y="365">Agents · identity · Revoke</text>
 </g>
-<text x="840" y="322" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A" text-anchor="end">core/ · work</text>
+<text x="840" y="322" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A" text-anchor="end">core/ · agent</text>
 <rect x="60" y="396" width="780" height="56" rx="10" fill="#1F2328"/>
 <text x="80" y="420" font-size="15" font-weight="800" fill="#FFFFFF">Gate</text>
 <text x="80" y="441" font-size="13" fill="#D0D7DE">the only way in or out: World tools · Grants · drafts wait for approval · every call audited</text>
 
 <!-- Know -->
 <rect x="40" y="510" width="820" height="180" rx="14" fill="#FFF8EC" stroke="#F0CF8E"/>
-<text x="60" y="542" font-size="20" font-weight="800" fill="#9A6700">3 · Know</text>
-<text x="160" y="542" font-size="14" fill="#57606A">everything the World knows, in one store</text>
+<text x="60" y="542" font-size="20" font-weight="800" fill="#9A6700">3 · Context</text>
+<text x="190" y="542" font-size="14" fill="#57606A">everything the World knows, in one store</text>
 <text x="840" y="542" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A" text-anchor="end">core/ · context</text>
 <rect x="60" y="558" width="560" height="116" rx="10" fill="#FFFFFF" stroke="#F0CF8E"/>
 <text x="76" y="582" font-size="14" font-weight="700" fill="#1F2328">Context</text>
