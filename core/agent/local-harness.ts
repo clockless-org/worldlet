@@ -264,6 +264,12 @@ export function codexWorldToolsFailed(text:string):string|null {
 export function modelAtCapacity(text:string):boolean {
  return /at capacity|overloaded|server_is_overloaded|\b529\b|\b503\b|service unavailable/i.test(text);
 }
+/** The provider refused the model itself for this person's account ("The 'gpt-6.1-sol' model is not supported when using
+ * Codex with a ChatGPT account.", Alpha 4511 on both release hosts, #668/#669): Codex's own default can be a model the
+ * account's plan does not include, and every turn on it fails the same way until another model is named. */
+export function modelRefusedByAccount(text:string):boolean {
+ return /model is not supported when using Codex with a ChatGPT account/i.test(text);
+}
 /** Codex's notice while it retries a dropped or refused stream by itself ("Reconnecting... 2/5 (…)"). */
 const codexReconnecting=(value:unknown)=>typeof value==='string'&&/^\s*Reconnecting\b/i.test(value);
 export function openClawMissingKey(text:string):string|null {

@@ -435,6 +435,26 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
     assert.equal(fs.readFileSync(tries,'utf8').trim().split('\n').length,2,'background work runs again after turning busy mid-pass');
    }finally{BUSY_RETRIES.splice(0,BUSY_RETRIES.length,...waits);}
   }
+  // Codex's own default refused for a ChatGPT account (Alpha 4511, #668/#669): the same turn runs at once on the ChatGPT
+  // chat-tier model, and so do later turns; a model Worldlet named itself is not swapped for another.
+  {
+   const dir=path.join(scratch,'codex-refused');fs.mkdirSync(dir,{recursive:true});
+   const tries=path.join(dir,'tries.txt'),refused=path.join(dir,'refused.jsonl'),answer=path.join(dir,'answer.jsonl'),codexBin=path.join(dir,'codex');
+   const reason=JSON.stringify({type:'error',status:400,error:{type:'invalid_request_error',message:"The 'gpt-6.1-sol' model is not supported when using Codex with a ChatGPT account."}});
+   fs.writeFileSync(refused,[{type:'turn.started'},{type:'error',message:reason},{type:'turn.failed',error:{message:reason}}].map(line=>JSON.stringify(line)).join('\n')+'\n');
+   fs.writeFileSync(answer,[{type:'turn.started'},{type:'item.completed',item:{id:'i1',type:'agent_message',text:'Hello from Codex'}},{type:'turn.completed',usage:{}}].map(line=>JSON.stringify(line)).join('\n')+'\n');
+   script(codexBin,`cat > /dev/null\necho "$*" >> "${tries}"\ncase " $* " in *" --model gpt-5.6-terra "*) cat "${answer}";; *) cat "${refused}"; exit 1;; esac\n`);
+   const codexInstall={id:'codex' as const,title:'Codex',command:codexBin,prefix:[],configured:true};
+   const turns=()=>fs.readFileSync(tries,'utf8').trim().split('\n');
+   await assert.rejects(new LocalHarnessRuntime(codexInstall,unix,undefined,null,null,null,()=>'gpt-6.1-sol').run({action:'chat',text:'Hi',_background:true},agentHome),/not supported when using Codex with a ChatGPT account/);
+   assert.equal(turns().length,1,'a model Worldlet named is not swapped');
+   fs.rmSync(tries);
+   assert.equal((await new LocalHarnessRuntime(codexInstall,unix).run({action:'chat',text:'Hi',_background:true},agentHome)).message,'Hello from Codex');
+   assert.deepEqual(turns().map(args=>args.includes('--model gpt-5.6-terra')),[false,true],'its own default once, then the ChatGPT chat-tier model: '+turns().join(' | '));
+   fs.rmSync(tries);
+   assert.equal((await new LocalHarnessRuntime(codexInstall,unix).run({action:'chat',text:'Hi'},agentHome,async()=>null)).message,'Hello from Codex');
+   assert.deepEqual(turns().map(args=>args.includes('--model gpt-5.6-terra')),[true],'later turns name it at once');
+  }
   // A turn that stays silent until its deadline, nothing shown and no World tool called, runs once more on a new process
   // (Mac Alpha 4469, #623).
   {
