@@ -4,7 +4,7 @@ import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import services from '../core/tools/services.json' with {type:'json'};
-import {worldHistoryQuery,worldHistoryPage} from '../core/items/index.ts';
+import {worldHistoryQuery,worldHistoryPage} from '../context/items/index.ts';
 const folder=mkdtempSync(join(tmpdir(),'worldlet-history-query-')),file=join(folder,'history.sqlite');
 let db=new DatabaseSync(file);
 try {

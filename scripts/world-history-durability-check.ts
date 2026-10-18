@@ -5,7 +5,7 @@ import {mkdtempSync,readFileSync,rmSync,writeFileSync,existsSync,unlinkSync} fro
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
-import {worldEventAppend,worldHistoryQuery,worldHistoryPage,journalEntry,taskExecutionEvents,conversationEntries} from '../core/items/index.ts';
+import {worldEventAppend,worldHistoryQuery,worldHistoryPage,journalEntry,taskExecutionEvents,conversationEntries} from '../context/items/index.ts';
 import {finishRuntimeTask} from '../core/tasks/index.ts';
 const views=readFileSync(new URL('../contracts/storage/world-views.sql',import.meta.url),'utf8');
 const folder=mkdtempSync(join(tmpdir(),'worldlet-history-'));

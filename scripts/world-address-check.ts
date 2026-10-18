@@ -10,7 +10,7 @@ import {WORLD_ADDRESS_VAULT,createWorldAddressHost} from '../platform/electron/s
 import {WORLD_ADDRESS_LIMITS,addressNameFrom,derToRaw,readWorldAddressState,validAddressName,worldAddress} from '../core/agent/world-address.ts';
 import {readRemoteMcpRequest,remoteConsentItemId} from '../core/agent/remote-mcp.ts';
 import {roomDenied} from '../contracts/web-world.ts';
-import {projectWorldItems} from '../core/items/world-items.ts';
+import {projectWorldItems} from '../context/items/world-items.ts';
 
 // One address per World on the host (core/agent/WORLD-ADDRESS.md), with the website played by a fake registry and the
 // front by a fake WebSocket, and passkeys made here with node:crypto as a browser's authenticator makes them. The name

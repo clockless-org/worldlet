@@ -5,7 +5,7 @@ import {ONGOING_APPLET,ONGOING_LIMITS,ongoingId,validOngoingId,ongoingName,ongoi
 import {attentionFromAgent,conversationAttentionId,foxSessions,foxSessionLine,foxSessionPlace,foxSessionOf,foxSessionCards,FOX_SESSION_LIMIT} from '../core/tasks/index.ts';
 import {harnessSessionThread,harnessChatThread,harnessThreadPlace,harnessOriginId} from '../core/agent/harness-sessions.ts';
 import {processedAttentionContent} from '../core/attention/attention-content.ts';
-import {validateWorldItem} from '../core/items/world-item-validation.ts';
+import {validateWorldItem} from '../context/items/world-item-validation.ts';
 import {phoneAttention,phoneTasks,phoneJournal,readPhoneMessage} from '../core/phone/index.ts';
 import {APP_DEFINITIONS} from '../core/applets/index.ts';
 

@@ -3,7 +3,7 @@ import {snapshotInbox} from './shell/index.ts';
 import {mountMemoryManager} from './companion/index.ts';
 import {appletSupport,appletsOffPage,connectionLive} from '../core/applets/index.ts';
 import {startWebAnalytics,withProductAnalytics} from './shell/index.ts';
-import {settleItemPage} from '../core/items/index.ts';
+import {settleItemPage} from '../context/items/index.ts';
 import {installDesktopCompanion} from './companion/index.ts';
 import {mountDesktopCompanionHint,mountFirstValue,mountLoginItemOffer,mountWorldTour} from './onboarding/index.ts';
 import {landSetupDevices} from './onboarding/index.ts';

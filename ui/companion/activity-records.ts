@@ -1,7 +1,7 @@
 import {uiIcon} from '../components/index.ts';
 import {companionStill,themeAppletIcon} from '../themes/index.ts';
 import {WORLD_APPS} from '../../core/applets/index.ts';
-import {journalPayload} from '../../core/items/index.ts';
+import {journalPayload} from '../../context/items/index.ts';
 /** Every event Worldlet recorded on this computer, newest first, for the Worldlet team (Settings › Help, folded under
  * For the Worldlet team). There is no History page any more (owner request 2026-10-10). Polling runs only while the
  * panel is open and the records show. */

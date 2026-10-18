@@ -9,7 +9,7 @@ Chapters:
 
 Fox is the user-facing assistant. Hermes (pinned 0.21.3, upstream commit `416a8177c25d87aa9929dfcf31f7964137d7fcdd`, no fork) is the agent kernel: model calls, tool loop, sessions, memory, skills and MCP. Worldlet owns the world, the host bridge, permissions, the persistent items in `world.sqlite` and the check schedule. Hermes runs as an app-owned resident Python process; it cannot run in a browser, so the marketing site's `/demo/` has no chat.
 
-Related docs: [Agent architecture](../../core/agent/PORTABILITY.md) (layer contract), Hermes desktop runtime (removed with the built-in Hermes on 2026-10-09) (JSON-RPC bridge, mid-run steering), Search, browser and routines, [Fox performance](CONVERSATION.md#fox-performance), [Model onboarding](CONVERSATION.md#model-onboarding), [World interaction contract](../../core/items/STORAGE.md#world-interaction).
+Related docs: [Agent architecture](../../core/agent/PORTABILITY.md) (layer contract), Hermes desktop runtime (removed with the built-in Hermes on 2026-10-09) (JSON-RPC bridge, mid-run steering), Search, browser and routines, [Fox performance](CONVERSATION.md#fox-performance), [Model onboarding](CONVERSATION.md#model-onboarding), [World interaction contract](../../context/items/STORAGE.md#world-interaction).
 
 ```mermaid
 flowchart TD

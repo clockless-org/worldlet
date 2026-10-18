@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {journalEntry,journalPayload,executionEvent} from '../core/items/index.ts';
+import {journalEntry,journalPayload,executionEvent} from '../context/items/index.ts';
 const payload=journalPayload({api_key:'secret',headers:{Authorization:'Bearer secret',Cookie:'session'},url:'https://host/?code=abc&token=xyz',text:'Bearer abc123',deep:[{password:'secret'}]});
 assert(!JSON.stringify(payload).includes('secret'));assert(!JSON.stringify(payload).includes('abc123'));assert(!JSON.stringify(payload).includes('xyz'));
 for(const kind of ['run.started','run.succeeded','run.failed','run.cancelled','run.interrupted','tool.requested','tool.result','tool.failed','harness.event','model.requested','model.result','model.interrupted','ui.command']){

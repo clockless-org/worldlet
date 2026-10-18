@@ -67,7 +67,7 @@ import {appletStatus as appStatus,connectionLive} from '../../core/applets/index
 import {phoneWebAddress} from '../../core/phone/index.ts';
 import {applyModuleWorld,moduleStatus} from '../world/index.ts';
 import {createModuleScene} from '../world/index.ts';
-import {settleItemPage} from '../../core/items/index.ts';
+import {settleItemPage} from '../../context/items/index.ts';
 import {createBrowserPanel} from '../browser/index.ts';
 import {restoreTextScale} from '../components/index.ts';
 import {detailTemplate} from '../components/index.ts';

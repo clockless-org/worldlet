@@ -5,7 +5,7 @@ import {HERMES_CHANNEL_READ_ONLY,hermesChannelToolAllowed} from '../core/agent/h
 import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
 import {turnWriteAdmission,writeDecision} from '../core/agent/turn-trust.ts';
 import {GITHUB_DRAFT_REASONS,GITHUB_WRITE_REASONS,readGithubWriteRun,readGithubWriteScope} from '../core/agent/github-drafts.ts';
-import {prepareWorldItem} from '../core/items/world-item-state.ts';
+import {prepareWorldItem} from '../context/items/world-item-state.ts';
 import {mergeArtifact,readArtifact} from '../core/artifacts/artifacts.ts';
 
 const now='2026-10-15T12:00:00.000Z',earlier='2026-10-15T11:00:00.000Z',later='2026-10-15T13:00:00.000Z';

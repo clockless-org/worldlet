@@ -9,7 +9,7 @@ Platform-independent product behavior. Components, by [feature](../docs/UI-CORE-
 - Tasks: tasks (work that runs without the person)
 - Artifacts & Journal: artifacts (everything work produces, kept by day)
 - Agents & Gate: agent, tools (the Agents connected to the World, World tools, Grants, approvals and audit)
-- Context: context, items (everything the World knows; [storage and its four kinds](items/STORAGE.md#four-kinds))
+- Context: context, items (everything the World knows; [storage and its four kinds](../context/items/STORAGE.md#four-kinds))
 - Connectors: accounts (sign-in to Services, their reads and approved writes)
 - Windows: phone (the World in a web browser and on the phone)
 - Base: onboarding, diagnostics, distribution

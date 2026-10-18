@@ -53,7 +53,7 @@ Cancellation belongs to the requesting turn. Tool execution stays in Worldlet's 
 
 ## Data ownership target
 
-Worldlet owns portable companion identity, personality, long-term memory, user-visible conversation history, source citations, items and layout. Adapters own transient execution sessions, compression state and caches. Credentials are separate and excluded from portable exports. Hermes remains the live memory writer while selected. World automatically persists supported durable memory checkpoints and lets replacement external adapters read them without Hermes; these are not two independently mutable memory stores. See [World storage](../items/STORAGE.md) for domain ownership, checkpoint timing and remaining adapter limitations.
+Worldlet owns portable companion identity, personality, long-term memory, user-visible conversation history, source citations, items and layout. Adapters own transient execution sessions, compression state and caches. Credentials are separate and excluded from portable exports. Hermes remains the live memory writer while selected. World automatically persists supported durable memory checkpoints and lets replacement external adapters read them without Hermes; these are not two independently mutable memory stores. See [World storage](../../context/items/STORAGE.md) for domain ownership, checkpoint timing and remaining adapter limitations.
 
 Use one open-source repository and one official composition. Separate repositories are optional for third-party adapters or future hosted billing/model services, not required for a signed desktop build.
 

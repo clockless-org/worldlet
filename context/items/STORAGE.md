@@ -11,7 +11,7 @@ The upper three layers own product logic and durable user data. Organize data by
 <a id="four-kinds"></a>
 ## Four kinds of Context
 
-Everything the World knows is Context, the third of the [four layers](../../docs/UI-CORE-PLATFORM.md#see-do-know). It comes in four kinds ([#676](https://github.com/clockless-org/worldlet/issues/676)). `core/context/` and `core/items/` hold its rules; the host's store (`platform/electron/src/store/`) persists it. Connections, Grants and preferences are configuration, not Context.
+Everything the World knows is Context, the third of the [four layers](../../docs/UI-CORE-PLATFORM.md#see-do-know). It comes in four kinds ([#676](https://github.com/clockless-org/worldlet/issues/676)). `core/context/` and `context/items/` hold its rules; the host's store (`platform/electron/src/store/`) persists it. Connections, Grants and preferences are configuration, not Context.
 
 | Kind | What it is | Who writes it | Today's storage (domains in the table below) |
 | --- | --- | --- | --- |
@@ -37,15 +37,15 @@ SQLite is the business database. JSON is appropriate for small configuration and
 | Domain | Current World-owned storage | Responsibility |
 | --- | --- | --- |
 | Attention | `world.sqlite`: `state.items`, `state.reviews` | Model-processed Title, Reason, Summary, time/place, source references, user decisions |
-| Agent asks | `world.sqlite`: `state.agent-asks`, each with its Attention item `ask-<id>` in `state.items` (provider `agents`); the bytes of its screenshots and files in `agent_ask_attachments` (`ask_id`, `id`, `data` BLOB), saved with the ask in one transaction | What Agents asked the person or left as work, its claim, answer and resolution, and what describes each attachment (name, type, size, SHA-256) ([Agent asks](../agent/GRANTS.md#agent-asks), [attachments](../agent/GRANTS.md#ask-attachments)). Attachments stay as long as their ask, however it settles |
-| Orders and wake commands | `world.sqlite` `agent_settings` (`agent-orders`): `defaultFor` and `wake` (Agent ID → the program's path and its arguments) | Which Agent new work goes to when none is named, and the program the person set to wake each Agent ([Orders and waking an Agent](../agent/GRANTS.md#orders-and-waking-an-agent)). Changed only in Settings › Agents; a revoked Agent's entries are removed. Follows the World and its backups |
-| Agent reports | `world.sqlite`: `state.agent-reports`, one per Agent | What each Agent last said it is doing, and when ([Agent reports](../agent/GRANTS.md#agent-reports)) |
-| Service presets | `world.sqlite`: `state.service-presets` | Named, saved reads of a Worldlet Service, without keys ([Service presets](../applets/INTEGRATIONS.md#service-presets)) |
-| Service sync | `world.sqlite`: `state.service-sync-jobs`, `state.service-sync-pages`, `state.service-sync-snapshots` | Opt-in schedules, resumable page checkpoints and last completed bounded snapshots; latest values only, no credentials ([scheduled collection](../applets/INTEGRATIONS.md#scheduled-service-collection)) |
-| GitHub drafts | `world.sqlite`: `state.github-drafts`, each with its Attention item `ghd-<id>` in `state.items` (provider `agents`) | Changes on GitHub Agents drafted, the target as it was read, and whether the person approved (with the result's link) or dismissed them ([GitHub drafts](../agent/GRANTS.md#github-drafts)); the GitHub App that writes them is in the vault (`github-app`) |
-| PostHog and Notion drafts | `world.sqlite`: `state.service-drafts`, each with its Attention item `svd-<id>` in `state.items` (provider `agents`) | Changes in PostHog or Notion Agents drafted, the target as it was read, and whether the person approved (with the result's link) or dismissed them ([PostHog and Notion drafts](../agent/GRANTS.md#posthog-and-notion-drafts)); no key is kept with them |
-| Service requests | `world.sqlite`: `state.service-requests`, one per Agent and Service (`<agentId>.<provider>`), each with its Attention item `service-request:<id>` in `state.items` (provider `agents`) | An Agent's refused Service read the person was asked about, when it was asked, and whether they allowed it or said not now ([When an Agent first needs a Service](../agent/GRANTS.md#when-an-agent-first-needs-a-service)) |
-| Board | `world.sqlite`: `state.board` (the definition, its revision and who defined it) | The person's board of Service presets ([the board](../board/README.md)) |
+| Agent asks | `world.sqlite`: `state.agent-asks`, each with its Attention item `ask-<id>` in `state.items` (provider `agents`); the bytes of its screenshots and files in `agent_ask_attachments` (`ask_id`, `id`, `data` BLOB), saved with the ask in one transaction | What Agents asked the person or left as work, its claim, answer and resolution, and what describes each attachment (name, type, size, SHA-256) ([Agent asks](../../core/agent/GRANTS.md#agent-asks), [attachments](../../core/agent/GRANTS.md#ask-attachments)). Attachments stay as long as their ask, however it settles |
+| Orders and wake commands | `world.sqlite` `agent_settings` (`agent-orders`): `defaultFor` and `wake` (Agent ID → the program's path and its arguments) | Which Agent new work goes to when none is named, and the program the person set to wake each Agent ([Orders and waking an Agent](../../core/agent/GRANTS.md#orders-and-waking-an-agent)). Changed only in Settings › Agents; a revoked Agent's entries are removed. Follows the World and its backups |
+| Agent reports | `world.sqlite`: `state.agent-reports`, one per Agent | What each Agent last said it is doing, and when ([Agent reports](../../core/agent/GRANTS.md#agent-reports)) |
+| Service presets | `world.sqlite`: `state.service-presets` | Named, saved reads of a Worldlet Service, without keys ([Service presets](../../core/applets/INTEGRATIONS.md#service-presets)) |
+| Service sync | `world.sqlite`: `state.service-sync-jobs`, `state.service-sync-pages`, `state.service-sync-snapshots` | Opt-in schedules, resumable page checkpoints and last completed bounded snapshots; latest values only, no credentials ([scheduled collection](../../core/applets/INTEGRATIONS.md#scheduled-service-collection)) |
+| GitHub drafts | `world.sqlite`: `state.github-drafts`, each with its Attention item `ghd-<id>` in `state.items` (provider `agents`) | Changes on GitHub Agents drafted, the target as it was read, and whether the person approved (with the result's link) or dismissed them ([GitHub drafts](../../core/agent/GRANTS.md#github-drafts)); the GitHub App that writes them is in the vault (`github-app`) |
+| PostHog and Notion drafts | `world.sqlite`: `state.service-drafts`, each with its Attention item `svd-<id>` in `state.items` (provider `agents`) | Changes in PostHog or Notion Agents drafted, the target as it was read, and whether the person approved (with the result's link) or dismissed them ([PostHog and Notion drafts](../../core/agent/GRANTS.md#posthog-and-notion-drafts)); no key is kept with them |
+| Service requests | `world.sqlite`: `state.service-requests`, one per Agent and Service (`<agentId>.<provider>`), each with its Attention item `service-request:<id>` in `state.items` (provider `agents`) | An Agent's refused Service read the person was asked about, when it was asked, and whether they allowed it or said not now ([When an Agent first needs a Service](../../core/agent/GRANTS.md#when-an-agent-first-needs-a-service)) |
+| Board | `world.sqlite`: `state.board` (the definition, its revision and who defined it) | The person's board of Service presets ([the board](../../core/board/README.md)) |
 | Source collection | `state.checks`, `state.attention-context` | Check settings/cursors; bounded, expiring source facts |
 | Execution | `state.runs`, `state.attention-budget` | Check outcomes, synthesis acknowledgements and budgets |
 | History | Non-`state.*` rows in `entries` | Local product events and references |
@@ -54,16 +54,16 @@ SQLite is the business database. JSON is appropriate for small configuration and
 | Website recordings | `world.sqlite` tables `web_visits` (one stay on one site) and `web_records` (page text, typing, clicks, network bodies, WebSocket and event-stream messages); derived trigram search index | What happened in the built-in browser, for Fox to find and analyse ([website recording](../../contracts/README.md#website-recording-for-fox)). Raw network records leave after 30 days or past 2 GB; text and interactions stay until deleted |
 | Chat by place | `world.sqlite`: `companion_cards` (one card per turn: question, steps, answer, tagged with its thread), `companion_views` (each place's last reply) | What Fox's chat shows place by place; earlier `conversation-recall.json` moves in once and stays as `*.before-database` |
 | Browsing history | `world.sqlite`: `browser_visits` | Pages visited inside Worldlet (bounded by Core); earlier `browser-history.json` moves in once |
-| Brought Agents | `world.sqlite`: `brought_skills` (Markdown files by Agent and folder), `brought_routines` | Another Agent's skills and routines, copied into the Harness ([details](../agent/PORTABILITY.md#bringing-the-rest-of-a-local-agent)); earlier `companion/brought/<agent>.json` moves in once |
+| Brought Agents | `world.sqlite`: `brought_skills` (Markdown files by Agent and folder), `brought_routines` | Another Agent's skills and routines, copied into the Harness ([details](../../core/agent/PORTABILITY.md#bringing-the-rest-of-a-local-agent)); earlier `companion/brought/<agent>.json` moves in once |
 | World configuration | `world.sqlite` `world_settings` (`configuration`: the library state, earlier `index.json`; `overlay`: the page's layout edits, `environment`: weather; earlier `overlay.json` and `environment.json` move in once) | Connections, onboarding, user layout and environment; Sources/Knowledge arrays are empty compatibility fields. An `index.json` found beside the database (an older backup brought it back) is the newer copy and moves in again. A library whose `world.sqlite` is gone opens read-only |
 | Sources | SQLite `sources` table plus immutable `sources/` files | Source metadata, ID, version and original-file reference |
 | Knowledge | SQLite `knowledge` table | Validated merged results, linked to source ID/version and processing version |
 | Derived cache | `cache/knowledge/`; legacy `knowledge/` remains readable | Disposable per-chunk analysis; never the authority for formal Knowledge |
 | Made games | `world.sqlite`: `made_games` (record and page), `made_game_versions`; earlier `games/<id>/` moves in once | Games the [Game Factory](../../context/games/README.md) made: the page, its title, the person's words, versions and best score |
-| Moment Applets | `world.sqlite` table `widgets`: record, page and state per made Applet | Applets Fox made for one moment ([Moment Applets](../artifacts/README.md)): title, end, pin, the person's words, the page and what was ticked, merged with the phone |
-| Artifacts | `world.sqlite` table `artifacts`: one record per artifact | Every card Fox showed ([Artifacts](../artifacts/README.md)): an Attention card's title, category and summary (its World item stays the truth), and each explanation Fox showed in conversation with its Markdown, chart and size; artifacts Agents saved to the Journal, each with its `agentId` ([Agent artifacts](../agent/GRANTS.md#agent-artifacts)) |
-| Artifact pages | `world.sqlite` table `artifact_pages`: one record per page | The page the Agent laid out for a card in the theme's style ([Theme-driven Artifacts](../artifacts/README.md#theme-driven-artifacts)): the document with its materials, the size and theme it was made for and what the person set on it; forgotten with its artifact, at most 200 |
-| Ongoing things | `world.sqlite` table `ongoing`: one record per thing | Brought conversations Fox proposed or the person made into Applets ([Ongoing things](../tasks/README.md)): the conversation's name, the person's answer and its counts; the conversation itself stays in `companion_turns` |
+| Moment Applets | `world.sqlite` table `widgets`: record, page and state per made Applet | Applets Fox made for one moment ([Moment Applets](../../core/artifacts/README.md)): title, end, pin, the person's words, the page and what was ticked, merged with the phone |
+| Artifacts | `world.sqlite` table `artifacts`: one record per artifact | Every card Fox showed ([Artifacts](../../core/artifacts/README.md)): an Attention card's title, category and summary (its World item stays the truth), and each explanation Fox showed in conversation with its Markdown, chart and size; artifacts Agents saved to the Journal, each with its `agentId` ([Agent artifacts](../../core/agent/GRANTS.md#agent-artifacts)) |
+| Artifact pages | `world.sqlite` table `artifact_pages`: one record per page | The page the Agent laid out for a card in the theme's style ([Theme-driven Artifacts](../../core/artifacts/README.md#theme-driven-artifacts)): the document with its materials, the size and theme it was made for and what the person set on it; forgotten with its artifact, at most 200 |
+| Ongoing things | `world.sqlite` table `ongoing`: one record per thing | Brought conversations Fox proposed or the person made into Applets ([Ongoing things](../../core/tasks/README.md)): the conversation's name, the person's answer and its counts; the conversation itself stays in `companion_turns` |
 | Execution journal | `world.sqlite`: history rows in `entries` and their payloads in `execution_payloads` (keyed by the id in the `execution/<id>.json` reference the event keeps); earlier `execution/` files move in once | Each Agent run, tool call and result, redacted by Core. Streamed text is saved at least once a second, so a crash loses at most the last second of a reply |
 | Email drafts | `world.sqlite`: `mail_reviews`; earlier `mail/reviews.json` moves in once | [Saved email reviews](#saved-email-reviews) |
 | Codex coding tasks | `world.sqlite`: `coding_tasks` (record and the files it made); earlier `agent/private/codex/<id>/task.json` moves in once | Code Fox delegated to Codex. The task folder's `files/` is the copy Show in Finder opens, written again from the database when missing |
@@ -84,7 +84,7 @@ Connected providers remain the authority for remote originals. A bounded source 
 
 Local deletion is separate from disconnecting an account and from resetting Fox.
 The shared `localDataDeletion` host capability gates the HUD and source controls.
-One rule, `core/items/local-deletion.ts`, decides every deletion: deleting one provider's data,
+One rule, `context/items/local-deletion.ts`, decides every deletion: deleting one provider's data,
 one saved item, or all saved World content. `localDeletionRequest` validates the request, words
 the confirmation and names the scoped buckets; `localDeletionSources` names the library sources
 of a provider (by origin or by a connection of that provider); `localDeletionRecord` decides,
@@ -309,7 +309,7 @@ Presentation follows [Peek → Open → Focus](../../ui/components/INTERACTION.m
 Worldlet owns durable source, item and event records; Fox is the conversational
 entry point. The selected Harness owns execution through the negotiated contract.
 Portable companion identity and memory checkpoints remain Worldlet-owned; live
-backend memory is distinct. See [Agent portability](../agent/PORTABILITY.md).
+backend memory is distinct. See [Agent portability](../../core/agent/PORTABILITY.md).
 
 The storage sections above own schema, history retention and profile paths. Source
 collection is model-independent; isolated analysis and Attention synthesis use the
@@ -335,8 +335,8 @@ A date validation failure or any invalid entry rolls back the whole batch. A fai
 
 ### Periodic checks
 
-[Applet runtime](../applets/RUNTIME.md) owns trigger policy, collection windows,
-claims, retries and checkpoints. [Attention Center](../attention/README.md) owns
+[Applet runtime](../../core/applets/RUNTIME.md) owns trigger policy, collection windows,
+claims, retries and checkpoints. [Attention Center](../../core/attention/README.md) owns
 synthesis and publication. Do not duplicate fixed tick/provider lists here.
 Authorization and private-processing consent remain separate. Failed reads do
 not delete old findings; expired evidence becomes uncertain, not completed.

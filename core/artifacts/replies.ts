@@ -59,7 +59,7 @@ export function backgroundBlocked(m:BackgroundMoment):''|'sample'|'automated'|'o
  return '';
 }
 
-/** An Attention item as the page holds it (`core/items/world-items.ts` pages). */
+/** An Attention item as the page holds it (`context/items/world-items.ts` pages). */
 export type ReplyItem={id:string;kind?:string;status?:string;snoozedUntil?:string|null;ready?:boolean;title?:string;
  sources?:{provider?:string;id?:string;title?:string}[];receivedAt?:unknown;occurredAt?:unknown;sourceUpdatedAt?:unknown};
 export type ReplyCandidate={id:string;thread:string;title:string};
