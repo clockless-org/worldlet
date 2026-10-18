@@ -1,6 +1,6 @@
 // What the desktop shows the paired phone, and what the phone may ask of the desktop (README.md in this folder).
 import {WIDGET_LIMITS,widgetDocument,readWidgetState,type Widget,type WidgetState} from '../artifacts/index.ts';
-import {worldLogApplet} from '../activity/index.ts';
+import {worldLogApplet} from '../../context/activity/index.ts';
 import {httpsAddress} from './phone-web.ts';
 // The phone renders exactly these shapes (ios/Worldlet/Models.swift); bump PAIR_PROTOCOL in pairing.ts when one
 // changes incompatibly.
@@ -156,7 +156,7 @@ export function phoneJournal(artifacts:any[],at:number):PhoneJournalEntry[]{
 /** What the World page knows about its Applets, for the phone's Applet world. `places` are the Applets in the World
  * (key, title, provider, lamp `state`, status `label`, `source` true for one that reads an account, `url` the website
  * the phone opens, phoneWebAddress; a place without one stays on the computer); `now` what each is
- * doing this moment ("Reading Mail…", core/activity worldLogNow); `log` the world log (core/activity WorldLogLine);
+ * doing this moment ("Reading Mail…", context/activity worldLogNow); `log` the world log (context/activity WorldLogLine);
  * `widgets` the widgets for now; `jobs` the ongoing things kept (core/tasks: id, title, line and the conversation's latest
  * lines); `thread` an Applet's own turns of Fox's conversation (native-chat threadOf). */
 export type PhoneWorld={places:any[],now?:{applet:string,text:string}[],log?:{at:number,text:string,applet?:string}[],

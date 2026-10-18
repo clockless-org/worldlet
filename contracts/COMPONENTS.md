@@ -200,7 +200,7 @@ Shared companion limits and timestamp/UUID policy live in
 | Core Applets | `core/applets/index.ts` | Catalog, runtime definitions, read plans, capabilities and device state |
 | Core Scheduling | `core/tasks/index.ts` | Claims, leases, fencing, retries, pools, deliveries and operation outcomes |
 | Core Attention | `core/attention/index.ts` | Visibility, relevance inputs, suppression, synthesis budgets |
-| Core Activity | `core/activity/index.ts`, `contracts/activity.ts` | Local observation schemas, visit correlation, sampled foreground dwell, snapshot changes and redaction; no IO |
+| Core Activity | `context/activity/index.ts`, `contracts/activity.ts` | Local observation schemas, visit correlation, sampled foreground dwell, snapshot changes and redaction; no IO |
 | Core Items | `core/items/index.ts` | Identity, validation, state transitions, evidence projections; `worldHistoryQuery` and `worldHistoryPage` own shared history filtering and bounded retrieval |
 | Core Context | `core/context/index.ts` | Source context, validation, schema and layout; Service sync snapshots, the saved Service context search (`world_context`) and selected Notion pages |
 | Core Companion / Agent | `core/companion/index.ts`, `core/agent/index.ts` | Portable memory/history, guidance, model freshness and response classification |
@@ -333,7 +333,7 @@ record concrete exceptions and required device checks in its issue/PR.
 
 ### Activity boundary and coverage
 
-`core/activity/index.ts` exposes `activityEvent`, `activityObserve` and
+`context/activity/index.ts` exposes `activityEvent`, `activityObserve` and
 `activityURL`. `ActivityRecorder` (`platform/electron/src/modules/browser/activity.ts`)
 is the only browser activity persistence adapter; the website panel (`device.ts`)
 supplies page/focus/clock facts, and website page views (`page.ts`) never open the

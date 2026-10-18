@@ -7,7 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {CONVERSATION_ATTENTION,conversationAttentionId,conversationObservation,conversationOriginal,conversationsForAttention,validConversationAttentionId} from '../core/tasks/index.ts';
-import {worldLogLines} from '../core/activity/index.ts';
+import {worldLogLines} from '../context/activity/index.ts';
 import {HERMES_OLDER,HERMES_RECENT,readOlderHermes,readOwnHermes} from '../platform/electron/src/modules/agent-runtime/agent-files.ts';
 import {createOlderHistory} from '../platform/electron/src/modules/fox/older-history.ts';
 import {broughtConversations} from '../platform/electron/src/modules/fox/migration.ts';

@@ -1,5 +1,5 @@
 import {conversationEntries,worldHistoryQuery,worldHistoryPage,worldEventAppend} from './items/index.ts';
-import {activityObserve,activityEvent} from './activity/index.ts';
+import {activityObserve,activityEvent} from '../context/activity/index.ts';
 import {homeWritePlan,curatedSourceRead,todoistWriteReview,todoistWriteResult} from './applets/index.ts';
 import {readItemHostRequest} from '../contracts/item-actions.ts';
 import {readBrowserOutcomeRequest} from '../contracts/browser-receipt.ts';

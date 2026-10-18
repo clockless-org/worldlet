@@ -1,11 +1,11 @@
 // What happened in the World since a Fox thread's resident session last spoke (ui/companion/CONVERSATION.md#since-you-last-spoke):
-// the World's own History lines (core/activity/world-log.ts: checks, records read and saved, items finished, snoozed or
+// the World's own History lines (context/activity/world-log.ts: checks, records read and saved, items finished, snoozed or
 // dismissed, Applet tasks and schedule changes, routines) after the session's last reply, deduplicated and bounded,
 // as one short note that leads the next turn's input (contracts/harness-services.ts HarnessTurnInput.world). The
 // Harness keeps it in the session's context like any line, so Fox remembers what happened beside the chat. Only lines
 // the History page already shows; the person's own page steps (`activity.*`: Applets opened, sites visited) stay out, as
 // they do of every turn's recent history (core/items recentWorldHistory). Kept ES-compatible for JavaScriptCore and Jint.
-import {WORLD_LOG_KINDS,worldLogLines} from '../activity/index.ts';
+import {WORLD_LOG_KINDS,worldLogLines} from '../../context/activity/index.ts';
 import {harnessSessionThread} from './harness-sessions.ts';
 
 /** At most `lines` lines (the newest), `chars` characters in all; `maxAge` seconds back at most. */

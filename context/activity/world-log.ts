@@ -1,4 +1,4 @@
-import {getApp,connectionFacts} from '../applets/index.ts';
+import {getApp,connectionFacts} from '../../core/applets/index.ts';
 /** The world log: a running, plain-language line per thing the world or the person did.
  * It exists so the person can see the world keeps going (checks, reads, Fox's saves)
  * next to their own steps (Applets opened, sites visited). It is not the Attention

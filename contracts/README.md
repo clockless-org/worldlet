@@ -61,7 +61,7 @@ Device acceptance remains separate from contract and loopback-model fixtures.
 ## Local World activity
 
 `activity.ts` defines observation inputs, visit state and facts, owned by the
-public `core/activity/index.ts` component. This complements Task/Run/Event:
+public `context/activity/index.ts` component. This complements Task/Run/Event:
 passive page viewing is an observation, not an invented Agent task.
 
 | Records | Capture behavior |
