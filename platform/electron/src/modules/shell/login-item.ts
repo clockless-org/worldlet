@@ -1,5 +1,5 @@
 import {app,type Settings} from 'electron';
-import {LOGIN_ITEM_ARG,loginItemOn,loginItemStatus,type LoginItemStatus} from '../../../../../core/distribution/index.ts';
+import {LOGIN_ITEM_ARG,loginItemOn,loginItemStatus,type LoginItemStatus} from '../../../../../agent/distribution/index.ts';
 import {WorldletError} from '../../files.ts';
 import type {Host} from '../../host/types.ts';
 

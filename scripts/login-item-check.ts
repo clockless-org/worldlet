@@ -3,7 +3,7 @@
 // `login` guide, and the quiet start. The packaged round trip is scripts/release-login-item-mac.mjs.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {LOGIN_ITEM_ARG,loginItemOfferDue,loginItemOn,loginItemStatus,loginItemText,openedAtLogin,releaseLaunch} from '../core/distribution/index.ts';
+import {LOGIN_ITEM_ARG,loginItemOfferDue,loginItemOn,loginItemStatus,loginItemText,openedAtLogin,releaseLaunch} from '../agent/distribution/index.ts';
 
 // Status: only packaged Mac and Windows builds register; the Mac reads SMAppService back.
 const release=(platform:string,settings:object|null)=>loginItemStatus({channel:'release',platform,settings});

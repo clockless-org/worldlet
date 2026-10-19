@@ -1,1 +1,1 @@
-export {displayReleaseVersion} from '../../core/distribution/index.ts';
+export {displayReleaseVersion} from '../../agent/distribution/index.ts';

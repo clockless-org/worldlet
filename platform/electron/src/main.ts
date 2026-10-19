@@ -22,7 +22,7 @@ import {installCapture} from './world/capture.ts';
 import {captureRequest,refuseBesideRunningCopy,runCapture,type CaptureRequest} from './world/window-capture.ts';
 import {probeRequest,refuseProbeBesideRunningCopy,runProbe,type ProbeRequest} from './world/permission-probe.ts';
 import {loginItemCheckRequest,refuseLoginItemCheckBesideRunningCopy,runLoginItemCheck,type LoginItemCheckRequest} from './world/login-item-check.ts';
-import {openedAtLogin} from '../../../core/distribution/index.ts';
+import {openedAtLogin} from '../../../agent/distribution/index.ts';
 import {onboardingUnfinished} from '../../../agent/onboarding/index.ts';
 import {updateAcceptance} from './modules/shell/update-acceptance.ts';
 import {modules} from './modules/index.ts';

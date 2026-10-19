@@ -1,4 +1,4 @@
-import {onboardingUnfinished} from '../../agent/onboarding/index.ts';
+import {onboardingUnfinished} from '../onboarding/index.ts';
 /** Open Worldlet at login (#1229): the setting's truthful status, when Fox offers it once, and whether
  * this launch came from the login item. Pure, so every host and the fixture check share one mapping. */
 export type LoginItemStatus='enabled'|'disabled'|'requires-approval'|'unsupported';

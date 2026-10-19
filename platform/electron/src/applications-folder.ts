@@ -6,7 +6,7 @@ import {execFileSync} from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import {app,dialog} from 'electron';
-import {releaseLaunch} from '../../../core/distribution/index.ts';
+import {releaseLaunch} from '../../../agent/distribution/index.ts';
 import type {Profile} from './profile.ts';
 
 const plistBuild=(bundle:string)=>{
