@@ -1,4 +1,4 @@
-/** Native crashes of the installed app (core/diagnostics/ANALYTICS.md#native-crashes): the crashed process, the
+/** Native crashes of the installed app (agent/diagnostics/ANALYTICS.md#native-crashes): the crashed process, the
  * exception and the crashed thread as module + offset frames, nothing else. Offsets into Electron's own modules are
  * symbolicated later against Electron's published symbols (`npm run crash:symbols`); a device never holds them. */
 const MAX_FRAMES=40;

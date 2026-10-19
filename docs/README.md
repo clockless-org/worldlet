@@ -11,7 +11,7 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | Know what Fox does and how far it goes on its own | [Fox: conversation and assistance](FOX-AGENT.md) |
 | Know why something shows up in the Attention Center | [Attention Center](ATTENTION-CENTER.md) |
 | Pair your phone | [iPhone](../ios/README.md) · [Android](../android/README.md) |
-| Know what is stored on your computer and what is reported | [World data and lifecycle](WORLD-STORAGE.md) · [Analytics](../core/diagnostics/ANALYTICS.md) |
+| Know what is stored on your computer and what is reported | [World data and lifecycle](WORLD-STORAGE.md) · [Analytics](../agent/diagnostics/ANALYTICS.md) |
 
 ## How it works
 
@@ -347,6 +347,7 @@ Indexed: **284 Markdown documents** and **747 supporting documentation files**.
 - [agent/agent/REMOTE-MCP.md](../agent/agent/REMOTE-MCP.md)
 - [agent/agent/WORLD-ADDRESS.md](../agent/agent/WORLD-ADDRESS.md)
 - [agent/attention/README.md](../agent/attention/README.md)
+- [agent/diagnostics/ANALYTICS.md](../agent/diagnostics/ANALYTICS.md)
 - [agent/phone/README.md](../agent/phone/README.md)
 - [agent/tasks/README.md](../agent/tasks/README.md)
 - [android/README.md](../android/README.md)
@@ -361,7 +362,6 @@ Indexed: **284 Markdown documents** and **747 supporting documentation files**.
 - [contracts/HARNESS.md](../contracts/HARNESS.md)
 - [contracts/README.md](../contracts/README.md)
 - [core/README.md](../core/README.md)
-- [core/diagnostics/ANALYTICS.md](../core/diagnostics/ANALYTICS.md)
 - [harness/README.md](../harness/README.md)
 - [harness/example/README.md](../harness/example/README.md)
 - [harness/skills/README.md](../harness/skills/README.md)
@@ -390,7 +390,7 @@ Indexed: **284 Markdown documents** and **747 supporting documentation files**.
 
 <details><summary>Documentation diagrams, previews and evidence (747)</summary>
 
-- [core/diagnostics/analytics-insights.json](../core/diagnostics/analytics-insights.json)
+- [agent/diagnostics/analytics-insights.json](../agent/diagnostics/analytics-insights.json)
 - [docs/architecture.html](architecture.html)
 - [docs/assets/readme/applet-notes.jpg](assets/readme/applet-notes.jpg)
 - [docs/assets/readme/attention.jpg](assets/readme/attention.jpg)

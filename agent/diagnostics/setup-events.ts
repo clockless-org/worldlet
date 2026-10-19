@@ -1,6 +1,6 @@
-// Setup's product events for people who bring their own Agent (core/diagnostics/ANALYTICS.md#bringing-an-agent):
+// Setup's product events for people who bring their own Agent (agent/diagnostics/ANALYTICS.md#bringing-an-agent):
 // which supported Agent, coarse counts and outcomes only. Never a name, title, path or text.
-import {LOCAL_HARNESSES} from '../../agent/agent/index.ts';
+import {LOCAL_HARNESSES} from '../agent/index.ts';
 
 /** Coarse counts, the only form an amount from setup leaves the device in. */
 export const COUNT_BUCKETS=['0','1_9','10_99','100_999','1000_plus'] as const;

@@ -145,7 +145,7 @@ Open your whole World, not only the Attention Center and Fox, in a web browser o
 
 ## Privacy
 
-There is no Worldlet account, and your records stay on your computer. Official builds report basic usage analytics (setup, connection and core-operation outcomes, never message content, connected content or browsing history), and you can turn them off in Settings › General › Usage counts; see [analytics](core/diagnostics/ANALYTICS.md). Builds you make yourself report nothing unless you configure a PostHog project.
+There is no Worldlet account, and your records stay on your computer. Official builds report basic usage analytics (setup, connection and core-operation outcomes, never message content, connected content or browsing history), and you can turn them off in Settings › General › Usage counts; see [analytics](agent/diagnostics/ANALYTICS.md). Builds you make yourself report nothing unless you configure a PostHog project.
 
 ## Build from source
 

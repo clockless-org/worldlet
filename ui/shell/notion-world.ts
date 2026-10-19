@@ -23,7 +23,7 @@ import {attentionPreviewData,attentionLaterUntil} from '../../agent/attention/in
 import {mountPhoneBridge} from '../companion/index.ts';
 import {attentionBrief} from '../../agent/attention/index.ts';
 import {artifactFollowUpSent,artifactFollowUpRequest,type ArtifactFollowUpDraft,artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,dayKey,dailyArtifactDue,dailyPlanned,dailyArtifactRequest,firstPrepRequest,readDailyRoutines,DAILY_ROUTINES_ON,DAILY_ROUTINE_NAMES,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../context/artifacts/index.ts';
-import {timingBucket} from '../../core/diagnostics/index.ts';
+import {timingBucket} from '../../agent/diagnostics/index.ts';
 import {applyRegionLayout,lastUse,readRegionLayout,parseRegionLayout,moveRegionApplet,pinRegionApplet,pinnedPlace,recordAppletUse,regionId,recentlyUsedFirst,storedRegionLayout} from '../world/index.ts';
 import {resolvePlacements,lampLabels,lampNeeds} from '../world/index.ts';
 import {WORLD_LAYOUT,THEME_SCENE,themeAreaMap} from '../world/index.ts';
@@ -1685,7 +1685,7 @@ export function mountNotionWorld(data: World, native: any) {
   // once per World (a busy background session asks again at the next poll), not with Today's prep paused, and not
   // with Mail connected.
   // `data-first-card` tells the tour it is on its way (`preparing`), then `ready` or `failed`. Its steps are product
-  // events (core/diagnostics/ANALYTICS.md#the-first-card): started, ready (with how it ended), shown and approved.
+  // events (agent/diagnostics/ANALYTICS.md#the-first-card): started, ready (with how it ended), shown and approved.
   const firstCardKey='worldlet-first-card-'+(data.workspaceId||data.workspace);
   let firstCardStarted=0,routinesKnown=!native?.dailyRoutines;
   const firstCardEvent=(event:string,dimensions:Record<string,string>={},duration='')=>window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event,dimensions,duration}}));

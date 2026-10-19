@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {chipFamily,deviceClass,localDataDimensions,memoryBucket,rowBucket,sizeBucket,stallTask} from '../core/diagnostics/index.ts';
+import {chipFamily,deviceClass,localDataDimensions,memoryBucket,rowBucket,sizeBucket,stallTask} from '../agent/diagnostics/index.ts';
 import {busyWith,onStall,watchMainStalls,type Stall} from '../platform/electron/src/host/busy.ts';
 
 // Device class: the chip family and a memory band, never the model string or the exact size.

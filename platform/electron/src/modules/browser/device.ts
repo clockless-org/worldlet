@@ -28,7 +28,7 @@ import {HOMES,SIGN_IN_HOSTS,signInPage,isGoogleMaps,isNotion,isX,parse,publicPag
 import type {Host,Row} from '../../host/types.ts';
 import {ANALYTICS,FOX,SPEECH,USER_ACTIVITY,type AnalyticsService,type FoxService,type SpeechService,type UserActivityService} from '../../host/services.ts';
 import {userIdle} from '../../../../../agent/tasks/index.ts';
-import {timingBucket} from '../../../../../core/diagnostics/index.ts';
+import {timingBucket} from '../../../../../agent/diagnostics/index.ts';
 import {GAME_REVIEW_APPLET} from '../../../../../context/games/index.ts';
 import {busyWith} from '../../host/busy.ts';
 

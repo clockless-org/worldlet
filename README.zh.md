@@ -145,7 +145,7 @@ Fox 是你用文字或语音对话的伙伴。它通过你的 Agent 干活，把
 
 ## 隐私
 
-没有 Worldlet 账号，你的记录都在你自己的电脑上。官方构建会上报基础使用统计（设置、连接和核心操作的结果，绝不包括消息内容、连接的内容或浏览记录），可以在 设置 › General › Usage counts 里关掉，详见[统计说明](core/diagnostics/ANALYTICS.md)。你自己构建的版本不上报任何东西，除非你配置了自己的 PostHog 项目。
+没有 Worldlet 账号，你的记录都在你自己的电脑上。官方构建会上报基础使用统计（设置、连接和核心操作的结果，绝不包括消息内容、连接的内容或浏览记录），可以在 设置 › General › Usage counts 里关掉，详见[统计说明](agent/diagnostics/ANALYTICS.md)。你自己构建的版本不上报任何东西，除非你配置了自己的 PostHog 项目。
 
 ## 从源码构建
 
