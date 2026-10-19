@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1946" height="990" viewBox="0 0 1946 990" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
-<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#57606A"/></marker></defs>
-<rect width="1946" height="990" rx="18" fill="#FFFFFF"/><rect x="0.5" y="0.5" width="1945" height="989" rx="18" fill="none" stroke="#D8DDE4"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="2460" height="910" viewBox="0 0 2460 910" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#57606A"/></marker></defs>
+<rect width="2460" height="910" rx="18" fill="#FFFFFF"/><rect x="0.5" y="0.5" width="2459" height="909" rx="18" fill="none" stroke="#D8DDE4"/>
 <text x="32" y="50" font-size="26" font-weight="700" fill="#1F2328">Worldlet architecture: layers and components</text>
 <text x="32" y="76" font-size="14" fill="#57606A">Rows are the four layers, columns the features. Each cell is that feature’s code directory in that layer (Platform: under platform/electron/src/modules/). Calls go downward only.</text>
 <rect x="250" y="96" width="146" height="44" rx="8" fill="#F6F8FA" stroke="#D0D7DE"/>
@@ -36,7 +36,7 @@
 <rect x="1770" y="96" width="146" height="44" rx="8" fill="#F6F8FA" stroke="#D0D7DE"/>
 <text x="1843.0" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#1F2328">Base</text>
 <text x="1843.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">shell · setup</text>
-<rect x="20" y="150" width="1906" height="150" rx="14" fill="#EEF4FF" stroke="#B6CCFE"/>
+<rect x="20" y="150" width="1906" height="170" rx="14" fill="#EEF4FF" stroke="#B6CCFE"/>
 <text x="36" y="182" font-size="20" font-weight="800" fill="#1F4BB8">1 · UI</text>
 <text x="36" y="204" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A">ui/</text>
 <text x="36" y="226" font-size="12" fill="#57606A">what a person sees and touches</text>
@@ -68,6 +68,10 @@
 <text x="1539.0" y="180" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">Settings › Connectors</text>
 <rect x="1622" y="164" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#B6CCFE"/>
 <text x="1691.0" y="179" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/web/</text>
+<rect x="1622" y="190" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#B6CCFE"/>
+<text x="1691.0" y="205" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ios/</text>
+<rect x="1622" y="216" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#B6CCFE"/>
+<text x="1691.0" y="231" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">android/</text>
 <rect x="1774" y="164" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#B6CCFE"/>
 <text x="1843.0" y="179" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/shell/</text>
 <rect x="1774" y="190" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#B6CCFE"/>
@@ -76,116 +80,135 @@
 <text x="1843.0" y="231" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/onboarding/</text>
 <rect x="1774" y="242" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#B6CCFE"/>
 <text x="1843.0" y="257" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/distribution/</text>
-<rect x="20" y="310" width="1906" height="150" rx="14" fill="#F1F8F3" stroke="#A9D8B8"/>
-<text x="36" y="342" font-size="20" font-weight="800" fill="#1A7F37">2 · Agent</text>
-<text x="36" y="364" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A">agent/</text>
-<text x="36" y="386" font-size="12" fill="#57606A">who does the work</text>
-<text x="323.0" y="340" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<text x="475.0" y="340" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<rect x="558" y="324" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
-<text x="627.0" y="339" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/companion/</text>
-<rect x="710" y="324" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
-<text x="779.0" y="339" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/attention/</text>
-<rect x="862" y="324" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
-<text x="931.0" y="339" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/tasks/</text>
-<text x="1083.0" y="340" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<rect x="1166" y="324" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
-<text x="1235.0" y="339" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/agent/</text>
-<rect x="1166" y="350" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
-<text x="1235.0" y="365" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/tools/</text>
-<text x="1387.0" y="340" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<text x="1539.0" y="340" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<rect x="1622" y="324" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
-<text x="1691.0" y="339" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/phone/</text>
-<rect x="1774" y="324" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
-<text x="1843.0" y="339" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/onboarding/</text>
-<rect x="1774" y="350" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
-<text x="1843.0" y="365" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/diagnostics/</text>
-<rect x="1774" y="376" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
-<text x="1843.0" y="391" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/distribution/</text>
-<rect x="250" y="426" width="1666" height="26" rx="7" fill="#1F2328"/>
-<text x="262" y="443" font-size="12.5" fill="#FFFFFF"><tspan font-weight="800">Gate</tspan>  the only door into Context: World tools · per-Agent Grants · drafts wait for approval · every call audited</text>
-<rect x="20" y="470" width="1906" height="160" rx="14" fill="#FFF8EC" stroke="#F0CF8E"/>
-<text x="36" y="502" font-size="20" font-weight="800" fill="#9A6700">3 · Context</text>
-<text x="36" y="524" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A">context/</text>
-<text x="36" y="546" font-size="12" fill="#57606A">everything the World knows</text>
-<rect x="254" y="484" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
-<text x="323.0" y="499" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/activity/</text>
-<rect x="406" y="484" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
-<text x="475.0" y="499" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/applets/</text>
-<rect x="406" y="510" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
-<text x="475.0" y="525" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/board/</text>
-<rect x="406" y="536" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
-<text x="475.0" y="551" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/browser/</text>
-<rect x="406" y="562" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
-<text x="475.0" y="577" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/games/</text>
-<text x="627.0" y="500" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<text x="779.0" y="500" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<text x="931.0" y="500" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<rect x="1014" y="484" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
-<text x="1083.0" y="499" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/artifacts/</text>
-<text x="1235.0" y="500" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<rect x="1318" y="484" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
-<text x="1387.0" y="499" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/context/</text>
-<rect x="1318" y="510" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
-<text x="1387.0" y="525" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/items/</text>
-<rect x="1470" y="484" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
-<text x="1539.0" y="499" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/accounts/</text>
-<text x="1691.0" y="500" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<text x="1843.0" y="500" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<rect x="250" y="596" width="1666" height="26" rx="7" fill="#FFFFFF" stroke="#F0CF8E"/>
-<text x="262" y="613" font-size="12.5" fill="#1F2328"><tspan font-weight="800" fill="#9A6700">Four kinds</tspan>  Synced (from Services) · Recorded (what happened) · Made (Artifacts, Applets) · Known (memory, summaries) — one search across all</text>
-<rect x="20" y="640" width="1906" height="170" rx="14" fill="#F6F8FA" stroke="#D0D7DE"/>
-<text x="36" y="672" font-size="20" font-weight="800" fill="#57606A">4 · Platform</text>
-<text x="36" y="694" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#57606A">platform/electron/src/modules/</text>
-<text x="36" y="716" font-size="12" fill="#57606A">the host: Electron or Node</text>
-<rect x="254" y="654" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="323.0" y="669" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">world.ts</text>
-<rect x="254" y="680" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="323.0" y="695" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">world-audio/</text>
-<rect x="406" y="654" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="475.0" y="669" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">applet-art/</text>
-<rect x="406" y="680" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="475.0" y="695" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">applet-tools/</text>
-<rect x="406" y="706" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="475.0" y="721" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">browser/</text>
-<rect x="406" y="732" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="475.0" y="747" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">calendar/</text>
-<rect x="406" y="758" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="475.0" y="773" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">games/</text>
-<rect x="558" y="654" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="627.0" y="669" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">fox/</text>
-<rect x="558" y="680" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="627.0" y="695" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">voice/</text>
-<rect x="710" y="654" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="779.0" y="669" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">attention/</text>
-<rect x="862" y="654" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="931.0" y="669" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">tasks/</text>
-<rect x="1014" y="654" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="1083.0" y="669" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">artifacts/</text>
-<rect x="1166" y="654" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="1235.0" y="669" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent-runtime/</text>
-<rect x="1318" y="654" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="1387.0" y="669" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">../store/</text>
-<rect x="1470" y="654" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="1539.0" y="669" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">sources/</text>
-<rect x="1622" y="654" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="1691.0" y="669" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">phone/</text>
-<rect x="1774" y="654" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="1843.0" y="669" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">shell/</text>
-<rect x="1774" y="680" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="1843.0" y="695" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">media/</text>
-<text x="32" y="846" font-size="13" font-weight="700" fill="#57606A">OUTSIDE THE WORLD</text>
-<rect x="32.0" y="858" width="616.6666666666666" height="88" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="46.0" y="882" font-size="15" font-weight="700" fill="#1F2328">The person</text>
-<text x="46.0" y="902" font-size="12" fill="#57606A">desktop window · browser at the World’s address · phone → UI</text>
-<rect x="664.6666666666666" y="858" width="616.6666666666666" height="88" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="678.6666666666666" y="882" font-size="15" font-weight="700" fill="#1F2328">The person’s Agents</text>
-<text x="678.6666666666666" y="902" font-size="12" fill="#57606A">Claude Code · Codex · Hermes · scripts (local MCP); claude.ai · ChatGPT</text>
-<text x="678.6666666666666" y="919" font-size="12" fill="#57606A">· Cursor (remote MCP) → Gate</text>
-<rect x="1297.3333333333333" y="858" width="616.6666666666666" height="88" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="1311.3333333333333" y="882" font-size="15" font-weight="700" fill="#1F2328">Services</text>
-<text x="1311.3333333333333" y="902" font-size="12" fill="#57606A">GitHub · PostHog · Google · Notion · Cloudflare · Search Console · HTTP</text>
-<text x="1311.3333333333333" y="919" font-size="12" fill="#57606A">JSON ↔ Connectors</text>
-<text x="32" y="976" font-size="12" fill="#8C959F">contracts/ holds the interfaces between layers. Models come from the person’s own Agents; Worldlet provides none.</text>
+<rect x="20" y="330" width="1906" height="170" rx="14" fill="#F1F8F3" stroke="#A9D8B8"/>
+<text x="36" y="362" font-size="20" font-weight="800" fill="#1A7F37">2 · Agent</text>
+<text x="36" y="384" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A">agent/</text>
+<text x="36" y="406" font-size="12" fill="#57606A">who does the work</text>
+<text x="323.0" y="360" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
+<text x="475.0" y="360" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
+<rect x="558" y="344" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="627.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/companion/</text>
+<rect x="710" y="344" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="779.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/attention/</text>
+<rect x="862" y="344" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="931.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/tasks/</text>
+<text x="1083.0" y="360" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
+<rect x="1166" y="344" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="1235.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/agent/</text>
+<rect x="1166" y="370" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="1235.0" y="385" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/tools/</text>
+<text x="1387.0" y="360" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
+<text x="1539.0" y="360" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
+<rect x="1622" y="344" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="1691.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/phone/</text>
+<rect x="1774" y="344" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="1843.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/onboarding/</text>
+<rect x="1774" y="370" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="1843.0" y="385" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/diagnostics/</text>
+<rect x="1774" y="396" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="1843.0" y="411" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/distribution/</text>
+<rect x="250" y="466" width="1666" height="26" rx="7" fill="#1F2328"/>
+<text x="262" y="483" font-size="12.5" fill="#FFFFFF"><tspan font-weight="800">Gate</tspan>  the only door into Context: World tools · per-Agent Grants · drafts wait for approval · every call audited</text>
+<rect x="20" y="510" width="1906" height="170" rx="14" fill="#FFF8EC" stroke="#F0CF8E"/>
+<text x="36" y="542" font-size="20" font-weight="800" fill="#9A6700">3 · Context</text>
+<text x="36" y="564" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A">context/</text>
+<text x="36" y="586" font-size="12" fill="#57606A">everything the World knows</text>
+<rect x="254" y="524" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
+<text x="323.0" y="539" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/activity/</text>
+<rect x="406" y="524" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
+<text x="475.0" y="539" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/applets/</text>
+<rect x="406" y="550" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
+<text x="475.0" y="565" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/board/</text>
+<rect x="406" y="576" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
+<text x="475.0" y="591" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/browser/</text>
+<rect x="406" y="602" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
+<text x="475.0" y="617" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/games/</text>
+<text x="627.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
+<text x="779.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
+<text x="931.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
+<rect x="1014" y="524" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
+<text x="1083.0" y="539" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/artifacts/</text>
+<text x="1235.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
+<rect x="1318" y="524" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
+<text x="1387.0" y="539" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/context/</text>
+<rect x="1318" y="550" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
+<text x="1387.0" y="565" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/items/</text>
+<rect x="1470" y="524" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
+<text x="1539.0" y="539" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/accounts/</text>
+<text x="1691.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
+<text x="1843.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
+<rect x="250" y="646" width="1666" height="26" rx="7" fill="#FFFFFF" stroke="#F0CF8E"/>
+<text x="262" y="663" font-size="12.5" fill="#1F2328"><tspan font-weight="800" fill="#9A6700">Four kinds</tspan>  Synced (from Services) · Recorded (what happened) · Made (Artifacts, Applets) · Known (memory, summaries) — one search across all</text>
+<rect x="20" y="690" width="1906" height="170" rx="14" fill="#F6F8FA" stroke="#D0D7DE"/>
+<text x="36" y="722" font-size="20" font-weight="800" fill="#57606A">4 · Platform</text>
+<text x="36" y="744" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#57606A">platform/electron/src/modules/</text>
+<text x="36" y="766" font-size="12" fill="#57606A">the host: Electron or Node</text>
+<rect x="254" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="323.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">world.ts</text>
+<rect x="254" y="730" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="323.0" y="745" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">world-audio/</text>
+<rect x="406" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="475.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">applet-art/</text>
+<rect x="406" y="730" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="475.0" y="745" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">applet-tools/</text>
+<rect x="406" y="756" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="475.0" y="771" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">browser/</text>
+<rect x="406" y="782" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="475.0" y="797" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">calendar/</text>
+<rect x="406" y="808" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="475.0" y="823" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">games/</text>
+<rect x="558" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="627.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">fox/</text>
+<rect x="558" y="730" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="627.0" y="745" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">voice/</text>
+<rect x="710" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="779.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">attention/</text>
+<rect x="862" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="931.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">tasks/</text>
+<rect x="1014" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="1083.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">artifacts/</text>
+<rect x="1166" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="1235.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent-runtime/</text>
+<rect x="1318" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="1387.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">../store/</text>
+<rect x="1470" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="1539.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">sources/</text>
+<rect x="1622" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="1691.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">phone/</text>
+<rect x="1774" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="1843.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">shell/</text>
+<rect x="1774" y="730" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="1843.0" y="745" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">media/</text>
+<text x="1996" y="136" font-size="13" font-weight="700" fill="#57606A">OUTSIDE THE WORLD, AND HOW EACH CONNECTS</text>
+<rect x="1996" y="150" width="440" height="170" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="2012" y="178" font-size="16" font-weight="700" fill="#1F2328">People and their windows</text>
+<text x="2012" y="204" font-size="12.5" fill="#1F2328">• Desktop window: Electron, on this computer</text>
+<text x="2012" y="224" font-size="12.5" fill="#1F2328">• Browser anywhere: ui/web/ at the World’s link</text>
+<text x="2012" y="244" font-size="12.5" fill="#1F2328">• iPhone ios/ · Android android/ (native)</text>
+<text x="2012" y="290" font-size="11.5" fill="#1F4BB8" font-style="italic">paired by QR · end-to-end encrypted relay, WebRTC when direct</text>
+<line x1="1992" y1="235.0" x2="1930" y2="235.0" stroke="#1F4BB8" stroke-width="2.5" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<rect x="1996" y="330" width="440" height="170" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="2012" y="358" font-size="16" font-weight="700" fill="#1F2328">External Agents</text>
+<text x="2012" y="384" font-size="12.5" fill="#1F2328">• Fox’s Agent (Hermes, Claude Code, OpenClaw…): adapter</text>
+<text x="2012" y="404" font-size="12.5" fill="#1F2328">• Local: Claude Code · Codex · Hermes · scripts</text>
+<text x="2012" y="424" font-size="12.5" fill="#1F2328">• Cloud: claude.ai · ChatGPT · Cursor · tokens</text>
+<text x="2012" y="470" font-size="11.5" fill="#1A7F37" font-style="italic">local MCP (stdio → loopback) · remote MCP via mcp.worldlet.ai,</text>
+<text x="2012" y="486" font-size="11.5" fill="#1A7F37" font-style="italic">OAuth + 4-digit code → Gate</text>
+<line x1="1992" y1="479" x2="1930" y2="479" stroke="#1A7F37" stroke-width="2.5" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<rect x="1996" y="510" width="440" height="170" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="2012" y="538" font-size="16" font-weight="700" fill="#1F2328">Services</text>
+<text x="2012" y="564" font-size="12.5" fill="#1F2328">• Google · GitHub · Notion · Linear</text>
+<text x="2012" y="584" font-size="12.5" fill="#1F2328">• PostHog · Cloudflare · Search Console</text>
+<text x="2012" y="604" font-size="12.5" fill="#1F2328">• HTTP JSON · this computer’s own sources</text>
+<text x="2012" y="650" font-size="11.5" fill="#9A6700" font-style="italic">sign-in (OAuth PKCE, device code, key) · API/MCP reads ·</text>
+<text x="2012" y="666" font-size="11.5" fill="#9A6700" font-style="italic">approved writes → Connectors</text>
+<line x1="1992" y1="595.0" x2="1930" y2="595.0" stroke="#9A6700" stroke-width="2.5" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<rect x="1996" y="690" width="440" height="170" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="2012" y="718" font-size="16" font-weight="700" fill="#1F2328">worldlet.ai Worker</text>
+<text x="2012" y="744" font-size="12.5" fill="#1F2328">• Relay for remote MCP and for web and phone pairing</text>
+<text x="2012" y="764" font-size="12.5" fill="#1F2328">• Forwards only, stores nothing of a World</text>
+<text x="2012" y="784" font-size="12.5" fill="#1F2328">• Updates and downloads</text>
+<text x="2012" y="830" font-size="11.5" fill="#57606A" font-style="italic">one outbound WebSocket from this computer</text>
+<line x1="1992" y1="775.0" x2="1930" y2="775.0" stroke="#57606A" stroke-width="2.5" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<text x="32" y="896" font-size="12" fill="#8C959F">contracts/ holds the interfaces between layers. Models come from the person’s own Agents; Worldlet provides none.</text>
 </svg>
