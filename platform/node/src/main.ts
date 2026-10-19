@@ -25,7 +25,7 @@ import {AGENT,PHONE,VAULT,WORLD_ROOM_PAGE,WORLD_WEB,type AgentService,type Phone
 import type {Host,PageBridge} from '../../electron/src/host/types.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
 import {isWorldToolsRegistrar} from '../../../core/agent/index.ts';
-import {onboardingUnfinished} from '../../../core/onboarding/index.ts';
+import {onboardingUnfinished} from '../../../agent/onboarding/index.ts';
 import {ALREADY_RUNNING,controlSocketPath,serveControl,type ControlReply,type ControlRequest} from './control.ts';
 import {mcpHome,openMcpHome,registerAgent,registeredAgents} from './mcp-home.ts';
 import {installWorld} from '../../electron/src/modules/world.ts';

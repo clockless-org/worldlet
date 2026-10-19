@@ -1,6 +1,6 @@
 import {createCompanionAI} from '../../ui/companion/companion-ai.ts';
 import {attentionRequest} from '../../core/agent/index.ts';
-import {firstValueRequest} from '../../core/onboarding/index.ts';
+import {firstValueRequest} from '../../agent/onboarding/index.ts';
 import {validateConversationHistory} from '../../core/companion/conversation-history.ts';
 
 const w=window as any,key='synthetic-action-history';

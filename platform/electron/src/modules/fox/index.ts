@@ -31,7 +31,7 @@ import {diagnosticError} from '../../../../../core/diagnostics/index.ts';
 import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,hermesChannelTrust,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,reduceAgentResponse,routineScheduleResult,standingCallDecision,worldSinceNote,type MigrationSource} from '../../../../../core/agent/index.ts';
 import {worldLogKeeps} from '../../../../../context/activity/index.ts';
 import {worldActionOf,worldActions} from '../../../../../core/tools/index.ts';
-import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
+import {onboardingUnfinished} from '../../../../../agent/onboarding/index.ts';
 import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../context/artifacts/index.ts';
 import {phoneApprovalPush,phoneFoxPush,phoneLive,worldLinkReply} from '../../../../../core/phone/index.ts';
 import {placeKey,placeKind,proactiveAsked,proactiveDue,proactiveCard,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../../core/companion/index.ts';

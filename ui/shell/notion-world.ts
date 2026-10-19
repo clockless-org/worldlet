@@ -7,7 +7,7 @@ import {getApp,inAppletCatalog,recommendForArea,appletHost,curatedConnection,CUR
 import {observeWorldActivity,recordWorldActivity} from '../../platform/bridge/activity.ts';
 import {curatedOriginal,renderCuratedTable} from '../applets/index.ts';
 import {recordWorldCommand} from '../../platform/bridge/host.ts';
-import {firstValueRequest,firstValueLinks} from '../../core/onboarding/index.ts';
+import {firstValueRequest,firstValueLinks} from '../../agent/onboarding/index.ts';
 import {carriesConversation,worldSpeechTerms} from '../../core/companion/index.ts';
 import {helpNarration,narrateHelp} from '../companion/index.ts';
 import {createWorldUI} from './public-interface.ts';

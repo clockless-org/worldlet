@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {emptyRegionLayout,moveRegionApplet,parseRegionLayout,pinnedPlace,pinRegionApplet,recentlyUsedFirst,readRegionLayout,recordAppletUse} from '../ui/world/region-layout.ts';
-import {updateOnboarding} from '../core/onboarding/onboarding.ts';
+import {updateOnboarding} from '../agent/onboarding/onboarding.ts';
 import {WORLD_APPS} from '../context/applets/catalog.ts';
 import {recommendForArea,appletHost} from '../context/applets/area-recommend.ts';
 import {inAppletCatalog} from '../context/applets/applet-support.ts';

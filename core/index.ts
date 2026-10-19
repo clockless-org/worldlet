@@ -33,7 +33,7 @@ import {processedAttentionContent,attentionOwnerAllowed} from './attention/index
 import {sourceReadAction} from '../context/applets/index.ts';
 import {recordAttentionProgress,discardedAttentionRemovals,matchingAttentionID,suppressedAttention,observeAttention,projectAttention,planAttention,startAttentionBudget,finishAttentionBudget,attentionDependencies,attentionCurrent,validateAttentionRegistrations,weatherObservationText} from './attention/index.ts';
 import {browserHistoryDestination,recordBrowserVisit,searchBrowserHistory} from '../context/browser/index.ts';
-import {updateOnboarding,worldMenuState} from './onboarding/index.ts';
+import {updateOnboarding,worldMenuState} from '../agent/onboarding/index.ts';
 import {receiveAppletActivity,describeAppletActivity,finishAppletActivity,appletActivitySnapshot} from '../context/applets/index.ts';
 import {readPresentationRequest,sourceSnapshotPlan,sourceSnapshotRows,sourceAnalysisRequest,mergeSourceAnalysis,validateSourceAnalysis,validateContextAnalysis,validateContextLayout,contextChunks} from '../context/context/index.ts';
 import {validateAgentCapabilities,validateAgentEvent} from '../contracts/agent.ts';

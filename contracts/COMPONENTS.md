@@ -17,7 +17,7 @@ runtime stack remains **UI → Core → Platform → Harness → Models/Services
 | Layer | Components / directories | Public interface | Must not own |
 | --- | --- | --- | --- |
 | UI | `ui/world`, `ui/applets`, `ui/companion`, `ui/attention`, `ui/shell` | Versioned semantic World actions in `contracts/ui.ts`; component functions; host transport | OS branches, provider protocols, independent scheduling policy |
-| Core | `core/agent`, `context/applets`, `core/attention`, `core/tasks`, `core/companion`, `context/context`, `context/items`, `context/browser`, `core/tools`, `core/diagnostics`, `core/onboarding` | Each component's `index.ts`; serialized native entry in `core/index.ts` | DOM, filesystem, clocks, sockets, Electron/Node types, platform conditions |
+| Core | `core/agent`, `context/applets`, `core/attention`, `core/tasks`, `core/companion`, `context/context`, `context/items`, `context/browser`, `core/tools`, `core/diagnostics`, `agent/onboarding` | Each component's `index.ts`; serialized native entry in `core/index.ts` | DOM, filesystem, clocks, sockets, Electron/Node types, platform conditions |
 | Platform | `platform/bridge`, `platform/electron`, `platform/browser`, `platform/local-tools` | `contracts/platform.ts`; shared Core requests/results; negotiated Harness contract | A second copy of onboarding, source processing, retry/priority or model-selection rules |
 | Harness | `harness/hermes` or an external adapter | `contracts/harness.ts`, capability discovery, tasks/events/cancellation | World UI implementation or ownership of portable user records |
 | Models/Services | `models` and provider APIs | Harness/provider protocols | UI navigation and OS permissions |
@@ -152,7 +152,7 @@ Business behavior is shared by default. A new condition, state transition, retry
 | Source completion and retry | `core/tasks/source-checks.ts` | Clock, authorized read, persist result |
 | Queue priority, admission and preemption | `core/tasks/agent-work.ts` | Reservations, process handles, cancellation and draining |
 | Execution deadlines | `core/tasks/agent-deadline.ts` | Timers and process termination |
-| Onboarding transitions | `core/onboarding/onboarding.ts` | Account authorization and persistence |
+| Onboarding transitions | `agent/onboarding/onboarding.ts` | Account authorization and persistence |
 | Model status and product guidance | `core/companion/model-status.ts`, `conversation-guidance.ts` | Provider facts, capability facts and IO |
 | Trace/report projection and privacy | `core/diagnostics/` | OS/build facts, bounded file IO, export picker |
 | Conversation/interface state | `ui/companion/`, `core/agent/` | Harness transport and OS lifecycle |
@@ -205,7 +205,7 @@ Shared companion limits and timestamp/UUID policy live in
 | Core Context | `context/context/index.ts` | Source context, validation, schema and layout; Service sync snapshots, the saved Service context search (`world_context`) and selected Notion pages |
 | Core Companion / Agent | `core/companion/index.ts`, `core/agent/index.ts` | Portable memory/history, guidance, model freshness and response classification |
 | Core Browser / Tools | `context/browser/index.ts`, `core/tools/index.ts` | Browser action policy and declared tools; no browser IO |
-| Core Onboarding / Diagnostics | `core/onboarding/index.ts`, `core/diagnostics/index.ts` | Setup transitions and allowlisted diagnostic projection |
+| Core Onboarding / Diagnostics | `agent/onboarding/index.ts`, `core/diagnostics/index.ts` | Setup transitions and allowlisted diagnostic projection |
 | Platform UI bridge | `platform/bridge/host.ts`, `contracts/platform.ts` | One trusted Host transport; capability discovery |
 | Platform Store / ledger | Host-facing Store domain operations; ledger transactions stay internal to domain adapters | Authorization, atomic claims, output writes, delivery acknowledgement and persistence |
 | Platform browser | World browser gateway; `platform/browser/README.md` | Selected-page IO, consent, confirmations, cancellation and receipts |

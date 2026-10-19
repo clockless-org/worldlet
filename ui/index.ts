@@ -23,7 +23,7 @@ import {SAMPLE_DATASET_ID} from './world/index.ts';
 import {makeSampleWorld} from './world/index.ts';
 import {createNativeCompanion} from './companion/index.ts';
 import {mountWorldOnboarding} from './onboarding/index.ts';
-import {onboardingUnfinished} from '../core/onboarding/index.ts';
+import {onboardingUnfinished} from '../agent/onboarding/index.ts';
 import {mountNotionWorld} from './shell/index.ts';
 import {setMailAvatarLookup} from './applets/index.ts';
 import {setAttentionImageLookup} from './attention/index.ts';

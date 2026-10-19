@@ -112,7 +112,7 @@ assert.deepEqual([appletStatus({provider:'gmail'},snoozedLink(wakes-1)).phase,ap
 assert.deepEqual([appletStatus({provider:'gmail'},snoozedLink(wakes)).label,appletIndicator({provider:'gmail'},snoozedLink(wakes)).label],['Needs attention · 1 saved item needs attention','Needs attention']);
 console.log('PASS Applet concurrent reads, turn isolation, cancellation and persisted attention/error projection');
 
-import {updateOnboarding} from '../core/onboarding/onboarding.ts';
+import {updateOnboarding} from '../agent/onboarding/onboarding.ts';
 import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
 const initialSetup={version:1,presets:['home'],completed:false};
 const placed=updateOnboarding(initialSetup,{operation:'region',region:'work',sourceIds:['s','s'],connectionIds:['c']});
