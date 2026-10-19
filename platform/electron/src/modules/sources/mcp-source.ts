@@ -4,7 +4,7 @@ import {WorldletError,ensureDirectory,writeAtomic,digest} from '../../files.ts';
 import {curatedSourceRead} from '../../../../../context/applets/index.ts';
 import {GITHUB_GATE,LINEAR_GATE,NOTION_GATE,PAYPAL_GATE,SUPABASE_GATE,TODOIST_GATE,MCP_POLICY,enabledMcpTools,mcpConfiguration,notion,readGithub,readLinear,readPaypal,readSupabase,todoist,todoistTimeoutSeconds,
  mcpServiceRecords,type McpGate,type McpSession,type NotionReviewStore} from '../../../../../context/accounts/index.ts';
-import {collectNotionPage} from '../../../../../context/context/index.ts';
+import {collectNotionPage} from '../../../../../context/sources/index.ts';
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
 import type {McpAccounts,McpConnection} from './mcp-account.ts';

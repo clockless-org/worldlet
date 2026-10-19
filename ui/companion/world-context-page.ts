@@ -1,10 +1,10 @@
 /** Settings › Context (issue #674): everything this World keeps, in one place. One row each for conversations, memory,
  * what the connected services brought in, the Journal, what Agents saved there and the board, with how much each holds
- * (context/context/world-context.ts: past conversations are counted, the rest says how much room it takes); then the
+ * (context/sources/world-context.ts: past conversations are counted, the rest says how much room it takes); then the
  * memory itself (the page passes it in), Save a copy (the World backup, host `dataBackup` export) and, where the host
  * deletes local data, Delete for each service and Delete everything saved, which the host asks about once more. A
  * Journal delete asks here, in the page, first. Nothing technical: no paths, files or record names. */
-import {readWorldContextSizes,worldContextRows,worldContextServices,type WorldContextKind,type WorldContextSizes} from '../../context/context/index.ts';
+import {readWorldContextSizes,worldContextRows,worldContextServices,type WorldContextKind,type WorldContextSizes} from '../../context/sources/index.ts';
 import {agentButton as button,agentEl as el,type AgentCall} from './agent-change.ts';
 
 type Options={

@@ -35,11 +35,11 @@ import {recordAttentionProgress,discardedAttentionRemovals,matchingAttentionID,s
 import {browserHistoryDestination,recordBrowserVisit,searchBrowserHistory} from '../context/browser/index.ts';
 import {updateOnboarding,worldMenuState} from './onboarding/index.ts';
 import {receiveAppletActivity,describeAppletActivity,finishAppletActivity,appletActivitySnapshot} from '../context/applets/index.ts';
-import {readPresentationRequest,sourceSnapshotPlan,sourceSnapshotRows,sourceAnalysisRequest,mergeSourceAnalysis,validateSourceAnalysis,validateContextAnalysis,validateContextLayout,contextChunks} from '../context/context/index.ts';
+import {readPresentationRequest,sourceSnapshotPlan,sourceSnapshotRows,sourceAnalysisRequest,mergeSourceAnalysis,validateSourceAnalysis,validateContextAnalysis,validateContextLayout,contextChunks} from '../context/sources/index.ts';
 import {validateAgentCapabilities,validateAgentEvent} from '../contracts/agent.ts';
 import {journalEntry,executionEvent,taskExecutionEvents,worldActionEvent,worldEvent,recentWorldHistory} from '../context/items/index.ts';
 import {defaultSourceChecks,dueSourceCheck,startSourceCheck,reconcileSourceCheck,finishSourceCheck,configureSourceCheck} from './tasks/index.ts';
-import {contextLayout} from '../context/context/index.ts';
+import {contextLayout} from '../context/sources/index.ts';
 import {validateConversationHistory} from './companion/index.ts';
 import {visibleWorldItems,queryWorldItems,calendarItemTimes} from '../context/items/index.ts';
 import {needsTaskContinuityReview,matchingWorldItemOwnerSource,resolveWorldItemID} from '../context/items/index.ts';

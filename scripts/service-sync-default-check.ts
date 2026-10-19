@@ -8,7 +8,7 @@ import path from 'node:path';
 import {withTempDir} from './test-temp.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {createServiceSync} from '../platform/electron/src/modules/sources/service-sync.ts';
-import {SERVICE_SYNC_DEFAULTS,SERVICE_SYNC_DEFAULT_MINUTES,serviceSyncDefaultId,serviceSyncDefaultStep,serviceSyncLine} from '../context/context/index.ts';
+import {SERVICE_SYNC_DEFAULTS,SERVICE_SYNC_DEFAULT_MINUTES,serviceSyncDefaultId,serviceSyncDefaultStep,serviceSyncLine} from '../context/sources/index.ts';
 import type {ServiceRead} from '../contracts/services.ts';
 
 // The tile's words.
