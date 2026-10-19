@@ -7,9 +7,11 @@ const root=process.cwd();
 const config=ts.readConfigFile('tsconfig.json',ts.sys.readFile);
 const options=ts.parseJsonConfigFileContent(config.config,ts.sys,root).options;
 // Agent and Context (#681): context/ imports only itself and contracts/, agent/ imports context/ and contracts/.
-const layers=['platform/bridge','ui','agent','context','contracts','models','harness','platform','website','worker'];
+const layers=['api','platform/bridge','ui','agent','context','contracts','models','harness','platform','website','worker'];
 const PURE=['agent','context','contracts'];
 const allowed:Record<string,string[]>={
+ // api/ is what the operations repository uses (api/README.md): it reaches into any layer, and nothing here imports it.
+ api:['api','ui','agent','context','contracts','platform','platform/bridge','resources'],
  ui:['ui','agent','context','contracts','platform/bridge','resources'],
  agent:['agent','context','contracts'], context:['context','contracts'],
  contracts:['contracts'],
@@ -35,7 +37,7 @@ export function checkEdge(file:string,target:string){
  if(exceptions.has(edge)){used.add(edge);return;}
  assert(allowed[layer(file)]?.includes(layer(target)),`Forbidden layer dependency: ${edge}`);
  const component=/^(ui|agent|context)\/([^/]+)\/(.+)$/.exec(target);
- if(component&&!file.startsWith(`${component[1]}/${component[2]}/`))
+ if(component&&!file.startsWith('api/')&&!file.startsWith(`${component[1]}/${component[2]}/`))
   assert.equal(component[3],'index.ts',`${file} bypasses public component entry: ${target}`);
 }
 export function checkSource(file:string,source:string){
@@ -53,7 +55,7 @@ export function checkSource(file:string,source:string){
   assert(!specifier.startsWith('.')&&!specifier.startsWith('/')&&!layers.some(x=>specifier.startsWith(x+'/')),`${file}: unresolved local dependency ${specifier}`);
   assert(!PURE.includes(layer(file)),`${file}: pure layer cannot import external module ${specifier}`);
  }
- assert.equal(ast.referencedFiles.length,0,`${file}: use explicit module imports instead of reference paths`);
+ if(file!=='api/types.d.ts')assert.equal(ast.referencedFiles.length,0,`${file}: use explicit module imports instead of reference paths`);
  function visit(node:ts.Node){
   if(PURE.includes(layer(file))&&ts.isIdentifier(node)&&['window','document','navigator','process','require'].includes(node.text))assert.fail(`${file}: pure layer cannot use host global ${node.text}`);
   if((ts.isImportDeclaration(node)||ts.isExportDeclaration(node))&&node.moduleSpecifier&&ts.isStringLiteral(node.moduleSpecifier))dependency(node.moduleSpecifier.text);
@@ -77,6 +79,6 @@ function scan(dir:string){
 }
 export function checkRepository(){
  // The open-source export (scripts/oss-export.mjs) leaves out the hosted services, so a missing root is skipped.
- for(const dir of ['ui','agent','context','contracts','platform/bridge','platform/electron','platform/node','website','models','worker','harness'])if(fs.existsSync(dir))scan(dir);
+ for(const dir of ['api','ui','agent','context','contracts','platform/bridge','platform/electron','platform/node','website','models','worker','harness'])if(fs.existsSync(dir))scan(dir);
  for(const edge of exceptions.keys())assert(used.has(edge)||!fs.existsSync(edge.split(' -> ')[0]),`Remove stale architecture exception: ${edge}`);
 }

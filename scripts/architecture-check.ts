@@ -24,5 +24,9 @@ assert.throws(()=>checkSource('agent/agents/example.ts','process.env.TOKEN'),/ho
 assert.throws(()=>checkSource('ui/hud/example.ts','window.chrome.webview.postMessage({})'),/Host bridge/);
 assert.throws(()=>checkSource('harness/example/tools.ts',"export {practiceTools} from '../../agent/tools/practice.ts'"),/Forbidden/);
 for(const branch of ["state.platform!=='windows'","platform != \"macos\"","platform==='windows'"])assert.throws(()=>checkSource('ui/hud/example.ts',branch),/capabilities/,branch);
+// api/ reaches into any component for the operations repository; nothing here imports it.
+checkEdge('api/build.ts','ui/world/world-layout.ts');
+assert.throws(()=>checkEdge('ui/hud/example.ts','api/build.ts'),/Forbidden/);
+assert.throws(()=>checkEdge('agent/tasks/example.ts','api/checks.ts'),/Forbidden/);
 checkRepository();
 console.log('PASS resolved layer dependencies, public component APIs, exact exceptions and bypass rejection');
