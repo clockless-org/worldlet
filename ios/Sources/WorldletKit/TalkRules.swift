@@ -1,7 +1,7 @@
 import Foundation
 
 /// Talk with Fox (owner parity plan item 7): a spoken conversation in the Fox dock. The rules match the computer's
-/// (agent/companion/fox-talk.ts) and Android's (kit TalkRules.kt): an utterance ends when the recognizer's words stop
+/// (agent/fox/fox-talk.ts) and Android's (kit TalkRules.kt): an utterance ends when the recognizer's words stop
 /// changing for `pause`, a short "be quiet" (安静点, 别说话, shut up…) keeps Talk going without reading replies aloud,
 /// the voice reads the reply without Markdown marks or link targets, and words of the person's own heard while Fox
 /// speaks interrupt it (`interruption`).
@@ -10,7 +10,7 @@ public enum TalkRules {
     /// since the recognizer's partial results arrive late).
     public static let pause: TimeInterval = 1.2
 
-    /// A short request to stop talking; a longer message is a conversation, not a mute (agent/companion/fox-proactive.ts).
+    /// A short request to stop talking; a longer message is a conversation, not a mute (agent/fox/fox-proactive.ts).
     public static func quietRequest(_ text: String) -> Bool {
         let value = text.lowercased()
             .replacingOccurrences(of: "[\\s,，.。!！~～]+", with: " ", options: .regularExpression)

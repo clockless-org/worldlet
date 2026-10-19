@@ -2,7 +2,7 @@ import {randomUUID} from 'node:crypto';
 import {AGENT,type AgentService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {WorldletError} from '../../files.ts';
-import {harnessReadOnlyNote,isConnectionId,readConnectionAdd} from '../../../../../agent/agents/index.ts';
+import {harnessReadOnlyNote,isConnectionId,readConnectionAdd} from '../../../../../agent/gate/index.ts';
 import type {HarnessConnectionChange} from '../../../../../contracts/harness-services.ts';
 
 // Settings › Agents › Your Agent › Connections, the Agent's part (owner approval 2026-10-08: manage the Agent's MCP connections through its

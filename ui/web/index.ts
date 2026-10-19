@@ -1,6 +1,6 @@
-import {canRenderWorld,createWebClient,createRoomWebClient,isRoomLink,worldLinkFromWeb,WebPairingEnded,type WorldDevice,type WebClient,type WebMessage,type WebView,type PhoneAttentionItem,type PhoneTask,type RoomSocketFactory} from '../../agent/windows/index.ts';
+import {canRenderWorld,createWebClient,createRoomWebClient,isRoomLink,worldLinkFromWeb,WebPairingEnded,type WorldDevice,type WebClient,type WebMessage,type WebView,type PhoneAttentionItem,type PhoneTask,type RoomSocketFactory} from '../../agent/base/index.ts';
 
-// Worldlet in a web browser (agent/windows/README.md#web): the page the relay serves at /open/ pairs with the computer
+// Worldlet in a web browser (agent/base/README.md#web): the page the relay serves at /open/ pairs with the computer
 // like the phone apps, from the link the computer's Mobile page makes, and shows what the phones show: what needs
 // the person (the Attention Center's Now and Later), what the Agent is doing (the Task panel), today's Journal and
 // Fox's conversation. The computer does all the work; this page only shows what it sends and passes back what the person
@@ -14,7 +14,7 @@ const TABS:[Tab,string][]=[['now','Needs you'],['working','Working'],['today','T
 const GROUPS:Record<string,string>={event:'Coming up',needsAction:'Worth doing',unseen:'Worth knowing'};
 export type WebOpenOptions={fetch:typeof fetch,storage:Pick<Storage,'getItem'|'setItem'|'removeItem'>,location:{hash:string,origin:string},
  replaceURL:(url:string)=>void,version:string,userAgent:string,wait?:number,retry?:number,WebSocket?:RoomSocketFactory,
- /** What this device can draw, and how to go to the full World (agent/windows/world-room.ts): a link that carries the
+ /** What this device can draw, and how to go to the full World (agent/base/world-room.ts): a link that carries the
   * World's pairing opens it on a device that can draw it, and keeps the Center here on one that cannot. */
  device?:WorldDevice,openWorld?:(url:string)=>void,
  /** `/open/?simple`: the person wants the Center here, not the full World; kept for this browser. */
@@ -47,7 +47,7 @@ export function mountWebOpen(root:HTMLElement,options:WebOpenOptions){
  let client:WebClient|null=null,view:WebView={},tab:Tab='now',notice='',ended=false,stopped=false,draft='';
  const pending=new Set<string>();
  try{if(saved){
-  // A link with `m=room` meets the computer in the pairing room (agent/windows room.ts), where nothing is stored; an older
+  // A link with `m=room` meets the computer in the pairing room (agent/base room.ts), where nothing is stored; an older
   // one reads the relay's slots.
   const base={link:saved,relay:options.location.origin,name:browserName(options.userAgent),version:options.version};
   client=isRoomLink(saved)?createRoomWebClient({...base,...(options.WebSocket?{WebSocket:options.WebSocket}:{})}):createWebClient({...base,fetch:options.fetch});

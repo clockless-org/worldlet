@@ -1,9 +1,9 @@
-// Talk with Fox on the computer (agent/companion/fox-talk.ts): listen, send each utterance as a turn, read the reply
+// Talk with Fox on the computer (agent/fox/fox-talk.ts): listen, send each utterance as a turn, read the reply
 // aloud, listen again. While Fox speaks the microphone stays open (`listenWhileSpeaking`, a capture that keeps only its
 // last moment; the system voice plays outside Chromium's echo canceller) and the person's voice clearly over Fox's echo
 // interrupts it (`talkBargeIn`): the voice stops and the same capture becomes the next utterance. Pressing the microphone, Fox or Space interrupts too.
 // native-chat.ts owns the capture and the turn; this keeps the rhythm, so it runs with fakes in scripts/fox-talk-check.ts.
-import {talkBargeIn,talkEndpoint,talkQuietRequest,talkSpeakingLimit} from '../../agent/companion/index.ts';
+import {talkBargeIn,talkEndpoint,talkQuietRequest,talkSpeakingLimit} from '../../agent/fox/index.ts';
 
 export type TalkPhase='off'|'listening'|'thinking'|'speaking';
 

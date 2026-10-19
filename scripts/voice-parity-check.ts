@@ -1,18 +1,18 @@
 // Voice beyond OpenClaw and Hermes Agent (blueprint rows "Voice input" and "Spoken conversation voice"): dictation goes
 // into any text field of the World, not only Fox's bar (ui/companion/field-dictation.ts); local Whisper hears the
-// World's own names as its initial prompt (agent/companion/speech-vocabulary.ts, platform/local-tools/whisper_*.py);
+// World's own names as its initial prompt (agent/fox/speech-vocabulary.ts, platform/local-tools/whisper_*.py);
 // Fox's spoken replies use the Agent's own text-to-speech through the Harness `voice` service where the Harness has one
-// (agent/agents/harness-voice.ts, agent-runtime/harness-voice.ts), and a system voice otherwise.
+// (agent/gate/harness-voice.ts, agent-runtime/harness-voice.ts), and a system voice otherwise.
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {SPEECH_VOCABULARY,speechPrompt,speechTerm,speechTerms,worldSpeechTerms} from '../agent/companion/index.ts';
+import {SPEECH_VOCABULARY,speechPrompt,speechTerm,speechTerms,worldSpeechTerms} from '../agent/fox/index.ts';
 import {makeSampleWorld} from '../ui/world/sample-data.ts';
 import {dictationTarget,dictationWords} from '../ui/companion/field-dictation.ts';
 import {validateHarnessServices} from '../contracts/harness-services.ts';
-import {HARNESS_SERVICES,HARNESS_VOICE,harnessService,harnessVoiceArgs,harnessVoiceResult,harnessVoiceText} from '../agent/agents/index.ts';
+import {HARNESS_SERVICES,HARNESS_VOICE,harnessService,harnessVoiceArgs,harnessVoiceResult,harnessVoiceText} from '../agent/gate/index.ts';
 import {harnessVoice} from '../platform/electron/src/modules/agent-runtime/harness-voice.ts';
 import type {SendCommand} from '../platform/electron/src/modules/agent-runtime/harness-send.ts';
 

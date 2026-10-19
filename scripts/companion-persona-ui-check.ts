@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,worldUrl,openCompanionPanel,waitForWorld} from './browser-test.ts';
-import {companionPersona} from '../agent/companion/index.ts';
+import {companionPersona} from '../agent/fox/index.ts';
 
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1380,height:900},reducedMotion:'reduce'});

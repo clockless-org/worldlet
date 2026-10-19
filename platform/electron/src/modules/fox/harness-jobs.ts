@@ -1,6 +1,6 @@
 import {AGENT,ANALYTICS,PHONE,type AgentService,type AnalyticsService,type PhoneService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
-import {harnessService,scheduleElsewhere,scheduleStep,type ScheduleState} from '../../../../../agent/agents/index.ts';
+import {harnessService,scheduleElsewhere,scheduleStep,type ScheduleState} from '../../../../../agent/gate/index.ts';
 import type {HarnessJobRun} from '../../../../../contracts/harness-services.ts';
 
 // The person's scheduled jobs keep running on their own Agent's scheduler (owner goal 2026-10-07: what used to go to
@@ -8,7 +8,7 @@ import type {HarnessJobRun} from '../../../../../contracts/harness-services.ts';
 // service (core `harnessService`), each new run becomes an Attention item and a phone notification, a stopped
 // scheduler is noted once, and Worldlet's own routines leave that Agent's brought copies alone (`elsewhere`). Nothing
 // here knows which Harness it is: the adapter hands over the service, Core decides what each run becomes
-// (agent/agents/harness-schedule.ts). Where it got to is kept per Harness in world.sqlite (`harness-schedule:<id>`).
+// (agent/gate/harness-schedule.ts). Where it got to is kept per Harness in world.sqlite (`harness-schedule:<id>`).
 
 /** Pages of runs read per poll; a long backlog continues at the next one. */
 const PAGES=10;

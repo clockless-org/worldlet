@@ -1,12 +1,12 @@
 import os from 'node:os';
 import path from 'node:path';
-import {SCRIPT_AGENT_LIMITS,SCRIPT_AGENT_REASONS,SCRIPT_HARNESS,agentRevoked,scriptAgentId,scriptAgentName} from '../../../../../agent/agents/index.ts';
+import {SCRIPT_AGENT_LIMITS,SCRIPT_AGENT_REASONS,SCRIPT_HARNESS,agentRevoked,scriptAgentId,scriptAgentName} from '../../../../../agent/gate/index.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 import {ensureDirectory} from '../../files.ts';
 import type {AgentAccess} from '../../host/services.ts';
 import {standingEndpointFile,type StandingAgent,type StandingWorldTools} from './world-tool-bridge.ts';
 
-// Agents for scripts (agent/agents/GRANTS.md#agents-for-scripts). The person names one in Settings › Agents (or
+// Agents for scripts (agent/gate/GRANTS.md#agents-for-scripts). The person names one in Settings › Agents (or
 // `worldlet register --script <name>` on the Node host); it becomes an Agent like any other, with harness `script`, and
 // each run the host writes its endpoint and new token into its own owner-only file in the fixed MCP home, where a
 // program on this computer reads them. Revoking it removes that file. The Electron and Node hosts share this.

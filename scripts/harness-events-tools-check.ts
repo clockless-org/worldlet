@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
-import {harnessService,harnessToolsLine,harnessToolsSummary,hermesConfigValues,hermesExternalEvent,hermesHarnessTools,localHarnessTurn,openClawExternalEvent,openClawHarnessTools} from '../agent/agents/index.ts';
+import {harnessService,harnessToolsLine,harnessToolsSummary,hermesConfigValues,hermesExternalEvent,hermesHarnessTools,localHarnessTurn,openClawExternalEvent,openClawHarnessTools} from '../agent/gate/index.ts';
 import {channelMessageAsks,channelMessageEvent,externalEventAttentionId,externalEventMatters,externalEventObservation,externalEventPush,externalEventsForAttention,validExternalEventAttentionId} from '../agent/tasks/index.ts';
 import {harnessEvents,harnessTools,readHarnessEvents} from '../platform/electron/src/modules/agent-runtime/harness-services.ts';
 import {withTempDir} from './test-temp.ts';

@@ -4,14 +4,14 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
-import {afterScheduleCursor,harnessService,hermesScheduleJob,hermesScheduleRun,openClawScheduleJob,openClawScheduleRun,scheduleCursor,scheduleElsewhere,scheduleRunsAfter,scheduleStep,SCHEDULE_PUSH_MAX,dailyScheduleResult,dailyScheduleFailure,routineScheduleResult,journalTarget,WORLDLET_SCHEDULE} from '../agent/agents/index.ts';
+import {afterScheduleCursor,harnessService,hermesScheduleJob,hermesScheduleRun,openClawScheduleJob,openClawScheduleRun,scheduleCursor,scheduleElsewhere,scheduleRunsAfter,scheduleStep,SCHEDULE_PUSH_MAX,dailyScheduleResult,dailyScheduleFailure,routineScheduleResult,journalTarget,WORLDLET_SCHEDULE} from '../agent/gate/index.ts';
 import {hermesSchedule,openClawSchedule} from '../platform/electron/src/modules/agent-runtime/harness-schedule.ts';
 import {createHarnessJobs} from '../platform/electron/src/modules/fox/harness-jobs.ts';
 import {AGENT,PHONE} from '../platform/electron/src/host/services.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 
 // The person's scheduled jobs run on their own Agent's scheduler and each run comes back to the World
-// (agent/agents/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent): Core's rules for OpenClaw's and Hermes Agent's
+// (agent/gate/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent): Core's rules for OpenClaw's and Hermes Agent's
 // records and for what a run becomes, the host's read-only `files` readers against fixture folders (OpenClaw's
 // task_runs, older cron_run_logs and JSONL run logs, its Gateway lock; Hermes Agent's run documents and ticker
 // heartbeat), and the Harness-neutral consumer writing Attention items and phone notifications into a World.

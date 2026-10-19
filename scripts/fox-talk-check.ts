@@ -1,10 +1,10 @@
-// Talk with Fox (owner parity plan item 7): when an utterance ends (agent/companion/fox-talk.ts), and the rhythm on the
+// Talk with Fox (owner parity plan item 7): when an utterance ends (agent/fox/fox-talk.ts), and the rhythm on the
 // computer (ui/companion/fox-talk.ts): listen, send, read the reply, listen again; a press or the person's voice over
 // Fox's echo interrupts it (barge-in), "be quiet" keeps Talk without the voice.
 // Fakes only: no microphone, voice or model. The phones' pause, quiet and barge-in rules are in WorldletKit's
 // TalkRulesTests and the Android kit's TalkRulesTest.
 import assert from 'node:assert/strict';
-import {TALK,talkBargeIn,talkEndpoint,talkQuietRequest,talkSpeakingLimit,talkSpokenText} from '../agent/companion/index.ts';
+import {TALK,talkBargeIn,talkEndpoint,talkQuietRequest,talkSpeakingLimit,talkSpokenText} from '../agent/fox/index.ts';
 import {createFoxTalk} from '../ui/companion/fox-talk.ts';
 
 // Endpointing from the capture's levels, one every 60 ms as the host sends them.
@@ -30,7 +30,7 @@ assert.equal(barge([...Array(20).fill(0).map((_,i)=>echo[i%echo.length]),...Arra
 assert.equal(barge(Array(Math.floor(TALK.bargeSettleMs/60)).fill(0.6)),0,'the reply’s first moment only learns the echo');
 {const e=talkEndpoint(0);e.reset(0,TALK.bargeMs);let last='';for(let t=60;t<=TALK.pauseMs+60;t+=60)last=e.feed(0.01,t);assert.equal(last,'ended','a barge-in’s speech already counts toward the utterance');}
 
-// The quiet rule is Fox's own (agent/companion/fox-proactive.ts).
+// The quiet rule is Fox's own (agent/fox/fox-proactive.ts).
 for(const text of ['安静点','be quiet','闭嘴','Fox 别说话了'])assert.ok(talkQuietRequest(text),text);
 for(const text of ['what is quiet hours','帮我安静地整理一下邮件'])assert.ok(!talkQuietRequest(text),text);
 assert.equal(talkSpokenText('**Done**: see [the note](worldlet://x) <worldlet-action>x</worldlet-action>'),'Done: see the note');

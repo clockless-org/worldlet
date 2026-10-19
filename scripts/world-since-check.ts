@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import fs from 'node:fs';
-import {WORLD_SINCE_LIMITS,harnessTurnText,readWorldSince,worldSinceCutoff,worldSinceNote} from '../agent/agents/index.ts';
-import {readRemoteToHost,remoteTurnBody,remoteTurnRequest} from '../agent/windows/index.ts';
+import {WORLD_SINCE_LIMITS,harnessTurnText,readWorldSince,worldSinceCutoff,worldSinceNote} from '../agent/gate/index.ts';
+import {readRemoteToHost,remoteTurnBody,remoteTurnRequest} from '../agent/base/index.ts';
 import type {HarnessSessionKey,HarnessTurnInput} from '../contracts/harness-services.ts';
 import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
 import {withTempDir} from './test-temp.ts';

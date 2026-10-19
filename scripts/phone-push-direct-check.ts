@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import {PUSH_BOX_PLACE,boxPlace,openBox,pairKeys,phoneDesktop,readPairLink,readPhoneMessage,sealBox} from '../agent/windows/index.ts';
+import {PUSH_BOX_PLACE,boxPlace,openBox,pairKeys,phoneDesktop,readPairLink,readPhoneMessage,sealBox} from '../agent/base/index.ts';
 import {createLocalRelay} from '../platform/electron/src/modules/phone/local-relay.ts';
 import {createPhoneRelay} from '../platform/electron/src/modules/phone/relay.ts';
 
-// The phone's notification token kept on the computer (agent/windows/README.md#push): the phone hands it over with a sealed
+// The phone's notification token kept on the computer (agent/base/README.md#push): the phone hands it over with a sealed
 // `push` message, the computer keeps it in its vault and never delivers it, and a notification goes to the relay's
 // stateless `/api/push` with the token and the box. A relay without `/api/push` (404) gets the old `/notify`, and the
 // pairing stays. The relay here is the in-memory one (local-relay.ts) with `/api/push` added when `direct` is on.

@@ -11,4 +11,4 @@ export type {AnatomyRuntimeSources} from '../ui/companion/animation/fox-anatomy-
 export type {ThemeSpriteRig} from '../ui/companion/animation/theme-sprite-rig.ts';
 export {APP_DEFINITIONS,WORLD_APPS} from '../context/applets/catalog.ts';
 export {MOMENT_ART} from '../context/applets/moment.ts';
-export {calendarParts,nativeReleaseVersion} from '../agent/distribution/index.ts';
+export {calendarParts,nativeReleaseVersion} from '../agent/base/index.ts';

@@ -2,13 +2,13 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
-import {HERMES_INSTALLERS,hermesChatGptModel,hermesInstallerResult,hermesInstallerStages,hermesSignInPrompt} from '../../../../../agent/agents/index.ts';
+import {HERMES_INSTALLERS,hermesChatGptModel,hermesInstallerResult,hermesInstallerStages,hermesSignInPrompt} from '../../../../../agent/gate/index.ts';
 import {WorldletError,writeJSON} from '../../files.ts';
 import {hermesCommandPath,isOwnHermes,standardHermesHome} from './hermes-files.ts';
 import {runHarnessCommand} from './harness-approvals.ts';
 import {harnessEnvironment,localHarnessStarts,locateLocalHarnesses,type HarnessEnvironment,type LocalHarnessInstall} from './local-harness.ts';
 
-/** Stock Hermes Agent for a person with no Agent (agent/agents/hermes-setup.ts): the official installer, run stage by
+/** Stock Hermes Agent for a person with no Agent (agent/gate/hermes-setup.ts): the official installer, run stage by
  * stage as Hermes' own desktop installer runs it, to Hermes' default location; nothing when a Hermes Agent is here. */
 export interface HermesInstallProgress {step:number;steps:number;title:string}
 // A step is stopped once its output has been quiet this long, or after the whole limit however busy it is: a slow

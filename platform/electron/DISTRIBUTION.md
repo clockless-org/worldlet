@@ -42,7 +42,7 @@ Updating replaces the app bundle only; `~/Library/Application Support/Worldlet/`
 
 ### Update channels
 
-Owner request 2026-10-04: **Settings › General** chooses which builds an installed copy follows, on Mac and Windows. The installed version (`2026.MMDD.BUILD`) and its channel always show under the Settings list; the phone apps show their version in their own Settings. The channels are the release stages ([`update-channel.ts`](../../agent/distribution/update-channel.ts)):
+Owner request 2026-10-04: **Settings › General** chooses which builds an installed copy follows, on Mac and Windows. The installed version (`2026.MMDD.BUILD`) and its channel always show under the Settings list; the phone apps show their version in their own Settings. The channels are the release stages ([`update-channel.ts`](../../agent/base/update-channel.ts)):
 
 | Channel | Stage | Builds | Feed |
 | --- | --- | --- | --- |
@@ -247,7 +247,7 @@ It needs Accessibility and Screen Recording for the node that runs it, plus Auto
 
 ### Open at Login
 
-Issue #1229. The setting is the app menu's **Open at Login** checkbox (the Worldlet menu on Mac, File on Windows) and Fox's `login` guide. Both use the `loginItem` host action (`platform/electron/src/modules/shell/login-item.ts`), which is backed by `app.setLoginItemSettings`/`getLoginItemSettings`. The status mapping is shared in `agent/distribution/login-item.ts`:
+Issue #1229. The setting is the app menu's **Open at Login** checkbox (the Worldlet menu on Mac, File on Windows) and Fox's `login` guide. Both use the `loginItem` host action (`platform/electron/src/modules/shell/login-item.ts`), which is backed by `app.setLoginItemSettings`/`getLoginItemSettings`. The status mapping is shared in `agent/base/login-item.ts`:
 
 - **enabled:** the system will open Worldlet at login.
 - **requires-approval:** registered, but the person still has to allow it. On macOS 13+ SMAppService reports this until Worldlet is allowed in System Settings → General → Login Items. On Windows it means the Run entry was turned off in Task Manager or Settings → Apps → Startup.
@@ -262,7 +262,7 @@ The NSIS uninstaller does not remove the Run entry. A leftover entry points at a
 
 ### Default browser
 
-The setting is **Default browser** in Settings → General, off until a person turns it on. It uses the `defaultBrowser` host action (`platform/electron/src/modules/shell/default-browser.ts`); the support rule, the routing of an incoming link and the setting's words are shared in `agent/distribution/default-browser.ts`. Only the installed Mac and Windows apps offer it; a Dev build, Linux and a Microsoft Store package report `unsupported` and never touch the system's link handlers.
+The setting is **Default browser** in Settings → General, off until a person turns it on. It uses the `defaultBrowser` host action (`platform/electron/src/modules/shell/default-browser.ts`); the support rule, the routing of an incoming link and the setting's words are shared in `agent/base/default-browser.ts`. Only the installed Mac and Windows apps offer it; a Dev build, Linux and a Microsoft Store package report `unsupported` and never touch the system's link handlers.
 
 - **Mac:** the packaged app declares `http` and `https` URL types (`scripts/package-electron.ts`), which changes nothing by itself. Turning the setting on calls `app.setAsDefaultProtocolClient`, and macOS asks the person to confirm. Turning it off sets the browser recorded when it was turned on back as the handler (macOS asks again), or lets Electron pick another handler when none was recorded.
 - **Windows:** Windows lets only the person choose a default browser. Turning the setting on writes a per-user browser registration (`HKCU\Software\Clients\StartMenuInternet\Worldlet`, a `WorldletURL` ProgId and a `RegisteredApplications` entry) and opens Settings → Default apps at Worldlet. Each launch rewrites it so the registered path follows updates. Turning the setting off removes the registration and opens Default apps.

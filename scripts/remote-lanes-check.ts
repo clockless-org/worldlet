@@ -1,9 +1,9 @@
 // An Agent on another computer runs Fox's background work too (owner decision 2026-10-09: the Harness runs the
-// conversation and the background work alike, wherever it is; agent/windows/README.md#another-computers-agent): a turn on
+// conversation and the background work alike, wherever it is; agent/base/README.md#another-computers-agent): a turn on
 // the background lane carries its flags across, the host runs it on its own background lane beside the person's turn
 // (up to two at once), and a host that does not say it runs lanes is sent none.
 import assert from 'node:assert/strict';
-import {readRemoteHostInfo,readRemoteToHost,remoteHostInfo,remoteTurnBody,remoteTurnRequest} from '../agent/windows/index.ts';
+import {readRemoteHostInfo,readRemoteToHost,remoteHostInfo,remoteTurnBody,remoteTurnRequest} from '../agent/base/index.ts';
 import {createRemoteAgentHost} from '../platform/electron/src/modules/phone/remote-host.ts';
 
 type Row=Record<string,unknown>;

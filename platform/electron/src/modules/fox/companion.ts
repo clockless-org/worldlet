@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {core} from '../../core.ts';
-import {MIGRATION_SOURCES,MIGRATION_SOURCE_TITLES,isMigrationSource,worldSinceCutoff,type MigrationSource} from '../../../../../agent/agents/index.ts';
+import {MIGRATION_SOURCES,MIGRATION_SOURCE_TITLES,isMigrationSource,worldSinceCutoff,type MigrationSource} from '../../../../../agent/gate/index.ts';
 import {characterPrefix,digest,isLink,isoSeconds,uuid,writeAtomic,WorldletError} from '../../files.ts';
 import {WorldLedger} from '../../store/ledger.ts';
 import {swiftJSON,stableJSON} from '../../store/swift-json.ts';
@@ -406,7 +406,7 @@ export function createCompanion(host:Host){
  function closeLedgers(){for(const db of ledgers.values())db.close();ledgers.clear();}
 
  /** This place's earlier turns and where the previous turn was said (spatial context switching). */
- /** When the resident session of `thread` last replied (epoch seconds), or null (agent/agents/world-since.ts). */
+ /** When the resident session of `thread` last replied (epoch seconds), or null (agent/gate/world-since.ts). */
  function lastReply(scope:Scope,thread:string):number|null {return worldSinceCutoff(conversationLedger(scope).recentTurnPlaces(400),thread);}
  function place(scope:Scope,thread:string){
   if(!thread)return null;

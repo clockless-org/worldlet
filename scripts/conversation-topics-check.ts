@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {conversationTopics,topicTitle,TOPIC_PAUSE_MS} from '../agent/companion/index.ts';
+import {conversationTopics,topicTitle,TOPIC_PAUSE_MS} from '../agent/fox/index.ts';
 // Earlier turns in one place group into topics (owner Order 2026-10-08): turns about one thing are one
 // stack, a turn about something else starts the next, a long pause starts a new one, and short follow-ups
 // stay with the topic they answer. Fictional turns; no model.

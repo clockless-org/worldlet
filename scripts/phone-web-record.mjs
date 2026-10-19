@@ -1,5 +1,5 @@
 // The phones' copy of the built-in browser's page observer (platform/bridge/web-record.js), for websites they open in
-// their own browser (owner request 2026-10-07; agent/windows/README.md). The observer is the computer's own; only how it
+// their own browser (owner request 2026-10-07; agent/base/README.md). The observer is the computer's own; only how it
 // reports differs: on the iPhone to the `worldletRecord` message handler in its own script world, on Android to the
 // `WorldletAndroid` bridge. `node scripts/phone-web-record.mjs` writes both copies, `--check` fails when one is stale.
 import fs from 'node:fs';

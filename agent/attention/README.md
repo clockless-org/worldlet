@@ -110,7 +110,7 @@ Every visible Attention item uses one model-authored brief based on verified sou
 
 `context` remains a persistence compatibility alias of `reason`, not a separately generated field. `attentionReason` remains the internal task/review assessment, distinct from display Reason.
 
-Limits count Unicode code points after trimming surrounding whitespace; whitespace trimming is the only normalization, and over-long copy is never shortened. `ATTENTION_CONTENT_LIMITS` in `attention-content.ts` owns the numbers. The `upsert_world_items` schema in `agent/tools/services.json` must carry the same `maxLength` values, so the model sees the real limit and the background batch rejects an over-long field before the host write, inside its single repair. `scripts/attention-content-check.ts` fails when they drift. JSON Schema cannot count words, so the Center batch (`harness/hermes/source_batch.py`) pre-checks the `reason` word limit with Core's definition (`attentionReasonWords`: whitespace runs split the trimmed reason) and repairs it in the same call; `scripts/source-batch-check.py` fails when its constant or word count drifts from Core. The source-candidate (S) schema keeps its longer staging limits and states that `reason` is always required. The host validates and stamps `attentionContentVersion: 1` on model submissions; there is no direct Calendar exception. Authored sample fixtures remain available independently.
+Limits count Unicode code points after trimming surrounding whitespace; whitespace trimming is the only normalization, and over-long copy is never shortened. `ATTENTION_CONTENT_LIMITS` in `attention-content.ts` owns the numbers. The `upsert_world_items` schema in `agent/gate/services.json` must carry the same `maxLength` values, so the model sees the real limit and the background batch rejects an over-long field before the host write, inside its single repair. `scripts/attention-content-check.ts` fails when they drift. JSON Schema cannot count words, so the Center batch (`harness/hermes/source_batch.py`) pre-checks the `reason` word limit with Core's definition (`attentionReasonWords`: whitespace runs split the trimmed reason) and repairs it in the same call; `scripts/source-batch-check.py` fails when its constant or word count drifts from Core. The source-candidate (S) schema keeps its longer staging limits and states that `reason` is always required. The host validates and stamps `attentionContentVersion: 1` on model submissions; there is no direct Calendar exception. Authored sample fixtures remain available independently.
 
 Legacy unprocessed items no longer signal in the Center. The synthesis cursor requeues cached facts once under the new content version, respecting consent, daily budgets and cooldown. Originals, IDs and user settlement/snooze are retained; source/dependency matching reuses the existing item when rewritten. An unavailable model does not fall back to showing raw copy. The UI projects the complete processed summary without extracting a first sentence or parsing addresses out of it.
 
@@ -254,7 +254,7 @@ Extraction may write an explicit `event: {topic, subject}` label. Shared Core (`
 
 One contract for everything an Applet wants to put in front of the user. An **attention item** is one saved finding from one Applet, with evidence, that earns a place in the **Attention Center**, the left panel. Every Applet may publish them. The Attention Center is the single reminder surface: nothing in the world asks for attention on its own, and nothing floats above an Applet or a roof to say a second time what the panel already says.
 
-The name is deliberate. These are not operating-system notifications: nothing is pushed outside Worldlet (the one push is to the person's own paired Worldlet phone, and only for a new Coming Up or Worth Doing item, [phone push](../windows/README.md#push)), and an attention item persists until it is read, done or dismissed. It also matches what the code already calls them, from `needsAttention` and `attentionReason` to `attention_policy.py`.
+The name is deliberate. These are not operating-system notifications: nothing is pushed outside Worldlet (the one push is to the person's own paired Worldlet phone, and only for a new Coming Up or Worth Doing item, [phone push](../base/README.md#push)), and an attention item persists until it is read, done or dismissed. It also matches what the code already calls them, from `needsAttention` and `attentionReason` to `attention_policy.py`.
 
 ### Why it exists
 
@@ -286,7 +286,7 @@ An Applet with nothing worth saying publishes nothing. An empty Attention Center
 
 ### Publishing
 
-Hermes calls `upsert_world_items` with one or more items. The provider is the Applet's own key. The `upsert_world_items` and `read_world_source` schemas in `agent/tools/services.json` accept only the Applets with a bounded read path (Gmail, Google Calendar, Notion, Apple Notes, Apple Reminders); `scripts/build-hermes.ts` copies them into `hermes/services.json` for the Hermes World service. The gateway's `read_world_source` targets come from the Applet definitions' non-observation `attention` registrations, and `scripts/world-gateway-check.ts` keeps them equal to that enum.
+Hermes calls `upsert_world_items` with one or more items. The provider is the Applet's own key. The `upsert_world_items` and `read_world_source` schemas in `agent/gate/services.json` accept only the Applets with a bounded read path (Gmail, Google Calendar, Notion, Apple Notes, Apple Reminders); `scripts/build-hermes.ts` copies them into `hermes/services.json` for the Hermes World service. The gateway's `read_world_source` targets come from the Applet definitions' non-observation `attention` registrations, and `scripts/world-gateway-check.ts` keeps them equal to that enum.
 
 | Field | Rule |
 | --- | --- |
@@ -345,7 +345,7 @@ The other Applets can publish, but nothing reads them yet. Each needs one of:
 | Official API, not adapted | Google Sheets, Strava, Oura, Plaid | Planned |
 | Website only | X, TikTok, Discord, Airbnb, Google Maps | No bounded read path exists |
 
-Adding a route means: a bounded reader that returns records with stable IDs, canonical links and quotable text; an `attention` registration in its Applet definition plus a place in the provider enums in `agent/tools/services.json`; and a decision about whether it joins the scheduled set or is only read when the user asks.
+Adding a route means: a bounded reader that returns records with stable IDs, canonical links and quotable text; an `attention` registration in its Applet definition plus a place in the provider enums in `agent/gate/services.json`; and a decision about whether it joins the scheduled set or is only read when the user asks.
 
 ### Opening an original
 

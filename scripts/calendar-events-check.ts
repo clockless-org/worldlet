@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {LOCAL_CALENDAR_LIMITS,calendarAlerts,calendarEventId,calendarOccurrences,mergeCalendarEvent,orderCalendarEvents,readCalendarEvent,upcomingCalendarEvents,validCalendarEventId} from '../context/applets/index.ts';
-import {runCalendarTool,worldActions} from '../agent/tools/index.ts';
+import {runCalendarTool,worldActions} from '../agent/gate/index.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 // The person's own calendar events (ui/applets/google-calendar/applet.md#local-events): IDs, reading a stored or
 // requested event, saving one again, the World's limit, that world.sqlite keeps them across a reopen, repeats, alerts,

@@ -10,7 +10,7 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 
-/** The pairing room (agent/windows/README.md#room) over OkHttp's WebSocket, for the kit's PhoneSession. */
+/** The pairing room (agent/base/README.md#room) over OkHttp's WebSocket, for the kit's PhoneSession. */
 object RoomClient : RoomConnector {
     private val client = OkHttpClient.Builder().pingInterval(30, TimeUnit.SECONDS).build()
 

@@ -1,5 +1,5 @@
 import {readCompanionProfile,type CompanionKnowledge,type CompanionProfile} from '../../contracts/companion.ts';
-import {companionPersona} from '../../agent/companion/index.ts';
+import {companionPersona} from '../../agent/fox/index.ts';
 import {node,uiIcon} from '../components/index.ts';
 import {isDesktopCompanion,requireWorldSurface} from './world-surface.ts';
 import {eventTrigger,reportProductEvent} from '../shell/index.ts';

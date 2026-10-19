@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import type {HarnessSkill,HarnessSkillChange,HarnessSkillDraft,HarnessSkills} from '../../../../../contracts/harness-services.ts';
-import {commandLine,commandReason,harnessService,hermesDisabledAfter,hermesDisabledSkills,hermesHubSkills,hermesSkillCommand,openClawSkillCommand,openClawSkillEnabled,openClawSkillKey,skillDraftProblem,skillFrontmatter,skillMarkdown} from '../../../../../agent/agents/index.ts';
+import {commandLine,commandReason,harnessService,hermesDisabledAfter,hermesDisabledSkills,hermesHubSkills,hermesSkillCommand,openClawSkillCommand,openClawSkillEnabled,openClawSkillKey,skillDraftProblem,skillFrontmatter,skillMarkdown} from '../../../../../agent/gate/index.ts';
 import {claudeCodeHome,codexHome,directories,inside,json,piHome,readFile} from './agent-files.ts';
 import {runSendCommand,type SendCommand} from './harness-send.ts';
 import {discoverHermes} from './hermes-files.ts';
@@ -10,13 +10,13 @@ import {currentEnvironment,harnessEnvironment,locateLocalHarnesses,type HarnessE
 import {openClawAgents,openClawSkillRoots,readOpenClawConfig} from './openclaw-files.ts';
 
 // The `skills` Harness service (contracts/harness-services.ts HarnessSkills) for the local Harnesses that declare it
-// (agent/agents/harness-services.ts), as each keeps its skills (agent/agents/PORTABILITY.md#the-agents-skills-in-the-world).
+// (agent/gate/harness-services.ts), as each keeps its skills (agent/gate/PORTABILITY.md#the-agents-skills-in-the-world).
 // Listing only reads its folder. Saving adds one new skill the person confirmed, the Agent's own way: OpenClaw's
 // `openclaw skills install <folder> --as <name> --agent <id>` (docs/cli/skills.md, OpenClaw 2026.9.8), Hermes Agent's
 // `skills/<name>/SKILL.md` where its own `skill_manage` tool creates one (tools/skill_manager_tool.py `_create_skill`),
 // since `hermes skills install` takes only a hub identifier or a URL. Saving never changes or removes a skill already there.
 // Settings › Agents turns one off or on, or removes it, only with the Agent's own command after the person
-// confirmed it (agent/agents/harness-controls.ts says where each was checked): Hermes Agent's `hermes config set
+// confirmed it (agent/gate/harness-controls.ts says where each was checked): Hermes Agent's `hermes config set
 // skills.disabled` and `hermes skills uninstall` (hub-installed skills only), OpenClaw's `openclaw config set
 // skills.entries.<key>.enabled`; OpenClaw has no command of its own that removes a skill, so it offers none.
 // Claude Code, Codex and pi keep a skill as `<home>/skills/<name>/SKILL.md` (CLAUDE_CONFIG_DIR, CODEX_HOME and

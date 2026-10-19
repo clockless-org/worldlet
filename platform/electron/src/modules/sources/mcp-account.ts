@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
-import {hermesConfigValues} from '../../../../../agent/agents/index.ts';
+import {hermesConfigValues} from '../../../../../agent/gate/index.ts';
 import {connectorScopes,githubDevicePollForm,githubDeviceStartForm,readGithubDevicePoll,readGithubDeviceStart,GITHUB_APP} from '../../../../../context/sources/index.ts';
 import {WorldletError,writeAtomic} from '../../files.ts';
 import type {VaultService} from '../../host/services.ts';

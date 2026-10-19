@@ -12,7 +12,7 @@ import assert from 'node:assert/strict';
 import http from 'node:http';
 import path from 'node:path';
 import {app,BaseWindow,session} from 'electron';
-import {PAGE_MEMORY,chromiumBrands,chromiumUserAgent,clientHintHeaders,signInRejectedMessage,withClientHints} from '../../../../../agent/browser/index.ts';
+import {PAGE_MEMORY,chromiumBrands,chromiumUserAgent,clientHintHeaders,signInRejectedMessage,withClientHints} from '../../../../../agent/applets/index.ts';
 import {HOMES,signInPage} from './rules.ts';
 import {BrowserDevice} from './device.ts';
 import {PageView} from './page.ts';

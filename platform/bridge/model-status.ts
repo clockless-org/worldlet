@@ -1,4 +1,4 @@
-import {modelStatusFresh} from '../../agent/companion/index.ts';
+import {modelStatusFresh} from '../../agent/fox/index.ts';
 
 /** Coalesce bridge IO; invalidation prevents an old response from publishing or winning a newer read. */
 type ModelStatus = {available?:boolean;reason?:string;cloudAllowed?:boolean;[key:string]:unknown};

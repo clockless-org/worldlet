@@ -61,7 +61,7 @@ Electron main ──spawn, stdin/stdout──▶ Worldlet Web (CEF, windowless p
   (#1176) without the page reflowing under Fox.
 - **Frame clock.** The engine issues each shown page's frames itself (CEF external begin frames), at
   the rate the host sets for where the page shows (`pageFrameRate` in
-  `agent/browser/picture-in-picture.ts`): in the panel the display's refresh rate, 60 to 120 a second
+  `agent/applets/picture-in-picture.ts`): in the panel the display's refresh rate, 60 to 120 a second
   (120 on a ProMotion or other 120 Hz screen, as in the person's own browser; Linux's software frames
   stay at 60), 15 in the task window, and 4 while that window waits out of sight. A hidden page gets
   none. The engine accepts up to 120.
@@ -137,7 +137,7 @@ Messages are length-prefixed (4-byte little-endian) UTF-8 JSON objects with a ty
 
 Each engine keeps its own cookie storage, so a sign-in on Electron's views (the X, Douyin and Twitch Applets, a site
 moved there for its video) did not reach the engine's pages, nor the other way (owner report 2026-10-08). The host's
-`cookie-bridge.ts` keeps the two alike for each world, by the rules in `agent/browser/cookie-sync.ts`. A cookie that
+`cookie-bridge.ts` keeps the two alike for each world, by the rules in `agent/applets/cookie-sync.ts`. A cookie that
 Electron's storage sets or deletes goes to the engine at once, or when the engine next runs. The engine has no cookie
 events, so the host reads its cookies (`cookies`) after a page loads and every half minute while a page shows, and
 makes the changes since the last look in Electron's storage. A just-started engine has nothing to compare with: each
@@ -145,7 +145,7 @@ side then only gains the cookies it lacks, so a stale copy never replaces a fres
 engine has Electron's cookies, waiting at most 1.5 seconds. Other browser storage stays per engine, except when a page
 moves between the engines (video, passkey, Google sign-in) and stays on its origin. The host then reads the site's
 `localStorage` from the old page, at most 2 MB, and the new page's first document gets the same copy before the site's
-own scripts run (`agent/browser/storage-carry.ts`). IndexedDB stays per engine.
+own scripts run (`agent/applets/storage-carry.ts`). IndexedDB stays per engine.
 
 ## Building
 

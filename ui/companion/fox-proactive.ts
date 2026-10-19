@@ -1,4 +1,4 @@
-import {PROACTIVE,proactiveLate,type ProactiveMoment} from '../../agent/companion/index.ts';
+import {PROACTIVE,proactiveLate,type ProactiveMoment} from '../../agent/fox/index.ts';
 /**
  * Fox speaks first (owner request 2026-10-06). The page notices quiet moments (the person settled
  * into a place and paused, stayed a long time, or is up late) and asks the host whether Fox has one

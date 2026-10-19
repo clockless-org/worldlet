@@ -1,4 +1,4 @@
-// Picture in picture for website Applets (#919, #950, agent/browser/picture-in-picture.ts), driven
+// Picture in picture for website Applets (#919, #950, agent/applets/picture-in-picture.ts), driven
 // through the real World UI with a faked native bridge. The offer on the top bar (#951) shows
 // only while the page plays a video, never while Fox drives it and never on a host without
 // browserPictureInPicture. Choosing it returns to the World with the page as a 16:9 window in the
@@ -12,7 +12,7 @@ import type {Page} from 'playwright';
 import {launchTestBrowser,pageErrors,worldUrl,leaveApplet} from './browser-test.ts';
 import path from 'node:path';
 import {readFile} from 'node:fs/promises';
-import {PICTURE_IN_PICTURE} from '../agent/browser/index.ts';
+import {PICTURE_IN_PICTURE} from '../agent/applets/index.ts';
 const shots=process.env.PIP_SHOTS;
 const browser=await launchTestBrowser({args:['--allow-file-access-from-files']});
 type Box={x:number;y:number;width:number;height:number};

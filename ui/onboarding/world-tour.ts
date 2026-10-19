@@ -1,5 +1,5 @@
 import {connectionLive,getApp} from '../../context/applets/index.ts';
-import {tourInProgress} from '../../agent/onboarding/index.ts';
+import {tourInProgress} from '../../agent/fox/index.ts';
 import {appletBox,createCoachMark,createTourSpotlight,elementBox} from './tour-spotlight.ts';
 import {createTourLock} from './tour-lock.ts';
 import {pairingQR} from '../companion/index.ts';
@@ -60,7 +60,7 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false,conn
   const title=(row:HTMLElement)=>String(row.dataset.worldItemId?items.find((i:any)=>i.id===row.dataset.worldItemId)?.title||'':themes.find((t:any)=>t.id===row.dataset.ongoing)?.title||'').trim();
   return {count:rows.length,first:rows.map(title).find(Boolean)||''};
  }
- // Phone pairing (agent/windows/README.md): the host owns it (`phonePair`) and reports changes as `worldlet:phone-status`.
+ // Phone pairing (agent/base/README.md): the host owns it (`phonePair`) and reports changes as `worldlet:phone-status`.
  // Pairing starts only on I have the app, so a skipped step registers nothing with the relay; a host without phone
  // pairing leaves the phone out of the last step.
  type Phone={state?:'none'|'waiting'|'paired',link?:string,phone?:{name?:string}|null};
@@ -125,7 +125,7 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false,conn
   },
    actions:()=>{if(!phoneOffered())return [button('Continue',next)];const state=phoneState();return state==='paired'?[button('Continue',next)]:state==='waiting'?[button('Not now',skipPhone,true)]:[button('Not now',skipPhone,true),button('I have the app',()=>void pairPhone())];}},
  ];
- // `tour_skipped`'s step (agent/diagnostics/ANALYTICS.md): the five steps here, 6–8 in first value.
+ // `tour_skipped`'s step (agent/base/ANALYTICS.md): the five steps here, 6–8 in first value.
  const TOUR_STEP:Record<string,number>={hello:1,attention:2,applets:3,dock:4,fox:5};
  function introduce(on:boolean){
   if((root.dataset.attentionIntroduced==='true')===on)return;

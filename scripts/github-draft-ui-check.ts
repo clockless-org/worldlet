@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
-// An Agent's GitHub draft on its Attention card (agent/agents/GRANTS.md#github-drafts): the card names the Agent and the
+// An Agent's GitHub draft on its Attention card (agent/gate/GRANTS.md#github-drafts): the card names the Agent and the
 // repository, shows exactly the text that will be written (as plain text, not rendered) and a link to the target, and
 // Approve and Dismiss go to the host's `githubDraft` with only the draft's ID, never the ordinary item status. A stale
 // target's refusal is said in the card's own words. Bundled UI, faked bridge, fictional draft.

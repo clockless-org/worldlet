@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {recallCompanion} from '../agent/companion/companion-recall.ts';
-import {companionPrompt} from '../agent/companion/companion-prompt.ts';
+import {recallCompanion} from '../agent/fox/companion-recall.ts';
+import {companionPrompt} from '../agent/fox/companion-prompt.ts';
 import {invoke} from '../agent/index.ts';
 import type {CompanionArchive} from '../contracts/companion.ts';
 const archive:CompanionArchive={format:'worldlet.companion',version:1,identity:{id:'fixture',name:'Fox',createdAt:'2026-09-24T00:00:00Z'},personality:'Helpful',memoryAuthority:'worldlet',memories:[{id:'memory',kind:'user',text:'👩‍💻'.repeat(4000),source:'fixture'}],conversations:Array.from({length:8},(_,i)=>({id:'turn-'+i,role:'user',session:'one',text:'Meeting '+i,createdAt:'2026-09-24T00:00:00Z'}))};
@@ -24,7 +24,7 @@ assert.equal(JSON.parse(invoke('unknown','{}')).ok,false);
 assert.equal(JSON.parse(invoke('companionRecall','not json')).ok,false);
 console.log('PASS shared companion retrieval, paging, prompt budget, foreign-memory isolation and error envelope');
 
-const {validateCompanionArchive,validCompanionTimestamp,validCompanionID,shouldRotateCompanion}=await import('../agent/companion/companion-archive.ts');
+const {validateCompanionArchive,validCompanionTimestamp,validCompanionID,shouldRotateCompanion}=await import('../agent/fox/companion-archive.ts');
 const {readFileSync}=await import('node:fs');
 for(const row of JSON.parse(readFileSync('contracts/fixtures/companion-dates.json','utf8')))assert.equal(validCompanionTimestamp(row.text),row.valid,row.text);
 const valid={...archive,identity:{...archive.identity,id:'00000000-0000-0000-0000-000000000001'},conversations:[]};
@@ -48,7 +48,7 @@ for(const memoryAuthority of ['worldlet','hermes','adapter:example']){
 for(const memoryAuthority of ['adapter:','adapter:../outside','adapter:Upper','adapter:x\n'])assert.throws(()=>validateCompanionArchive({...valid,memoryAuthority}));
 console.log('PASS qualified Harness memory owners, legacy archives and foreign-memory prompt isolation');
 
-const {companionPersona,companionPersonaPrompt}=await import('../agent/companion/index.ts');
+const {companionPersona,companionPersonaPrompt}=await import('../agent/fox/index.ts');
 const baseline=companionPersona();
 assert.equal(baseline.source,'builtin');
 assert.equal(baseline.summary,'Warm, witty and on your side; speaks up when it helps.');

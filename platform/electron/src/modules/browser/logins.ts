@@ -1,5 +1,5 @@
 import {safeStorage} from 'electron';
-import {SAVED_LOGINS,loginsOverLimit,type SavedLogin} from '../../../../../agent/browser/index.ts';
+import {SAVED_LOGINS,loginsOverLimit,type SavedLogin} from '../../../../../agent/applets/index.ts';
 import type {Row} from '../../host/types.ts';
 
 /** The World's records this keeps in (world.sqlite). */
@@ -8,7 +8,7 @@ type Ledger={records(bucket:string):unknown[];put(bucket:string,id:string,row:an
 const idOf=(site:string,username:string)=>site+'\n'+username;
 
 /**
- * Saved sign-ins of the built-in browser (agent/browser/saved-logins.ts decides what is offered). Native IO only:
+ * Saved sign-ins of the built-in browser (agent/applets/saved-logins.ts decides what is offered). Native IO only:
  * each password is encrypted with the system keychain's key (Electron safeStorage) before it reaches the World's
  * records, and is decrypted only to fill a page in or to compare with a new sign-in. Nothing here is a Fox tool.
  */

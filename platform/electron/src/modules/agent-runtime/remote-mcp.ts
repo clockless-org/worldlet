@@ -1,11 +1,11 @@
-import {DEFAULT_PAIR_RELAY} from '../../../../../agent/windows/index.ts';
+import {DEFAULT_PAIR_RELAY} from '../../../../../agent/base/index.ts';
 import {isWorldAddressRequest,MCP_FRONT_ORIGIN,REMOTE_MCP_LIMITS,agentRevoked,createRemoteMcpServer,emptyRemoteMcpState,newRemoteMcpToken,readRemoteMcpRequest,readRemoteMcpState,remoteConsentItem,
- remoteMcpAddress,remoteMcpAgent,remoteMcpHostEntry,remoteMcpResponseFrame,remoteMcpRoom,type RemoteMcpConsent,type RemoteMcpRequest,type RemoteMcpResponse,type RemoteMcpServer,type RemoteMcpState} from '../../../../../agent/agents/index.ts';
+ remoteMcpAddress,remoteMcpAgent,remoteMcpHostEntry,remoteMcpResponseFrame,remoteMcpRoom,type RemoteMcpConsent,type RemoteMcpRequest,type RemoteMcpResponse,type RemoteMcpServer,type RemoteMcpState} from '../../../../../agent/gate/index.ts';
 import type {AgentAccess,VaultService} from '../../host/services.ts';
 import {toolText,worldToolList,type StandingWorldTools} from './world-tool-bridge.ts';
 import type {Row} from './types.ts';
 
-// Remote MCP on this computer (agent/agents/REMOTE-MCP.md): while the person has it on, one WebSocket to the front
+// Remote MCP on this computer (agent/gate/REMOTE-MCP.md): while the person has it on, one WebSocket to the front
 // (`<relay>/api/mcp-host/<room>`) carries each HTTP request a cloud MCP client makes at `mcp.worldlet.ai/<room>`, and
 // core's server answers it here. The host token, the registered clients and the hashes of each connection's tokens are
 // kept only in the vault (`remote-mcp`); the tokens themselves only ever go to the client that asked. A connection the

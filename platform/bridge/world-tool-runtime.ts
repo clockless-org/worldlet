@@ -1,10 +1,10 @@
 import {Compile} from 'typebox/compile';
-import {listWorldTools,publicWorldToolNames,runCalendarTool,serviceToolNames,worldGatewayTools} from '../../agent/tools/index.ts';
-import {worldActions,describeActions,resolveAction} from '../../agent/tools/index.ts';
-import {withoutUntrusted,turnBrowserAdmission,turnTrustObserve,turnWriteAdmission} from '../../agent/agents/index.ts';
+import {listWorldTools,publicWorldToolNames,runCalendarTool,serviceToolNames,worldGatewayTools} from '../../agent/gate/index.ts';
+import {worldActions,describeActions,resolveAction} from '../../agent/gate/index.ts';
+import {withoutUntrusted,turnBrowserAdmission,turnTrustObserve,turnWriteAdmission} from '../../agent/gate/index.ts';
 import {contentWrites,createTurnPolicy} from './tool-policy.ts';
 import {runAudioCommand,runLocalMusicTool} from '../../ui/shell/index.ts';
-import {pageToolFeature} from '../../agent/tools/index.ts';
+import {pageToolFeature} from '../../agent/gate/index.ts';
 import {WEB_PAGE_UNAVAILABLE} from '../../contracts/web-world.ts';
 import {pageFeatures} from './features.ts';
 

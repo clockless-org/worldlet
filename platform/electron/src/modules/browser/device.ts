@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import {WebContentsView,screen,session,type BaseWindow,type Rectangle,type View} from 'electron';
 import {openInBrowser} from '../../system-browser.ts';
-import {PAGE_MEMORY,RAW_KINDS,WEB_RECORD,type WebRecord,webSite,desktopTaskPictureInPicturePlacement,googleSignInRejected,memoryPressure,focusHost,pageFocusPlan,readSiteFocus,siteFocusFor,siteFocusRecord,PAGE_FOCUS_LIMITS,type PageFocusPlan,type SiteFocusRecord,signInRejectedMessage,linkRefusedMessage,type RefusedLink,sitePage,taskPictureInPictureAspect,type MemoryReading,VIDEO_FORMATS,needsProprietaryVideo,videoFormatHost,carriedStorage,storageCarryScript,STORAGE_READ,readLoginSignal,loginSite,loginUsername,loginOffer,loginsFor,tabApplet,isBrowserTab} from '../../../../../agent/browser/index.ts';
+import {PAGE_MEMORY,RAW_KINDS,WEB_RECORD,type WebRecord,webSite,desktopTaskPictureInPicturePlacement,googleSignInRejected,memoryPressure,focusHost,pageFocusPlan,readSiteFocus,siteFocusFor,siteFocusRecord,PAGE_FOCUS_LIMITS,type PageFocusPlan,type SiteFocusRecord,signInRejectedMessage,linkRefusedMessage,type RefusedLink,sitePage,taskPictureInPictureAspect,type MemoryReading,VIDEO_FORMATS,needsProprietaryVideo,videoFormatHost,carriedStorage,storageCarryScript,STORAGE_READ,readLoginSignal,loginSite,loginUsername,loginOffer,loginsFor,tabApplet,isBrowserTab} from '../../../../../agent/applets/index.ts';
 import {SavedLogins} from './logins.ts';
 import {pageScript} from './page-scripts.ts';
 import {WorldletError} from '../../files.ts';
@@ -28,7 +28,7 @@ import {HOMES,SIGN_IN_HOSTS,signInPage,isGoogleMaps,isNotion,isX,parse,publicPag
 import type {Host,Row} from '../../host/types.ts';
 import {ANALYTICS,FOX,SPEECH,USER_ACTIVITY,type AnalyticsService,type FoxService,type SpeechService,type UserActivityService} from '../../host/services.ts';
 import {userIdle} from '../../../../../agent/tasks/index.ts';
-import {timingBucket} from '../../../../../agent/diagnostics/index.ts';
+import {timingBucket} from '../../../../../agent/base/index.ts';
 import {GAME_REVIEW_APPLET} from '../../../../../context/artifacts/index.ts';
 import {busyWith} from '../../host/busy.ts';
 
@@ -46,9 +46,9 @@ const PAGE_AFTER_MS=300;
 /** How long the same page goes before its text is read again for browsing history. */
 const HISTORY_REREAD_MS=30_000;
 const MEETING_HOSTS=['meet.google.com','zoom.us','teams.microsoft.com','teams.live.com','teams.cloud.microsoft'];
-/** Focus on website pages (agent/browser/page-focus.ts): each site's choice is a record in the World. */
+/** Focus on website pages (agent/applets/page-focus.ts): each site's choice is a record in the World. */
 const FOCUS_BUCKET='site-focus';
-/** Sites whose video needs H.264/AAC (agent/browser/video-formats.ts): one record each in the World. */
+/** Sites whose video needs H.264/AAC (agent/applets/video-formats.ts): one record each in the World. */
 // v2 (2026-10-07): sites the first version moved for a failed sound, not a video, open on CEF again with their sign-ins.
 const VIDEO_BUCKET='video-formats-v2';
 /** Fox works on the site's own page: Focus steps aside from Fox's first step there until this long after its last. */
@@ -79,7 +79,7 @@ export class BrowserDevice {
  private signingInUntil=0;
  private historyRead:{view:WebPage;url:string;at:number}|null=null;
  // Website Applet pages the person left, kept hidden with media paused and muted so returning
- // resumes them (agent/browser/page-resume.ts sends `live`). Keys include the world scope.
+ // resumes them (agent/applets/page-resume.ts sends `live`). Keys include the world scope.
  private parked=new Map<string,Kept>();
  private pageKey:string|null=null;
  // Newly opened remembered pages whose media is held from their first load (`hold`).
@@ -99,7 +99,7 @@ export class BrowserDevice {
  private worldLayout:Layout|null=null;
  private away=false;
  private task:TaskWindow|null=null;
- // Fox's copy of the visible page while the person keeps it (agent/browser/picture-in-picture.ts FOX_COPY).
+ // Fox's copy of the visible page while the person keeps it (agent/applets/picture-in-picture.ts FOX_COPY).
  private copy:Copy|null=null;
  private taskSize:{width:number;height:number}|null=null;
  private taskFox:GlowStyle|null=null;
@@ -182,12 +182,12 @@ export class BrowserDevice {
   const parent=this.surface.parent();
   if(!parent)throw new WorldletError('The world is not ready.');
   const demo=this.host.profile.channel==='dev';
-  // A Browser tab's page ('browser--2', agent/browser/browser-tabs.ts) belongs to the Browser Applet.
+  // A Browser tab's page ('browser--2', agent/applets/browser-tabs.ts) belongs to the Browser Applet.
   const key=this.pageKey?.split(':').slice(1).join(':')||'',applet=tabApplet(key)||this.platform,tabs=isBrowserTab(key);
   // Website pages run on the CEF engine when it is built for this host (#1170); Google accepts its
   // sign-in, which it refuses in Electron's own views (#1089). Otherwise Electron's views serve, and
   // always for X, Douyin and Twitch, whose H.264 video the standard CEF build cannot play (ELECTRON_VIEW_APPLETS).
-  // A site seen needing H.264/AAC opens there too (agent/browser/video-formats.ts). A page that asks for a passkey
+  // A site seen needing H.264/AAC opens there too (agent/applets/video-formats.ts). A page that asks for a passkey
   // reopens on CEF (`force`, passkeyRequested): Electron's views draw no passkey dialogs.
   const engine=force==='cef'||!this.videoHosts().has(videoFormatHost(url))&&pageEngine(this.host.profile,this.platform,applet)==='cef'?sharedEngine(this.host.profile):null;
   // A crashed website renderer or engine reaches PostHog like Electron's own processes (allowlisted type and reason).
@@ -204,7 +204,7 @@ export class BrowserDevice {
   if(view instanceof PageView)view.tabs=tabs;
   view.makeDriver=(page:any)=>this.makeAgent!(page);
   this.pagesScope=this.scope;this.pagesWindow=this.surface.window();
-  // What happens on the page is kept in the World (agent/browser/web-record.ts); the practice world keeps nothing.
+  // What happens on the page is kept in the World (agent/applets/web-record.ts); the practice world keeps nothing.
   if(this.scope==='personal'&&this.store.writable){
    view.record(new WebRecorder(view,(visits,records)=>this.recorded(visits,records),
     {applet,onError:error=>this.host.diagnostics.record(error,'webRecord')}));
@@ -271,7 +271,7 @@ export class BrowserDevice {
   const focused=this.focusState.get(this.browser);if(focused)this.emit({...focused,platform:this.platform});
   this.startTimer();
  }
- // Focus (agent/browser/page-focus.ts) -----------------------------------------------------------
+ // Focus (agent/applets/page-focus.ts) -----------------------------------------------------------
  private focusRecords():SiteFocusRecord[]{
   if(this.sample||!this.store.writable)return [];
   try{return this.store.ledger().records(FOCUS_BUCKET).flatMap(row=>{const record=readSiteFocus(row);return record?[record]:[];});}
@@ -511,7 +511,7 @@ export class BrowserDevice {
   if(copied){this.pointerScale=copied.width/this.copy!.page.width;this.applyGlow(style,copied);}
   else this.applyGlow(style,frame);
  }
- // Fox's copy (agent/browser/picture-in-picture.ts FOX_COPY) ----------------------------------------
+ // Fox's copy (agent/applets/picture-in-picture.ts FOX_COPY) ----------------------------------------
  /** Shows Fox's copy at `request.rect`, made the first time from the visible page: its address on the
   * same engine, so the same sign-in, at `request.page` as its own size. Only the CEF engine draws a
   * page smaller than its own size; elsewhere there is no copy and Fox works on the person's page. */
@@ -579,7 +579,7 @@ export class BrowserDevice {
   this.parked.clear();this.stopMemoryWatch();this.dropGlow();
   this.away=true;this.taskSize={width:size.width,height:size.height};this.taskFox=fox;
  }
- /** Once the Companion's window shows, Fox's page shows beside it (agent/browser/picture-in-picture.ts). */
+ /** Once the Companion's window shows, Fox's page shows beside it (agent/applets/picture-in-picture.ts). */
  placeTask(companion:Rectangle|null){
   const view=this.browser,size=this.taskSize;
   if(!this.away||!(view instanceof CefPageView)||!size)return;
@@ -773,7 +773,7 @@ export class BrowserDevice {
   if(view!==this.browser||playing===this.videoPlaying)return;
   this.videoPlaying=playing;this.emit({phase:'video',platform:this.platform,playing});
  }
- // Video formats (agent/browser/video-formats.ts) -----------------------------------------------
+ // Video formats (agent/applets/video-formats.ts) -----------------------------------------------
  private videoHosts(){
   if(this.videoHostsLoaded)return this.videoHostsLoaded;
   const hosts=new Set<string>();
@@ -828,7 +828,7 @@ export class BrowserDevice {
   void this.move(view,popup?view.url:url,'cef');
   if(popup)this.emit({phase:'notice',platform:this.platform,message:'Google sign-in works on this page now. Choose Sign in with Google again.'});
  }
- /** The site's localStorage, for a move that stays on its origin (agent/browser/storage-carry.ts): each engine keeps its
+ /** The site's localStorage, for a move that stays on its origin (agent/applets/storage-carry.ts): each engine keeps its
   * own, so it goes along as the cookies do. Account sign-in pages stay uninspected; a page that does not answer quickly moves without it. */
  private async carriedStorage(view:WebPage,url:string){
   const from=parse(view.url),to=parse(url);
@@ -1024,7 +1024,7 @@ return {title:document.title,text:(parts.join(' ')+ ' '+images).slice(0,6000),ur
   current.transcriber.stop();
  }
 
- // Saved sign-ins (agent/browser/saved-logins.ts) ------------------------------------------------
+ // Saved sign-ins (agent/applets/saved-logins.ts) ------------------------------------------------
  private logins=new SavedLogins(()=>this.store.ledger() as any);
  // The account typed on its own step before a password page.
  private recentUsername:{site:string;value:string;at:number}|null=null;

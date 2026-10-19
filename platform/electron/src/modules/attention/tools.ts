@@ -9,7 +9,7 @@ import {CONTEXT_CHANGED,SOURCE_PAUSED,uuid,message,isValidation,isCancel,isRow,r
 export const WORLD_TOOL_NAMES=['read_companion_archive','meeting_decisions','_source_begin','_source_result','query_world_items','upsert_world_items','review_world_item','update_world_item','archive_world_items','configure_world_check','read_world_history'];
 const TRACKED=['_source_result','upsert_world_items','review_world_item','update_world_item','archive_world_items','configure_world_check','meeting_decisions'];
 const UNVERIFIED='Source evidence was not read or cannot be verified.';
-// Why a cited source was rejected, one message each so error tracking can tell them apart (agent/diagnostics/report.ts
+// Why a cited source was rejected, one message each so error tracking can tell them apart (agent/base/report.ts
 // itemRule); the model always gets UNVERIFIED with the indexed evidenceIssues.
 const EVIDENCE={
  missing:'Source evidence needs a provider, record id and quote.',
@@ -73,7 +73,7 @@ export async function worldTool(center:AttentionCenter,name:string,args:Row,turn
  if(name==='query_world_items'){
   const provider=monitorProvider??(typeof args.provider==='string'?args.provider:undefined);
   // A call outside any Fox turn (an Agent on the standing server) reads its own asks with asks/read only, never other
-  // Agents' asks through their Attention items (provider `agents`, agent/agents/GRANTS.md#agent-asks).
+  // Agents' asks through their Attention items (provider `agents`, agent/gate/GRANTS.md#agent-asks).
   const items=db.records('items').filter(item=>!(turn.startsWith('channel-')&&item.provider===AGENT_ASK_PROVIDER));
   const result=core('worldItemsQuery',{items,checks:db.records('checks'),provider});
   if(!isRow(result))throw new WorldletError('Invalid item query result.');

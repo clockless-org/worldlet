@@ -7,10 +7,10 @@ import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/
 import {createAgentReports} from '../platform/electron/src/modules/agent-runtime/agent-reports.ts';
 import {createScriptAgents} from '../platform/electron/src/modules/agent-runtime/script-agents.ts';
 import {openStandingWorldTools,type StandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
-import {SCRIPT_AGENT_REASONS,scriptAgentId,scriptAgentName} from '../agent/agents/script-agents.ts';
-import {STANDING_OUTSIDE_TURN} from '../agent/agents/grants.ts';
+import {SCRIPT_AGENT_REASONS,scriptAgentId,scriptAgentName} from '../agent/gate/script-agents.ts';
+import {STANDING_OUTSIDE_TURN} from '../agent/gate/grants.ts';
 
-// Agents for scripts (agent/agents/GRANTS.md#agents-for-scripts): the name and ID rules in Core, then the host modules
+// Agents for scripts (agent/gate/GRANTS.md#agents-for-scripts): the name and ID rules in Core, then the host modules
 // the Electron and Node hosts run: an added one gets its own owner-only endpoint file in the MCP home, a program reaches
 // the standing server with it under that Agent's own Grants, a new run writes a new token, and revoking removes it.
 assert.equal(scriptAgentName('  Nightly build '),'Nightly build');

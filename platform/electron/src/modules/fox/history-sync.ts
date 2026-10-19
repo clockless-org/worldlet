@@ -1,7 +1,7 @@
 import path from 'node:path';
 import {setTimeout as sleep} from 'node:timers/promises';
 import type {HarnessExternalEvent,HarnessHistory} from '../../../../../contracts/harness-services.ts';
-import {harnessService,isMigrationSource,migrationSession,openClawSessionIs,type MigrationSource} from '../../../../../agent/agents/index.ts';
+import {harnessService,isMigrationSource,migrationSession,openClawSessionIs,type MigrationSource} from '../../../../../agent/gate/index.ts';
 import {channelMessageEvent} from '../../../../../agent/tasks/index.ts';
 import {isoSeconds} from '../../files.ts';
 import {AGENT,ONGOING,type AgentService,type OngoingService} from '../../host/services.ts';
@@ -14,7 +14,7 @@ import {readAdopted} from '../agent-runtime/local-memory.ts';
 import {boundBytes,broughtTurnId} from './migration.ts';
 
 // The person's Agent keeps talking after setup (a Discord channel, a Telegram DM, a terminal session), so the World
-// reads its history again while Worldlet runs instead of only once (agent/agents/PORTABILITY.md "History, read
+// reads its history again while Worldlet runs instead of only once (agent/gate/PORTABILITY.md "History, read
 // continuously"). Harness-neutral: it asks each source for the `history` service (contracts/harness-services.ts) and
 // never for a Harness by name. The sources are the chosen Harness, the Agent brought at setup and every Agent whose
 // conversations the World already keeps. Each one lists the threads written to since it was last checked, and only the

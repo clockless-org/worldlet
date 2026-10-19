@@ -7,12 +7,12 @@ import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/
 import {openStandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
 import {REMOTE_MCP_VAULT,createRemoteMcpHost} from '../platform/electron/src/modules/agent-runtime/remote-mcp.ts';
 import {WORLD_ADDRESS_VAULT,createWorldAddressHost} from '../platform/electron/src/modules/agent-runtime/world-address.ts';
-import {WORLD_ADDRESS_LIMITS,addressNameFrom,derToRaw,readWorldAddressState,validAddressName,worldAddress} from '../agent/agents/world-address.ts';
-import {readRemoteMcpRequest,remoteConsentItemId} from '../agent/agents/remote-mcp.ts';
+import {WORLD_ADDRESS_LIMITS,addressNameFrom,derToRaw,readWorldAddressState,validAddressName,worldAddress} from '../agent/gate/world-address.ts';
+import {readRemoteMcpRequest,remoteConsentItemId} from '../agent/gate/remote-mcp.ts';
 import {roomDenied} from '../contracts/web-world.ts';
 import {projectWorldItems} from '../context/items/world-items.ts';
 
-// One address per World on the host (agent/agents/WORLD-ADDRESS.md), with the website played by a fake registry and the
+// One address per World on the host (agent/gate/WORLD-ADDRESS.md), with the website played by a fake registry and the
 // front by a fake WebSocket, and passkeys made here with node:crypto as a browser's authenticator makes them. The name
 // is claimed with remote access's host token; the page's requests arrive as `address` frames and only the address
 // server answers them; a browser asks with a fresh passkey and a code, the person allows it on the card, and its

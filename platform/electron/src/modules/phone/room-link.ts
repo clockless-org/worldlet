@@ -1,13 +1,13 @@
-import {DEFAULT_PAIR_RELAY,ROOM_LINK_MODE,RTC_ANSWER_PLACE,RTC_OFFER_PLACE,base64url,boxPlace,fromBase64url,newPairSecret,openBox,pairKeys,pairLink,phoneMessageKey,readPhoneMessage,readRoomFrame,roomEntry,sealBox,stalePhoneMessage,PHONE_SEEN_LIMIT,type PairKeys,type PhoneMessage,type RoomFrame,type RoomSocketFactory} from '../../../../../agent/windows/index.ts';
+import {DEFAULT_PAIR_RELAY,ROOM_LINK_MODE,RTC_ANSWER_PLACE,RTC_OFFER_PLACE,base64url,boxPlace,fromBase64url,newPairSecret,openBox,pairKeys,pairLink,phoneMessageKey,readPhoneMessage,readRoomFrame,roomEntry,sealBox,stalePhoneMessage,PHONE_SEEN_LIMIT,type PairKeys,type PhoneMessage,type RoomFrame,type RoomSocketFactory} from '../../../../../agent/base/index.ts';
 import type {PhoneNotifyResult,PhoneStatus} from './relay.ts';
 import type {RtcHost} from './rtc-host.ts';
 
-// A browser on another device, met in the pairing room (agent/windows/README.md#web, agent/windows room.ts): the relay passes
+// A browser on another device, met in the pairing room (agent/base/README.md#web, agent/base room.ts): the relay passes
 // what each side sends while both are connected and stores nothing, so this computer is the only place the browser's
 // content lives. It keeps the same face as the relay pairing (relay.ts: status, start, end, publish, poll), so the phone
 // module runs it in the same loop. A browser that joins gets every slot this computer has at once; a changed slot goes
 // to every browser in the room. Its messages are taken like a phone's, each once (the same persistent seen list).
-// A browser takes no notifications. A browser that offers a direct line (agent/windows rtc.ts) is answered through `rtc`;
+// A browser takes no notifications. A browser that offers a direct line (agent/base rtc.ts) is answered through `rtc`;
 // while its line is open, frames to and from it go over the line and the room only says it is there.
 type Saved={secret:string,relay:string,name:string,paired:boolean,phone?:{name:string,version:string}|null};
 export type RoomLinkOptions={

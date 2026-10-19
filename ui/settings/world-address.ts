@@ -1,4 +1,4 @@
-/** Your World's address, in Settings › Agents (agent/agents/WORLD-ADDRESS.md, host `worldAddress`): the person picks a
+/** Your World's address, in Settings › Agents (agent/gate/WORLD-ADDRESS.md, host `worldAddress`): the person picks a
  * name and their World opens at `https://<name>.worldlet.ai` on any device. Nothing is visible there unless they allow
  * a browser of their own (on a card in Attention) or share their board. Below the address: the browsers that can open
  * the World, what is shared and with whom, each with a way to end it. Plain words: no passkeys, tokens or rooms. */

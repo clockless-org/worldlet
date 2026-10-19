@@ -3,7 +3,7 @@
 // Fox's PASS hides the answer, and that Fox's voice rides with every turn. No model, no browser.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {FOX_VOICE,PLACE,PROACTIVE,placeKind,companionPrompt,onScreenText,proactiveAsked,proactiveCard,proactiveDue,proactiveHeard,proactiveLate,proactiveLine,proactiveQuietRequest,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed} from '../agent/companion/index.ts';
+import {FOX_VOICE,PLACE,PROACTIVE,placeKind,companionPrompt,onScreenText,proactiveAsked,proactiveCard,proactiveDue,proactiveHeard,proactiveLate,proactiveLine,proactiveQuietRequest,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed} from '../agent/fox/index.ts';
 
 const day='2026-10-06',t0=1_800_000_000;
 const policyIncludes=(action:string)=>JSON.parse(fs.readFileSync('contracts/world-event-policy.json','utf8')).plumbing.includes(action);
@@ -254,7 +254,7 @@ assert.match(fox,/context\.page=\{site:visit\.site,title:visit\.title,text:pageT
 const prompt=companionPrompt({format:'worldlet.companion',version:1,identity:{id:'fixture',name:'Fox',createdAt:'2026-09-24T00:00:00Z'},personality:'Formal',memoryAuthority:'worldlet',memories:[],conversations:[]} as any);
 assert(prompt.includes(FOX_VOICE));
 for(const banned of ['How can I help','Let me know if you need anything else'])assert(FOX_VOICE.includes(banned),banned);
-assert(!/\bPoke\b/.test(FOX_VOICE+fs.readFileSync('agent/companion/fox-proactive.ts','utf8').replace(/modelled on Poke/,'')));
+assert(!/\bPoke\b/.test(FOX_VOICE+fs.readFileSync('agent/fox/fox-proactive.ts','utf8').replace(/modelled on Poke/,'')));
 
 // The host asks through plumbing commands, so asks never fill the World's history.
 const policy=JSON.parse(fs.readFileSync('contracts/world-event-policy.json','utf8'));

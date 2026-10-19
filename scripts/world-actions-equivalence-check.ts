@@ -3,12 +3,12 @@
 // and proves the cached version returns the same values, the same internal sharing (an Applet
 // alias shares its base action's schema) and the same freedom to change a result.
 import assert from 'node:assert/strict';
-import {listWorldTools,publicWorldToolNames} from '../agent/tools/catalog.ts';
-import {worldModules} from '../agent/tools/modules.ts';
+import {listWorldTools,publicWorldToolNames} from '../agent/gate/catalog.ts';
+import {worldModules} from '../agent/gate/modules.ts';
 import {APP_DEFINITIONS} from '../context/applets/index.ts';
-import {CALENDAR_REQUIRED} from '../agent/tools/calendar.ts';
+import {CALENDAR_REQUIRED} from '../agent/gate/calendar.ts';
 import {SERVICE_ACTIONS,SERVICE_PROVIDERS} from '../contracts/services.ts';
-import {worldActions,describeActions,resolveAction,type WorldAction} from '../agent/tools/gateway.ts';
+import {worldActions,describeActions,resolveAction,type WorldAction} from '../agent/gate/gateway.ts';
 
 const READABLE_SOURCES=APP_DEFINITIONS.flatMap(app=>app.attention&&app.attention.reader!=='observation'&&!SERVICE_PROVIDERS.includes(app.attention.provider)?[app.attention.provider]:[]);
 // The earlier worldActions, verbatim.

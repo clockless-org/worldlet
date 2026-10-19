@@ -12,8 +12,8 @@ owns view selection, context consent, sensitive-field protection and durable
 outcome receipts. Clicks, fills and submits run without an approval prompt (#408). The existing Hermes gateway is retained so these controls cannot
 be bypassed by enabling an unrestricted shell/browser toolset. No new Agent loop.
 
-- `agent/browser/agent-browser.ts`: pure snapshot projection and action policy.
-- `agent/browser/driver-flow.ts`: the shared command sequence (see [Shared driver boundary](#shared-driver-boundary)).
+- `agent/applets/agent-browser.ts`: pure snapshot projection and action policy.
+- `agent/applets/driver-flow.ts`: the shared command sequence (see [Shared driver boundary](#shared-driver-boundary)).
 - `platform/electron/src/modules/browser/agent.ts`: driver process, document-generation
   checks, ordered driver commands and cancellation. `page.ts` relays CDP to the selected
   page through `webContents.debugger`.
@@ -85,7 +85,7 @@ that a refund, booking or payment completed.
 
 ## Shared driver boundary
 
-`agent/browser/driver-flow.ts` sequences snapshot, attribute observation, prepare,
+`agent/applets/driver-flow.ts` sequences snapshot, attribute observation, prepare,
 fill, click, submit and scroll. The host executes the resulting argv and returns
 responses to Core. The legacy injected DOM automation is not the driver. The Python
 transport handles Unix socket / Windows port lifecycle and uses bounded portable
@@ -117,7 +117,7 @@ edge: it lists Fox's steps, the plain words Fox says for each browser action and
 says in words (`do`), ticking each once Fox moves on, with "Thinking…" in its heading between
 steps; when Fox's turn ends it says Done (or that Fox stopped) and shows the start of Fox's
 reply as the result in the same place for a few seconds once the person sees the page, also
-after returning from the World ([steps](../../agent/browser/fox-steps.ts)). Fox's bubble does not
+after returning from the World ([steps](../../agent/applets/fox-steps.ts)). Fox's bubble does not
 repeat any of it.
 
 The card and the pointer are drawn by the host (`modules/browser/glow.ts`) in a
@@ -149,7 +149,7 @@ visible page, and Fox's session on it ends when it leaves the panel.
 ### Direct browser actions — 2026-09-29 (#408)
 
 By owner decision, clicks, fills and submits run directly: no Fox approval prompt
-or approval timeout. `browserElementPolicy` in `agent/browser/agent-browser.ts` is
+or approval timeout. `browserElementPolicy` in `agent/applets/agent-browser.ts` is
 the only consequential-control rule; it decides only which actions leave an
 unverified receipt (`receipt`; a submit intent always does). While Fox drives a page
 the host overlay above shows Fox's steps and pointer. A task linked to an

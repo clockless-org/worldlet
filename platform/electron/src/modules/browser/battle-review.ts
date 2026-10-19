@@ -1,6 +1,6 @@
 import {BATTLE_REVIEW,battleNow,battleReviewDue,battleReviewTask,battleSite,battleSummaryDue,battleWatch,battlesReviewed,battlesSummarized,observeBattleMessage,type FinishedBattle} from '../../../../../context/artifacts/index.ts';
 import type {RecordedVisit} from './recorder.ts';
-import type {WebRecord} from '../../../../../agent/browser/index.ts';
+import type {WebRecord} from '../../../../../agent/applets/index.ts';
 
 /** What starting a review needs of the host: whether Fox may run one now, and handing it over. `start`
  * returns 'started', 'later' (Fox is busy; ask again) or 'never' (this Agent cannot; drop these games). */

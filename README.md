@@ -73,7 +73,7 @@ Prefer a regular installer? [Download from worldlet.ai](https://worldlet.ai/down
 
 **Let your Agent do it**: tell it 「Install Worldlet: follow https://worldlet.ai/agent.md」. [agent.md](platform/install/agent.md) has any Agent run the installer with its own name, register Worldlet in itself and reply with the link and QR code; the [`worldlet` skill](harness/skills/worldlet/SKILL.md) says the same. Details: [one-line installers](platform/install/README.md).
 
-No account is needed. If you have no Agent yet, setup installs the standard [Hermes Agent](agent/agents/PORTABILITY.md#stock-hermes-agent-for-people-with-no-agent) the official way, to its usual location; one you already have is used as it is.
+No account is needed. If you have no Agent yet, setup installs the standard [Hermes Agent](agent/gate/PORTABILITY.md#stock-hermes-agent-for-people-with-no-agent) the official way, to its usual location; one you already have is used as it is.
 
 ## Features
 
@@ -126,14 +126,14 @@ Mail, Calendar, Notes, GitHub, Notion, Linear and the other Applets that connect
 
 - **[Phone companions](ios/README.md)**: the Attention Center and Fox on iPhone and [Android](android/README.md), paired by QR code through an end-to-end encrypted relay.
 - **[Journal](ui/artifacts/CARD-SYSTEM.md)**: the cards Fox makes are kept, day by day.
-- **[Scheduled](agent/agents/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**: ask once ("every morning at 8, tell me the weather and my first meeting") and Fox keeps doing it; your Agent's scheduled jobs come along. Two come with every install, on unless you turn them off: [Today’s prep at 7 AM and Wrap up today at 6 PM](context/artifacts/README.md#the-days-plan-and-summary), each one Attention card.
+- **[Scheduled](agent/gate/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**: ask once ("every morning at 8, tell me the weather and my first meeting") and Fox keeps doing it; your Agent's scheduled jobs come along. Two come with every install, on unless you turn them off: [Today’s prep at 7 AM and Wrap up today at 6 PM](context/artifacts/README.md#the-days-plan-and-summary), each one Attention card.
 - **[Connectors](context/applets/INTEGRATIONS.md#settings--connectors)**: Settings › Connectors connects Google, Notion, Linear, PostHog, Cloudflare and more with their own sign-in, Search Console with your Google sign-in, and GitHub with a short code you paste on GitHub's own page (no key, no secret). A connected service's latest context is kept up to date in your World every hour (turn it off on its tile), and the Agents you allow can search it all in one place. Fox and its Agent can read a connected service, other Agents only if you choose them, and any change asks you first: an Agent's GitHub Issue or comment is written as you, with a "Drafted by" line, only after you approve it.
 - **[Board](context/sources/BOARD.md)**: a Thing for the numbers you track, such as a north-star number, a funnel or a release, read from GitHub, PostHog, Cloudflare, a JSON endpoint or your Agents' reports.
-- **[Cloud Agents](agent/agents/REMOTE-MCP.md)**: Settings › Agents › **Use your World in Claude or ChatGPT** copies your World's address (Remote access, on by default) and says where to paste it; a ChatGPT, Claude or Cursor connector, or an Agent in the cloud, uses your World through `mcp.worldlet.ai`; you allow each connection on this computer, and Allow also lets it read the services you connected (or choose Allow without them).
-- **[Your World's address](agent/agents/WORLD-ADDRESS.md)**: give your World its own web address, like `alex.worldlet.ai`, in Settings › Agents › Your World's address, and open it from any device. A new browser asks first, and you allow it on a card in Attention; after that a passkey signs it in. You can also share your board there, read only, with people you allow or with anyone who has the link. Nobody sees anything else, and the World stays on your computer.
-- **[Your Agent on another computer](agent/agents/PORTABILITY.md#an-agent-on-another-computer)**: pair with the always-on machine where your Agent runs, and talk to it from this World.
+- **[Cloud Agents](agent/gate/REMOTE-MCP.md)**: Settings › Agents › **Use your World in Claude or ChatGPT** copies your World's address (Remote access, on by default) and says where to paste it; a ChatGPT, Claude or Cursor connector, or an Agent in the cloud, uses your World through `mcp.worldlet.ai`; you allow each connection on this computer, and Allow also lets it read the services you connected (or choose Allow without them).
+- **[Your World's address](agent/gate/WORLD-ADDRESS.md)**: give your World its own web address, like `alex.worldlet.ai`, in Settings › Agents › Your World's address, and open it from any device. A new browser asks first, and you allow it on a card in Attention; after that a passkey signs it in. You can also share your board there, read only, with people you allow or with anyone who has the link. Nobody sees anything else, and the World stays on your computer.
+- **[Your Agent on another computer](agent/gate/PORTABILITY.md#an-agent-on-another-computer)**: pair with the always-on machine where your Agent runs, and talk to it from this World.
 - **[Local first](docs/WORLD-STORAGE.md)**: your records stay in `world.sqlite` on your computer.
-- **[Settings](agent/agents/GRANTS.md#settings--agents)** in three parts: **Connectors** (the services your World reads), **Agents** (every Agent that uses your World, your own first, each with what it may do, what it did lately and Revoke) and **Context** (everything your World keeps, how much each holds, Save a copy and delete). Fox, Phone, General and Help sit below them.
+- **[Settings](agent/gate/GRANTS.md#settings--agents)** in three parts: **Connectors** (the services your World reads), **Agents** (every Agent that uses your World, your own first, each with what it may do, what it did lately and Revoke) and **Context** (everything your World keeps, how much each holds, Save a copy and delete). Fox, Phone, General and Help sit below them.
 
 ## Your World on another device
 
@@ -141,11 +141,11 @@ Open your whole World, not only the Attention Center and Fox, in a web browser o
 
 - It works while your computer is on and Worldlet runs there: the World, your records and Fox all stay on your computer, and the browser only shows them. **Run in background** keeps Worldlet running with no window open.
 - The page comes from worldlet.ai, one copy per Worldlet version, and holds none of your data. What your computer and the browser say to each other is end-to-end encrypted and passes through a relay that only forwards it and stores nothing.
-- Keep the link private: anyone who has it can see and act in your World. **Turn off** ends it. Settings, connections and pairing stay on your computer. [How it works](agent/windows/README.md#the-world-on-another-device)
+- Keep the link private: anyone who has it can see and act in your World. **Turn off** ends it. Settings, connections and pairing stay on your computer. [How it works](agent/base/README.md#the-world-on-another-device)
 
 ## Privacy
 
-There is no Worldlet account, and your records stay on your computer. Official builds report basic usage analytics (setup, connection and core-operation outcomes, never message content, connected content or browsing history), and you can turn them off in Settings › General › Usage counts; see [analytics](agent/diagnostics/ANALYTICS.md). Builds you make yourself report nothing unless you configure a PostHog project.
+There is no Worldlet account, and your records stay on your computer. Official builds report basic usage analytics (setup, connection and core-operation outcomes, never message content, connected content or browsing history), and you can turn them off in Settings › General › Usage counts; see [analytics](agent/base/ANALYTICS.md). Builds you make yourself report nothing unless you configure a PostHog project.
 
 ## Build from source
 

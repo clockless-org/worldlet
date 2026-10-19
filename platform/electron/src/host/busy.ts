@@ -1,5 +1,5 @@
 import {performance} from 'node:perf_hooks';
-import {MAIN_STALL_MS,stallTask} from '../../../../agent/diagnostics/index.ts';
+import {MAIN_STALL_MS,stallTask} from '../../../../agent/base/index.ts';
 
 // Main-process stalls (owner decision 2026-10-11, after a report of a slow first week on a smaller Mac): the World page,
 // every website page's input and Fox all wait on this process, so synchronous work here that runs for a second or more

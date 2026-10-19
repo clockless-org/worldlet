@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import {harnessService,isMigrationSource,memoryEntries} from '../../../../../agent/agents/index.ts';
+import {harnessService,isMigrationSource,memoryEntries} from '../../../../../agent/gate/index.ts';
 import type {HarnessMemory,HarnessMemoryEntry} from '../../../../../contracts/harness-services.ts';
 import {claudeCodeHome,codexHome,piHome} from './agent-files.ts';
 import {discoverHermes} from './hermes-files.ts';
@@ -8,7 +8,7 @@ import {openClawWorkspace,readLocalAgentMemory} from './local-memory.ts';
 import type {HarnessEnvironment,LocalHarnessInstall} from './local-harness.ts';
 
 // The `memory` Harness service (contracts/harness-services.ts HarnessMemory) for every local Agent that declares it
-// (agent/agents/harness-services.ts): the same files setup reads to bring an Agent's memory over (local-memory.ts
+// (agent/gate/harness-services.ts): the same files setup reads to bring an Agent's memory over (local-memory.ts
 // readLocalAgentMemory: bounded regular UTF-8 files inside the Agent's own folder), as entries (core memoryEntries).
 // Only read: Worldlet never writes them, and forgetting one is a request to the Agent in Fox's conversation.
 

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {validateWorldItem} from '../context/items/world-item-validation.ts';
 import {readFileSync} from 'node:fs';
 import {processedAttentionContent,ATTENTION_CONTENT_LIMITS,attentionReasonWords} from '../agent/attention/attention-content.ts';
-import services from '../agent/tools/services.json' with {type:'json'};
+import services from '../agent/gate/services.json' with {type:'json'};
 import {matterCopy} from '../agent/attention/index.ts';
 import {attentionPreviewData} from '../agent/attention/attention-preview.ts';
 import {projectWorldItems} from '../context/items/world-items.ts';

@@ -4,18 +4,18 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {WorldletError} from '../../files.ts';
 import {spawn} from 'node:child_process';
-import {CLAUDE_CODE_STATUS,claudeCodeLoggedIn,providerSignIn} from '../../../../../agent/agents/index.ts';
+import {CLAUDE_CODE_STATUS,claudeCodeLoggedIn,providerSignIn} from '../../../../../agent/gate/index.ts';
 import {stopChild} from './protocol.ts';
 import type {LocalHarnessInstall} from './local-harness.ts';
 
-// Signing in to a provider happens in the person's own Agent (agent/agents/model-providers.ts): its own sign-in command
+// Signing in to a provider happens in the person's own Agent (agent/gate/model-providers.ts): its own sign-in command
 // opens in their Terminal (macOS `.command`, Windows `.cmd`), where they answer it as they would by hand. Worldlet
 // never sees what they type; it only learns afterwards which providers the Agent lists.
 
 const quoteUnix=(value:string)=>`'${value.replace(/'/g,`'\\''`)}'`;
 const quoteWindows=(value:string)=>`"${value.replace(/"/g,'""')}"`;
 const SIGNED_IN='When it says you are signed in, close this window and go back to Worldlet.';
-/** What an update's window says when the Agent's own update command is done (agent/agents/agent-versions.ts). */
+/** What an update's window says when the Agent's own update command is done (agent/gate/agent-versions.ts). */
 export const UPDATED='When it has finished updating, close this window and go back to Worldlet.';
 /** The script that runs `install`'s own `args` in a Terminal window and keeps it open, `after` its last line (plain
  * words: it is echoed unquoted on Windows). */
@@ -33,7 +33,7 @@ export async function openSignIn(install:Pick<LocalHarnessInstall,'command'|'pre
  if(failure)throw new WorldletError(`Could not open Terminal: ${failure}`);
 }
 
-/** An Agent that signs in on its own in the browser (`BACKGROUND_SIGN_IN`, agent/agents/model-providers.ts): Worldlet runs
+/** An Agent that signs in on its own in the browser (`BACKGROUND_SIGN_IN`, agent/gate/model-providers.ts): Worldlet runs
  * its sign-in command itself, with no window, and waits until it ends (the person approved it in their browser), is
  * cancelled (`signal`) or ten minutes pass. Its output is not kept: the Agent keeps its own sign-in, Worldlet sees none. */
 export function signInInBackground(install:LocalHarnessInstall,args:string[],env:Record<string,string>,signal:AbortSignal,timeoutMs=600_000):Promise<void> {

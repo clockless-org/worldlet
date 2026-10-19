@@ -34,7 +34,7 @@ practice world keeps its events in memory for the session.
   alert is a Mac or Windows notification, and clicking it shows that day in Calendar.
 - Attention: what is on in the next day stands in Coming Up (at most five, in time order with the synced events),
   here and on the phone; an event whose alert has come leads it. Opening one shows its day.
-- Fox works with them through `manage_calendar` (`agent/tools/calendar.ts`, gateway `calendar/list|add|change|delete`):
+- Fox works with them through `manage_calendar` (`agent/gate/calendar.ts`, gateway `calendar/list|add|change|delete`):
   it lists, adds and changes events, and deletes one only when the person asked in their own words this turn.
   `google-calendar/draft` stays for the Mac's Calendar app only.
 

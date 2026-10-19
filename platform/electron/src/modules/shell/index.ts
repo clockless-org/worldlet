@@ -21,7 +21,7 @@ import {relaunchAfterQuit,wantsQuit} from '../../host/quit.ts';
 import {currentGraphics,graphicsCrashed} from '../../graphics.ts';
 import {busyWith,onStall,watchMainStalls} from '../../host/busy.ts';
 import {localDataFacts} from './data-size.ts';
-import {exitCodeName,foxTimingEvent,nativeCrashFromIps} from '../../../../../agent/diagnostics/index.ts';
+import {exitCodeName,foxTimingEvent,nativeCrashFromIps} from '../../../../../agent/base/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
 /** App shell: menus, the desktop Companion, updates, Open at Login, the default browser setting, diagnostics, feedback, usage analytics and World backups. */
@@ -54,7 +54,7 @@ export function installShell(host:Host){
  analytics.onChange(()=>host.page.event('worldlet:analytics-changed'));
  loginItem.onChange(buildMenus);
  // Crashed renderer, GPU and helper processes reach PostHog as an allowlisted type and Electron reason only.
- // The exit code only as a fixed name (agent/diagnostics/graphics-mode.ts exitCodeName).
+ // The exit code only as a fixed name (agent/base/graphics-mode.ts exitCodeName).
  const processGone=(type:string,reason:string,code:number)=>{const exit=exitCodeName(code);if(reason!=='clean-exit')analytics.recordProductEvent('app_process_gone','',{process_type:type,exit_reason:reason,...(exit?{exit_code:exit}:{})});};
  app.on('render-process-gone',(_event,_contents,details)=>processGone('renderer',details.reason,details.exitCode));
  app.on('child-process-gone',(_event,details)=>{
@@ -165,7 +165,7 @@ export function installShell(host:Host){
   // world_active_time (owner 2026-10-11 20:21 PDT: Production metrics): the World's use so far, once it is left.
   world?.on('blur',()=>analytics.endActive());world?.on('hide',()=>analytics.endActive());
   analytics.recordActiveDay();
-  // How much this computer keeps, once a day, two minutes after start (agent/diagnostics/data-size.ts).
+  // How much this computer keeps, once a day, two minutes after start (agent/base/data-size.ts).
   setTimeout(()=>{try{analytics.recordLocalData(()=>busyWith('dataSize',()=>localDataFacts(host)));}catch(error){host.diagnostics.record(error,'dataSize');}},120_000).unref?.();
   startUpdates();
  });

@@ -1,4 +1,4 @@
-// The companion panel's Phone page and the World page's half of phone pairing (agent/windows/README.md): pairing by QR
+// The companion panel's Phone page and the World page's half of phone pairing (agent/base/README.md): pairing by QR
 // code, the paired state, the Center sent to the host, and a phone chat line reaching Fox as the person's message.
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
@@ -20,7 +20,7 @@ try{
   return {ok:true};
  }}}};});
  await page.goto(worldUrl());await waitForWorld(page);
- // The Center goes to the host for the phone, shaped by agent/windows.
+ // The Center goes to the host for the phone, shaped by agent/base.
  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='phonePublish'));
  const published=await page.evaluate(()=>(window as any).calls.find(c=>c.action==='phonePublish'));
  assert.equal(published.slot,'attention');assert.deepEqual([published.value.v,published.value.now,published.value.later],[1,[],[]]);
@@ -44,7 +44,7 @@ try{
  await phoneButton.waitFor();// unpaired (the host reports the change, as its relay does), the Phone button is back
  // One status read for Fox's Phone button as the World starts, one for the panel, then pairing and unpairing.
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='phonePair'&&!c.kind).map(c=>c.operation)),['status','status','start','end']);
- // Another computer (agent/windows/README.md#another-computers-agent): its code is text to copy, then the paired laptop.
+ // Another computer (agent/base/README.md#another-computers-agent): its code is text to copy, then the paired laptop.
  await phone.getByRole('button',{name:'Pair another computer',exact:true}).click();
  await phone.locator('.companion-phone-code').getByText('worldlet://agent?v=1&s=',{exact:false}).waitFor();
  await phone.getByRole('button',{name:'Copy code',exact:true}).waitFor();
@@ -54,7 +54,7 @@ try{
  await phone.locator('.companion-phone-computers').getByRole('button',{name:'Unpair',exact:true}).click();
  await phone.getByRole('button',{name:'Pair another computer',exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='phonePair'&&c.kind==='agent').map(c=>c.operation)),['status','start','end']);
- // Any web browser (agent/windows/README.md#web): on this computer one button makes a link this app serves itself and opens
+ // Any web browser (agent/base/README.md#web): on this computer one button makes a link this app serves itself and opens
  // it; another device's browser gets a link to copy. Once a browser opened one, Run in background appears, and Turn off
  // ends both.
  const web=phone.locator('.companion-phone-browser');
@@ -75,7 +75,7 @@ await web.getByText('Opened in Chrome on Mac · Active now').waitFor();
  await web.getByRole('button',{name:'Copy link',exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='phonePair'&&c.kind==='local').map(c=>c.operation)),['status','start','open','background','end']);
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='phonePair'&&c.kind==='web').map(c=>c.operation)),['status','start','end']);
- // The full World on another device (agent/windows/README.md#the-world-on-another-device): Open the World opens its link
+ // The full World on another device (agent/base/README.md#the-world-on-another-device): Open the World opens its link
  // in a browser here, the page says when another device has it open, and that alone lets Worldlet run in background
  // (a computer's browser goes straight on to the World, so the Center's own pairing may never complete).
  await web.getByRole('button',{name:'Open the World',exact:true}).click();
@@ -98,7 +98,7 @@ await web.getByText('Opened in Chrome on Mac · Active now').waitFor();
  assert.equal(await page.evaluate(()=>(window as any).worldletPhoneMessage({type:'chat',id:'c1',text:'What is next?'})),true);
  assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentChat').length),1,'a repeated delivery runs once');
  assert.equal(await page.evaluate(()=>(window as any).worldletPhoneMessage({type:'run',id:'x'})),true);
- // Attention messages carry the item's id: the host names each delivery (agent/windows phoneMessageKey), so Later then
+ // Attention messages carry the item's id: the host names each delivery (agent/base phoneMessageKey), so Later then
  // Done on one item both settle it, and only the same delivery again is taken once.
  const settles=()=>page.evaluate(()=>(window as any).calls.filter(c=>c.action==='worldItemStatus'&&c.id==='item-7').map(c=>c.status));
  for(const [action,key] of [['later','b:1'],['done','b:2'],['done','b:2']])

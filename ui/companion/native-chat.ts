@@ -9,7 +9,7 @@ import {mountAppletTaskResults} from './applet-task-results.ts';
 import {mountFoxProactive,arriveProactive} from './fox-proactive.ts';
 import {isDesktopCompanion,requireWorldSurface} from './world-surface.ts';
 import {errorFields,isRequestCancellation,reportEngagement,reportProductEvent} from '../shell/index.ts';
-import {FOX_RETRY_ACTION,FOX_RETRY_DELAY_MS,foxTurnFailureText,foxTurnRetry} from '../../agent/companion/index.ts';
+import {FOX_RETRY_ACTION,FOX_RETRY_DELAY_MS,foxTurnFailureText,foxTurnRetry} from '../../agent/fox/index.ts';
 import {contextThread,cleanRecall,FOX_MAIN_THREAD,restoredMainHistory} from '../attention/index.ts';
 import {foxVisibleText,guidedVisibleText} from './fox-visible-text.ts';
 import {modelFailure} from './model-failure.ts';
@@ -39,7 +39,7 @@ import {mountMicrophonePicker} from './microphone-picker.ts';
 import {createFoxTalk} from './fox-talk.ts';
 import {mountCompanionPortrait} from './companion-portrait.ts';
 import {foxTrace} from './fox-performance.ts';
-import {harnessUsageLabel} from '../../agent/agents/index.ts';
+import {harnessUsageLabel} from '../../agent/gate/index.ts';
 
 /** A line Fox said on its own (fox-proactive.ts), as opposed to a reply, question or notice. */
 const spokeFirstLine=(value:any)=>String(value?.source||'').startsWith('proactive:');
@@ -915,7 +915,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   const entryId=invitation||quiet?'':'turn:'+Date.now()+':'+turn;
   // A turn in which Fox does something (a tool runs) is a task beside Fox while it lasts (ui/hud/task-panel.ts).
   let taskShown=false;const turnTask=(step:string)=>{taskShown=true;window.dispatchEvent(new CustomEvent(FOX_STATUS_EVENT,{detail:{source:TURN_TASK_SOURCE,text:step,name:turnTaskName(shown)}}));};
-  // The paired phone shows the turn as it streams (agent/windows phoneLive): its steps and the reply so far.
+  // The paired phone shows the turn as it streams (agent/base phoneLive): its steps and the reply so far.
   const live=(text:string,done=false)=>{if(!entryId)return;root.dispatchEvent(new CustomEvent('worldlet:fox-live',{detail:{id:entryId,key:requestContext,user:thread.find(e=>e.id===entryId)?.user||shown,steps:thread.find(e=>e.id===entryId)?.steps||[],text,done}}));};
   try{
    activeView=recallKey(requestContext,requestView);

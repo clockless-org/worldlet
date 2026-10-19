@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
-// An Agent's ask on its Attention card (agent/agents/GRANTS.md#agent-asks): the card names the Agent, its choices are
+// An Agent's ask on its Attention card (agent/gate/GRANTS.md#agent-asks): the card names the Agent, its choices are
 // pills with an optional note, and Done and Dismiss settle the ask itself through the host's `agentAsk` answer, never
 // the ordinary item status. Bundled UI, faked bridge, fictional ask.
 await withBrowser(fileAccess,async browser=>{

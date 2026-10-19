@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {contextLayout} from '../context/sources/context-layout.ts';
-import {validateConversationHistory} from '../agent/companion/conversation-history.ts';
+import {validateConversationHistory} from '../agent/fox/conversation-history.ts';
 const original=contextLayout({themes:[{theme:'library'},{theme:'studio'}]});
 assert.deepEqual(original.places.map(p=>p.position),[[0,0,2],[0,0,17],[0,0,-13]]);
 const next=contextLayout({themes:[{theme:'library'},{theme:'studio'},{theme:'health'}],previous:JSON.stringify(original)});
@@ -112,7 +112,7 @@ assert.deepEqual([appletStatus({provider:'gmail'},snoozedLink(wakes-1)).phase,ap
 assert.deepEqual([appletStatus({provider:'gmail'},snoozedLink(wakes)).label,appletIndicator({provider:'gmail'},snoozedLink(wakes)).label],['Needs attention · 1 saved item needs attention','Needs attention']);
 console.log('PASS Applet concurrent reads, turn isolation, cancellation and persisted attention/error projection');
 
-import {updateOnboarding} from '../agent/onboarding/onboarding.ts';
+import {updateOnboarding} from '../agent/fox/onboarding.ts';
 import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
 const initialSetup={version:1,presets:['home'],completed:false};
 const placed=updateOnboarding(initialSetup,{operation:'region',region:'work',sourceIds:['s','s'],connectionIds:['c']});
@@ -150,7 +150,7 @@ assert.deepEqual(moved.unlockedApplets,['app-gmail','app-game-2048','app-random-
 assert.deepEqual(updateOnboarding({...firstFive,hiddenApplets:['app-breakout']},{operation:'offerGames'}).unlockedApplets,['app-gmail','app-game-2048'],'a removed Breakout keeps the Random game away too');
 console.log('PASS onboarding progress, placement, immutable inputs, Unicode notes, optional Applet roster and the one-time Games offer');
 
-import {recordBrowserVisit,searchBrowserHistory} from '../agent/browser/browser-history.ts';
+import {recordBrowserVisit,searchBrowserHistory} from '../agent/applets/browser-history.ts';
 const visits=[{url:'https://example.com/A',title:'Notebook',text:'paper',visitedAt:100},{url:'https://example.com/b',title:'Paper',text:'notebook',visitedAt:200}];
 assert.equal(recordBrowserVisit(visits,{...visits[0],visitedAt:250},[true,true]),null,'unchanged same-day snapshot is throttled');
 assert.equal(recordBrowserVisit(visits,{...visits[0],url:'https://example.com/a',visitedAt:250},[true,true]).length,3,'URL paths are case sensitive');

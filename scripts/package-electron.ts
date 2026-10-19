@@ -117,7 +117,7 @@ const options={
  // Runs once per architecture; `buildPath` is that architecture's staging root. It runs before packager signs (Mac,
  // after the universal merge) and before it edits Windows resources, so the fuses are flipped before any signature.
  afterCopyExtraResources:[async({buildPath,arch:target}:{buildPath:string,arch:string})=>{cpSync(staged[target==='x64'?'x64':'arm64'],platform==='darwin'?path.join(buildPath,'Worldlet.app/Contents/Resources'):path.join(buildPath,'resources'),{recursive:true});placeEngine(buildPath,target==='x64'?'x64':'arm64');await flipAppFuses(buildPath,platform,arch!=='universal');}],
- // http and https as URL types, so the default browser setting can offer Worldlet (agent/distribution/default-browser.ts).
+ // http and https as URL types, so the default browser setting can offer Worldlet (agent/base/default-browser.ts).
  // Declaring them changes nothing until a person turns the setting on and confirms the Mac's prompt.
  protocols:platform==='darwin'?[{name:'Web page',schemes:['http','https']}]:undefined,
  extendInfo:platform==='darwin'?{

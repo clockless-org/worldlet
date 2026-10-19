@@ -72,7 +72,7 @@ export function mountLocalMusic(call:(action:string,body:any)=>Promise<any>){
  };
 }
 
-/** Fox's control_local_music (agent/tools/controls.ts) through the same host requests as the corner. */
+/** Fox's control_local_music (agent/gate/controls.ts) through the same host requests as the corner. */
 export async function runLocalMusicTool(call:(action:string,body:any)=>Promise<any>,args:any){
  const operation=String(args?.operation||'status');
  try{

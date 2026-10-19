@@ -1,4 +1,4 @@
-/** Remote access, folded at the foot of Settings › Agents (issue #674; agent/agents/REMOTE-MCP.md, host `remoteMcp`): while it is on,
+/** Remote access, folded at the foot of Settings › Agents (issue #674; agent/gate/REMOTE-MCP.md, host `remoteMcp`): while it is on,
  * Agents in the cloud (a ChatGPT, Claude or Cursor connector, a cloud Agent session) can reach this World at its
  * address, each only after the person allows it on a card in Attention, and then as an Agent of its own in the list above.
  * Turn off stops the address answering; New address ends every connection. The address is the one thing here the
@@ -73,7 +73,7 @@ export async function showRemoteAccess(target:HTMLElement,call:(action:string,bo
  await draw();
 }
 
-/** "Use your World in Claude or ChatGPT", on Settings › Agents under the list of Agents (issue #674; agent/agents/REMOTE-MCP.md#connect-a-connector): the
+/** "Use your World in Claude or ChatGPT", on Settings › Agents under the list of Agents (issue #674; agent/gate/REMOTE-MCP.md#connect-a-connector): the
  * steps to add this World to Claude or ChatGPT in plain words, with Copy address. The address itself is not shown:
  * the person only pastes it. Hidden on a host without Remote access. */
 export async function showUseInClaude(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){

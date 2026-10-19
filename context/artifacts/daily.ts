@@ -43,7 +43,7 @@ export function readDailyRoutines(value:unknown):DailyRoutines {
 }
 
 /** Kept per World in the page's storage. `used` is the last time the person used Worldlet on each day. A kept brief or
- * summary does not open the Journal by itself: it arrives as an Attention item (agent/agents/harness-schedule.ts
+ * summary does not open the Journal by itself: it arrives as an Attention item (agent/gate/harness-schedule.ts
  * `dailyScheduleResult`), so an older `journal` field is dropped. */
 export type DailyArtifactsState={used:Record<string,number>;plan:string[];summary:string[]};
 export type DailyArtifactKind='plan'|'summary';

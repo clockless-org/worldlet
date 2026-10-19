@@ -1,9 +1,9 @@
-/** GitHub drafts (agent/agents/GRANTS.md#github-drafts): a change on GitHub an Agent prepares and the person approves. An
+/** GitHub drafts (agent/gate/GRANTS.md#github-drafts): a change on GitHub an Agent prepares and the person approves. An
  * Agent drafts it through the `worldlet` MCP server; the host reads the target as it is now and keeps that beside the
  * draft. Nothing is written until the person chooses Approve on the draft's Attention card. Then the host reads the
  * target again, refuses when it changed since the draft (its state, its updatedAt, or it is gone), and otherwise writes
  * once as the person's GitHub App. Hosts own IDs, clocks, storage and the network; Core decides
- * (agent/agents/github-drafts.ts). */
+ * (agent/gate/github-drafts.ts). */
 
 /** What a draft writes. `issue.create`: a new Issue in `repo`. `issue.comment`: a comment on an Issue or pull request.
  * `labels.add` and `labels.remove`: labels on an Issue or pull request. `labels.set`: a label transition on an Issue or
@@ -88,7 +88,7 @@ export const GITHUB_DRAFT_ACTIONS=Object.freeze({create:'github-drafts/create',r
  * one is given) and `set` (what they become): `{prefix:'state:',expected:['state:queued'],set:['state:running']}`. */
 export interface GithubDraftCreate {write:GithubWrite;target:string;title?:string;body?:string;labels?:string[];prefix?:string;expected?:string[];set?:string[]}
 
-/** Standing GitHub writes (agent/agents/GRANTS.md#standing-github-writes): writes one Agent may run on one repository
+/** Standing GitHub writes (agent/gate/GRANTS.md#standing-github-writes): writes one Agent may run on one repository
  * without a card, under a Grant the person gives it in Settings › Agents. Only a comment and a label transition
  * under one prefix: never a new Issue, closing or reopening. */
 export type GithubStandingWrite='issue.comment'|'labels.set';

@@ -1,12 +1,12 @@
 import {session,type Cookie,type Session} from 'electron';
-import {COOKIE_SYNC,cookieKey,cookiePlan,cookieUrl,isHostCookie,queueCookieChange,readSyncCookie,type SyncCookie} from '../../../../../agent/browser/index.ts';
+import {COOKIE_SYNC,cookieKey,cookiePlan,cookieUrl,isHostCookie,queueCookieChange,readSyncCookie,type SyncCookie} from '../../../../../agent/applets/index.ts';
 import type {WebEngine} from './engine/process.ts';
 
 type Scope='personal'|'practice';
 const partition=(scope:Scope)=>scope==='practice'?'persist:website-practice':'persist:website';
 const bridges=new Map<Scope,CookieBridge>();
 
-/** The bridge of a world's website storage, made once per world (agent/browser/cookie-sync.ts says what it does). */
+/** The bridge of a world's website storage, made once per world (agent/applets/cookie-sync.ts says what it does). */
 export function cookieBridge(scope:Scope,engine:WebEngine):CookieBridge {
  let bridge=bridges.get(scope);
  if(!bridge){bridge=new CookieBridge(scope,engine,session.fromPartition(partition(scope)));bridges.set(scope,bridge);}
@@ -18,7 +18,7 @@ const toEngine=(cookie:SyncCookie)=>({...cookie,url:cookieUrl(cookie),domain:isH
 
 /**
  * Keeps Electron's website storage and the CEF engine's alike for one world, so a sign-in on either engine holds
- * on the other (owner report 2026-10-08). Native IO only; the rules are agent/browser/cookie-sync.ts.
+ * on the other (owner report 2026-10-08). Native IO only; the rules are agent/applets/cookie-sync.ts.
  */
 export class CookieBridge {
  private readonly scope:Scope;

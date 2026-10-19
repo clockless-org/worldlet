@@ -6,12 +6,12 @@ import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/agent-access.ts';
 import {openStandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
 import {REMOTE_MCP_VAULT,createRemoteMcpHost} from '../platform/electron/src/modules/agent-runtime/remote-mcp.ts';
-import {serviceGranted} from '../agent/agents/grants.ts';
-import {MCP_HOST_PROTOCOL,REMOTE_MCP_LIMITS,readRemoteMcpRequest,remoteConsentItemId,remoteMcpRoom,validRedirect,wellKnownAddress} from '../agent/agents/remote-mcp.ts';
+import {serviceGranted} from '../agent/gate/grants.ts';
+import {MCP_HOST_PROTOCOL,REMOTE_MCP_LIMITS,readRemoteMcpRequest,remoteConsentItemId,remoteMcpRoom,validRedirect,wellKnownAddress} from '../agent/gate/remote-mcp.ts';
 import {roomDenied} from '../contracts/web-world.ts';
 import {projectWorldItems} from '../context/items/world-items.ts';
 
-// Remote MCP on the host (agent/agents/REMOTE-MCP.md), the same modules the Electron and Node hosts run, with the front
+// Remote MCP on the host (agent/gate/REMOTE-MCP.md), the same modules the Electron and Node hosts run, with the front
 // played by a fake WebSocket: turned on, the host opens the room as its host with its token; a cloud client discovers
 // OAuth, registers, is sent to the authorize page, which waits while the consent card waits in Attention; Allow hands
 // the page a code, the code and its PKCE verifier buy tokens, and the tokens reach the World tools as an Agent of its

@@ -11,7 +11,7 @@ import javax.crypto.spec.SecretKeySpec
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 
-// Phone pairing protocol v1, the Android half of agent/windows/pairing.ts (see agent/windows/README.md), the same as the
+// Phone pairing protocol v1, the Android half of agent/base/pairing.ts (see agent/base/README.md), the same as the
 // iPhone's Pairing.swift. The QR code carries a 32-byte secret; HKDF-SHA256 turns it into the relay pairing id, one
 // bearer token per side and the AES-256-GCM key that seals every payload. scripts/phone-pairing-check.ts,
 // PairingTests.swift and PairingTest.kt pin the same test vector.
@@ -40,7 +40,7 @@ data class PairLink(
     @Serializable(with = SecretSerializer::class) val secret: ByteArray,
     val relay: String = DEFAULT_RELAY,
     val name: String,
-    /** The pairing meets in the pairing room (agent/windows/README.md#room): the code said `m=room`, or the computer moved a
+    /** The pairing meets in the pairing room (agent/base/README.md#room): the code said `m=room`, or the computer moved a
      * relay pairing there. Absent from links kept before. */
     val room: Boolean = false,
 ) {
@@ -140,7 +140,7 @@ class PairKeys(secret: ByteArray) {
         /** "slot:attention", "to:desktop": the additional data binds a box to its pairing and place. */
         fun slot(name: String) = "slot:$name"
         fun to(role: String) = "to:$role"
-        /** The place of a notification's box (agent/windows, POST /notify): the additional data is `<id>|push`. */
+        /** The place of a notification's box (agent/base, POST /notify): the additional data is `<id>|push`. */
         const val PUSH = "push"
 
         /** RFC 5869 HKDF-SHA256 with the protocol's salt. */

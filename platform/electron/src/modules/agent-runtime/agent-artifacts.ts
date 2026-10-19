@@ -1,9 +1,9 @@
 import crypto from 'node:crypto';
 import {artifactId,readArtifact,type Artifact} from '../../../../../context/artifacts/index.ts';
-import {findAgentArtifacts,readAgentArtifactRead,readAgentArtifactSave,saveAgentArtifact} from '../../../../../agent/agents/index.ts';
+import {findAgentArtifacts,readAgentArtifactRead,readAgentArtifactSave,saveAgentArtifact} from '../../../../../agent/gate/index.ts';
 import type {Row} from './types.ts';
 
-// Agent artifacts (agent/agents/GRANTS.md#agent-artifacts). Core checks and decides; this keeps each artifact in the World's
+// Agent artifacts (agent/gate/GRANTS.md#agent-artifacts). Core checks and decides; this keeps each artifact in the World's
 // `artifacts` table (world.sqlite), where the Journal lists it like every other artifact, and tells the page it changed.
 
 /** The World's ledger, while it is the person's own World (not the practice World), writable, with private context. */

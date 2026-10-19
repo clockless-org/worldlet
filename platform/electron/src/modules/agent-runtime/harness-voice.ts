@@ -2,12 +2,12 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import type {HarnessVoice} from '../../../../../contracts/harness-services.ts';
-import {HARNESS_VOICE,harnessService,harnessVoiceArgs,harnessVoiceResult,harnessVoiceText} from '../../../../../agent/agents/index.ts';
+import {HARNESS_VOICE,harnessService,harnessVoiceArgs,harnessVoiceResult,harnessVoiceText} from '../../../../../agent/gate/index.ts';
 import {currentEnvironment,harnessEnvironment,locateLocalHarnesses,type HarnessEnvironment,type LocalHarnessInstall} from './local-harness.ts';
 import {runSendCommand,type SendCommand} from './harness-send.ts';
 
 // The `voice` Harness service (contracts/harness-services.ts HarnessVoice) for the local Harnesses that declare it
-// (agent/agents/harness-services.ts): one clip of Fox's reply synthesized by the person's own Agent into a private
+// (agent/gate/harness-services.ts): one clip of Fox's reply synthesized by the person's own Agent into a private
 // temporary folder, read back and removed. The World asks for the service, never for a Harness by name: one that
 // declares no `voice`, or is not installed here, gets null and Fox reads with a system voice.
 

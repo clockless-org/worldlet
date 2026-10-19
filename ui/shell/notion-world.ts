@@ -7,23 +7,23 @@ import {getApp,inAppletCatalog,recommendForArea,appletHost,curatedConnection,CUR
 import {observeWorldActivity,recordWorldActivity} from '../../platform/bridge/activity.ts';
 import {curatedOriginal,renderCuratedTable} from '../applets/index.ts';
 import {recordWorldCommand} from '../../platform/bridge/host.ts';
-import {firstValueRequest,firstValueLinks} from '../../agent/onboarding/index.ts';
-import {carriesConversation,worldSpeechTerms} from '../../agent/companion/index.ts';
+import {firstValueRequest,firstValueLinks} from '../../agent/fox/index.ts';
+import {carriesConversation,worldSpeechTerms} from '../../agent/fox/index.ts';
 import {helpNarration,narrateHelp} from '../companion/index.ts';
 import {createWorldUI} from './public-interface.ts';
 import {eventTrigger,reportAppletOpened,reportEngagement,reportProductEvent} from './product-analytics.ts';
 import {mountFoxArtifact,flyIntoJournal,artifactPageSpec,turnIntoDock} from '../artifacts/index.ts';
 import {node,textButton,worldletMark,uiIcon} from '../components/index.ts';
 import {readRetryDelay,sourceReadAction} from '../../context/applets/index.ts';
-import {attentionRequest,journalTarget} from '../../agent/agents/index.ts';
-import {FOCUS_RULES_REQUEST,browserEffectDecision,browserFinalStep,browserFollowThrough,typedAddress,webSite} from '../../agent/browser/index.ts';
+import {attentionRequest,journalTarget} from '../../agent/gate/index.ts';
+import {FOCUS_RULES_REQUEST,browserEffectDecision,browserFinalStep,browserFollowThrough,typedAddress,webSite} from '../../agent/applets/index.ts';
 import {quietSourceReader} from '../applets/index.ts';
 import {mountAttentionPreview,taskReviewLine} from '../attention/index.ts';
 import {attentionPreviewData,attentionLaterUntil} from '../../agent/attention/index.ts';
 import {mountPhoneBridge} from '../companion/index.ts';
 import {attentionBrief} from '../../agent/attention/index.ts';
 import {artifactFollowUpSent,artifactFollowUpRequest,type ArtifactFollowUpDraft,artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,dayKey,dailyArtifactDue,dailyPlanned,dailyArtifactRequest,firstPrepRequest,readDailyRoutines,DAILY_ROUTINES_ON,DAILY_ROUTINE_NAMES,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../context/artifacts/index.ts';
-import {timingBucket} from '../../agent/diagnostics/index.ts';
+import {timingBucket} from '../../agent/base/index.ts';
 import {applyRegionLayout,lastUse,readRegionLayout,parseRegionLayout,moveRegionApplet,pinRegionApplet,pinnedPlace,recordAppletUse,regionId,recentlyUsedFirst,storedRegionLayout} from '../world/index.ts';
 import {resolvePlacements,lampLabels,lampNeeds} from '../world/index.ts';
 import {WORLD_LAYOUT,THEME_SCENE,themeAreaMap} from '../world/index.ts';
@@ -64,7 +64,7 @@ import {appLogoSource} from '../applets/index.ts';
 import {eventWhen} from '../attention/index.ts';
 import {appletIndicator,myAppletKind,momentAppletId,siteAppletId,siteAppletPage,websiteAppletFor} from '../../context/applets/index.ts';
 import {appletStatus as appStatus,connectionLive} from '../../context/applets/index.ts';
-import {phoneWebAddress} from '../../agent/windows/index.ts';
+import {phoneWebAddress} from '../../agent/base/index.ts';
 import {applyModuleWorld,moduleStatus} from '../world/index.ts';
 import {createModuleScene} from '../world/index.ts';
 import {settleItemPage} from '../../context/items/index.ts';
@@ -260,7 +260,7 @@ export function mountNotionWorld(data: World, native: any) {
     }});
   window.addEventListener('worldlet:fox-idle',()=>{attentionOrigin=null;attentionOpening=null;if(carryPending){const next=carryPending;carryPending=null;setTimeout(()=>carryToApplet(next.from,next.to),0);}});
   /** The page in an Applet moved from one website to another (a link, or Fox's step). While the person and Fox are
-   * talking (agent/companion/conversation-place.ts, carriesConversation) the conversation goes with it: the new site
+   * talking (agent/fox/conversation-place.ts, carriesConversation) the conversation goes with it: the new site
    * continues the place it came from instead of starting its own (owner Order 2026-10-09). A page that belongs to
    * another website Applet in the World moves there, with its background and title; Fox's turn finishes first, so
    * its steps on the page are never cut off by the move. */
@@ -490,7 +490,7 @@ export function mountNotionWorld(data: World, native: any) {
    if(data.sample||areaSignalsReading||Date.now()-areaSignals.at<600_000)return;areaSignalsReading=true;
    const installed=native?.installedApplets?Promise.resolve(native.installedApplets()).then(r=>new Set<string>(Array.isArray(r?.keys)?r.keys:[]),()=>areaSignals.installed):Promise.resolve(areaSignals.installed);
    const visits=native?.visitedSites?Promise.resolve(native.visitedSites()).then(r=>r?.hosts&&typeof r.hosts==='object'?r.hosts:{},()=>areaSignals.visits):Promise.resolve(areaSignals.visits);
-   // What the person's own Agent suggested when it described itself (agent/agents/agent-profile.ts), kept on this computer.
+   // What the person's own Agent suggested when it described itself (agent/gate/agent-profile.ts), kept on this computer.
    const suggested=native?.agentSuggestions?Promise.resolve(native.agentSuggestions()).then(r=>new Set<string>(Array.isArray(r?.keys)?r.keys:[]),()=>areaSignals.suggested):Promise.resolve(areaSignals.suggested);
    void Promise.all([installed,visits,suggested]).then(([i,v,s])=>{areaSignals={installed:i,visits:v,suggested:s,at:Date.now()};}).finally(()=>{areaSignalsReading=false;});
   }
@@ -950,12 +950,12 @@ export function mountNotionWorld(data: World, native: any) {
     const memberIds=nativeHUD?.attentionMembers(item.worldItemId)||[item.worldItemId];
     for(const id of memberIds){
       if(data.sample){settleSampleItem(id,status);const saved=readSnoozes();if(snoozedUntil)saved[id]=snoozedUntil;else delete saved[id];native?.storage?.setItem('itemSnoozes',JSON.stringify(saved));}
-      // An Agent's ask (agent/agents/GRANTS.md#agent-asks) is answered on the host, which settles its item with it.
-      // A GitHub, PostHog or Notion draft the host already approved or dismissed (agent/agents/GRANTS.md#github-drafts): its
+      // An Agent's ask (agent/gate/GRANTS.md#agent-asks) is answered on the host, which settles its item with it.
+      // A GitHub, PostHog or Notion draft the host already approved or dismissed (agent/gate/GRANTS.md#github-drafts): its
       // item is settled.
       else if(hosted){}
       else if(ask){
-        // Approve on an ask that carries drafts approves them on the host first (agent/agents/GRANTS.md#agent-asks).
+        // Approve on an ask that carries drafts approves them on the host first (agent/gate/GRANTS.md#agent-asks).
         const asked=itemPage(id)?.worldItemAsk,askId=asked?.id,drafts=!!asked?.drafts&&ask.outcome==='answered'&&ask.choice==='Approve';
         const result=askId&&native?.agentAsk?await native.agentAsk(askId,ask.outcome,ask.choice,ask.note,drafts):null;
         if(!result?.ok){nativeHUD?.sync();throw Error(result?.error||'Could not answer this.');}
@@ -1054,7 +1054,7 @@ export function mountNotionWorld(data: World, native: any) {
       // The conversation shows an action's icon and title, never the prompt behind it.
       for(const [label,request]of suggestions)actions.push({id:'applet:assist:'+r.moduleId+':'+label,label,icon:'spark',placement:'contextual',kind:'navigation',run:()=>{voice?.setGuide?.(null);return voice?.ask(request,{displayText:label,icon:'spark'});}});
       // Clean up, on every website page in the personal world (owner request 2026-10-05): Fox saves which parts of the
-      // site Focus hides (agent/browser/page-focus.ts), at once and for every later visit.
+      // site Focus hides (agent/applets/page-focus.ts), at once and for every later visit.
       if(website&&native?.browser&&!data.sample)actions.push({id:'applet:focus-rules:'+r.moduleId,label:'Clean up',icon:'focus',placement:'contextual',kind:'navigation',run:()=>{voice?.setGuide?.(null);return voice?.ask(FOCUS_RULES_REQUEST,{displayText:'Clean up this page',icon:'focus'});}});
       if(data.sample&&r.key==='google-calendar')actions.push({id:'practice:tennis',label:'Plan tennis',icon:'calendar',placement:'contextual',kind:'navigation',run:reviewTennis});
       if(MONEY_READERS.includes(r.key)&&content.hidden){actions.push({id:'money:refresh:'+r.key,label:'Refresh',icon:'refresh',placement:'contextual',kind:'navigation',run:()=>showMoney(r)});if(r.key==='stripe'&&moneyConnections.get(r.key))actions.push({id:'stripe:disconnect',label:'Disconnect',icon:'link',placement:'contextual',kind:'navigation',run:async()=>{await native.stripe({operation:'disconnect'});localStageRecords.delete(r.key);showMoney(r);}});}
@@ -1240,7 +1240,7 @@ export function mountNotionWorld(data: World, native: any) {
     showDraftLine(page);voice?.setAttentionActions?.([]);
     return;
    }
-   // A connector asking to reach the World (agent/agents/REMOTE-MCP.md): Allow makes it an Agent of its own; Deny sends it
+   // A connector asking to reach the World (agent/gate/REMOTE-MCP.md): Allow makes it an Agent of its own; Deny sends it
    // away. Only this computer's pages can answer (not in ROOM_ALLOWED). The card names where it returns and the code
    // its waiting page shows.
    const consent=page.worldItemRemoteConsent&&page.worldItemRemoteConsent.status==='pending'&&!data.sample&&native?.remoteMcp?page.worldItemRemoteConsent:null;
@@ -1255,7 +1255,7 @@ export function mountNotionWorld(data: World, native: any) {
       const result=await native.remoteMcp(operation,consent.id);
       if(!result?.ok)throw Error(result?.error||'Could not do that.');
       await settleAttention(page,result.status==='allowed'?'done':'dismissed',null,{advance:true,hosted:true});
-      // A browser or a person at the World's own address (agent/agents/WORLD-ADDRESS.md).
+      // A browser or a person at the World's own address (agent/gate/WORLD-ADDRESS.md).
       if(consent.asks){notify(result.status!=='allowed'?'Declined. Nothing was shared.':consent.asks==='owner'?`${consent.client} can now open your World. Sign it out in Settings › Agent › Access.`:`${consent.client} can now see your ${consent.share||'board'}. Remove them in Settings › Agent › Access.`);return;}
       notify(result.status!=='allowed'?'Declined. Nothing was connected.'
        :operation==='allow'&&named?`${consent.client} can now reach your World and read your ${named}. Change what it may do in Settings › Agents.`
@@ -1268,7 +1268,7 @@ export function mountNotionWorld(data: World, native: any) {
     showDraftLine(page);voice?.setAttentionActions?.([]);
     return;
    }
-   // An Agent's first need of a Service (agent/agents/GRANTS.md#when-an-agent-first-needs-a-service): Allow gives it that
+   // An Agent's first need of a Service (agent/gate/GRANTS.md#when-an-agent-first-needs-a-service): Allow gives it that
    // Service's read Grant; Connect signs in to the Service first, then allows. Only this computer's pages (not in
    // ROOM_ALLOWED).
    const wanted=page.worldItemServiceRequest&&page.worldItemServiceRequest.status==='pending'&&!data.sample&&native?.serviceRequest?page.worldItemServiceRequest:null;
@@ -1685,7 +1685,7 @@ export function mountNotionWorld(data: World, native: any) {
   // once per World (a busy background session asks again at the next poll), not with Today's prep paused, and not
   // with Mail connected.
   // `data-first-card` tells the tour it is on its way (`preparing`), then `ready` or `failed`. Its steps are product
-  // events (agent/diagnostics/ANALYTICS.md#the-first-card): started, ready (with how it ended), shown and approved.
+  // events (agent/base/ANALYTICS.md#the-first-card): started, ready (with how it ended), shown and approved.
   const firstCardKey='worldlet-first-card-'+(data.workspaceId||data.workspace);
   let firstCardStarted=0,routinesKnown=!native?.dailyRoutines;
   const firstCardEvent=(event:string,dimensions:Record<string,string>={},duration='')=>window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event,dimensions,duration}}));
@@ -2270,7 +2270,7 @@ export function mountNotionWorld(data: World, native: any) {
   // The first-run tour's first value can be a conversation the person brought (ui/onboarding/first-value.ts).
   let firstValueOngoing:{list:()=>{id:string,title:string,say:string}[],make:(id:string)=>Promise<boolean>}|null=null;
   if(native){
-    // The paired iPhone mirrors the Center and talks to Fox through this page (agent/windows/README.md).
+    // The paired iPhone mirrors the Center and talks to Fox through this page (agent/base/README.md).
     let widgetsNow:any[]=[],phoneWorldLog:{lines:any[],now:any[]}={lines:[],now:[]};
     // Ongoing things (agent/tasks/README.md): proposals stand in Worth Doing as themes; each one kept earlier is a Thing of
     // its own, a device in the area Fox picked (app-job-…), with its own tile in the phone's Thing world and its own thread.
@@ -2320,7 +2320,7 @@ export function mountNotionWorld(data: World, native: any) {
      askItem:(id,text)=>{previewAttention({worldItemId:id});return voice?.ask(text,{origin:'user',displayText:text});},
      choose:id=>{if(id.startsWith('ongoing:'))return isOngoingThemeId(id.slice(8))?makeTheme(id.slice(8)):undefined;const page=itemPage(id);if(!page||!previewAttention({worldItemId:id}))return;return previewActions(page)[0]?.run();},
      itemFox:id=>{if(id.startsWith('ongoing:')){const theme=themesNow().find(t=>'ongoing:'+t.id===id);if(!theme)return null;return {say:theme.say,option:theme.option,turns:[]};}const page=itemPage(id);if(!page)return null;return {say:attentionPreviewData(page).suggestion,option:previewActions(page)[0]?.label||'',turns:voice?.threadOf?.('attention:'+id)||[]};},
-     // The Thing world (agent/windows phoneApplets): the Things in this World with their lamps, what each is doing, the
+     // The Thing world (agent/base phoneApplets): the Things in this World with their lamps, what each is doing, the
      // world log, the widgets for now and each Thing's thread. A line said in a Thing's page opens it here first.
      askApplet:async(key,text)=>{
       let r=sections.find(s=>s.entity==='app'&&s.key===key);

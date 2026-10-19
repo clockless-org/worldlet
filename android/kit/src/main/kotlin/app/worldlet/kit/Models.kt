@@ -18,7 +18,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.put
 
 // The payloads the desktop seals for the phone and the messages the phone sends back. They mirror
-// agent/windows/payloads.ts (and the iPhone's Models.swift); change them together.
+// agent/base/payloads.ts (and the iPhone's Models.swift); change them together.
 
 val WorldletJson = Json {
     ignoreUnknownKeys = true
@@ -81,7 +81,7 @@ data class AccountIssue(val provider: String, val title: String, val action: Act
     enum class Action { @SerialName("reconnect") Reconnect, @SerialName("permissions") Permissions }
 }
 
-/** One Applet in the phone's Applets tab (agent/windows/payloads.ts PhoneApplet): the section the list shows it in,
+/** One Applet in the phone's Applets tab (agent/base/payloads.ts PhoneApplet): the section the list shows it in,
  * its lamp, what it is doing or its status ([line]), its latest world log lines ([recent], newest last), the widget a
  * moment Applet opens (its key is `widget:<id>`), its own thread of Fox's conversation, and where one of the person's
  * own Applets came from ([mine]: `site`, `page` or `conversation`; null for a built-in one), so its row carries the mark
@@ -136,7 +136,7 @@ private open class LenientEnum<T : Enum<T>>(name: String, private val values: Li
 private object SectionSerializer : LenientEnum<PhoneApplet.Section>("app.worldlet.kit.PhoneApplet.Section", PhoneApplet.Section.entries, PhoneApplet.Section.Places)
 private object StateSerializer : LenientEnum<PhoneApplet.State>("app.worldlet.kit.PhoneApplet.State", PhoneApplet.State.entries, PhoneApplet.State.Off)
 
-/** One card of the computer's Task panel (agent/windows/payloads.ts PhoneTask): [name] and [status] are the card's words,
+/** One card of the computer's Task panel (agent/base/payloads.ts PhoneTask): [name] and [status] are the card's words,
  * [when] its time text ("In progress", "Tomorrow 6:00 AM"), [icon] its picture (`fox`, `clock` or an Applet's key),
  * [progress] how far it is (0 to 1) when the computer knows, [applet] the phone Applet the row opens, [every] and [by]
  * how often a routine runs and who runs it, and [lines] what a running task said, newest last. */
@@ -161,7 +161,7 @@ data class PhoneTask(
 @Serializable
 data class PhoneTasks(val now: List<PhoneTask> = emptyList(), val routines: List<PhoneTask> = emptyList())
 
-/** One of today's Journal cards (agent/windows/payloads.ts PhoneJournalEntry): an answer Fox showed or an Attention card
+/** One of today's Journal cards (agent/base/payloads.ts PhoneJournalEntry): an answer Fox showed or an Attention card
  * the person closed, with its brief or body as [text] and, for an Attention card, its [category] ("Worth Knowing"). */
 @Serializable
 data class JournalEntry(
@@ -242,7 +242,7 @@ data class Conversation(
     companion object { val Empty = Conversation() }
 }
 
-/** The person's own Agent asks before it acts (agent/windows/payloads.ts PhoneApproval, contracts/harness-services.ts
+/** The person's own Agent asks before it acts (agent/base/payloads.ts PhoneApproval, contracts/harness-services.ts
  * `approvals`): a dangerous command of Hermes Agent's, an exec request of OpenClaw's. It rides on the running turn; the
  * phone answers with [PhoneMessage.Approval], the same three choices as Fox's card on the computer. [offered] is what
  * the computer sent; [choices] the buttons. */
@@ -264,11 +264,11 @@ data class HarnessApproval(
     /** In the computer's order: a choice this version does not know is left out, and Deny is always there. */
     val choices: List<Choice> get() = Choice.entries.filter { it == Choice.Deny || it.wire in offered }
 
-    /** Clamped as agent/windows `phoneLive()` does, so a long line never fills the card. */
+    /** Clamped as agent/base `phoneLive()` does, so a long line never fills the card. */
     fun clamped() = copy(id = id.take(120), title = title.take(200), detail = detail.take(2000))
 }
 
-/** The turn Fox is on now, as it streams (agent/windows/payloads.ts PhoneLive): [steps] are its thinking, newest last,
+/** The turn Fox is on now, as it streams (agent/base/payloads.ts PhoneLive): [steps] are its thinking, newest last,
  * and [text] the reply so far. [item] is the Attention item whose card the turn was asked from, [applet] the Applet
  * whose page it was asked in; both null for the main conversation. [done] marks the finished reply; [approval] is what
  * the person's own Agent asks while it runs (absent from older computers and once answered or expired). */
@@ -295,7 +295,7 @@ data class LiveTurn(
     fun shown(seconds: Long): Boolean = done || seconds < if (approval != null) 600 else 90
 }
 
-/** The computer's own slot. `order` is true while it takes Orders (agent/windows PhoneDesktop): the dock shows its Order
+/** The computer's own slot. `order` is true while it takes Orders (agent/base PhoneDesktop): the dock shows its Order
  * button. `push` is true when the computer keeps this phone's notification token itself, so the relay keeps none, and
  * `room` when it waits in the pairing room, where the pairing then moves. All are absent from computers that don't. */
 @Serializable
@@ -305,7 +305,7 @@ data class DesktopInfo(val v: Int = 1, val at: String = "", val name: String = "
 @Serializable
 data class PhoneInfo(val v: Int = 1, val name: String, val version: String)
 
-/** A notification the computer sends while this phone is closed (agent/windows/payloads.ts PhonePush), sealed for the
+/** A notification the computer sends while this phone is closed (agent/base/payloads.ts PhonePush), sealed for the
  * place "push" and carried by the relay to Firebase Messaging as `{p: pairing id, b: box}`. [open] is where a tap on it
  * opens the app; [target] reads it. */
 @Serializable
@@ -333,12 +333,12 @@ data class PhonePush(
             ?: PushTarget.Conversation.takeIf { o.conversation == true }
     }
 
-    /** What the buttons answer (agent/windows/payloads.ts PhonePushAct): [attention] an item's id (Done, Later), [reply] an
+    /** What the buttons answer (agent/base/payloads.ts PhonePushAct): [attention] an item's id (Done, Later), [reply] an
      * inline reply where [open] points, [approval] a request's id (Allow once when [once], and Deny). */
     @Serializable
     data class Act(val attention: String? = null, val reply: Boolean? = null, val approval: String? = null, val once: Boolean? = null)
 
-    /** The buttons on the notification, in the order they show; the first set the push carries, as agent/windows reads it. */
+    /** The buttons on the notification, in the order they show; the first set the push carries, as agent/base reads it. */
     val actions: List<PushAction> get() = act?.let { a ->
         when {
             !a.attention.isNullOrEmpty() -> listOf(PushAction.Done, PushAction.Later)
@@ -370,17 +370,17 @@ data class PhonePush(
         }
     }
 
-    /** Clamped as agent/windows `phonePush()` does, so a long line never reaches the shade. */
+    /** Clamped as agent/base `phonePush()` does, so a long line never reaches the shade. */
     fun clamped() = copy(title = title.trim().take(TITLE_LIMIT), body = body.trim().take(BODY_LIMIT),
         act = act?.let { it.copy(attention = it.attention?.take(200), approval = it.approval?.take(120)) })
 
-    /** agent/windows/payloads.ts PHONE_PUSH_LIMITS. */
+    /** agent/base/payloads.ts PHONE_PUSH_LIMITS. */
     companion object { const val TITLE_LIMIT = 80; const val BODY_LIMIT = 240 }
 }
 
 private object PushKindSerializer : LenientEnum<PhonePush.Kind>("app.worldlet.kit.PhonePush.Kind", PhonePush.Kind.entries, PhonePush.Kind.Task)
 
-/** A button on a notification (agent/windows/README.md, Push › Actions); [label] is what it says. */
+/** A button on a notification (agent/base/README.md, Push › Actions); [label] is what it says. */
 enum class PushAction(val wire: String, val label: String) {
     Done("done", "Done"), Later("later", "Later"), Reply("reply", "Reply"), Allow("allow", "Allow once"), Deny("deny", "Deny");
 
@@ -438,15 +438,15 @@ sealed interface PhoneMessage {
     /** What happened on a website opened in this app's own browser (owner request 2026-10-07): the page observer's
      * reports, which the computer keeps in its World by its own recording rules. */
     data class Web(override val id: String, val applet: String, val records: List<WebReport>) : PhoneMessage
-    /** The person's answer to the approval riding on the live turn (agent/windows PhoneMessage `approval`). */
+    /** The person's answer to the approval riding on the live turn (agent/base PhoneMessage `approval`). */
     data class Approval(override val id: String, val approval: String, val choice: HarnessApproval.Choice) : PhoneMessage
-    /** One part of a photo or file attached with "+" (owner request 2026-10-12; agent/windows PhoneMessage `file`): [data]
+    /** One part of a photo or file attached with "+" (owner request 2026-10-12; agent/base PhoneMessage `file`): [data]
      * is a slice of the whole file's base64, sent before the line that names [file]. */
     data class File(override val id: String, val file: String, val part: Int, val parts: Int, val name: String, val mime: String, val data: String) : PhoneMessage
     /** A line with attached files (each sent before as [File] parts), in the main conversation, an item's card ([item])
      * or an Applet's page ([applet]). */
     data class Attach(override val id: String, val text: String, val files: List<String>, val item: String? = null, val applet: String? = null) : PhoneMessage
-    /** This phone's notification token for a computer that keeps it (agent/windows PhoneMessage `push`); empty takes it back. */
+    /** This phone's notification token for a computer that keeps it (agent/base PhoneMessage `push`); empty takes it back. */
     data class Push(override val id: String, val platform: String, val token: String) : PhoneMessage
 
     fun toJson(): JsonObject = buildJsonObject {
@@ -484,7 +484,7 @@ sealed interface PhoneMessage {
 
 /**
  * One report from the page observer (platform/bridge/web-record.js, copied to assets/web-record.js) on a website opened
- * in this app's browser, with this phone's time in seconds (agent/windows/payloads.ts PhoneWebRecord). The observer never
+ * in this app's browser, with this phone's time in seconds (agent/base/payloads.ts PhoneWebRecord). The observer never
  * reports passwords, card numbers or one-time codes, and says `private` when a page shows such a field.
  */
 @Serializable
@@ -555,7 +555,7 @@ class WebReportBuffer(val applet: String) {
     }
 }
 
-/** A photo or file attached with "+": split into [PhoneMessage.File] parts that each fit a sealed box (agent/windows
+/** A photo or file attached with "+": split into [PhoneMessage.File] parts that each fit a sealed box (agent/base
  * PHONE_LIMITS `filePart`, base64 characters), sent before the line that names [file]. */
 class PhoneAttachment(val name: String, val mime: String, val bytes: ByteArray, val file: String = java.util.UUID.randomUUID().toString().replace("-", "")) {
     fun messages(id: () -> String): List<PhoneMessage.File> {

@@ -1,10 +1,10 @@
 import type {SurfaceRect} from '../../contracts/browser-surface.ts';
 import {getApp} from '../../context/applets/index.ts';
-import {PICTURE_IN_PICTURE,pictureInPicturePlacement,pictureInPictureShare,pictureInPictureShows,tabApplet} from '../../agent/browser/index.ts';
+import {PICTURE_IN_PICTURE,pictureInPicturePlacement,pictureInPictureShare,pictureInPictureShows,tabApplet} from '../../agent/applets/index.ts';
 import {appHudIcon} from '../applets/index.ts';
 import {node,uiIcon} from '../components/index.ts';
 
-// Picture in picture in the World (agent/browser/picture-in-picture.ts). The host's page is a
+// Picture in picture in the World (agent/applets/picture-in-picture.ts). The host's page is a
 // native view above this HTML, so the controls sit around it: a bar above the video and a thin
 // rim, sized here so the frame's slot is exactly the 16:9 video the host draws.
 const RIM=6,BAR=32,CHROME={top:RIM+BAR,right:RIM,bottom:RIM,left:RIM};

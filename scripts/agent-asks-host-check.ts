@@ -7,14 +7,14 @@ import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/agent-access.ts';
 import {createAgentAsks} from '../platform/electron/src/modules/agent-runtime/agent-asks.ts';
 import {createAgentOrders} from '../platform/electron/src/modules/agent-runtime/agent-orders.ts';
-import {ORDER_REASONS} from '../agent/agents/orders.ts';
+import {ORDER_REASONS} from '../agent/gate/orders.ts';
 import {DatabaseSync} from 'node:sqlite';
 import {openStandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
-import {STANDING_OUTSIDE_TURN} from '../agent/agents/grants.ts';
-import {ASK_REASONS,askItemId} from '../agent/agents/asks.ts';
-import {HERMES_CHANNEL_READ_ONLY} from '../agent/agents/hermes-server.ts';
+import {STANDING_OUTSIDE_TURN} from '../agent/gate/grants.ts';
+import {ASK_REASONS,askItemId} from '../agent/gate/asks.ts';
+import {HERMES_CHANNEL_READ_ONLY} from '../agent/gate/hermes-server.ts';
 
-// Agent asks on the host (agent/agents/GRANTS.md#agent-asks), the same modules the Electron and Node hosts run: each ask
+// Agent asks on the host (agent/gate/GRANTS.md#agent-asks), the same modules the Electron and Node hosts run: each ask
 // and its Attention item in world.sqlite, reached only through the standing `worldlet` MCP server with each Agent's
 // own token and Grants. A granted Agent posts and reads only its own; an ungranted one is refused; claims hold a lease
 // and resolve names the revision; the person's answer reaches the Agent's next read; every call and answer is audited.
@@ -143,7 +143,7 @@ await withTempDir('worldlet-asks-',async dir=>{
    assert.equal(ledger.agentAskAttachment(askId,'att-1',0,8)!.length,8);
   }
 
-  // Orders and waking an Agent (agent/agents/GRANTS.md#orders-and-waking-an-agent).
+  // Orders and waking an Agent (agent/gate/GRANTS.md#orders-and-waking-an-agent).
   {
    const out=path.join(dir,'woken.txt'),script=path.join(dir,'wake.mjs'),sleeper=path.join(dir,'sleep.mjs');
    fs.writeFileSync(script,"import fs from 'node:fs';fs.appendFileSync(process.argv[3],process.argv.slice(2).join(' ')+'\\n');console.log('not kept');");
