@@ -1,4 +1,4 @@
-import {characters} from '../../core/companion/index.ts';
+import {characters} from '../items/index.ts';
 import type {Knowledge} from './context-validation.ts';
 
 /** Merge validated chunks in source order. Host IO owns caches and revision fencing. */

@@ -1,4 +1,4 @@
-import {utf8Length} from './companion-text.ts';
+import {utf8Length} from '../../context/items/index.ts';
 import type {CompanionArchive} from '../../contracts/companion.ts';
 /** Explicit user edits pin a memory section; runtime checkpoints cannot undo them. */
 export function applyMemoryEdits(archive:CompanionArchive,edits:unknown):CompanionArchive {

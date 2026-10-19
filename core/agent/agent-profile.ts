@@ -4,6 +4,8 @@
 // ~/.openclaw, a password vault, a mailbox it runs, the channels it answers in) and what its person does with it. The
 // answer only adds to what the files brought: where things are, its connections and channels, and Applets worth having.
 // It runs on the person's own Agent and stays on this computer; nothing in it may be a secret.
+import {looksSecret} from '../../context/items/index.ts';
+export {looksSecret};
 
 export const AGENT_PROFILE_SCHEMA='worldlet.agent-profile/v1';
 /** Agents asked; others keep only what their files hold. */
@@ -76,12 +78,6 @@ export function agentProfilePrompt(catalog:readonly string[],conversations:reado
  ].join('\n\n');
 }
 
-/** A string that may be a credential: never kept, whatever field it is in. */
-export function looksSecret(text:string):boolean {
- return /\b(?:sk-[A-Za-z0-9_-]{12,}|sk_(?:live|test)_[A-Za-z0-9]{8,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_\w{20,}|xox[abprs]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{30,}|ya29\.[0-9A-Za-z_-]{20,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,})/.test(text)
-  ||/-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(text)||/\bBearer\s+[A-Za-z0-9._~+/-]{16,}/i.test(text)
-  ||text.split(/\s+/).some(word=>/^[A-Za-z0-9+_=-]{40,}$/.test(word)&&/\d/.test(word)&&/[A-Za-z]/.test(word));
-}
 
 const text=(value:unknown,limit:number):string|undefined=>{
  if(typeof value!=='string')return undefined;

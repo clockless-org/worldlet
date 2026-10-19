@@ -1,5 +1,5 @@
 import type {FoxHostRequest,FoxHostAction} from '../../contracts/fox.ts';
-import {utf8Length} from './companion-text.ts';
+import {utf8Length} from '../../context/items/index.ts';
 /** Reject malformed requests identically in Mac, Windows and shared UI.
  * Client scope/history never authorizes private access; hosts resolve their own scope. */
 export function readFoxHostRequest(input:unknown):FoxHostRequest {

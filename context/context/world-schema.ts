@@ -1,4 +1,4 @@
-import {utf8Length} from '../../core/companion/index.ts';
+import {utf8Length} from '../items/index.ts';
 export const THEMES={home:'Life & home',library:'Reading & learning',studio:'Creation & projects',factory:'Code & GitHub projects',cafe:'Friends & connections',family:'Family & growth',calendar:'Calendar & plans',finance:'Budget & planning',archive:'Sources & collections',rocket:'Travel & exploration',health:'Movement & rest',vision:'Wishes & future'};
 export const EMPTY_OVERLAY=()=>({version:1,created:{},edits:{},trash:{},receipts:{},undo:null});
 export function validateOverlay(s: any){

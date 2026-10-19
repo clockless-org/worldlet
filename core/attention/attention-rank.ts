@@ -1,3 +1,5 @@
+import {attentionArrivedAt,recordInstant as instant,type AttentionRankItem} from '../../context/items/index.ts';
+export {attentionArrivedAt};
 import type {AttentionWorkflow} from '../../contracts/attention.ts';
 /** Attention ranking signals (#1152, owner decision 2026-10-01). Importance first, then fit with
  * the moment; within those, explicit unfinished obligations and deadlines come before the
@@ -12,22 +14,8 @@ export const attentionDeadlineHours=72;
  * long past and an event that is over rank lower. It weighs order and focus admission, never hides
  * or settles an item, and every time is a trusted record (mail receipt, extracted due date, event time). */
 export const attentionTimeliness={urgentHours:24,recentOverdueDays:3,lapsedDays:14,freshHours:48,staleDays:14,oldDays:30,eventGraceMinutes:60} as const;
-export type AttentionRankItem={state?:string;dueAt?:unknown;placement?:unknown;unread?:unknown;receivedAt?:unknown;occurredAt?:unknown;sourceUpdatedAt?:unknown;start?:unknown;end?:unknown;allDay?:unknown};
+export type {AttentionRankItem};
 const day=86400000;
-/** A calendar date alone is the viewer's local day: it starts at local midnight, and as a due date
- * it lasts until the end of that day. */
-function instant(value:unknown,endOfDay=false):number {
- if(typeof value==='number')return value;
- if(typeof value!=='string')return NaN;
- const date=/^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
- return date?new Date(+date[1],+date[2]-1,+date[3]+(endOfDay?1:0)).getTime()-(endOfDay?1:0):Date.parse(value);
-}
-/** When the evidence arrived: the mail receipt the reader reports, else when the source says it
- * happened or changed. Never the local first observation: a first sync observes a whole backlog at once. */
-export function attentionArrivedAt(item:AttentionRankItem):number {
- for(const value of [item.receivedAt,item.occurredAt,item.sourceUpdatedAt]){const t=instant(value);if(Number.isFinite(t)&&t>0)return t;}
- return NaN;
-}
 /** An event (or dated matter) that has finished: its end, else its start plus a short grace
  * (a whole day for an all-day date), is behind us. */
 export function attentionOver(item:AttentionRankItem,now:number):boolean {

@@ -1,4 +1,5 @@
-import {characters} from './companion-text.ts';
+import {agentReplyFailed,characters} from '../../context/items/index.ts';
+export {agentReplyFailed};
 
 /** Fox speaks first (owner request 2026-10-06: "更主动更 helpful", modelled on Poke). At a natural pause
  * Worldlet asks Fox whether one line is worth saying now; most of the time the answer is no and
@@ -242,9 +243,6 @@ export function proactiveToolAllowed(event:{name?:unknown;args?:unknown}):boolea
 /** Hermes Agent answers a provider failure with its error as the reply (a completed response, not a failed one), e.g.
  * "ChatGPT or Codex Subscription rejected the request and retrying won't help. Pick another model with /model, …"
  * (owner Order 2026-10-10, Discord), or a model the account no longer accepts (HTTP 400, Applet analysis 2026-10-11). */
-const AGENT_FAILURE=/rejected the request and retrying won['’]t help|^\W*\s*(?:non-retryable (?:client )?error|api (?:call )?failed|provider authentication failed|rate limited after \d+ retries|the model provider (?:rejected|failed|is rate-limiting))/i;
-/** Whether an Agent's final reply is its own provider error rather than an answer. */
-export function agentReplyFailed(message:unknown):boolean {return AGENT_FAILURE.test(String(message??'').trim());}
 /** `[card:ID]` at the end of a line: the Attention item the line is about (proactiveTask). */
 const CARD_MARK=/\s*\[card:\s*([^\]\s]{1,200})\s*\]/gi;
 /** The Attention item Fox's line points to, as Fox wrote it; the host keeps it only if that item is open in the World. */

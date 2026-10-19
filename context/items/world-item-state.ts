@@ -1,4 +1,4 @@
-import {characters} from '../../core/companion/index.ts';
+import {characters} from './text.ts';
 
 import type {WorldItem as Item} from '../../contracts/world-item.ts';
 import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
