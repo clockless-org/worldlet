@@ -5,7 +5,7 @@ import {googleConsentActions,googleConsentUrl} from './google-consent.ts';
 import {connectionGuide} from '../applets/index.ts';
 import {WORLD_PRESETS} from '../world/index.ts';
 import {connectorTiles} from '../../context/accounts/index.ts';
-import {copyAndOpen,listenForSignInCode} from '../companion/index.ts';
+import {copyAndOpen,listenForSignInCode} from '../settings/index.ts';
 const el=(tag: string,text?: string,cls?: string): any=>Object.assign(document.createElement(tag),{...(text==null?{}:{textContent:text}),className:cls||''});
 const providerTitle=p=>getApp(p)?.title||{google:'Google','google-drive':'Google Drive',folder:'Local folder'}[p];
 const suggestions={home:[...HOME_NATIVE],work:[],library:['notion'],money:[],health:[],travel:[],people:[]};
@@ -98,7 +98,7 @@ export function mountWorldOnboarding({root,call,view,state:initial,toggleSample,
   else{
    view.setGuide({text:connecting+' '+(local?'Allow access when macOS asks.':token?'Checking the token with one read.':'Finish the sign-in, then come back here.'),actions:local||token?[]:[cancel],takeover:true});
    // A service that gives a code to type on its own page (GitHub): the code, large, and one button that copies it and
-   // opens the page (ui/companion/sign-in-code.ts).
+   // opens the page (ui/settings/sign-in-code.ts).
    if(!local&&!token)stopStages=listenForSignInCode(provider,code=>{
     const title=providerTitle(provider)||provider,open=button('Copy and open '+title,()=>{});
     open.onclick=()=>void copyAndOpen(call,code).then(text=>{open.textContent='Copied';view.setGuide({text:'**Your '+title+' code: '+code.code+'** '+text,actions:[open,cancel],takeover:true});},()=>{});

@@ -9,7 +9,7 @@ import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/
 import {createHarnessApprovalRules} from '../platform/electron/src/modules/fox/harness-approvals.ts';
 import {AGENT} from '../platform/electron/src/host/services.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {permissionLine,showAgentPermissions} from '../ui/companion/agent-permissions.ts';
+import {permissionLine,showAgentPermissions} from '../ui/settings/agent-permissions.ts';
 import {approvalResultBody,approvalResultText} from '../ui/companion/fox-harness-approval.ts';
 import {withTempDir} from './test-temp.ts';
 

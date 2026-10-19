@@ -1,4 +1,4 @@
-// Settings › Connectors (ui/companion/connectors-page.ts) against a fake host: one tile per sign-in service with
+// Settings › Connectors (ui/settings/connectors-page.ts) against a fake host: one tile per sign-in service with
 // Connect, the waiting state with Cancel, Connected with Disconnect that asks once, a plain line when a sign-in did not
 // finish or the service signed the person out, key services shown once connected, and every key, address and file
 // under Advanced. Fails when the default path (everything outside Advanced) shows a technical word
@@ -13,7 +13,7 @@ await withBrowser(async browser=>{
  await page.setContent('<!doctype html><title>Worldlet connectors settings check</title><main class="native-console" style="max-width:640px;margin:20px auto;font:14px system-ui;--control-fill:#f0f3ed;--control-ink:#203b30;--hud-paper-ink:#203b30;--hud-muted:#5b6b60;--ui-font-ui:system-ui"><h4>Connectors</h4><div id="settings"></div></main>');
  await page.addStyleTag({content:fs.readFileSync('ui/companion/companion-panel.css','utf8')});
  await page.addStyleTag({content:fs.readFileSync('ui/components/hud.css','utf8')});
- await page.addScriptTag({content:await bundleScript({entryPoints:['ui/companion/connectors-page.ts'],globalName:'ConnectorsPage'})});
+ await page.addScriptTag({content:await bundleScript({entryPoints:['ui/settings/connectors-page.ts'],globalName:'ConnectorsPage'})});
  await page.evaluate(async()=>{
   const w=window as any;w.calls=[];w.connections=[{provider:'github',label:'GitHub',transport:'hermes',syncStatus:'connected',connected:true,failed:false}];
   w.pending=null;w.refuse=null;w.chosen='2';w.opened=[];w.copied=[];

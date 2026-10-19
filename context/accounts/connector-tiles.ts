@@ -1,4 +1,4 @@
-// Settings › Connectors (ui/companion/connectors-page.ts): one tile per service, its state and its words, decided here
+// Settings › Connectors (ui/settings/connectors-page.ts): one tile per service, its state and its words, decided here
 // from the World's connection rows so every host shows the same thing. Plain words only on this path
 // (CONNECTOR_TECHNICAL_WORDS); keys and addresses live under Advanced.
 import {CONNECTORS,plainConnectorText,type Connector} from './connectors.ts';

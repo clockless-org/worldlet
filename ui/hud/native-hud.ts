@@ -131,7 +131,7 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
  let updateBusy=false;
  const syncUpdate=()=>{const value=updates?.snapshot();updateButton.hidden=!value?.visible;updateButton.disabled=updateBusy||!value?.enabled;updateButton.textContent=value?.label||'Update';updateButton.title=value?.detail||'Update Worldlet';};
  updateButton.onclick=async()=>{if(updateBusy||updateButton.disabled)return;updateBusy=true;syncUpdate();try{await updates.activate();}catch(error){updates.failure?.(error);}finally{updateBusy=false;syncUpdate();}};
- // Settings live in the companion panel (ui/companion/companion-settings.ts); the World lends it the
+ // Settings live in the companion panel (ui/settings/companion-settings.ts); the World lends it the
  // sample world switch and which host features exist.
  root.companionSettingsHost={toggleSample,sample:()=>!!sample(),localDataDeletion:()=>!!hostFeatures(snapshot().data).localDataDeletion};
  root.append(brand);

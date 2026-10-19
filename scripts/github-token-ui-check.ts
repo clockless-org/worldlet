@@ -1,5 +1,5 @@
 // Connecting GitHub from the World (ui/onboarding/world-onboarding.ts): by default it signs in with GitHub's code, shown
-// in Fox's bubble with Copy and open GitHub (ui/companion/sign-in-code.ts). Under Advanced, GitHub with a key
+// in Fox's bubble with Copy and open GitHub (ui/settings/sign-in-code.ts). Under Advanced, GitHub with a key
 // (TOKEN_PROVIDERS) shows one password field with the access it needs; what is pasted goes to the host's `connect`
 // once, is cleared from the page at once and never shows in the guide; a refused token says why and asks again.
 import assert from 'node:assert/strict';
