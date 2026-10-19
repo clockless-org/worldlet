@@ -1,5 +1,5 @@
 import {WebRecorder,type RecordSink} from '../applets/recorder.ts';
-import type {PhoneMessage} from '../../../../../agent/base/index.ts';
+import type {PhoneMessage} from '../../../../web/index.ts';
 
 const WEEK=7*86400;
 

@@ -2,7 +2,7 @@
 
 Worldlet with no screen: a plain Node process for Linux and any computer without a display. It runs the same host
 modules as the [Electron host](../electron/README.md) that work without a window, so Attention reading, routines, the
-standing `worldlet` MCP server for Hermes Agent and the [browser link](../../agent/base/README.md#web) run as they do
+standing `worldlet` MCP server for Hermes Agent and the [browser link](../web/README.md#web) run as they do
 in the desktop app, and a phone or any web browser reaches this computer through the pairing room. The World itself,
 the same 3D World page the app shows, opens in a web browser on this computer.
 
@@ -57,7 +57,7 @@ without it.
 On start it makes the browser link once (a restart keeps it) and writes it to `room-link.txt` in the library
 (owner-only). The log says only that the link is ready and where that file is: the link is the pairing secret, and
 anyone who has it reaches this computer's Fox and Attention Center, so it never goes to stdout or a service's journal.
-In a turn with Fox, the Agent can also get it with `world/link` (see [Web](../../agent/base/README.md#web)).
+In a turn with Fox, the Agent can also get it with `world/link` (see [Web](../web/README.md#web)).
 
 ## The World in a browser
 
@@ -77,7 +77,7 @@ do (`WEB_PAGE_ACTIONS`), and the page is served under the web variant of its Con
 only its own origin and socket ([trust](../../docs/UI-CORE-PLATFORM.md#the-world-in-a-web-browser)). To reach it from another computer, forward the
 same port number over SSH (for 47630, `ssh -L 47630:127.0.0.1:47630 <computer>`) and open the link there. The host also
 makes a link for the full World on another device through the pairing room and writes it to `world-room-link.txt`
-(owner-only; [the World on another device](../../agent/base/README.md#the-world-on-another-device)).
+(owner-only; [the World on another device](../web/README.md#the-world-on-another-device)).
 
 ## The `worldlet` command
 

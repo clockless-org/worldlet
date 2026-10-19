@@ -6,7 +6,7 @@ import {attentionFromAgent,conversationAttentionId,foxSessions,foxSessionLine,fo
 import {harnessSessionThread,harnessChatThread,harnessThreadPlace,harnessOriginId} from '../agent/gate/harness-sessions.ts';
 import {processedAttentionContent} from '../agent/attention/attention-content.ts';
 import {validateWorldItem} from '../context/items/world-item-validation.ts';
-import {phoneAttention,phoneTasks,phoneJournal,readPhoneMessage} from '../agent/base/index.ts';
+import {phoneAttention,phoneTasks,phoneJournal,readPhoneMessage} from '../platform/web/index.ts';
 import {APP_DEFINITIONS} from '../context/applets/index.ts';
 
 const DAY=86400,now=Date.parse('2026-10-04T12:00:00Z')/1000;

@@ -19,7 +19,7 @@ import {createWebPage} from '../platform/electron/src/host/web-page.ts';
 import {createPagePair,serveWorldWeb,WORLD_LINK_FILE,WORLD_TOKEN_VAULT} from '../platform/electron/src/host/world-web.ts';
 import type {PageBridge} from '../platform/electron/src/host/types.ts';
 import {WEB_DENIED_MESSAGE,WEB_PAGE_ACTIONS,WEB_PAGE_FEATURES,WEB_PAGE_UNAVAILABLE,WORLD_ELSEWHERE_CODE,WORLD_PAGE_CSP,WORLD_PROTOCOL,webDenied,webEventDetail,worldLinkToken,worldTokenProtocol,worldWebCsp} from '../contracts/web-world.ts';
-import {worldLinkReply} from '../agent/base/index.ts';
+import {worldLinkReply} from '../platform/web/index.ts';
 
 const opened:Duplex[]=[];
 /** A WebSocket client written out, so the check chooses every header a browser would set itself. */

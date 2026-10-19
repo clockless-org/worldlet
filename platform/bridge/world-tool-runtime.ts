@@ -61,7 +61,7 @@ export function createWorldToolRuntime({execute,call,codex,audio,backend,sample=
   if(!sample&&serviceToolNames.has(name))result=backend?await backend(name,args,signal):{error:'World service is unavailable.'};
   else if(name==='control_background_music')result=audio?await audio(args,signal):call?await runAudioCommand(call,args,signal):{error:'Native audio is unavailable.'};
   else if(name==='control_local_music')result=call?await runLocalMusicTool(call,args):{error:'Music players on this computer are unavailable here.'};
-  // An offered channel reply: the host shows it to the person, who alone sends it (modules/fox/channel-reply.ts).
+  // An offered channel reply: the host shows it to the person, who alone sends it (modules/companion/channel-reply.ts).
   else if(name==='reply_in_channel')result=call?await call('channelReply',{operation:'prepare',conversation:args.conversation,text:args.text}):{error:'Replying in a channel is unavailable here.'};
   else if(name==='open_worldlet_controls')result=call?await call('foxControls',args):{error:'Native controls are unavailable.'};
   else if(name==='set_worldlet_preference'){

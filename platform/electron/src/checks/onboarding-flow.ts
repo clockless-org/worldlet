@@ -147,7 +147,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  const doing=Date.now()/1000;
  await press('Do it for me');
  await wait('browser open under Fox’s glow',"!!document.querySelector('.browser-viewport.is-fox-control')",8);
- // The glow is a separate transparent window above the page (modules/browser/glow.ts): FoxGlow
+ // The glow is a separate transparent window above the page (modules/applets/glow.ts): FoxGlow
  // shows it with the style applied (isShowing) and hides it when Fox stops driving the page.
  const glowing=()=>foxGlowShowing(window);
  for(let i=0;i<80&&!await glowing();i++)await sleep(100);
@@ -336,7 +336,7 @@ async function foxGlowShowing(window:BaseWindow){
  }
  return false;
 }
-/** Website views on the rehearsal site, as attached to the World window (modules/browser/page.ts PageView). */
+/** Website views on the rehearsal site, as attached to the World window (modules/applets/page.ts PageView). */
 /** Check evidence: the World window's screen area, the glow window above it included. A background launch keeps the
  * World behind other windows (background-launch.ts), so there it saves the World window alone. */
 function capture(window:BaseWindow,file:string){
@@ -422,7 +422,7 @@ async function detectorCheck(){
  const db=new WorldLedger(root);
  try{
   if(recordedFailures(root,db).failures.length)throw Error('The failure detector reports failures in an empty library.');
-  // The Agent runtime's journal writer (modules/agent-runtime/index.ts) into this scratch ledger.
+  // The Agent runtime's journal writer (modules/agents/index.ts) into this scratch ledger.
   const record=(entry:Row)=>db.recordExecution(entry);
   const home=(scope:string)=>ExecutionJournal.register(path.join(root,'agent',scope,'hermes'),true,record);
   const diagnostics=createDiagnostics(root);
@@ -446,7 +446,7 @@ async function detectorCheck(){
   await saves({action:'chat',mode:'chat',monitor:true,sourceAnalysis:true,analysisLane:'google-calendar',session:unrepaired},'applet-analysis',['save-1'],unrepaired);
   // A source tool call refused within a turn (attention/tools.ts _source_begin) is that call's result, not failed work.
   try{await ExecutionJournal.run({action:'sourceTool',name:'read_world_source',args:{}},home('source'),undefined,async()=>{throw Error('Source is unavailable or this turn reached its read limit.');});}catch{}
-  // A kept page released under memory pressure (modules/browser/device.ts) is the host relieving
+  // A kept page released under memory pressure (modules/applets/device.ts) is the host relieving
   // memory as designed, not failed background work.
   diagnostics.record(Error('Kept page released under memory pressure (lowMemory).'),'keptPageRelease');
   diagnostics.record(Error('Kept page released under memory pressure (appFootprint).'),'keptPageRelease');

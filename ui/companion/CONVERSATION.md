@@ -67,7 +67,7 @@ In a website, Fox's input is also the address bar (owner request 2026-10-04): a 
 | Current view context | `ui/companion/fox-context.ts` trims location, state, setup, view id / title and the last four actions to fixed string sizes, and the app appends the last eight world events as identifiers (`WorldStore.recentHistory`); `world_context.py` validates the same shape and injects it into the outgoing request through Hermes request middleware, not into history |
 | Coding tasks | `delegate_codex` runs `codex exec --sandbox read-only` (`platform/electron/src/modules/applets/coding.ts`); the request must contain a coding keyword, only excerpts read this turn are shared, one delegation per turn, output is never installed or deployed. There is no Claude Code delegation |
 | Model | The person's own Agent's, chosen in Settings › Agents; Worldlet provides none. See [Model connection](CONVERSATION.md#model-onboarding) |
-| Routines | `manage_routines` (`routines.py`) over Hermes cron; the host's `HermesRoutines` (`modules/agent-runtime/hermes.ts`) ticks every 60 s while the app is open, consent is on and Sample Mode is off; with Hermes Agent kept running as a service ([kept running](../../agent/gate/PORTABILITY.md#hermes-agent-kept-running)), its gateway runs them also while Worldlet is closed, through Hermes' same claim, so never twice. See Search, browser and routines |
+| Routines | `manage_routines` (`routines.py`) over Hermes cron; the host's `HermesRoutines` (`modules/agents/hermes.ts`) ticks every 60 s while the app is open, consent is on and Sample Mode is off; with Hermes Agent kept running as a service ([kept running](../../agent/gate/PORTABILITY.md#hermes-agent-kept-running)), its gateway runs them also while Worldlet is closed, through Hermes' same claim, so never twice. See Search, browser and routines |
 | Voice | See "Live voice" below |
 
 Hermes decides whether a request is a coding request, a navigation or a music command; Worldlet has no keyword intent router. Buttons still execute locally and immediately.
@@ -112,7 +112,7 @@ Checks: `node scripts/world-tool-runtime-check.ts` (navigation refusal without a
 - Private processing requires `cloudConsent`; connecting an account does not grant it. Without consent, source reads and item extraction are unavailable.
 - The child process inherits only the environment it needs; model keys and connector credentials never enter the trusted World renderer. Changing the endpoint clears the previous key.
 - Hermes runs with `max_turns` 20. The desktop adapter's stream budget is 210 s; the host request timeout (Core `agentRequestDeadline`) is 240 s (360 s while authorizing, 600 s for background monitor runs, 960 s for model login). Locks: `worldlet.lock` (short configuration), `worldlet.chat.lock` (conversation), `worldlet.sources.lock` (connections and source reads), `worldlet.doordash.lock`.
-- Cancel is per caller. A queued job is dropped without affecting others; an active conversation receives `session.interrupt` first and the process is reused; after 12 s without completion the worker is killed (`modules/agent-runtime/hermes-worker.ts`). Every request carries its own ID; late events and tool receipts cannot enter the next turn. Requests that may have written are never replayed automatically.
+- Cancel is per caller. A queued job is dropped without affecting others; an active conversation receives `session.interrupt` first and the process is reused; after 12 s without completion the worker is killed (`modules/agents/hermes-worker.ts`). Every request carries its own ID; late events and tool receipts cannot enter the next turn. Requests that may have written are never replayed automatically.
 
 ## Resident runtime and chat priority
 
@@ -185,7 +185,7 @@ python3 scripts/hermes-latency.py
 - `test:hermes`: real pinned Hermes with a loopback model fixture; tool receipts, streaming protocol, cross-process memory, session database, skills, MCP discovery / read / filter / disconnect.
 - `test:hermes:desktop`: Desktop adapter; session resume by stored ID, full history after restart, tools run once, interrupt while streaming or waiting on a host tool, workspace isolation.
 - `test:hermes:steer`: redirect while preparing, streaming and running tools; restart persistence; stale control messages rejected.
-- `test:electron`: host contract, the Electron module checks (including `modules/agent-runtime/check.ts`) and an app smoke run on a disposable library.
+- `test:electron`: host contract, the Electron module checks (including `modules/agents/check.ts`) and an app smoke run on a disposable library.
 - The retired Mac host's in-app checks (resident runtime: process reuse, priority queue, cancel ownership, crash recovery, quit cleanup; trusted World → host → Hermes → world tools with consent, sample isolation, cancel and resume; a live-model check) are not yet ported to Electron beyond what `test:electron` covers.
 
 None of these are real-account acceptance. Still pending: end-to-end Google OAuth with external users, Notion OAuth, GitHub token, Apple TCC prompts.

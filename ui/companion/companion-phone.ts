@@ -1,14 +1,14 @@
 import qrcode from 'qrcode-generator';
 
-// The companion panel's Mobile page (agent/base/README.md): pair the Worldlet iPhone or Android app by QR code, see the paired
+// The companion panel's Mobile page (platform/web/README.md): pair the Worldlet iPhone or Android app by QR code, see the paired
 // phone and whether it takes notifications, unpair. The host owns the pairing (`phonePair`) and reports changes as
 // `worldlet:phone-status`. Below it, another Worldlet (a laptop) can use this computer's Agent for Fox (`phonePair` with
-// `kind: 'agent'`, `worldlet:agent-pair-status`, agent/base/README.md#another-computers-agent): its code is pasted there
+// `kind: 'agent'`, `worldlet:agent-pair-status`, platform/web/README.md#another-computers-agent): its code is pasted there
 // (a laptop rarely scans), so it shows as text to copy. Last, any web browser can open the same Center and Fox
-// (agent/base/README.md#web): a browser on this computer opens a link this app serves itself (`phonePair` with `kind:
+// (platform/web/README.md#web): a browser on this computer opens a link this app serves itself (`phonePair` with `kind:
 // 'local'`, `worldlet:local-pair-status`), and another device's browser a link to copy (`kind: 'web'`,
 // `worldlet:web-pair-status`). That link carries the full World's own pairing (`kind: 'world'`,
-// `worldlet:world-pair-status`, agent/base/README.md#the-world-on-another-device), which a computer's browser goes on to.
+// `worldlet:world-pair-status`, platform/web/README.md#the-world-on-another-device), which a computer's browser goes on to.
 type Status={state:'none'|'waiting'|'paired',link?:string,phone?:{name:string,version:string}|null,seenAt?:number|null,push?:{platform:string}|null,error?:string};
 export function pairingQR(link:string){
  const qr=qrcode(0,'M');qr.addData(link,'Byte');qr.make();
@@ -39,13 +39,13 @@ export function createCompanionPhone({call}:{call:(action:string,body?:any)=>Pro
   const opened=(p:Status|null)=>p?.state==='paired'?(p.phone?.name?`Opened in ${p.phone.name}`:'Opened in a browser')+' · '+seen(p.seenAt):'';
   box.append(el('h4','','In a browser'),el('p','','Open what needs you, what your Agent is doing and Fox in any web browser. Keep the link private: anyone who has it can see and approve here.'));
   if(!local||!web)return box;
-  // This computer: Worldlet serves the page itself, so nothing goes over the internet (modules/phone local-relay.ts).
+  // This computer: Worldlet serves the page itself, so nothing goes over the internet (modules/shell local-relay.ts).
   box.append(el('p','companion-phone-place','On this computer'));
   if(local.state==='paired')box.append(el('p','',opened(local)));
   box.append(button('Open in browser',async()=>{if(!on(local))await pairLocal('start');await pairLocal('open');},true));
   // The full 3D World, the same page as this window, served beside it (host/world-web.ts).
   box.append(button('Open the World in browser',()=>call('phonePair',{kind:'local',operation:'world'})));
-  // Another device: a link to copy (still through the relay; agent/base/README.md#web).
+  // Another device: a link to copy (still through the relay; platform/web/README.md#web).
   box.append(el('p','companion-phone-place','On another device'));
   if(web.state==='paired')box.append(el('p','',opened(web)));
   // The full World on another device: the same link goes on to it where the device can draw it; this opens it here.
@@ -55,7 +55,7 @@ export function createCompanionPhone({call}:{call:(action:string,body?:any)=>Pro
   const paired=local.state==='paired'||web.state==='paired'||world?.state==='paired';
   if(on(local)||on(web)||on(world)){
    box.append(button(paired?'Turn off':'Cancel',async()=>{if(on(local))await pairLocal('end');if(on(web)||on(world))await pairWeb('end');}));
-   // Run in background: no window stays on screen, not even Fox, and the links keep working (modules/phone).
+   // Run in background: no window stays on screen, not even Fox, and the links keep working (modules/shell).
    if(paired)box.append(el('p','','Use Worldlet only from the browser: close every window and keep it running. Click Worldlet in the Dock or the notification area to bring the World back.'),
     button('Run in background',()=>local?.state==='paired'?pairLocal('background'):web?.state==='paired'?pairWeb('background'):pairWorld('background')));
   }

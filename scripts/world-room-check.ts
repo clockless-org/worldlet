@@ -1,4 +1,4 @@
-// The full World on another device (agent/base/README.md#the-world-on-another-device): a `world` pairing of its own,
+// The full World on another device (platform/web/README.md#the-world-on-another-device): a `world` pairing of its own,
 // met in the pairing room, which only forwards. 1. The link, the sealed `{w}` pieces (big frames cut, replay and
 // reordering refused) and ROOM_ALLOWED. 2. The host's side in process (world-room-link.ts, host/web-page.ts with
 // roomDenied, createPagePair's third page) against the memory room, with a page written out from core's helpers.
@@ -15,7 +15,7 @@ import {execFileSync,spawn} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import type {Duplex} from 'node:stream';
 import {withTempDir} from './test-temp.ts';
-import {worldAnswers} from '../ui/web/index.ts';
+import {worldAnswers} from '../platform/web/page/index.ts';
 import {memoryRoom} from './memory-room.ts';
 import {launchTestBrowser,pageErrors,waitForWorld} from './browser-test.ts';
 import {createWorldBoard} from '../platform/electron/src/modules/agents/board.ts';
@@ -27,7 +27,7 @@ import {createWorldRoomLink,WORLD_ROOM_VAULT} from '../platform/electron/src/mod
 import {createWebPage} from '../platform/electron/src/host/web-page.ts';
 import {createPagePair,NO_PAGE} from '../platform/electron/src/host/world-web.ts';
 import {ROOM_ALLOWED,ROOM_DENIED_MESSAGE,WEB_DENIED_MESSAGE,WEB_PAGE_FEATURES,WEB_PAGE_UNAVAILABLE,WORLD_PAGE_CSP_META,roomDenied,worldRoomCsp} from '../contracts/web-world.ts';
-import {canRenderWorld,withWorldLink,worldLinkFromWeb,newPairSecret,openHello,pairKeys,readWorldRoomFrame,readWorldRoomLink,roomEntry,sealJoin,worldBundlePath,worldRoomLink,worldRoomNonce,worldRoomSession,WORLD_ROOM_PIECE,ROOM_PROTOCOL,isWorldRoomPage} from '../agent/base/index.ts';
+import {canRenderWorld,withWorldLink,worldLinkFromWeb,newPairSecret,openHello,pairKeys,readWorldRoomFrame,readWorldRoomLink,roomEntry,sealJoin,worldBundlePath,worldRoomLink,worldRoomNonce,worldRoomSession,WORLD_ROOM_PIECE,ROOM_PROTOCOL,isWorldRoomPage} from '../platform/web/index.ts';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 /** The room's own limit on one message (worker/room.ts in the operations repository). */

@@ -1,6 +1,6 @@
 // Website engine check (#1170): the CEF engine renders a page into the panel and takes the person's
 // input, on a disposable profile with the development rehearsal site (no network, no account).
-// npm run test:electron -- modules/browser/engine
+// npm run test:electron -- modules/applets/engine
 // - the engine's own URL rules agree with contracts/fixtures/parity (public pages, http:// upgrades, popups);
 // - a page's frames reach the surface through shared GPU surfaces, on Linux shared-memory frames
 //   (pixels read back from the view);

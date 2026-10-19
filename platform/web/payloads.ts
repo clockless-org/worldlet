@@ -292,17 +292,8 @@ export function phoneActionStatus(action:PhoneAction,kind:string):{status:'done'
  return {status:kind==='update'?'read':'done',later:false};
 }
 
-/** A notification for the paired phone (README.md in this folder, Push), sealed whole with place `push` (pairing.ts
- * PUSH_BOX_PLACE): the phone opens it and shows `title` and `body`; a tap opens `open`: the item's card, the Applet's
- * page or Fox's dialogue (the app's Now when it names none). */
-export type PhonePush={v:1,id:string,at:number,kind:'attention'|'fox'|'routine'|'task',title:string,body:string,open:{item?:string,applet?:string,conversation?:true},act?:PhonePushAct};
-/** What the notification's own buttons do (README.md in this folder, Push › Actions), answered from the shade with the
- * phone's ordinary sealed messages: `attention` (an item id) offers Done and Later (`attention` message), `reply` an inline
- * reply said where `open` points (`chat` with its item or Applet), `approval` (the request id) Allow once, when `once`
- * says it is offered, and Deny (`approval` message). Optional, so an older phone shows the notification as before. */
-export type PhonePushAct={attention:string}|{reply:true}|{approval:string,once?:true};
-/** What a module asks PhoneService.notify for; `collapse` replaces an earlier notification with the same key. */
-export type PhonePushRequest=Omit<PhonePush,'v'|'id'|'at'>&{collapse?:string};
+export type {PhonePush,PhonePushAct,PhonePushRequest} from '../../contracts/window-push.ts';
+import type {PhonePush,PhonePushAct,PhonePushRequest} from '../../contracts/window-push.ts';
 /** `box` is the relay's cap on the sealed box (worker/push.ts PUSH_LIMITS), `perCall` the Attention pushes per snapshot. */
 /** The paired phone's system for `phone_paired` (owner 2026-10-11 20:21 PDT: Production metrics), from the platform it
  * registered for notifications with (`apns`, `apns-dev` or `fcm`); a phone that has not registered is `unknown`. */

@@ -5,7 +5,7 @@ import WorldletKit
 /// An Applet's website, opened in this app rather than Safari or the site's own app (owner request 2026-10-07: "不要跳转，
 /// 在我们自己的app里做"): the system's navigation bar with the page's title and Done, the page, and back, forward and
 /// reload below. Sign-ins made here stay on this iPhone, in this app's own website storage. What happens on the page
-/// goes to the computer, which keeps it in the World by its browser's rules (agent/base/README.md); the observer runs
+/// goes to the computer, which keeps it in the World by its browser's rules (platform/web/README.md); the observer runs
 /// in a script world of its own, so the page can neither see nor imitate it.
 struct WebBrowserScreen: View {
     @Environment(AppModel.self) private var model

@@ -142,7 +142,7 @@ async function start(){
   gone:()=>{},
   failed,
  });
- // The World on another device, met through the pairing room (modules/phone/world-room-link.ts): a page beside the
+ // The World on another device, met through the pairing room (modules/shell/world-room-link.ts): a page beside the
  // others, with only what ROOM_ALLOWED lets through (contracts/web-world.ts roomDenied).
  const remote=createWebPage({
   platform:platformName(),

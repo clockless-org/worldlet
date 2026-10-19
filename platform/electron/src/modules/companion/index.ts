@@ -33,7 +33,7 @@ import {worldLogKeeps} from '../../../../../context/activity/index.ts';
 import {worldActionOf,worldActions} from '../../../../../agent/gate/index.ts';
 import {onboardingUnfinished} from '../../../../../agent/companion/index.ts';
 import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../context/artifacts/index.ts';
-import {phoneApprovalPush,phoneFoxPush,phoneLive,worldLinkReply} from '../../../../../agent/base/index.ts';
+import {phoneApprovalPush,phoneFoxPush,phoneLive,worldLinkReply} from '../../../../web/index.ts';
 import {placeKey,placeKind,proactiveAsked,proactiveDue,proactiveCard,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../../agent/companion/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
@@ -188,7 +188,7 @@ export function installFox(host:Host){
  // The World's Task panel (agent/tasks/task-panel.ts): one read of what it draws from. The person's scheduled jobs on
  // their own Agent's scheduler (its `schedule` service; names and schedules only, never prompts) and the Applet tasks
  // Fox handed over that are working now. Applets' own checks are not the person's tasks, and finished work lives in the
- // Journal: neither is read. Core decides the rows. The page's panel and, without the page, the host's (modules/phone).
+ // Journal: neither is read. Core decides the rows. The page's panel and, without the page, the host's (modules/shell).
  async function taskPanelInput():Promise<Row>{
   if(store.sampleEnabled())return {sample:true};
   const runtime=agent(),schedule=runtime?.schedule?.();
@@ -464,7 +464,7 @@ export function installFox(host:Host){
    done(reply:string){text=reply||text;approval=null;return send(true);},
   };
  }
- /** A line said in a browser or on the phone (agent/base/README.md#web) while the World page is not there: it waits
+ /** A line said in a browser or on the phone (platform/web/README.md#web) while the World page is not there: it waits
   * behind Fox's running turn, then runs as the person's own line in Fox's main conversation, without the page. Its
   * steps that only the page can do (a World view, an Applet's page) answer that the window must be open. The reply
   * reaches the browser or phone through the conversation the host already publishes. */

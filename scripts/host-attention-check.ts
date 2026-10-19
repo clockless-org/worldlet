@@ -1,9 +1,9 @@
 // The host's Attention Center for a phone or a browser without the World page (agent/attention hostAttention,
-// agent/base/README.md#web): the same rows, in the same groups, as the desktop builds from the same World items.
+// platform/web/README.md#web): the same rows, in the same groups, as the desktop builds from the same World items.
 import assert from 'node:assert/strict';
 import {hostAttention,collectMatters,collectNativeActions,upcomingEvents} from '../agent/attention/index.ts';
 import {projectNativeWorld} from '../ui/world/world-projection.ts';
-import {hostAppletPlaces,threadPairs,phoneAttention} from '../agent/base/index.ts';
+import {hostAppletPlaces,threadPairs,phoneAttention} from '../platform/web/index.ts';
 
 // The World page reads the clock itself, so the items are placed around the real now.
 const now=Date.now(),hour=3600_000;

@@ -66,7 +66,7 @@ data class PhoneUpdate(
     val computerSeenAt: Double? = null,
 )
 
-/** The phone's side of a pairing, against the relay in worker/pairing.ts or in the pairing room (agent/base/README.md#room,
+/** The phone's side of a pairing, against the relay in worker/pairing.ts or in the pairing room (platform/web/README.md#room,
  * through [room]). It keeps the poll cursor or the room socket; the app keeps the link in its encrypted store and calls
  * [sync] while it is open. A relay pairing moves to the room once the computer's desktop slot says `room` ([inRoom] then
  * turns true, and the app keeps the link that says so). In the room the computer sends everything it has when the phone
@@ -295,7 +295,7 @@ class PhoneSession(
 
     /** Gives this phone's push token ([platform] "fcm") to whoever wakes it while it is closed. With [direct] (the
      * computer's desktop slot says `push`) it goes to the computer in a sealed message and the relay's registration is
-     * removed, so the relay keeps none (agent/base/README.md#push); otherwise the relay keeps it, as older computers need. */
+     * removed, so the relay keeps none (platform/web/README.md#push); otherwise the relay keeps it, as older computers need. */
     suspend fun registerPush(platform: String, token: String, direct: Boolean = false) {
         if (!direct) {
             request("api/pair/${keys.id}/push", "PUT", body = buildJsonObject { put("platform", platform); put("token", token) })

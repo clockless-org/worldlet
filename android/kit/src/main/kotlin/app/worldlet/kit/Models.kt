@@ -18,7 +18,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.put
 
 // The payloads the desktop seals for the phone and the messages the phone sends back. They mirror
-// agent/base/payloads.ts (and the iPhone's Models.swift); change them together.
+// platform/web/payloads.ts (and the iPhone's Models.swift); change them together.
 
 val WorldletJson = Json {
     ignoreUnknownKeys = true
@@ -81,7 +81,7 @@ data class AccountIssue(val provider: String, val title: String, val action: Act
     enum class Action { @SerialName("reconnect") Reconnect, @SerialName("permissions") Permissions }
 }
 
-/** One Applet in the phone's Applets tab (agent/base/payloads.ts PhoneApplet): the section the list shows it in,
+/** One Applet in the phone's Applets tab (platform/web/payloads.ts PhoneApplet): the section the list shows it in,
  * its lamp, what it is doing or its status ([line]), its latest world log lines ([recent], newest last), the widget a
  * moment Applet opens (its key is `widget:<id>`), its own thread of Fox's conversation, and where one of the person's
  * own Applets came from ([mine]: `site`, `page` or `conversation`; null for a built-in one), so its row carries the mark
@@ -136,7 +136,7 @@ private open class LenientEnum<T : Enum<T>>(name: String, private val values: Li
 private object SectionSerializer : LenientEnum<PhoneApplet.Section>("app.worldlet.kit.PhoneApplet.Section", PhoneApplet.Section.entries, PhoneApplet.Section.Places)
 private object StateSerializer : LenientEnum<PhoneApplet.State>("app.worldlet.kit.PhoneApplet.State", PhoneApplet.State.entries, PhoneApplet.State.Off)
 
-/** One card of the computer's Task panel (agent/base/payloads.ts PhoneTask): [name] and [status] are the card's words,
+/** One card of the computer's Task panel (platform/web/payloads.ts PhoneTask): [name] and [status] are the card's words,
  * [when] its time text ("In progress", "Tomorrow 6:00 AM"), [icon] its picture (`fox`, `clock` or an Applet's key),
  * [progress] how far it is (0 to 1) when the computer knows, [applet] the phone Applet the row opens, [every] and [by]
  * how often a routine runs and who runs it, and [lines] what a running task said, newest last. */
@@ -161,7 +161,7 @@ data class PhoneTask(
 @Serializable
 data class PhoneTasks(val now: List<PhoneTask> = emptyList(), val routines: List<PhoneTask> = emptyList())
 
-/** One of today's Journal cards (agent/base/payloads.ts PhoneJournalEntry): an answer Fox showed or an Attention card
+/** One of today's Journal cards (platform/web/payloads.ts PhoneJournalEntry): an answer Fox showed or an Attention card
  * the person closed, with its brief or body as [text] and, for an Attention card, its [category] ("Worth Knowing"). */
 @Serializable
 data class JournalEntry(
@@ -242,7 +242,7 @@ data class Conversation(
     companion object { val Empty = Conversation() }
 }
 
-/** The person's own Agent asks before it acts (agent/base/payloads.ts PhoneApproval, contracts/harness-services.ts
+/** The person's own Agent asks before it acts (platform/web/payloads.ts PhoneApproval, contracts/harness-services.ts
  * `approvals`): a dangerous command of Hermes Agent's, an exec request of OpenClaw's. It rides on the running turn; the
  * phone answers with [PhoneMessage.Approval], the same three choices as Fox's card on the computer. [offered] is what
  * the computer sent; [choices] the buttons. */
@@ -268,7 +268,7 @@ data class HarnessApproval(
     fun clamped() = copy(id = id.take(120), title = title.take(200), detail = detail.take(2000))
 }
 
-/** The turn Fox is on now, as it streams (agent/base/payloads.ts PhoneLive): [steps] are its thinking, newest last,
+/** The turn Fox is on now, as it streams (platform/web/payloads.ts PhoneLive): [steps] are its thinking, newest last,
  * and [text] the reply so far. [item] is the Attention item whose card the turn was asked from, [applet] the Applet
  * whose page it was asked in; both null for the main conversation. [done] marks the finished reply; [approval] is what
  * the person's own Agent asks while it runs (absent from older computers and once answered or expired). */
@@ -305,7 +305,7 @@ data class DesktopInfo(val v: Int = 1, val at: String = "", val name: String = "
 @Serializable
 data class PhoneInfo(val v: Int = 1, val name: String, val version: String)
 
-/** A notification the computer sends while this phone is closed (agent/base/payloads.ts PhonePush), sealed for the
+/** A notification the computer sends while this phone is closed (platform/web/payloads.ts PhonePush), sealed for the
  * place "push" and carried by the relay to Firebase Messaging as `{p: pairing id, b: box}`. [open] is where a tap on it
  * opens the app; [target] reads it. */
 @Serializable
@@ -333,7 +333,7 @@ data class PhonePush(
             ?: PushTarget.Conversation.takeIf { o.conversation == true }
     }
 
-    /** What the buttons answer (agent/base/payloads.ts PhonePushAct): [attention] an item's id (Done, Later), [reply] an
+    /** What the buttons answer (platform/web/payloads.ts PhonePushAct): [attention] an item's id (Done, Later), [reply] an
      * inline reply where [open] points, [approval] a request's id (Allow once when [once], and Deny). */
     @Serializable
     data class Act(val attention: String? = null, val reply: Boolean? = null, val approval: String? = null, val once: Boolean? = null)
@@ -374,13 +374,13 @@ data class PhonePush(
     fun clamped() = copy(title = title.trim().take(TITLE_LIMIT), body = body.trim().take(BODY_LIMIT),
         act = act?.let { it.copy(attention = it.attention?.take(200), approval = it.approval?.take(120)) })
 
-    /** agent/base/payloads.ts PHONE_PUSH_LIMITS. */
+    /** platform/web/payloads.ts PHONE_PUSH_LIMITS. */
     companion object { const val TITLE_LIMIT = 80; const val BODY_LIMIT = 240 }
 }
 
 private object PushKindSerializer : LenientEnum<PhonePush.Kind>("app.worldlet.kit.PhonePush.Kind", PhonePush.Kind.entries, PhonePush.Kind.Task)
 
-/** A button on a notification (agent/base/README.md, Push › Actions); [label] is what it says. */
+/** A button on a notification (platform/web/README.md, Push › Actions); [label] is what it says. */
 enum class PushAction(val wire: String, val label: String) {
     Done("done", "Done"), Later("later", "Later"), Reply("reply", "Reply"), Allow("allow", "Allow once"), Deny("deny", "Deny");
 
@@ -484,7 +484,7 @@ sealed interface PhoneMessage {
 
 /**
  * One report from the page observer (platform/bridge/web-record.js, copied to assets/web-record.js) on a website opened
- * in this app's browser, with this phone's time in seconds (agent/base/payloads.ts PhoneWebRecord). The observer never
+ * in this app's browser, with this phone's time in seconds (platform/web/payloads.ts PhoneWebRecord). The observer never
  * reports passwords, card numbers or one-time codes, and says `private` when a page shows such a field.
  */
 @Serializable

@@ -8,7 +8,7 @@ import {acceptWebSocket,refuseUpgrade,type TextSocket} from './web-socket.ts';
 import {WORLD_PAGE_CSP_META,WORLD_PROTOCOL,WORLD_SOCKET_PATH,WORLD_TOKEN,worldTokenFrom,worldWebCsp} from '../../../../../contracts/web-world.ts';
 
 // Worldlet in a browser on this computer, served by this computer (owner decision 2026-10-13: "我们不要存，用户应该从他
-// 安装worldlet的设备直接serve"; agent/base/README.md#web). The app answers on 127.0.0.1 with the browser page (ui/web,
+// 安装worldlet的设备直接serve"; platform/web/README.md#web). The app answers on 127.0.0.1 with the browser page (platform/web/page,
 // built into the interface's `open/` folder) and the relay protocol the page and the computer already speak
 // (worker/pairing.ts in the operations repository: the link, the first poll completing the pairing, slots, messages),
 // kept in this process's memory. Nothing goes over the internet and nothing is written to disk: the boxes are sealed as

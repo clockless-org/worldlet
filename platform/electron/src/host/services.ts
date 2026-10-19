@@ -2,7 +2,7 @@ import type {ServiceRead} from '../../../../contracts/services.ts';
 import type {NativeImage} from 'electron';
 import type {Row} from './types.ts';
 import type {HarnessApprovals,HarnessCalls,HarnessEvents,HarnessSend,HarnessSkills,HarnessTools,HarnessVoice} from '../../../../contracts/harness-services.ts';
-import type {PhonePushRequest} from '../../../../agent/base/index.ts';
+import type {PhonePushRequest} from '../../../web/index.ts';
 import type {AgentAuditEntry,AgentIdentity,Grant} from '../../../../contracts/agent-identity.ts';
 import type {McpSession,PosthogSettings} from '../../../../context/sources/index.ts';
 import type {PosthogRequest} from '../../../../agent/gate/index.ts';
@@ -10,7 +10,7 @@ import type {PosthogRequest} from '../../../../agent/gate/index.ts';
 // `host.provide(NAME, impl)` and others reach it with `host.use(NAME)` / `host.optional(NAME)`.
 // Modules never import each other's implementation files.
 
-// Agent runtime (modules/agent-runtime) ---------------------------------------------------
+// Agent runtime (modules/agents) ---------------------------------------------------
 /** One Harness conversation lane. `onEvent` receives adapter events; returning a value
  * answers a `tool` event (the value becomes the tool result). */
 export type AgentEventHandler=(event:Row)=>Promise<Row|null|undefined>|Row|null|undefined;
@@ -215,7 +215,7 @@ export interface CompanionService {
 }
 export const COMPANION='companion';
 
-// Fox foreground conversation (modules/fox) --------------------------------------------------
+// Fox foreground conversation (modules/companion) --------------------------------------------------
 export interface FoxService {
  /** Mac `foxScope()`: chat, status, warm-up and privacy gates address the same Agent home. */
  scope():{sample:boolean,setup:boolean};
@@ -248,12 +248,12 @@ export interface FoxService {
  /** Answers the Agent's permission prompt (as the `harnessApproval` action does), for a phone or browser without the page. */
  answerApproval?(id:string,choice:string):Promise<void>;
  /** What the Task panel draws from (agent/tasks TaskPanelInput: the Agent's scheduled jobs, the Applet tasks working now),
-  * for the host's own Center while the World page is not there (modules/phone). */
+  * for the host's own Center while the World page is not there (modules/shell). */
  taskPanel?():Promise<Row>;
 }
 export const FOX='fox';
 
-// Phone pairing (modules/phone) and widgets (modules/artifacts) ------------------------------------
+// Phone pairing (modules/shell) and widgets (modules/attention) ------------------------------------
 export interface PhoneService {
  /** Sends a desktop slot to the paired phone when it changed (kept for a phone that pairs later). */
  publish(slot:'widgets',value:unknown):Promise<boolean>;
@@ -265,19 +265,19 @@ export interface PhoneService {
  /** The turn Fox is streaming (agent/base phoneLive) for an open phone or browser, from a turn the host runs without the
   * World page (FoxService.converse); the done update also pushes the reply to a phone that is put away. */
  live?(value:Row):Promise<boolean>;
- /** The browser link to this World for another device (agent/base/README.md#web, `kind: 'web'`): the one there is, or a
+ /** The browser link to this World for another device (platform/web/README.md#web, `kind: 'web'`): the one there is, or a
   * new one when there is none. The Agent's `world/link` hands it to the person; it needs no World page. */
  worldLink?():Promise<Row>;
- /** The full World's link for another device (`kind: 'world'`, agent/base/world-room.ts): the one there is, or a new one. */
+ /** The full World's link for another device (`kind: 'world'`, platform/web/world-room.ts): the one there is, or a new one. */
  worldRoomLink?():Promise<Row>;
  /** A new full World link in place of the old one, whose pages close (a browser signed out of the World's address). */
  worldRoomRenew?():Promise<Row>;
- /** This computer's own server on 127.0.0.1 (modules/phone/local-relay.ts), started on first use on the port it used
+ /** This computer's own server on 127.0.0.1 (modules/shell/local-relay.ts), started on first use on the port it used
   * last: a browser link on this computer, and the World page a host without a window serves there (platform/node). */
  localServer?():Promise<import('../modules/shell/local-relay.ts').LocalServer>;
 }
 export const PHONE='phone';
-/** Opens the page that runs browsers' direct lines (modules/phone/rtc-host.ts): a hidden window in the Electron host
+/** Opens the page that runs browsers' direct lines (modules/shell/rtc-host.ts): a hidden window in the Electron host
  * (rtc-window.ts), provided before the modules install. A host without it runs a browser link through the room only. */
 export type RtcPageFactory=()=>import('../modules/shell/rtc-host.ts').RtcPage;
 export const RTC_PAGE='rtcPage';
@@ -300,7 +300,7 @@ export interface OngoingService {
 }
 export const ONGOING='ongoing';
 
-// Browser (modules/browser) -----------------------------------------------------------------
+// Browser (modules/applets) -----------------------------------------------------------------
 export interface BrowserService {
  /** The website page the panel shows, on either engine, for the release-gate checks. */
  visiblePage():import('../modules/applets/web-page.ts').WebPage|null;
@@ -324,12 +324,12 @@ export interface BrowserService {
 }
 export const BROWSER='browser';
 
-// The media surface (modules/media) ------------------------------------------------------------
+// The media surface (modules/shell) ------------------------------------------------------------
 /** The host-owned playback and capture surface the World's sound, Fox's voice and Voice Memos share. */
 export interface MediaService {readonly surface:import('../modules/shell/surface.ts').MediaSurface}
 export const MEDIA='media';
 
-// World sound (modules/world-audio) and Fox's voice (modules/voice) -----------------------------
+// World sound (modules/world) and Fox's voice (modules/companion) -----------------------------
 export interface AudioService {setDucked(active:boolean,reason:'live'|'recording'|'spoken-reply'):void;snapshot():Row;stop():void}
 export const AUDIO='audio';
 export interface SpeechService {
@@ -372,7 +372,7 @@ export interface DesktopCompanionService {
  backdropImage?():NativeImage|null;
 }
 export const DESKTOP_COMPANION='desktopCompanion';
-/** Run in background (agent/base/README.md#web): a preference set from the browser link's section (modules/phone) and
+/** Run in background (platform/web/README.md#web): a preference set from the browser link's section (modules/shell) and
  * cleared when that link ends. Closing the World then leaves no window, not even Fox, and a login launch opens none. */
 export const RUN_IN_BACKGROUND='worldlet.runInBackground';
 export interface AppUpdatesService {snapshot():Row;activate():Promise<Row>}
@@ -463,7 +463,7 @@ export interface WorldWebService {
  link():Promise<string>;
 }
 export const WORLD_WEB='worldWeb';
-/** The World page on another device, met through the pairing room (modules/phone/world-room-link.ts): the host takes
+/** The World page on another device, met through the pairing room (modules/shell/world-room-link.ts): the host takes
  * each page that joined as it takes a browser's World page here (host/web-page.ts), with only what ROOM_ALLOWED lets
  * through (contracts/web-world.ts). */
 export interface WorldRoomPageService {

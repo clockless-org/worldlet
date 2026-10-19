@@ -60,7 +60,7 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false,conn
   const title=(row:HTMLElement)=>String(row.dataset.worldItemId?items.find((i:any)=>i.id===row.dataset.worldItemId)?.title||'':themes.find((t:any)=>t.id===row.dataset.ongoing)?.title||'').trim();
   return {count:rows.length,first:rows.map(title).find(Boolean)||''};
  }
- // Phone pairing (agent/base/README.md): the host owns it (`phonePair`) and reports changes as `worldlet:phone-status`.
+ // Phone pairing (platform/web/README.md): the host owns it (`phonePair`) and reports changes as `worldlet:phone-status`.
  // Pairing starts only on I have the app, so a skipped step registers nothing with the relay; a host without phone
  // pairing leaves the phone out of the last step.
  type Phone={state?:'none'|'waiting'|'paired',link?:string,phone?:{name?:string}|null};

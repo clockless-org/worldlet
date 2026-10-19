@@ -26,7 +26,7 @@ Location requests are answered only for Google Maps pages; Chromium's location p
 Fox uses the Worldlet gateway and private-context gate. The host calls
 `browserDriverStart` / `browserDriverNext` in `agent/applets/driver-flow.ts`, then
 executes the returned commands through the pinned agent-browser runtime and
-`platform/browser/agent_browser.py` (`modules/browser/agent.ts`). Its DevTools IO
+`platform/browser/agent_browser.py` (`modules/applets/agent.ts`). Its DevTools IO
 attaches through `webContents.debugger` to the selected page only (`page.ts`). The
 host owns no second browser command policy.
 
@@ -100,7 +100,7 @@ releases pages as the `browserShow`/`browserHide` requests say (`contracts/brows
 
 Checks: `node scripts/page-resume-check.ts` (rule, bounds, parity vectors) and
 `node scripts/applet-resume-check.ts` (World UI with a faked bridge, and the media hold in
-Chromium); `npm run test:electron -- modules/browser` drives the memory-pressure release
+Chromium); `npm run test:electron -- modules/applets` drives the memory-pressure release
 with injected readings (order, protected pages, diagnostics). The real-page kept-page check of the retired Mac host (kept, returned, held,
 released, practice isolation) is not yet ported to Electron; device acceptance of kept
 pages on Electron is pending.
@@ -248,7 +248,7 @@ Checks:
   tab, remembered addresses and labels, stored tabs revalidated. `node scripts/browser-tabs-ui-check.ts` (in
   `test:ui`) drives the strip and the menu's keys through the World UI with a faked host.
 - `node scripts/applet-task-pip-check.ts`: Fox works on a copy of the page in the panel's corner, and its page goes out of sight with a badge when the person leaves.
-- The engine check (`npm run test:electron -- modules/browser/engine`):
+- The engine check (`npm run test:electron -- modules/applets/engine`):
   - two pages render and take typing each on its own;
   - two Fox drivers run at once on separate pages, each answered by its own page;
   - the second page's sound pauses the first's.
@@ -329,7 +329,7 @@ Checks:
   beside the Companion.
 - `npm run test:onboarding` on the CEF engine: Fox's first task with real Fox, finished in the
   Applet's panel.
-- The engine check (`npm run test:electron -- modules/browser/engine`):
+- The engine check (`npm run test:electron -- modules/applets/engine`):
   - shown smaller, the page keeps its size and reports presses instead of taking clicks;
   - Fox's driver clicks a page element at the page's own coordinates;
   - the frame rate follows `pageFrameRate`;
@@ -462,7 +462,7 @@ Signing in through the system browser does not sign the panel in. The panel's se
 
 Checks:
 - `node scripts/browser-sign-in-check.ts`: the rule and the World UI action, with a faked bridge.
-- `npm run test:electron -- modules/browser`: the host turns the refusal URL into the error and the YouTube destination; a real website session on a loopback page sends the user agent and hint headers its JavaScript reports; a page starting toward a sign-in host loses its DevTools session until the next page.
+- `npm run test:electron -- modules/applets`: the host turns the refusal URL into the error and the YouTube destination; a real website session on a loopback page sends the user agent and hint headers its JavaScript reports; a page starting toward a sign-in host loses its DevTools session until the next page.
 - `node scripts/browser-engine-probe.ts --engine <binary>`: a measurement, not a pass/fail check. It prints the engine facts above for the website session and each given engine, and lists the facts that differ.
 
 Neither check signs in to Google. Whether Google still refuses sign-in in the panel, and whether a sign-in that Google accepts persists across restarts (Account acceptance step 2), needs a manual run with a real account on each platform (#1120). The client-hint platform values for macOS and Windows are derived the same way but were measured only on Linux.

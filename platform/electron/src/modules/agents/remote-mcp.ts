@@ -1,4 +1,4 @@
-import {DEFAULT_PAIR_RELAY} from '../../../../../agent/base/index.ts';
+import {DEFAULT_PAIR_RELAY} from '../../../../web/index.ts';
 import {isWorldAddressRequest,MCP_FRONT_ORIGIN,REMOTE_MCP_LIMITS,agentRevoked,createRemoteMcpServer,emptyRemoteMcpState,newRemoteMcpToken,readRemoteMcpRequest,readRemoteMcpState,remoteConsentItem,
  remoteMcpAddress,remoteMcpAgent,remoteMcpHostEntry,remoteMcpResponseFrame,remoteMcpRoom,type RemoteMcpConsent,type RemoteMcpRequest,type RemoteMcpResponse,type RemoteMcpServer,type RemoteMcpState} from '../../../../../agent/gate/index.ts';
 import type {AgentAccess,VaultService} from '../../host/services.ts';

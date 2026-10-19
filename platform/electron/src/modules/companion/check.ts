@@ -1,5 +1,5 @@
 // Focused check of Fox's companion records on a real WorldStore (no Electron, no model):
-// npm run test:electron -- module:modules/fox
+// npm run test:electron -- module:modules/companion
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';

@@ -8,7 +8,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {WebSocketServer} from 'ws';
 import {acpApprovalOutcome,acpApprovalRequest,harnessSessionName,harnessSessionThread,hermesBorrowsCodex,hermesConversationIncluded,HERMES_CHANNEL_READ_ONLY,hermesAcpAnnouncement,hermesChannelToolAllowed,hermesChannelTrust,HermesOwnCalls,hermesStandingWriteApproval,hermesStreamAnnouncement,hermesServerEnvLines,hermesServerSettings,hermesWorldTools,hermesWorldToolsCommand,hermesWorldToolsRegistered,localHarnessStream,localHarnessTurn,openClawApprovalFor,openClawApprovalRequest,openClawConnect,openClawSessionIs,openClawDecision,openClawDeviceProof,
  openClawGateway,openClawResponsesBody,readHarnessApprovalRequest,readLocalHarnessLine,readOpenClawFrame,readResponsesChunk,responsesBody,responsesStream,turnWriteAdmission,usableHermesServerKey} from '../agent/gate/index.ts';
-import {phoneLive,readPhoneMessage} from '../agent/base/index.ts';
+import {phoneLive,readPhoneMessage} from '../platform/web/index.ts';
 import {mountHarnessApproval} from '../ui/companion/fox-harness-approval.ts';
 import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/src/modules/agents/local-harness.ts';
 import {hermesServer,keepHermesResident} from '../platform/electron/src/modules/agents/hermes-service.ts';

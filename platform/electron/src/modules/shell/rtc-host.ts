@@ -1,4 +1,4 @@
-import {RTC_CHANNEL,RTC_GATHER_MS,RTC_ICE_SERVERS,channelJoiner,channelPieces} from '../../../../../agent/base/index.ts';
+import {RTC_CHANNEL,RTC_GATHER_MS,RTC_ICE_SERVERS,channelJoiner,channelPieces} from '../../../../web/index.ts';
 
 // The computer's side of browsers' direct lines (agent/base rtc.ts), on the page in rtc-page.ts: a hidden window that
 // is open only while a browser has a line or is offering one. `open` gives that page (rtc-window.ts in the app, a plain

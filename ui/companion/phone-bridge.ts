@@ -1,8 +1,8 @@
-import {phoneAttention,phoneActionStatus,phoneLive,type PhoneMessage,type PhoneWorld} from '../../agent/base/index.ts';
+import {phoneAttention,phoneActionStatus,phoneLive,type PhoneMessage,type PhoneWorld} from '../../platform/web/index.ts';
 import {attentionLaterUntil} from '../../agent/attention/index.ts';
 import {attentionSceneArt} from '../attention/index.ts';
 
-// The World page's half of phone pairing (agent/base/README.md). It sends the Attention Center's Now and Later to the
+// The World page's half of phone pairing (platform/web/README.md). It sends the Attention Center's Now and Later to the
 // host when they change, and carries out what the paired phone asks: a chat line goes to Fox's main conversation as the
 // person's own message (queued behind a running turn, like a typed one), and Done, Later or Remove settles the item the
 // way the desktop card does, and Connect opens that account's sign-in here, where the person finishes it (the phone never
@@ -36,7 +36,7 @@ export function mountPhoneBridge({publish,publishLive=async()=>{},answer=()=>fal
  journal?:()=>any[]|null,
  /** The option Fox offers on an item's card (its primary help), chosen on the phone. */
  choose?:(id:string)=>unknown,
- /** What Fox says on an item's card and that item's latest turns (agent/base/payloads.ts PhoneItemFox). */
+ /** What Fox says on an item's card and that item's latest turns (platform/web/payloads.ts PhoneItemFox). */
  itemFox?:(id:string)=>unknown,
  settle:Settle,
  kindOf:(id:string)=>string|undefined,

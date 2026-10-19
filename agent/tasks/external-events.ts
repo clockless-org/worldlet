@@ -6,7 +6,7 @@
 // person (it asks something, names a date, mentions someone) joins them as a `channel` event as soon as the World reads
 // it (agent/gate/PORTABILITY.md#history-read-continuously). These rules know no Harness by name.
 import type {HarnessExternalEvent} from '../../contracts/harness-services.ts';
-import type {PhonePushRequest} from '../base/index.ts';
+import type {PhonePushRequest} from '../../contracts/window-push.ts';
 import {digest,ongoingTurnText} from './ongoing.ts';
 
 export const EXTERNAL_EVENTS=Object.freeze({

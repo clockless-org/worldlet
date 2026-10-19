@@ -10,7 +10,7 @@ import {collectNativeActions,upcomingEvents} from './signals.ts';
 export const ATTENTION_GROUPS=[['event','Coming Up'],['needsAction','Worth Doing'],['unseen','Worth Knowing']] as const;
 
 /** The Attention Center's Now and Later for a phone or a browser, worked out from the saved World items alone, with no
- * World page (agent/base/README.md#web). The rows are the ones the desktop builds for the same items (collectMatters
+ * World page (platform/web/README.md#web). The rows are the ones the desktop builds for the same items (collectMatters
  * over the items' pages in their Applets, focus by attentionFocusSet, groups by attentionOrder). They differ where the
  * desktop knows more: its place on the map (region relevance) and the sample world. `saved` is the focus state of the
  * previous call, so the set stays steady between calls; the result returns the next one. */

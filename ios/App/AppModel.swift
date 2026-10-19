@@ -362,7 +362,7 @@ final class AppModel {
         opening = target
     }
 
-    /// A notification's button (Done, Later, Reply, Allow once, Deny; agent/base/README.md, Push › Actions), answered
+    /// A notification's button (Done, Later, Reply, Allow once, Deny; platform/web/README.md, Push › Actions), answered
     /// without bringing the app up: the box opens again with this pairing's keys, and the same message as the app's own
     /// button goes to the computer. When it cannot go, the notification comes back with its buttons and says so.
     func answerNotification(_ button: PushAction, text: String?, pair: String?, box: String?) async {

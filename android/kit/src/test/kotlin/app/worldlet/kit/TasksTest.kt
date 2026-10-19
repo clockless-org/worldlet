@@ -4,7 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-/** The Tasks and Today tabs' slots on the attention payload (agent/base/payloads.ts PhoneTasks, PhoneJournalEntry),
+/** The Tasks and Today tabs' slots on the attention payload (platform/web/payloads.ts PhoneTasks, PhoneJournalEntry),
  * owner request 2026-10-11. */
 class TasksTest {
     private fun decode(json: String) = WorldletJson.decodeFromString(AttentionSnapshot.serializer(), json)

@@ -266,7 +266,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    // An Agent on another computer and an OpenClaw Gateway are for few people: folded away unless one is in use.
    const elsewhere=el('details','companion-settings-elsewhere') as HTMLDetailsElement;elsewhere.append(el('summary','','Other ways to connect'));
    elsewhere.ontoggle=()=>{showElsewhere=elsewhere.open;};
-   // An Agent on another computer (agent/base/README.md#another-computers-agent): the code from Worldlet there pairs
+   // An Agent on another computer (platform/web/README.md#another-computers-agent): the code from Worldlet there pairs
    // this one with it, and Fox's conversation runs on it; this World stays here.
    const remote=found?.remote,row=el('div','companion-settings-row'),text=el('div');row.dataset.agent='remote';
    if(remote&&typeof remote.computer==='string'){
@@ -284,7 +284,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    }
    elsewhere.append(row);
    // An OpenClaw Gateway on another computer, reached directly with its address and token, nothing of Worldlet there
-   // (agent/base/README.md#an-agent-gateway-on-another-computer). The token goes to the host's vault and never comes back.
+   // (platform/web/README.md#an-agent-gateway-on-another-computer). The token goes to the host's vault and never comes back.
    const gateway=found?.gateway&&typeof found.gateway.host==='string'?found.gateway:null,gRow=el('div','companion-settings-row'),gText=el('div');gRow.dataset.agent='gateway';
    const connect=async(request:Record<string,unknown>)=>{
     said.textContent='Connecting to your Gateway…';

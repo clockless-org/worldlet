@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
-import {PUSH_BOX_PLACE,channelJoiner,channelPieces,boxPlace,openBox,pairKeys,readPairLink,readRoomFrame,roomEntry,sealBox,type PairKeys,type PhoneMessage} from '../agent/base/index.ts';
+import {PUSH_BOX_PLACE,channelJoiner,channelPieces,boxPlace,openBox,pairKeys,readPairLink,readRoomFrame,roomEntry,sealBox,type PairKeys,type PhoneMessage} from '../platform/web/index.ts';
 import {createLocalRelay} from '../platform/electron/src/modules/shell/local-relay.ts';
 import {createPhoneRelay} from '../platform/electron/src/modules/shell/relay.ts';
 import {memoryRoom} from './memory-room.ts';
 
-// The phone's pairing in the pairing room (agent/base/README.md#room): the computer's code says `m=room` and the computer
+// The phone's pairing in the pairing room (platform/web/README.md#room): the computer's code says `m=room` and the computer
 // waits in the room as well as on the relay. An older app pairs on the relay as before. An app that comes to the room
 // moves the pairing there, also one paired on the relay before: the relay's pairing is deleted, and slots, the phone's
 // name and its messages pass only while both are connected; a phone that comes back gets everything at once. The

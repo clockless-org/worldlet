@@ -64,7 +64,7 @@ import {appLogoSource} from '../applets/index.ts';
 import {eventWhen} from '../attention/index.ts';
 import {appletIndicator,myAppletKind,momentAppletId,siteAppletId,siteAppletPage,websiteAppletFor} from '../../context/applets/index.ts';
 import {appletStatus as appStatus,connectionLive} from '../../context/applets/index.ts';
-import {phoneWebAddress} from '../../agent/base/index.ts';
+import {phoneWebAddress} from '../../platform/web/index.ts';
 import {applyModuleWorld,moduleStatus} from '../world/index.ts';
 import {createModuleScene} from '../world/index.ts';
 import {settleItemPage} from '../../context/items/index.ts';
@@ -2270,7 +2270,7 @@ export function mountNotionWorld(data: World, native: any) {
   // The first-run tour's first value can be a conversation the person brought (ui/onboarding/first-value.ts).
   let firstValueOngoing:{list:()=>{id:string,title:string,say:string}[],make:(id:string)=>Promise<boolean>}|null=null;
   if(native){
-    // The paired iPhone mirrors the Center and talks to Fox through this page (agent/base/README.md).
+    // The paired iPhone mirrors the Center and talks to Fox through this page (platform/web/README.md).
     let widgetsNow:any[]=[],phoneWorldLog:{lines:any[],now:any[]}={lines:[],now:[]};
     // Ongoing things (agent/tasks/README.md): proposals stand in Worth Doing as themes; each one kept earlier is a Thing of
     // its own, a device in the area Fox picked (app-job-…), with its own tile in the phone's Thing world and its own thread.

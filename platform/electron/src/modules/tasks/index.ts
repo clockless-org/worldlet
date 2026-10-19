@@ -120,7 +120,7 @@ export function installOngoing(host:Host){
    throw new WorldletError('Unknown request.');
   },
  });
- // Bringing an Agent calls refresh() (modules/fox); the clock catches conversations that age into or out of view.
+ // Bringing an Agent calls refresh() (modules/companion); the clock catches conversations that age into or out of view.
  const clock=setInterval(refresh,HOUR);
  host.onPageLoaded(refresh);
  host.onQuit(()=>clearInterval(clock));

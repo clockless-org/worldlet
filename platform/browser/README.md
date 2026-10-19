@@ -120,7 +120,7 @@ reply as the result in the same place for a few seconds once the person sees the
 after returning from the World ([steps](../../agent/applets/fox-steps.ts)). Fox's bubble does not
 repeat any of it.
 
-The card and the pointer are drawn by the host (`modules/browser/glow.ts`) in a
+The card and the pointer are drawn by the host (`modules/applets/glow.ts`) in a
 transparent, non-focusable child window over the page that ignores the mouse, so they
 add nothing to the website's document, survive page loads and follow the World window
 when it moves or resizes. The host declares `browserFoxOverlay`; a host without it insets

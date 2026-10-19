@@ -1,6 +1,6 @@
 // What the operations repository's checks use to test the website Worker against the app (api/README.md). Runs in Node.
-export {PHONE_DESKTOP_ONLY,PHONE_PUSH_LIMITS,PHONE_SEEN_LIMIT,PUSH_BOX_PLACE,REMOTE_TURN_LIMITS,boxPlace,fitRemoteView,newPairSecret,openBox,pairKeys,pairLink,phoneActionStatus,phoneApplets,phoneApprovalPush,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phoneLive,phonePush,phoneWebAddress,readPairLink,readPhoneMessage,readRemoteToClient,readRemoteToHost,remoteAssembler,remoteHostInfo,remoteParts,remoteSessionWorld,remoteTurnRequest,sealBox,sha256Hex,stalePhoneMessage} from '../agent/base/index.ts';
-export type {PhoneMessage} from '../agent/base/index.ts';
+export {PHONE_DESKTOP_ONLY,PHONE_PUSH_LIMITS,PHONE_SEEN_LIMIT,PUSH_BOX_PLACE,REMOTE_TURN_LIMITS,boxPlace,fitRemoteView,newPairSecret,openBox,pairKeys,pairLink,phoneActionStatus,phoneApplets,phoneApprovalPush,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phoneLive,phonePush,phoneWebAddress,readPairLink,readPhoneMessage,readRemoteToClient,readRemoteToHost,remoteAssembler,remoteHostInfo,remoteParts,remoteSessionWorld,remoteTurnRequest,sealBox,sha256Hex,stalePhoneMessage} from '../platform/web/index.ts';
+export type {PhoneMessage} from '../platform/web/index.ts';
 export {harnessSessionThread,harnessThreadPlace} from '../agent/gate/index.ts';
 export {agentBoardRecords,agentLiveness,makeAgentReport} from '../agent/gate/reports.ts';
 export {boardPresetIds,defineBoard,readBoardDefinition,resolveBoard} from '../context/sources/board.ts';

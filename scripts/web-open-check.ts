@@ -1,5 +1,5 @@
-// Worldlet in a web browser (agent/base/README.md#web): the computer's `web` pairing (platform/electron/src/modules/
-// phone/relay.ts) and the page (ui/web) against the relay this computer serves itself (local-relay.ts), which answers
+// Worldlet in a web browser (platform/web/README.md#web): the computer's `web` pairing (platform/electron/src/modules/
+// phone/relay.ts) and the page (platform/web/page) against the relay this computer serves itself (local-relay.ts), which answers
 // like worker/pairing.ts, over real HTTP on 127.0.0.1: the link, the
 // first poll completing the pairing with the browser's name, the Center reaching the page, Done and a chat line
 // reaching the computer, the fragment leaving the address bar, a reload from storage, and the page ending with the link.
@@ -17,7 +17,7 @@ import {createRoomLink} from '../platform/electron/src/modules/shell/room-link.t
 import {createRtcHost,type RtcPage} from '../platform/electron/src/modules/shell/rtc-host.ts';
 import {RTC_PAGE_SCRIPT} from '../platform/electron/src/modules/shell/rtc-page.ts';
 import {memoryRoom} from './memory-room.ts';
-import {createWebClient,createRoomWebClient,isRoomLink,readWebPairLink,WebPairingEnded,pairKeys,fromBase64url,sha256Hex,worldLinkReply,type PhoneMessage} from '../agent/base/index.ts';
+import {createWebClient,createRoomWebClient,isRoomLink,readWebPairLink,WebPairingEnded,pairKeys,fromBase64url,sha256Hex,worldLinkReply,type PhoneMessage} from '../platform/web/index.ts';
 import {resolveAction,worldActions} from '../agent/gate/index.ts';
 import {buildWebOpen} from './build-web-open.ts';
 
@@ -310,10 +310,10 @@ const until=async(client:{poll(wait?:number):Promise<any>},ok:(view:any)=>boolea
 }
 await server.close();await rm(out,{recursive:true,force:true});
 
-// A line said in the browser or on the phone while the World page is not there (agent/base/README.md#web, Fox without
+// A line said in the browser or on the phone while the World page is not there (platform/web/README.md#web, Fox without
 // the page): the host gives it to Fox's main conversation on its own, and the turn is not ended for want of the page.
 {
- const phone=readFileSync('platform/electron/src/modules/shell/index.ts','utf8'),fox=readFileSync('platform/electron/src/modules/companion/index.ts','utf8');
+ const phone=readFileSync('platform/electron/src/modules/shell/phone.ts','utf8'),fox=readFileSync('platform/electron/src/modules/companion/index.ts','utf8');
  assert.match(phone,/if\(!host\.page\.ready\(\)\)\{[\s\S]{0,2400}message\.type!=='chat'\|\|!fox\?\.converse[\s\S]{0,1600}fox\.converse\(message\.text,place\)/,'a main-conversation line without the page goes to Fox on the host');
  assert.match(phone,/if\(!host\.page\.ready\(\)\)\{[\s\S]{0,800}message\.type==='attention'&&hostRows\.has\(message\.id\)[\s\S]{0,600}host\.store\.setWorldItemStatus\(id,status,until\)/,'Done or Later without the page settles the item on the host');
  assert.match(phone,/if\(link\.phone\)await hostCenter\(\);/,'the host publishes the Center while the page is not there');

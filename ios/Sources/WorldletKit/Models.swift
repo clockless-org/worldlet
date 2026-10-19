@@ -126,7 +126,7 @@ public struct AccountIssue: Codable, Identifiable, Hashable, Sendable {
     }
 }
 
-/// One Applet in the Applet world, the layer above Now (agent/base/payloads.ts PhoneApplet): where the grid shows it,
+/// One Applet in the Applet world, the layer above Now (platform/web/payloads.ts PhoneApplet): where the grid shows it,
 /// its lamp, what it is doing or its status, its latest world log lines (newest last), the widget a moment Applet opens,
 /// its own thread of Fox's conversation, and where one of the person's own Applets came from (`site`, `page` or
 /// `conversation`; absent for a built-in one), so its tile carries the mark its device has on the computer.
@@ -213,7 +213,7 @@ public struct PhoneApplet: Codable, Identifiable, Hashable, Sendable {
     }
 }
 
-/// One card of the computer's Task panel, the cards either side of Fox (agent/base/payloads.ts PhoneTask), as the Tasks
+/// One card of the computer's Task panel, the cards either side of Fox (platform/web/payloads.ts PhoneTask), as the Tasks
 /// tab lists it: its name and status, its time text ("In progress", "Tomorrow 6:00 AM"), its picture (`fox`, `clock` or an
 /// Applet's key), how far along it is, the Applet it opens, how often a routine runs and who runs it, and what a running
 /// task has said (newest last).
@@ -355,7 +355,7 @@ public struct Conversation: Codable, Sendable, Equatable {
     public static let empty = Conversation(v: 1, at: "", busy: false, name: "Fox", messages: [])
 }
 
-/// The person's own Agent asks before it acts (agent/base/payloads.ts PhoneApproval, contracts/harness-services.ts
+/// The person's own Agent asks before it acts (platform/web/payloads.ts PhoneApproval, contracts/harness-services.ts
 /// `approvals`): a dangerous command of Hermes Agent's, an exec request of OpenClaw's. It rides on the running turn; the
 /// phone answers with `PhoneMessage.approval`, the same three choices as Fox's card on the computer.
 public struct HarnessApproval: Codable, Sendable, Equatable {
@@ -407,7 +407,7 @@ public struct HarnessApproval: Codable, Sendable, Equatable {
     }
 }
 
-/// The turn Fox is on now, as it streams (agent/base/payloads.ts PhoneLive): `steps` are its thinking, newest last, and
+/// The turn Fox is on now, as it streams (platform/web/payloads.ts PhoneLive): `steps` are its thinking, newest last, and
 /// `text` the reply so far. `item` is the Attention item whose card the turn was asked from; nil for the main
 /// conversation. `done` marks the finished reply; `approval` is what the person's own Agent asks while it runs.
 public struct LiveTurn: Codable, Sendable, Equatable {
@@ -597,7 +597,7 @@ public enum PhoneMessage: Encodable, Sendable, Equatable {
 
 // MARK: Notifications
 
-/// What one notification says (agent/base/payloads.ts PhonePush), sealed by the computer with place "push" and carried
+/// What one notification says (platform/web/payloads.ts PhonePush), sealed by the computer with place "push" and carried
 /// as `b` in the APNs payload, so Apple and the relay see only the fallback text. `open` is where a tap goes.
 public struct PhonePush: Codable, Sendable, Equatable {
     public enum Kind: String, Codable, Sendable { case attention, fox, routine, task }
@@ -613,7 +613,7 @@ public struct PhonePush: Codable, Sendable, Equatable {
         }
     }
 
-    /// What the notification's own buttons answer (agent/base/payloads.ts PhonePushAct): `attention` an item's id (Done,
+    /// What the notification's own buttons answer (platform/web/payloads.ts PhonePushAct): `attention` an item's id (Done,
     /// Later), `reply` an inline reply where `open` points, `approval` a request's id (Allow once when `once`, and Deny).
     public struct Act: Codable, Sendable, Equatable {
         public let attention: String?
@@ -701,7 +701,7 @@ public struct PhonePush: Codable, Sendable, Equatable {
     }
 }
 
-/// A button on a notification (agent/base/README.md, Push › Actions); the raw value is its action identifier.
+/// A button on a notification (platform/web/README.md, Push › Actions); the raw value is its action identifier.
 public enum PushAction: String, CaseIterable, Sendable {
     case done = "worldlet.done", later = "worldlet.later", reply = "worldlet.reply", allow = "worldlet.allow", deny = "worldlet.deny"
 
@@ -758,7 +758,7 @@ public enum PushTarget: Equatable, Sendable {
 // MARK: Website recording
 
 /// One report from the page observer (platform/bridge/web-record.js, copied to App/web-record.js) on a website opened
-/// in this app's browser, with this phone's time in seconds (agent/base/payloads.ts PhoneWebRecord). The observer
+/// in this app's browser, with this phone's time in seconds (platform/web/payloads.ts PhoneWebRecord). The observer
 /// never reports passwords, card numbers or one-time codes, and says `private` when a page shows such a field.
 public struct WebReport: Codable, Hashable, Sendable {
     public var at: Double
@@ -882,7 +882,7 @@ public enum WidgetLimits {
     public static let key = 200
 }
 
-/// A widget for now (agent/base/payloads.ts PhoneWidget): a page made for the moment. `page` is the whole document with
+/// A widget for now (platform/web/payloads.ts PhoneWidget): a page made for the moment. `page` is the whole document with
 /// the widget prelude and no seed (the phone injects its stored values); it is nil when the computer's slot had no room
 /// for it, and the phone keeps the page it already has for the same version.
 public struct PhoneWidget: Codable, Identifiable, Hashable, Sendable {

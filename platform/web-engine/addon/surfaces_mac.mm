@@ -1,7 +1,7 @@
 // Host side of the engine's shared surfaces on macOS (../src/frames_mac.mm sends them). Electron's
 // sharedTexture imports an IOSurfaceRef of the importing process, so the Electron main process takes
 // each surface's Mach send right here, from the engine's process only, and hands JavaScript the
-// pointer. Loaded by platform/electron/src/modules/browser/engine/surfaces.ts.
+// pointer. Loaded by platform/electron/src/modules/applets/engine/surfaces.ts.
 #import <Foundation/Foundation.h>
 #import <IOSurface/IOSurface.h>
 #include <bsm/libbsm.h>

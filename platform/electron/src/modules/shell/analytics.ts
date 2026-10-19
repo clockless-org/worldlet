@@ -42,7 +42,7 @@ const EVENTS=new Set(['external_outcome_confirmed','content_opened','world_tool_
  'attention_shown','attention_approved','attention_opened_from_fox','journal_opened','routine_completed','phone_paired','phone_approved','agent_settings_changed','main_stall','local_data_size','app_graphics_fallback',
  // owner 2026-10-11 20:21 PDT: Production metrics.
  'attention_item_opened','task_completed','world_active_time']);
-/** Coarse timing only: turn and tool buckets, the longer ones of Applet tasks (`taskDuration` in modules/fox) and
+/** Coarse timing only: turn and tool buckets, the longer ones of Applet tasks (`taskDuration` in modules/companion) and
  * Fox and startup timings (`timingBucket` in agent/base). */
 const DURATIONS=['under_1s','1_5s','5_15s','over_15s','15_60s','1_5m','5_15m','over_15m'];
 const ALLOWED:Record<string,string[]>={
@@ -88,7 +88,7 @@ const ALLOWED:Record<string,string[]>={
  // Updates (modules/shell/updates.ts): how long a prepared update waited for Update, and which step failed.
  update_wait:[...UPDATE_WAIT_BUCKETS],update_stage:['check','folder','download','prepare','install'],
  update_error:['open','contents','copy','build','identity','signature','team','incomplete','disk','timeout','other'],
- // Fox's speak-first ask (modules/fox proactiveRunTurn): the moment and whether Fox spoke, never the line.
+ // Fox's speak-first ask (modules/companion proactiveRunTurn): the moment and whether Fox spoke, never the line.
  proactive_moment:[...PROACTIVE_MOMENTS],proactive_status:['spoke','passed'],
  // fox_proactive_shown: whether the line pointed to an open Attention card.
  proactive_card:['yes','no'],
@@ -108,7 +108,7 @@ const ALLOWED:Record<string,string[]>={
  // agent_settings_changed: which part of Settings › Agents changed; never what it changed to.
  agent_setting:['model','permission','account','routine','skill'],
  // owner 2026-10-11 20:21 PDT: Production metrics. phone_paired: the phone's system, from its notification platform, or
- // `web` for a web browser (agent/base/README.md#web).
+ // `web` for a web browser (platform/web/README.md#web).
  // attention_item_opened: where the person opened the item's card. task_completed: which kind of background work finished.
  phone_platform:['ios','android','web','unknown'],open_surface:['computer','phone'],task_kind:['routine','fox','applet'],
  // local_data_size (agent/base/data-size.ts): how much this computer keeps, in bands; never a name or path.

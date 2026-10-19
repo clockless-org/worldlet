@@ -5,7 +5,7 @@ import {app} from 'electron';
 import type {Host,Row} from '../../host/types.ts';
 import {AGENT,ANALYTICS,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,PHONE,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,WIDGETS,WORLD_ROOM_PAGE,WORLD_WEB,type WorldRoomPageService,type WorldWebService,type AgentService,type RtcPageFactory,type DesktopCompanionService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
 import {WorldletError} from '../../files.ts';
-import {withWorldLink,PHONE_LIMITS,hostAppletPlaces,threadPairs,readRemoteToHost,remoteHostInfo,phoneActionStatus,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,pairKeys,fromBase64url,sha256Hex,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../agent/base/index.ts';
+import {withWorldLink,PHONE_LIMITS,hostAppletPlaces,threadPairs,readRemoteToHost,remoteHostInfo,phoneActionStatus,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,pairKeys,fromBase64url,sha256Hex,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../web/index.ts';
 import {createPhoneRelay} from './relay.ts';
 import {createLocalRelay,serveLocalRelay,type LocalServer} from './local-relay.ts';
 import {createRoomLink} from './room-link.ts';
@@ -21,14 +21,14 @@ import {taskPanel} from '../../../../../agent/tasks/index.ts';
 import {APP_DEFINITIONS} from '../../../../../context/applets/index.ts';
 import {readArtifact} from '../../../../../context/artifacts/index.ts';
 
-// Phone pairing (agent/base/README.md): the iPhone app mirrors the Attention Center and Fox's main conversation.
+// Phone pairing (platform/web/README.md): the iPhone app mirrors the Attention Center and Fox's main conversation.
 // This module owns the pairing secret and the relay connection; the World page supplies the Attention snapshot
 // (`phonePublish`, sent the moment the Center changes) and carries out the phone's messages (`worldletPhoneMessage`),
 // because Center ordering and Fox turns live there. While the phone is open (it reached the relay in the last two
 // minutes, or any time in the last week; see LISTENING) the desktop long-polls the relay, so a chat line or a Done from
 // the phone arrives within about a second; while the app is open it re-reads Fox's conversation every two seconds while
 // Fox works. Otherwise it checks every 15 seconds.
-// Notifications (agent/base/README.md#push) go out only while the phone is not showing the app: it reached the relay in
+// Notifications (platform/web/README.md#push) go out only while the phone is not showing the app: it reached the relay in
 // the last 45 seconds (an open app long-polls every 20), a shorter window than the two minutes that keep this loop quick, so
 // a reply that lands just after the person put the phone away still reaches them. New Coming Up and Worth Doing items
 // (agent/base phoneAttentionPushes, diffed against the previous snapshot) and Fox's finished reply to a line said on the
@@ -57,9 +57,9 @@ export function installPhone(host:Host){
  const asked=new Map<string,{item?:string,applet?:string,at:number}>();
  const askedKey=(text:unknown)=>typeof text==='string'?text.trim().slice(0,PHONE_LIMITS.field):'';
  const attachments=phoneAttachments(()=>path.join(app.getPath('userData'),'Phone files'));
- // What the phone or a paired browser (agent/base/README.md#web) asked; both are carried out alike.
+ // What the phone or a paired browser (platform/web/README.md#web) asked; both are carried out alike.
  const deliver=async(message:PhoneMessage,key:string)=>{
-   // A widget edit is the host's own (modules/artifacts): it is merged and saved even while the page reloads.
+   // A widget edit is the host's own (modules/attention): it is merged and saved even while the page reloads.
    if(message.type==='widget'){
     lastActive=Date.now();
     const widgets=host.optional<WidgetsService>(WIDGETS);if(!widgets)return false;
@@ -203,7 +203,7 @@ export function installPhone(host:Host){
   if(push)void notify(push).catch(e=>host.diagnostics.record(e,'phonePush'));
  }
  const phoneOpen=()=>{const seen=relay.status().seenAt;return !!seen&&Date.now()-seen<ACTIVE||Date.now()-lastActive<ACTIVE;};
- // Another Worldlet that runs Fox's turns on this computer's Agent (agent/base/README.md#another-computers-agent):
+ // Another Worldlet that runs Fox's turns on this computer's Agent (platform/web/README.md#another-computers-agent):
  // a second pairing on the same relay with a `worldlet://agent` code. Its turns run here on the Agent service's own
  // runtime (remote-host.ts), never through the World page: in that computer's own sessions, with its instructions and
  // view, and every World tool call goes back to run in its World. It gets nothing of this World (no Attention Center,
@@ -234,7 +234,7 @@ export function installPhone(host:Host){
   deliver:message=>remoteHost.receive(message),
   onChange:status=>{if(status.state!=='paired')remoteHost.stop();host.page.event('worldlet:agent-pair-status',status);},
  });
- // The full World on another device (agent/base/README.md#the-world-on-another-device): a `world` pairing of its own,
+ // The full World on another device (platform/web/README.md#the-world-on-another-device): a `world` pairing of its own,
  // met in the pairing room. Each page that joins is the host's remote World page (WORLD_ROOM_PAGE), with only what
  // ROOM_ALLOWED lets through; a host without one closes it.
  const worldRoom=createWorldRoomLink({
@@ -245,7 +245,7 @@ export function installPhone(host:Host){
  // The browser link carries the World's pairing too (agent/base withWorldLink), so it opens the full World on a device
  // that can draw it and the Center on one that cannot.
  const webStatus=(status:PhoneStatus):PhoneStatus=>status.link?{...status,link:withWorldLink(status.link,worldRoom.status().link)}:status;
- // A web browser on another device (agent/base/README.md#web): the page at `<relay>/open/` meets this computer in the
+ // A web browser on another device (platform/web/README.md#web): the page at `<relay>/open/` meets this computer in the
  // pairing room (room-link.ts), which stores nothing, and gets the same Center, conversation and live turn as a phone,
  // over a direct line when the two can reach each other.
  // It takes no notifications; a tab seen in the last hour keeps the loop listening, so a Done from it lands at once.
@@ -268,7 +268,7 @@ export function installPhone(host:Host){
  if(vault.get('web-pairing'))void createPhoneRelay({fetch:(input,init)=>fetch(input,init),vault,name:computerName,userAgent:`Worldlet/${version} (web pairing)`,kind:'web',
   relay:process.env.WORLDLET_PAIR_RELAY||undefined,deliver:async()=>false}).end().catch(error=>host.diagnostics.record(error,'phonePairing'));
  webPaired=browser.status().state==='paired';
- // A browser on this computer (agent/base/README.md#web): a pairing of its own, served by this app on 127.0.0.1
+ // A browser on this computer (platform/web/README.md#web): a pairing of its own, served by this app on 127.0.0.1
  // (local-relay.ts) with the page and a relay in memory, so what it shows never leaves the computer. The server starts
  // with the first link and with a launch that kept one, on the port the last one used, so the browser's saved link and
  // bookmark keep working; a link made for another port is ended, since that browser storage is gone with its origin.

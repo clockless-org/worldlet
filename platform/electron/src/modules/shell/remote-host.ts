@@ -1,7 +1,7 @@
 import type {HarnessApprovalChoice} from '../../../../../contracts/harness-services.ts';
-import {REMOTE_TURN_LIMITS,readRemoteToHost,remoteAssembler,remoteParts,remoteSessionWorld,remoteTurnBody,type RemotePart,type RemoteToHost,type RemoteTurnEvent,type RemoteTurnRequest} from '../../../../../agent/base/index.ts';
+import {REMOTE_TURN_LIMITS,readRemoteToHost,remoteAssembler,remoteParts,remoteSessionWorld,remoteTurnBody,type RemotePart,type RemoteToHost,type RemoteTurnEvent,type RemoteTurnRequest} from '../../../../web/index.ts';
 
-// The host side of Fox on another computer's Agent (agent/base/README.md#another-computers-agent), free of Electron so
+// The host side of Fox on another computer's Agent (platform/web/README.md#another-computers-agent), free of Electron so
 // scripts/remote-agent-check.ts drives it in process. The paired client's `turn` runs on this computer's Agent (`run`,
 // the Agent service's own runtime, not the World page): in that Fox thread's session for the client, with the client's
 // instructions and view. Its words and steps go back as `events` (gathered for a quarter second), each World tool call

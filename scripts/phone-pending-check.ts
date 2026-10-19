@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {boxPlace,pairKeys,readPairLink,sealBox} from '../agent/base/index.ts';
+import {boxPlace,pairKeys,readPairLink,sealBox} from '../platform/web/index.ts';
 import {createLocalRelay} from '../platform/electron/src/modules/shell/local-relay.ts';
 import {createPhoneRelay} from '../platform/electron/src/modules/shell/relay.ts';
 

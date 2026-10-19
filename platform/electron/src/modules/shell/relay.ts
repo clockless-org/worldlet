@@ -1,17 +1,17 @@
-import {DEFAULT_PAIR_RELAY,PUSH_BOX_PLACE,ROOM_LINK_MODE,readRoomFrame,roomEntry,base64url,boxPlace,fromBase64url,newPairSecret,openBox,pairKeys,pairLink,readPhoneMessage,sealBox,sha256Hex,phoneMessageKey,stalePhoneMessage,phonePushToken,PHONE_SEEN_LIMIT,type PairKeys,type PairKind,type PhoneMessage,type PhonePush,type RoomFrame,type RoomSocketFactory} from '../../../../../agent/base/index.ts';
+import {DEFAULT_PAIR_RELAY,PUSH_BOX_PLACE,ROOM_LINK_MODE,readRoomFrame,roomEntry,base64url,boxPlace,fromBase64url,newPairSecret,openBox,pairKeys,pairLink,readPhoneMessage,sealBox,sha256Hex,phoneMessageKey,stalePhoneMessage,phonePushToken,PHONE_SEEN_LIMIT,type PairKeys,type PairKind,type PhoneMessage,type PhonePush,type RoomFrame,type RoomSocketFactory} from '../../../../web/index.ts';
 
-// The desktop side of phone pairing (agent/base/README.md), free of Electron so scripts/phone-pairing-check.ts can drive
+// The desktop side of phone pairing (platform/web/README.md), free of Electron so scripts/phone-pairing-check.ts can drive
 // it against the relay Worker in process. It keeps one pairing: the secret in the vault, the relay cursor in memory.
 // The host runs one for the phone and one for another Worldlet that uses this computer's Agent (`kind: 'agent'`,
-// agent/base/README.md#another-computers-agent): the same relay, keys and boxes, with a code and vault entry of its own.
+// platform/web/README.md#another-computers-agent): the same relay, keys and boxes, with a code and vault entry of its own.
 // Slots the desktop owns are sealed and written only when their content changes; the phone's messages go to `deliver`,
 // and one it does not take yet is kept in the vault and offered again on each poll, while the relay's cursor moves on
 // (a message held on the relay instead came back at once on every long poll, about four requests a second). The agent pairing reads its
 // client's messages with `read` (agent/base readRemoteToHost) instead of a phone's, and `send` queues one to the client. `notify` asks the relay to
 // wake the phone with a sealed notification; `push` in the status says whether the phone registered for them. A phone
-// that hands its notification token to the computer (a `push` message, agent/base/README.md#push) has it kept in the
+// that hands its notification token to the computer (a `push` message, platform/web/README.md#push) has it kept in the
 // vault, never delivered: `notify` then sends the token with the box to the relay's `/api/push`, which stores nothing.
-// With `room` (the phone's pairing, agent/base/README.md#room) the computer also waits in the pairing room (agent/base
+// With `room` (the phone's pairing, platform/web/README.md#room) the computer also waits in the pairing room (agent/base
 // room.ts), and its code says so (`m=room`): a phone app that meets it there moves the pairing into the room for good,
 // the relay's pairing is deleted with everything it kept, and from then on slots and messages pass only while both are
 // connected, as with a browser (room-link.ts). An older app keeps using the relay.
@@ -76,7 +76,7 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
  const link=()=>pairLink({secret:fromBase64url(saved!.secret),relay:saved!.relay,name:saved!.name,kind})+(options.room?'&m='+ROOM_LINK_MODE:'');
  // A phone in the room now is seen now.
  const seenNow=()=>peers.size?Date.now():seenAt;
- // A browser's link stays shown once paired: any browser that opens it joins the same pairing (agent/base/README.md#web).
+ // A browser's link stays shown once paired: any browser that opens it joins the same pairing (platform/web/README.md#web).
  const status=():PhoneStatus=>!saved?{state:'none'}:saved.paired?{state:'paired',...(kind==='web'?{link:link()}:{}),phone:saved.phone??null,seenAt:seenNow(),...(push!==undefined?{push}:{}),...(error?{error}:{})}
   :{state:'waiting',link:link(),...(error?{error}:{})};
  const changed=()=>options.onChange?.(status());

@@ -7,7 +7,7 @@ import {GatewayConversation,type GatewaySettings,type OwnSession,type ResidentSe
 import {ElsewhereAdapter} from './remote-harness.ts';
 import type {Adapter,AgentEventHandler,AgentRuntime,Row,RuntimeContext} from './types.ts';
 
-// Fox on an OpenClaw Gateway on another computer, reached directly (agent/base/README.md#an-agent-gateway-on-another-computer;
+// Fox on an OpenClaw Gateway on another computer, reached directly (platform/web/README.md#an-agent-gateway-on-another-computer;
 // Harness `remote-openclaw`, location `native`): no Worldlet runs there. The person types its address and token in
 // Settings › Agents; the token is kept in the vault (safeStorage: the OS keychain's key), never in a settings file, a
 // log or what the page reads. Fox's conversation turns go to its `/v1/responses` in a session per Fox thread, the same

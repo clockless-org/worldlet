@@ -7,17 +7,20 @@ const root=process.cwd();
 const config=ts.readConfigFile('tsconfig.json',ts.sys.readFile);
 const options=ts.parseJsonConfigFileContent(config.config,ts.sys,root).options;
 // Agent and Context (#681): context/ imports only itself and contracts/, agent/ imports context/ and contracts/.
-const layers=['api','platform/bridge','ui','agent','context','contracts','models','harness','platform','website','worker'];
+const layers=['api','platform/bridge','platform/web','ui','agent','context','contracts','models','harness','platform','website','worker'];
 const PURE=['agent','context','contracts'];
 const allowed:Record<string,string[]>={
  // api/ is what the operations repository uses (api/README.md): it reaches into any layer, and nothing here imports it.
- api:['api','ui','agent','context','contracts','platform','platform/bridge','resources'],
- ui:['ui','agent','context','contracts','platform/bridge','resources'],
+ api:['api','ui','agent','context','contracts','platform','platform/bridge','platform/web','resources'],
+ // platform/web is the window protocol (pairing, sealing, what each window is sent) and the browser page; the World page
+ // feeds paired windows, so UI and the bridge use it.
+ ui:['ui','agent','context','contracts','platform/bridge','platform/web','resources'],
  agent:['agent','context','contracts'], context:['context','contracts'],
  contracts:['contracts'],
- 'platform/bridge':['platform/bridge','agent','context','contracts'],
+ 'platform/bridge':['platform/bridge','platform/web','agent','context','contracts'],
+ 'platform/web':['platform/web','agent','context','contracts'],
  'models':['models','contracts','agent','context'],
- harness:['harness','contracts'], platform:['platform','platform/bridge','agent','context','contracts'],
+ harness:['harness','contracts'], platform:['platform','platform/bridge','platform/web','agent','context','contracts'],
  website:['website','ui','agent','context','contracts','resources','platform/bridge'],
  worker:['worker','agent','context','contracts'],
 };

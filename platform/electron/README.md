@@ -19,15 +19,15 @@ decisions. See the [five-layer standard](../../docs/UI-CORE-PLATFORM.md).
 | `src/core.ts` | Shared Core in-process: the same `invoke(operation, json)` entry JavaScriptCore and Jint used |
 | `src/preferences.ts`, `src/vault.ts` | Display/companion preferences (`preferences.json`); credentials encrypted with `safeStorage` (or the storage a host passes in) |
 | `src/resources.ts` | Bundled helpers: Hermes bootstrap, agent-browser, Stripe CLI, imsg (Messages), Google OAuth registration, distribution config |
-| `src/modules/agent-runtime` | Harness adapters (Hermes worker, external Agent), model access, execution journal, routines |
-| `src/modules/fox` | Fox chat/model actions, World tool host services, conversation and companion records, reset |
+| `src/modules/agents` | Harness adapters (Hermes worker, external Agent), model access, execution journal, routines |
+| `src/modules/companion` | Fox chat/model actions, World tool host services, conversation and companion records, reset |
 | `src/modules/sources` | Connections, Applet content readers, reviews (mail, Notion, Home), imports, onboarding, deletion |
 | `src/modules/attention` | World tools, source checks, Applet analysis, Attention synthesis, runtime tasks |
-| `src/modules/browser` | Website views, agent-browser over CDP, history, bookmarks, picture-in-picture, YouTube, Stripe |
-| `src/modules/media` | The shared media surface (hidden playback and capture view), helper processes, tools Python |
-| `src/modules/world-audio` | World ambience, music, radio/podcasts, the computer's own music players |
-| `src/modules/voice` | Fox's dictation and Talk capture, local Whisper, spoken replies, cloud requests |
-| `src/modules/applet-tools` | Voice Memos, weather, Codex and Claude Code sessions, delegated coding tasks |
+| `src/modules/applets` | Website views, agent-browser over CDP, history, bookmarks, picture-in-picture, YouTube, Stripe |
+| `src/modules/shell` | The shared media surface (hidden playback and capture view), helper processes, tools Python |
+| `src/modules/world` | World ambience, music, radio/podcasts, the computer's own music players |
+| `src/modules/companion` | Fox's dictation and Talk capture, local Whisper, spoken replies, cloud requests |
+| `src/modules/applets` | Voice Memos, weather, Codex and Claude Code sessions, delegated coding tasks |
 | `src/modules/shell` | Menus, desktop Companion, updates, diagnostics, feedback, analytics, World backup |
 | `distribution/` | Public update feed config, analytics capture key, Mac entitlements, Mac release scripts (`mac/`), Windows installer and Store identity (`windows/`) |
 

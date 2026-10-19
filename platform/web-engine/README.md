@@ -203,7 +203,7 @@ views instead: no archive is pinned, so engines use the standard build.
 
 ## Checks
 
-`npm run test:electron -- modules/browser/engine` runs on a disposable profile with the development
+`npm run test:electron -- modules/applets/engine` runs on a disposable profile with the development
 rehearsal site. It uses no network and no account. It checks that:
 
 - the engine's URL, popup and new-tab rules match the parity fixtures;

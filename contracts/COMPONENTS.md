@@ -124,9 +124,9 @@ Directory ownership follows the [component table](#components-and-interfaces). E
 ### One component, one owner
 
 - **Applet definitions:** `context/applets/catalog.ts` and `context/applets/definitions/<key>.ts` own identity, capabilities and declared states. `ui/applets/<key>/` owns rendering, panels and logo presentation. Model context and tools can read the catalog without importing UI.
-- **Companion:** `agent/companion/` owns portable records, validation, recall and prompt rules; `ui/companion/` owns dialogue and animation. Host storage and credential operations remain in the Electron host (`modules/fox/companion.ts`, `src/vault.ts`).
+- **Companion:** `agent/companion/` owns portable records, validation, recall and prompt rules; `ui/companion/` owns dialogue and animation. Host storage and credential operations remain in the Electron host (`modules/companion/companion.ts`, `src/vault.ts`).
 - **Schedules:** `agent/tasks/` owns Worldlet source-check rules and settings policy. The platform supplies consent, app lifecycle and an awake clock. `harness/hermes/routines.py` claims due jobs, runs them and saves results. External backends must advertise and implement equivalent services.
-- **Host persistence:** `platform/electron/src/store/world-store.ts`, `store/ledger.ts` and the companion records in `modules/fox/companion.ts` belong to layer 3. Layer 2 owns the rules they apply. They are not listed as a second implementation in `core/`.
+- **Host persistence:** `platform/electron/src/store/world-store.ts`, `store/ledger.ts` and the companion records in `modules/companion/companion.ts` belong to layer 3. Layer 2 owns the rules they apply. They are not listed as a second implementation in `core/`.
 - **Local execution:** `platform/local-tools/` supplies speech and coding CLI helpers independently of the selected Harness.
 - **Connectors:** Hermes-bound readers/authentication remain in `harness/hermes/`. There is no empty generic connectors folder or claim that these modules are independent. Do not put source connectors in `models/`; that directory owns only the hosted model API.
 
@@ -222,15 +222,15 @@ project, not separately packaged libraries. Paths are under `platform/electron/s
 
 | Component | Shared owner / interface | Electron effect adapter |
 | --- | --- | --- |
-| Page presentation | `ui/browser/index.ts`, `contracts/browser-surface.ts` | `modules/browser/device.ts` (panel, layout), `page.ts` (website `WebContentsView`), `surface.ts` (session partitions) |
+| Page presentation | `ui/browser/index.ts`, `contracts/browser-surface.ts` | `modules/applets/device.ts` (panel, layout), `page.ts` (website `WebContentsView`), `surface.ts` (session partitions) |
 | [Page resume](../platform/browser/INTEGRATION.md#resuming-a-website-applet) | `agent/applets/page-resume.ts`, `platform/bridge/media-hold.js` | `device.ts` keeps, shows and releases pages as `live` lists; kept pages are hidden, muted and media-held |
 | [Picture in picture](../platform/browser/INTEGRATION.md#picture-in-picture) | `agent/applets/picture-in-picture.ts`, `ui/browser/picture-in-picture.ts`, `platform/bridge/picture-in-picture.js` | `device.ts` places the page as `browserPip` says and lays a transparent press view over it to report a press; Chromium's `AudioFocusEnforcement` (enabled in `main.ts`) keeps one page playing sound |
 | Browser action decisions | `agent/applets/index.ts`, `agent/gate/index.ts` | `device.ts` executes shared decisions |
-| Element interaction | Bundled upstream `agent-browser`; `platform/browser/agent_browser.py` transport | `modules/browser/agent.ts` (driver process), `page.ts` (agent CDP transport) |
+| Element interaction | Bundled upstream `agent-browser`; `platform/browser/agent_browser.py` transport | `modules/applets/agent.ts` (driver process), `page.ts` (agent CDP transport) |
 | Selected-target CDP | Private commands/events; no browser-wide access | `page.ts` through `webContents.debugger`; `Target.*`/`Browser.*` refused |
 | World semantic actions | `contracts/ui.ts`, `window.worldletUI.snapshot/dispatch` | Trusted World view (`world/window.ts`) |
 | Headless Core execution | Serialized operations in `agent/index.ts` | `core.ts`, in-process |
-| Durable execution | `contracts/execution.ts`, `context/items/index.ts` | `store/ledger.ts`, `modules/agent-runtime/journal.ts` |
+| Durable execution | `contracts/execution.ts`, `context/items/index.ts` | `store/ledger.ts`, `modules/agents/journal.ts` |
 
 Chromium paints pages; Electron embeds it. CDP controls the selected page;
 agent-browser interprets website elements and executes interactions through that

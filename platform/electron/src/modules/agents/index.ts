@@ -354,8 +354,8 @@ const AGENT_ACCESS_AUDIT=20;
  * 2026-10-09): Hermes Agent, OpenClaw, pi and Claude Code answer for Fox themselves (`LocalHarnessAdapter`), with
  * World tools, and run the World's background work too. Codex alone is no Agent; stock Hermes Agent is offered instead.
  * `pair` (with a `worldlet://agent` code) makes the Agent on another computer Fox's Agent instead (Harness location
- * remote, agent/base/README.md#another-computers-agent); `select` or `clear` ends that pairing.
- * `gateway` (an address and token, agent/base/README.md#an-agent-gateway-on-another-computer) proves an OpenClaw
+ * remote, platform/web/README.md#another-computers-agent); `select` or `clear` ends that pairing.
+ * `gateway` (an address and token, platform/web/README.md#an-agent-gateway-on-another-computer) proves an OpenClaw
  * Gateway on another computer answers, keeps its token in the vault and makes it Fox's Agent; without a token it uses
  * the one saved for that address again. `pair`, `select` and `clear` set it aside (kept, to use again);
  * `forget-gateway` deletes it. `detect` reports its address and whether it is in use, never its token.
@@ -592,7 +592,7 @@ export function installAgentRuntime(host:Host){
   },
   changed:reason=>{for(const listener of listeners)try{listener(reason);}catch(error){host.diagnostics.record(error,'agentRuntime');}}
  });
- // The pairing with Worldlet on another computer whose Agent Fox uses (agent/base/README.md#another-computers-agent).
+ // The pairing with Worldlet on another computer whose Agent Fox uses (platform/web/README.md#another-computers-agent).
  const remote=createRemoteAgentLink({fetch:(input,init)=>fetch(input,init),vault:host.use<VaultService>(VAULT),
   name:()=>os.hostname().replace(/\.(local|lan|home)$/i,'').slice(0,60)||'Computer',version:app.getVersion(),userAgent:`Worldlet/${app.getVersion()} (agent pairing)`,
   // Unpaired on the other computer: Fox has no Agent until one is chosen.

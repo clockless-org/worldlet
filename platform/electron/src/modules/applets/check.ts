@@ -2,7 +2,7 @@
 // readings release the oldest kept page first, one per reading, never the visible or the
 // picture-in-picture page, and diagnostics get the reason without the page. The real sampler
 // reads Electron's process and system memory. Runs in an Electron main process:
-// npm run test:electron -- modules/browser
+// npm run test:electron -- modules/applets
 // It also feeds Google's sign-in refusal page (#1089) as the visible page's URL: the panel reports
 // the refusal instead of the page and the browser action opens YouTube, never Google's page.
 // Engine identity (#1089): a real website session on a loopback page sends the user agent and

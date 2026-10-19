@@ -345,7 +345,6 @@ Indexed: **286 Markdown documents** and **749 supporting documentation files**.
 - [agent/README.md](../agent/README.md)
 - [agent/attention/README.md](../agent/attention/README.md)
 - [agent/base/ANALYTICS.md](../agent/base/ANALYTICS.md)
-- [agent/base/README.md](../agent/base/README.md)
 - [agent/gate/GRANTS.md](../agent/gate/GRANTS.md)
 - [agent/gate/PORTABILITY.md](../agent/gate/PORTABILITY.md)
 - [agent/gate/REMOTE-MCP.md](../agent/gate/REMOTE-MCP.md)
@@ -381,6 +380,7 @@ Indexed: **286 Markdown documents** and **749 supporting documentation files**.
 - [platform/local-tools/README.md](../platform/local-tools/README.md)
 - [platform/node/README.md](../platform/node/README.md)
 - [platform/web-engine/README.md](../platform/web-engine/README.md)
+- [platform/web/README.md](../platform/web/README.md)
 - [scripts/DEVELOPMENT.md](../scripts/DEVELOPMENT.md)
 
 </details>
