@@ -28,7 +28,7 @@ import {createHarnessConnections} from './harness-connections.ts';
 import {createHarnessControls} from './harness-controls.ts';
 import {WORLD_APPS,MOMENT_MAKER} from '../../../../../context/applets/index.ts';
 import {diagnosticError} from '../../../../../agent/diagnostics/index.ts';
-import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,hermesChannelTrust,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,reduceAgentResponse,routineScheduleResult,standingCallDecision,worldSinceNote,type MigrationSource} from '../../../../../agent/agent/index.ts';
+import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,hermesChannelTrust,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,reduceAgentResponse,routineScheduleResult,standingCallDecision,worldSinceNote,type MigrationSource} from '../../../../../agent/agents/index.ts';
 import {worldLogKeeps} from '../../../../../context/activity/index.ts';
 import {worldActionOf,worldActions} from '../../../../../agent/tools/index.ts';
 import {onboardingUnfinished} from '../../../../../agent/onboarding/index.ts';
@@ -341,7 +341,7 @@ export function installFox(host:Host){
  }
 
  /** What happened in the World since `thread`'s resident session last replied, for an Agent that keeps one per thread
-  * (its `conversation` service): the History lines after that reply as one bounded note (agent/agent/world-since.ts),
+  * (its `conversation` service): the History lines after that reply as one bounded note (agent/agents/world-since.ts),
   * read the way the History page reads them; '' for a new session, or when nothing happened. */
  function worldSince(scope:Scope,thread:string):string {
   const harness=agent()?.harness;
@@ -493,7 +493,7 @@ export function installFox(host:Host){
   * a prepared email waits as a card, sent only from its review). The one exception is the World's browser link
   * (`share_world_link`, owner decision 2026-10-15): its turn starts trusted (core hermesChannelTrust), so it runs.
   * Anything else is refused with the reason; the World page runs no tools for it, since nobody there asked. What a
-  * channel may do is the calling Agent's Grants (agent/agent/GRANTS.md; its default Grants are the list above), decided
+  * channel may do is the calling Agent's Grants (agent/agents/GRANTS.md; its default Grants are the list above), decided
   * on the standing server and again here. */
  async function channelToolReply(name:string,args:Row,agentId?:string):Promise<Row> {
   const id='channel-'+crypto.randomUUID().toUpperCase(),scope={sample:false,setup:false};

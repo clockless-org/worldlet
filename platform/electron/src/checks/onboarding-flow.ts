@@ -30,7 +30,7 @@ import {backgroundLaunch,showInBackground} from '../background-launch.ts';
 // and says why in one line; scripts/startup-setup-check.ts drives that on the setup page (owner decision 2026-10-11).
 // Claude Code whose sign-in ran out opens its own sign-in page in the browser by itself, once per launch
 // (agent-runtime/provider-sign-in.ts signInOnce, scripts/model-providers-check.ts); this journey runs on Codex.
-// An OpenClaw or Hermes Agent also describes itself after that check (agent/agent/agent-profile.ts), in the background,
+// An OpenClaw or Hermes Agent also describes itself after that check (agent/agents/agent-profile.ts), in the background,
 // from its conversations Worldlet already read from its files (titles, counts, openings), without running tools:
 // Codex is not asked, so this journey never waits for it; startup-setup-check.ts drives a late description arriving.
 // The things it names the person handles most show on a Things tile while setup waits ("Asking … what you do most"),

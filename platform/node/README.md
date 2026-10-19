@@ -7,7 +7,7 @@ in the desktop app, and a phone or any web browser reaches this computer through
 the same 3D World page the app shows, opens in a web browser on this computer.
 
 Each Agent that reaches the standing server gets its own token, endpoint file, Grants and audit here as in the desktop
-app ([Agent identity, Grants and audit](../../agent/agent/GRANTS.md#the-standing-mcp-server)); the token hashes go into
+app ([Agent identity, Grants and audit](../../agent/agents/GRANTS.md#the-standing-mcp-server)); the token hashes go into
 this host's own vault.
 
 This is the headless service: the host, the `worldlet` command line that talks to it, the fixed MCP home Agents
@@ -94,10 +94,10 @@ answers on its control socket says so and exits with code 1.
 | `link --local` | Prints the existing local World link (`world-link.txt`) for setup, Service connections and Agent access; use a browser on this computer or forward the same port over SSH |
 | `link [--qr]` | Prints the browser link (`world/link`'s, the one in `room-link.txt`), with `--qr` also its QR code; anyone who has it reaches this World, so it is for the person alone |
 | `setup --agent <id>` | Chooses the Agent Fox talks through with setup's own `agentHarness` `select` (it proves the Agent answers first; Codex alone is no Agent for Fox), then registers Claude Code or Codex as below |
-| `register --agent <id>` | Registers the `worldlet` MCP server and skill in `claude-code` or `codex`. Hermes Agent gets its entry in its own profile once it is Fox's Agent ([World tools on Hermes](../../agent/agent/PORTABILITY.md#world-tools-on-hermes)) |
-| `remote [on\|off]` | Turns [remote access](../../agent/agent/REMOTE-MCP.md) for cloud connectors (on by default) on or off, as Settings › Agents does, and prints this World's address and what is connected. Each connector still waits for Allow on its card in Attention |
-| `remote token <name>` | Makes a [token](../../agent/agent/REMOTE-MCP.md#a-token-for-a-script-or-another-computer) for an Agent that cannot open a browser, such as a script or a daemon on another computer, and prints it once with the address. Remote access must be on |
-| `register --script <name>` | Adds an [Agent for a script](../../agent/agent/GRANTS.md#agents-for-scripts) (a daemon or scheduled job on this computer) and prints its endpoint file in the MCP home |
+| `register --agent <id>` | Registers the `worldlet` MCP server and skill in `claude-code` or `codex`. Hermes Agent gets its entry in its own profile once it is Fox's Agent ([World tools on Hermes](../../agent/agents/PORTABILITY.md#world-tools-on-hermes)) |
+| `remote [on\|off]` | Turns [remote access](../../agent/agents/REMOTE-MCP.md) for cloud connectors (on by default) on or off, as Settings › Agents does, and prints this World's address and what is connected. Each connector still waits for Allow on its card in Attention |
+| `remote token <name>` | Makes a [token](../../agent/agents/REMOTE-MCP.md#a-token-for-a-script-or-another-computer) for an Agent that cannot open a browser, such as a script or a daemon on another computer, and prints it once with the address. Remote access must be on |
+| `register --script <name>` | Adds an [Agent for a script](../../agent/agents/GRANTS.md#agents-for-scripts) (a daemon or scheduled job on this computer) and prints its endpoint file in the MCP home |
 
 Neither command gives consent or finishes onboarding: World tools on the standing server keep answering that the person
 has not finished setting up until they do so in the World, as in the desktop app.
@@ -116,15 +116,15 @@ The library holds the World and vault; the install directory holds replaceable p
 
 `~/.worldlet/mcp` (`WORLDLET_HOME` names another place than `~/.worldlet`) holds the standing server's stdio shim
 (`worldlet-mcp-standing.cjs`), its tool list and one owner-only endpoint file per Agent
-(`worldlet-mcp-endpoint.<agentId>.json`, [per-Agent tokens](../../agent/agent/GRANTS.md#the-standing-mcp-server)). The
+(`worldlet-mcp-endpoint.<agentId>.json`, [per-Agent tokens](../../agent/agents/GRANTS.md#the-standing-mcp-server)). The
 names never change, so an Agent registers once: each run the host writes this run's endpoint and the Agent's new token
 into the same file, and removes it when it stops, so a call then answers that Worldlet is not open. `registered.json`
-lists the Agents registered here. Each registers with its own command (`agent/agent/harness-connections.ts`):
+lists the Agents registered here. Each registers with its own command (`agent/agents/harness-connections.ts`):
 
 - Claude Code: `claude mcp add --scope user worldlet --env WORLDLET_MCP_ENDPOINT_FILE=… --env WORLDLET_MCP_TOOLS_FILE=… -- <node> ~/.worldlet/mcp/worldlet-mcp-standing.cjs`, after `claude mcp remove --scope user worldlet`; the skill goes to `~/.claude/skills/worldlet/SKILL.md` (under `CLAUDE_CONFIG_DIR` when set).
 - Codex: `codex mcp add worldlet --env … -- <node> …`, after `codex mcp remove worldlet`; the skill goes to `~/.codex/skills/worldlet/SKILL.md` (under `CODEX_HOME` when set).
 
-An [Agent for a script](../../agent/agent/GRANTS.md#agents-for-scripts) has its endpoint file here too, written again each
+An [Agent for a script](../../agent/agents/GRANTS.md#agents-for-scripts) has its endpoint file here too, written again each
 run by this host and the desktop app alike; its program reads it directly and registers nothing.
 
 `<node>` is `~/.worldlet/current/node/bin/node` when that is the Node running the host (an install by install.sh), so

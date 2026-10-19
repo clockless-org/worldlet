@@ -171,7 +171,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     providers.scrollIntoView({block:'nearest'});(providers.querySelector('button') as HTMLButtonElement|null)?.focus();
    },{primary:true,id:'fix-connect'})
    :action('Restart Fox',()=>restartFox(said),{primary:true,id:'fix-restart'});
-  // The provider the Agent in use answers with (agent/agent/model-providers.ts, owner decisions 2026-10-10): only a
+  // The provider the Agent in use answers with (agent/agents/model-providers.ts, owner decisions 2026-10-10): only a
   // provider is chosen, never a model; each maps to small, balanced and large models and Fox's turns use the balanced
   // one. Every provider the Agent supports is listed, signed in or not; signing in happens in the Agent itself.
   const drawProviders=async()=>{
@@ -227,7 +227,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     text.append(el('strong','',agent.title+(using?' · In use':'')),el('span','',agent.id==='codex'?(agent.model===false?'Sign in to Codex on this computer first.':'Your ChatGPT plan through Codex.'):agent.memory?.model?'Runs on its own API key.':'Answers for Fox on its own sign-in.'),
      // What the Agent can do beyond World tools, which Fox offers in conversation (its own tools, under its own approvals).
      ...using&&typeof agent.canAlso==='string'&&agent.canAlso?[el('span','companion-settings-quiet',agent.canAlso)]:[]);
-    // Older than Worldlet works with (agent/agent/agent-versions.ts): its own update command opens in Terminal instead of
+    // Older than Worldlet works with (agent/agents/agent-versions.ts): its own update command opens in Terminal instead of
     // Use; Worldlet never updates it by itself. Check again reads its version afresh.
     const version=agent.version&&typeof agent.version==='object'?agent.version:null,old=version?.outdated===true;
     if(old)text.append(el('span','companion-settings-model-problem',`Version ${version.current} is too old. Worldlet needs ${version.minimum} or newer.`),...version.update?[]:[el('span','companion-settings-quiet',String(version.howTo||''))]);
@@ -351,7 +351,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   const remote=el('details','companion-settings-elsewhere companion-settings-remote-access') as HTMLDetailsElement;remote.dataset.part='remote';
   remote.append(el('summary','','Remote access'));
   const claude=el('div');claude.dataset.part='use-in-claude';
-  // Your World's address (agent/agent/WORLD-ADDRESS.md): its own web page, the browsers allowed there and what is shared.
+  // Your World's address (agent/agents/WORLD-ADDRESS.md): its own web page, the browsers allowed there and what is shared.
   const address=el('div');address.dataset.part='world-address';
   target.append(list,claude,address,remote);
   const own=await ownAgent();if(!live())return;

@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import {REPORT_REASONS,agentLiveness,listAgents,makeAgentReport,readStoredReport} from '../agent/agent/reports.ts';
+import {REPORT_REASONS,agentLiveness,listAgents,makeAgentReport,readStoredReport} from '../agent/agents/reports.ts';
 import {AGENT_REPORT_LIMITS} from '../contracts/agent-reports.ts';
 import type {AgentIdentity} from '../contracts/agent-identity.ts';
 
-// Agent reports in Core (agent/agent/reports.ts, agent/agent/GRANTS.md#agent-reports): what one report may hold, the
+// Agent reports in Core (agent/agents/reports.ts, agent/agents/GRANTS.md#agent-reports): what one report may hold, the
 // host-stamped Agent and time, how it reads as time passes, and what agents/list returns.
 const now='2026-10-17T12:00:00.000Z',later=(minutes:number)=>new Date(Date.parse(now)+minutes*60_000).toISOString();
 const refused=(input:unknown,reason:string=REPORT_REASONS.invalid)=>assert.throws(()=>makeAgentReport('codex',input,now),{message:reason},JSON.stringify(input));

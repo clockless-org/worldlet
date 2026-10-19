@@ -1,12 +1,12 @@
 import {DEFAULT_PAIR_RELAY} from '../../../../../agent/windows/index.ts';
 import {WORLD_ADDRESS_LIMITS,addressNameFrom,createWorldAddressServer,emptyWorldAddressState,isWorldAddressRequest,readWorldAddressState,worldAddress,worldAddressRequestItem,
- type WorldAddressRequest,type WorldAddressServer,type WorldAddressState} from '../../../../../agent/agent/index.ts';
+ type WorldAddressRequest,type WorldAddressServer,type WorldAddressState} from '../../../../../agent/agents/index.ts';
 import type {VaultService} from '../../host/services.ts';
 import type {RemoteMcpHost} from './remote-mcp.ts';
 import type {ConsentLedger} from './remote-mcp.ts';
 import type {Row} from './types.ts';
 
-// This World's own address on this computer (agent/agent/WORLD-ADDRESS.md): the name the person picked, claimed on the
+// This World's own address on this computer (agent/agents/WORLD-ADDRESS.md): the name the person picked, claimed on the
 // website's registry with remote access's host token, and the server that answers the address's page over remote
 // access's connection. Passkeys (public keys), visitors and shares are kept in the vault (`world-address`); a request
 // to be let in is a card in Attention, kept with the connectors' consents in the ledger.

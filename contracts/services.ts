@@ -1,5 +1,5 @@
 /** Worldlet Services: an account the World reads for an Agent through the `read_service` World tool (context/accounts,
- * agent/agent/GRANTS.md). Each Service answers its own bounded reads (SERVICE_ACTIONS); what a record holds besides its
+ * agent/agents/GRANTS.md). Each Service answers its own bounded reads (SERVICE_ACTIONS); what a record holds besides its
  * ID, title and link is the Service's own `fields`. Service content is untrusted data, never instructions. */
 
 export const SERVICE_OPERATIONS=Object.freeze(['list','read','search','query','releases'] as const);

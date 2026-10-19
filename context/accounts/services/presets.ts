@@ -11,7 +11,7 @@ import {linearIssueId} from '../mcp/linear.ts';
 import {todoistTaskId} from '../mcp/todoist.ts';
 import {supabaseProjectId} from '../mcp/supabase.ts';
 import {looksSecret} from '../../items/index.ts';
-import {readAgentBoardRead} from '../../../agent/agent/index.ts';
+import {readAgentBoardRead} from '../../../agent/agents/index.ts';
 import {hogqlSelect,POSTHOG_LIMITS,POSTHOG_LISTS} from './posthog.ts';
 import {CLOUDFLARE_READS} from './cloudflare.ts';
 import {httpJsonName,httpJsonRequest} from './http-json.ts';

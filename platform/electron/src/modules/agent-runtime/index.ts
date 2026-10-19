@@ -40,7 +40,7 @@ import {harnessConnections} from './harness-connections.ts';
 import {harnessScheduleControls} from './harness-schedule-controls.ts';
 import {harnessSkills} from './harness-skills.ts';
 import {harnessMemory} from './harness-memory.ts';
-import {AGENT_VERSIONS,agentRevoked,serviceGranted,askGranted,ASK_GRANT_KINDS,type AskGrantKind,boardGranted,BOARD_GRANT_KINDS,type BoardGrantKind,artifactGranted,ARTIFACT_GRANT_KINDS,type ArtifactGrantKind,githubDraftGranted,githubWriteGrants,isServiceDraftProvider,serviceDraftGranted,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId,reportGranted,REPORT_GRANT_KINDS,type ReportGrantKind,SCRIPT_HARNESS} from '../../../../../agent/agent/index.ts';
+import {AGENT_VERSIONS,agentRevoked,serviceGranted,askGranted,ASK_GRANT_KINDS,type AskGrantKind,boardGranted,BOARD_GRANT_KINDS,type BoardGrantKind,artifactGranted,ARTIFACT_GRANT_KINDS,type ArtifactGrantKind,githubDraftGranted,githubWriteGrants,isServiceDraftProvider,serviceDraftGranted,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId,reportGranted,REPORT_GRANT_KINDS,type ReportGrantKind,SCRIPT_HARNESS} from '../../../../../agent/agents/index.ts';
 import {harnessTools} from './harness-services.ts';
 import {ongoingId} from '../../../../../agent/tasks/index.ts';
 import {SERVICE_PROVIDERS,SERVICE_TITLES} from '../../../../../contracts/services.ts';
@@ -260,7 +260,7 @@ export function setsUpThisComputer(context:RuntimeContext):boolean {
  return profile.channel==='release'&&!profile.rcCheck&&!profile.smoke&&process.env.WORLDLET_AGENT_CONFIG===undefined&&path.resolve(context.root)===path.resolve(installationRoot(profile));
 }
 
-/** Remote access is on by default (agent/agent/REMOTE-MCP.md) only in the library the installed app opens by default:
+/** Remote access is on by default (agent/agents/REMOTE-MCP.md) only in the library the installed app opens by default:
  * never a development build, a release check, a smoke run or another library. */
 export function opensRemoteAccess(context:RuntimeContext):boolean {
  const profile=context.profile;
@@ -360,7 +360,7 @@ const AGENT_ACCESS_AUDIT=20;
  * the one saved for that address again. `pair`, `select` and `clear` set it aside (kept, to use again);
  * `forget-gateway` deletes it. `detect` reports its address and whether it is in use, never its token.
  * `requested` hands over, once, the Agent a `--connect=<id>` launch named (`takeRequested`). `detect` also reports each
- * Agent's version against the oldest Worldlet works with (agent/agent/agent-versions.ts); `select` turns an older one
+ * Agent's version against the oldest Worldlet works with (agent/agents/agent-versions.ts); `select` turns an older one
  * away and `update` opens its own update command in Terminal. */
 /** Each Agent's `--version` line, kept for a minute so Settings and setup do not start every Agent on each redraw;
  * `fresh` reads it again (choosing an Agent, or after its update). */
@@ -375,7 +375,7 @@ function installedVersion(install:LocalHarnessInstall,fresh=false):Promise<strin
 }
 /** What setup hears while Hermes Agent is installed (`install-hermes`) or signs in to ChatGPT (`sign-in-hermes`). */
 /** How the short turn that proves a chosen Agent answers ended, when setup let it run after the switch (`checkLater`). */
-/** How the proving turn ended; then, for an Agent that describes itself (agent/agent/agent-profile.ts), what it said. */
+/** How the proving turn ended; then, for an Agent that describes itself (agent/agents/agent-profile.ts), what it said. */
 export type AgentCheckEvent={id:LocalHarnessId;ok:true}|{id:LocalHarnessId;ok:false;message:string}|{id:LocalHarnessId;profile:AgentProfile|null;result:AgentProfileResult;ms:number};
 export type HermesSetupEvent=({stage:'install'}&HermesInstallProgress)|{stage:'sign-in';url:string;code:string|null};
 export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Adapter)=>Promise<void>,noAgent:()=>Adapter,remote:RemoteAgentLink|null=null,vault:VaultService|null=null,takeRequested:()=>LocalHarnessId|null=()=>null,onHermesSetup:(event:HermesSetupEvent)=>void=()=>{},release:(id:LocalHarnessId)=>Promise<void>=async()=>{},onAgentCheck:(event:AgentCheckEvent)=>void=()=>{}){
@@ -430,7 +430,7 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    });
    // What each can do beyond World tools (its `tools` service), as one quiet line in Settings › Agents.
    for(const agent of agents as Row[]){const summary=harnessToolsSummary(await harnessTools(agent.id)?.list()??[]);if(summary)agent.canAlso=summary;}
-   // Its version against the oldest Worldlet works with (agent/agent/agent-versions.ts), so a too-old one says so before it
+   // Its version against the oldest Worldlet works with (agent/agents/agent-versions.ts), so a too-old one says so before it
    // is chosen; `fresh` reads it again, after the person updated it.
    const versions=await Promise.all(found.map(install=>installedVersion(install,request.fresh===true)));
    (agents as Row[]).forEach((agent,i)=>{agent.version=agentVersionStatus(found[i].id,versions[i]);});
@@ -518,7 +518,7 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    else void describe();
    return {ok:true,id:install.id,title:install.title,...connect?{connected:true}:{},...later?{checking:true}:{}};
   }
-  // The provider Fox's Agent answers with (agent/agent/model-providers.ts): `providers` lists the ones it supports, which
+  // The provider Fox's Agent answers with (agent/agents/model-providers.ts): `providers` lists the ones it supports, which
   // it is signed in to and the chosen one; `provider` chooses one (null: the Agent's own default); `provider-sign-in`
   // opens the Agent's own sign-in for one in Terminal.
   if(request.operation==='providers'){
@@ -552,7 +552,7 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    return {ok:true};
   }
   // The Agent's own update command, opened in Terminal like a sign-in, for one older than Worldlet works with
-  // (agent/agent/agent-versions.ts). The person runs it; Worldlet never updates an Agent by itself.
+  // (agent/agents/agent-versions.ts). The person runs it; Worldlet never updates an Agent by itself.
   if(request.operation==='update'){
    const install=isLocalHarnessId(request.id)?locateLocalHarnesses().find(item=>item.id===request.id):undefined,args=install?AGENT_VERSIONS[install.id].update:null;
    if(!install)throw new WorldletError('That Agent is no longer on this computer.');
@@ -599,7 +599,7 @@ export function installAgentRuntime(host:Host){
   onEnded:()=>{if(adapter instanceof RemoteHarnessAdapter)void switchTo(noAgent()).catch(error=>host.diagnostics.record(error,'agentRuntime'));}});
  const vault=host.use<VaultService>(VAULT);
  agentAccess=createAgentAccess({root:context.root,vault,ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()?host.store.ledger():null;}catch{return null;}}});
- // Remote MCP (agent/agent/REMOTE-MCP.md): cloud MCP clients reach the same World tools through the front, each
+ // Remote MCP (agent/agents/REMOTE-MCP.md): cloud MCP clients reach the same World tools through the front, each
  // connection an Agent of its own, allowed on a consent card in Attention.
  remoteMcp=createRemoteMcpHost({vault,access:agentAccess,tools:()=>standingWorldTools(),services:()=>connectedServices().map(provider=>({provider,title:SERVICE_TITLES[provider]??provider})),relay:process.env.WORLDLET_PAIR_RELAY||undefined,onByDefault:opensRemoteAccess(context),changed:()=>host.store.worldChanged(),
   ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()?host.store.ledger():null;}catch{return null;}}});
@@ -623,7 +623,7 @@ export function installAgentRuntime(host:Host){
   }catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
   throw new WorldletError('Unknown remote access operation.');
  }});
- // This World's own address (agent/agent/WORLD-ADDRESS.md): its name, claimed with remote access's host token, and the
+ // This World's own address (agent/agents/WORLD-ADDRESS.md): its name, claimed with remote access's host token, and the
  // page there answered over remote access's connection. Signed-in owner browsers are handed the World's link for
  // another device; a shared board is read as the person sees it.
  const phone=()=>host.optional<PhoneService>(PHONE);
@@ -648,14 +648,14 @@ export function installAgentRuntime(host:Host){
   }catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
   throw new WorldletError('Unknown address operation.');
  }});
- // Orders (agent/agent/GRANTS.md#orders-and-waking-an-agent): which Agent new work goes to, and the program the person
+ // Orders (agent/agents/GRANTS.md#orders-and-waking-an-agent): which Agent new work goes to, and the program the person
  // set to wake each Agent, run here when work is posted for it.
  agentOrders=createAgentOrders({root:context.root,access:agentAccess,ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()?host.store.ledger():null;}catch{return null;}}});
  host.onQuit(()=>agentOrders?.close());
  // Asks need the person's own World with private context allowed, as a channel's reads do.
  agentAsks=createAgentAsks({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
   name:agentId=>agentAccess?.identity(agentId)?.name??agentId,changed:()=>host.store.worldChanged(),drafts:askDrafts,orders:()=>agentOrders});
- // An Agent's first need of a Service (agent/agent/GRANTS.md#when-an-agent-first-needs-a-service): in the person's own
+ // An Agent's first need of a Service (agent/agents/GRANTS.md#when-an-agent-first-needs-a-service): in the person's own
  // World with private context allowed, as asks are.
  serviceRequests=createServiceRequests({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
   access:()=>agentAccess,connected:provider=>connectedServices().includes(provider),title:provider=>SERVICE_TITLES[provider]??provider,changed:()=>host.store.worldChanged()});
@@ -664,13 +664,13 @@ export function installAgentRuntime(host:Host){
  host.register({serviceRequest:async request=>{
   try{return serviceRequests!.answer(request);}catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
  }});
- // Agents for scripts (agent/agent/GRANTS.md#agents-for-scripts): their endpoint files are written again each run.
+ // Agents for scripts (agent/agents/GRANTS.md#agents-for-scripts): their endpoint files are written again each run.
  scriptAgents=createScriptAgents({root:context.root,access:agentAccess,tools:()=>standingWorldTools()});
  void scriptAgents.open().catch(error=>host.diagnostics.record(error,'scriptAgents'));
- // Agent reports (agent/agent/GRANTS.md#agent-reports): in the person's own World with private context allowed, as asks are.
+ // Agent reports (agent/agents/GRANTS.md#agent-reports): in the person's own World with private context allowed, as asks are.
  agentReports=createAgentReports({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
   identities:()=>agentAccess?.list(0).map(entry=>entry.identity)??[]});
- /** The person's answer on an ask's Attention card (agent/agent/GRANTS.md#agent-asks): `answer` with the ask's ID and
+ /** The person's answer on an ask's Attention card (agent/agents/GRANTS.md#agent-asks): `answer` with the ask's ID and
   * `answered` (one of its own choices and an optional note), `done` or `skipped`. Core checks it against the stored
   * ask; the page never names an Agent. Approve on an ask that carries GitHub drafts is `approveDrafts`, which runs them
   * first; a World page on another device may send only `answer` (ROOM_ALLOWED), so it cannot approve them. `attachment`
@@ -683,7 +683,7 @@ export function installAgentRuntime(host:Host){
   if(request.operation!=='answer'&&request.operation!=='approveDrafts')throw new WorldletError('Unknown asks operation.');
   try{return await agentAsks!.answer(request);}catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not answer this.');}
  }});
- // GitHub drafts (agent/agent/GRANTS.md#github-drafts): in the person's own World with private context allowed, as asks are.
+ // GitHub drafts (agent/agents/GRANTS.md#github-drafts): in the person's own World with private context allowed, as asks are.
  // GitHub's sign-in, read from the vault as the GitHub tile keeps it (one McpAccounts per vault entry is safe: each
  // renewal is checked against the entry it read).
  const githubSignIn=new McpAccounts({vault,agentHomes:()=>[]});
@@ -692,7 +692,7 @@ export function installAgentRuntime(host:Host){
   // Writes as the person through their GitHub sign-in (Settings › Connectors), when no own GitHub App is connected.
   signedIn:()=>githubSignIn.signedInWith('github',GITHUB_APP.clientId),
   userToken:async force=>githubSignIn.signedInWith('github',GITHUB_APP.clientId)?(await githubSignIn.bearer('github',force))?.replace(/^Bearer /,'')??null:null});
- // What Agents save to the Journal (agent/agent/GRANTS.md#agent-artifacts): in the person's own World with private context allowed, as asks
+ // What Agents save to the Journal (agent/agents/GRANTS.md#agent-artifacts): in the person's own World with private context allowed, as asks
  // are, kept with every other artifact so the Journal lists them.
  agentArtifacts=createAgentArtifacts({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
   name:agentId=>agentAccess?.identity(agentId)?.name??agentId,changed:id=>host.page.event('worldlet:artifacts',{id})});
@@ -706,7 +706,7 @@ export function installAgentRuntime(host:Host){
   }catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
   throw new WorldletError('Unknown GitHub draft operation.');
  }});
- // PostHog and Notion drafts (agent/agent/GRANTS.md#posthog-and-notion-drafts): the same way, written through the World's
+ // PostHog and Notion drafts (agent/agents/GRANTS.md#posthog-and-notion-drafts): the same way, written through the World's
  // own PostHog and Notion connections.
  serviceDrafts=createServiceDrafts({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
   connections:()=>service.serviceDraftConnections?.()??null,name:agentId=>agentAccess?.identity(agentId)?.name??agentId,changed:()=>host.store.worldChanged()});
@@ -790,7 +790,7 @@ export function installAgentRuntime(host:Host){
  // forward); first-run setup reads it once (`requested`) and decides (core connectRequestPlan).
  let requested=connectArgument(process.argv);
  app.on('second-instance',(_event,argv)=>{const id=connectArgument(argv);if(!id)return;requested=id;host.page.event('worldlet:connect-agent');});
- /** Settings › Agents (agent/agent/GRANTS.md): each Agent with its last use, Grants, newest audit entries and,
+ /** Settings › Agents (agent/agents/GRANTS.md): each Agent with its last use, Grants, newest audit entries and,
   * unless revoked, "Can read <Service>" for each connected Service (`list`); one revoked (`revoke`: its token and
   * endpoint files go, revokedAt is stamped); or one Service's read Grant given or taken back (`grantService`,
   * `ungrantService`). The page names only the Service: the targets are that Service's own reads (core serviceReadGrant),
@@ -895,7 +895,7 @@ export function installAgentRuntime(host:Host){
    }else if(!access.ungrantReports(id,kind))throw new WorldletError('Could not change that.');
    return {ok:true};
   }
-  // "Can update Issues in <repo> without asking" (agent/agent/GRANTS.md#standing-github-writes): the page sends the Agent,
+  // "Can update Issues in <repo> without asking" (agent/agents/GRANTS.md#standing-github-writes): the page sends the Agent,
   // the repository and one of Core's choices (with its label prefix); Core builds the Grant, never from targets.
   if(request.operation==='grantGithubWrites'||request.operation==='ungrantGithubWrites'){
    const id=typeof request.id==='string'?request.id:'';
@@ -940,7 +940,7 @@ export function installAgentRuntime(host:Host){
    services:agentRevoked(identity,now)?[]:services.map(provider=>({provider,title:SERVICE_TITLES[provider],granted:serviceGranted(identity.id,grants,provider,now)})),
    asks:{ask:askGranted(identity.id,grants,'ask',now),work:askGranted(identity.id,grants,'work',now)},
    board:{read:boardGranted(identity.id,grants,'read',now),define:boardGranted(identity.id,grants,'define',now)},
-   // What it last reported and how that reads now (agent/agent/GRANTS.md#agent-reports), with its two Grants.
+   // What it last reported and how that reads now (agent/agents/GRANTS.md#agent-reports), with its two Grants.
    reports:{report:reportGranted(identity.id,grants,'report',now),list:reportGranted(identity.id,grants,'list',now)},
    ...agentRevoked(identity,now)?{}:agentReports?.state(identity.id)??{},
    // An Agent for a script: where its program reads its endpoint and token.

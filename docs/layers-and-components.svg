@@ -94,7 +94,7 @@
 <text x="931.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/tasks/</text>
 <text x="1083.0" y="360" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
 <rect x="1166" y="344" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
-<text x="1235.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/agent/</text>
+<text x="1235.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/agents/</text>
 <rect x="1166" y="370" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
 <text x="1235.0" y="385" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/tools/</text>
 <text x="1387.0" y="360" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>

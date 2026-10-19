@@ -24,7 +24,7 @@ export function controlSocketTooLong(file:string,limit=CONTROL_SOCKET_LIMIT):str
 }
 export const CONTROL_COMMANDS=['setup','link','status','register','remote'] as const;
 export type ControlCommand=typeof CONTROL_COMMANDS[number];
-/** `remote` takes `on` or `off` (remote access, agent/agent/REMOTE-MCP.md); without it, it only reports. */
+/** `remote` takes `on` or `off` (remote access, agent/agents/REMOTE-MCP.md); without it, it only reports. */
 export type ControlRequest={command:ControlCommand;agent?:string;script?:string;local?:boolean;remote?:'on'|'off'|'token';name?:string};
 /** An answer: `lines` for the asker's stdout, or `error`. */
 export type ControlReply={lines:string[]}|{error:string};

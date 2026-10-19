@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
-import {appletAgentThread,harnessAgentInstructions,harnessService,hermesProfileModel,localHarnessInvocation,openClawAgentModel,openClawResponsesBody} from '../agent/agent/index.ts';
+import {appletAgentThread,harnessAgentInstructions,harnessService,hermesProfileModel,localHarnessInvocation,openClawAgentModel,openClawResponsesBody} from '../agent/agents/index.ts';
 import {hermesAgentsService,openClawAgentsService} from '../platform/electron/src/modules/agent-runtime/harness-agents.ts';
 import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
 import {createHarnessAgents} from '../platform/electron/src/modules/fox/harness-agents.ts';
@@ -11,7 +11,7 @@ import {AGENT} from '../platform/electron/src/host/services.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {withTempDir} from './test-temp.ts';
 
-// The person's own agents in an Applet (agent/agent/PORTABILITY.md#the-persons-own-agents-in-an-applet): the `agents`
+// The person's own agents in an Applet (agent/agents/PORTABILITY.md#the-persons-own-agents-in-an-applet): the `agents`
 // service's rules, the read-only `files` readers against fixture OpenClaw and Hermes Agent folders, the per-Applet
 // choice kept in a World, and a chosen agent answering the Applet's thread: OpenClaw's Gateway request naming it and
 // its per-turn fallback in that agent's workspace and model; Hermes Agent's resident process started with `-p`.

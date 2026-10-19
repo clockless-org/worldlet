@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {BACKGROUND_SIGN_IN,CHAT_TIER,claudeCodeLoggedIn,PROVIDERS,hermesRequestModel,agentProviders,backgroundModel,chooseProvider,chosenModel,localHarnessInvocation,localHarnessStream,providerModel,providerSignIn,readLocalHarnessLine,readProviderChoices,signedInProviders} from '../agent/agent/index.ts';
+import {BACKGROUND_SIGN_IN,CHAT_TIER,claudeCodeLoggedIn,PROVIDERS,hermesRequestModel,agentProviders,backgroundModel,chooseProvider,chosenModel,localHarnessInvocation,localHarnessStream,providerModel,providerSignIn,readLocalHarnessLine,readProviderChoices,signedInProviders} from '../agent/agents/index.ts';
 import {backgroundSignIn,signInOnce,signInScript} from '../platform/electron/src/modules/agent-runtime/provider-sign-in.ts';
 
-// The provider Fox's Agent answers with (agent/agent/model-providers.ts): each provider maps to S, M and L models, chat
+// The provider Fox's Agent answers with (agent/agents/model-providers.ts): each provider maps to S, M and L models, chat
 // uses M, the choice reaches every Harness on its own per-turn switch, and signing in happens in the Agent itself.
 
 // Providers and tiers -------------------------------------------------------------------------------------------------

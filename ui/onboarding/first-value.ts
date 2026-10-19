@@ -1,6 +1,6 @@
 import {firstValueCandidate} from '../../agent/onboarding/index.ts';
 import {connectionLive,sourcesReading} from '../../context/applets/index.ts';
-import {journalTarget} from '../../agent/agent/index.ts';
+import {journalTarget} from '../../agent/agents/index.ts';
 import {createCoachMark,createTourSpotlight,elementBox} from './tour-spotlight.ts';
 
 /**
@@ -37,7 +37,7 @@ import {createCoachMark,createTourSpotlight,elementBox} from './tour-spotlight.t
  * an interrupted operation is never replayed.
  */
 const WAIT=60000,BROUGHT_WAIT=15000,READING_WAIT=300000,FIRST_CARD_WAIT=180000;
-/** The first Today’s prep, or any day's card Fox kept in the Journal, as its Attention item (agent/agent harness-schedule). */
+/** The first Today’s prep, or any day's card Fox kept in the Journal, as its Attention item (agent/agents harness-schedule). */
 const journalCard=(item:any)=>!!item&&item.kind==='update'&&!!journalTarget(item.sources);
 
 export function mountFirstValue({root,view,call,state:initial,arriving=false}){

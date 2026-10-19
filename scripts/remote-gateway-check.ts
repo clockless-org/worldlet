@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import http from 'node:http';
 import path from 'node:path';
 import {WebSocketServer} from 'ws';
-import {REMOTE_GATEWAY_HARNESS_ID,harnessLocation,harnessService,readRemoteGatewayToken,readRemoteGatewayUrl,remoteGatewaySocketUrl} from '../agent/agent/index.ts';
+import {REMOTE_GATEWAY_HARNESS_ID,harnessLocation,harnessService,readRemoteGatewayToken,readRemoteGatewayUrl,remoteGatewaySocketUrl} from '../agent/agents/index.ts';
 import {RemoteGatewayAdapter,checkRemoteGateway,readRemoteGateway,remoteGatewayView,writeRemoteGateway} from '../platform/electron/src/modules/agent-runtime/remote-gateway.ts';
 import {withTempDir} from './test-temp.ts';
 

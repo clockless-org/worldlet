@@ -1,4 +1,4 @@
-import {agentRevoked,serviceGranted} from '../../../../../agent/agent/index.ts';
+import {agentRevoked,serviceGranted} from '../../../../../agent/agents/index.ts';
 import type {AgentAccess} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
@@ -6,7 +6,7 @@ import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts'
 /** The Services that were connected when reading was last given by default (serviceReadDefaults). */
 export const SERVICE_READ_DEFAULTS='service-read-defaults';
 
-/** Reading is on by default (owner decision 2026-10-17, agent/agent/GRANTS.md#settings--connectors): when a Service
+/** Reading is on by default (owner decision 2026-10-17, agent/agents/GRANTS.md#settings--connectors): when a Service
  * becomes connected, the Agent Fox uses (`selected`) gets its read Grant, as if the person had ticked "Can read" for it.
  * Which Services were already connected is kept in the World's Agent settings, so a restart grants nothing again and a
  * Grant the person took back stays off until the Service is connected anew. The first time, what is connected is kept

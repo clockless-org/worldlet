@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
 import {hermesRequestModel,openClawMissingKey,WORLD_TOOL_SERVER,acpApprovalOutcome,acpModels,acpPromptUsage,acpUsageUpdate,addHarnessUsage,isHarnessModelId,usageSince,acpChangesAsked,acpChangesUpdate,approvalChanges,changesAnswered,changesAsked,isHarnessAgentId,acpApprovalRequest,harnessSessionName,openClawApprovalFor,openClawApprovalRequest,openClawChangesEvent,openClawConnect,openClawDecision,openClawDeviceProof,
- harnessTurnText,openClawResponsesBody,openClawSessionIs,openClawUserInput,readOpenClawFrame,hermesAcpAnnouncement,readResponsesChunk,remoteGatewaySocketUrl,responsesBody,responsesStream,type ApprovalChanges,type HermesAnnouncedCall,type ResponsesTool,type ResponsesTurn} from '../../../../../agent/agent/index.ts';
+ harnessTurnText,openClawResponsesBody,openClawSessionIs,openClawUserInput,readOpenClawFrame,hermesAcpAnnouncement,readResponsesChunk,remoteGatewaySocketUrl,responsesBody,responsesStream,type ApprovalChanges,type HermesAnnouncedCall,type ResponsesTool,type ResponsesTurn} from '../../../../../agent/agents/index.ts';
 import {worldGatewayTools} from '../../../../../agent/tools/index.ts';
 import type {HarnessApprovalChoice,HarnessApprovalRequest,HarnessApprovalResult,HarnessApprovals,HarnessConversation,HarnessModel,HarnessSession,HarnessSessionKey,HarnessTurnEvent,HarnessTurnInput,HarnessUsage} from '../../../../../contracts/harness-services.ts';
 import {WorldletError,writeAtomic} from '../../files.ts';
@@ -17,14 +17,14 @@ import type {Row} from './types.ts';
 // `session/prompt` per turn, its permission prompts surfaced as approval events. OpenClaw: its running Gateway's
 // `/v1/responses`, a session key per thread, World tools as client function tools, and while a turn runs its exec
 // approvals for that session from the Gateway's WebSocket, answered there (GatewayApprovals). Core owns the rules
-// (agent/agent/harness-sessions.ts); LocalHarnessRuntime falls back to a process per turn when `unavailable` says why.
+// (agent/agents/harness-sessions.ts); LocalHarnessRuntime falls back to a process per turn when `unavailable` says why.
 // A thread answered by another of the person's agents (HarnessSessionKey.agent, the `agents` service): Hermes Agent
 // runs one `hermes -p <profile> acp` process per profile (AgentConversations); OpenClaw's Gateway takes the agent per
 // request (`openclaw/<id>`).
-// What an approved action changed (`approval_result`, agent/agent/harness-approvals.ts): Hermes Agent's ACP tool calls
+// What an approved action changed (`approval_result`, agent/agents/harness-approvals.ts): Hermes Agent's ACP tool calls
 // report their diffs as they start and finish; OpenClaw's Gateway sends the turn's tool events to a client that
 // subscribes to its session (`sessions.messages.subscribe`, scope operator.read), an exec's output but no files.
-// Model and usage (the `models` service, agent/agent/harness-models.ts and harness-usage.ts): an Applet's chosen model is
+// Model and usage (the `models` service, agent/agents/harness-models.ts and harness-usage.ts): an Applet's chosen model is
 // set with ACP `session/set_model` before its turn (and again back to the Agent's own when the choice goes), or sent as
 // OpenClaw's `x-openclaw-model` header; each turn resolves with the usage the Agent reported. `open` is idempotent, also
 // while a first open is still under way, so the World can open a thread's session as the person starts typing.

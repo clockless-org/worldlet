@@ -8,7 +8,7 @@ import {attentionCompletion,attentionPlanCurrent} from "./attention/index.ts";
 import {readFoxHostRequest} from './companion/index.ts';
 import {readBrowserSurfaceRequest} from '../contracts/browser-surface.ts';
 import {browserDriverStart,browserDriverNext} from '../context/browser/index.ts';
-import {harnessHandshake,harnessReceive,harnessAuthHandoff,turnTrustObserve,turnTrustInherit,turnWriteAdmission,turnWriteNotice,worldItemSnapshot,worldItemRestore} from './agent/index.ts';
+import {harnessHandshake,harnessReceive,harnessAuthHandoff,turnTrustObserve,turnTrustInherit,turnWriteAdmission,turnWriteNotice,worldItemSnapshot,worldItemRestore} from './agents/index.ts';
 import {sourceEvidenceIssues,sourceEvidenceContext,attentionBatchInput} from './attention/index.ts';
 import {analysisSourceContent,mergeAnalysisCandidates,orderAnalysisRecords,analysisBatch} from '../context/applets/index.ts';
 import {appletChangedSources,appletInvalidateFacts,appletObservations,appletAnalysisPending,appletAnalysisRetrying,appletAnalysisParked,appletAnalysisFailed,appletAnalysisCommit,appletAnalysisRequest,appletAnalysisUnsubmitted,appletAnalysisItems,appletAnalysisInput,appletAnalysisRefresh,appletCandidateContent,canonicalSourceQuotes} from '../context/applets/index.ts';

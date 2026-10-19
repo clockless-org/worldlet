@@ -3,7 +3,7 @@ import {build} from 'esbuild';
 import {chromium} from 'playwright';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {createServer} from 'node:http';
-import {attentionRequest,legacyActionDisplayText,summarizeRequest} from '../agent/agent/system-requests.ts';
+import {attentionRequest,legacyActionDisplayText,summarizeRequest} from '../agent/agents/system-requests.ts';
 import {firstValueRequest} from '../agent/onboarding/first-value.ts';
 import {restoreThread,threadRow,threadStart} from '../ui/companion/fox-thread.ts';
 import {validateConversationHistory} from '../agent/companion/conversation-history.ts';

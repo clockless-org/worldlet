@@ -83,10 +83,10 @@ export interface ConnectorReader {id:string;name:string;granted:boolean}
 /** The Agents that may read a connected service (`agentAccess` `serviceReaders`): the Agent Fox uses (`main`, read on by
  * default when the service is connected) and every other Agent that has reached the World. */
 export interface ConnectorReaders {main:ConnectorReader|null;others:ConnectorReader[]}
-/** "Who may use it", the sentences under a connected service's tile (agent/agent/GRANTS.md#settings--connectors). `main`:
+/** "Who may use it", the sentences under a connected service's tile (agent/agents/GRANTS.md#settings--connectors). `main`:
  * the switch for the Agent Fox uses; `fox` when there is none (Fox's own turns read it when the person asks). `changes`
  * cannot be turned off: every change is a draft the person approves. `others` leads to Choose Agents, each a switch; an
- * Agent not chosen asks the person on an Attention card the first time it needs the service (agent/agent/service-requests.ts). */
+ * Agent not chosen asks the person on an Attention card the first time it needs the service (agent/agents/service-requests.ts). */
 export function connectorWhoMayUse(name:string,readers:ConnectorReaders):{main:{id:string;text:string;on:boolean}|null;fox:string|null;changes:string;others:{text:string;choose:string;agents:{id:string;text:string;on:boolean}[]}|null} {
  const main=readers.main?{id:readers.main.id,text:`Fox and ${readers.main.name} can look at your ${name}.`,on:readers.main.granted}:null;
  const others=readers.others.filter(agent=>agent.id!==readers.main?.id);

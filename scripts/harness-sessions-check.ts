@@ -7,12 +7,12 @@ import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {WebSocketServer} from 'ws';
 import {acpApprovalOutcome,acpApprovalRequest,harnessSessionName,harnessSessionThread,hermesBorrowsCodex,hermesConversationIncluded,HERMES_CHANNEL_READ_ONLY,hermesAcpAnnouncement,hermesChannelToolAllowed,hermesChannelTrust,HermesOwnCalls,hermesStandingWriteApproval,hermesStreamAnnouncement,hermesServerEnvLines,hermesServerSettings,hermesWorldTools,hermesWorldToolsCommand,hermesWorldToolsRegistered,localHarnessStream,localHarnessTurn,openClawApprovalFor,openClawApprovalRequest,openClawConnect,openClawSessionIs,openClawDecision,openClawDeviceProof,
- openClawGateway,openClawResponsesBody,readHarnessApprovalRequest,readLocalHarnessLine,readOpenClawFrame,readResponsesChunk,responsesBody,responsesStream,turnWriteAdmission,usableHermesServerKey} from '../agent/agent/index.ts';
+ openClawGateway,openClawResponsesBody,readHarnessApprovalRequest,readLocalHarnessLine,readOpenClawFrame,readResponsesChunk,responsesBody,responsesStream,turnWriteAdmission,usableHermesServerKey} from '../agent/agents/index.ts';
 import {phoneLive,readPhoneMessage} from '../agent/windows/index.ts';
 import {mountHarnessApproval} from '../ui/companion/fox-harness-approval.ts';
 import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
 import {hermesServer,keepHermesResident} from '../platform/electron/src/modules/agent-runtime/hermes-service.ts';
-import {STANDING_OUTSIDE_TURN} from '../agent/agent/grants.ts';
+import {STANDING_OUTSIDE_TURN} from '../agent/agents/grants.ts';
 import {holdStandingTurn,openStandingWorldTools,STANDING_LEGACY_ENDPOINT_FILE,standingEndpointFile} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
 import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/agent-access.ts';
 import {withTempDir} from './test-temp.ts';
@@ -359,7 +359,7 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
   const key='fixture-key-'+'7'.repeat(32),serverHome=path.join(scratch,'server-home'),profile=path.join(serverHome,'.hermes');
   fs.mkdirSync(profile,{recursive:true});
   const channel:any[]=[];
-  // Each Agent's identity, Grants and audit (agent/agent/GRANTS.md): token hashes in the vault, audit in the ledger.
+  // Each Agent's identity, Grants and audit (agent/agents/GRANTS.md): token hashes in the vault, audit in the ledger.
   const secrets=new Map<string,string>(),audit:any[]=[];
   const vault={get:(id:string)=>secrets.get(id)??null,set:(id:string,value:string)=>{secrets.set(id,value);},delete:(id:string)=>{secrets.delete(id);},deleteAll:()=>secrets.clear()};
   const access=createAgentAccess({root:path.join(scratch,'access-root'),vault,ledger:()=>({recordAgentAudit:(entry:any)=>{audit.push(entry);return true;},agentAudit:(agent:string)=>audit.filter(e=>e.agentId===agent).reverse()})});
@@ -531,7 +531,7 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
      assert.equal(access.ungrantService('codex','github'),true,'taking back twice changes nothing');
      assert.deepEqual(audit.filter(e=>e.agentId==='codex'&&['grant','ungrant'].includes(e.action)).map(e=>[e.target,e.action,e.grantId]),[['github','grant','codex-service-github'],['github','ungrant','codex-service-github']],'each change audited once');
      assert.deepEqual(audit.filter(e=>e.agentId==='codex'&&e.target==='github'&&e.action==='list').map(e=>e.decision),['denied','allowed','denied'],'and each call');
-     // Agent asks (agent/agent/GRANTS.md#agent-asks): refused until the person lets it ask; then each call goes to the asks
+     // Agent asks (agent/agents/GRANTS.md#agent-asks): refused until the person lets it ask; then each call goes to the asks
      // service as this Agent's own (an agentId in the arguments names no one), never to Fox's turn or the channel.
      channel.length=0;askCalls.length=0;toTurn.length=0;
      const post={target:'asks',action:'post',arguments:JSON.stringify({title:'Which plan?',choices:['A','B'],agentId:'hermes'})};

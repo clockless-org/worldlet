@@ -65,7 +65,7 @@ export class WorldLedger {
   if(!this.db||!kind||kind.length>64)return false;
   try{this.run('INSERT INTO entries(at,kind,key,body) VALUES(?,?,?,?)',at,kind,key,stableJSON(body));return true;}catch{return false;}
  }
- /** One Agent's audit entry (`agent.audit`, agent/agent/GRANTS.md), keyed by its Agent; only its newest `keep` stay. */
+ /** One Agent's audit entry (`agent.audit`, agent/agents/GRANTS.md), keyed by its Agent; only its newest `keep` stay. */
  recordAgentAudit(entry:Row,keep:number):boolean {
   const agent=typeof entry.agentId==='string'?entry.agentId:'';
   if(!agent||!this.record('agent.audit',agent,entry))return false;
@@ -78,7 +78,7 @@ export class WorldLedger {
    try{const value=JSON.parse(row.body);return value&&typeof value==='object'&&!Array.isArray(value)?[value]:[];}catch{return [];}
   });
  }
- // Agent asks (agent/agent/asks.ts, agent/agent/GRANTS.md#agent-asks) ---------------------------------------
+ // Agent asks (agent/agents/asks.ts, agent/agents/GRANTS.md#agent-asks) ---------------------------------------
  /** Every Agent ask's current value (`state.agent-asks`). */
  agentAsks():Row[]{return this.records('agent-asks');}
  /** One ask and its Attention item, saved together. The item is the host's own (provider `agents`): its status is the
@@ -110,13 +110,13 @@ export class WorldLedger {
   const row=this.all('SELECT substr(data,?,?) AS part FROM agent_ask_attachments WHERE ask_id=? AND id=?',Math.max(0,offset)+1,Math.max(0,length),askId,id)[0];
   return row?(row.part instanceof Uint8Array?row.part:new Uint8Array(0)):null;
  }
- // GitHub drafts (agent/agent/github-drafts.ts, agent/agent/GRANTS.md#github-drafts) -------------------------------
+ // GitHub drafts (agent/agents/github-drafts.ts, agent/agents/GRANTS.md#github-drafts) -------------------------------
  /** Every GitHub draft's current value (`state.github-drafts`). */
  githubDrafts():Row[]{return this.records('github-drafts');}
  /** One draft and its Attention item, saved together, as an ask is: the item is the host's own (provider `agents`), its
   * status the draft's, set by the person (`user`) or by the Agent's draft (`agent`), and its Agent the draft's. */
  saveGithubDraft(draft:Row,item:Row,origin:'user'|'agent'){this.saveDraft('github-drafts',draft,item,origin);}
- // PostHog and Notion drafts (agent/agent/service-drafts.ts, agent/agent/GRANTS.md#posthog-and-notion-drafts) -------
+ // PostHog and Notion drafts (agent/agents/service-drafts.ts, agent/agents/GRANTS.md#posthog-and-notion-drafts) -------
  /** Every PostHog and Notion draft's current value (`state.service-drafts`). */
  serviceDrafts():Row[]{return this.records('service-drafts');}
  /** One draft and its Attention item, saved together, as a GitHub draft is. */
@@ -131,7 +131,7 @@ export class WorldLedger {
    this.put(bucket,draft.id,draft);this.put('items',item.id,prepared);
   });
  }
- // Remote MCP consents (agent/agent/remote-mcp.ts, agent/agent/REMOTE-MCP.md) ----------------------------------------
+ // Remote MCP consents (agent/agents/remote-mcp.ts, agent/agents/REMOTE-MCP.md) ----------------------------------------
  /** Every remote connection the person was asked to allow (`state.remote-mcp-consents`). */
  remoteConsents():Row[]{return this.records('remote-mcp-consents');}
  /** One consent and its Attention item, saved together: the item is the host's own (provider `agents`), its status the
@@ -146,7 +146,7 @@ export class WorldLedger {
    this.put('remote-mcp-consents',consent.id,consent);this.put('items',item.id,prepared);
   });
  }
- // Service requests (agent/agent/service-requests.ts, agent/agent/GRANTS.md#when-an-agent-first-needs-a-service) -----
+ // Service requests (agent/agents/service-requests.ts, agent/agents/GRANTS.md#when-an-agent-first-needs-a-service) -----
  /** Every Agent's request to read a Service, answered or not (`state.service-requests`). */
  serviceRequests():Row[]{return this.records('service-requests');}
  /** One request and its Attention item, saved together, as a draft is: the item is the host's own (provider `agents`),
@@ -164,7 +164,7 @@ export class WorldLedger {
    this.delete('service-presets',id);
   });
  }
- // Agent reports (agent/agent/reports.ts, agent/agent/GRANTS.md#agent-reports) ------------------------------------
+ // Agent reports (agent/agents/reports.ts, agent/agents/GRANTS.md#agent-reports) ------------------------------------
  /** Each Agent's one report (`state.agent-reports`, keyed by the Agent). */
  agentReports():Row[]{return this.records('agent-reports');}
  saveAgentReport(report:Row){this.put('agent-reports',report.agentId,report);}
@@ -903,7 +903,7 @@ export class WorldLedger {
   return rows.map(({r:_,...row})=>({...row}));
  }
  /** The person's turns, in any conversation, that invoked a skill (`/name` as typed, or Hermes Agent's expanded form
-  * of one), newest first and only their start (agent/agent skillInvocation reads the name). */
+  * of one), newest first and only their start (agent/agents skillInvocation reads the name). */
  skillTurns(limit=2000):{role:string;text:string;at:number}[] {
   this.ensureCompanion();
   return this.all("SELECT role,substr(text,1,200) AS text,created_at FROM companion_turns WHERE role='user' AND (text LIKE '/%' OR text LIKE '[IMPORTANT: The user has invoked the %') ORDER BY created_at DESC LIMIT ?",limit)

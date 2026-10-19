@@ -2,13 +2,13 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import type {HarnessHistory,HarnessThread,HarnessTurnRecord} from '../../../../../contracts/harness-services.ts';
-import {harnessService,type MigrationSource,type MigrationTurn} from '../../../../../agent/agent/index.ts';
+import {harnessService,type MigrationSource,type MigrationTurn} from '../../../../../agent/agents/index.ts';
 import {claudeCodeConversation,claudeCodeHome,codexConversation,codexHome,codexNames,codexSessionId,hermesStateFolders,hermesThread,hermesThreads,inFolders,newBudget,piConversation,piHome,sessionFiles,type BroughtConversation} from './agent-files.ts';
 import {openClawThread,openClawThreads} from './openclaw-files.ts';
 import {discoverHermes} from './hermes-files.ts';
 import {openClawState} from './local-memory.ts';
 
-// The `history` Harness service in mode `files` (contracts/harness-services.ts, agent/agent/PORTABILITY.md "History,
+// The `history` Harness service in mode `files` (contracts/harness-services.ts, agent/agents/PORTABILITY.md "History,
 // read continuously"): the same read-only readers that bring an Agent, asked again for what changed. A thread is one
 // conversation under the key bringing it uses; a turn's ID is its place in that conversation ("0", "1", …), so a cursor
 // is the last ID returned and the World's turn IDs match what bringing made. Fox's own sessions are left out: any

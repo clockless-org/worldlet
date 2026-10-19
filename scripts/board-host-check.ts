@@ -7,12 +7,12 @@ import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/
 import {createAgentReports} from '../platform/electron/src/modules/agent-runtime/agent-reports.ts';
 import {BOARD_READ_REUSE_MS,createWorldBoard} from '../platform/electron/src/modules/agent-runtime/board.ts';
 import {openStandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
-import {STANDING_OUTSIDE_TURN} from '../agent/agent/grants.ts';
+import {STANDING_OUTSIDE_TURN} from '../agent/agents/grants.ts';
 import {BOARD_REASONS} from '../context/board/index.ts';
 import {PRESET_REASONS,saveServicePreset} from '../context/accounts/index.ts';
 import type {ServiceRead} from '../contracts/services.ts';
 
-// The board on the host (context/board/README.md, agent/agent/GRANTS.md#the-board), the same modules the Electron and Node
+// The board on the host (context/board/README.md, agent/agents/GRANTS.md#the-board), the same modules the Electron and Node
 // hosts run: kept in world.sqlite beside its Service presets, reached only through the standing `worldlet` MCP server
 // with each Agent's own token and Grants (none by default, never a Fox turn's), each preset read once through the
 // World's own Service reader, a block of a Service the Agent may not read refused on that block alone, the World's own

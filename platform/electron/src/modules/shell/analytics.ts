@@ -92,7 +92,7 @@ const ALLOWED:Record<string,string[]>={
  proactive_moment:[...PROACTIVE_MOMENTS],proactive_status:['spoke','passed'],
  // fox_proactive_shown: whether the line pointed to an open Attention card.
  proactive_card:['yes','no'],
- // How the chosen Agent's description of itself ended (agent/agent/agent-profile.ts).
+ // How the chosen Agent's description of itself ended (agent/agents/agent-profile.ts).
  profile_result:['ok','timeout','invalid','failed'],
  // tour_skipped: the step of the first run's eight-step tour it was skipped on (ui/onboarding/README.md).
  tour_step:['1','2','3','4','5','6','7','8'],

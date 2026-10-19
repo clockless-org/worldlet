@@ -1,12 +1,12 @@
 // Stock Hermes Agent for a person with no Agent (platform/electron/src/modules/agent-runtime/hermes-official.ts,
-// agent/agent/hermes-setup.ts): the official installer runs stage by stage without a person (the ones that need input
+// agent/agents/hermes-setup.ts): the official installer runs stage by stage without a person (the ones that need input
 // are Hermes' own), its steps are reported, a failed step says which, a Hermes Agent already here installs nothing and keeps its model,
 // Worldlet's old links at the standard locations are removed first and never the person's own; ChatGPT is signed in
 // with Hermes' own command, the address it prints is opened, and Hermes is set to ChatGPT with a model it lists.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {hermesChatGptModel,hermesInstallerResult,hermesInstallerStages,hermesSignInPrompt,HERMES_INSTALLERS} from '../agent/agent/index.ts';
+import {hermesChatGptModel,hermesInstallerResult,hermesInstallerStages,hermesSignInPrompt,HERMES_INSTALLERS} from '../agent/agents/index.ts';
 import {HERMES_WINDOW_DONE,hermesInstallWindow,hermesStarts,installHermes,workingHermesAgent,installedHermes,ownHermesAgent,releaseStandardHermes,setAsideUnfinished,signInHermes} from '../platform/electron/src/modules/agent-runtime/hermes-official.ts';
 import {withTempDir} from './test-temp.ts';
 import {signInScript} from '../platform/electron/src/modules/agent-runtime/provider-sign-in.ts';

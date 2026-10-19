@@ -1,7 +1,7 @@
 import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
 import {looksSecret} from './agent-profile.ts';
 
-/** Agents for scripts (agent/agent/GRANTS.md#agents-for-scripts): a daemon, a scheduled job or any program on this
+/** Agents for scripts (agent/agents/GRANTS.md#agents-for-scripts): a daemon, a scheduled job or any program on this
  * computer that reaches the World as an Agent of its own, with its own token, Grants and audit, through an endpoint file
  * in the fixed MCP home. Pure: the host keeps the list and writes the files. */
 

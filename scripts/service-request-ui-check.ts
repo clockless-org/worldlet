@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
-// An Agent's first need of a Service on its Attention card (agent/agent/GRANTS.md#when-an-agent-first-needs-a-service):
+// An Agent's first need of a Service on its Attention card (agent/agents/GRANTS.md#when-an-agent-first-needs-a-service):
 // Allow and Not now go to the host's `serviceRequest` with only the request's ID; a Service that is not connected and
 // signs in is connected from the card (the host's `connect`, into its Thing's region) before Allow; one that takes a key
 // opens Settings › Connectors. Never the ordinary item status. Bundled UI, faked bridge, fictional requests.

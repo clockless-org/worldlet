@@ -36,7 +36,7 @@ export function installOngoing(host:Host){
    const ledger=store.ledger();
    const {save,forget}=ongoingRefresh(things(),ledger.broughtConversations(),now(),c=>ledger.ownText(c.source,c.session,60));
    if(save.length||forget.length){store.ledger().saveOngoing(save as any[],forget);changed();}
-   // The things the chosen Agent said the person handles most (agent/agent/agent-profile.ts) become their own Applets once
+   // The things the chosen Agent said the person handles most (agent/agents/agent-profile.ts) become their own Applets once
    // their conversations are here; a removed one stays removed (agent/tasks ongoingFromAgent).
    const chosen=readSelection(host.profile.root),said=chosen?readAgentProfile(host.profile.root,chosen)?.things??[]:[];
    const keep=said.length?ongoingFromAgent(said,things(),ledger.broughtConversations(),now(),c=>ledger.ownText(c.source,c.session,60),chosen??undefined):[];
@@ -60,7 +60,7 @@ export function installOngoing(host:Host){
    seed(center,conversationsForAttention(ledger.broughtConversations(),now()));
   }catch(error){host.diagnostics.record(error,'ongoingAttention');}
  }
- // What the chosen Agent picked out for the Center when setup asked it to describe itself (agent/agent/agent-profile.ts
+ // What the chosen Agent picked out for the Center when setup asked it to describe itself (agent/agents/agent-profile.ts
  // `attention`) is there when the World opens, before any synthesis pass, each from a conversation the Center reads.
  function seed(center:WorldToolsService,recent:ReturnType<typeof conversationsForAttention>){
   const chosen=readSelection(host.profile.root),said=chosen?readAgentProfile(host.profile.root,chosen)?.attention??[]:[];

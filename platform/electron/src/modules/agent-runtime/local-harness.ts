@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
 import {claudeCodeNeedsSignIn,LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,PROVIDER_SETTING,backgroundModel,chosenModel,hermesConfigValues,LOCAL_HARNESS_SPARE,modelAtCapacity,modelRefusedByAccount,providerModel,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessOriginId,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
- readWorldSince,HERMES_CHANNEL_READ_ONLY,HERMES_STANDING_WRITE_DECLINED,HermesOwnCalls,hermesStandingWriteApproval,type LocalHarnessId,type ModelTier} from '../../../../../agent/agent/index.ts';
+ readWorldSince,HERMES_CHANNEL_READ_ONLY,HERMES_STANDING_WRITE_DECLINED,HermesOwnCalls,hermesStandingWriteApproval,type LocalHarnessId,type ModelTier} from '../../../../../agent/agents/index.ts';
 import {WorldletError,writeAtomic} from '../../files.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 import {ExecutionJournal} from './journal.ts';
@@ -625,7 +625,7 @@ export class LocalHarnessRuntime implements AgentRuntime {
   * hermesStandingWriteApproval): Allow once runs it as the turn's tool (null), Deny, a timeout or the turn ending
   * refuses it. With no one to ask (background work, setup) it is refused like a call from another channel. */
  private async confirmWrite(name:string,args:Row,call:McpCall,own:HermesOwnCalls,emit:(event:Row)=>Promise<unknown>,hold:<T>(work:Promise<T>)=>Promise<T>,asks:boolean,thread:unknown,agent:string|null):Promise<Row|null> {
-  // The card names the Agent whose token made the call (agent/agent/GRANTS.md).
+  // The card names the Agent whose token made the call (agent/agents/GRANTS.md).
   const ask=hermesStandingWriteApproval(name,args,call.agent?.name||this.install.title);
   if(!ask||await own.take(call))return null;
   if(!asks||!this.approvals)return {error:HERMES_CHANNEL_READ_ONLY};

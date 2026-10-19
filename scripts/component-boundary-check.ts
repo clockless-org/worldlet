@@ -3,6 +3,7 @@ import {readdir,readFile} from 'node:fs/promises';
 import {existsSync} from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
+import {oldCorePath} from './architecture-boundaries.ts';
 
 // Native/Python bridges consume agent/index.ts. Production TypeScript consumers
 // enter other Core/UI components through their explicit public APIs.
@@ -12,7 +13,7 @@ export function assertComponentImport(file:string,specifier:string) {
  const match=/^(core|ui|agent|context)\/([^/]+)\/(.+)$/.exec(target);
  if(!match||file.startsWith(`${match[1]}/${match[2]}/`))return;
  // A file left at its old core/ path while core/ moves into agent/ and context/ (#681) re-exports the same file.
- if(file.startsWith('core/')&&/^(agent|context)\//.test(target)&&target.replace(/^(agent|context)\//,'core/')===file)return;
+ if(oldCorePath(target)===file)return;
  assert.equal(match[3],'index.ts',`${file} bypasses ${match[1]}/${match[2]}'s public API: ${target}`);
 }
 async function scan(dir:string):Promise<void>{

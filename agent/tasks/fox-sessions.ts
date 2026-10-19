@@ -6,7 +6,7 @@
 import {ongoingAgo,type OngoingThing} from './ongoing.ts';
 
 /** The place key of a session that is not a Thing: Fox's conversation is shown and kept per place, and the person's
- * Agent keeps one session per such place (agent/agent/harness-sessions.ts `session:`). */
+ * Agent keeps one session per such place (agent/agents/harness-sessions.ts `session:`). */
 export const FOX_SESSION_PLACE='session:';
 /** At most this many sessions besides the main one: the column never scrolls far. */
 export const FOX_SESSION_LIMIT=12;

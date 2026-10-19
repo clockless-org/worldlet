@@ -38,7 +38,7 @@ export async function showWorldletAccounts(target:HTMLElement,call:(action:strin
  if(current())await showAgentConnections(target,call,current);
 }
 
-/** Your own GitHub App (agent/agent/GRANTS.md#github-drafts), under Settings › Connectors › Advanced: GitHub drafts the
+/** Your own GitHub App (agent/agents/GRANTS.md#github-drafts), under Settings › Connectors › Advanced: GitHub drafts the
  * person approves are written through their GitHub sign-in by default; connecting their own App writes them as that App
  * instead (and allows standing writes). Its App ID, installation ID and private key go to the host once, are checked with GitHub
  * and kept only in the vault; the page never gets them back and clears the fields at once. */

@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {describeActions,resolveAction,worldActions,worldGatewayTools,type WorldAction} from '../../../../../agent/tools/index.ts';
-import {GRANT_REASONS,HERMES_WORLD_TOOLS_SHIM,agentAuditEntry,artifactGranted,standingActions,standingCallDecision,type GrantDecision,type HermesOwnCalls,type HermesWorldToolsServer,type WorldToolServer} from '../../../../../agent/agent/index.ts';
+import {GRANT_REASONS,HERMES_WORLD_TOOLS_SHIM,agentAuditEntry,artifactGranted,standingActions,standingCallDecision,type GrantDecision,type HermesOwnCalls,type HermesWorldToolsServer,type WorldToolServer} from '../../../../../agent/agents/index.ts';
 import type {AgentAccess} from '../../host/services.ts';
 import type {AgentIdentity,Grant} from '../../../../../contracts/agent-identity.ts';
 import {AGENT_REPORT_TARGET} from '../../../../../contracts/agent-reports.ts';
@@ -109,7 +109,7 @@ const ARTIFACT_TOOL='agent_artifacts';
 /** The World tool behind `posthog-drafts/*` and `notion-drafts/*` (agent/tools/gateway.ts). */
 const SERVICE_DRAFT_TOOL='service_drafts';
 
-/** What one Agent may reach on the standing server (agent/agent/GRANTS.md): the actions it may discover and the decision
+/** What one Agent may reach on the standing server (agent/agents/GRANTS.md): the actions it may discover and the decision
  * for one resolved call. Absent for a Fox turn's own bridge, whose calls the turn's trust alone decides. */
 export type GatewayAccess={actions:(all:WorldAction[])=>WorldAction[];decide:(target:string,action:string,tool:string,args:Row)=>GrantDecision};
 /** describe_world_tools / call_world_tool, resolved by shared Core; `dispatch` runs the resolved tool. With `access`, an
@@ -190,7 +190,7 @@ export async function openWorldToolBridge(home:string,{sample,dispatch,runner=pr
 // World tools on Hermes, standing (owner decision 2026-10-08 19:15Z, Kelvin: "把 World 工具挂到 Hermes 上，让它所有渠道都能用"):
 // the `worldlet` MCP server in the Hermes profile Fox uses (core HERMES_WORLD_TOOLS) is started by Hermes itself (its
 // gateway, `hermes acp`), not for one turn, so it relays to one endpoint per app run. Each Agent has its own identity and
-// token (agent/agent/GRANTS.md): the endpoint and that Agent's new token go into its own owner-only file in the profile
+// token (agent/agents/GRANTS.md): the endpoint and that Agent's new token go into its own owner-only file in the profile
 // each run (removed on quit or when the person revokes it), and only the token's hash is kept, in the vault; every call
 // is decided by that Agent's Grants and recorded in its audit. The tool list stays beside it, so Hermes lists the tools
 // even while Worldlet is closed, and a call then answers that Worldlet is not open. MCP calls name no Hermes session, so
@@ -221,7 +221,7 @@ export const HERMES_STANDING_AGENT:StandingAgent={id:'hermes',name:'Hermes Agent
  * `hermes mcp add` saves the new entry and its gateway restarts, so during that run it holds the same Agent's token. */
 export const STANDING_LEGACY_ENDPOINT_FILE='worldlet-mcp-endpoint.json',STANDING_TOOLS_FILE='worldlet-mcp-tools.json';
 export const standingEndpointFile=(agentId:string)=>`worldlet-mcp-endpoint.${agentId}.json`;
-/** `asks`: an Agent ask call (`agent_asks`, agent/agent/GRANTS.md#agent-asks) by the Agent whose token made it. It is
+/** `asks`: an Agent ask call (`agent_asks`, agent/agents/GRANTS.md#agent-asks) by the Agent whose token made it. It is
  * always that Agent's own, under its own Grants: never a Fox turn's, and never routed to one. */
 /** `board`: a board call (`world_board`, context/board/README.md) by the Agent whose token made it, the same way: its own
  * Grants decide it, and `canRead` says whether they let it read a Service, so the board never shows an Agent a Service
@@ -229,16 +229,16 @@ export const standingEndpointFile=(agentId:string)=>`worldlet-mcp-endpoint.${age
 /** `context`: a search or read of the World's saved Service context (`world_context`, context/sources/service-context.ts)
  * by the Agent whose token made it, the same way: `canRead` says whether its own Grants let it read a Service, so an
  * answer never holds a Service its own `read_service` call would be refused. */
-/** `drafts`: a GitHub draft call (`github_drafts`, agent/agent/GRANTS.md#github-drafts) by the Agent whose token made it,
+/** `drafts`: a GitHub draft call (`github_drafts`, agent/agents/GRANTS.md#github-drafts) by the Agent whose token made it,
  * the same way: its own Grants decide it, never a Fox turn's. `serviceDrafts`: a PostHog or Notion draft call
- * (`service_drafts`, agent/agent/GRANTS.md#posthog-and-notion-drafts), the same way. */
-/** `reports`: an Agent report call (`agent_reports`, agent/agent/GRANTS.md#agent-reports), the same way. */
-/** `writes`: a standing GitHub write (`github_writes`, agent/agent/GRANTS.md#standing-github-writes) by the Agent whose
+ * (`service_drafts`, agent/agents/GRANTS.md#posthog-and-notion-drafts), the same way. */
+/** `reports`: an Agent report call (`agent_reports`, agent/agents/GRANTS.md#agent-reports), the same way. */
+/** `writes`: a standing GitHub write (`github_writes`, agent/agents/GRANTS.md#standing-github-writes) by the Agent whose
  * token made it, the same way, with that Agent's own Grants, whose reach (repository, writes, label prefix) it checks. */
-/** `artifacts`: a Journal artifact call (`agent_artifacts`, agent/agent/GRANTS.md#agent-artifacts) by the Agent whose token made it,
+/** `artifacts`: a Journal artifact call (`agent_artifacts`, agent/agents/GRANTS.md#agent-artifacts) by the Agent whose token made it,
  * the same way; `readsAll` says whether its own Grants let it read what every Agent saved, not only its own. */
 /** `serviceRequest`: an Agent's `read_service` call was refused for a Service (not allowed to read it, or not connected):
- * the host may ask the person on an Attention card (agent/agent/service-requests.ts) and answers what the refusal says
+ * the host may ask the person on an Attention card (agent/agents/service-requests.ts) and answers what the refusal says
  * after its reason. */
 export async function openStandingWorldTools({channel,access,asks,board,context,drafts,writes,reports,artifacts,serviceDrafts,serviceRequest,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;
  board?:(agentId:string,args:Row,canRead:(provider:string,operation:string)=>boolean)=>Promise<Row>;context?:(args:Row,canRead:(provider:string)=>boolean)=>Row;drafts?:(agentId:string,args:Row)=>Promise<Row>;writes?:(agentId:string,args:Row,grants:Grant[])=>Promise<Row>;

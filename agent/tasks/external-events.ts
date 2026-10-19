@@ -4,7 +4,7 @@
 // the Center's ordinary synthesis shows it, usually as Worth Knowing, quoting what the Agent was asked and answered;
 // once an item cites one that matters, the phone hears of it. A new message in a shared channel thread that may need the
 // person (it asks something, names a date, mentions someone) joins them as a `channel` event as soon as the World reads
-// it (agent/agent/PORTABILITY.md#history-read-continuously). These rules know no Harness by name.
+// it (agent/agents/PORTABILITY.md#history-read-continuously). These rules know no Harness by name.
 import type {HarnessExternalEvent} from '../../contracts/harness-services.ts';
 import type {PhonePushRequest} from '../windows/index.ts';
 import {digest,ongoingTurnText} from './ongoing.ts';

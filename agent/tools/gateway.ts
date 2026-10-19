@@ -87,7 +87,7 @@ function buildWorldActions(sample:boolean):WorldAction[]{
  // The person's own events (agent/tools/calendar.ts); each operation names what it needs.
  operations('calendar','manage_calendar');
  for(const action of actions.filter(a=>a.tool==='manage_calendar'))action.parameters.required=CALENDAR_REQUIRED[action.action];
- // Agent asks (agent/agent/asks.ts): each its own Grant target, which only "Can ask you" and "Can take work" name.
+ // Agent asks (agent/agents/asks.ts): each its own Grant target, which only "Can ask you" and "Can take work" name.
  operations('asks','agent_asks');
  for(const action of actions.filter(a=>a.tool==='agent_asks'))action.parameters.required={post:['title'],read:[],claim:[],resolve:['id','note','expectedRevision'],attachment:['id','attachment']}[action.action]??[];
  // The board (context/board/README.md): each its own Grant target, which only "Can see your board" and "Can set up your
@@ -98,22 +98,22 @@ function buildWorldActions(sample:boolean):WorldAction[]{
  // read <Service>" names; an answer holds only the Services the Agent may read.
  operations('context','world_context');
  for(const action of actions.filter(a=>a.tool==='world_context'))action.parameters.required=action.action==='search'?['query']:['id'];
- // Agent reports (agent/agent/reports.ts): each its own Grant target, which only "Can report its work" and "Can see
+ // Agent reports (agent/agents/reports.ts): each its own Grant target, which only "Can report its work" and "Can see
  // other Agents" name.
  operations('agents','agent_reports');
  for(const action of actions.filter(a=>a.tool==='agent_reports'))action.parameters.required=action.action==='report'?['status']:[];
- // Agent artifacts (agent/agent/agent-artifacts.ts): each its own Grant target, which only "Can save to your
+ // Agent artifacts (agent/agents/agent-artifacts.ts): each its own Grant target, which only "Can save to your
  // Journal" and "Can read Agents' Journal artifacts" name.
  operations('agent-artifacts','agent_artifacts');
  for(const action of actions.filter(a=>a.tool==='agent_artifacts'))action.parameters.required=action.action==='save'?['title','body']:[];
- // GitHub drafts (agent/agent/github-drafts.ts): each its own Grant target, which only "Can draft GitHub changes" names.
+ // GitHub drafts (agent/agents/github-drafts.ts): each its own Grant target, which only "Can draft GitHub changes" names.
  operations('github-drafts','github_drafts');
  for(const action of actions.filter(a=>a.tool==='github_drafts'))action.parameters.required=action.action==='create'?['write','target']:[];
- // Standing GitHub writes (agent/agent/GRANTS.md#standing-github-writes): their own Grant target, which only a standing
+ // Standing GitHub writes (agent/agents/GRANTS.md#standing-github-writes): their own Grant target, which only a standing
  // GitHub write Grant for one repository names.
  operations('github-writes','github_writes');
  for(const action of actions.filter(a=>a.tool==='github_writes'))action.parameters.required=['write','target'];
- // PostHog and Notion drafts (agent/agent/service-drafts.ts): one tool, each Service's own Grant targets
+ // PostHog and Notion drafts (agent/agents/service-drafts.ts): one tool, each Service's own Grant targets
  // (posthog-drafts/create…), which only "Can draft PostHog changes" or "Can draft Notion changes" names.
  for(const provider of ['posthog','notion'])for(const operation of ['create','read']){
   const draft=add(provider+'-drafts',operation,'service_drafts',{provider,operation});
@@ -194,7 +194,7 @@ export function describeActions(actions:WorldAction[],target='',action=''){
  const found=matches.find(a=>a.action===action);
  return found?{target,action,description:found.description,parameters:found.parameters,requiresPrivateContext:!found.public}:{error:'Unknown action for this target.'};
 }
-/** The actions one Agent may reach (agent/agent/GRANTS.md): `covers` is its Grants' answer for a target and action.
+/** The actions one Agent may reach (agent/agents/GRANTS.md): `covers` is its Grants' answer for a target and action.
  * `describe_world_tools` lists only these, so an Agent never discovers a target no Grant names. */
 export function grantedActions(actions:WorldAction[],covers:(target:string,action:string)=>boolean):WorldAction[]{
  return actions.filter(a=>covers(a.target,a.action));

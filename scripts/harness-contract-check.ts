@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {harnessHandshake,harnessReceive} from '../agent/agent/index.ts';
+import {harnessHandshake,harnessReceive} from '../agent/agents/index.ts';
 import {validateAgentDescriptor} from '../contracts/agent.ts';
 import type {HarnessTurn} from '../contracts/harness.ts';
 const caps={streaming:true,tools:true,cancel:true,steer:false,memory:false,sessions:false};
@@ -40,7 +40,7 @@ for(const patch of [{id:12},{name:[]},{id:'has spaces'},{capabilities:{}}])asser
 console.log('PASS shared Harness contract: handshake, optional execution, correlation, duplicate tools, terminal replies, UTF-8 limit, descriptor projection, resident Hermes routing');
 // Harness services v2 (contracts/HARNESS.md#harness-services-v2): every local Harness has a valid declaration.
 const {validateHarnessServices}=await import('../contracts/harness-services.ts');
-const {HARNESS_SERVICES,harnessService,harnessLocation}=await import('../agent/agent/harness-services.ts');
+const {HARNESS_SERVICES,harnessService,harnessLocation}=await import('../agent/agents/harness-services.ts');
 for(const id of ['hermes','openclaw','claude-code','codex','pi','remote'])assert.equal(HARNESS_SERVICES[id]?.harness,id);
 // Location comes from the declaration and the status, never from a Harness name: only a Harness that declares it is remote.
 assert.deepEqual(harnessLocation('remote',{location:{kind:'remote',computer:'Mac mini'}}),{kind:'remote',computer:'Mac mini'});

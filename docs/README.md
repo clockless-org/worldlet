@@ -7,7 +7,7 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | You want to | Read |
 | --- | --- |
 | Install with one command, or let your Agent install it | [One-line installers](../platform/install/README.md) · [the `worldlet` skill for Agents](../harness/skills/worldlet/SKILL.md) |
-| Connect the Agent you already run (OpenClaw, Hermes Agent, Claude Code, Codex, pi) | [Portable Agent architecture](../agent/agent/PORTABILITY.md) · [Harness independence and data ownership](AGENT-PORTABILITY.md) |
+| Connect the Agent you already run (OpenClaw, Hermes Agent, Claude Code, Codex, pi) | [Portable Agent architecture](../agent/agents/PORTABILITY.md) · [Harness independence and data ownership](AGENT-PORTABILITY.md) |
 | Know what Fox does and how far it goes on its own | [Fox: conversation and assistance](FOX-AGENT.md) |
 | Know why something shows up in the Attention Center | [Attention Center](ATTENTION-CENTER.md) |
 | Pair your phone | [iPhone](../ios/README.md) · [Android](../android/README.md) |
@@ -21,8 +21,8 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | The stack in computer terms, as a picture | [Stack diagram](stack-in-computer-terms.svg) ([Chinese](stack-in-computer-terms.zh.svg)) · [interactive architecture diagram](architecture.html) |
 | Five runtime layers: UI, Core, Platform, Harness, Models | [Five-layer architecture](UI-CORE-PLATFORM.md) · [shared UI, pure Core, thin Platform](../contracts/COMPONENTS.md) |
 | How Worldlet talks to an Agent, and an Agent to the World | [Platform–Harness contract](../contracts/HARNESS.md) · [Agent adapters](../harness/README.md) |
-| What each Agent may do in the World, and what it did | [Agent identity, Grants and audit](../agent/agent/GRANTS.md) |
-| Let a ChatGPT, Claude or Cursor connector, or a cloud Agent, use the World | [Remote MCP](../agent/agent/REMOTE-MCP.md) |
+| What each Agent may do in the World, and what it did | [Agent identity, Grants and audit](../agent/agents/GRANTS.md) |
+| Let a ChatGPT, Claude or Cursor connector, or a cloud Agent, use the World | [Remote MCP](../agent/agents/REMOTE-MCP.md) |
 | Interaction, HUD and Applet states | [Product interaction design](DESIGN.md) |
 | How the World is composed | [World and environment design](WORLD-LAYOUT.md) |
 | Applet lifecycle and execution | [Applet runtime](APPLET-RUNTIME.md) · [Core runtime](../context/applets/RUNTIME.md) |
@@ -342,10 +342,10 @@ Indexed: **284 Markdown documents** and **749 supporting documentation files**.
 
 <details><summary>Module and service documentation (38)</summary>
 
-- [agent/agent/GRANTS.md](../agent/agent/GRANTS.md)
-- [agent/agent/PORTABILITY.md](../agent/agent/PORTABILITY.md)
-- [agent/agent/REMOTE-MCP.md](../agent/agent/REMOTE-MCP.md)
-- [agent/agent/WORLD-ADDRESS.md](../agent/agent/WORLD-ADDRESS.md)
+- [agent/agents/GRANTS.md](../agent/agents/GRANTS.md)
+- [agent/agents/PORTABILITY.md](../agent/agents/PORTABILITY.md)
+- [agent/agents/REMOTE-MCP.md](../agent/agents/REMOTE-MCP.md)
+- [agent/agents/WORLD-ADDRESS.md](../agent/agents/WORLD-ADDRESS.md)
 - [agent/attention/README.md](../agent/attention/README.md)
 - [agent/diagnostics/ANALYTICS.md](../agent/diagnostics/ANALYTICS.md)
 - [agent/tasks/README.md](../agent/tasks/README.md)

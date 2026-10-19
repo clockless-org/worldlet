@@ -24,7 +24,7 @@ import {roomDenied} from '../../../contracts/web-world.ts';
 import {AGENT,PHONE,VAULT,WORLD_ROOM_PAGE,WORLD_WEB,type AgentService,type PhoneService,type VaultService,type WorldRoomPageService,type WorldWebService} from '../../electron/src/host/services.ts';
 import type {Host,PageBridge} from '../../electron/src/host/types.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
-import {isWorldToolsRegistrar} from '../../../agent/agent/index.ts';
+import {isWorldToolsRegistrar} from '../../../agent/agents/index.ts';
 import {onboardingUnfinished} from '../../../agent/onboarding/index.ts';
 import {ALREADY_RUNNING,controlSocketPath,serveControl,type ControlReply,type ControlRequest} from './control.ts';
 import {mcpHome,openMcpHome,registerAgent,registeredAgents} from './mcp-home.ts';
@@ -212,7 +212,7 @@ async function answer(request:ControlRequest):Promise<ControlReply> {
    'Allow what it may do in Settings › Agents in the World.']};
  }
  if(request.command==='register')return {lines:await registerAgent(request.agent!)};
- // Remote access (agent/agent/REMOTE-MCP.md), the same as Settings › Agents: each connector still asks the
+ // Remote access (agent/agents/REMOTE-MCP.md), the same as Settings › Agents: each connector still asks the
  // person on a card in Attention.
  if(request.command==='remote'&&request.remote==='token'){
   const made=await router.dispatch({action:'remoteMcp',operation:'token',name:request.name}) as {ok:boolean;error?:string;token?:string;address?:string;agent?:{name:string}};
