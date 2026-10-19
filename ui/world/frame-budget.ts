@@ -41,7 +41,7 @@ export function environmentShifted(before:any,after:any):boolean {
  return before?.kind!==after?.kind||before?.night!==after?.night||!near('daylight',.01)||!near('progress',.01)||!near('cloud',.01)||!near('wind',1)||!near('windFrom',5);
 }
 
-// The desktop host reports its window becoming active or inactive (platform/electron/src/main.ts);
+// The desktop host reports its window becoming active or inactive (platform/desktop/src/main.ts);
 // the website and fixtures have only the page's own focus.
 let active=typeof document==='undefined'||document.hasFocus?.()!==false;
 if(typeof window!=='undefined'){

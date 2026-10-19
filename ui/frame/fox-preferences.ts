@@ -1,6 +1,6 @@
 import {hostFeatures,hostCopy} from '../../platform/bridge/features.ts';
 import {companionPersona} from '../../agent/companion/index.ts';
-import {loginItemText} from '../../agent/base/index.ts';
+import {loginItemText} from '../../agent/app/index.ts';
 
 import {connectionLive} from '../../context/applets/index.ts';
 import {getApp} from '../../context/applets/index.ts';

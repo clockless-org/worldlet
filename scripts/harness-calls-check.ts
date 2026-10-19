@@ -4,8 +4,8 @@ import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {harnessChatThread,harnessNoCallsNote,harnessService,harnessSessionName,harnessToolsLine,localHarnessTurn,openClawCallArgs,openClawCallChunkKey,openClawCallPlacing,openClawCallRecord,openClawCallResult,openClawHangUpArgs,openClawHarnessCall,openClawHarnessCalls,openClawHarnessTools,openClawVoiceCallStore} from '../agent/gate/index.ts';
 import {callAttentionId,callBrief,conversationCallBrief,callLine,callLive,callMatters,callNumber,callObservation,callOpening,callOriginal,callReportDue,callSeconds,callStatus,callThread,callsForAttention,validCallAttentionId} from '../agent/tasks/index.ts';
-import {harnessCalls,openClawVoiceCallDir,readHarnessCalls} from '../platform/electron/src/modules/agents/harness-services.ts';
-import {installHarnessCalls} from '../platform/electron/src/modules/tasks/harness-calls.ts';
+import {harnessCalls,openClawVoiceCallDir,readHarnessCalls} from '../platform/host/modules/agents/harness-services.ts';
+import {installHarnessCalls} from '../platform/host/modules/tasks/harness-calls.ts';
 import {mountHarnessCall} from '../ui/companion/fox-call.ts';
 import {withTempDir} from './test-temp.ts';
 

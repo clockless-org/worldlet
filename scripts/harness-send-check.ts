@@ -10,9 +10,9 @@ import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {HARNESS_SERVICE_NAMES} from '../contracts/harness-services.ts';
 import {HARNESS_SERVICES,channelReplyText,harnessSendResult,harnessService,hermesSendArgs,hermesSendRoute,hermesSharedChat,openClawSendArgs,openClawSendRoute,openClawSharedSession} from '../agent/gate/index.ts';
-import {harnessSend,type SendCommand} from '../platform/electron/src/modules/agents/harness-send.ts';
-import {installChannelReplies} from '../platform/electron/src/modules/companion/channel-reply.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {harnessSend,type SendCommand} from '../platform/host/modules/agents/harness-send.ts';
+import {installChannelReplies} from '../platform/host/modules/companion/channel-reply.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
 import {mountChannelReply} from '../ui/companion/fox-channel-reply.ts';
 
 // Declared, never assumed from a name.

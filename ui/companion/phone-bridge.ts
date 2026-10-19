@@ -9,16 +9,16 @@ import {attentionSceneArt} from '../attention/index.ts';
 // signs in to anything). An Order said on the phone goes to Claude like the computer's own Order button (never to Fox as a
 // chat line), and Fox says here how it went. The host calls window.worldletPhoneMessage and acknowledges the message
 // when it returns true.
-// The Applet world rides with the Center: the World's Applets, what each is doing and its own thread (agent/base
+// The Applet world rides with the Center: the World's Applets, what each is doing and its own thread (agent/app
 // phoneApplets), so the phone's swipe down from Now shows them and each item links to its Applet.
 const LIVE_GAP=250;
 type Settle=(item:{worldItemId:string},status:string,snoozedUntil:string|null)=>Promise<unknown>;
 type Account={provider:string,title:string,action:string,run:()=>unknown};
 export function mountPhoneBridge({publish,publishLive=async()=>{},answer=()=>false,ask,askItem=(_id,text)=>ask(text),askApplet=(_key,text)=>ask(text),openApplet=()=>false,world=()=>null,tasks=()=>null,journal=()=>null,choose=()=>false,itemFox=()=>null,settle,kindOf,ready=()=>true}:{
  publish:(value:unknown)=>Promise<unknown>,
- /** Sends the turn Fox is streaming (agent/base phoneLive). */
+ /** Sends the turn Fox is streaming (agent/app phoneLive). */
  publishLive?:(value:unknown)=>Promise<unknown>,
- /** The phone's answer to the Agent's permission prompt that rides with the live turn (agent/base PhoneLive `approval`). */
+ /** The phone's answer to the Agent's permission prompt that rides with the live turn (agent/app PhoneLive `approval`). */
  answer?:(id:string,choice:'once'|'always'|'deny')=>unknown,
  ask:(text:string)=>unknown,
  /** A line the person said on the phone with an item's card open: it joins that item's conversation, as on the computer. */
@@ -28,11 +28,11 @@ export function mountPhoneBridge({publish,publishLive=async()=>{},answer=()=>fal
  /** Open on the computer, asked from an Applet's page on the phone. */
  openApplet?:(key:string)=>unknown,
  /** What the person said with the phone's Order button: sent as an Order from this computer (ui/companion/native-chat.ts). */
- /** The Applet world (agent/base PhoneWorld), or null where there is none. */
+ /** The Applet world (agent/app PhoneWorld), or null where there is none. */
  world?:()=>PhoneWorld|null,
  /** The Task panel's cards (agent/tasks TaskPanel), for the phone's Tasks tab; null until the panel has read them. */
  tasks?:()=>unknown,
- /** The Journal's cards (context/store Artifact); the phone gets today's (agent/base phoneJournal). */
+ /** The Journal's cards (context/store Artifact); the phone gets today's (agent/app phoneJournal). */
  journal?:()=>any[]|null,
  /** The option Fox offers on an item's card (its primary help), chosen on the phone. */
  choose?:(id:string)=>unknown,
@@ -55,7 +55,7 @@ export function mountPhoneBridge({publish,publishLive=async()=>{},answer=()=>fal
  const handled=new Set<string>();
  (globalThis as any).worldletPhoneMessage=async(message:PhoneMessage,key?:string)=>{
   // Retried deliveries (the host could not record the acknowledgement) are taken once. The host names each delivery
-  // (agent/base phoneMessageKey): an Attention message's id is its item's, so "Later" then "Done" on one item are two.
+  // (agent/app phoneMessageKey): an Attention message's id is its item's, so "Later" then "Done" on one item are two.
   const delivery=typeof key==='string'&&key?key:message?.type==='attention'?'':message?.id;
   if(delivery&&handled.has(delivery))return true;
   if(!ready())return false;

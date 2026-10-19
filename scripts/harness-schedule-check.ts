@@ -5,10 +5,10 @@ import os from 'node:os';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {afterScheduleCursor,harnessService,hermesScheduleJob,hermesScheduleRun,openClawScheduleJob,openClawScheduleRun,scheduleCursor,scheduleElsewhere,scheduleRunsAfter,scheduleStep,SCHEDULE_PUSH_MAX,dailyScheduleResult,dailyScheduleFailure,routineScheduleResult,journalTarget,WORLDLET_SCHEDULE} from '../agent/gate/index.ts';
-import {hermesSchedule,openClawSchedule} from '../platform/electron/src/modules/agents/harness-schedule.ts';
-import {createHarnessJobs} from '../platform/electron/src/modules/companion/harness-jobs.ts';
-import {AGENT,PHONE} from '../platform/electron/src/host/services.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {hermesSchedule,openClawSchedule} from '../platform/host/modules/agents/harness-schedule.ts';
+import {createHarnessJobs} from '../platform/host/modules/companion/harness-jobs.ts';
+import {AGENT,PHONE} from '../platform/host/services.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
 
 // The person's scheduled jobs run on their own Agent's scheduler and each run comes back to the World
 // (agent/gate/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent): Core's rules for OpenClaw's and Hermes Agent's

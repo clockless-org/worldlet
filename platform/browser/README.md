@@ -14,7 +14,7 @@ be bypassed by enabling an unrestricted shell/browser toolset. No new Agent loop
 
 - `agent/applets/agent-browser.ts`: pure snapshot projection and action policy.
 - `agent/applets/driver-flow.ts`: the shared command sequence (see [Shared driver boundary](#shared-driver-boundary)).
-- `platform/electron/src/modules/applets/agent.ts`: driver process, document-generation
+- `platform/host/modules/applets/agent.ts`: driver process, document-generation
   checks, ordered driver commands and cancellation. `page.ts` relays CDP to the selected
   page through `webContents.debugger`.
 - `agent_browser.py`: stdio/WebSocket transport and upstream provider handshake.
@@ -164,7 +164,7 @@ for opens (owner decision 2026-10-08: "打开apple developer网站" was refused)
 
 ### Trusted UI tool waits
 
-A World tool can await trusted UI work, such as the automatic element check before a click, before issuing a browser command. Nothing asks the person (#671). Its call to the World page uses Core's foreground Agent deadline (`agentRequestDeadline`), rather than the 15-second page timeout (`platform/electron/src/modules/companion/index.ts`). Ordinary page inspections retain their short timeout.
+A World tool can await trusted UI work, such as the automatic element check before a click, before issuing a browser command. Nothing asks the person (#671). Its call to the World page uses Core's foreground Agent deadline (`agentRequestDeadline`), rather than the 15-second page timeout (`platform/host/modules/companion/index.ts`). Ordinary page inspections retain their short timeout.
 
 ## Evidence history
 

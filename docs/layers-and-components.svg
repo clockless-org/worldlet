@@ -2,7 +2,7 @@
 <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#57606A"/></marker></defs>
 <rect width="2460" height="910" rx="18" fill="#FFFFFF"/><rect x="0.5" y="0.5" width="2459" height="909" rx="18" fill="none" stroke="#D8DDE4"/>
 <text x="32" y="50" font-size="26" font-weight="700" fill="#1F2328">Worldlet architecture: layers and components</text>
-<text x="32" y="76" font-size="14" fill="#57606A">Rows are the four layers, columns the features. Each cell is that feature’s code directory in that layer (Platform: under platform/electron/src/modules/). Calls go downward only.</text>
+<text x="32" y="76" font-size="14" fill="#57606A">Rows are the four layers, columns the features. Each cell is that feature’s code directory in that layer (Platform: under platform/host/modules/). Calls go downward only.</text>
 <rect x="250" y="96" width="146" height="44" rx="8" fill="#F6F8FA" stroke="#D0D7DE"/>
 <text x="323.0" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#1F2328">World</text>
 <text x="323.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">areas · HUD · themes</text>
@@ -78,7 +78,7 @@
 <text x="1539.0" y="360" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
 <text x="1691.0" y="360" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">in agent/base</text>
 <rect x="1774" y="344" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
-<text x="1843.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/base/</text>
+<text x="1843.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/app/</text>
 <rect x="250" y="466" width="1666" height="26" rx="7" fill="#1F2328"/>
 <text x="262" y="483" font-size="12.5" fill="#FFFFFF"><tspan font-weight="800">Gate</tspan>  the only door into Context: World tools · per-Agent Grants · drafts wait for approval · every call audited</text>
 <rect x="20" y="510" width="1906" height="170" rx="14" fill="#FFF8EC" stroke="#F0CF8E"/>
@@ -103,7 +103,7 @@
 <text x="262" y="663" font-size="12.5" fill="#1F2328"><tspan font-weight="800" fill="#9A6700">Four kinds</tspan>  Synced (from Services) · Recorded (what happened) · Made (Artifacts, Applets) · Known (memory, summaries) — one search across all</text>
 <rect x="20" y="690" width="1906" height="170" rx="14" fill="#F6F8FA" stroke="#D0D7DE"/>
 <text x="36" y="722" font-size="20" font-weight="800" fill="#57606A">4 · Platform</text>
-<text x="36" y="744" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#57606A">platform/electron/src/modules/</text>
+<text x="36" y="744" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#57606A">platform/host/modules/</text>
 <text x="36" y="766" font-size="12" fill="#57606A">the host: Electron or Node</text>
 <rect x="254" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
 <text x="323.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">world/</text>

@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import {withTempDir} from './test-temp.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {createServicePresets} from '../platform/electron/src/modules/sources/service-presets.ts';
-import {createServiceSync,SERVICE_SYNC_BUCKETS} from '../platform/electron/src/modules/sources/service-sync.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
+import {createServicePresets} from '../platform/host/modules/sources/service-presets.ts';
+import {createServiceSync,SERVICE_SYNC_BUCKETS} from '../platform/host/modules/sources/service-sync.ts';
 import {finishServiceSyncPage,serviceSyncPage,SERVICE_SYNC_LIMITS} from '../context/connectors/index.ts';
 import {localDeletionRecord,localDeletionRequest} from '../context/store/local-deletion.ts';
 import {roomDenied,ROOM_DENIED_MESSAGE} from '../contracts/web-world.ts';
@@ -108,9 +108,9 @@ assert.throws(()=>finishServiceSyncPage(syntheticJob,{seen:[],pages:SERVICE_SYNC
 console.log('PASS Service sync: explicit scheduling, real SQLite, restart/cursors/dedup, leases, retry/last-good, pause/account/consent guards, bounded storage, deletion and three mock Services.');
 
 // Real bounded Service adapter with a synthetic vault + mock HTTP, even when an execution home is registered.
-const {ServiceSource}=await import('../platform/electron/src/modules/sources/service-source.ts');
-const {collectServicePage}=await import('../platform/electron/src/modules/sources/service-collection.ts');
-const {ExecutionJournal}=await import('../platform/electron/src/modules/agents/journal.ts');
+const {ServiceSource}=await import('../platform/host/modules/sources/service-source.ts');
+const {collectServicePage}=await import('../platform/host/modules/sources/service-collection.ts');
+const {ExecutionJournal}=await import('../platform/host/modules/agents/journal.ts');
 await withTempDir('worldlet-service-collector-',async dir=>{
  const entries:unknown[]=[],values=new Map<string,string>();let fail=false,calls=0;
  const vault={get:(id:string)=>values.get(id)??null,set:(id:string,value:string)=>{values.set(id,value);},delete:(id:string)=>{values.delete(id);},deleteAll:()=>values.clear()};
@@ -172,7 +172,7 @@ console.log('PASS Service sync recovery: real mock-HTTP reader without payload h
 await withTempDir('worldlet-sync-consent-',async dir=>{
  // This host module uses build-time JSON imports, so load it through the same bundler as the host.
  const {build}=await import('esbuild'),{writeFileSync}=await import('node:fs'),{createRequire}=await import('node:module');
- const bundled=await build({stdin:{contents:"export {WorldStore} from './platform/electron/src/store/world-store.ts'; export {Preferences} from './platform/electron/src/preferences.ts';",resolveDir:process.cwd()},bundle:true,platform:'node',format:'cjs',write:false});
+ const bundled=await build({stdin:{contents:"export {WorldStore} from './platform/host/store/world-store.ts'; export {Preferences} from './platform/host/preferences.ts';",resolveDir:process.cwd()},bundle:true,platform:'node',format:'cjs',write:false});
  const moduleFile=path.join(dir,'store.cjs');writeFileSync(moduleFile,bundled.outputFiles[0].text);
  const {WorldStore,Preferences}=createRequire(import.meta.url)(moduleFile);
 

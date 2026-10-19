@@ -1,12 +1,12 @@
 // Development rehearsal site: the pages Fox completes in onboarding (book a cleaning, cancel a trial), served at its reserved
-// HTTPS origin exactly as the website panel does (platform/electron/src/modules/applets/page.ts, engine/page.ts). No network access.
+// HTTPS origin exactly as the website panel does (platform/host/modules/applets/page.ts, engine/page.ts). No network access.
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {mockGoogle} from '../context/connectors/google/mock.ts';
 
-const native=await readFile('platform/electron/src/modules/applets/page.ts','utf8');
-const device=await readFile('platform/electron/src/modules/applets/device.ts','utf8');
+const native=await readFile('platform/host/modules/applets/page.ts','utf8');
+const device=await readFile('platform/host/modules/applets/device.ts','utf8');
 const mock=await readFile('context/connectors/google/mock.ts','utf8');
 const host=native.match(/export const DEMO_HOST='([^']+)'/)?.[1];
 assert.equal(host,'demo.worldlet.test');

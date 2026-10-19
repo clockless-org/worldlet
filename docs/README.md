@@ -10,8 +10,8 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | Connect the Agent you already run (OpenClaw, Hermes Agent, Claude Code, Codex, pi) | [Portable Agent architecture](../agent/gate/PORTABILITY.md) · [Harness independence and data ownership](AGENT-PORTABILITY.md) |
 | Know what Fox does and how far it goes on its own | [Fox: conversation and assistance](FOX-AGENT.md) |
 | Know why something shows up in the Attention Center | [Attention Center](ATTENTION-CENTER.md) |
-| Pair your phone | [iPhone](../ios/README.md) · [Android](../android/README.md) |
-| Know what is stored on your computer and what is reported | [World data and lifecycle](WORLD-STORAGE.md) · [Analytics](../agent/base/ANALYTICS.md) |
+| Pair your phone | [iPhone](../platform/ios/README.md) · [Android](../platform/android/README.md) |
+| Know what is stored on your computer and what is reported | [World data and lifecycle](WORLD-STORAGE.md) · [Analytics](../agent/app/ANALYTICS.md) |
 
 ## How it works
 
@@ -26,7 +26,7 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | Interaction, HUD and Applet states | [Product interaction design](DESIGN.md) |
 | How the World is composed | [World and environment design](WORLD-LAYOUT.md) |
 | Applet lifecycle and execution | [Applet runtime](APPLET-RUNTIME.md) · [Core runtime](../context/applets/RUNTIME.md) |
-| The desktop host and its browser | [Electron host](../platform/electron/README.md) · [browser](../platform/browser/README.md) |
+| The desktop host and its browser | [Electron host](../platform/desktop/README.md) · [browser](../platform/browser/README.md) |
 
 ## Building Applets and Worlds
 
@@ -45,7 +45,7 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | --- | --- |
 | Rules for every change | [Contributing](../CONTRIBUTING.md) · [Working in this repository](../AGENTS.md) |
 | Building, checks and tests | [Development workflow](DEVELOPMENT.md) · [development and release scripts](../scripts/DEVELOPMENT.md) |
-| Dev, Alpha, Beta and GA builds | [Releasing from GitHub Actions](RELEASING.md) · [desktop distribution](../platform/electron/DISTRIBUTION.md) |
+| Dev, Alpha, Beta and GA builds | [Releasing from GitHub Actions](RELEASING.md) · [desktop distribution](../platform/desktop/DISTRIBUTION.md) |
 | Security reports | [Security](../SECURITY.md) |
 
 The README's screenshots come from the sample world, which holds only fictional records and needs no model or account: `npm run build:native-ui`, then `node scripts/readme-screenshots.ts` (set `CHROMIUM_PATH` when Playwright's own browser is not installed) rewrites [docs/assets/readme](assets/readme).
@@ -343,14 +343,13 @@ Indexed: **286 Markdown documents** and **749 supporting documentation files**.
 <details><summary>Module and service documentation (40)</summary>
 
 - [agent/README.md](../agent/README.md)
+- [agent/app/ANALYTICS.md](../agent/app/ANALYTICS.md)
 - [agent/attention/README.md](../agent/attention/README.md)
-- [agent/base/ANALYTICS.md](../agent/base/ANALYTICS.md)
 - [agent/gate/GRANTS.md](../agent/gate/GRANTS.md)
 - [agent/gate/PORTABILITY.md](../agent/gate/PORTABILITY.md)
 - [agent/gate/REMOTE-MCP.md](../agent/gate/REMOTE-MCP.md)
 - [agent/gate/WORLD-ADDRESS.md](../agent/gate/WORLD-ADDRESS.md)
 - [agent/tasks/README.md](../agent/tasks/README.md)
-- [android/README.md](../android/README.md)
 - [api/README.md](../api/README.md)
 - [context/README.md](../context/README.md)
 - [context/applets/INTEGRATIONS.md](../context/applets/INTEGRATIONS.md)
@@ -367,18 +366,19 @@ Indexed: **286 Markdown documents** and **749 supporting documentation files**.
 - [harness/example/README.md](../harness/example/README.md)
 - [harness/skills/README.md](../harness/skills/README.md)
 - [harness/skills/worldlet/SKILL.md](../harness/skills/worldlet/SKILL.md)
-- [ios/README.md](../ios/README.md)
 - [platform/README.md](../platform/README.md)
 - [platform/STEAM.md](../platform/STEAM.md)
+- [platform/android/README.md](../platform/android/README.md)
 - [platform/browser/INTEGRATION.md](../platform/browser/INTEGRATION.md)
 - [platform/browser/README.md](../platform/browser/README.md)
-- [platform/electron/COMPANION.md](../platform/electron/COMPANION.md)
-- [platform/electron/DISTRIBUTION.md](../platform/electron/DISTRIBUTION.md)
-- [platform/electron/README.md](../platform/electron/README.md)
+- [platform/desktop/COMPANION.md](../platform/desktop/COMPANION.md)
+- [platform/desktop/DISTRIBUTION.md](../platform/desktop/DISTRIBUTION.md)
+- [platform/desktop/README.md](../platform/desktop/README.md)
 - [platform/install/README.md](../platform/install/README.md)
 - [platform/install/agent.md](../platform/install/agent.md)
+- [platform/ios/README.md](../platform/ios/README.md)
 - [platform/local-tools/README.md](../platform/local-tools/README.md)
-- [platform/node/README.md](../platform/node/README.md)
+- [platform/server/README.md](../platform/server/README.md)
 - [platform/web-engine/README.md](../platform/web-engine/README.md)
 - [platform/web/README.md](../platform/web/README.md)
 - [scripts/DEVELOPMENT.md](../scripts/DEVELOPMENT.md)
@@ -392,7 +392,7 @@ Indexed: **286 Markdown documents** and **749 supporting documentation files**.
 
 <details><summary>Documentation diagrams, previews and evidence (749)</summary>
 
-- [agent/base/analytics-insights.json](../agent/base/analytics-insights.json)
+- [agent/app/analytics-insights.json](../agent/app/analytics-insights.json)
 - [docs/architecture.html](architecture.html)
 - [docs/assets/readme/applet-notes.jpg](assets/readme/applet-notes.jpg)
 - [docs/assets/readme/attention.jpg](assets/readme/attention.jpg)

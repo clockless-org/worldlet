@@ -1,4 +1,4 @@
-// The Node host (platform/node): builds it, runs its contract check, boots it on a temporary library and stops it with
+// The Node host (platform/server): builds it, runs its contract check, boots it on a temporary library and stops it with
 // SIGTERM. It must start with no window, write the browser link (room only), keep that link across a restart through
 // its own vault storage, and stop cleanly. Its shim and vault storage are checked on their own first. Then the World
 // in a browser on this computer (contracts/web-world.ts): on a library with one item, the link it writes opens the real
@@ -16,11 +16,11 @@ import {fileURLToPath} from 'node:url';
 import qrcode from 'qrcode-generator';
 import {withTempDir} from './test-temp.ts';
 import {launchTestBrowser,pageErrors,waitForWorld} from './browser-test.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
 import {WEB_DENIED_MESSAGE,WEB_PAGE_FEATURES,WEB_PAGE_UNAVAILABLE,WORLD_PROTOCOL,worldLinkToken,worldTokenProtocol,worldWebCsp} from '../contracts/web-world.ts';
-import {nodeVaultStorage,VAULT_KEY_FILE} from '../platform/node/src/vault-storage.ts';
-import {askControl,readControlRequest,CONTROL_SOCKET_LIMIT,controlSocketTooLong,serveControl} from '../platform/node/src/control.ts';
-import {app,BrowserWindow,BaseWindow,DESKTOP_ONLY,dialog,Notification,shell} from '../platform/node/src/electron-shim.ts';
+import {nodeVaultStorage,VAULT_KEY_FILE} from '../platform/server/src/vault-storage.ts';
+import {askControl,readControlRequest,CONTROL_SOCKET_LIMIT,controlSocketTooLong,serveControl} from '../platform/server/src/control.ts';
+import {app,BrowserWindow,BaseWindow,DESKTOP_ONLY,dialog,Notification,shell} from '../platform/server/src/electron-shim.ts';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 const web=path.join(root,'dist/WorldletWeb');

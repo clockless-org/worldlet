@@ -7,9 +7,9 @@ import {readFileSync} from 'node:fs';
 
 const read=(file:string)=>readFileSync(file,'utf8');
 // Where the host looks: `<resourcesPath>/GoogleOAuthClient.json` in a package.
-assert.match(read('platform/electron/src/resources.ts'),/case 'googleClient':\s*\n\s*if\(packaged\)candidates\.push\(path\.join\(packaged,'GoogleOAuthClient\.json'\)\)/);
+assert.match(read('platform/host/resources.ts'),/case 'googleClient':\s*\n\s*if\(packaged\)candidates\.push\(path\.join\(packaged,'GoogleOAuthClient\.json'\)\)/);
 // The Node host's resourcesPath is the program's own folder in an installed copy.
-assert.match(read('platform/node/src/main.ts'),/resources=fs\.existsSync\(path\.join\(here,'WorldletWeb'\)\)\?here:path\.dirname\(here\);\s*\n\(process as \{resourcesPath\?:string\}\)\.resourcesPath=resources;/);
+assert.match(read('platform/server/src/main.ts'),/resources=fs\.existsSync\(path\.join\(here,'WorldletWeb'\)\)\?here:path\.dirname\(here\);\s*\n\(process as \{resourcesPath\?:string\}\)\.resourcesPath=resources;/);
 // Mac (and any signed package): required.
 assert.match(read('scripts/package-electron.ts'),/google-oauth-bundle\.py',googleStage,\.\.\.\(sign\?\['--required'\]:\[\]\)/);
 assert.match(read('scripts/package-electron.ts'),/copyFileSync\(path\.join\(googleStage,'Resources\/GoogleOAuthClient\.json'\),path\.join\(dir,'GoogleOAuthClient\.json'\)\)/);

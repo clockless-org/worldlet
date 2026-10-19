@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import {withTempDir} from './test-temp.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
 import {contextAmount,contextServiceName,readWorldContextSizes,worldContextRows,worldContextServices} from '../context/connectors/index.ts';
 import {CONNECTOR_TECHNICAL_WORDS} from '../context/connectors/index.ts';
 

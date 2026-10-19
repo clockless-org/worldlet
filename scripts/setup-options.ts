@@ -1,5 +1,5 @@
 // RC setup options (#1503): every way in on setup's sign-in page, through the real UI of this
-// checkout's development build (platform/electron/src/checks/setup-options.ts), one launch on one fresh
+// checkout's development build (platform/desktop/src/checks/setup-options.ts), one launch on one fresh
 // library per option, each ending with Quit Completely; after each launch nothing may be left running
 // with that library. Options: mock Google, Continue with Codex, and OpenClaw, Claude Code, pi and
 // Hermes Agent brought in from fixture homes (scripts/setup-fixtures.ts), plus OpenClaw with Start fresh.
@@ -18,7 +18,7 @@ import {createRequire} from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {SETUP_OPTIONS} from '../platform/electron/src/checks/setup-option-names.ts';
+import {SETUP_OPTIONS} from '../platform/desktop/src/checks/setup-option-names.ts';
 import {workspace} from './dev-workspace.ts';
 import {leftoverReason,leftovers} from './onboarding-paths.ts';
 import {FIXTURE_EXPECTATIONS,launchEnvironment,writeSetupFixtures,type FixtureAgent} from './setup-fixtures.ts';

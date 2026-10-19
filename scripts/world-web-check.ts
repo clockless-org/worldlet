@@ -14,10 +14,10 @@ import crypto from 'node:crypto';
 import path from 'node:path';
 import type {Duplex} from 'node:stream';
 import {withTempDir} from './test-temp.ts';
-import {createLocalRelay,serveLocalRelay} from '../platform/electron/src/modules/shell/local-relay.ts';
-import {createWebPage} from '../platform/electron/src/host/web-page.ts';
-import {createPagePair,serveWorldWeb,WORLD_LINK_FILE,WORLD_TOKEN_VAULT} from '../platform/electron/src/host/world-web.ts';
-import type {PageBridge} from '../platform/electron/src/host/types.ts';
+import {createLocalRelay,serveLocalRelay} from '../platform/host/modules/shell/local-relay.ts';
+import {createWebPage} from '../platform/host/web-page.ts';
+import {createPagePair,serveWorldWeb,WORLD_LINK_FILE,WORLD_TOKEN_VAULT} from '../platform/host/world-web.ts';
+import type {PageBridge} from '../platform/host/types.ts';
 import {WEB_DENIED_MESSAGE,WEB_PAGE_ACTIONS,WEB_PAGE_FEATURES,WEB_PAGE_UNAVAILABLE,WORLD_ELSEWHERE_CODE,WORLD_PAGE_CSP,WORLD_PROTOCOL,webDenied,webEventDetail,worldLinkToken,worldTokenProtocol,worldWebCsp} from '../contracts/web-world.ts';
 import {worldLinkReply} from '../platform/web/index.ts';
 

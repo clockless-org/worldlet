@@ -1,5 +1,5 @@
 // A Worldlet Service read over the service's own HTTPS API with a key the person pasted, where no official MCP server
-// fits the World's account pipeline. The Platform runs each request (platform/electron/src/modules/sources/
+// fits the World's account pipeline. The Platform runs each request (platform/host/modules/sources/
 // service-source.ts); Core decides which requests and what of each answer reaches an Agent.
 
 /** What a reader may ask. `path` is an absolute path on the one address the person gave (it starts with `/`); the

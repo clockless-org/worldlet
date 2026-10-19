@@ -16,8 +16,8 @@ import {turnTrustObserve} from '../agent/gate/turn-trust.ts';
 import {resolveAction,worldActionOf,worldActions} from '../agent/gate/gateway.ts';
 import {APP_DEFINITIONS,SOURCE_PROVIDERS,connectSettings,connectToken} from '../context/applets/index.ts';
 import {validateAppletRuntimes} from '../context/applets/runtime.ts';
-import {ExecutionJournal} from '../platform/electron/src/modules/agents/journal.ts';
-import {ServiceSource,ServiceSourceAccess,ServiceSourceConnections} from '../platform/electron/src/modules/sources/service-source.ts';
+import {ExecutionJournal} from '../platform/host/modules/agents/journal.ts';
+import {ServiceSource,ServiceSourceAccess,ServiceSourceConnections} from '../platform/host/modules/sources/service-source.ts';
 import {withTempDir} from './test-temp.ts';
 
 const KEY='phx_'+'Fixture1'.repeat(5);

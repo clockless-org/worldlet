@@ -167,7 +167,7 @@ export function openClawConnectionCommand(change:HarnessConnectionChange,name?:s
 // Worldlet's own `worldlet` server in Claude Code and Codex -------------------------------------------------------
 
 /** The Agents whose own command registers Worldlet's standing `worldlet` server from its fixed home (the Node host's
- * `worldlet register`, platform/node/README.md): each command, run in order. An entry by that name is removed first
+ * `worldlet register`, platform/server/README.md): each command, run in order. An entry by that name is removed first
  * (that command fails harmlessly when there is none), so a later registration replaces it rather than failing. */
 export const WORLD_TOOLS_REGISTRARS=['claude-code','codex'] as const;
 export type WorldToolsRegistrar=typeof WORLD_TOOLS_REGISTRARS[number];

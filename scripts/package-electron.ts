@@ -50,7 +50,7 @@ function resources(target:'arm64'|'x64'){
  // The app reads only these at runtime (shell/release.ts); release scripts, the installer script and
  // the Store screenshots (~19 MB) are read from the checkout and stay out of the package.
  mkdirSync(path.join(dir,'distribution'));
- for(const name of ['Updates.json','Analytics.json'])copyFileSync(path.join(root,'platform/electron/distribution',name),path.join(dir,'distribution',name));
+ for(const name of ['Updates.json','Analytics.json'])copyFileSync(path.join(root,'platform/desktop/distribution',name),path.join(dir,'distribution',name));
  writeFileSync(path.join(dir,'build-info.json'),JSON.stringify({...info,platform:platform==='win32'?'windows':platform==='darwin'?'macos':'linux',architecture:arch==='universal'?'universal':target,distributionChannel:channel,sourceCommit:git(root,'rev-parse','HEAD'),sourceDirty:!!git(root,'status','--porcelain')},null,2)+'\n');
  const env={...process.env,WORLDLET_TARGET_ARCH:target==='x64'?'x86_64':'arm64'};
  if(platform==='darwin'){
@@ -92,12 +92,12 @@ const staged=Object.fromEntries(await Promise.all(targets.map(async target=>{
  return [target,dir];
 })));
 // 3. Package. Each architecture copies its own helpers; universal merges the Mach-O pairs.
-const entitlements=path.join(root,'platform/electron/distribution/entitlements.mac.plist');
+const entitlements=path.join(root,'platform/desktop/distribution/entitlements.mac.plist');
 const identity=process.env.WORLDLET_SIGN_IDENTITY;
 if(sign&&platform==='darwin'&&!/^Developer ID Application: /.test(identity??''))throw Error('Set WORLDLET_SIGN_IDENTITY to a Developer ID Application identity.');
 const out=path.join(root,'dist/packages');
 // Installed apps (Sparkle-based and Electron-based) find updates through these keys.
-const updates=JSON.parse(readFileSync(path.join(root,'platform/electron/distribution/Updates.json'),'utf8'));
+const updates=JSON.parse(readFileSync(path.join(root,'platform/desktop/distribution/Updates.json'),'utf8'));
 // Icons come from the brand master: .icns for Mac, the committed .ico for Windows.
 async function icon(){
  if(platform!=='darwin')return path.join(root,'resources/styles/builtin/assets/brand/worldlet.ico');
@@ -117,7 +117,7 @@ const options={
  // Runs once per architecture; `buildPath` is that architecture's staging root. It runs before packager signs (Mac,
  // after the universal merge) and before it edits Windows resources, so the fuses are flipped before any signature.
  afterCopyExtraResources:[async({buildPath,arch:target}:{buildPath:string,arch:string})=>{cpSync(staged[target==='x64'?'x64':'arm64'],platform==='darwin'?path.join(buildPath,'Worldlet.app/Contents/Resources'):path.join(buildPath,'resources'),{recursive:true});placeEngine(buildPath,target==='x64'?'x64':'arm64');await flipAppFuses(buildPath,platform,arch!=='universal');}],
- // http and https as URL types, so the default browser setting can offer Worldlet (agent/base/default-browser.ts).
+ // http and https as URL types, so the default browser setting can offer Worldlet (agent/app/default-browser.ts).
  // Declaring them changes nothing until a person turns the setting on and confirms the Mac's prompt.
  protocols:platform==='darwin'?[{name:'Web page',schemes:['http','https']}]:undefined,
  extendInfo:platform==='darwin'?{

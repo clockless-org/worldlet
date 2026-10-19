@@ -1,6 +1,6 @@
 # Agent adapters
 
-The desktop host (`platform/electron/src/modules/agents/`) consumes these adapter sources. The host owns process launch, installation, credential storage and final authorization; adapters consume the shared World tool protocol and never import the host.
+The desktop host (`platform/host/modules/agents/`) consumes these adapter sources. The host owns process launch, installation, credential storage and final authorization; adapters consume the shared World tool protocol and never import the host.
 
 - [example/](example/README.md): independent executable example of the Agent protocol, with no Hermes dependency.
 - [skills/](skills/README.md): skills an Agent the person already runs (OpenClaw, Hermes Agent) installs so it can set up Worldlet itself with the [one-line installer](../platform/install/README.md).

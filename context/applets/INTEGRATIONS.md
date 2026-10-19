@@ -137,7 +137,7 @@ Peek device-state artwork (mailbox lid/flag, calendar face and equivalent physic
 | Notes | Apple Events automation of Apple Notes; not EventKit | 50 notes, text only; locked notes skipped |
 | Mail | Existing Google OAuth | Local Apple Mail adapter is proposed, not implemented |
 
-The Electron host reaches EventKit and Apple Notes from `platform/electron/src/modules/sources/apple.ts` (macOS only), through bounded JavaScript-for-Automation helpers; the permission prompts on that path are not yet device-accepted.
+The Electron host reaches EventKit and Apple Notes from `platform/host/modules/sources/apple.ts` (macOS only), through bounded JavaScript-for-Automation helpers; the permission prompts on that path are not yet device-accepted.
 
 Calendar retains the internal `google-calendar` Applet/provider ID for saved-item compatibility. Its connection transport distinguishes EventKit (`native`, `system`) from existing Google (`hermes`, `oauth`). Connecting Calendar replaces the Calendar connection with local access, preserving saved findings and Gmail authorization. Source reads use the native receipt before considering OAuth. EventKit occurrence IDs are prefixed and include start time so recurring events stay distinct. All-day dates use local calendar dates. Notes, reminders and event bodies stay in the session cache; model processing still needs private-context consent. Disconnect clears the session cache, keeps saved findings and does not revoke the OS permission; OS permissions can be revoked in System Settings.
 
@@ -150,7 +150,7 @@ Notes through the existing World gateway. Core validates operation/fields and
 explicit timezone timestamps; OS adapters resolve the real destination and source
 revision. Fox displays the complete change with Confirm/Cancel. Only the trusted
 UI can commit a one-use review. Sample and non-Mac hosts do not execute these writes
-(`platform/electron/src/modules/sources/apple.ts` is macOS-only).
+(`platform/host/modules/sources/apple.ts` is macOS-only).
 
 - Calendar: create ordinary timed events in the default writable calendar or
   reschedule an existing non-recurring, non-all-day event with no attendees.
@@ -179,7 +179,7 @@ Google (`hermes`), which is read-only here, and has no Reminders or Notes. No
 EventKit mock exists. Still unverified: EventKit create/reschedule/complete/due
 change, readback and the recurring/all-day/attendee/repeating-reminder guards;
 live Notes/osascript and Automation consent; the TCC prompts; the host draft and
-operation-receipt lifecycle (`platform/electron/src/modules/sources/apple.ts`). These need console permission approval with
+operation-receipt lifecycle (`platform/host/modules/sources/apple.ts`). These need console permission approval with
 dedicated test records.
 
 #### Mail before Google verification
@@ -211,7 +211,7 @@ Notion and Obsidian use native **Peek → Open → Focus**, with a deliberate we
 | Device | Ivory N book spine, page index and oak archive drawers | Purple crystal linking notebook leaves above a knowledge desk |
 | Open | Four selectable page folios per page | Four selectable Markdown notes per page |
 | Focus | Live original Notion Markdown; selected page and parent device at right | Read-only original Markdown; selected note and parent device at right |
-| Integration | Existing authorized official Notion MCP through Hermes | Explicitly selected local vault; the chosen path is stored in the connection store (`platform/electron/src/modules/sources/local.ts`) |
+| Integration | Existing authorized official Notion MCP through Hermes | Explicitly selected local vault; the chosen path is stored in the connection store (`platform/host/modules/sources/local.ts`) |
 | Native / Web toggle | Selected original URL, otherwise Notion home, inside the same Applet | Not offered: the local vault has no web equivalent |
 
 The device toggle preserves the current native selection. Switching to Native restores it. Back returns from website to the native view, then from Focus to Open. Previous/Next stays outside the selected item. Task actions belong with Fox. No second editor or send toolbar is introduced.
@@ -365,7 +365,7 @@ flowchart LR
 | Completed / Stopped / Failed | Completion, interruption or failure events received on this connection |
 | Needs attention | Connection dropped or a request failed; refresh to reconnect |
 
-Worldlet runs its own `codex app-server` stdio child through `platform/local-tools/codex_sessions.py`, started by the host (`platform/electron/src/modules/applets/coding.ts`); it reuses the local Codex login and history; it copies no credentials and does not control the desktop Codex app. Do not continue the same session from two clients at once. After a restart every session is Saved until Worldlet runs it and receives new events.
+Worldlet runs its own `codex app-server` stdio child through `platform/local-tools/codex_sessions.py`, started by the host (`platform/host/modules/applets/coding.ts`); it reuses the local Codex login and history; it copies no credentials and does not control the desktop Codex app. Do not continue the same session from two clients at once. After a restart every session is Saved until Worldlet runs it and receives new events.
 
 Scope is **reading and continuing existing sessions**. Creating, archiving, deleting, live takeover from other clients and the full set of experimental server requests are not covered, so the Applet stays Building. Unsupported server requests return an explicit error and are never auto-approved. The installed CLI must support `thread/turns/list`; which Codex version provides it depends on the user's installation and is not pinned by Worldlet. Sample Mode and read-only storage refuse the local session interface.
 
@@ -377,7 +377,7 @@ npm run build:native-ui
 
 UI tests use fictional sessions to cover selection, continuation, streamed replies, approvals, file preview, cancel and back. `python3 scripts/codex-sessions-portable-check.py` (in `npm run test:harness`) drives the helper against a local app-server fixture, and `npm run test:codex:stream` checks that large RPC lines reach the Electron host whole. The native protocol tests that also covered paged history, resume only on explicit send and unchanged session configuration retired with #996; coverage of those cases in the portable check is not re-audited here. No test sends to a real user session or writes real session content into the repository.
 
-Interface: [OpenAI Codex App Server](https://developers.openai.com/codex/app-server/). Code: `platform/electron/src/modules/applets/coding.ts`, `platform/local-tools/codex_sessions.py`, `ui/applets/codex/codex-applet.ts`.
+Interface: [OpenAI Codex App Server](https://developers.openai.com/codex/app-server/). Code: `platform/host/modules/applets/coding.ts`, `platform/local-tools/codex_sessions.py`, `ui/applets/codex/codex-applet.ts`.
 
 <a id="health-travel-money-applets"></a>
 ## Worldlet Services read over their own API
@@ -432,7 +432,7 @@ Verification: `node scripts/http-json-service-check.ts` (a stub HTTP server: nam
 <a id="search-console-service"></a>
 ### Google Search Console (read only)
 
-The World reads Google Search performance for the sites the person's Google account can see, through the [Search Console API](https://developers.google.com/webmaster-tools/v1/api_reference_index) (`context/connectors/services/search-console.ts`). By default it signs in with Worldlet's own Google sign-in, the one Mail, Calendar and Drive use, which adds the read-only `https://www.googleapis.com/auth/webmasters.readonly` permission only when the person connects Search Console. Under Advanced, a Google **service account** does the same for a World that runs with no one at the screen (the [Node host](../../platform/node/README.md)): it needs no sign-in window and no refresh token, and the person decides which sites it sees by adding its email as a user in Search Console.
+The World reads Google Search performance for the sites the person's Google account can see, through the [Search Console API](https://developers.google.com/webmaster-tools/v1/api_reference_index) (`context/connectors/services/search-console.ts`). By default it signs in with Worldlet's own Google sign-in, the one Mail, Calendar and Drive use, which adds the read-only `https://www.googleapis.com/auth/webmasters.readonly` permission only when the person connects Search Console. Under Advanced, a Google **service account** does the same for a World that runs with no one at the screen (the [Node host](../../platform/server/README.md)): it needs no sign-in window and no refresh token, and the person decides which sites it sees by adding its email as a user in Search Console.
 
 - **Sign-in.** **Connect** on Search Console's tile in Settings › Connectors (and in Work's setup) asks Google, in the browser on this computer, for `webmasters.readonly` beside what the Google sign-in already allows (`GoogleAccount.connect(['search-console'])`: Worldlet's Desktop OAuth client, a loopback address, PKCE, no server of ours). Nothing is typed. A sign-in that already allows it opens no browser. Any later Google sign-in (for Mail, say) keeps every permission it already had, so Search Console stays allowed. The vault entry `service:search-console` then says only `{"v":1,"settings":{},"token":"","google":true}`; the access and refresh tokens stay with the Google sign-in (`google`). Reads send the Google sign-in's access token, renewed once after a 401. A sign-in Google no longer accepts says "Google signed you out of Search Console. Sign in again in Settings › Connectors.", and the tile shows **Sign in again**. A site the account cannot see says so in plain words. **Disconnect** forgets only Search Console: the Google sign-in stays for Mail and Calendar, and disconnecting Google there also ends Search Console. A host with no Google sign-in (the Node host) says to connect it under Advanced. The permission is sensitive: until Google verifies it for Worldlet's OAuth client, Google shows its unverified-app screen at this sign-in.
 
@@ -535,7 +535,7 @@ Totals over 1,000 records are reported as unavailable rather than truncated. Eve
 
 #### Verification and local runs
 
-- The native `--stripe-check` (CLI argument allowlist and both authorization response shapes) is not yet ported to Electron; the host implementation is `platform/electron/src/modules/applets/stripe.ts`.
+- The native `--stripe-check` (CLI argument allowlist and both authorization response shapes) is not yet ported to Electron; the host implementation is `platform/host/modules/applets/stripe.ts`.
 - Mac packaging (`scripts/package-electron.ts`) calls `scripts/bundle-stripe.ts`, which takes the official binary from the `@stripe/cli-darwin-<arch>` npm package (arm64 or x64), and ships it as `<resources>/stripe`. Development runs use the binary from `node_modules`. The version is pinned by `package.json` (`@stripe/cli` 1.50.11), not by the script. `bundle-stripe.ts` also stages the upstream license, but whether the Electron package ships `STRIPE-CLI-LICENSE.txt` still needs checking.
 - Test data lives only in fixtures. Real browser authorization and account reads wait for the user to connect.
 
@@ -583,7 +583,7 @@ CLI features outside this list are not available through Worldlet. The adapter a
 
 ### Verification
 
-- `node scripts/applet-focus-check.ts` covers the DoorDash route and its single Back. The host side is `platform/electron/src/modules/sources/content.ts`; DoorDash operations run in the Platform with no Agent (`modules/sources/doordash.ts`, rules in `context/connectors/doordash.ts`).
+- `node scripts/applet-focus-check.ts` covers the DoorDash route and its single Back. The host side is `platform/host/modules/sources/content.ts`; DoorDash operations run in the Platform with no Agent (`modules/sources/doordash.ts`, rules in `context/connectors/doordash.ts`).
 - `node scripts/doordash-check.ts` (and `python3 scripts/doordash-outcome-check.py` for the earlier Hermes adapter) passes mocked timeout, nonzero exit, malformed/oversized response and partial-item failures: all potentially applied cart changes are uncertain, execute once and require cart inspection before another mutation. Private stderr stays out of results; payment submission remains unavailable and checkout hosts are constrained. It also covers a connection marked earlier in Fox's Hermes profile staying connected, and `use_doordash` being admitted by its turn before the CLI runs.
 - Not yet accepted: real early-access account, browser sign-in, real menus, carts, quotes and checkout. No order has been created and nothing has been spent.
 
@@ -623,7 +623,7 @@ flowchart LR
 | --- | --- |
 | Device | `resources/styles/builtin/assets/world/devices/youtube.png`: a television with wooden feet, antenna and knobs, drawn at its authored Explore slot in `ui/world/applet-sprites.ts`. The brand mark stays in `ui/applets/youtube/logo.ts` and is used for the HUD icon, not painted on the device |
 | UI | `ui/applets/youtube/panel.ts` and `panel.css`: a link field, the player and queue cards with loading, empty and error states |
-| Data | `YouTubeService` (`platform/electron/src/modules/applets/youtube.ts`): link parsing, the local queue and Open on YouTube. No Google API call and no network request of its own |
+| Data | `YouTubeService` (`platform/host/modules/applets/youtube.ts`): link parsing, the local queue and Open on YouTube. No Google API call and no network request of its own |
 | Credentials | None. The service holds no token, and `forgetAccount()` deletes anything an earlier build stored |
 | Player | `YouTubePlayer` (same file) loads `ui/applets/youtube/player.html` (copied to `youtube-player.html` by `scripts/build-native-ui.ts`) in a sandboxed `WebContentsView` with a synthetic HTTPS origin derived from the Mac bundle ID; official controls kept |
 | Fox | `use_youtube` in `worker/companion-tools.ts` drives the same panel operations; the host bridge re-checks private-content consent |
@@ -679,7 +679,7 @@ Entering website Focus shows a brief local Fox invitation when no conversation, 
 
 Todoist now uses its [official OAuth MCP](https://developer.todoist.com/api/v1/#tag/Todoist-MCP)
 inside the packaged Hermes source adapter. Users authorize an account; they do not install a plugin.
-The Electron host advertises `curatedSourceRead` on every OS (`platform/electron/src/capabilities.ts`); acceptance outside Mac is pending.
+The Electron host advertises `curatedSourceRead` on every OS (`platform/host/capabilities.ts`); acceptance outside Mac is pending.
 
 Open lists active tasks (20 per cursor page), Focus reads the complete task description and returned
 metadata, and Web remains available for editing. Fox can prepare completion of a non-recurring task without active subtasks, using the shared one-use review and durable receipts. Core checks fresh source facts against the review; only UI confirmation reaches the isolated `complete-tasks` call. A returned success receipt and completed-task readback are both required. Uncertain writes are never automatically replayed. The provider does not offer an atomic compare-and-complete; concurrent external edits can race the final read.

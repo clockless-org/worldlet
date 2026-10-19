@@ -7,7 +7,7 @@
 // Advanced replaces the sign-in, a cancelled sign-in leaves a kept key, and Disconnect forgets both.
 import assert from 'node:assert/strict';
 import {connectorScopes} from '../context/connectors/index.ts';
-import {ServiceSource} from '../platform/electron/src/modules/sources/service-source.ts';
+import {ServiceSource} from '../platform/host/modules/sources/service-source.ts';
 
 const MCP='https://mcp.posthog.com/mcp',ISSUER='https://oauth.posthog.com',US='https://us.posthog.com',EU='https://eu.posthog.com';
 const KEY='phx_'+'Fixture1'.repeat(5);

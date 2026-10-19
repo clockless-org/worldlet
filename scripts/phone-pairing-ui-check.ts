@@ -20,7 +20,7 @@ try{
   return {ok:true};
  }}}};});
  await page.goto(worldUrl());await waitForWorld(page);
- // The Center goes to the host for the phone, shaped by agent/base.
+ // The Center goes to the host for the phone, shaped by agent/app.
  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='phonePublish'));
  const published=await page.evaluate(()=>(window as any).calls.find(c=>c.action==='phonePublish'));
  assert.equal(published.slot,'attention');assert.deepEqual([published.value.v,published.value.now,published.value.later],[1,[],[]]);
@@ -98,7 +98,7 @@ await web.getByText('Opened in Chrome on Mac · Active now').waitFor();
  assert.equal(await page.evaluate(()=>(window as any).worldletPhoneMessage({type:'chat',id:'c1',text:'What is next?'})),true);
  assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentChat').length),1,'a repeated delivery runs once');
  assert.equal(await page.evaluate(()=>(window as any).worldletPhoneMessage({type:'run',id:'x'})),true);
- // Attention messages carry the item's id: the host names each delivery (agent/base phoneMessageKey), so Later then
+ // Attention messages carry the item's id: the host names each delivery (agent/app phoneMessageKey), so Later then
  // Done on one item both settle it, and only the same delivery again is taken once.
  const settles=()=>page.evaluate(()=>(window as any).calls.filter(c=>c.action==='worldItemStatus'&&c.id==='item-7').map(c=>c.status));
  for(const [action,key] of [['later','b:1'],['done','b:2'],['done','b:2']])

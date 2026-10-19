@@ -5,7 +5,7 @@ import {createReadStream,readFileSync} from 'node:fs';
 import {stat} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-const config=JSON.parse(readFileSync(new URL('../platform/electron/distribution/Updates.json',import.meta.url),'utf8'));
+const config=JSON.parse(readFileSync(new URL('../platform/desktop/distribution/Updates.json',import.meta.url),'utf8'));
 export function publicationBucket(bucket){
  if(bucket!=='worldlet-releases')throw Error('Publication is blocked until reviewed tools target worldlet-releases.');
  return bucket;

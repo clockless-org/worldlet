@@ -66,7 +66,7 @@ export const externalEventOriginal=(record:{title?:unknown;text?:unknown})=>({ti
 export const externalEventMatters=(event:Pick<HarnessExternalEvent,'source'>)=>event.source==='webhook'||event.source==='email'||event.source==='channel';
 
 /** The push for an item that cites a pending event, or null. Coming Up and Worth Doing items reach the phone through
- * agent/base phoneAttentionPushes already, so only a Worth Knowing (`update`) item is pushed here. */
+ * agent/app phoneAttentionPushes already, so only a Worth Knowing (`update`) item is pushed here. */
 export function externalEventPush(item:{id?:unknown;kind?:unknown;title?:unknown;reason?:unknown;context?:unknown;sources?:unknown},pending:ReadonlySet<string>):PhonePushRequest|null {
  if(typeof item.id!=='string'||item.kind!=='update'||!Array.isArray(item.sources))return null;
  if(!item.sources.some((ref:any)=>ref?.provider==='conversations'&&pending.has(String(ref?.id))))return null;

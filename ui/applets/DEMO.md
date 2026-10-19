@@ -156,7 +156,7 @@ These are questions about fictional records. Prices, balances, confirmations and
 
 The JSON is bundled into the app build. `sample-persona.ts` attaches the notes to the fixed room hierarchy, resolves relative dates at load, replaces every earlier seed note, and projects the items. `ui/world/apps-matters.ts` reads each note's Matter from the data and gives each region's Matters the authored slots in the order the data lists them. The fictional profile is exposed to Fox through `inspect_world`; detailed records are read through the existing retrieval tools; in sample mode Fox's prompt says that the world is fiction.
 
-Practice edits are kept in the desktop host's World store memory (`sampleUI`, saved through the `saveSampleUI` presentation request in `platform/electron/src/store/world-store.ts`), tagged with the dataset version. Every new app session, and a backup restore or reset, starts with the seed. Legacy `sample-ui.json` files are ignored. Real-source storage and connection credentials are separate.
+Practice edits are kept in the desktop host's World store memory (`sampleUI`, saved through the `saveSampleUI` presentation request in `platform/host/store/world-store.ts`), tagged with the dataset version. Every new app session, and a backup restore or reset, starts with the seed. Legacy `sample-ui.json` files are ignored. Real-source storage and connection credentials are separate.
 
 The sample **never loads or merges a private archive**. Never copy personal imports, screenshots or credentials into this fixture or a distributed bundle. Kelvin, Clockless and everyone around them are authored fiction; the founder's name is the only thing borrowed, and the file is the place to change it.
 

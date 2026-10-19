@@ -17,7 +17,7 @@ assert.throws(()=>checkEdge('agent/gate/example.ts','platform/bridge/index.ts'),
 assert.throws(()=>checkEdge('context/store/example.ts','agent/tasks/index.ts'),/Forbidden/);
 assert.throws(()=>checkEdge('context/store/example.ts','agent/index.ts'),/Forbidden/);
 checkEdge('agent/tasks/example.ts','context/store/index.ts');
-checkEdge('platform/electron/src/example.ts','agent/index.ts');
+checkEdge('platform/desktop/src/example.ts','agent/index.ts');
 assert.throws(()=>checkEdge('ui/world/example.ts','harness/example/agent.ts'),/Forbidden/);
 assert.throws(()=>checkSource('contracts/example.ts',"import fs from 'node:fs'"),/pure layer/);
 assert.throws(()=>checkSource('agent/gate/example.ts','process.env.TOKEN'),/host global/);

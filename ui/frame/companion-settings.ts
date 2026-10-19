@@ -1,4 +1,4 @@
-import {defaultBrowserText,displayReleaseVersion} from '../../agent/base/index.ts';
+import {defaultBrowserText,displayReleaseVersion} from '../../agent/app/index.ts';
 import {BROWSER_HOME,createBrowserHome} from '../../agent/applets/index.ts';
 import {createFoxPreferences} from './fox-preferences.ts';
 import {createPanelGuide} from './panel-guide.ts';
@@ -115,7 +115,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   target.append(box,said);
   await draw();
  }
- // The update channel (agent/base/update-channel.ts): Dev, Alpha, Beta and Production, the release stages.
+ // The update channel (agent/app/update-channel.ts): Dev, Alpha, Beta and Production, the release stages.
  // Only the owner's installed copy shows the switcher (`switchable`); the Dev app and everyone else see the channel
  // they follow and nothing to change. Only the channels this copy can follow can be chosen; the host says why not.
  async function updates(target:HTMLElement){

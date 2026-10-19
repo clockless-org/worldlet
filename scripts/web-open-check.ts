@@ -1,4 +1,4 @@
-// Worldlet in a web browser (platform/web/README.md#web): the computer's `web` pairing (platform/electron/src/modules/
+// Worldlet in a web browser (platform/web/README.md#web): the computer's `web` pairing (platform/host/modules/
 // phone/relay.ts) and the page (platform/web/page) against the relay this computer serves itself (local-relay.ts), which answers
 // like worker/pairing.ts, over real HTTP on 127.0.0.1: the link, the
 // first poll completing the pairing with the browser's name, the Center reaching the page, Done and a chat line
@@ -11,11 +11,11 @@ import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
-import {createPhoneRelay} from '../platform/electron/src/modules/shell/relay.ts';
-import {createLocalRelay,serveLocalRelay,LOCAL_RELAY_LIMITS} from '../platform/electron/src/modules/shell/local-relay.ts';
-import {createRoomLink} from '../platform/electron/src/modules/shell/room-link.ts';
-import {createRtcHost,type RtcPage} from '../platform/electron/src/modules/shell/rtc-host.ts';
-import {RTC_PAGE_SCRIPT} from '../platform/electron/src/modules/shell/rtc-page.ts';
+import {createPhoneRelay} from '../platform/host/modules/shell/relay.ts';
+import {createLocalRelay,serveLocalRelay,LOCAL_RELAY_LIMITS} from '../platform/host/modules/shell/local-relay.ts';
+import {createRoomLink} from '../platform/host/modules/shell/room-link.ts';
+import {createRtcHost,type RtcPage} from '../platform/host/modules/shell/rtc-host.ts';
+import {RTC_PAGE_SCRIPT} from '../platform/host/modules/shell/rtc-page.ts';
 import {memoryRoom} from './memory-room.ts';
 import {createWebClient,createRoomWebClient,isRoomLink,readWebPairLink,WebPairingEnded,pairKeys,fromBase64url,sha256Hex,worldLinkReply,type PhoneMessage} from '../platform/web/index.ts';
 import {resolveAction,worldActions} from '../agent/gate/index.ts';
@@ -156,7 +156,7 @@ console.log('PASS Worldlet in a web browser: link, pairing, Center, Done, chat, 
  console.log('PASS the in-memory relay: a kept pairing survives a restart, a long poll wakes at once, no notifications, a capped queue.');
 }
 
-// Another device's browser meets the computer in the pairing room (agent/base room.ts, room-link.ts), here in memory
+// Another device's browser meets the computer in the pairing room (agent/app room.ts, room-link.ts), here in memory
 // (memory-room.ts).
 const room=memoryRoom(),RoomSocket=room.Socket;
 // Polls a browser until what it shows passes `ok` (a poll returns once anything new arrives).
@@ -313,7 +313,7 @@ await server.close();await rm(out,{recursive:true,force:true});
 // A line said in the browser or on the phone while the World page is not there (platform/web/README.md#web, Fox without
 // the page): the host gives it to Fox's main conversation on its own, and the turn is not ended for want of the page.
 {
- const phone=readFileSync('platform/electron/src/modules/shell/phone.ts','utf8'),fox=readFileSync('platform/electron/src/modules/companion/index.ts','utf8');
+ const phone=readFileSync('platform/host/modules/shell/phone.ts','utf8'),fox=readFileSync('platform/host/modules/companion/index.ts','utf8');
  assert.match(phone,/if\(!host\.page\.ready\(\)\)\{[\s\S]{0,2400}message\.type!=='chat'\|\|!fox\?\.converse[\s\S]{0,1600}fox\.converse\(message\.text,place\)/,'a main-conversation line without the page goes to Fox on the host');
  assert.match(phone,/if\(!host\.page\.ready\(\)\)\{[\s\S]{0,800}message\.type==='attention'&&hostRows\.has\(message\.id\)[\s\S]{0,600}host\.store\.setWorldItemStatus\(id,status,until\)/,'Done or Later without the page settles the item on the host');
  assert.match(phone,/if\(link\.phone\)await hostCenter\(\);/,'the host publishes the Center while the page is not there');
@@ -328,7 +328,7 @@ await server.close();await rm(out,{recursive:true,force:true});
  assert.match(fox,/if\(!page\.ready\(\)\)return tool\?NEEDS_WORLD:null;/,'its page-only steps say the window must be open');
  assert.match(fox,/host\.onPageReload\(\(\)=>\{if\(agentTurn!==null&&!headless\.has\(agentTurn\)\)cancelCloud\(\)/,'a page reload leaves it running');
  // Run in background starts the host's own work with no World page, and loads the page only when the World is shown.
- const main=readFileSync('platform/electron/src/main.ts','utf8'),attentionModule=readFileSync('platform/electron/src/modules/attention/index.ts','utf8');
+ const main=readFileSync('platform/desktop/src/main.ts','utf8'),attentionModule=readFileSync('platform/host/modules/attention/index.ts','utf8');
  assert.match(main,/if\(hidden\)\{\s*world\.window\.once\('show',\(\)=>void loadWorld\(\)[\s\S]{0,120}startServices\(\);[\s\S]{0,120}\}else await loadWorld\(\);/,'a background launch loads no page and starts the host');
  assert.match(main,/loaded:\(\)=>\{sent='';startServices\(\);/,'a normal launch starts the host with the first page load');
  assert.match(attentionModule,/host\.onStarted\(\(\)=>center\.start\(\)\)/,'Attention reads without the page');

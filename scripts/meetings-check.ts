@@ -39,7 +39,7 @@ console.log('PASS due meetings are offered with an explicit Join action; nothing
  const ending=world.slice(world.indexOf("window.addEventListener('worldlet:browser'"),world.indexOf('function showMeetings('));
  assert.match(ending,/!value\.active&&!value\.waiting&&value\.lines>0&&typeof value\.visit==='string'&&value\.visit&&!data\.sample&&!summarizedTranscripts\.has\(value\.session\)/,'Only a finished transcript with lines, in the own world, once');
  assert.match(ending,/summarizedTranscripts\.add\(value\.session\);\s*void voice\?\.ask\?\.\(meetingSummaryRequest\(\{meeting:value\.meeting,visit:value\.visit\}\),\{displayText:'Meeting summary'/,'Fox is asked for the summary artifact');
- const device=await readFile(new URL('../platform/electron/src/modules/applets/device.ts',import.meta.url),'utf8');
+ const device=await readFile(new URL('../platform/host/modules/applets/device.ts',import.meta.url),'utf8');
  assert.match(device,/emit:value=>this\.emit\(\{phase:'transcript',session,meeting,\.\.\.state\.visit\?\{visit:state\.visit\}:\{\},\.\.\.value\}\)/,'The transcript state names its visit');
  console.log('PASS a finished transcript asks Fox once for its summary artifact, read from the saved transcript');
 }

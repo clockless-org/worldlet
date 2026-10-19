@@ -29,7 +29,7 @@ User identity may include the authorized user's email and available display name
 connected third-party content, prompts, replies, page bodies, browsing history,
 credentials and recordings are excluded. The World page uses PostHog's standard web
 capture (autocapture, sessions, heatmaps and session replay) with all text, attributes
-and inputs masked and media blocked ([details](../agent/base/ANALYTICS.md#world-page-web-capture)).
+and inputs masked and media blocked ([details](../agent/app/ANALYTICS.md#world-page-web-capture)).
 Diagnostics and voluntarily submitted support feedback remain separate flows.
 
 ## AI observability
@@ -45,6 +45,6 @@ Drop-off is missing a next event within a stated window, not proof someone quit
 forever. Offline use, opt-outs, older builds and deployment lag create gaps. A
 successful tool invocation is not evidence a payment or booking succeeded.
 
-[Event schema, dashboard definitions and verification](../agent/base/ANALYTICS.md)
+[Event schema, dashboard definitions and verification](../agent/app/ANALYTICS.md)
 own the concrete tracking plan. New production event types appear only after real
 instrumented activity; never fabricate traffic to populate a dashboard.

@@ -7,9 +7,9 @@
 //                    checksums. A prerelease until the Build is promoted to Beta, which makes it the repository's latest release.
 //  channel-<name>    one release per channel (dev, alpha, beta) holding that channel's update feeds, replaced in place,
 //                    so a feed's address never changes: releases/download/channel-<name>/<feed>.
-//  staging-<name>    the same for a channel that is not live yet (platform/electron/distribution/Channels.json): CI
+//  staging-<name>    the same for a channel that is not live yet (platform/desktop/distribution/Channels.json): CI
 //                    publishes there while the release machines still run the channel, and nothing reads it.
-// Channels are the in-app update channels (agent/base/update-channel.ts):
+// Channels are the in-app update channels (agent/app/update-channel.ts):
 //  dev    every push to main; alpha  a Dev build promoted by a maintainer; beta  an Alpha build promoted, the public
 //  download, whose feeds keep history. Promotion never rebuilds: it only names the same installer in another feed.
 // The website's old /downloads/ addresses forward to these (installed apps that read them keep updating).
@@ -57,7 +57,7 @@ export function labelOf(version){
 export const releaseManifest=(identity,sourceCommit)=>({version:identity.version,build:identity.build,platformBuilds:{mac:identity.build,windows:identity.build},builtAt:identity.builtAt,sourceCommit});
 
 /** Whether a channel publishes to its live feeds, from the committed Channels.json. */
-export function liveChannel(channel,config=JSON.parse(readFileSync(path.join(root,'platform/electron/distribution/Channels.json'),'utf8'))){
+export function liveChannel(channel,config=JSON.parse(readFileSync(path.join(root,'platform/desktop/distribution/Channels.json'),'utf8'))){
  if(!CHANNELS[channel])throw Error('Unknown channel '+channel);
  return Array.isArray(config.live)&&config.live.includes(channel);
 }
@@ -170,7 +170,7 @@ export function githubStore(repo=process.env.GITHUB_REPOSITORY,gh=(args,input)=>
 
 /** Publishes one platform's build to a channel. `dir` holds the build job's output (with release.json, its
  * identity). Refuses to replace a channel's newer build. Returns what it did. */
-export async function publish({channel,platform,dir,live=liveChannel(channel),store,now=new Date(),updates=JSON.parse(readFileSync(path.join(root,'platform/electron/distribution/Updates.json'),'utf8'))}){
+export async function publish({channel,platform,dir,live=liveChannel(channel),store,now=new Date(),updates=JSON.parse(readFileSync(path.join(root,'platform/desktop/distribution/Updates.json'),'utf8'))}){
  const keys=channelKeys(channel,live),own=store||githubStore();
  const identity=JSON.parse(readFileSync(path.join(dir,'release.json'),'utf8')),label=labelOf(identity.version),tag='v'+label;
  try{
@@ -220,7 +220,7 @@ export async function publish({channel,platform,dir,live=liveChannel(channel),st
    const exe=readdirOne(dir,/-windows-x64-unsigned\.exe$/),built=JSON.parse(readFileSync(exe+'.json','utf8')),name=path.basename(exe);
    if(built.sha256!==await sha256(exe)||built.build!==identity.build)throw Error('The Windows installer differs from its identity.');
    const manifest=windowsManifest(built,statSync(exe).size,keys.prefix,assetURL(own.repo,tag,name));
-   const {parseWindowsManifest}=await import(pathToFileURL(path.join(root,'platform/electron/src/modules/shell/windows-release.ts')).href);
+   const {parseWindowsManifest}=await import(pathToFileURL(path.join(root,'platform/host/modules/shell/windows-release.ts')).href);
    // The shipped updater reads /downloads/ and /downloads/alpha/; every other field is checked as it would check them.
    parseWindowsManifest(['','alpha/'].includes(keys.prefix)?manifest:{...manifest,url:'/downloads/'+name});
    const current=feedBuild('windows',await own.read(keys.feedTag,keys.windows));
@@ -324,7 +324,7 @@ async function main(){
  if(command==='analytics'){
   // Writes the PostHog project key (POSTHOG_PROJECT_KEY, a release secret) into the app's analytics config. This
   // repository keeps the key empty; a build without it would send no crash or usage events (owner decision 2026-10-09).
-  const key=(process.env.POSTHOG_PROJECT_KEY||'').trim(),file=path.join(root,'platform/electron/distribution/Analytics.json');
+  const key=(process.env.POSTHOG_PROJECT_KEY||'').trim(),file=path.join(root,'platform/desktop/distribution/Analytics.json');
   if(!/^phc_\w+$/.test(key))throw Error('POSTHOG_PROJECT_KEY is not a PostHog project key.');
   writeFileSync(file,JSON.stringify({...JSON.parse(readFileSync(file,'utf8')),projectKey:key},null,2)+'\n');
   // The build still counts as a clean commit (ci-build.sh refuses a dirty checkout; sourceDirty in build-info).

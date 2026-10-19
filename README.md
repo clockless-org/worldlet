@@ -124,7 +124,7 @@ Mail, Calendar, Notes, GitHub, Notion, Linear and the other Applets that connect
 
 **Also in the box:**
 
-- **[Phone companions](ios/README.md)**: the Attention Center and Fox on iPhone and [Android](android/README.md), paired by QR code through an end-to-end encrypted relay.
+- **[Phone companions](platform/ios/README.md)**: the Attention Center and Fox on iPhone and [Android](platform/android/README.md), paired by QR code through an end-to-end encrypted relay.
 - **[Journal](ui/attention/CARD-SYSTEM.md)**: the cards Fox makes are kept, day by day.
 - **[Scheduled](agent/gate/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**: ask once ("every morning at 8, tell me the weather and my first meeting") and Fox keeps doing it; your Agent's scheduled jobs come along. Two come with every install, on unless you turn them off: [Today’s prep at 7 AM and Wrap up today at 6 PM](context/store/ARTIFACTS.md#the-days-plan-and-summary), each one Attention card.
 - **[Connectors](context/applets/INTEGRATIONS.md#settings--connectors)**: Settings › Connectors connects Google, Notion, Linear, PostHog, Cloudflare and more with their own sign-in, Search Console with your Google sign-in, and GitHub with a short code you paste on GitHub's own page (no key, no secret). A connected service's latest context is kept up to date in your World every hour (turn it off on its tile), and the Agents you allow can search it all in one place. Fox and its Agent can read a connected service, other Agents only if you choose them, and any change asks you first: an Agent's GitHub Issue or comment is written as you, with a "Drafted by" line, only after you approve it.
@@ -145,7 +145,7 @@ Open your whole World, not only the Attention Center and Fox, in a web browser o
 
 ## Privacy
 
-There is no Worldlet account, and your records stay on your computer. Official builds report basic usage analytics (setup, connection and core-operation outcomes, never message content, connected content or browsing history), and you can turn them off in Settings › General › Usage counts; see [analytics](agent/base/ANALYTICS.md). Builds you make yourself report nothing unless you configure a PostHog project.
+There is no Worldlet account, and your records stay on your computer. Official builds report basic usage analytics (setup, connection and core-operation outcomes, never message content, connected content or browsing history), and you can turn them off in Settings › General › Usage counts; see [analytics](agent/app/ANALYTICS.md). Builds you make yourself report nothing unless you configure a PostHog project.
 
 ## Build from source
 

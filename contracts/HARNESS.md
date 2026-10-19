@@ -21,12 +21,12 @@ flowchart TD
 | Wire shapes | `contracts/harness.ts`, `contracts/agent.ts` | Version, handshake, request, event, tool result, terminal result/error, declared capabilities |
 | Protocol acceptance | `agent/gate/index.ts`: `harnessHandshake`, `harnessReceive` | Shared validation for every adapter; correlation, declared streaming/tools, duplicate tool IDs, terminal state |
 | Sign-in handoffs | `agent/gate/index.ts`: `harnessAuthHandoff` | Hermes `google_auth`/`model_auth` events: one per run, matching request only, fixed Google OAuth path/OpenAI device URL, bounded device code; hosts open or display only accepted values |
-| Serialization facade | `agent/index.ts`: `harnessHandshake`, `harnessReceive`, `harnessAuthHandoff` | JSON envelopes for the host's in-process Core (`platform/electron/src/core.ts`) |
-| Executable adapter | `platform/electron/src/modules/agents/external.ts` | Spawn, bounded JSONL IO, deadline, cancellation, execute accepted tool callbacks |
+| Serialization facade | `agent/index.ts`: `harnessHandshake`, `harnessReceive`, `harnessAuthHandoff` | JSON envelopes for the host's in-process Core (`platform/host/core.ts`) |
+| Executable adapter | `platform/host/modules/agents/external.ts` | Spawn, bounded JSONL IO, deadline, cancellation, execute accepted tool callbacks |
 | Reference Harness | `harness/example/agent.py` | Independent executable example; no Hermes dependency |
 | Browser policy and flow | `agent/applets/index.ts` | Observation projection, element policy, command sequencing and snapshot consumption |
 | Browser transport | `platform/browser/agent_browser.py` | Private provider endpoint and pinned upstream driver process; no model or planner |
-| Host browser endpoints | `platform/electron/src/modules/applets/agent.ts` (driver process), `page.ts` (CDP through `webContents.debugger`) | Selected page, navigation generation, cancellation, CDP IO |
+| Host browser endpoints | `platform/host/modules/applets/agent.ts` (driver process), `page.ts` (CDP through `webContents.debugger`) | Selected page, navigation generation, cancellation, CDP IO |
 
 Consumers enter through these interfaces. Harnesses cannot call host storage
 internals, Core internals or the page CDP endpoint directly. Tools travel back
@@ -144,7 +144,7 @@ attempt deduplication and result-review policy. Hosts provide normalized HTTPS
 origins, current records and an explicit clock; only the host user-confirmation
 route may resolve an outcome, and the UI calls it only after the person's Go ahead on that step. An Agent's click result never proves completion.
 
-The host's ledger (`platform/electron/src/store/ledger.ts`) persists the shared
+The host's ledger (`platform/host/store/ledger.ts`) persists the shared
 decision, runtime operation and linked task transition in one SQLite transaction.
 Existing receipt IDs and fields remain compatible. Future inspection timestamps are
 rejected as well as missing/expired ones. The website panel (`modules/applets/device.ts`)
@@ -161,7 +161,7 @@ an awake clock, grants, pure Core policy and ledger IO. The Harness executes adm
 
 Current limit: the Electron host does not send `attention_tick` or answer the
 `_attention_*` callbacks below. Its Attention Center
-(`platform/electron/src/modules/attention/center.ts`) applies the same Core plan,
+(`platform/host/modules/attention/center.ts`) applies the same Core plan,
 start, execution-plan, follow-up and finish operations itself and asks the Harness
 only for model-free `sourceTool` reads and `_background` synthesis turns. Earlier
 native-host acceptance is history (Git, linked Issues) and does not carry over to Electron.

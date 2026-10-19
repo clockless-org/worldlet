@@ -1,5 +1,5 @@
 import type {HostCall} from '../../contracts/platform.ts';
-import {diagnosticError,timingBucket} from '../../agent/base/index.ts';
+import {diagnosticError,timingBucket} from '../../agent/app/index.ts';
 /** Explicit product events only. Request bodies, replies and error text never enter telemetry;
  * a failure carries only Core's classified `error_code` (timeout, authentication, …) so it can be debugged. */
 function reporter(host,enabled){

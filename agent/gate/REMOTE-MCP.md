@@ -2,7 +2,7 @@
 
 Agents in the cloud can use a person's World the same way local Agents do: a ChatGPT, Claude or Cursor connector, or an Agent session running on another machine. They reach the `worldlet` MCP server on the person's own computer through an HTTPS front at `https://mcp.worldlet.ai/<room>`. The person allows each connection on a card in Attention, and from then on it is an Agent of its own, with its own Grants and audit ([GRANTS.md](GRANTS.md)).
 
-Remote access is on by default (owner decision 2026-10-17): the installed app's first run makes the address and keeps the room open, so the person only copies the address. Nothing gets in until the person allows a connection on a card or makes a token. **Turn off** in Settings › Agents, or `worldlet remote off` on the [Node host](../../platform/node/README.md#the-worldlet-command), closes the room and stays off after restarts. Development builds, release checks and libraries other than the installed app's own stay off until turned on. Remote access works while the computer is on and Worldlet is running.
+Remote access is on by default (owner decision 2026-10-17): the installed app's first run makes the address and keeps the room open, so the person only copies the address. Nothing gets in until the person allows a connection on a card or makes a token. **Turn off** in Settings › Agents, or `worldlet remote off` on the [Node host](../../platform/server/README.md#the-worldlet-command), closes the room and stays off after restarts. Development builds, release checks and libraries other than the installed app's own stay off until turned on. Remote access works while the computer is on and Worldlet is running.
 
 ## Connect a connector
 

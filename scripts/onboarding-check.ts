@@ -1,5 +1,5 @@
 // npm run test:onboarding: the whole first-run journey on real code (Mac release gate), as the
-// Electron host's development check `--check onboarding-flow` (platform/electron/src/checks).
+// Electron host's development check `--check onboarding-flow` (platform/desktop/src/checks).
 // Builds the host (and the interface when missing), runs it on a disposable library with this
 // computer's Codex CLI as Fox's Agent (there is no built-in Agent, owner decisions 2026-10-09; test:agent:local runs
 // Fox on it too; WORLDLET_TEST_AGENT=claude-code runs both on Claude Code), and propagates the check's exit code.
@@ -40,12 +40,12 @@ console.log(`Onboarding setup (builds, browser driver): ${seconds(began)}`);
 const profile=mkdtempSync(path.join(os.tmpdir(),'worldlet-onboarding-flow-'));
 // An empty preferences file: a disposable library never imports this Mac's Worldlet settings.
 writeFileSync(path.join(profile,'preferences.json'),'{}\n',{mode:0o600});
-// The Agent as Fox's Agent, as setup saves a choice (platform/electron/src/store/agent-settings.ts).
+// The Agent as Fox's Agent, as setup saves a choice (platform/host/store/agent-settings.ts).
 mkdirSync(path.join(profile,'agent'),{recursive:true});
 writeFileSync(path.join(profile,'agent','local-harness.json'),JSON.stringify({version:1,id:agent.id}),{mode:0o600});
 const logs=path.join(root,'.local/electron-checks');mkdirSync(logs,{recursive:true});
 const logFile=path.join(logs,'onboarding-flow.log'),log=createWriteStream(logFile);
-// RC 录像: pictures of the run for scripts/ui-review.ts (platform/electron/src/checks/index.ts).
+// RC 录像: pictures of the run for scripts/ui-review.ts (platform/desktop/src/checks/index.ts).
 const env:NodeJS.ProcessEnv={...process.env,WORLDLET_UV:uv,WORLDLET_DEV:'1',WORLDLET_REPO_ROOT:root,WORLDLET_CHECK_FRAMES:path.join(logs,'onboarding-flow-frames'),WORLDLET_PROFILE_ROOT:profile};
 for(const key of ['ELECTRON_RUN_AS_NODE','WORLDLET_DEV_MODEL','WORLDLET_AGENT_CONFIG','WORLDLET_WORKTREE_PROFILE','WORLDLET_WEB_ROOT','WORLDLET_CAPTURE'])delete env[key];
 console.log(`Onboarding flow: library ${profile}, ${agent.title} (${agent.home}), log ${path.relative(root,logFile)}`);

@@ -14,7 +14,7 @@ const test=process.argv.includes('--test'),payload=path.join(root,'dist/packages
 const identity=JSON.parse(readFileSync(path.join(payload,'build-identity.json'),'utf8'));
 if(identity.sourceCommit!==git(root,'rev-parse','HEAD')||identity.platform!=='windows'||identity.architecture!=='x64'||identity.distributionChannel!=='microsoft-store')throw Error('Build a current Microsoft Store candidate first.');
 if(!test&&(identity.sourceDirty||git(root,'status','--porcelain')))throw Error('Store submissions require committed clean source.');
-const store=JSON.parse(readFileSync(path.join(root,'platform/electron/distribution/windows/store-identity.json'),'utf8'));
+const store=JSON.parse(readFileSync(path.join(root,'platform/desktop/distribution/windows/store-identity.json'),'utf8'));
 const name=test?'Worldlet.MSIXTest':store.name;
 const publisher=test?'CN=Worldlet MSIX Test':store.publisher;
 const display=test?'Worldlet MSIX Test':'Worldlet';

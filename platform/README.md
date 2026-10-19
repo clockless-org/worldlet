@@ -1,14 +1,17 @@
-# 03 · Desktop shell
+# Platform
 
-OS integration and controlled execution. Components: electron, node, bridge, browser, local-tools.
+Where the World runs, and every window that reaches it. One of the four [layers](../docs/UI-CORE-PLATFORM.md#see-do-know); it runs things and makes no product decisions.
 
 See the [layer and dependency contract](../docs/UI-CORE-PLATFORM.md#repository-layers).
 
-`electron/` is the one desktop host for Mac, Windows and Linux: windows and views,
-permissions, persistence, processes, packaging and distribution ([Electron host](electron/README.md)).
-`node/` runs the Electron host's modules that need no window in a plain Node process, for Linux and
-computers without a display ([Node host](node/README.md)).
-`bridge/` is shared browser-side host integration; `browser/` holds the agent-browser
-transport and pinned driver; `local-tools/` contains Harness-independent helper
-processes. Build the common UI with `npm run build:native-ui`. No UI source or
+| Component | Folder | What it is |
+| --- | --- | --- |
+| Host | [`host/`](host/) | The shared host Desktop and Server both run: the request router, the host modules (`host/modules/`), storage (`host/store/`), the vault, the `worldlet://` protocol, the browser engine's host side and the relay link |
+| Desktop | [`desktop/`](desktop/README.md) | Electron around the Host for Mac, Windows and Linux: the World window, OS permissions, packaging, updates and installers (`desktop/distribution/`) |
+| Server | [`server/`](server/README.md) | Node around the Host: the same World on a computer without a display |
+| Web | [`web/`](web/README.md) | How any page talks to its host, the page a browser opens (`web/page/`), pairing and the room |
+| Phone | [`ios/`](ios/README.md), [`android/`](android/README.md) | The iPhone and Android apps, paired the same way |
+
+Helpers used by the Host and Desktop: `bridge/` (the page side of the host bridge), `browser/` (the agent-browser transport and pinned driver), `local-tools/` (Harness-independent helper processes), `web-engine/`, `install/` (the one-line installers) and `distribution/`.
+Build the common UI with `npm run build:native-ui`. No UI source or
 artwork is owned by the host.

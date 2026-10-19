@@ -3,12 +3,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {validateHarnessServices} from '../contracts/harness-services.ts';
 import {agentServerConnections,claudeCodeStandingRules,codexStandingRules,harnessApprovalFeatures,harnessReadOnlyNote,harnessService,isMemoryEntryId,memoryEntries,memoryForgetRequest} from '../agent/gate/index.ts';
-import {standingRules} from '../platform/electron/src/modules/agents/harness-approvals.ts';
-import {harnessConnections} from '../platform/electron/src/modules/agents/harness-connections.ts';
-import {harnessMemory} from '../platform/electron/src/modules/agents/harness-memory.ts';
-import {harnessSkills} from '../platform/electron/src/modules/agents/harness-skills.ts';
-import {createHarnessControls} from '../platform/electron/src/modules/companion/harness-controls.ts';
-import {createHarnessConnections} from '../platform/electron/src/modules/companion/harness-connections.ts';
+import {standingRules} from '../platform/host/modules/agents/harness-approvals.ts';
+import {harnessConnections} from '../platform/host/modules/agents/harness-connections.ts';
+import {harnessMemory} from '../platform/host/modules/agents/harness-memory.ts';
+import {harnessSkills} from '../platform/host/modules/agents/harness-skills.ts';
+import {createHarnessControls} from '../platform/host/modules/companion/harness-controls.ts';
+import {createHarnessConnections} from '../platform/host/modules/companion/harness-connections.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Settings › Context and the read-only parts for Claude Code, Codex and pi (owner plan 2026-10-11, PR 3;

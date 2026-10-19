@@ -1,7 +1,7 @@
 // npm run test:android: the Android app on the Windows release gate (owner decision 2026-10-03: 01 tests Windows
 // and Android, 02 tests Mac and iOS; pull requests only compile the app). The protocol library's tests (the
 // pairing vector shared with the desktop and the iPhone), the demo UI tests on the JVM (Robolectric), then the
-// instrumented UI tests (android/app/src/androidTest) in the real app on an Android emulator: pairing, Now, an
+// instrumented UI tests (platform/android/app/src/androidTest) in the real app on an Android emulator: pairing, Now, an
 // item's card with Fox's dialogue, Later by a swipe, typing to Fox and Settings, on demo data, so no network,
 // account or signing is needed.
 // What it needs is set up in code (a host fix done in code, #1391): a JDK 17 or later (Temurin 17 is downloaded
@@ -20,7 +20,7 @@ import {fileURLToPath} from 'node:url';
 
 export const BLOCKING=false;
 const root=fileURLToPath(new URL('../',import.meta.url));
-const project=path.join(root,'android'),out=path.join(root,'.local/android-build');
+const project=path.join(root,'platform/android'),out=path.join(root,'.local/android-build');
 const windows=process.platform==='win32',mac=process.platform==='darwin';
 const home=path.join(os.homedir(),'.worldlet-android');
 const started=Date.now();

@@ -1,4 +1,4 @@
-// The credential vault (platform/electron/src/vault.ts), with Electron stubbed: a vault file that no longer parses
+// The credential vault (platform/host/vault.ts), with Electron stubbed: a vault file that no longer parses
 // is moved aside before the next write instead of being overwritten (every stored credential was lost before), and
 // Linux's keyring-less `basic_text` storage is reported by code.
 import fs from 'node:fs';
@@ -7,7 +7,7 @@ import {execFileSync} from 'node:child_process';
 import {build} from 'esbuild';
 import {withTempDir} from './test-temp.ts';
 
-const source=(file:string)=>JSON.stringify(path.resolve('platform/electron/src',file));
+const source=(file:string)=>JSON.stringify(path.resolve('platform/host',file));
 await withTempDir('worldlet-vault-',async temp=>{
  fs.writeFileSync(path.join(temp,'main.ts'),`import assert from 'node:assert/strict';
 import fs from 'node:fs';

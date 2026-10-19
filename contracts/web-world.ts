@@ -1,7 +1,7 @@
 // The World in a web browser (docs/UI-CORE-PLATFORM.md#the-world-in-a-web-browser): the same World page the app shows,
 // served by the host on 127.0.0.1 at /world/ and talking to it over one WebSocket at /world/socket instead of the
 // app's IPC. Both sides use this file: the page's transport (platform/bridge/web-host.ts) and the host's
-// (platform/electron/src/host/web-page.ts, platform/electron/src/modules/shell/local-relay.ts).
+// (platform/host/web-page.ts, platform/host/modules/shell/local-relay.ts).
 import type {HostFeatures} from './platform.ts';
 
 /** Where the host serves the World page and its socket. */

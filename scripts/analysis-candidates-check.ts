@@ -44,7 +44,7 @@ assert.throws(()=>batch(queue,0));
 console.log('PASS whole-record character budget, count bound, oversized isolation and complete coverage');
 
 // A Calendar event's times are the provider's facts: upsert_world_items projects them before the candidate rules run,
-// so a model-written start or end never rejects the event (#1609, platform/electron/src/modules/attention/tools.ts).
+// so a model-written start or end never rejects the event (#1609, platform/host/modules/attention/tools.ts).
 const {appletCandidateContent:content}=await import('../context/applets/candidate-content.ts');
 const {calendarItemTimes:times}=await import('../context/store/world-item-projection.ts');
 const meeting={provider:'google-calendar',kind:'event',title:'Design review',reason:'Review the launch plan',summary:'Design review with the launch team.',

@@ -1,7 +1,7 @@
 // node scripts/ios-applet-icons.mjs: the iPhone app's Applet icons are the computer's own Applet devices (owner
 // request 2026-10-04: "applet 用我们的 icons"). For every Applet in the built-in style (resources/styles/builtin/
 // manifest.json `applets`), its Peek device art is trimmed to the device, centred on a transparent square and kept
-// at 180 px (a 60-point tile at 3x) as ios/App/Assets.xcassets/Applets/applet-<key>.imageset, palette-compressed so
+// at 180 px (a 60-point tile at 3x) as platform/ios/App/Assets.xcassets/Applets/applet-<key>.imageset, palette-compressed so
 // the whole set stays small. `moment` (Moment Applets) and `ongoing` (things brought from other Agents) are there
 // too. Run it again after Applet art changes; `--check` (part of npm run test:ios) fails when an Applet has no icon.
 import {mkdirSync,readFileSync,readdirSync,rmSync,writeFileSync,existsSync} from 'node:fs';
@@ -10,7 +10,7 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 const manifest=JSON.parse(readFileSync(path.join(root,'ui/style/theme-packages/village/style.json'),'utf8'));
-const folder=path.join(root,'ios/App/Assets.xcassets/Applets');
+const folder=path.join(root,'platform/ios/App/Assets.xcassets/Applets');
 const SIZE=180,INFO={author:'xcode',version:1};
 const keys=Object.keys(manifest.applets).filter(k=>manifest.applets[k]?.peek).sort();
 

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import {sendOAuthCallbackPage} from '../platform/electron/src/modules/sources/oauth-callback.ts';
+import {sendOAuthCallbackPage} from '../platform/host/modules/sources/oauth-callback.ts';
 import {withBrowser} from './browser-test.ts';
 // Browser-specific CSP coverage belongs to the UI suite; fast CI needs no Chromium installation.
 const server=http.createServer((_request,response)=>sendOAuthCallbackPage(response,'received'));

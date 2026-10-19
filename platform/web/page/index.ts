@@ -47,7 +47,7 @@ export function mountWebOpen(root:HTMLElement,options:WebOpenOptions){
  let client:WebClient|null=null,view:WebView={},tab:Tab='now',notice='',ended=false,stopped=false,draft='';
  const pending=new Set<string>();
  try{if(saved){
-  // A link with `m=room` meets the computer in the pairing room (agent/base room.ts), where nothing is stored; an older
+  // A link with `m=room` meets the computer in the pairing room (agent/app room.ts), where nothing is stored; an older
   // one reads the relay's slots.
   const base={link:saved,relay:options.location.origin,name:browserName(options.userAgent),version:options.version};
   client=isRoomLink(saved)?createRoomWebClient({...base,...(options.WebSocket?{WebSocket:options.WebSocket}:{})}):createWebClient({...base,fetch:options.fetch});

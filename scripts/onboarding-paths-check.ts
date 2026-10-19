@@ -1,13 +1,13 @@
 // RC onboarding paths (#1492), without launching the app: when a packaged release accepts the harness's
-// disposable library (platform/electron/src/rc-check.ts), that its fixture OpenClaw is a local Agent setup
+// disposable library (platform/host/rc-check.ts), that its fixture OpenClaw is a local Agent setup
 // can choose, how a phase's launch is judged, and how leftover processes are found (scripts/onboarding-paths.ts).
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {locateLocalHarnesses} from '../platform/electron/src/modules/agents/local-harness.ts';
-import {readLocalAgentMemory} from '../platform/electron/src/modules/agents/local-memory.ts';
-import {rcCheckRoot,RC_CHECK_MARKER,RELEASE_CHECKS} from '../platform/electron/src/rc-check.ts';
+import {locateLocalHarnesses} from '../platform/host/modules/agents/local-harness.ts';
+import {readLocalAgentMemory} from '../platform/host/modules/agents/local-memory.ts';
+import {rcCheckRoot,RC_CHECK_MARKER,RELEASE_CHECKS} from '../platform/host/rc-check.ts';
 import {holders,leftoverReason,leftovers,parseArgs,phaseOutcome,PHASES,BLOCKING} from './onboarding-paths.ts';
 import {launchEnvironment,writeOpenClawFixture} from './setup-fixtures.ts';
 

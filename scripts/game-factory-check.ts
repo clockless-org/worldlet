@@ -67,7 +67,7 @@ assert.equal(APP_DEFINITIONS.some(app=>app.id===GAME_FACTORY_APPLET),false,'the 
 // The host side: every made game's and Moment Applet's contents (trial, Game Factory and Widgets players) is
 // locked the same way, including WebRTC, whose UDP never passes the session's request filter.
 {
- const read=(file:string)=>readFileSync(new URL('../platform/electron/src/modules/'+file,import.meta.url),'utf8');
+ const read=(file:string)=>readFileSync(new URL('../platform/host/modules/'+file,import.meta.url),'utf8');
  const trial=read('applets/trial.ts'),lock=trial.slice(trial.indexOf('export function lockGameContents'),trial.indexOf('export function placeGameView'));
  assert.match(lock,/setWebRTCIPHandlingPolicy\('disable_non_proxied_udp'\)/);assert.match(lock,/action:'deny'/);assert.match(lock,/will-navigate/);assert.match(lock,/will-redirect/);
  assert.match(trial.slice(trial.indexOf('export async function tryMadeGame')),/lockGameContents\(contents\)/,'the trial');

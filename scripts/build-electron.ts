@@ -12,12 +12,12 @@ const out=index>0?path.resolve(process.argv[index+1]):path.join(root,'dist/elect
 await mkdir(out,{recursive:true});
 const common={bundle:true,platform:'node' as const,format:'cjs' as const,target:'node24',external:['electron'],loader:{'.sql':'text' as const},sourcemap:'linked' as const,logLevel:'warning' as const};
 await Promise.all([
- build({...common,entryPoints:[path.join(root,'platform/electron/src/main.ts')],outfile:path.join(out,'main.cjs')}),
- build({...common,entryPoints:[path.join(root,'platform/electron/src/world/preload.ts')],outfile:path.join(out,'world-preload.cjs')}),
- build({...common,entryPoints:[path.join(root,'platform/electron/src/modules/applets/engine/surface-preload.ts')],outfile:path.join(out,'web-surface-preload.cjs')})
+ build({...common,entryPoints:[path.join(root,'platform/desktop/src/main.ts')],outfile:path.join(out,'main.cjs')}),
+ build({...common,entryPoints:[path.join(root,'platform/desktop/src/world/preload.ts')],outfile:path.join(out,'world-preload.cjs')}),
+ build({...common,entryPoints:[path.join(root,'platform/host/modules/applets/engine/surface-preload.ts')],outfile:path.join(out,'web-surface-preload.cjs')})
 ]);
 await writeFile(path.join(out,'package.json'),JSON.stringify({name:'worldlet',productName:'Worldlet',main:'main.cjs',private:true},null,1));
-// Development hosts find the browser driver in .local/browser-driver (platform/electron/src/resources.ts).
+// Development hosts find the browser driver in .local/browser-driver (platform/host/resources.ts).
 // Offline builds still succeed; Fox's browser tasks then report the missing driver.
 if(!process.env.WORLDLET_AGENT_BROWSER)await cachedAgentBrowser(root).catch(error=>console.warn('Browser driver not prepared: '+error.message));
 // The Messages Applet's imsg (scripts/package-imsg.ts) in .local/imsg, Mac only.

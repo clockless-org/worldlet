@@ -23,7 +23,7 @@ import {attentionPreviewData,attentionLaterUntil} from '../../agent/attention/in
 import {mountPhoneBridge} from '../companion/index.ts';
 import {attentionBrief} from '../../agent/attention/index.ts';
 import {artifactFollowUpSent,artifactFollowUpRequest,type ArtifactFollowUpDraft,artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,dayKey,dailyArtifactDue,dailyPlanned,dailyArtifactRequest,firstPrepRequest,readDailyRoutines,DAILY_ROUTINES_ON,DAILY_ROUTINE_NAMES,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../context/store/index.ts';
-import {timingBucket} from '../../agent/base/index.ts';
+import {timingBucket} from '../../agent/app/index.ts';
 import {applyRegionLayout,lastUse,readRegionLayout,parseRegionLayout,moveRegionApplet,pinRegionApplet,pinnedPlace,recordAppletUse,regionId,recentlyUsedFirst,storedRegionLayout} from '../world/index.ts';
 import {resolvePlacements,lampLabels,lampNeeds} from '../world/index.ts';
 import {WORLD_LAYOUT,THEME_SCENE,themeAreaMap} from '../world/index.ts';
@@ -348,7 +348,7 @@ export function mountNotionWorld(data: World, native: any) {
   }
   window.addEventListener('worldlet:open-url',(event:any)=>openWorldURL(event.detail?.url||''));
   // Links other apps opened while Worldlet is the default browser wait in the host until the World is here (after
-  // onboarding): the newest opens in its own website Thing, else the Browser (platform/electron/src/system-browser.ts).
+  // onboarding): the newest opens in its own website Thing, else the Browser (platform/host/system-browser.ts).
   const takeIncoming=()=>{
     if(!native?.incomingLinks)return;
     void Promise.resolve(native.incomingLinks()).then(result=>{const links=Array.isArray(result?.links)?result.links:[],last=links[links.length-1];if(typeof last==='string')openWorldURL(last,{incoming:true});},()=>{});
@@ -1685,7 +1685,7 @@ export function mountNotionWorld(data: World, native: any) {
   // once per World (a busy background session asks again at the next poll), not with Today's prep paused, and not
   // with Mail connected.
   // `data-first-card` tells the tour it is on its way (`preparing`), then `ready` or `failed`. Its steps are product
-  // events (agent/base/ANALYTICS.md#the-first-card): started, ready (with how it ended), shown and approved.
+  // events (agent/app/ANALYTICS.md#the-first-card): started, ready (with how it ended), shown and approved.
   const firstCardKey='worldlet-first-card-'+(data.workspaceId||data.workspace);
   let firstCardStarted=0,routinesKnown=!native?.dailyRoutines;
   const firstCardEvent=(event:string,dimensions:Record<string,string>={},duration='')=>window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event,dimensions,duration}}));
@@ -2320,7 +2320,7 @@ export function mountNotionWorld(data: World, native: any) {
      askItem:(id,text)=>{previewAttention({worldItemId:id});return voice?.ask(text,{origin:'user',displayText:text});},
      choose:id=>{if(id.startsWith('ongoing:'))return isOngoingThemeId(id.slice(8))?makeTheme(id.slice(8)):undefined;const page=itemPage(id);if(!page||!previewAttention({worldItemId:id}))return;return previewActions(page)[0]?.run();},
      itemFox:id=>{if(id.startsWith('ongoing:')){const theme=themesNow().find(t=>'ongoing:'+t.id===id);if(!theme)return null;return {say:theme.say,option:theme.option,turns:[]};}const page=itemPage(id);if(!page)return null;return {say:attentionPreviewData(page).suggestion,option:previewActions(page)[0]?.label||'',turns:voice?.threadOf?.('attention:'+id)||[]};},
-     // The Thing world (agent/base phoneApplets): the Things in this World with their lamps, what each is doing, the
+     // The Thing world (agent/app phoneApplets): the Things in this World with their lamps, what each is doing, the
      // world log, the widgets for now and each Thing's thread. A line said in a Thing's page opens it here first.
      askApplet:async(key,text)=>{
       let r=sections.find(s=>s.entity==='app'&&s.key===key);

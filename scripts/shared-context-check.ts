@@ -27,7 +27,7 @@ assert.deepEqual(defaultSourceChecks([],['notion'],100,[{provider:'notion',inter
 {
  // The host hands the Applet registrations to shared core instead of patching intervals itself.
  const {readFileSync}=await import('node:fs');
- const host=readFileSync(new URL('../platform/electron/src/modules/attention/center.ts',import.meta.url),'utf8');
+ const host=readFileSync(new URL('../platform/host/modules/attention/center.ts',import.meta.url),'utf8');
  assert.match(host,/core\('sourceChecksDefault',\{[^}]*\bregistrations\b/,'the Electron host passes registrations to sourceChecksDefault');
 }
 assert.equal(dueSourceCheck([paused],['gmail'],100,undefined,true),null,'first mail must not bypass pause');

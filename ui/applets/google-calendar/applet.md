@@ -13,7 +13,7 @@ Read your connected calendars, and keep your own events on this computer. Access
 
 Owner request 2026-10-06: Calendar matches Apple Calendar, and the person can add, change and delete events. Worldlet
 has no write access to a connected calendar, so these events live in this World only: the `calendar_events` table of
-world.sqlite (rules in `context/applets/calendar-events.ts`, host in `platform/electron/src/modules/applets/`). The
+world.sqlite (rules in `context/applets/calendar-events.ts`, host in `platform/host/modules/applets/`). The
 practice world keeps its events in memory for the session.
 
 - Day and Week are a time grid (`grid.ts`): an hour gutter, an all-day strip, overlapping events side by side, a

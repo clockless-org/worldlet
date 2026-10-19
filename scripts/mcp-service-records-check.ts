@@ -11,8 +11,8 @@ import {SERVICE_ACTIONS,SERVICE_PROVIDERS,SERVICE_TITLES} from '../contracts/ser
 import {MCP_SERVICE_RECORD_LIMITS,mcpServiceRecords,readServicePresetRead} from '../context/connectors/index.ts';
 import {channelDefaultGrants,serviceReadGrant,standingCallDecision} from '../agent/gate/grants.ts';
 import {resolveAction,worldActions} from '../agent/gate/gateway.ts';
-import {McpAccounts} from '../platform/electron/src/modules/sources/mcp-account.ts';
-import {McpSource,McpSourceAccess} from '../platform/electron/src/modules/sources/mcp-source.ts';
+import {McpAccounts} from '../platform/host/modules/sources/mcp-account.ts';
+import {McpSource,McpSourceAccess} from '../platform/host/modules/sources/mcp-source.ts';
 import {withTempDir} from './test-temp.ts';
 
 const NEW=['linear','todoist','supabase'];

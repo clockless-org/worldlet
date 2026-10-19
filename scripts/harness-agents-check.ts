@@ -4,11 +4,11 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import {appletAgentThread,harnessAgentInstructions,harnessService,hermesProfileModel,localHarnessInvocation,openClawAgentModel,openClawResponsesBody} from '../agent/gate/index.ts';
-import {hermesAgentsService,openClawAgentsService} from '../platform/electron/src/modules/agents/harness-agents.ts';
-import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/src/modules/agents/local-harness.ts';
-import {createHarnessAgents} from '../platform/electron/src/modules/companion/harness-agents.ts';
-import {AGENT} from '../platform/electron/src/host/services.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {hermesAgentsService,openClawAgentsService} from '../platform/host/modules/agents/harness-agents.ts';
+import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/host/modules/agents/local-harness.ts';
+import {createHarnessAgents} from '../platform/host/modules/companion/harness-agents.ts';
+import {AGENT} from '../platform/host/services.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
 import {withTempDir} from './test-temp.ts';
 
 // The person's own agents in an Applet (agent/gate/PORTABILITY.md#the-persons-own-agents-in-an-applet): the `agents`

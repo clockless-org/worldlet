@@ -7,9 +7,9 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import {connectorWhoMayUse,plainConnectorText} from '../context/connectors/index.ts';
 import {serviceGranted} from '../agent/gate/index.ts';
-import {createAgentAccess} from '../platform/electron/src/modules/agents/agent-access.ts';
-import {serviceReadDefaults,serviceReaders} from '../platform/electron/src/modules/agents/service-readers.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {createAgentAccess} from '../platform/host/modules/agents/agent-access.ts';
+import {serviceReadDefaults,serviceReaders} from '../platform/host/modules/agents/service-readers.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
 import {withTempDir} from './test-temp.ts';
 
 // The sentences.

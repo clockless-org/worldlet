@@ -9,11 +9,11 @@ import os from 'node:os';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {HARNESS_SERVICES,harnessService,MIGRATION_SOURCES,type MigrationSource} from '../agent/gate/index.ts';
-import {filesHistory} from '../platform/electron/src/modules/agents/agent-history.ts';
-import {writeSelection} from '../platform/electron/src/modules/agents/local-harness.ts';
-import {bringAgent,broughtTurnId} from '../platform/electron/src/modules/companion/migration.ts';
-import {createHistorySync,ownHarnessSession} from '../platform/electron/src/modules/companion/history-sync.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {filesHistory} from '../platform/host/modules/agents/agent-history.ts';
+import {writeSelection} from '../platform/host/modules/agents/local-harness.ts';
+import {bringAgent,broughtTurnId} from '../platform/host/modules/companion/migration.ts';
+import {createHistorySync,ownHarnessSession} from '../platform/host/modules/companion/history-sync.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
 
 for(const source of MIGRATION_SOURCES)assert.equal(harnessService(source,'history'),'files',source+' reads its history from its own files');
 // Every Harness that declares history reads it from its own files; one on another computer (`remote`) declares none.

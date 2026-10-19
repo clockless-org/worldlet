@@ -18,15 +18,15 @@ export const FILES=Object.freeze({
  webOpenStyle:'platform/web/page/open.css',
  modelSources:'contracts/model-sources.json',
  // The release hosts.
- channels:'platform/electron/distribution/Channels.json',
- updates:'platform/electron/distribution/Updates.json',
- analytics:'platform/electron/distribution/Analytics.json',
- macBuild:'platform/electron/distribution/mac/ci-build.sh',
- windowsInstaller:'platform/electron/distribution/windows/installer.nsi',
- updatesModule:'platform/electron/src/modules/shell/updates.ts',
- onboardingPaths:'platform/electron/src/checks/onboarding-paths.ts',
+ channels:'platform/desktop/distribution/Channels.json',
+ updates:'platform/desktop/distribution/Updates.json',
+ analytics:'platform/desktop/distribution/Analytics.json',
+ macBuild:'platform/desktop/distribution/mac/ci-build.sh',
+ windowsInstaller:'platform/desktop/distribution/windows/installer.nsi',
+ updatesModule:'platform/host/modules/shell/updates.ts',
+ onboardingPaths:'platform/desktop/src/checks/onboarding-paths.ts',
  // The phone release jobs (Play, TestFlight) build these projects.
- iosProject:'ios/',
- androidProject:'android/',
+ iosProject:'platform/ios/',
+ androidProject:'platform/android/',
 });
 export type PublicFile=keyof typeof FILES;

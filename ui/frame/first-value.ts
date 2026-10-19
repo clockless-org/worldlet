@@ -49,7 +49,7 @@ export function mountFirstValue({root,view,call,state:initial,arriving=false}){
  // starts the wait for a first item; `ending` is set once the tour ends without one.
  let focus='',waitingSince=0,ending=false,keeping=false;
  const mountedAt=Date.now();
- // The first card's steps, each reported once (agent/base/ANALYTICS.md#the-first-card).
+ // The first card's steps, each reported once (agent/app/ANALYTICS.md#the-first-card).
  const reported=new Set<string>();
  const firstCardStep=(event:string)=>{if(reported.has(event))return;reported.add(event);window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event,dimensions:{}}}));};
  // The step's main action is filled, a second choice quiet (owner request 2026-10-06; world-tour.ts).

@@ -6,7 +6,7 @@ the HUD and Fox. Google refuses a fresh account sign-in in Electron's own views.
 machine and account it accepts CEF 154 (#1089). Electron lacks Chrome's layer: `window.chrome` is
 empty and Chrome's passkey support is missing. Imitating that layer inside Electron is excluded.
 
-Electron's website views (`platform/electron/src/modules/applets/page.ts`) remain the fallback. They
+Electron's website views (`platform/host/modules/applets/page.ts`) remain the fallback. They
 serve wherever the engine is not built, and wherever `WORLDLET_WEB_ENGINE=electron` is set.
 
 ## Architecture
@@ -77,7 +77,7 @@ Electron main ──spawn, stdin/stdout──▶ Worldlet Web (CEF, windowless p
     (`src/frames_win.cc`). The engine's ordinary delayed tasks wake on the 15.6 ms system timer
     tick, which held a panel page at 50 to 59 frames a second, at the edge of what the engine check
     allows.
-- **Surface view** (`platform/electron/src/modules/applets/engine/surface*.ts`). This is a trusted,
+- **Surface view** (`platform/host/modules/applets/engine/surface*.ts`). This is a trusted,
   sandboxed view at the panel's rect; no website loads there.
   - It draws frames and the `<select>` popup widget onto canvases.
   - It forwards the person's input in page coordinates: mouse, wheel, keys with native key codes

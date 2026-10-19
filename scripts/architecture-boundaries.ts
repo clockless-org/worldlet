@@ -26,7 +26,7 @@ const allowed:Record<string,string[]>={
 };
 // Exact legacy edges, deliberately visible in review. No directory-wide exemption.
 const exceptions=new Map([
- ['website/analytics.ts -> platform/electron/distribution/Analytics.json','The website and the desktop app share one public analytics config.'],
+ ['website/analytics.ts -> platform/desktop/distribution/Analytics.json','The website and the desktop app share one public analytics config.'],
  
  ['platform/bridge/world-tool-runtime.ts -> ui/frame/index.ts','Host tool dispatcher invokes the public semantic World UI.'],
  ['platform/bridge/agent-client.ts -> ui/companion/index.ts','Presentation status copy is still exported by Companion.'],
@@ -82,6 +82,6 @@ function scan(dir:string){
 }
 export function checkRepository(){
  // The open-source export (scripts/oss-export.mjs) leaves out the hosted services, so a missing root is skipped.
- for(const dir of ['api','ui','agent','context','contracts','platform/bridge','platform/electron','platform/node','website','models','worker','harness'])if(fs.existsSync(dir))scan(dir);
+ for(const dir of ['api','ui','agent','context','contracts','platform/bridge','platform/host','platform/desktop','platform/server','platform/web','website','models','worker','harness'])if(fs.existsSync(dir))scan(dir);
  for(const edge of exceptions.keys())assert(used.has(edge)||!fs.existsSync(edge.split(' -> ')[0]),`Remove stale architecture exception: ${edge}`);
 }

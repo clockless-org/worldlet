@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {PUSH_BOX_PLACE,channelJoiner,channelPieces,boxPlace,openBox,pairKeys,readPairLink,readRoomFrame,roomEntry,sealBox,type PairKeys,type PhoneMessage} from '../platform/web/index.ts';
-import {createLocalRelay} from '../platform/electron/src/modules/shell/local-relay.ts';
-import {createPhoneRelay} from '../platform/electron/src/modules/shell/relay.ts';
+import {createLocalRelay} from '../platform/host/modules/shell/local-relay.ts';
+import {createPhoneRelay} from '../platform/host/modules/shell/relay.ts';
 import {memoryRoom} from './memory-room.ts';
 
 // The phone's pairing in the pairing room (platform/web/README.md#room): the computer's code says `m=room` and the computer
@@ -131,7 +131,7 @@ await until(()=>mac.status().state==='none','the computer forgets the pairing');
 ws.close();app.close();
 assert.equal(PUSH_BOX_PLACE,'push');
 
-// A direct line's frames (agent/base rtc.ts) go in pieces small enough for every browser and join back in order; one too
+// A direct line's frames (agent/app rtc.ts) go in pieces small enough for every browser and join back in order; one too
 // big is dropped whole, and the next one still joins. An `r` frame reads like the others.
 {
  const big='x'.repeat(300_000)+'é',pieces=channelPieces(big),join=channelJoiner();

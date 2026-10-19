@@ -4,10 +4,10 @@ import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {HARNESS_SERVICES,worldToolsCommands,isWorldToolsRegistrar,commandLine,commandReason,commandWords,connectionId,dotenvNames,harnessService,hermesConnectionCommand,hermesConnections,hermesMcpPrefixes,isConnectionId,maskSecrets,
  openClawConnectionCommand,openClawConnections,openClawMcpPrefixes,readConnectionAdd,withLastUse} from '../agent/gate/index.ts';
-import {harnessConnections,hermesConnectionsService,openClawConnectionsService} from '../platform/electron/src/modules/agents/harness-connections.ts';
-import type {HarnessEnvironment} from '../platform/electron/src/modules/agents/local-harness.ts';
-import {createHarnessConnections} from '../platform/electron/src/modules/companion/harness-connections.ts';
-import {AGENT} from '../platform/electron/src/host/services.ts';
+import {harnessConnections,hermesConnectionsService,openClawConnectionsService} from '../platform/host/modules/agents/harness-connections.ts';
+import type {HarnessEnvironment} from '../platform/host/modules/agents/local-harness.ts';
+import {createHarnessConnections} from '../platform/host/modules/companion/harness-connections.ts';
+import {AGENT} from '../platform/host/services.ts';
 import {connectionLine,connectionUseLine,showAgentConnections} from '../ui/frame/agent-connections.ts';
 import {withTempDir} from './test-temp.ts';
 

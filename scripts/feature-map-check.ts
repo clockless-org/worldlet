@@ -14,15 +14,15 @@ const COMPONENT_ROOTS=['ui','agent','context'].filter(root=>existsSync(root));
 const owner=new Map<string,string>(),problems:string[]=[];
 for(const row of rows){
  const feature=row.split('|')[1].trim();
- for(const [,dir] of row.matchAll(/`((?:ui|agent|context)\/[a-z-]+|platform\/electron\/src\/modules\/[a-z-]+(?:\.ts)?)\/?`/g)){
+ for(const [,dir] of row.matchAll(/`((?:ui|agent|context)\/[a-z-]+|platform\/host\/modules\/[a-z-]+(?:\.ts)?)\/?`/g)){
   if(owner.has(dir))problems.push(`${dir} is listed under ${owner.get(dir)} and ${feature}.`);
   owner.set(dir,feature);
  }
 }
 const featureOf=new Map(owner);
-for(const layer of [...COMPONENT_ROOTS,'platform/electron/src/modules'])for(const name of readdirSync(layer)){
+for(const layer of [...COMPONENT_ROOTS,'platform/host/modules'])for(const name of readdirSync(layer)){
  const dir=`${layer}/${name}`;
- if(layer!=='platform/electron/src/modules'&&!statSync(join(layer,name)).isDirectory())continue;
+ if(layer!=='platform/host/modules'&&!statSync(join(layer,name)).isDirectory())continue;
  if(name==='index.ts')continue;
  if(!owner.has(dir))problems.push(`${dir} belongs to no feature in docs/UI-CORE-PLATFORM.md#features.`);
  owner.delete(dir);

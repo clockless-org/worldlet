@@ -8,7 +8,7 @@ export function agentBrowserTarget(platform=process.platform,arch=process.arch){
  return platform==='win32'?'win32-x64':`${platform}-${arch==='arm64'?'arm64':'x64'}`;
 }
 /** Verified, executable driver in `.local/browser-driver` (the development host's lookup path,
- * platform/electron/src/resources.ts). Reuses the primary checkout's copy before downloading. */
+ * platform/host/resources.ts). Reuses the primary checkout's copy before downloading. */
 export async function cachedAgentBrowser(root:string,target=agentBrowserTarget()){
  const spec=JSON.parse(await readFile(path.join(root,'platform/browser/driver.json'),'utf8'));
  const {version}=spec,asset=spec.assets[target];

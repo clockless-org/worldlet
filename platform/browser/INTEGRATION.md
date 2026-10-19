@@ -7,11 +7,11 @@ YouTube opens youtube.com in this panel; its player and queue are Fox's tooling,
 <a id="native-browser"></a>
 ## Website views
 
-Website panels run on the [CEF website engine](../web-engine/README.md) (#1170). It is a separate process with Chrome's own layer, which Google's sign-in accepts where it refuses Electron's views (#1089). Each page renders windowless; the host draws its frames in a trusted surface view placed over the World view, at the rect the World page reserves. Input goes back to the engine (`platform/electron/src/modules/applets/device.ts`, `engine/`). Where the engine is not built, or with `WORLDLET_WEB_ENGINE=electron`, the panels are sibling `WebContentsView`s instead (`page.ts`), sandboxed with no preload or host bridge. Both engines keep one page contract, so every rule below holds on either. The panel follows the DOM-measured viewport; it does not launch an external browser window.
+Website panels run on the [CEF website engine](../web-engine/README.md) (#1170). It is a separate process with Chrome's own layer, which Google's sign-in accepts where it refuses Electron's views (#1089). Each page renders windowless; the host draws its frames in a trusted surface view placed over the World view, at the rect the World page reserves. Input goes back to the engine (`platform/host/modules/applets/device.ts`, `engine/`). Where the engine is not built, or with `WORLDLET_WEB_ENGINE=electron`, the panels are sibling `WebContentsView`s instead (`page.ts`), sandboxed with no preload or host bridge. Both engines keep one page contract, so every rule below holds on either. The panel follows the DOM-measured viewport; it does not launch an external browser window.
 
 On the CEF engine, website state lives in request contexts under `<library>/Browser/CEF`: `Website` for the personal world and `Practice` for the practice world. On Electron's views it lives in session partitions, `persist:website` for the personal world and `persist:website-practice` for the practice world, under `<library>/Browser/Electron/Partitions`. The two keep the same cookies, so a sign-in on one holds on the other (owner report 2026-10-08, [cookies](../web-engine/README.md#cookies)); other browser storage stays per engine. Release, main Dev and linked-worktree libraries stay separate. Sign-ins from the retired CEF profile (`Browser/Chromium/Default`) and earlier WebKit cookies/passwords are not carried over; people sign in again. Worldlet's API connector grants, sources and conversations are unchanged. The dedicated YouTube player is its own `WebContentsView` in the same website partition, independent of generic website panels.
 
-The YouTube Applet's official player and queue (`platform/electron/src/modules/applets/youtube.ts`, Fox's tooling) are not a website panel, and they stay on Electron.
+The YouTube Applet's official player and queue (`platform/host/modules/applets/youtube.ts`, Fox's tooling) are not a website panel, and they stay on Electron.
 - **Why.** The Applet holds no YouTube account (`ui/applets/youtube/panel.ts`, [Google OAuth review](../../docs/GOOGLE-OAUTH-REVIEW.md)), so the player is an Electron view in its own account-less session and plays only public links. The CEF engine's signed-in contexts would give it the person's account.
 - **youtube.com itself** runs in the panel on the engine, signed in once the person signs in there.
 
@@ -31,7 +31,7 @@ attaches through `webContents.debugger` to the selected page only (`page.ts`). T
 host owns no second browser command policy.
 
 The driver transport is local, authenticated and restricted to the selected page;
-it is not a general remote-debugging endpoint. `platform/electron/src/main.ts` removes
+it is not a general remote-debugging endpoint. `platform/desktop/src/main.ts` removes
 `--remote-debugging-port`, `--remote-debugging-pipe`, `--remote-debugging-address` and
 `--remote-allow-origins` from the launch command line in release and Dev alike, so no
 debugging port exists. The visible website view runs with background throttling off: Fox
@@ -52,7 +52,7 @@ scene Applet and every other Applet with a website) shows the page the person le
 its start page. The rule is shared: `agent/applets/page-resume.ts` decides, the Browser
 panel (`ui/applets/browser-device.ts`) applies it, and the host only keeps, shows and
 releases pages as the `browserShow`/`browserHide` requests say (`contracts/browser-surface.ts`;
-`platform/electron/src/modules/applets/device.ts`).
+`platform/host/modules/applets/device.ts`).
 
 - **Live page.** Leaving (Back to the World, another Applet, a dialog over the panel)
   keeps the page hidden with its media paused and muted. The most recently left Applets keep
@@ -66,7 +66,7 @@ releases pages as the `browserShow`/`browserHide` requests say (`contracts/brows
   (the World backup does not include browser storage).
 - **Memory pressure.** Electron has no memory-pressure event, so while a page is kept the
   host samples memory every 30 seconds (`PAGE_MEMORY` in `agent/applets/page-resume.ts`,
-  read by `platform/electron/src/modules/applets/memory.ts`): memory the system can hand out
+  read by `platform/host/modules/applets/memory.ts`): memory the system can hand out
   and the app's footprint, the working sets of `app.getAppMetrics()` plus the CEF engine's
   whole process tree (from `ps`; Electron's metrics leave it out). On macOS available memory
   comes from `vm_stat` (free, inactive, speculative and purgeable pages; Electron's free
@@ -109,7 +109,7 @@ pages on Electron is pending.
 
 Every website page opens in Focus (owner request 2026-10-05). The rule is shared: `agent/applets/page-focus.ts`
 decides what Focus does on a page (`pageFocusPlan`), the host applies it on each page load
-(`platform/electron/src/modules/applets/device.ts`) by evaluating `browser/page-focus.js`
+(`platform/host/modules/applets/device.ts`) by evaluating `browser/page-focus.js`
 (`platform/bridge/page-focus.ts`, bundled with Readability by the native UI build) in the page's isolated world, and
 the Browser panel shows the switch after Back (`ui/applets/browser-device.ts`).
 
@@ -152,7 +152,7 @@ The rule is shared: `agent/applets/picture-in-picture.ts` decides which Applets 
 its size and where it may go; the Browser panel (`ui/applets/browser-device.ts`, with the offer
 and the window's frame in `ui/applets/picture-in-picture.ts`) applies it; the host only places,
 shows and hides the page as `browserPip` says (`contracts/browser-surface.ts`;
-`platform/electron/src/modules/applets/device.ts`) and runs the shared page script.
+`platform/host/modules/applets/device.ts`) and runs the shared page script.
 
 - **Offer.** Applets whose own view is their website (`fullView.kind: 'web'`: YouTube, TikTok,
   X, Netflix, Twitch, Browser and the rest), while the host reports a playing video: the
@@ -174,7 +174,7 @@ shows and hides the page as `browserPip` says (`contracts/browser-surface.ts`;
 - **One sound at a time.** When a page starts audible media (the person plays a video in X, for
   example), the page playing before it pauses, so the window never talks over the Applet the
   person opened. Chromium does this itself: the host enables its audio focus
-  (`AudioFocusEnforcement`, `platform/electron/src/main.ts`). Muted autoplay, short
+  (`AudioFocusEnforcement`, `platform/desktop/src/main.ts`). Muted autoplay, short
   sounds (which only lower the others) and WebAudio cues such as the World's take no part.
 - **One window.** Choosing it on another page, for example X's video while YouTube is in the
   window, moves the window to that page; the previous page is left like any page the person
@@ -305,10 +305,10 @@ hides the page as before. The Browser panel (`ui/applets/browser-device.ts`) app
   Moving around the World therefore does not stop Fox. Opening another website Applet does: that
   Applet's page is the person's.
 - **Beside the desktop Companion.** Closing or minimizing the World window stops website pages
-  ([desktop Companion](../electron/COMPANION.md)), except Fox's own page: one out of sight, or one
+  ([desktop Companion](../desktop/COMPANION.md)), except Fox's own page: one out of sight, or one
   Fox is driving in the panel.
   - That page moves into a window of its own beside the Companion's window, placed by
-    `desktopTaskPictureInPicturePlacement` (`platform/electron/src/modules/applets/task-window.ts`).
+    `desktopTaskPictureInPicturePlacement` (`platform/host/modules/applets/task-window.ts`).
     It keeps its size there, and Fox keeps working.
   - While the World is away, the panel's layouts only tell the host whether Fox is working; Fox's
     steps card follows the page.
@@ -363,7 +363,7 @@ Users authenticate directly in the visible website. Safari/Chrome logins do not 
 
 **Google sign-in on Electron's views** (owner 2026-10-08: "先不自己编，做最佳实现"). Google refuses account sign-in in Electron's views (#1089) and accepts it on the CEF engine. When a main-frame navigation on Electron's views starts at `accounts.google.com` (`googleSignInPage`, `agent/applets/sign-in.ts`), the host reopens the page on the engine before Google judges the browser. A page's own sign-in reopens at Google's address, so the return to the site finishes there. A sign-in popup (Sign in with Google on X), whose opener waits for it, reopens its opener page on the engine instead, and a notice asks the person to choose Sign in with Google again. For three minutes afterwards the page's video does not move it back to Electron's views. When it does move back, the sign-in goes along ([cookies](../web-engine/README.md#cookies)). Without a CEF build for the host, Google's refusal page and the system-browser offer stay as before.
 
-**Saved sign-ins** (owner request 2026-10-07; `agent/applets/saved-logins.ts`, `platform/bridge/login-watch.js`, `platform/electron/src/modules/applets/logins.ts`). Chrome's password manager and autofill belong to its `//chrome` layer, which the windowless CEF panel does not draw, so the World keeps sign-ins itself. Every website page's isolated world gets a small watch, the built-in browser's own. It reports three things: that the page shows a sign-in form, an account typed on its own step (an email page before the password page, kept by the host for five minutes), and the account and password when the person signs in. A sign-in is a trusted submit, Enter, or a press on a form's submit button or a button named like Log in, Sign in, Next or 登录, with a password typed. A form-less dialog such as Pokémon Showdown's counts; a show-password eye and one-time codes do not. A sign-in is saved without asking (owner 2026-10-08: "password 不用问 自动存"), and a changed password replaces the saved one; a short notice says **Password saved for AshK on play.pokemonshowdown.com**. On a site's sign-in form, a button per saved account (**Fill in AshK**) fills it in, as typing would. Passwords are encrypted with the system keychain's key (Electron `safeStorage`) into the World's `saved-logins` records. Only the host decrypts them, to fill a page or compare a new sign-in. They never reach the World UI, Fox (every `login*` browser command refuses an agent caller) or the recordings. Account sign-in hosts (`SIGN_IN_HOSTS`) stay uninspected, and the practice world keeps none. Settings › General lists each saved site and account, without the password, with **Delete**. A record another computer's keychain made cannot be opened, and filling it says to delete it. Worldlet's system-browser OAuth grant for Mail/Calendar is independent. See [website sign-in](INTEGRATION.md#sign-in-acceptance).
+**Saved sign-ins** (owner request 2026-10-07; `agent/applets/saved-logins.ts`, `platform/bridge/login-watch.js`, `platform/host/modules/applets/logins.ts`). Chrome's password manager and autofill belong to its `//chrome` layer, which the windowless CEF panel does not draw, so the World keeps sign-ins itself. Every website page's isolated world gets a small watch, the built-in browser's own. It reports three things: that the page shows a sign-in form, an account typed on its own step (an email page before the password page, kept by the host for five minutes), and the account and password when the person signs in. A sign-in is a trusted submit, Enter, or a press on a form's submit button or a button named like Log in, Sign in, Next or 登录, with a password typed. A form-less dialog such as Pokémon Showdown's counts; a show-password eye and one-time codes do not. A sign-in is saved without asking (owner 2026-10-08: "password 不用问 自动存"), and a changed password replaces the saved one; a short notice says **Password saved for AshK on play.pokemonshowdown.com**. On a site's sign-in form, a button per saved account (**Fill in AshK**) fills it in, as typing would. Passwords are encrypted with the system keychain's key (Electron `safeStorage`) into the World's `saved-logins` records. Only the host decrypts them, to fill a page or compare a new sign-in. They never reach the World UI, Fox (every `login*` browser command refuses an agent caller) or the recordings. Account sign-in hosts (`SIGN_IN_HOSTS`) stay uninspected, and the practice world keeps none. Settings › General lists each saved site and account, without the password, with **Delete**. A record another computer's keychain made cannot be opened, and filling it says to delete it. Worldlet's system-browser OAuth grant for Mail/Calendar is independent. See [website sign-in](INTEGRATION.md#sign-in-acceptance).
 
 ## Verification
 

@@ -7,9 +7,9 @@ import os from 'node:os';
 import path from 'node:path';
 import {MEETING_TRANSCRIPT,TranscriptWindows,pcmLevel,transcriptText} from '../context/applets/meeting-transcript.ts';
 import {webTranscript,type WebRecord} from '../agent/applets/index.ts';
-import {MeetingTranscriber} from '../platform/electron/src/modules/applets/meeting-transcript.ts';
-import {WebRecorder,readRecordings} from '../platform/electron/src/modules/applets/recorder.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {MeetingTranscriber} from '../platform/host/modules/applets/meeting-transcript.ts';
+import {WebRecorder,readRecordings} from '../platform/host/modules/applets/recorder.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
 import {installMeetingAudio} from '../platform/bridge/meeting-audio.js';
 import {fakeMedia,launchTestBrowser} from './browser-test.ts';
 
@@ -146,11 +146,11 @@ const silence=(seconds:number)=>new Int16Array(Math.round(seconds*RATE));
 // Wiring -------------------------------------------------------------------------------------------
 {
  const read=(file:string)=>fs.readFileSync(new URL('../'+file,import.meta.url),'utf8');
- const device=read('platform/electron/src/modules/applets/device.ts');
+ const device=read('platform/host/modules/applets/device.ts');
  assert.match(device,/if\(agent\)throw new WorldletError\('Only the person can transcribe a meeting/,'Fox can never start a transcript');
  assert.match(device,/private close\(\)\{\n  (this\.closeCopy\(\);)?this\.endTranscript\(\);/,'closing the call ends its transcript');
  assert.match(device,/private park\(live\?:string\[\]\)\{\n  (this\.closeCopy\(\);)?this\.endTranscript\(\);/,'leaving the call ends its transcript');
- const page=read('platform/electron/src/modules/applets/engine/page.ts');
+ const page=read('platform/host/modules/applets/engine/page.ts');
  // Every website page (a meeting page among them) starts blank and is loaded through load().
  assert.match(page,/const deferred=!!parsed&&publicPage\(parsed\);\n  const start='about:blank';/,'a meeting page starts blank');
  assert.match(page,/if\(deferred\)this\.load\(parsed!\.href\);/,'its first load goes through load()');
