@@ -165,11 +165,11 @@ npm run package        # 为当前系统打包桌面 App（不签名）
 | `ui/` | 共享渲染和交互：World、Applet、Fox、Attention Center |
 | `agent/` | 谁来做事：Fox、任务、Agent 和门禁（与平台无关的规则） |
 | `context/` | World 知道的一切：记录、存储和连接器（与平台无关的规则） |
-| `platform/` | Electron 宿主和 Node 宿主（无显示器）：系统集成、浏览器引擎、受控执行 |
+| `platform/` | World 运行的地方：共享宿主 Host、Desktop（Electron）、Server（Node，无显示器）、Web（浏览器页面和配对）以及手机伴侣（`platform/ios/`、`platform/android/`）：系统集成、浏览器引擎、受控执行 |
 | `harness/` | Agent 后端和参考 Harness 适配器 |
 | `contracts/` | 宿主和 Agent 共用的接口与数据形状 |
 | `resources/` | 世界、风格、美术、字体和媒体 |
-| `ios/`、`android/` | 手机伴侣 |
+| `api/` | 运维仓库使用的公开入口 |
 | `scripts/`、`docs/` | 构建、校验和贡献指南 |
 
 Worldlet 只有一个主题：Village（村庄）。主题就是静态图片、声音和 JSON（[主题契约](resources/themes/CONTRACT.md)），Worldlet 据此画出会动的 World。没有主题选择器。

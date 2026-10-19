@@ -165,11 +165,11 @@ No account, secret or hosted service is needed to build. Checks: `npm run check:
 | `ui/` | Shared rendering and interaction: World, Applets, Fox, Attention Center |
 | `agent/` | Who does the work: Fox, Tasks, Agents and the Gate (platform-independent rules) |
 | `context/` | Everything the World knows: records, storage and Connectors (platform-independent rules) |
-| `platform/` | The Electron host and the Node host (no display): OS integration, browser engine, controlled execution |
+| `platform/` | Where the World runs: the shared Host, Desktop (Electron), Server (Node, no display), Web (the browser page and pairing) and the phone companions (`platform/ios/`, `platform/android/`): OS integration, browser engine, controlled execution |
 | `harness/` | Agent backends and the reference Harness adapter |
 | `contracts/` | Shared Host/Agent interfaces and data shapes |
 | `resources/` | Worlds, styles, artwork, fonts and media |
-| `ios/`, `android/` | Phone companions |
+| `api/` | The public entry points the operations repository uses |
 | `scripts/`, `docs/` | Build, validation and contributor guidance |
 
 Worldlet has one theme, the Village. A theme is static pictures, sounds and JSON ([Theme contract](resources/themes/CONTRACT.md)); Worldlet draws the animated World from it. There is no theme picker.

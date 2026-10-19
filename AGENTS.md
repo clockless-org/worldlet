@@ -21,7 +21,7 @@ Use placeholders instead: `alex@example.com`, `example.com`, `192.0.2.10` (or `1
 
 ## Architecture
 
-- Follow [the UI/Core/Platform standard](docs/UI-CORE-PLATFORM.md): shared Web UI, pure Core decisions, native IO adapters; the trusted World and external sites are separate Chromium surfaces. CDP never substitutes for authorization or ordinary component interfaces.
+- Follow [the layer standard](docs/UI-CORE-PLATFORM.md): shared Web UI, pure Agent and Context decisions, native IO adapters; the trusted World and external sites are separate Chromium surfaces. CDP never substitutes for authorization or ordinary component interfaces.
 - Preserve five runtime layers: UI → Agent and Context → Platform → Harness → Models/Services. `contracts/` is a cross-layer interface package, not a sixth layer.
 - Worldlet's scope is the upper three layers. Put most product behavior in shared `ui/` and pure `agent/` and `context/`; keep native Platform adapters thin (few independent product decisions). Harness and model concerns belong to the Harness.
 - Before adding native branching, state transitions, schedules, retry or cache policy, validation, prompts or status copy, look for a shared owner. Native code supplies OS facts and permission results, executes shared decisions and performs browser, process and file IO.
