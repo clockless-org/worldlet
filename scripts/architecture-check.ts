@@ -19,7 +19,8 @@ assert.throws(()=>checkEdge('context/items/example.ts','core/index.ts'),/Forbidd
 assert.throws(()=>checkEdge('agent/tasks/example.ts','core/index.ts'),/Forbidden/);
 assert.throws(()=>checkEdge('ui/hud/example.ts','core/tasks/index.ts'),/Forbidden/);
 checkEdge('agent/tasks/example.ts','context/items/index.ts');
-checkEdge('platform/electron/src/example.ts','core/index.ts');
+checkEdge('platform/electron/src/example.ts','agent/index.ts');
+assert.throws(()=>checkEdge('platform/electron/src/example.ts','core/tasks/index.ts'),/Forbidden/);
 assert.throws(()=>checkEdge('ui/hud/example.ts','harness/example/agent.ts'),/Forbidden/);
 assert.throws(()=>checkSource('contracts/example.ts',"import fs from 'node:fs'"),/pure layer/);
 assert.throws(()=>checkSource('agent/agent/example.ts','process.env.TOKEN'),/host global/);

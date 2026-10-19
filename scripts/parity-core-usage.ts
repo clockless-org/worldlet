@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import {readdirSync,readFileSync} from 'node:fs';
 import path from 'node:path';
 const baselineFile='contracts/fixtures/parity/host-core-usage.json';
-const operations=new Set([...readFileSync('core/index.ts','utf8').matchAll(/operation==='([A-Za-z]+)'/g)].map(match=>match[1]));
+const operations=new Set([...readFileSync('agent/index.ts','utf8').matchAll(/operation==='([A-Za-z]+)'/g)].map(match=>match[1]));
 const sources=(dir:string):string[]=>readdirSync(dir,{withFileTypes:true}).flatMap(entry=>{
  const file=path.join(dir,entry.name);
  if(entry.isDirectory())return sources(file);

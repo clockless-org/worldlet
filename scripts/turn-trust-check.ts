@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {type HostTurnTrust,turnBrowserAdmission,turnTrustInherit,turnTrustObserve,turnWriteAdmission,turnWriteNotice,worldItemRestore,worldItemSnapshot} from '../agent/agent/turn-trust.ts';
-import {invoke as invokeSharedCore} from '../core/index.ts';
+import {invoke as invokeSharedCore} from '../agent/index.ts';
 import {browserElementPolicy,browserEffectDecision,browserFinalStep,browserFollowThrough} from '../context/browser/agent-browser.ts';
 
 const fold=(events:object[])=>events.reduce<HostTurnTrust>((state,event)=>turnTrustObserve(state,event),{untrusted:false,sources:[]});

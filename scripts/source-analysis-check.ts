@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {invoke} from '../core/index.ts';
+import {invoke} from '../agent/index.ts';
 import {contextChunks,mergeSourceAnalysis} from '../context/context/index.ts';
 const fixtures=JSON.parse(readFileSync(new URL('./fixtures/source-analysis.json',import.meta.url),'utf8'));
 for(const fixture of fixtures){

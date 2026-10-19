@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {recallCompanion} from '../agent/companion/companion-recall.ts';
 import {companionPrompt} from '../agent/companion/companion-prompt.ts';
-import {invoke} from '../core/index.ts';
+import {invoke} from '../agent/index.ts';
 import type {CompanionArchive} from '../contracts/companion.ts';
 const archive:CompanionArchive={format:'worldlet.companion',version:1,identity:{id:'fixture',name:'Fox',createdAt:'2026-09-24T00:00:00Z'},personality:'Helpful',memoryAuthority:'worldlet',memories:[{id:'memory',kind:'user',text:'👩‍💻'.repeat(4000),source:'fixture'}],conversations:Array.from({length:8},(_,i)=>({id:'turn-'+i,role:'user',session:'one',text:'Meeting '+i,createdAt:'2026-09-24T00:00:00Z'}))};
 const original=JSON.stringify(archive);
