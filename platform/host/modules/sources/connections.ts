@@ -1,3 +1,5 @@
+import {connectorWriter} from '../../../../context/connectors/index.ts';
+import {contextReader} from '../../../../context/store/index.ts';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -117,9 +119,9 @@ export function createConnections(ctx:SourcesContext){
   try{
    for(const file of files){
     const resolved=path.resolve(file);
-    if(store.ingest({title:path.basename(resolved,path.extname(resolved)),text:readText(resolved),origin:'file',externalId:resolved,connectionID,commit:false}))imported+=1;
+    if(connectorWriter(store.libraryContext(),'file').write('sources',{operation:'ingest',with:{title:path.basename(resolved,path.extname(resolved)),text:readText(resolved),origin:'file',externalId:resolved,connectionID,commit:false}}))imported+=1;
     const id=digest('file:'+resolved);
-    if(store.state.sources.some((s:Row)=>s.id===id&&s.enabled!==false))ids.push(id);
+    if(contextReader(store.libraryContext()).bodies('sources').some((s:Row)=>s.id===id&&s.enabled!==false))ids.push(id);
    }
   }finally{if(imported)store.changed();}
   return {imported,ids};

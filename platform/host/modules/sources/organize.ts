@@ -1,3 +1,4 @@
+import {contextReader,contextWriter} from '../../../../context/store/index.ts';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -33,13 +34,14 @@ export function createOrganizer(ctx:SourcesContext){
   return result.message;
  }
  const validate=(items:Row[],chunk:Row,text:string)=>core<Row[]>('sourceAnalysisValidate',{items,sources:[{id:chunk.id,revision:chunk.revision}],originals:{[chunk.id]:text},themes:THEMES});
- const needsOrganization=(source:Row)=>source.enabled!==false&&!store.state.knowledge.some((k:Row)=>k.sourceId===source.id&&k.sourceRevision===source.revision&&k.activityVersion===1);
- const current=(source:Row)=>store.state.sources.some((s:Row)=>s.id===source.id&&s.revision===source.revision&&s.enabled!==false);
+ const library=()=>contextReader(store.libraryContext());
+ const needsOrganization=(source:Row)=>source.enabled!==false&&!library().bodies('knowledge').some((k:Row)=>k.sourceId===source.id&&k.sourceRevision===source.revision&&k.activityVersion===1);
+ const current=(source:Row)=>library().bodies('sources').some((s:Row)=>s.id===source.id&&s.revision===source.revision&&s.enabled!==false);
 
  async function generate(){
   if(store.busy||store.organizing)return;
   if(!store.state.cloudConsent){store.error='Ask Fox to allow selected context before organizing your private sources.';return;}
-  const selected=store.state.sources.filter((s:Row)=>s.enabled!==false);
+  const selected=library().bodies('sources').filter((s:Row)=>s.enabled!==false);
   if(!selected.length){store.status='No sources need organizing.';return;}
   const pending=selected.filter(needsOrganization);
   if(!pending.length&&store.state.layout){store.status='No source changes. Your world is up to date.';return;}
@@ -50,7 +52,7 @@ export function createOrganizer(ctx:SourcesContext){
     check();
     if(!store.state.cloudConsent)throw new WorldletError('Context processing is paused.');
     if(!current(source))continue;
-    const original=store.original(source.id);
+    const original=library().query<Row>('sources','original',{id:source.id});
     const chunks=core<string[]>('contextChunks',{text:String(original.text??''),limit:24000});
     if(!Array.isArray(chunks))throw new WorldletError('Invalid source chunks.');
     const parsed:Row[]=[];
@@ -68,7 +70,7 @@ export function createOrganizer(ctx:SourcesContext){
       }catch{}
      }
      store.status=`Organizing ${sourceIndex+1}/${pending.length} · Chunk ${index+1}/${chunks.length}`;store.state.lastJob=store.status;
-     const request=core('sourceAnalysisRequest',{sourceId:chunk.id,title:source.title,text,now:new Date().toISOString().replace(/\.\d{3}Z$/,'Z'),topics:store.state.knowledge.map((k:Row)=>k.topic)});
+     const request=core('sourceAnalysisRequest',{sourceId:chunk.id,title:source.title,text,now:new Date().toISOString().replace(/\.\d{3}Z$/,'Z'),topics:library().bodies('knowledge').map((k:Row)=>k.topic)});
      const bytes=await analyze(JSON.stringify(request));
      if(!store.state.cloudConsent)throw new WorldletError('Context processing is paused.');
      const valid=validate(JSON.parse(bytes).items??[],chunk,text);
@@ -79,9 +81,9 @@ export function createOrganizer(ctx:SourcesContext){
     const merged=core('sourceAnalysisMerge',{source:{id:source.id,revision:source.revision},chunks:parsed});
     if(merged==null||!current(source))continue;
     // Each validated source checkpoints independently; restart reuses completed chunks.
-    store.state.knowledge=[...store.state.knowledge.filter((k:Row)=>k.sourceId!==source.id),merged];store.changed();
+    contextWriter(store.libraryContext(),'fox').write('knowledge',{save:[merged]});
    }
-   const analyzed=store.state.knowledge.filter((k:Row)=>selected.some((s:Row)=>s.id===k.sourceId&&s.revision===k.sourceRevision));
+   const analyzed=library().bodies('knowledge').filter((k:Row)=>selected.some((s:Row)=>s.id===k.sourceId&&s.revision===k.sourceRevision));
    if(analyzed.length!==selected.length)throw new WorldletError('Some sources still need organizing. The layout has not been updated.');
    store.status='Designing your world…';store.state.lastJob=store.status;
    // Layout needs theme aggregates, not another upload of every original or fact.
@@ -108,7 +110,7 @@ export function createOrganizer(ctx:SourcesContext){
   organizeSources(body:Row){
    if(store.sampleEnabled()||body.consent!==true)throw new WorldletError('Choose whether to allow cloud processing first.');
    if(store.busy||!store.writable)throw new WorldletError('Please wait for the current operation to finish.');
-   if(!store.state.sources.some((s:Row)=>s.enabled!==false))throw new WorldletError('Add a source before organizing your world.');
+   if(!library().bodies('sources').some((s:Row)=>s.enabled!==false))throw new WorldletError('Add a source before organizing your world.');
    store.setCloudConsent(true);
    if(!running){cancelled=false;running=generate().catch(error=>ctx.host.diagnostics.record(error,'organizeSources')).finally(()=>{running=null;});}
    return {ok:true};

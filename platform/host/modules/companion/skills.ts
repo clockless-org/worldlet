@@ -1,3 +1,4 @@
+import {contextReads,ledgerContext} from '../../store/context-storage.ts';
 import {AGENT,type AgentService} from '../../services.ts';
 import type {Host,Row} from '../../types.ts';
 import {WorldletError} from '../../files.ts';
@@ -24,10 +25,10 @@ export function createFoxSkills(host:Host,{now=()=>Date.now()}:{now?:()=>number}
  const decided=(ledger:Shelf):Record<string,string>=>{const value=ledger.setting(KEY)?.decided;return value&&typeof value==='object'&&!Array.isArray(value)?value:{};};
  const decide=(ledger:Shelf,id:string,choice:'saved'|'declined')=>{const all=Object.entries({...decided(ledger),[id]:choice}).slice(-200);ledger.saveSetting(KEY,{decided:Object.fromEntries(all)});};
  /** Every skill the World keeps a copy of (each Agent's brought ones and Fox's own), by its SKILL.md. */
- const worldCopy=(ledger:Shelf)=>ledger.broughtStores().flatMap(value=>Object.entries(value.skills).flatMap(([folder,files])=>typeof files?.['SKILL.md']==='string'?[skillFrontmatter(files['SKILL.md'],folder)]:[]));
+ const worldCopy=(ledger:Shelf)=>contextReads(ledgerContext(ledger),'brought-agents').broughtStores().flatMap(value=>Object.entries(value.skills).flatMap(([folder,files])=>typeof files?.['SKILL.md']==='string'?[skillFrontmatter(files['SKILL.md'],folder)]:[]));
  /** The turns Fox's cards hold (ui/companion/fox-thread.ts), as the page saved them. */
  const turns=(ledger:Shelf):SkillTurn[]=>{
-  const row=ledger.companionViews().find(value=>value?.key===CARDS);
+  const row=contextReads(ledgerContext(ledger),'chat-by-place').companionViews().find(value=>value?.key===CARDS);
   return (Array.isArray(row?.entries)?row.entries:[]).map((e:Row)=>({id:String(e?.id??''),user:typeof e?.user==='string'?e.user:'',steps:Array.isArray(e?.steps)?e.steps.filter((s:unknown)=>typeof s==='string'):[],status:String(e?.status??''),at:Number(e?.at)||0}));
  };
  async function list():Promise<Row> {
@@ -35,7 +36,7 @@ export function createFoxSkills(host:Host,{now=()=>Date.now()}:{now?:()=>number}
   if(!own())return {skills:[],proposals:[],saves:'world',agent:title};
   const ledger=shelf();
   const mine=skills?await skills.list().catch(error=>{host.diagnostics.record(error,'harnessSkills');return [];}):[];
-  const rows=worldSkills(mine,worldCopy(ledger),skillLastRuns(ledger.skillTurns()));
+  const rows=worldSkills(mine,worldCopy(ledger),skillLastRuns(contextReads(ledgerContext(ledger),'conversations').skillTurns()));
   const proposals=skillRepeats(turns(ledger),now(),{known:new Set(rows.map(row=>row.name.toLowerCase())),decided:new Set(Object.keys(decided(ledger)))});
   return {skills:rows,proposals,saves:skills?.save?'agent':'world',agent:title};
  }
@@ -46,7 +47,7 @@ export function createFoxSkills(host:Host,{now=()=>Date.now()}:{now?:()=>number}
   const draft={name:proposal.name,description:proposal.description,body:proposal.body},problem=skillDraftProblem(draft);
   if(problem||!migrationSkillPath(draft.name,'SKILL.md'))throw new WorldletError(problem??'That skill name cannot be saved.');
   // The World's copy first, so changing Agents loses none.
-  const ledger=shelf(),fox=ledger.broughtStores().find(value=>value.source===OWN);
+  const ledger=shelf(),fox=contextReads(ledgerContext(ledger),'brought-agents').broughtStores().find(value=>value.source===OWN);
   ledger.replaceBrought(OWN,{...fox?.skills,[draft.name]:{'SKILL.md':skillMarkdown(draft)}},fox?.routines??[]);
   decide(ledger,proposal.id,'saved');
   const skills=service(),name=agent()?.harness?.title??'Your Agent';

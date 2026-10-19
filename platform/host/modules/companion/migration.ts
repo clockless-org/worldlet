@@ -1,10 +1,11 @@
+import {contextChanges,contextReads,ledgerContext} from '../../store/context-storage.ts';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {MIGRATION_SOURCES,MIGRATION_SOURCE_TITLES,migrationMemoryNote,migrationNotesSession,migrationSession,migrationSkillMarkdown,migrationSkillName,migrationSkillPath,openClawAgentSkill,openClawChannelPrompts,openClawConversationSkill,openClawPromptFor,openClawRoutine,
  type MigrationRoutine,type MigrationSource} from '../../../../agent/gate/index.ts';
-import {dailyNoteArtifacts,journalOrigin,orderArtifacts,readArtifact} from '../../../../context/store/index.ts';
+import {contextReader,contextWriter,dailyNoteArtifacts,journalOrigin,orderArtifacts,readArtifact} from '../../../../context/store/index.ts';
 import {ensureDirectory,isLink,isoSeconds,writeAtomic} from '../../files.ts';
 import {readClaudeCode,readCodex,readOwnHermes,readPi,type AgentHistory,type BroughtSkill} from '../agents/agent-files.ts';
 import {readOpenClaw,type OpenClawData} from '../agents/openclaw-files.ts';
@@ -48,7 +49,7 @@ function moveLegacyBrought(world:BroughtShelf){
   try{
    if(isLink(file)||!fs.existsSync(file))continue;
    const value=JSON.parse(fs.readFileSync(file,'utf8'));
-   if(value?.version===1&&value.source===source&&value.skills&&typeof value.skills==='object'&&Array.isArray(value.routines))world.replaceBrought(source,value.skills,value.routines);
+   if(value?.version===1&&value.source===source&&value.skills&&typeof value.skills==='object'&&Array.isArray(value.routines))contextChanges(ledgerContext(world),'agent','brought-agents').replaceBrought(source,value.skills,value.routines);
    fs.renameSync(file,file+'.before-database');
   }catch{}
  }
@@ -56,7 +57,7 @@ function moveLegacyBrought(world:BroughtShelf){
 /** Each Agent's skills and routines kept in the World. */
 export function readBrought(world:BroughtShelf):BroughtStore[] {
  moveLegacyBrought(world);
- return world.broughtStores().flatMap(value=>(MIGRATION_SOURCES as readonly string[]).includes(value.source)?[{version:1 as const,source:value.source as MigrationSource,skills:value.skills,routines:value.routines as MigrationRoutine[]}]:[]);
+ return contextReads(ledgerContext(world),'brought-agents').broughtStores().flatMap(value=>(MIGRATION_SOURCES as readonly string[]).includes(value.source)?[{version:1 as const,source:value.source as MigrationSource,skills:value.skills,routines:value.routines as MigrationRoutine[]}]:[]);
 }
 // The Harness copy carries a digest of the World copy it was made from.
 const MARKER='.worldlet-brought';
@@ -186,13 +187,14 @@ function journalNotes(world:BroughtShelf,source:MigrationSource,notes:{date:stri
   idFor:date=>'art-'+crypto.createHash('sha256').update(source+'\u0000daily-note\u0000'+date).digest('hex').slice(0,12),
   at:date=>{const [y,m,d]=date.split('-').map(Number);return Math.floor(new Date(y,m-1,d,12).getTime()/1000);}});
  const ids=new Set(pages.map(page=>page.id));
- const kept=world.artifactRows().flatMap(row=>{const artifact=readArtifact(row);return artifact?[artifact]:[];});
+ const kept=contextReader(ledgerContext(world)).bodies('artifacts').flatMap(row=>{const artifact=readArtifact(row);return artifact?[artifact]:[];});
  const earlier=kept.filter(a=>!ids.has(a.id)&&a.origin.type==='conversation'&&a.origin.place===place&&journalOrigin(a)==='Daily note').map(a=>a.id);
  const {forget}=orderArtifacts([...pages,...kept.filter(a=>!ids.has(a.id)&&!earlier.includes(a.id))]);
  const gone=[...earlier,...forget];
  if(!pages.length&&!gone.length)return;
- world.saveArtifacts(pages.filter(page=>!forget.includes(page.id)) as unknown as Row[],gone);
- if(gone.length)world.deleteArtifactPages?.(gone);
+ const made=contextWriter(ledgerContext(world),'agent');
+ made.write('artifacts',{save:pages.filter(page=>!forget.includes(page.id)) as unknown as Row[],forget:gone});
+ if(world.deleteArtifactPages)made.remove('artifact-pages',gone);
 }
 
 /** `world`: the World's database, which keeps the skills and routines. */
@@ -223,7 +225,7 @@ export async function bringAgent(source:MigrationSource,{companion,world,hermesH
  for(const result of data.routines){if('routine' in result)routines.push(result.routine);else stayed.push({name:result.name,reason:result.reason});}
  // The World keeps them first; Fox's Harness gets a copy.
  const entry:BroughtStore={version:1,source,skills,routines};
- if(world){try{moveLegacyBrought(world);world.replaceBrought(source,skills,routines);}catch{partial=true;}}
+ if(world){try{moveLegacyBrought(world);contextChanges(ledgerContext(world),'agent','brought-agents').replaceBrought(source,skills,routines);}catch{partial=true;}}
  const placed=await placeBrought(entry,{hermesHome,importRoutines});
  partial||=placed.partial;stayed.push(...placed.stayed);
  const created=placed.routines,placedSkills=placed.skills;

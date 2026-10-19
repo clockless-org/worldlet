@@ -1,3 +1,4 @@
+import {contextReads,ledgerContext} from '../../store/context-storage.ts';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -42,7 +43,7 @@ import {setTimeout as sleep} from 'node:timers/promises';
 function knowledgeOf(profile:Row,ledger:{companionCounts():Record<string,{turns:number;notes:number}>;broughtStores():{source:string;skills:Record<string,Record<string,string>>;routines:Row[]}[]}|null){
  const memories=(profile.memories??[]).filter((m:Row)=>typeof m.text==='string'&&m.text.trim()).map((m:Row)=>({kind:String(m.kind),text:characterPrefix(String(m.text),20000),source:String(m.source??'')}));
  if(!ledger)return {memories,conversations:0,brought:[]};
- const counts=ledger.companionCounts(),stores=new Map(ledger.broughtStores().map(value=>[value.source,value]));
+ const counts=contextReads(ledgerContext(ledger),'conversations').companionCounts(),stores=new Map(contextReads(ledgerContext(ledger),'brought-agents').broughtStores().map(value=>[value.source,value]));
  const brought=[...new Set([...Object.keys(counts),...stores.keys()])].filter(isMigrationSource).map(source=>{
   const shelf=stores.get(source);
   return {source,title:MIGRATION_SOURCE_TITLES[source],conversations:counts[source]?.turns??0,notes:counts[source]?.notes??0,
@@ -654,11 +655,11 @@ export function installFox(host:Host){
    try{
     const page=browser()?.visiblePage(),shown=page&&!page.hidden&&!page.isClosed?page.recorder:null;
     shown?.flush?.();
-    const open=shown?.openVisit?.()??'',visits=store.ledger().recentWebVisits(8);
+    const open=shown?.openVisit?.()??'',visits=contextReads(ledgerContext(store.ledger()),'web-recordings').recentWebVisits(8);
     context.browsing=core<Row[]>('recentBrowsing',{visits,now:Date.now()/1000,open});
     // What the page on screen says: the ask may not read pages with tools, so its recorded text rides along.
-    const visit=open?visits.find(v=>v.id===open)??store.ledger().webVisit(open):null;
-    const pageText=visit?core<string>('onScreenText',{records:store.ledger().webPageText(visit.id)}):'';
+    const visit=open?visits.find(v=>v.id===open)??contextReads(ledgerContext(store.ledger()),'web-recordings').webVisit(open):null;
+    const pageText=visit?core<string>('onScreenText',{records:contextReads(ledgerContext(store.ledger()),'web-recordings').webPageText(visit.id)}):'';
     if(visit&&pageText)context.page={site:visit.site,title:visit.title,text:pageText};
    }catch(error){host.diagnostics.record(error,'foxPlace');}
    const local=new Date().toLocaleString([],{weekday:'short',hour:'2-digit',minute:'2-digit'});
@@ -796,7 +797,7 @@ export function installFox(host:Host){
      // The page on screen is saved first and marked, so Fox tells it apart from earlier visits.
      const page=browser()?.visiblePage(),shown=page&&!page.hidden&&!page.isClosed?page.recorder:null;
      shown?.flush?.();
-     context.browsing=core<Row[]>('recentBrowsing',{visits:store.ledger().recentWebVisits(8),now:Date.now()/1000,open:shown?.openVisit?.()??''});
+     context.browsing=core<Row[]>('recentBrowsing',{visits:contextReads(ledgerContext(store.ledger()),'web-recordings').recentWebVisits(8),now:Date.now()/1000,open:shown?.openVisit?.()??''});
     }catch(error){host.diagnostics.record(error,'foxPlace');}
    }
    const profileArchive=companion.archive(scope);

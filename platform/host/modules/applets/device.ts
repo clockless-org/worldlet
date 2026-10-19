@@ -1,3 +1,5 @@
+import {connectorWriter} from '../../../../context/connectors/index.ts';
+import {contextChanges,contextReads,ledgerContext} from '../../store/context-storage.ts';
 import crypto from 'node:crypto';
 import {WebContentsView,screen,session,type BaseWindow,type Rectangle,type View} from 'electron';
 import {openInBrowser} from '../../system-browser.ts';
@@ -29,7 +31,7 @@ import type {Host,Row} from '../../types.ts';
 import {ANALYTICS,FOX,SPEECH,USER_ACTIVITY,type AnalyticsService,type FoxService,type SpeechService,type UserActivityService} from '../../services.ts';
 import {userIdle} from '../../../../agent/tasks/index.ts';
 import {timingBucket} from '../../../../agent/app/index.ts';
-import {GAME_REVIEW_APPLET} from '../../../../context/store/index.ts';
+import {contextReader,GAME_REVIEW_APPLET} from '../../../../context/store/index.ts';
 import {busyWith} from '../../busy.ts';
 
 type Kept={view:WebPage;platform:string;requestedURL:URL|null};
@@ -217,7 +219,7 @@ export class BrowserDevice {
  /** A recorder's batch: kept in the World, and followed for games to review. */
  recorded(visits:RecordedVisit[],records:(WebRecord&{visit:string})[]){
   if(!this.store.writable||this.sample)return;
-  busyWith('recordWeb',()=>this.store.ledger().recordWeb(visits,records));
+  busyWith('recordWeb',()=>contextChanges(ledgerContext(this.store.ledger()),'world','web-recordings').recordWeb(visits,records));
   this.battles.observe(visits,records);
  }
  private prunedAt=0;
@@ -225,7 +227,7 @@ export class BrowserDevice {
   * hourly when a page opens, and on the start and hourly timers. */
  private pruneRecordings(timer=false){
   const now=Date.now()/1000;if(!timer&&now-this.prunedAt<3600)return;this.prunedAt=now;
-  try{if(!this.store.writable||this.sample)return;this.store.ledger().pruneWeb({rawKinds:RAW_KINDS,rawBefore:now-WEB_RECORD.rawDays*86400,maxBytes:WEB_RECORD.maxBytes});}catch(error){this.host.diagnostics.record(error,'webRecord');}
+  try{if(!this.store.writable||this.sample)return;contextChanges(ledgerContext(this.store.ledger()),'world','web-recordings').pruneWeb({rawKinds:RAW_KINDS,rawBefore:now-WEB_RECORD.rawDays*86400,maxBytes:WEB_RECORD.maxBytes});}catch(error){this.host.diagnostics.record(error,'webRecord');}
  }
  show(body:Row){
   const requested=typeof body.platform==='string'?body.platform:'x',address:string|undefined=body.url;
@@ -948,7 +950,7 @@ return {title:document.title,text:(parts.join(' ')+ ' '+images).slice(0,6000),ur
   if(!url||!isX(url)||!/^\/[^/]+\/status\/[0-9]+$/.test(url.pathname)||typeof text!=='string'||!text.trim()||Buffer.byteLength(text,'utf8')>30_000)throw new WorldletError('Open a post, or select a post\'s text first.');
   const title=[...(typeof value.title==='string'?value.title:'Saved from X')].slice(0,180).join('');
   const canonical='https://x.com'+url.pathname;
-  return this.store.ingest({title,text:text+'\n\nSource: '+canonical,origin:'x-bookmark',externalId:canonical,sourceURL:canonical});
+  return connectorWriter(this.store.libraryContext(),'x').write<boolean>('sources',{operation:'ingest',with:{title,text:text+'\n\nSource: '+canonical,origin:'x-bookmark',externalId:canonical,sourceURL:canonical}});
  }
  /** Waits (after `startMs`) while the page's document loads, up to LOAD_WAIT_MS. True when it is loaded and still shown.
   * The document only: iframes (ads, widgets, chat) that keep loading after it would hold every step for the whole wait. */
@@ -1078,9 +1080,9 @@ return {title:document.title,text:(parts.join(' ')+ ' '+images).slice(0,6000),ur
    if(agent)throw new WorldletError('Only the person can transcribe a meeting or open its transcripts here.');
    if(op==='transcribe')return this.transcribe(args);
    if(this.sample)return op==='transcripts'?{transcripts:[]}:{lines:[]};
-   if(op==='transcripts')return {transcripts:store.ledger().meetingTranscripts(20),active:this.transcript?{session:this.transcript.session,meeting:this.transcript.meeting}:null};
+   if(op==='transcripts')return {transcripts:contextReads(ledgerContext(store.ledger()),'web-recordings').meetingTranscripts(20),active:this.transcript?{session:this.transcript.session,meeting:this.transcript.meeting}:null};
    if(typeof args.session!=='string'||!/^[0-9a-f-]{36}$/.test(args.session))throw new WorldletError('Choose a transcript.');
-   return {lines:store.ledger().meetingTranscript(args.session)};
+   return {lines:contextReads(ledgerContext(store.ledger()),'web-recordings').meetingTranscript(args.session)};
   }
   if(op==='automate'){
    if(!agent||!store.state.cloudConsent||this.sample)throw new WorldletError('Allow private context in your personal world before browser automation.');
@@ -1189,8 +1191,9 @@ return {title:document.title,text:(parts.join(' ')+ ' '+images).slice(0,6000),ur
   if(agent&&['read','saved'].includes(op))this.contextRead=true;
   if(op==='saved'){
    const query=(typeof args.query==='string'?args.query:'').toLowerCase(),items:Row[]=[];
-   for(const source of store.state.sources.filter((s:Row)=>s.origin==='x-bookmark'&&s.enabled!==false).slice(-100).reverse()){
-    const original=store.original(source.id);
+   const library=contextReader(store.libraryContext());
+   for(const source of library.bodies('sources').filter((s:Row)=>s.origin==='x-bookmark'&&s.enabled!==false).slice(-100).reverse()){
+    const original=library.query<Row>('sources','original',{id:source.id});
     if(query&&!(String(original.title??'')+String(original.text??'')).toLowerCase().includes(query))continue;
     items.push({id:source.id,title:original.title,text:[...String(original.text??'')].slice(0,2200).join(''),url:source.sourceURL??''});
     if(items.length===4)break;

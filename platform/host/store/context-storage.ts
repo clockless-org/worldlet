@@ -1,4 +1,4 @@
-import type {ContextChange,ContextDomainId,ContextDomainStore,ContextOrigin,ContextStorage} from '../../../context/store/index.ts';
+import {contextReader,contextWriter,type ContextChange,type ContextDomainId,type ContextDomainStore,type ContextOrigin,type ContextStorage} from '../../../context/store/index.ts';
 import {SERVICE_SYNC_BUCKETS} from '../../../contracts/service-sync.ts';
 import type {WorldLedger} from './ledger.ts';
 
@@ -10,12 +10,48 @@ export type ContextLedger=Partial<WorldLedger>;
 // The host's side of the one way in to Context (#676, context/store/context.ts): each domain the World keeps, read and
 // written exactly as before, in the same tables and the same shapes. Nothing here decides who may write: the entry does.
 // A domain is offered only when the ledger given has what it needs, so a check's small fake ledger works the same.
-const has=<K extends keyof WorldLedger>(ledger:ContextLedger,...names:K[])=>names.every(name=>typeof ledger[name]==='function');
+const has=<K extends keyof WorldLedger>(ledger:ContextLedger|object,...names:K[])=>names.every(name=>typeof (ledger as Row)[name]==='function');
 const forget=(change:ContextChange)=>change.forget??[];
 /** How the ledger names who set an Attention item's status: the person (`user`) or an Agent's own call (`agent`). */
 const itemOrigin=(author:ContextOrigin):'user'|'agent'=>author.by==='person'?'user':'agent';
 
-export function ledgerContext(ledger:ContextLedger):ContextStorage {
+// A domain's own named reads and changes, by the ledger method that answers each (arguments in order). The entry checks
+// who may change the domain; these names are all the host lets through.
+const READS={
+ conversations:['companionTurns','companionRecord','companionCounts','companionBytes','searchCompanion','conversationTurns','threadTurns','recentTurnPlaces','previousThread','ownText','broughtConversations','skillTurns'],
+ 'chat-by-place':['companionViews'],
+ companion:['companionStored'],
+ 'brought-agents':['broughtStores'],
+ 'web-recordings':['webSites','webVisits','webVisit','webRecords','webPages','webPageText','recentWebVisits','meetingTranscripts','meetingTranscript'],
+ widgets:['widgetRows','widgetPage'],
+ 'made-games':['madeGamePage','madeGameVersions'],
+} as const satisfies Partial<Record<ContextDomainId,readonly (keyof WorldLedger)[]>>;
+const CHANGES={
+ conversations:['addCompanionTurns','replaceCompanionHistory'],
+ 'chat-by-place':['replaceCompanionViews'],
+ companion:['saveCompanionStored'],
+ 'web-recordings':['recordWeb','pruneWeb','deleteWeb'],
+ 'brought-agents':['replaceBrought'],
+} as const satisfies Partial<Record<ContextDomainId,readonly (keyof WorldLedger)[]>>;
+type Named<T extends Record<string,readonly string[]>,D extends keyof T>=T[D][number]&keyof WorldLedger;
+const call=(ledger:ContextLedger|object,names:readonly string[],name:string,args:unknown)=>{
+ const method=(ledger as Row)[name];
+ if(!names.includes(name)||typeof method!=='function')throw Error('Not kept here: '+name+'.');
+ return method.apply(ledger,Array.isArray(args)?args:[]);
+};
+
+/** A domain's own reads, through the entry, with the ledger's own types: `contextReads(context,'conversations').threadTurns(…)`. */
+export function contextReads<D extends keyof typeof READS>(storage:ContextStorage,domain:D):Pick<WorldLedger,Named<typeof READS,D>> {
+ const reader=contextReader(storage);
+ return Object.fromEntries(READS[domain].map(name=>[name,(...args:unknown[])=>reader.query(domain,name,{args})])) as any;
+}
+/** A domain's own changes, through the entry, written by `author`, with the ledger's own types. */
+export function contextChanges<D extends keyof typeof CHANGES>(storage:ContextStorage,author:Parameters<typeof contextWriter>[1],domain:D):Pick<WorldLedger,Named<typeof CHANGES,D>> {
+ const writer=contextWriter(storage,author);
+ return Object.fromEntries(CHANGES[domain].map(name=>[name,(...args:unknown[])=>writer.write(domain,{operation:name,with:{args}})])) as any;
+}
+
+export function ledgerContext(ledger:ContextLedger|object):ContextStorage {
  const domains:Partial<Record<ContextDomainId,ContextDomainStore>>={};
  const l=ledger as WorldLedger;
  // A state bucket: its rows, and one by its key without reading the others (a snapshot can be large).
@@ -89,5 +125,17 @@ export function ledgerContext(ledger:ContextLedger):ContextStorage {
   return l.searchCompanion(longest,0,limit*4).rows.filter(row=>terms.every(term=>String(row.text??'').toLowerCase().includes(term))).slice(0,limit);
  }};
  if(has(ledger,'webVisits'))domains['web-recordings']={search:(terms,limit)=>l.webVisits({terms,before:Date.now()/1000+86_400,limit}).visits};
+
+ for(const [domain,names] of Object.entries(READS) as [ContextDomainId,readonly string[]][]){
+  if(!names.some(name=>typeof (ledger as Row)[name]==='function'))continue;
+  const kept=domains[domain]??={},own=kept.query;
+  kept.query=(name,args)=>names.includes(name)?call(ledger,names,name,args.args):own?own(name,args):call(ledger,names,name,args.args);
+ }
+ for(const [domain,names] of Object.entries(CHANGES) as [ContextDomainId,readonly string[]][]){
+  if(!names.some(name=>typeof (ledger as Row)[name]==='function'))continue;
+  const kept=domains[domain]??={},own=kept.write;
+  kept.write=(change,author)=>change.operation&&names.includes(change.operation)?call(ledger,names,change.operation,change.with?.args)
+   :own?own(change,author):call(ledger,names,String(change.operation),change.with?.args);
+ }
  return {domains,...has(ledger,'transaction')?{transaction:<T>(work:()=>T):T=>l.transaction(work)}:{}};
 }

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import {withTempDir} from './test-temp.ts';
 import {WorldLedger} from '../platform/host/store/ledger.ts';
-import {ledgerContext} from '../platform/host/store/context-storage.ts';
+import {contextChanges,contextReads,ledgerContext} from '../platform/host/store/context-storage.ts';
 import {CONTEXT_DOMAINS,CONTEXT_KINDS,contextEnvelope,contextReader,contextTime,contextWriter,syncedWriter,type ContextStorage} from '../context/store/index.ts';
 import {connectorWriter} from '../context/connectors/index.ts';
 
@@ -114,6 +114,16 @@ await withTempDir('worldlet-context-entry-',async dir=>{
   assert.deepEqual(read.search('pears').map(hit=>hit.record.domain).sort(),['artifacts','service-sync']);
   ledger.addCompanionTurns('fox',[{id:'turn-1',session:'s',role:'user',text:'Remind me about the pears',createdAt:'2026-10-19T08:00:00.000Z'}]);
   assert.deepEqual(read.search('pears',{kinds:['recorded']}).map(hit=>hit.record.domain),['conversations']);
+  // A domain's own named reads and changes go through the entry with the ledger's own answers.
+  const turns=contextReads(context,'conversations');
+  assert.deepEqual(turns.companionTurns('fox').map(turn=>turn.text),['Remind me about the pears']);
+  assert.equal(contextChanges(context,'fox','conversations').addCompanionTurns('fox',[{id:'turn-2',session:'s',role:'assistant',text:'I will',createdAt:'2026-10-19T08:01:00.000Z'}]),1);
+  assert.equal(turns.companionTurns('fox').length,2);
+  contextChanges(context,'fox','companion').saveCompanionStored('private','profile',{name:'Fox'});
+  assert.deepEqual(contextReads(context,'companion').companionStored('private','profile'),{name:'Fox'});
+  assert.equal(contextReads(context,'widgets').widgetPage('wgt-0123456789'),'<p>moment</p>');
+  assert.throws(()=>contextReader(context).query('conversations','dropEverything',{args:[]}),/Not kept here/);
+  assert.throws(()=>syncedWriter(context,'x').write('conversations',{operation:'addCompanionTurns',with:{args:['fox',[]]}}),/not Synced/);
  }finally{ledger.close();}
 });
 console.log('PASS one way in to Context: kinds, envelope, search across kinds, Synced only from Connectors, host tables unchanged');

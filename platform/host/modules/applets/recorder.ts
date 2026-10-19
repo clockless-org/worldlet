@@ -1,3 +1,4 @@
+import {contextChanges,contextReads,ledgerContext} from '../../store/context-storage.ts';
 import crypto from 'node:crypto';
 import {WEB_RECORD,webSearchPlan,webTranscript,clip,cleanHeaders,cleanMessage,cleanRequestBody,cleanResponseBody,cleanWebAddress,continuesVisit,keptRequest,keptResponse,privateWebAddress,scrubCards,secretField,webSite,type WebRecord,type WebRecordKind} from '../../../../agent/applets/index.ts';
 import {WorldletError} from '../../files.ts';
@@ -170,12 +171,12 @@ export interface RecordingLedger {webSites():{site:string;visits:number}[];delet
 export function manageRecordings(op:'recordings'|'deleteRecordings',args:Row,{agent,sample,ledger,recorders}:{agent:boolean;sample:boolean;ledger:RecordingLedger;recorders:Iterable<unknown>}):Row {
  if(agent)throw new WorldletError('Only the person can manage browsing recordings.');
  if(sample)throw new WorldletError('Browsing recordings are unavailable in the practice world.');
- if(op==='recordings')return {sites:ledger.webSites().map(({site,visits})=>({site,visits}))};
+ if(op==='recordings')return {sites:contextReads(ledgerContext(ledger),'web-recordings').webSites().map(({site,visits})=>({site,visits}))};
  const named=typeof args.site==='string'?args.site.trim():'';
  const site=args.all===true?'':webSite(named.includes('://')?named:'https://'+named);
  if(args.all!==true&&!site)throw new WorldletError('Choose a site to delete recordings for.');
  for(const recorder of new Set(recorders))if(recorder instanceof WebRecorder)recorder.forget(site);
- return {site,deleted:ledger.deleteWeb({site})};
+ return {site,deleted:contextChanges(ledgerContext(ledger),'person','web-recordings').deleteWeb({site})};
 }
 
 /** What Fox's recording reads need of the World ledger (store/ledger.ts). */
@@ -192,18 +193,18 @@ export interface RecordingReader {
 export function readRecordings(op:'records'|'record',args:Row,{ledger,onScreen,now,offsetMinutes}:{ledger:RecordingReader;onScreen:string;now:number;offsetMinutes:number}):Row {
  if(op==='records'){
   const plan=webSearchPlan(args,now);
-  const found=ledger.webVisits(plan);
+  const found=contextReads(ledgerContext(ledger),'web-recordings').webVisits(plan);
   const local=(at:number)=>new Date((at+offsetMinutes*60)*1000).toISOString().slice(0,19).replace('T',' ');
   return {visits:found.visits.map(v=>({id:v.id,site:v.site,title:v.title,url:v.url,applet:v.applet,started:local(v.startedAt),...v.id===onScreen?{onScreen:true,ended:'still open'}:{ended:local(v.endedAt)},recorded:v.counts,...v.found?{found:v.found}:{}})),total:found.total,offset:plan.offset,
    untrustedContent:true,scope:'Visits recorded in Worldlet’s built-in browser, or on the paired phone for an applet starting phone: (local time). Read one with operation record and its id. A visit marked onScreen is the page open now and keeps growing; its newest records are at the end.'};
  }
- const visit=typeof args.id==='string'?ledger.webVisit(args.id):null;
+ const visit=typeof args.id==='string'?contextReads(ledgerContext(ledger),'web-recordings').webVisit(args.id):null;
  if(!visit)throw new WorldletError('No recorded visit has that id. Search with operation records first.');
  const offset=Number.isInteger(args.offset)&&args.offset>0?Number(args.offset):0;
  const only=args.only==='network'?['response','request','ws-in','ws-out','sse']:args.only==='page'?['page','text','text-more','input','click','submit']:args.only==='transcript'?['transcript']:[];
  const term=typeof args.query==='string'?args.query.trim().slice(0,200):'';
- const {records,total,after}=ledger.webRecords(visit.id,{offset,limit:400,kinds:only,term});
+ const {records,total,after}=contextReads(ledgerContext(ledger),'web-recordings').webRecords(visit.id,{offset,limit:400,kinds:only,term});
  const full=args.full===true;
- const read=webTranscript(visit,records as (WebRecord&{index:number})[],{offset,offsetMinutes,total,after,full,pages:offset===0&&!only.length&&!term?ledger.webPages(visit.id):[]});
+ const read=webTranscript(visit,records as (WebRecord&{index:number})[],{offset,offsetMinutes,total,after,full,pages:offset===0&&!only.length&&!term?contextReads(ledgerContext(ledger),'web-recordings').webPages(visit.id):[]});
  return {id:visit.id,text:read.text,...read.nextOffset!==null?{next_offset:read.nextOffset}:{},total,untrustedContent:true};
 }

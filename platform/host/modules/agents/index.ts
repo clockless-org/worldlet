@@ -1,3 +1,4 @@
+import {contextReads,ledgerContext} from '../../store/context-storage.ts';
 import {collectServicePage} from '../sources/service-collection.ts';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -585,7 +586,7 @@ export function installAgentRuntime(host:Host){
   origin:(source,id)=>{
    try{
     if(!host.store.writable||host.store.sampleEnabled())return null;
-    const ledger=host.store.ledger(),found=ledger.broughtConversations().find(c=>c.source===source&&ongoingId(c.source,c.session)===id);
+    const ledger=host.store.ledger(),found=contextReads(ledgerContext(ledger),'conversations').broughtConversations().find(c=>c.source===source&&ongoingId(c.source,c.session)===id);
     if(!found||ledger.historyShared(source,found.session)===true)return null;
     return ledger.historyThreads(source,found.session).find(thread=>ledger.historyCursor(source,thread)?.shared!==true)??null;
    }catch{return null;}

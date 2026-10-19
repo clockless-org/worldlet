@@ -1,3 +1,4 @@
+import {contextReads,ledgerContext} from '../../store/context-storage.ts';
 import {contextReader} from '../../../../context/store/index.ts';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -263,7 +264,7 @@ export class AttentionCenter {
  companionArchive():Row|null {
   const owner=this.host.optional<CompanionService>(COMPANION);
   if(owner)return owner.archive();
-  let archive:Row|null=this.store.ledger().companionStored('private','profile');
+  let archive:Row|null=contextReads(ledgerContext(this.store.ledger()),'companion').companionStored('private','profile');
   if(!archive)return null;
   try{const agent=this.agentService();if(agent&&this.writable)archive=agent.checkpointCompanion(archive);}catch{}
   return archive;
@@ -315,7 +316,7 @@ export class AttentionCenter {
   try{
    let archive=this.companionArchive();
    const agent=this.agentService();
-   if(archive&&agent)archive=agent.captureCompanion(archive,this.store.ledger().companionStored('private','session')!==null);
+   if(archive&&agent)archive=agent.captureCompanion(archive,contextReads(ledgerContext(this.store.ledger()),'companion').companionStored('private','session')!==null);
    if(archive)context.userContext={referenceOnly:true,memories:rows(archive.memories).filter(memory=>memory.kind!=='soul').slice(0,12).map(memory=>({kind:memory.kind,text:characterPrefix(String(memory.text??''),500)}))};
   }catch{}
   return context;

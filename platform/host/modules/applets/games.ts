@@ -1,3 +1,4 @@
+import {contextReads,ledgerContext} from '../../store/context-storage.ts';
 import {dialog} from 'electron';
 import {contextReader,contextWriter,GAME_FACTORY_APPLET,MADE_GAME_LIMITS,betterBest,checkMadeGameSource,gameFactoryModel,madeGameDocument,madeGameId,madeGameRecord,madeGameTask,orderMadeGames,readMadeGame,validMadeGameId,type MadeGame} from '../../../../context/store/index.ts';
 import {WorldletError} from '../../files.ts';
@@ -26,7 +27,7 @@ export function installGames(host:Host){
   return orderMadeGames(games());
  }
  const source=(id:string)=>{
-  const html=validMadeGameId(id)&&read(id)?store.ledger().madeGamePage(id):null;
+  const html=validMadeGameId(id)&&read(id)?contextReads(ledgerContext(store.ledger()),'made-games').madeGamePage(id):null;
   if(html===null)throw new WorldletError('That game is not in this world.');
   return html;
  };

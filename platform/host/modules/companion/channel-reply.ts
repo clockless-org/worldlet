@@ -1,3 +1,4 @@
+import {contextReads,ledgerContext} from '../../store/context-storage.ts';
 import crypto from 'node:crypto';
 import {CHANNEL_REPLY,channelReplyText,isMigrationSource} from '../../../../agent/gate/index.ts';
 import {conversationAttentionId,ongoingName} from '../../../../agent/tasks/index.ts';
@@ -22,7 +23,7 @@ export function installChannelReplies(host:Host){
  function conversation(named:string):{source:string;session:string}|null {
   const wanted=named.trim().toLowerCase();
   if(!wanted)return null;
-  const all=store.ledger().broughtConversations();
+  const all=contextReads(ledgerContext(store.ledger()),'conversations').broughtConversations();
   return all.find(c=>c.session.toLowerCase()===wanted||conversationAttentionId(c.source,c.session)===named.trim())
    ??all.find(c=>ongoingName(c.source,c.session).title.toLowerCase()===wanted.replace(/^[“"]|[”"]$/g,''))??null;
  }
