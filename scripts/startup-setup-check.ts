@@ -3,7 +3,7 @@ import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
 import path from 'node:path';
 import {tmpdir} from 'node:os';
 const platform=process.platform==='win32'?'windows':'macos';
-import {updateOnboarding} from '../core/onboarding/onboarding.ts';
+import {updateOnboarding} from '../agent/onboarding/onboarding.ts';
 import {WORLD_APPS,seedAppletSelection} from '../context/applets/index.ts';
 // Every app setup can offer says what it is for in one line (demo feedback 2026-10-03); a website Applet never claims account sync.
 for(const app of WORLD_APPS){

@@ -1,4 +1,4 @@
-import {firstValueRequest} from '../onboarding/index.ts';
+import {firstValueRequest} from '../../agent/onboarding/index.ts';
 // Requests Worldlet composes for a button press. They are sent with origin 'system':
 // the text is not the user's words, so it never counts as user edit intent, and any
 // source-derived value (a page or mail title) is quoted as data, never as instruction.

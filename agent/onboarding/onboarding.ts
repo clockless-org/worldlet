@@ -1,6 +1,6 @@
 import {APP_DEFINITIONS,AREA_LAYOUT_VERSION} from '../../context/applets/index.ts';
 import type {Onboarding} from '../../contracts/onboarding.ts';
-import {characters,utf8Length} from '../companion/index.ts';
+import {characters,utf8Length} from '../../core/companion/index.ts';
 const regions=['home','work','development','library','money','health','travel','people'];
 const GAME_IDS=()=>APP_DEFINITIONS.filter(a=>a.game).map(a=>a.id);
 const FIRST_GAMES=['app-game-2048','app-snake','app-minesweeper','app-sudoku','app-breakout'];
