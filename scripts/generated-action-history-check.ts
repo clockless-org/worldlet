@@ -6,7 +6,7 @@ import {createServer} from 'node:http';
 import {attentionRequest,legacyActionDisplayText,summarizeRequest} from '../core/agent/system-requests.ts';
 import {firstValueRequest} from '../agent/onboarding/first-value.ts';
 import {restoreThread,threadRow,threadStart} from '../ui/companion/fox-thread.ts';
-import {validateConversationHistory} from '../core/companion/conversation-history.ts';
+import {validateConversationHistory} from '../agent/companion/conversation-history.ts';
 import {buildUI} from './build-ui.ts';
 
 const id='synthetic-notification',title='Fictional garden club',intent='Help me with this next step: Summarize this item. Read the saved evidence first, then complete it directly.';

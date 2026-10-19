@@ -8,7 +8,7 @@ import {observeWorldActivity,recordWorldActivity} from '../../platform/bridge/ac
 import {curatedOriginal,renderCuratedTable} from '../applets/index.ts';
 import {recordWorldCommand} from '../../platform/bridge/host.ts';
 import {firstValueRequest,firstValueLinks} from '../../agent/onboarding/index.ts';
-import {carriesConversation,worldSpeechTerms} from '../../core/companion/index.ts';
+import {carriesConversation,worldSpeechTerms} from '../../agent/companion/index.ts';
 import {helpNarration,narrateHelp} from '../companion/index.ts';
 import {createWorldUI} from './public-interface.ts';
 import {eventTrigger,reportAppletOpened,reportEngagement,reportProductEvent} from './product-analytics.ts';
@@ -260,7 +260,7 @@ export function mountNotionWorld(data: World, native: any) {
     }});
   window.addEventListener('worldlet:fox-idle',()=>{attentionOrigin=null;attentionOpening=null;if(carryPending){const next=carryPending;carryPending=null;setTimeout(()=>carryToApplet(next.from,next.to),0);}});
   /** The page in an Applet moved from one website to another (a link, or Fox's step). While the person and Fox are
-   * talking (core/companion/conversation-place.ts, carriesConversation) the conversation goes with it: the new site
+   * talking (agent/companion/conversation-place.ts, carriesConversation) the conversation goes with it: the new site
    * continues the place it came from instead of starting its own (owner Order 2026-10-09). A page that belongs to
    * another website Applet in the World moves there, with its background and title; Fox's turn finishes first, so
    * its steps on the page are never cut off by the move. */

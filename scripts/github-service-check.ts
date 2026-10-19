@@ -22,7 +22,7 @@ import {APP_DEFINITIONS,connectToken} from '../context/applets/index.ts';
 import {validateAttentionRegistrations} from '../agent/attention/attention-center.ts';
 import {attentionFollowupReads,attentionReads} from '../agent/attention/index.ts';
 import {validateAppletRuntimes} from '../context/applets/runtime.ts';
-import {conversationGuidance} from '../core/companion/conversation-guidance.ts';
+import {conversationGuidance} from '../agent/companion/conversation-guidance.ts';
 import {listWorldTools} from '../agent/tools/index.ts';
 import {withTempDir} from './test-temp.ts';
 
