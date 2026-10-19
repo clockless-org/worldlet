@@ -10,6 +10,7 @@ import {WorldLedger} from './ledger.ts';
 import {ledgerContext} from './context-storage.ts';
 import {ActivityRecorder} from '../modules/applets/activity.ts';
 import {EMPTY_OVERLAY} from '../../../context/connectors/index.ts';
+import {contextReader,contextWriter} from '../../../context/store/index.ts';
 import eventPolicy from '../../../contracts/world-event-policy.json';
 
 type Row=Record<string,any>;
@@ -141,7 +142,7 @@ export class WorldStore {
  // Weather and brought conversations need no account: the World holds them (agent/tasks/attention.ts).
  get attentionProviders(){return [...this.state.connections.filter(canBuild).map(c=>c.provider),'weather','conversations'];}
  projectAttention(items:Row[]){return core<Row[]>('attentionProject',{items,facts:this.ledger().attentionFacts(),now:Date.now()/1000,providers:this.attentionProviders});}
- worldItems(){return core<Row[]>('worldItemsVisible',{items:this.projectAttention(this.ledger().records('items')),enabledSourceIDs:this.state.sources.filter(s=>s.enabled!==false).map(s=>s.id)});}
+ worldItems(){return core<Row[]>('worldItemsVisible',{items:this.projectAttention(contextReader(this.context()).bodies('attention-items')),enabledSourceIDs:this.state.sources.filter(s=>s.enabled!==false).map(s=>s.id)});}
  worldChecks(){return this.ledger().records('checks');}
  sourceContentRevision(provider:string){return `${this.sourceContentEpoch}:${this.sourceContentEpochs[provider]??0}`;}
  appRecords(provider:string){
@@ -256,12 +257,12 @@ export class WorldStore {
  markWorldItemRead(id:string){
   this.personal('Invalid item.');
   if(!this.worldItems().some(item=>item.id===id))throw new WorldletError('Unknown item.');
-  this.ledger().update(id,'read',null,true);this.worldChanged();
+  contextWriter(this.context(),'person').write('attention-items',{operation:'status',with:{id,status:'read',snoozedUntil:null,readOnly:true}});this.worldChanged();
  }
  setWorldItemStatus(id:string,status:string,snoozedUntil?:string|null,by?:'fox'){
   this.personal('Invalid item status.');
   if(!this.worldItems().some(item=>item.id===id))throw new WorldletError('Unknown item.');
-  this.ledger().update(id,status,snoozedUntil,false,by);this.worldChanged();
+  contextWriter(this.context(),by??'person').write('attention-items',{operation:'status',with:{id,status,snoozedUntil,by}});this.worldChanged();
  }
  /** Pending task reviews for the Attention cards of the tasks each may update (owner Order 2026-10-07: decisions
   * go to Attention, not Fox's dialog). Ids and the source's provider only, never the evidence. */
@@ -279,7 +280,7 @@ export class WorldStore {
    const row=db.find('task-reviews',id),refs=row?.proposal?.sources;
    if(!Array.isArray(refs)||!refs.every(ref=>this.state.connections.some(c=>c.provider===ref.provider&&canBuild(c))))throw new WorldletError("Reconnect the task's sources before confirming this change.");
   }
-  const result=db.resolveTaskReview(id,choice,candidateID);
+  const result=contextWriter(this.context(),'person').write('attention-items',{operation:'resolve',with:{id,choice,candidateId:candidateID}});
   this.worldChanged();return result;
  }
  resolveBrowserOutcome(id:string,done:boolean){
@@ -304,13 +305,13 @@ export class WorldStore {
   const db=this.ledger();
   if(tool==='configure_world_check')return db.find('checks',args.provider)??null;
   const ids=tool==='archive_world_items'?(Array.isArray(args.ids)?args.ids:[]):[args.id].filter(id=>typeof id==='string');
-  return db.records('items').filter(item=>ids.includes(item.id));
+  return contextReader(this.context()).bodies('attention-items').filter(item=>ids.includes(item.id));
  }
  undoGuardedWrite(undo:Row){
   if(!this.writable||!this.state.cloudConsent||this.sampleEnabled())throw new WorldletError('Open your personal world to undo this change.');
   if(undo.kind==='check'&&undo.request){this.configureWorldCheck(undo.request);return;}
   if(!Array.isArray(undo.items))throw new WorldletError('This change can no longer be undone.');
-  this.ledger().restore(undo.items);this.worldChanged();
+  contextWriter(this.context(),'person').write('attention-items',{operation:'restore',with:{snapshots:undo.items}});this.worldChanged();
  }
 
  // Sources -----------------------------------------------------------------------------

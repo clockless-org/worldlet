@@ -1,3 +1,4 @@
+import {contextReader} from '../../../../context/store/index.ts';
 import fs from 'node:fs';
 import path from 'node:path';
 import {core} from '../../core.ts';
@@ -55,6 +56,8 @@ export class AttentionCenter {
  get consent(){return this.store.state.cloudConsent===true;}
  sample(){return this.store.sampleEnabled();}
  db(){return this.store.ledger();}
+ /** The saved Attention items, through the one way in to Context (#676). */
+ attentionItems():Row[]{return contextReader(this.store.context()).bodies('attention-items');}
  agentService(){return this.host.optional<AgentService>(AGENT);}
  agent(){const agent=this.agentService();if(!agent)throw new WorldletError('Agent runtime is not available.');return agent;}
  sources(){return this.host.optional<SourcesService>(SOURCES);}
@@ -415,7 +418,7 @@ export class AttentionCenter {
       const name=event.name,args=event.args;
       if(name==='query_world_items'){
        queried=true;
-       const snapshot=core('appletAnalysisInput',{provider,records,items:this.db().records('items').filter(item=>item.provider===provider),now:now()});
+       const snapshot=core('appletAnalysisInput',{provider,records,items:this.attentionItems().filter(item=>item.provider===provider),now:now()});
        if(!isRow(snapshot))throw new WorldletError('Invalid source batch');
        snapshot.pendingContextIds=requiredIDs.filter(id=>!processedIDs.includes(id));snapshot.userContext=context.userContext??{};
        return snapshot;
@@ -790,7 +793,7 @@ export class AttentionCenter {
  /** Consumer housekeeping must run even when no model pass is eligible. */
  private retireUnreferencedAttentionRemovals(providers:string[]){
   const db=this.db();
-  const discarded=rows(core('attentionDiscardedRemovals',{facts:db.attentionFacts(),items:db.records('items'),providers}));
+  const discarded=rows(core('attentionDiscardedRemovals',{facts:db.attentionFacts(),items:this.attentionItems(),providers}));
   const pending=db.records('runtime-deliveries').filter(row=>row.consumerId==='attention:center'&&row.status==='pending');
   const number=(value:unknown)=>typeof value==='number'?value:null;
   const retire=discarded.filter(seed=>pending.some(row=>row.entityId===seed.id&&number(row.revision)===number(seed.revision)));
@@ -820,7 +823,7 @@ export class AttentionCenter {
      this.retireUnreferencedAttentionRemovals(providers);
      const budget=db.attentionInputBudget();
      // Probe pending revisions independently of the cooldown; execution still passes admission.
-     const plan=core('attentionPlan',{facts:db.attentionFacts(),budget:{...budget,nextAt:0},now:at,providers,items:db.records('items'),deliveries:db.records('runtime-deliveries'),backlog:this.analysisBacklog(providers)});
+     const plan=core('attentionPlan',{facts:db.attentionFacts(),budget:{...budget,nextAt:0},now:at,providers,items:this.attentionItems(),deliveries:db.records('runtime-deliveries'),backlog:this.analysisBacklog(providers)});
      if(!isRow(plan))return;
      const delay=Math.max(0,(typeof budget.nextAt==='number'?budget.nextAt:0)-at);
      if(delay>0){await sleep(Math.min(delay,60),signal);continue;}
@@ -842,7 +845,7 @@ export class AttentionCenter {
    const db=this.db(),at=now();
    const providers=this.centerProviders();
    this.retireUnreferencedAttentionRemovals(providers);
-   const plan=core('attentionPlan',{facts:db.attentionFacts(),budget:db.attentionInputBudget(),now:at,providers,items:db.records('items'),deliveries:db.records('runtime-deliveries'),backlog:this.analysisBacklog(providers)});
+   const plan=core('attentionPlan',{facts:db.attentionFacts(),budget:db.attentionInputBudget(),now:at,providers,items:this.attentionItems(),deliveries:db.records('runtime-deliveries'),backlog:this.analysisBacklog(providers)});
    if(!isRow(plan)||!Array.isArray(plan.facts))return true;
    const facts:Row[]=plan.facts;
    this.attentionRunning=true;
@@ -894,7 +897,7 @@ export class AttentionCenter {
          result.items=rows(result.items).filter(item=>rows(item.sources).some(ref=>sourceKeys.has((ref.provider??'')+':'+(ref.id??'')))||rows(item.attentionDependencies).some(dependency=>facts.some(f=>f.id===dependency.id))).slice(0,80);
          // The model-facing items omit internal dependencies; Core uses the saved ones to mark current items.
          const dependencies:Row={};
-         for(const row of this.db().records('items'))if(typeof row.id==='string'&&Array.isArray(row.attentionDependencies)&&!(row.id in dependencies))dependencies[row.id]=row.attentionDependencies;
+         for(const row of this.attentionItems())if(typeof row.id==='string'&&Array.isArray(row.attentionDependencies)&&!(row.id in dependencies))dependencies[row.id]=row.attentionDependencies;
          result.itemDependencies=dependencies;
          return core('attentionBatchInput',result);
         }

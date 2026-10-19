@@ -1,6 +1,8 @@
 import {answerServiceRequest,readServiceRequest,serviceRequestDue,serviceRequestItem,serviceRequestRefusal,type ServiceRequest} from '../../../../agent/gate/index.ts';
 import {connector} from '../../../../context/connectors/index.ts';
 import type {AgentAccess} from '../../services.ts';
+import {contextReader,contextWriter} from '../../../../context/store/index.ts';
+import {ledgerContext} from '../../store/context-storage.ts';
 import type {Row} from './types.ts';
 
 // When an Agent first needs a Service (agent/gate/GRANTS.md#when-an-agent-first-needs-a-service). Core decides; this
@@ -24,8 +26,10 @@ export function createServiceRequests({ledger,access,connected,title,changed,now
  {ledger:()=>ServiceRequestLedger|null;access:()=>AgentAccess|null;connected:(provider:string)=>boolean;title:(provider:string)=>string;changed:()=>void;now?:()=>string}):ServiceRequests {
  // A Service that signs in is connected from the card itself; one that takes a key, under Settings › Connectors.
  const signsIn=(provider:string)=>['mcp-oauth','google'].includes(connector(provider)?.mechanism??'');
- const load=(db:ServiceRequestLedger)=>db.serviceRequests().flatMap(row=>{const request=readServiceRequest(row);return request?[request]:[];});
- const save=(db:ServiceRequestLedger,request:ServiceRequest,origin:'user'|'agent')=>db.saveServiceRequest(request as unknown as Row,serviceRequestItem(request,title(request.provider),{signIn:signsIn(request.provider),region:connector(request.provider)?.region}) as unknown as Row,origin);
+ const load=(db:ServiceRequestLedger)=>contextReader(ledgerContext(db)).bodies('service-requests').flatMap(row=>{const request=readServiceRequest(row);return request?[request]:[];});
+ // Through the one way in to Context (#676): who writes decides whether the item's status is the person's or the Agent's.
+ const save=(db:ServiceRequestLedger,request:ServiceRequest,origin:'user'|'agent')=>contextWriter(ledgerContext(db),origin==='user'?{by:'person'}:{by:'agent',id:request.agentId})
+  .write('service-requests',{save:[request as unknown as Row],with:{item:serviceRequestItem(request,title(request.provider),{signIn:signsIn(request.provider),region:connector(request.provider)?.region}) as unknown as Row}});
  return {
   asked(agent,provider){
    try{

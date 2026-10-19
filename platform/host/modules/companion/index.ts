@@ -32,7 +32,7 @@ import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD
 import {worldLogKeeps} from '../../../../context/applets/index.ts';
 import {worldActionOf,worldActions} from '../../../../agent/gate/index.ts';
 import {onboardingUnfinished} from '../../../../agent/companion/index.ts';
-import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../context/store/index.ts';
+import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,contextWriter,readMorningBrief} from '../../../../context/store/index.ts';
 import {phoneApprovalPush,phoneFoxPush,phoneLive,worldLinkReply} from '../../../web/index.ts';
 import {placeKey,placeKind,proactiveAsked,proactiveDue,proactiveCard,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../agent/companion/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
@@ -150,7 +150,7 @@ export function installFox(host:Host){
    store.recordHistory({id:`routine:${job.id}:${at}`,kind:'routine.run',at,actor:'fox',status:job.last_status==='ok'?'complete':'failed',name:typeof job.name==='string'?job.name.slice(0,80):'',late:value.late===true,...typeof value.scheduledAt==='string'?{scheduledAt:value.scheduledAt}:{}});
    const result=store.writable&&!store.sampleEnabled()?routineScheduleResult(value,at*1000,Date.now()):null;
    if(result)try{
-    const id=store.ledger().upsert([result.item as Row],'worldlet-routine')[0]??'';
+    const id=contextWriter(store.context(),'fox').write<string[]>('attention-items',{save:[result.item as Row],with:{run:'worldlet-routine'}})[0]??'';
     store.worldChanged();
     if(result.push&&id)void host.optional<PhoneService>(PHONE)?.notify({...result.push,open:{item:id},act:{attention:id}}).catch(()=>{});
    }catch(error){host.diagnostics.record(error,'routines');}

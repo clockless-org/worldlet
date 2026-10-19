@@ -6,6 +6,8 @@ import type {AgentAuditEntry} from '../../../../contracts/agent-identity.ts';
 import type {McpSession} from '../../../../context/connectors/index.ts';
 import type {PosthogRequest} from '../../../../agent/gate/index.ts';
 import type {PosthogSettings} from '../../../../context/connectors/index.ts';
+import {contextReader,contextWriter} from '../../../../context/store/index.ts';
+import {ledgerContext} from '../../store/context-storage.ts';
 import type {Row} from './types.ts';
 
 // PostHog and Notion drafts (agent/gate/GRANTS.md#posthog-and-notion-drafts), as GitHub drafts are kept
@@ -47,8 +49,10 @@ const own=(value:unknown)=>value instanceof Error&&value.message?value.message:'
 
 export function createServiceDrafts({ledger,connections,name,changed,now=()=>new Date().toISOString(),newId=()=>crypto.randomUUID()}:
  {ledger:()=>ServiceDraftLedger|null;connections:()=>ServiceDraftConnections|null;name:(agentId:string)=>string;changed:()=>void;now?:()=>string;newId?:()=>string}):ServiceDrafts {
- const load=(db:ServiceDraftLedger)=>db.serviceDrafts().flatMap(row=>{const draft=readStoredServiceDraft(row);return draft?[draft]:[];});
- const save=(db:ServiceDraftLedger,draft:ServiceDraft,origin:'user'|'agent')=>db.saveServiceDraft(draft as unknown as Row,serviceDraftAttentionItem(draft,name(draft.agentId)) as Row,origin);
+ const load=(db:ServiceDraftLedger)=>contextReader(ledgerContext(db)).bodies('service-drafts').flatMap(row=>{const draft=readStoredServiceDraft(row);return draft?[draft]:[];});
+ // Through the one way in to Context (#676): who writes decides whether the item's status is the person's or the Agent's.
+ const save=(db:ServiceDraftLedger,draft:ServiceDraft,origin:'user'|'agent')=>contextWriter(ledgerContext(db),origin==='user'?{by:'person'}:{by:'agent',id:draft.agentId})
+  .write('service-drafts',{save:[draft as unknown as Row],with:{item:serviceDraftAttentionItem(draft,name(draft.agentId)) as Row}});
  const audit=(db:ServiceDraftLedger,draft:ServiceDraft,action:string,decision:AgentAuditEntry['decision'],reason:string,at:string)=>{
   try{db.recordAgentAudit({at,agentId:draft.agentId,target:serviceDraftTarget(draft.provider),action,decision,reason:[...reason].slice(0,300).join('')},AGENT_AUDIT_KEEP);}catch{}
  };
@@ -56,7 +60,7 @@ export function createServiceDrafts({ledger,connections,name,changed,now=()=>new
  // draft is dismissed. Approving needs this computer (`serviceDraft`), so neither writes anything.
  const settle=(db:ServiceDraftLedger,drafts:ServiceDraft[],at:string)=>drafts.map(draft=>{
   if(!serviceDraftPending(draft))return draft;
-  const item=db.value('items',serviceDraftItemId(draft.id));
+  const item=contextReader(ledgerContext(db)).get('attention-items',serviceDraftItemId(draft.id))?.body;
   if(item?.statusOrigin!=='user'||item.status!=='done'&&item.status!=='dismissed')return draft;
   const next=settleServiceDraft(draft,'dismissed',at);
   save(db,next,'user');audit(db,next,'dismiss','allowed','The person settled this draft\'s card without approving it; nothing was written.',at);

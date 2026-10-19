@@ -1,6 +1,8 @@
 import crypto from 'node:crypto';
 import {AGENT_AUDIT_KEEP,ASK_REASONS,askApprovesDrafts,answerAsk,askAttachment,askAttentionItem,askItemId,askOpen,claimAsks,postAsk,readAskAttachment,readAsks,readStoredAsk,resolveAsk} from '../../../../agent/gate/index.ts';
 import {AGENT_ASK_TARGET,type AgentAsk} from '../../../../contracts/agent-asks.ts';
+import {contextReader,contextWriter} from '../../../../context/store/index.ts';
+import {ledgerContext} from '../../store/context-storage.ts';
 import type {Row} from './types.ts';
 
 // Agent asks (agent/gate/GRANTS.md#agent-asks). Core decides; this keeps the records: each ask in the World's ledger
@@ -52,16 +54,19 @@ export function createAgentAsks({ledger,name,changed,drafts,orders,now=()=>new D
  const own=(ask:AgentAsk)=>(drafts?.()?.summaries(ask.draftIds??[])??[]).filter(d=>d.agentId===ask.agentId);
  const shown=(ask:AgentAsk)=>own(ask).map(({agentId:_agentId,service:_service,...draft})=>draft);
  const withDrafts=(ask:AgentAsk)=>ask.draftIds?.length?{...ask,drafts:shown(ask)}:ask;
- const load=(db:AskLedger)=>db.agentAsks().flatMap(row=>{const ask=readStoredAsk(row);return ask?[ask]:[];});
+ const load=(db:AskLedger)=>contextReader(ledgerContext(db)).bodies('agent-asks').flatMap(row=>{const ask=readStoredAsk(row);return ask?[ask]:[];});
  const item=(ask:AgentAsk)=>askAttentionItem(ask,name(ask.agentId),ask.for?name(ask.for):undefined,ask.draftIds?.length?own(ask).map(d=>d.service):[]) as Row;
- const save=(db:AskLedger,ask:AgentAsk,origin:'user'|'agent')=>db.saveAgentAsk(ask as unknown as Row,item(ask),origin);
+ // Through the one way in to Context (#676): who writes decides whether the item's status is the person's or the Agent's.
+ const author=(ask:AgentAsk,origin:'user'|'agent')=>origin==='user'?{by:'person' as const}:{by:'agent' as const,id:ask.agentId};
+ const save=(db:AskLedger,ask:AgentAsk,origin:'user'|'agent',attachments?:{id:string;data:Uint8Array}[])=>
+  contextWriter(ledgerContext(db),author(ask,origin)).write('agent-asks',{save:[ask as unknown as Row],with:{item:item(ask),...attachments?{attachments}:{}}});
  const audit=(db:AskLedger,ask:AgentAsk,at:string)=>{
   try{db.recordAgentAudit({at,agentId:ask.agentId,target:AGENT_ASK_TARGET,action:'answer',decision:'allowed',reason:'The person answered this Agent\'s ask in Attention.'},AGENT_AUDIT_KEEP);}catch{}
  };
  // Done or Dismiss on the ask's Attention card through the ordinary item status (a phone, a browser): the ask follows.
  const settle=(db:AskLedger,asks:AgentAsk[],at:string)=>asks.map(ask=>{
   if(!askOpen(ask))return ask;
-  const item=db.value('items',askItemId(ask.id));
+  const item=contextReader(ledgerContext(db)).get('attention-items',askItemId(ask.id))?.body;
   if(item?.statusOrigin!=='user'||item.status!=='done'&&item.status!=='dismissed')return ask;
   const next=answerAsk(ask,{id:ask.id,outcome:item.status==='done'?'done':'skipped'},at);
   save(db,next,'user');audit(db,next,at);
@@ -86,7 +91,7 @@ export function createAgentAsks({ledger,name,changed,drafts,orders,now=()=>new D
       const found=drafts?.()?.summaries(ask.draftIds)??[];
       if(found.length!==ask.draftIds.length||found.some(draft=>draft.agentId!==agentId||draft.status!=='pending'))return {error:ASK_REASONS.drafts};
      }
-     db.saveAgentAsk(ask as unknown as Row,item(ask),'agent',files);changed();
+     save(db,ask,'agent',files);changed();
      // Saved first: the woken Agent claims it with asks/claim as usual.
      try{order?.assigned(ask);}catch{}
      return {ok:true,ask,guidance:'The person sees this in their Attention Center. Read it later with asks/read to get their answer; do not post it again.'};
@@ -94,7 +99,7 @@ export function createAgentAsks({ledger,name,changed,drafts,orders,now=()=>new D
     if(operation==='read')return {asks:readAsks(asks,agentId,input).map(withDrafts)};
     if(operation==='attachment'){
      const {ask,attachment,offset,length}=readAskAttachment(asks,agentId,input);
-     const bytes=db.agentAskAttachment(ask.id,attachment.id,offset,length);
+     const bytes=contextReader(ledgerContext(db)).query<Uint8Array|null>('agent-asks','attachment',{askId:ask.id,id:attachment.id,offset,length});
      if(!bytes||bytes.length!==length)return {error:'This attachment\'s bytes are no longer kept.'};
      const next=offset+length;
      return {id:ask.id,attachment:attachment.id,name:attachment.name,type:attachment.type,size:attachment.size,sha256:attachment.sha256,offset,
@@ -145,7 +150,7 @@ export function createAgentAsks({ledger,name,changed,drafts,orders,now=()=>new D
    const db=ledger();
    if(!db)throw new Error(NOT_READY);
    const ask=load(db).find(item=>item.id===request?.id),attachment=askAttachment(ask,request?.attachment);
-   const bytes=db.agentAskAttachment(ask!.id,attachment.id,0,attachment.size);
+   const bytes=contextReader(ledgerContext(db)).query<Uint8Array|null>('agent-asks','attachment',{askId:ask!.id,id:attachment.id,offset:0,length:attachment.size});
    if(!bytes||bytes.length!==attachment.size)throw new Error('This attachment\'s bytes are no longer kept.');
    return {id:attachment.id,name:attachment.name,type:attachment.type,size:attachment.size,data:Buffer.from(bytes).toString('base64')};
   },
