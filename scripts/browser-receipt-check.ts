@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {beginBrowserReceipt,observeBrowserReceipt,resolveBrowserReceipt} from '../core/browser/index.ts';
+import {beginBrowserReceipt,observeBrowserReceipt,resolveBrowserReceipt} from '../context/browser/index.ts';
 const now=1000,task={id:'task',kind:'task',title:'Review request',status:'open',sources:[{id:'mail',quote:'original'}]};
 const input={id:'receipt',label:'Submit',origin:'https://example.com',attemptKey:'doc:1',taskID:'task',items:[task],receipts:[],now};
 const row=beginBrowserReceipt(input),saved=JSON.stringify(row);

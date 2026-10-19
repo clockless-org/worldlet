@@ -131,7 +131,7 @@ export function diagnosticError(value){
   // The person's model service failing after Hermes's own retries (HTTP 5xx), not a Worldlet fault: background checks
   // on 10-07 counted these as operationFailed.
   /model service is unavailable|internal ?server ?error|bad gateway|service unavailable|\b(?:http|error code:?) 5\d\d\b/.test(message)?'unavailable':
-  // A kept website page released under memory pressure (core/browser/page-resume.ts PAGE_MEMORY).
+  // A kept website page released under memory pressure (context/browser/page-resume.ts PAGE_MEMORY).
   message.includes('memory pressure (lowmemory)')?'lowMemory':message.includes('memory pressure (appfootprint)')?'appFootprint':'operationFailed';
  const operation=value.operation==='hermesChat'?'agentChat':value.operation;
  const rule=code==='operationFailed'?setupStep(message)??failureKind(message):code==='outputValidation'?itemRule(message):undefined;
@@ -151,7 +151,7 @@ function stackFrame(line:string){
   lineno:Number(match[3]),colno:Number(match[4]),in_app:!/^(node:|internal\/)|node_modules|electron\/js2c|<anonymous>/.test(location)};
 }
 /** Recorded on purpose, not failures: a kept website page released under memory pressure is the browser relieving
- * memory as designed (core/browser/page-resume.ts PAGE_MEMORY). diagnostics.jsonl keeps them; error tracking does not. */
+ * memory as designed (context/browser/page-resume.ts PAGE_MEMORY). diagnostics.jsonl keeps them; error tracking does not. */
 const NOT_EXCEPTIONS=new Set(['keptPageRelease']);
 /** An uncaught or recorded error as a PostHog `$exception` projection: its type, Core's failure code and sanitized
  * frames (oldest first, as error tracking expects), or null for an operation recorded on purpose. The message is

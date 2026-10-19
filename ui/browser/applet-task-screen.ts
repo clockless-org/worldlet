@@ -15,7 +15,7 @@
  */
 import type {SurfaceRect} from '../../contracts/browser-surface.ts';
 import {getApp} from '../../core/applets/index.ts';
-import {taskPictureInPictureAspect} from '../../core/browser/index.ts';
+import {taskPictureInPictureAspect} from '../../context/browser/index.ts';
 import {appHudIcon} from '../applets/index.ts';
 import {node} from '../components/index.ts';
 

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {type HostTurnTrust,turnBrowserAdmission,turnTrustInherit,turnTrustObserve,turnWriteAdmission,turnWriteNotice,worldItemRestore,worldItemSnapshot} from '../core/agent/turn-trust.ts';
 import {invoke as invokeSharedCore} from '../core/index.ts';
-import {browserElementPolicy,browserEffectDecision,browserFinalStep,browserFollowThrough} from '../core/browser/agent-browser.ts';
+import {browserElementPolicy,browserEffectDecision,browserFinalStep,browserFollowThrough} from '../context/browser/agent-browser.ts';
 
 const fold=(events:object[])=>events.reduce<HostTurnTrust>((state,event)=>turnTrustObserve(state,event),{untrusted:false,sources:[]});
 const write={type:'tool',name:'archive_world_items',args:{ids:['a']}};

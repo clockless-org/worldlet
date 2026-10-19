@@ -74,7 +74,7 @@ export type PhoneWidgets={v:1,at:string,widgets:PhoneWidget[]};
 // one an older phone still sends.
 // `web` is what happened on a website the phone opened in its own browser (owner request 2026-10-07): the observer's
 // reports (platform/bridge/web-record.js) with the phone's time, kept in the computer's World by the same rules as
-// the computer's browser (core/browser/web-record.ts).
+// the computer's browser (context/browser/web-record.ts).
 // `file` is one part of a photo or file the person attached with "+" (owner request 2026-10-12): a sealed box holds at most
 // 256 KiB, so the phone sends each attachment in parts (`part` from 0 of `parts`, `data` base64) before the chat line,
 // whose `files` names them; the computer saves the file and the line carries its path for Fox's Agent.

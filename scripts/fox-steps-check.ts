@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {foxStepsStart,foxStepsAdd,foxStepsFinish,foxStepsView,foxResultText,FOX_STEPS_SHOWN} from '../core/browser/index.ts';
+import {foxStepsStart,foxStepsAdd,foxStepsFinish,foxStepsView,foxResultText,FOX_STEPS_SHOWN} from '../context/browser/index.ts';
 // Fox's steps on a page, the page's one status card (#1619): each step is ticked once Fox moves on,
 // Thinking heads the card without becoming a step, a repeated step is one step, and the turn's end
 // ticks everything and keeps the reply's first lines as the result.

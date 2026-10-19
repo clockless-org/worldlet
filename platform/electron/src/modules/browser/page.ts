@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {WebContentsView,type Rectangle,type Session,type View,type WebContents} from 'electron';
 import {WorldletError} from '../../files.ts';
-import {googleSignInPage} from '../../../../../core/browser/index.ts';
+import {googleSignInPage} from '../../../../../context/browser/index.ts';
 import {MAX_POPUPS,httpsUpgrade,opensAsTab,popupAllowed,publicPage,signInPage} from './rules.ts';
 import type {Row} from '../../host/types.ts';
 import type {WebRecordLink} from './web-page.ts';
@@ -74,7 +74,7 @@ export class PageView {
  private readonly passkeyAsked=new WeakSet<WebContents>();
  onOpenTab=(_url:string,_background:boolean)=>{};
  onPress=()=>{};
- /** A document script the first document gets before its own, once (the storage a moved page carries, core/browser/storage-carry.ts). */
+ /** A document script the first document gets before its own, once (the storage a moved page carries, context/browser/storage-carry.ts). */
  private early='';
  constructor(parent:View,session:Session,webRoot:string,demo:boolean,url:string,early=''){
   this.parent=parent;this.session=session;this.webRoot=webRoot;this.demo=demo;this.early=early;
@@ -329,7 +329,7 @@ export class PageView {
    const source=pageScript(this.webRoot,'browser-observer.js',this.demo);
    await this.evaluateExpression(`if(!window.worldletXReader){${source}\n}`,context);
    if(this.recorder)await this.evaluateExpression(pageScript(this.webRoot,'browser/web-record.js',this.demo),context);
-   // Saved sign-ins (core/browser/saved-logins.ts): an older build without the script still browses.
+   // Saved sign-ins (context/browser/saved-logins.ts): an older build without the script still browses.
    try{await this.evaluateExpression(pageScript(this.webRoot,'browser/login-watch.js',this.demo),context);}catch{}
    if(this.contextTask===task)this.isolatedContext=context;
    return context;

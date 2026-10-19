@@ -80,18 +80,18 @@ await copyFile(path.join(root,'platform/browser/agent_browser.py'),path.join(out
 await cp(path.join(root,'platform/browser/demo'),path.join(output,'demo'),{recursive:true});
 await writeFile(path.join(output,'browser/activity-observer.js'),'('+installActivityCollector.toString()+')().read()');
 await writeFile(path.join(output,'browser/media-hold.js'),'('+holdMedia.toString()+')()');
-// What the built-in browser records of a page (core/browser/web-record.ts), installed in its isolated world.
+// What the built-in browser records of a page (context/browser/web-record.ts), installed in its isolated world.
 await writeFile(path.join(output,'browser/web-record.js'),'('+installWebRecorder.toString()+')()');
-// Saved sign-ins (core/browser/saved-logins.ts): every website page's isolated world, the built-in browser's own.
+// Saved sign-ins (context/browser/saved-logins.ts): every website page's isolated world, the built-in browser's own.
 await writeFile(path.join(output,'browser/login-watch.js'),'('+installLoginWatch.toString()+')()');
 await writeFile(path.join(output,'browser/passkey-watch.js'),'('+installPasskeyWatch.toString()+')()');
 // Meetings pages' call-audio hooks, a function of the binding's name (engine/page.ts calls it with one).
 await writeFile(path.join(output,'browser/meeting-audio.js'),'('+installMeetingAudio.toString()+')');
 // A function of its mode ('probe', 'enter', 'leave'); the host calls it with one.
 await writeFile(path.join(output,'browser/picture-in-picture.js'),'('+pictureInPicture.toString()+')');
-// Every CEF website page's video-format counts (core/browser/video-formats.ts), a function of the formats' pattern.
+// Every CEF website page's video-format counts (context/browser/video-formats.ts), a function of the formats' pattern.
 await writeFile(path.join(output,'browser/video-formats.js'),'('+installVideoFormatWatch.toString()+')');
-// Focus on website pages (core/browser/page-focus.ts): its rules with Readability, run in the page's isolated world.
+// Focus on website pages (context/browser/page-focus.ts): its rules with Readability, run in the page's isolated world.
 await build({entryPoints:[path.join(root,'platform/bridge/page-focus.ts')],outfile:path.join(output,'browser/page-focus.js'),bundle:true,format:'iife',minify:true,target:'es2022'});
 await copyFile(path.join(root,'node_modules/@mozilla/readability/LICENSE.md'),path.join(output,'READABILITY-LICENSE.txt'));
 // The development app polls this marker. Writing it here means any rebuild reloads it,

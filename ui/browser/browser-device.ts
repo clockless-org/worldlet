@@ -2,7 +2,7 @@ import type {BrowserSurfaceAction,BrowserSurfaceBodies,SurfaceRect} from '../../
 import {appletForWebsite} from './applet-match.ts';
 import {getApp,inAppletCatalog,siteAppletPage} from '../../core/applets/index.ts';
 import {uiIcon} from '../components/index.ts';
-import {BROWSER_TABS,appletSite,appletHomeLanding,atAppletHome,atBrowserHome,browserStartsHome,createBrowserHome,createBrowserTabs,createPageMemory,canAddTab,isBrowserTab,tabApplet,tabLabel,pageAddress,typedAddress,livePagePlan,pictureInPictureApplet,foxCopyPlacement,foxStepsStart,foxStepsAdd,foxStepsFinish,foxStepsView,foxStepsWorthShowing,loginSite,loginSavedText,loginFillText} from '../../core/browser/index.ts';
+import {BROWSER_TABS,appletSite,appletHomeLanding,atAppletHome,atBrowserHome,browserStartsHome,createBrowserHome,createBrowserTabs,createPageMemory,canAddTab,isBrowserTab,tabApplet,tabLabel,pageAddress,typedAddress,livePagePlan,pictureInPictureApplet,foxCopyPlacement,foxStepsStart,foxStepsAdd,foxStepsFinish,foxStepsView,foxStepsWorthShowing,loginSite,loginSavedText,loginFillText} from '../../context/browser/index.ts';
 import {createPictureInPictureOffer,createPictureInPictureWindow} from './picture-in-picture.ts';
 import {createAppletTaskScreen} from './applet-task-screen.ts';
 import {createPanelScene,appletSceneKey} from '../applets/index.ts';
@@ -10,11 +10,11 @@ import {createPanelScene,appletSceneKey} from '../applets/index.ts';
 
 export function createBrowserPanel({root,content,native,notify,openApplet=(_id:string)=>{},openPage=(_url:string)=>{},leave=()=>{},canReturn=()=>false,onPage=(_applet:string,_page:{title:string,url:string},_byFox:boolean)=>{},sample=false,madeApplets=null as null|{find:(url:string)=>{id:string,title:string}|null,make:(page:{title:string,url:string})=>Promise<{id:string,title:string}>}}){
  const visits=new Map<string,{title:string,url:string}>();let appletKey='';
- // Resume where the person left off (core/browser/page-resume.ts). The practice world keeps
+ // Resume where the person left off (context/browser/page-resume.ts). The practice world keeps
  // its pages in memory only, so they never reach the real world's.
  const store=sample?null:(()=>{try{return globalThis.localStorage;}catch{return null;}})();
  const memory=createPageMemory(store),browserHome=createBrowserHome(store);
- // The Browser's tabs (owner request 2026-10-07, core/browser/browser-tabs.ts): each tab is its own kept page under its
+ // The Browser's tabs (owner request 2026-10-07, context/browser/browser-tabs.ts): each tab is its own kept page under its
  // own key ('browser', 'browser--2'…) in `resumeKey`, `hidden` and the host's kept pages, so the live budget and resume
  // serve them as they serve Applets. Its page memory (the Browser's one page before tabs) becomes the first tab once.
  const tabs=createBrowserTabs(store,()=>browserHome.get(),{url:memory.get('browser'),at:memory.last('browser')});
@@ -23,7 +23,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  const forget=(key:string)=>{if(isBrowserTab(key))tabs.forget(key);else memory.forget(key);};
  const hidden=new Map<string,number>(),foxPages=new Set<string>();
  let resumeKey='',resuming=false,restoring=false,fallback=null,foxNavigating=false,liveTimer=0,shows=0,settled=true;
- // The host's budget (core/browser/budget.ts) sets how many pages stay live.
+ // The host's budget (context/browser/budget.ts) sets how many pages stay live.
  function livePages(){
   const plan=livePagePlan(hidden,Date.now(),pip||null,native?.browser?.budget?.()?.livePages);for(const key of [...hidden.keys()])if(!plan.live.includes(key))hidden.delete(key);
   clearTimeout(liveTimer);if(plan.nextCheck!==null)liveTimer=window.setTimeout(expire,Math.max(0,plan.nextCheck-Date.now())+50);
@@ -54,7 +54,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  const hostGlow=()=>!!native?.browser?.foxOverlay?.();
  /** Websites show here in a native page over the panel; a World page in a web browser opens them in a new tab. */
  const pagesHere=()=>!!native?.browser&&native.browser.pages?.()!==false;
- // Fox's copy of the page (owner request 2026-10-09, core/browser/picture-in-picture.ts FOX_COPY): when Fox
+ // Fox's copy of the page (owner request 2026-10-09, context/browser/picture-in-picture.ts FOX_COPY): when Fox
  // starts working on the page in view, the host makes Fox a copy of it in the panel's top-right corner,
  // and the person keeps their own page. `copyPage` is the copy's own size while there is one; the
  // glow, Fox's pointer and the steps card go to the copy, and the panel's frame stays plain.
@@ -75,7 +75,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  // The page's own status is the one place its status lives (owner feedback 2026-10-02: the window's
  // status, not the same words again in Fox's bubble and a note). On a host that draws over the page
  // it is a small card listing Fox's steps, each ticked as Fox moves on, and after Fox's turn the
- // result in the same place (#1619, core/browser/fox-steps.ts). Other hosts label the ring with the
+ // result in the same place (#1619, context/browser/fox-steps.ts). Other hosts label the ring with the
  // step Fox is on, like the small screen over the device ("Fox · Filling in the form…").
  let foxStepText='',foxSteps=foxStepsStart(),foxReply={message:'',ok:true},finishTimer=0,finishedApplet='',finishedAt=0;
  // Seen in the panel, the finished card stays this long; unseen, it is kept this long for a return.
@@ -223,7 +223,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  }
  // Where the page is (owner request 2026-10-08), now in the toolbar's address field (owner request 2026-10-09): the page's
  // address while it is read, the whole address to edit once the field is clicked. Enter opens what was typed here: an
- // address (core/browser/typed-address.ts), or a search for anything else.
+ // address (context/browser/typed-address.ts), or a search for anything else.
  const addressForm=document.createElement('form');addressForm.className='browser-address';
  const addressField=document.createElement('input');addressField.type='text';addressField.spellcheck=false;addressField.autocomplete='off';
  addressField.setAttribute('aria-label','Page address');addressField.placeholder='Type an address or search';addressForm.append(addressField);
@@ -240,7 +240,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   const url=typedAddress(text)||'https://www.google.com/search?q='+encodeURIComponent(text);
   addressField.blur();void command('open',{url});
  };
- // Each website Applet's home page is the address it opens at (core/browser/page-resume.ts appletSite); the Browser's is
+ // Each website Applet's home page is the address it opens at (context/browser/page-resume.ts appletSite); the Browser's is
  // the one in Settings › General. A page over the World ('web') has none. Where that address first lands (a redirect,
  // x.com/ → x.com/home) is its home too, for this session.
  const landedHomes=new Map<string,string>();let landingHome=false;
@@ -337,7 +337,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   if(key===resumeKey){resumeKey='';showTab(next);return;}
   renderTabs();resuming=true;if(showing){showing=false;lastRect='';geometry(true);}
  }
- // Focus, first of the Applet's controls right of the title (owner request 2026-10-05, core/browser/page-focus.ts; it stood
+ // Focus, first of the Applet's controls right of the title (owner request 2026-10-05, context/browser/page-focus.ts; it stood
  // left after Back until the page's Back and Forward took that side, 2026-10-06, and the title's room): on by default, a website
  // page shows its main content (an article alone, an app without its distractions); pressed, the whole page shows again,
  // and the site keeps that choice. The host says what Focus does on each page it shows (`focus` reports).
@@ -391,9 +391,9 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   finally{making=false;syncMakeOffer();}
  };
  root.addEventListener('worldlet:applet-layout',()=>syncMakeOffer());
- // A sign-in the website refuses here (core/browser/sign-in.ts) gets one explicit way out: the
+ // A sign-in the website refuses here (context/browser/sign-in.ts) gets one explicit way out: the
  // Applet's site in the system browser. It shows until the page moves on; nothing opens by itself.
- // Saved sign-ins (core/browser/saved-logins.ts, owner request 2026-10-07): after the person signs in, an offer beside the
+ // Saved sign-ins (context/browser/saved-logins.ts, owner request 2026-10-07): after the person signs in, an offer beside the
  // page to save the account (its password stays in the host); on a site's sign-in form, a button per saved account fills
  // it in. Both stand over the World beside the page, where the page's other offers are, since the page covers the panel.
  let loginFill:{site:string,accounts:string[]}|null=null,loginBusy=false;
@@ -420,7 +420,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   if(!signInOffer.hidden)signInOffer.textContent='Open '+title+' in your browser ↗';
  }
  signInOffer.onclick=event=>{event.stopPropagation();void command('external',{platform});};
- // Picture in picture (core/browser/picture-in-picture.ts). `pip` is the Applet whose page is
+ // Picture in picture (context/browser/picture-in-picture.ts). `pip` is the Applet whose page is
  // the World's small window and `pipPlatform` the platform its page opened with; choosing it
  // marks the next leave (`pipWanted`) to keep the page there, playing, instead of hiding it.
  // The host reports whether the page plays a video.
@@ -701,7 +701,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
    else if(previous!==key&&resumeKey&&showing&&!hidden.has(resumeKey))hidden.set(resumeKey,Date.now());
    const previousPage=resumeKey;
    resumeKey=appletSite(key)?key:'';resuming=!!resumeKey&&(!url||url===site?.url);
-   // The Browser entered again after a while away starts on its home page (core/browser/browser-home.ts),
+   // The Browser entered again after a while away starts on its home page (context/browser/browser-home.ts),
    // never while its page is in view (a World refresh re-mounts the open Browser): its tabs start again as one.
    if(key==='browser'&&!url&&!returning&&!(previous===key&&showing)&&browserStartsHome(tabs.last(),Date.now())){resuming=false;for(const gone of tabs.reset())hidden.delete(gone);memory.forget(key);}
    // The Browser shows its active tab; a page opened in the Browser opens there.
@@ -750,10 +750,10 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
    await geometryReady;await pending.catch(()=>{});
    if(args.operation==='history')return command('history',{query:args.query||'',after:args.after||'',before:args.before||'',offset:args.offset||0},true);
    if(args.operation==='saved')return command('saved',{query:args.query||''},true);
-   // Focus rules for the site open here (core/browser/page-focus.ts): its parts to choose from, then the ones to hide.
+   // Focus rules for the site open here (context/browser/page-focus.ts): its parts to choose from, then the ones to hide.
    if(args.operation==='outline')return command('outline',{},true);
    if(args.operation==='focus')return command('focus',{hide:Array.isArray(args.hide)?args.hide:null},true);
-   // What the built-in browser recorded (core/browser/web-record.ts): search visits, then read one.
+   // What the built-in browser recorded (context/browser/web-record.ts): search visits, then read one.
    if(args.operation==='records')return command('records',{query:args.query||'',site:args.site||'',after:args.after||'',before:args.before||'',offset:args.offset||0},true);
    if(args.operation==='record')return command('record',{id:args.id||'',query:args.query||'',only:args.only||'',offset:args.offset||0,full:args.full===true},true);
    return command(args.operation,{url:args.url||'',direction:args.direction||'down'},true);
