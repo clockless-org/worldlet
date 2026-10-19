@@ -84,7 +84,7 @@ function buildWorldActions(sample:boolean):WorldAction[]{
   const read=add(provider,operation,'read_service',{provider,operation});
   if(read)read.parameters.required=[...required??[]];
  }
- // The person's own events (core/tools/calendar.ts); each operation names what it needs.
+ // The person's own events (agent/tools/calendar.ts); each operation names what it needs.
  operations('calendar','manage_calendar');
  for(const action of actions.filter(a=>a.tool==='manage_calendar'))action.parameters.required=CALENDAR_REQUIRED[action.action];
  // Agent asks (core/agent/asks.ts): each its own Grant target, which only "Can ask you" and "Can take work" name.

@@ -4,7 +4,7 @@ import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
 import {hermesRequestModel,openClawMissingKey,WORLD_TOOL_SERVER,acpApprovalOutcome,acpModels,acpPromptUsage,acpUsageUpdate,addHarnessUsage,isHarnessModelId,usageSince,acpChangesAsked,acpChangesUpdate,approvalChanges,changesAnswered,changesAsked,isHarnessAgentId,acpApprovalRequest,harnessSessionName,openClawApprovalFor,openClawApprovalRequest,openClawChangesEvent,openClawConnect,openClawDecision,openClawDeviceProof,
  harnessTurnText,openClawResponsesBody,openClawSessionIs,openClawUserInput,readOpenClawFrame,hermesAcpAnnouncement,readResponsesChunk,remoteGatewaySocketUrl,responsesBody,responsesStream,type ApprovalChanges,type HermesAnnouncedCall,type ResponsesTool,type ResponsesTurn} from '../../../../../core/agent/index.ts';
-import {worldGatewayTools} from '../../../../../core/tools/index.ts';
+import {worldGatewayTools} from '../../../../../agent/tools/index.ts';
 import type {HarnessApprovalChoice,HarnessApprovalRequest,HarnessApprovalResult,HarnessApprovals,HarnessConversation,HarnessModel,HarnessSession,HarnessSessionKey,HarnessTurnEvent,HarnessTurnInput,HarnessUsage} from '../../../../../contracts/harness-services.ts';
 import {WorldletError,writeAtomic} from '../../files.ts';
 import {AgentCancelled,stopChild} from './protocol.ts';

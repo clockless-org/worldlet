@@ -9,7 +9,7 @@ import {hermesAcpAnnouncement,type HermesAnnouncedCall} from './hermes-server.ts
 import {piModelArguments} from './model-providers.ts';
 import {acpModels} from './harness-models.ts';
 import {record} from './values.ts';
-import {worldToolAliases,worldToolIndex} from '../tools/index.ts';
+import {worldToolAliases,worldToolIndex} from '../../agent/tools/index.ts';
 
 export type LocalHarnessId='claude-code'|'codex'|'hermes'|'openclaw'|'pi';
 export interface LocalHarnessDefinition {

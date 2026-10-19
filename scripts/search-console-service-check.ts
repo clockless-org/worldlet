@@ -14,7 +14,7 @@ import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
 import {GOOGLE_TOKEN_URL,SEARCH_CONSOLE_LIMITS,SEARCH_CONSOLE_SCOPE,readServicePresetRead,saveServicePreset,searchConsoleSpec} from '../context/accounts/index.ts';
 import {channelDefaultGrants,serviceReadTargets,standingActions,standingCallDecision} from '../core/agent/grants.ts';
 import {turnTrustObserve} from '../core/agent/turn-trust.ts';
-import {worldActionOf,worldActions} from '../core/tools/gateway.ts';
+import {worldActionOf,worldActions} from '../agent/tools/gateway.ts';
 import {SOURCE_PROVIDERS,TOKEN_PROVIDERS,connectSettings,connectToken} from '../context/applets/index.ts';
 import {resolveBoard,readBoardDefinition} from '../context/board/index.ts';
 import {SERVICE_TITLES,type ServiceRecords} from '../contracts/services.ts';

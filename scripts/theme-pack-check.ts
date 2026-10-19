@@ -173,7 +173,7 @@ console.log('PASS Theme Pack: the host draws with the Village pack, broken packs
 // Theme sound projection and the platform-independent selection policy.
 {
  const {themeAmbientTrack}=await import('../ui/themes/index.ts');
- const {createAmbientSelection}=await import('../core/tools/index.ts');
+ const {createAmbientSelection}=await import('../agent/tools/index.ts');
  const pack=castlePack;
  assert.equal(themeAmbientTrack(pack),'theme:castle:water-glints');
  assert.equal(themeAmbientTrack(pack,'building','building-home'),'theme:castle:chimney-smoke');

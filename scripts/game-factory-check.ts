@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 import {widgetDocument,WIDGET_POLICY} from '../context/artifacts/index.ts';
 import {checkMadeGameSource,madeGameDocument,readMadeGameReport,madeGameRecord,readMadeGame,orderMadeGames,madeGameTrialProblems,gameFactoryModel,madeGameId,validMadeGameId,madeGameTask,betterBest,GAME_MAKING_OPEN,MADE_GAME_POLICY,SANDBOX_POLICY,MADE_GAME_REPORT,GAME_FACTORY_APPLET} from '../context/games/index.ts';
 import {createWorldToolRuntime} from '../platform/bridge/world-tool-runtime.ts';
-import {worldActions,listWorldTools} from '../core/tools/index.ts';
+import {worldActions,listWorldTools} from '../agent/tools/index.ts';
 import {APP_DEFINITIONS} from '../context/applets/index.ts';
 
 // A plain canvas game passes; SVG namespaces, `rect.top`, `node.parent` and location.reload are not network use.

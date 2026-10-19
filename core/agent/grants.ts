@@ -7,7 +7,7 @@ import {githubWriteScope,githubWriteScopeCovers,readGithubWriteScope} from './gi
 import {AGENT_REPORT_ACTIONS,AGENT_REPORT_TARGET} from '../../contracts/agent-reports.ts';
 import {AGENT_ARTIFACT_ACTIONS,AGENT_ARTIFACT_TARGET} from '../../contracts/agent-artifacts.ts';
 import {SERVICE_DRAFT_OPERATIONS,SERVICE_DRAFT_PROVIDERS,SERVICE_DRAFT_TARGETS,SERVICE_DRAFT_TITLES,serviceDraftTarget,type ServiceDraftProvider} from '../../contracts/service-drafts.ts';
-import {grantedActions,worldActions,type WorldAction} from '../tools/index.ts';
+import {grantedActions,worldActions,type WorldAction} from '../../agent/tools/index.ts';
 import {turnGuardedWrite,turnWriteAdmission} from './turn-trust.ts';
 import {HERMES_CHANNEL_LINK_TOOL,HERMES_CHANNEL_READ_ONLY,HERMES_CHANNEL_TOOLS,hermesChannelTrust} from './hermes-server.ts';
 

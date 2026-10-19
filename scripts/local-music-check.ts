@@ -7,7 +7,7 @@
 // these fixtures do not claim them.
 import assert from 'node:assert/strict';
 import {localMusicCommand,localMusicQuery,localPlayerName,nowPlayingLine,readNowPlaying,readPlaylists,readTracks,worldletPlayer} from '../context/applets/index.ts';
-import {listWorldTools} from '../core/tools/catalog.ts';
+import {listWorldTools} from '../agent/tools/catalog.ts';
 import {runLocalMusicTool} from '../ui/world/local-music.ts';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
 

@@ -11,7 +11,7 @@ import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
 import {CLOUDFLARE_LIMITS,readCloudflare} from '../context/accounts/index.ts';
 import {channelDefaultGrants,standingActions,standingCallDecision} from '../core/agent/grants.ts';
 import {turnTrustObserve} from '../core/agent/turn-trust.ts';
-import {worldActionOf,worldActions} from '../core/tools/gateway.ts';
+import {worldActionOf,worldActions} from '../agent/tools/gateway.ts';
 import {APP_DEFINITIONS,SOURCE_PROVIDERS,TOKEN_PROVIDERS,connectSettings,connectToken} from '../context/applets/index.ts';
 import {validateAppletRuntimes} from '../context/applets/runtime.ts';
 import {ExecutionJournal} from '../platform/electron/src/modules/agent-runtime/journal.ts';

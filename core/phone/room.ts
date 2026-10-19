@@ -38,7 +38,7 @@ export function readRoomFrame(data:unknown):RoomFrame|null{
 }
 /** Whether a browser link meets the computer in the room. */
 export const isRoomLink=(link:string)=>new URLSearchParams(link.slice(link.indexOf('#')+1)).get('m')===ROOM_LINK_MODE;
-/** What the Agent's `world/link` answers (core/tools controls.ts `share_world_link`): the room link for another device's
+/** What the Agent's `world/link` answers (agent/tools controls.ts `share_world_link`): the room link for another device's
  * browser, from the pairing's status, and what to do with it. Anyone who has the link can see and act in the World, so
  * the Agent is told to send it to the person alone. */
 export function worldLinkReply(status:{state?:unknown,link?:unknown},local=''):{ok:true,link:string,opened:boolean,message:string,localLink?:string}|{error:string}{

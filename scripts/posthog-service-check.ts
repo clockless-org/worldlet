@@ -13,7 +13,7 @@ import {POSTHOG_LIMITS,hogqlSelect,posthogHost} from '../context/accounts/index.
 import {channelDefaultGrants,standingActions,standingCallDecision} from '../core/agent/grants.ts';
 import {hermesChannelToolAllowed} from '../core/agent/hermes-server.ts';
 import {turnTrustObserve} from '../core/agent/turn-trust.ts';
-import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
+import {resolveAction,worldActionOf,worldActions} from '../agent/tools/gateway.ts';
 import {APP_DEFINITIONS,SOURCE_PROVIDERS,connectSettings,connectToken} from '../context/applets/index.ts';
 import {validateAppletRuntimes} from '../context/applets/runtime.ts';
 import {ExecutionJournal} from '../platform/electron/src/modules/agent-runtime/journal.ts';

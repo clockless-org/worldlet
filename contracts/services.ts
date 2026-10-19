@@ -27,7 +27,7 @@ export const SERVICE_ACTIONS:Readonly<Record<string,Readonly<Partial<Record<Serv
 });
 /** The Services `read_service` reads. A Service's Attention reads (its Applet's registration) are the World's own
  * background reads: an Agent reads a Service only through `read_service` and a Grant naming it, never through
- * `read_world_source` (core/tools/gateway.ts). */
+ * `read_world_source` (agent/tools/gateway.ts). */
 export const SERVICE_PROVIDERS:readonly string[]=Object.freeze(Object.keys(SERVICE_ACTIONS));
 /** The World's saved Service context (context/context/service-context.ts): one search and one read across what the World
  * keeps up to date from each connected Service, for an Agent that may read that Service. Every "Can read <Service>"

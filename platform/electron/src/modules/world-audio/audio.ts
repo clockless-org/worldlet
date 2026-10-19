@@ -1,6 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs';
-import {createAmbientSelection} from '../../../../../core/tools/index.ts';
+import {createAmbientSelection} from '../../../../../agent/tools/index.ts';
 import {pathToFileURL} from 'node:url';
 import {WorldletError,errorMessage} from '../../files.ts';
 import type {Preferences} from '../../preferences.ts';
