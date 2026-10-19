@@ -67,7 +67,7 @@ export function conversationOriginal(c:Pick<BroughtConversation,'source'|'sessio
 }
 
 /** What the person's own Agent picked out for the Attention Center when setup asked it to describe itself
- * (agent/agent/agent-profile.ts `attention`; owner request 2026-10-12, Kelvin: "onboard了以后 Attention Center里面要有东西").
+ * (agent/agents/agent-profile.ts `attention`; owner request 2026-10-12, Kelvin: "onboard了以后 Attention Center里面要有东西").
  * Its answer comes before any synthesis pass has run on its conversations, so the Center is not empty when the World
  * opens. Each entry becomes a Center item of the `conversations` provider that cites the conversation it names (the
  * busiest brought one whose name matches) and opens back to it; one whose conversation is not here yet waits for it.

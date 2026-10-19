@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {DatabaseSync} from 'node:sqlite';
-import {isMigrationSource,migrationSkillPath,migrationSkillsSafe} from '../../../../../agent/agent/index.ts';
+import {isMigrationSource,migrationSkillPath,migrationSkillsSafe} from '../../../../../agent/agents/index.ts';
 import {core} from '../../core.ts';
 import {digest,ensureDirectory,INSTALLATION_FOLDERS,WorldletError} from '../../files.ts';
 import {WORLD_PREFERENCE_KEYS} from '../../preferences.ts';

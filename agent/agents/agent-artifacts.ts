@@ -3,7 +3,7 @@ import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
 import {looksSecret} from './agent-profile.ts';
 import {ARTIFACT_LIMITS,artifactSizeFor,mergeArtifact,orderArtifacts,validArtifactId,type Artifact} from '../../context/artifacts/index.ts';
 
-/** Agent artifacts (contracts/agent-artifacts.ts, agent/agent/GRANTS.md#agent-artifacts). Pure: hosts supply the kept
+/** Agent artifacts (contracts/agent-artifacts.ts, agent/agents/GRANTS.md#agent-artifacts). Pure: hosts supply the kept
  * artifacts, the calling Agent's ID (from its token) and name, the new artifact's ID and the clock, and save what comes
  * back. Every refusal throws an Error whose message the Agent is shown. */
 
@@ -18,7 +18,7 @@ export const AGENT_ARTIFACT_REASONS=Object.freeze({
 });
 
 // C0 controls (except tab and line breaks, allowed in the body only), DEL, C1 controls, and the bidirectional overrides
-// that can make a card read differently from what it holds (as agent/agent/asks.ts).
+// that can make a card read differently from what it holds (as agent/agents/asks.ts).
 const CONTROL=/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f‪-‮⁦-⁩]/;
 const LINE_BREAK=/[\t\r\n]/;
 const KEY=new RegExp(`^[A-Za-z0-9][A-Za-z0-9._:-]{0,${AGENT_ARTIFACT_LIMITS.key-1}}$`);

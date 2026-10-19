@@ -1,7 +1,7 @@
 import {AGENT,type AgentService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {WorldletError} from '../../files.ts';
-import {AGENT_BINDING_SCOPES,agentAnswerReason,agentBindingInstructions,agentBindingPlace,answeringAgent,bindAgent,harnessService,harnessSessionThread,isHarnessAgentId,noteAgentPlace,readAgentBindings,type AgentBindingScope,type AgentPlaces} from '../../../../../agent/agent/index.ts';
+import {AGENT_BINDING_SCOPES,agentAnswerReason,agentBindingInstructions,agentBindingPlace,answeringAgent,bindAgent,harnessService,harnessSessionThread,isHarnessAgentId,noteAgentPlace,readAgentBindings,type AgentBindingScope,type AgentPlaces} from '../../../../../agent/agents/index.ts';
 import {APPLET_REGION_TITLES,getApp,migrateAreaLayout} from '../../../../../context/applets/index.ts';
 import {conversationAttentionId,readOngoing} from '../../../../../agent/tasks/index.ts';
 import type {HarnessAgent} from '../../../../../contracts/harness-services.ts';

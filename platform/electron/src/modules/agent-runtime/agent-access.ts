@@ -1,12 +1,12 @@
 import crypto from 'node:crypto';
-import {AGENT_AUDIT_KEEP,agentRevoked,channelDefaultGrants,currentServiceGrant,grantActive,readAgentIdentity,readGrant,askGrant,askGrantAuditEntry,artifactGrant,artifactGrantAuditEntry,boardGrant,boardGrantAuditEntry,githubDraftGrant,githubDraftGrantAuditEntry,githubWriteGrant,githubWriteGrantAuditEntry,githubWriteGrants,githubWriteGrantId,isServiceDraftProvider,serviceDraftGrant,serviceDraftGrantAuditEntry,serviceGrantAuditEntry,serviceReadGrant,reportGrant,reportGrantAuditEntry} from '../../../../../agent/agent/index.ts';
+import {AGENT_AUDIT_KEEP,agentRevoked,channelDefaultGrants,currentServiceGrant,grantActive,readAgentIdentity,readGrant,askGrant,askGrantAuditEntry,artifactGrant,artifactGrantAuditEntry,boardGrant,boardGrantAuditEntry,githubDraftGrant,githubDraftGrantAuditEntry,githubWriteGrant,githubWriteGrantAuditEntry,githubWriteGrants,githubWriteGrantId,isServiceDraftProvider,serviceDraftGrant,serviceDraftGrantAuditEntry,serviceGrantAuditEntry,serviceReadGrant,reportGrant,reportGrantAuditEntry} from '../../../../../agent/agents/index.ts';
 import {GITHUB_WRITE_LIMITS} from '../../../../../contracts/github-drafts.ts';
 import type {AgentAuditEntry,AgentIdentity,Grant} from '../../../../../contracts/agent-identity.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 import type {AgentAccess,VaultService} from '../../host/services.ts';
 import type {Row} from './types.ts';
 
-// Per-Agent identity, Grants and audit (agent/agent/GRANTS.md). Core decides; this keeps the records: identities and
+// Per-Agent identity, Grants and audit (agent/agents/GRANTS.md). Core decides; this keeps the records: identities and
 // Grants with Fox's setup choices (`agent_settings`, so they follow the World and its backups), the hash of each Agent's
 // token for this run in the vault (the token itself only ever goes into that Agent's owner-only endpoint file), and
 // each decision in the World's ledger as `agent.audit`, the newest AGENT_AUDIT_KEEP per Agent.

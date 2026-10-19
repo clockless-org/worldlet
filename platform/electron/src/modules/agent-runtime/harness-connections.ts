@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {openAgentDatabase,type AgentDatabase} from './agent-database.ts';
-import {agentServerConnections,commandLine,commandReason,dotenvNames,harnessService,hermesConnectionCommand,hermesConnections,hermesConversationTitle,hermesMcpPrefixes,openClawConnectionCommand,openClawConnections,openClawMcpPrefixes,withLastUse,type ConnectionUse,type LocalHarnessId} from '../../../../../agent/agent/index.ts';
+import {agentServerConnections,commandLine,commandReason,dotenvNames,harnessService,hermesConnectionCommand,hermesConnections,hermesConversationTitle,hermesMcpPrefixes,openClawConnectionCommand,openClawConnections,openClawMcpPrefixes,withLastUse,type ConnectionUse,type LocalHarnessId} from '../../../../../agent/agents/index.ts';
 import type {HarnessConnection,HarnessConnectionChange,HarnessConnections} from '../../../../../contracts/harness-services.ts';
 import {WorldletError} from '../../files.ts';
 import {inside,readFile} from './agent-files.ts';
@@ -12,7 +12,7 @@ import {openClawThreads,openClawToolUses} from './openclaw-files.ts';
 import type {HarnessEnvironment,LocalHarnessInstall} from './local-harness.ts';
 
 // The person's connections in their Agent (contracts/harness-services.ts `connections`, declared per Harness in
-// agent/agent/harness-services.ts): its MCP servers and chat accounts, read where that Agent keeps them, each with its
+// agent/agents/harness-services.ts): its MCP servers and chat accounts, read where that Agent keeps them, each with its
 // last use from the Agent's own history (the same files the World's history sync reads), and a server added or removed
 // only with the Agent's own command, after the person confirmed the exact command (fox/harness-connections.ts). Hermes
 // Agent: each profile's config.yaml and .env (names only), state.db's tool rows, `hermes mcp add/remove` under that
@@ -138,7 +138,7 @@ export function openClawConnectionsService(install:LocalHarnessInstall,environme
 function readOnlyConnections(install:LocalHarnessInstall,environment:HarnessEnvironment):HarnessConnections {
  return {list:async()=>{try{return agentServerConnections(install.id,readAgentIntegrations(install.id as 'claude-code'|'codex',environment.home||undefined,environment.env).servers);}catch{return [];}}};
 }
-/** The Harnesses whose connections Worldlet reads (`connections` in agent/agent/harness-services.ts). */
+/** The Harnesses whose connections Worldlet reads (`connections` in agent/agents/harness-services.ts). */
 export const HARNESS_CONNECTIONS:Partial<Record<LocalHarnessId,(install:LocalHarnessInstall,environment:HarnessEnvironment)=>HarnessConnections>>={hermes:hermesConnectionsService,openclaw:openClawConnectionsService,'claude-code':readOnlyConnections,codex:readOnlyConnections};
 export function harnessConnections(install:LocalHarnessInstall,environment:HarnessEnvironment):HarnessConnections|null {
  return harnessService(install.id,'connections')?HARNESS_CONNECTIONS[install.id]?.(install,environment)??null:null;

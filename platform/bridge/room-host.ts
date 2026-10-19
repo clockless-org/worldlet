@@ -1,8 +1,8 @@
 import type {HostTransport} from '../../contracts/platform.ts';
 import type {WorldHostFrame} from '../../contracts/web-world.ts';
-import {isWorldRoomPage,openHello,pairKeys,readWorldRoomFrame,readWorldRoomLink,roomEntry,sealJoin,worldRoomNonce,worldRoomSession,type PairKeys,type WorldRoomSession} from '../../agent/phone/index.ts';
+import {isWorldRoomPage,openHello,pairKeys,readWorldRoomFrame,readWorldRoomLink,roomEntry,sealJoin,worldRoomNonce,worldRoomSession,type PairKeys,type WorldRoomSession} from '../../agent/windows/index.ts';
 import {createFrameHost,notice,takeFragment} from './web-host.ts';
-// The World page on another device (agent/phone/README.md#the-world-on-another-device, agent/phone/world-room.ts): the
+// The World page on another device (agent/windows/README.md#the-world-on-another-device, agent/windows/world-room.ts): the
 // same World bundle, served as static files that hold no data (served at worldlet.ai/world/<version>/), joins this
 // computer in the pairing room from its link's fragment and speaks the frames a World page in a browser on that computer
 // speaks over its socket (web-host.ts), each sealed with the pairing's key and cut in pieces. The room is on the

@@ -1,7 +1,7 @@
 import type {HarnessApprovalChoice,HarnessApprovalRequest} from '../../../../../contracts/harness-services.ts';
-import {REMOTE_TURN_LIMITS,base64url,boxPlace,fromBase64url,openBox,pairKeys,readPairLink,readRemoteHostInfo,readRemoteToClient,remoteAssembler,remoteParts,remoteTurnRequest,sealBox,stalePhoneMessage,type PairKeys,type RemoteHostInfo,type RemoteToClient} from '../../../../../agent/phone/index.ts';
+import {REMOTE_TURN_LIMITS,base64url,boxPlace,fromBase64url,openBox,pairKeys,readPairLink,readRemoteHostInfo,readRemoteToClient,remoteAssembler,remoteParts,remoteTurnRequest,sealBox,stalePhoneMessage,type PairKeys,type RemoteHostInfo,type RemoteToClient} from '../../../../../agent/windows/index.ts';
 
-// The client side of Fox on another computer's Agent (agent/phone/README.md#another-computers-agent), free of Electron
+// The client side of Fox on another computer's Agent (agent/windows/README.md#another-computers-agent), free of Electron
 // so scripts/remote-agent-check.ts drives it against the relay Worker and the host in process. It pairs with the host's
 // `worldlet://agent` code in the phone's role (same keys, boxes and relay) and keeps the pairing in the vault. A turn
 // sends the chat body as a sealed `turn` (this computer's instructions and view), then reads the host's messages to it:

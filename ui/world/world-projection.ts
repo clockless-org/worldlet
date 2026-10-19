@@ -1,4 +1,4 @@
-import {sourceContextRows,compileWorld} from '../../context/context/index.ts';
+import {sourceContextRows,compileWorld} from '../../context/sources/index.ts';
 import {projectWorldItems} from '../../context/items/index.ts';
 import type {World} from '../../contracts/world.ts';
 import {applyPersonalWorld} from './world-presets.ts';

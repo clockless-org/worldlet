@@ -5,8 +5,8 @@ Who does the work: Fox, Tasks, Asks, Agents and the Gate, one of the four [layer
 - Companion: companion
 - Attention: attention
 - Tasks: tasks (work that runs without the person)
-- Agents & Gate: agent, tools (the Agents connected to the World, World tools, Grants, approvals and audit)
-- Windows: phone (the World in a web browser and on the phone)
+- Agents & Gate: agents, tools (the Agents connected to the World, World tools, Grants, approvals and audit)
+- Windows: windows (the World in a web browser and on the phone)
 - Base: onboarding, diagnostics, distribution
 
 Agent imports [Context](../context/README.md) and `contracts/`, nothing else ([layer and dependency contract](../docs/UI-CORE-PLATFORM.md#repository-layers)).

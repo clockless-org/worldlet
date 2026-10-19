@@ -12,7 +12,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-/** Notifications (agent/phone/README.md, push): a box the relay hands Firebase Messaging opens with the pairing keys, in
+/** Notifications (agent/windows/README.md, push): a box the relay hands Firebase Messaging opens with the pairing keys, in
  * the place "push" only, and the phone registers its token with the relay. */
 class PushTest {
     private val secret = ByteArray(32) { it.toByte() }

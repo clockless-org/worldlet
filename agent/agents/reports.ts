@@ -4,7 +4,7 @@ import type {ServiceRecords} from '../../contracts/services.ts';
 import {looksSecret} from './agent-profile.ts';
 import {agentRevoked} from './grants.ts';
 
-/** Agent reports (contracts/agent-reports.ts, agent/agent/GRANTS.md#agent-reports). Pure: hosts supply the stored
+/** Agent reports (contracts/agent-reports.ts, agent/agents/GRANTS.md#agent-reports). Pure: hosts supply the stored
  * reports, the identities, the calling Agent's ID (from its token) and the clock, and save what comes back. Every
  * refusal throws an Error whose message the Agent is shown. */
 

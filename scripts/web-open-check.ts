@@ -1,4 +1,4 @@
-// Worldlet in a web browser (agent/phone/README.md#web): the computer's `web` pairing (platform/electron/src/modules/
+// Worldlet in a web browser (agent/windows/README.md#web): the computer's `web` pairing (platform/electron/src/modules/
 // phone/relay.ts) and the page (ui/web) against the relay this computer serves itself (local-relay.ts), which answers
 // like worker/pairing.ts, over real HTTP on 127.0.0.1: the link, the
 // first poll completing the pairing with the browser's name, the Center reaching the page, Done and a chat line
@@ -17,7 +17,7 @@ import {createRoomLink} from '../platform/electron/src/modules/phone/room-link.t
 import {createRtcHost,type RtcPage} from '../platform/electron/src/modules/phone/rtc-host.ts';
 import {RTC_PAGE_SCRIPT} from '../platform/electron/src/modules/phone/rtc-page.ts';
 import {memoryRoom} from './memory-room.ts';
-import {createWebClient,createRoomWebClient,isRoomLink,readWebPairLink,WebPairingEnded,pairKeys,fromBase64url,sha256Hex,worldLinkReply,type PhoneMessage} from '../agent/phone/index.ts';
+import {createWebClient,createRoomWebClient,isRoomLink,readWebPairLink,WebPairingEnded,pairKeys,fromBase64url,sha256Hex,worldLinkReply,type PhoneMessage} from '../agent/windows/index.ts';
 import {resolveAction,worldActions} from '../agent/tools/index.ts';
 import {buildWebOpen} from './build-web-open.ts';
 
@@ -156,7 +156,7 @@ console.log('PASS Worldlet in a web browser: link, pairing, Center, Done, chat, 
  console.log('PASS the in-memory relay: a kept pairing survives a restart, a long poll wakes at once, no notifications, a capped queue.');
 }
 
-// Another device's browser meets the computer in the pairing room (agent/phone room.ts, room-link.ts), here in memory
+// Another device's browser meets the computer in the pairing room (agent/windows room.ts, room-link.ts), here in memory
 // (memory-room.ts).
 const room=memoryRoom(),RoomSocket=room.Socket;
 // Polls a browser until what it shows passes `ok` (a poll returns once anything new arrives).
@@ -310,7 +310,7 @@ const until=async(client:{poll(wait?:number):Promise<any>},ok:(view:any)=>boolea
 }
 await server.close();await rm(out,{recursive:true,force:true});
 
-// A line said in the browser or on the phone while the World page is not there (agent/phone/README.md#web, Fox without
+// A line said in the browser or on the phone while the World page is not there (agent/windows/README.md#web, Fox without
 // the page): the host gives it to Fox's main conversation on its own, and the turn is not ended for want of the page.
 {
  const phone=readFileSync('platform/electron/src/modules/phone/index.ts','utf8'),fox=readFileSync('platform/electron/src/modules/fox/index.ts','utf8');

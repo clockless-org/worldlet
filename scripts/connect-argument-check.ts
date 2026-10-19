@@ -1,8 +1,8 @@
 // One-click install (`--connect=<id>`): an install script launches Worldlet naming the person's Agent.
 // The host only reads argv (`connectArgument`); first-run setup decides with `connectRequestPlan`
-// (agent/agent/PORTABILITY.md#local-harnesses-chosen-at-setup). No app, browser or Agent is started.
+// (agent/agents/PORTABILITY.md#local-harnesses-chosen-at-setup). No app, browser or Agent is started.
 import assert from 'node:assert/strict';
-import {CONNECT_ARGUMENT,LOCAL_HARNESSES,connectArgument,connectRequestPlan} from '../agent/agent/index.ts';
+import {CONNECT_ARGUMENT,LOCAL_HARNESSES,connectArgument,connectRequestPlan} from '../agent/agents/index.ts';
 
 // Reading argv ------------------------------------------------------------------------------------
 assert.equal(CONNECT_ARGUMENT,'--connect');

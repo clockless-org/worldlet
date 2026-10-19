@@ -254,7 +254,7 @@ Extraction may write an explicit `event: {topic, subject}` label. Shared Core (`
 
 One contract for everything an Applet wants to put in front of the user. An **attention item** is one saved finding from one Applet, with evidence, that earns a place in the **Attention Center**, the left panel. Every Applet may publish them. The Attention Center is the single reminder surface: nothing in the world asks for attention on its own, and nothing floats above an Applet or a roof to say a second time what the panel already says.
 
-The name is deliberate. These are not operating-system notifications: nothing is pushed outside Worldlet (the one push is to the person's own paired Worldlet phone, and only for a new Coming Up or Worth Doing item, [phone push](../phone/README.md#push)), and an attention item persists until it is read, done or dismissed. It also matches what the code already calls them, from `needsAttention` and `attentionReason` to `attention_policy.py`.
+The name is deliberate. These are not operating-system notifications: nothing is pushed outside Worldlet (the one push is to the person's own paired Worldlet phone, and only for a new Coming Up or Worth Doing item, [phone push](../windows/README.md#push)), and an attention item persists until it is read, done or dismissed. It also matches what the code already calls them, from `needsAttention` and `attentionReason` to `attention_policy.py`.
 
 ### Why it exists
 

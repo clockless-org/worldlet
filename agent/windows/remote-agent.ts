@@ -7,7 +7,7 @@
 // Shared rules only: the message shapes and bounds, the turn body the host runs and the parts. The relay calls belong
 // to the hosts (platform/electron/src/modules/phone/remote.ts and remote-host.ts).
 import {base64url,fromBase64url} from './pairing.ts';
-import {harnessSessionThread,harnessThreadPlace,isHarnessAgentId,isHarnessApprovalChoice,readHarnessApprovalRequest,readWorldSince} from '../agent/index.ts';
+import {harnessSessionThread,harnessThreadPlace,isHarnessAgentId,isHarnessApprovalChoice,readHarnessApprovalRequest,readWorldSince} from '../agents/index.ts';
 import type {HarnessApprovalChoice,HarnessApprovalRequest} from '../../contracts/harness-services.ts';
 
 /** The turn protocol a host speaks; it says so in its `desktop` slot, so a client never sends a turn to an older one. */
@@ -66,7 +66,7 @@ const worldNote=(value:unknown)=>{const note=readWorldSince(value);return note?{
 /** The `turn` a client sends for one of Fox's chat turns (the body agentChat gives the Agent): the line, the Fox thread
  * it is said in, the companion's instructions (`style`: personality, memory, guidance), the current view (`context`),
  * the last turns for a Harness without sessions, the person's agent chosen for the thread there, and what happened in
- * that computer's World since the thread last replied (`world`, agent/agent/world-since.ts). */
+ * that computer's World since the thread last replied (`world`, agent/agents/world-since.ts). */
 export function remoteTurnRequest(body:unknown,{id:turn,at:sent,lane}:{id:string;at:number;lane?:'background'}):RemoteTurnRequest {
  const input=record(body);
  const session=typeof input.session==='string'?input.session.replace(/[^A-Za-z0-9_.:-]+/g,'-').slice(0,100):'';

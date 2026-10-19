@@ -2,10 +2,10 @@ import type {ServiceRead} from '../../../../contracts/services.ts';
 import type {NativeImage} from 'electron';
 import type {Row} from './types.ts';
 import type {HarnessApprovals,HarnessCalls,HarnessEvents,HarnessSend,HarnessSkills,HarnessTools,HarnessVoice} from '../../../../contracts/harness-services.ts';
-import type {PhonePushRequest} from '../../../../agent/phone/index.ts';
+import type {PhonePushRequest} from '../../../../agent/windows/index.ts';
 import type {AgentAuditEntry,AgentIdentity,Grant} from '../../../../contracts/agent-identity.ts';
 import type {McpSession,PosthogSettings} from '../../../../context/accounts/index.ts';
-import type {PosthogRequest} from '../../../../agent/agent/index.ts';
+import type {PosthogRequest} from '../../../../agent/agents/index.ts';
 // Cross-module service contracts inside the Electron host. A module provides one with
 // `host.provide(NAME, impl)` and others reach it with `host.use(NAME)` / `host.optional(NAME)`.
 // Modules never import each other's implementation files.
@@ -98,9 +98,9 @@ export interface AgentService {
  channelSend?(source:string):HarnessSend|null;
  /** Where a World tool call that reaches Worldlet outside any Fox turn goes (World tools on Hermes: another Hermes channel,
   * owner decision 2026-10-08 19:15Z); Fox's module answers it as a turn of its own. `agent` is the Agent whose token made
-  * the call (agent/agent/GRANTS.md). */
+  * the call (agent/agents/GRANTS.md). */
  onChannelTool?(handler:(name:string,args:Row,agent?:string)=>Promise<Row>):void;
- /** Each Agent's identity, Grants and audit (agent/agent/GRANTS.md); null where the host keeps none. */
+ /** Each Agent's identity, Grants and audit (agent/agents/GRANTS.md); null where the host keeps none. */
  agentAccess?():AgentAccess|null;
  /** Fox's Harness's own text-to-speech (`voice`), null when it declares none or is not installed here: spoken replies
   * then use a system voice. */
@@ -176,7 +176,7 @@ export const WORLD_TOOLS='worldTools';
 export interface SourcesService {
  /** Persisted owner-collected Notion context. No live provider fallback. Caller keeps ordinary World Grants. */
  readNotionContext?(request:Row):Row;
- /** `context/search` and `context/read` (context/context/service-context.ts) over the World's saved Service context,
+ /** `context/search` and `context/read` (context/sources/service-context.ts) over the World's saved Service context,
   * limited to the Services `canRead` allows. */
  serviceContext?(request:Row,canRead:(provider:string)=>boolean):Row;
  /** `world-item:` original reads (Gmail thread, Notion page, local source). */
@@ -259,16 +259,16 @@ export interface PhoneService {
  publish(slot:'widgets',value:unknown):Promise<boolean>;
  /** Seconds since the paired phone was last open or sent something; null when it never was. */
  idleSeconds():number|null;
- /** Notifies the paired phone (agent/phone PhonePush), only while it is paired and not open and never in setup or the
+ /** Notifies the paired phone (agent/windows PhonePush), only while it is paired and not open and never in setup or the
   * sample world; resolves whether the relay sent it. Routines and background task reports call it directly. */
  notify(push:PhonePushRequest):Promise<boolean>;
- /** The turn Fox is streaming (agent/phone phoneLive) for an open phone or browser, from a turn the host runs without the
+ /** The turn Fox is streaming (agent/windows phoneLive) for an open phone or browser, from a turn the host runs without the
   * World page (FoxService.converse); the done update also pushes the reply to a phone that is put away. */
  live?(value:Row):Promise<boolean>;
- /** The browser link to this World for another device (agent/phone/README.md#web, `kind: 'web'`): the one there is, or a
+ /** The browser link to this World for another device (agent/windows/README.md#web, `kind: 'web'`): the one there is, or a
   * new one when there is none. The Agent's `world/link` hands it to the person; it needs no World page. */
  worldLink?():Promise<Row>;
- /** The full World's link for another device (`kind: 'world'`, agent/phone/world-room.ts): the one there is, or a new one. */
+ /** The full World's link for another device (`kind: 'world'`, agent/windows/world-room.ts): the one there is, or a new one. */
  worldRoomLink?():Promise<Row>;
  /** A new full World link in place of the old one, whose pages close (a browser signed out of the World's address). */
  worldRoomRenew?():Promise<Row>;
@@ -372,7 +372,7 @@ export interface DesktopCompanionService {
  backdropImage?():NativeImage|null;
 }
 export const DESKTOP_COMPANION='desktopCompanion';
-/** Run in background (agent/phone/README.md#web): a preference set from the browser link's section (modules/phone) and
+/** Run in background (agent/windows/README.md#web): a preference set from the browser link's section (modules/phone) and
  * cleared when that link ends. Closing the World then leaves no window, not even Fox, and a login launch opens none. */
 export const RUN_IN_BACKGROUND='worldlet.runInBackground';
 export interface AppUpdatesService {snapshot():Row;activate():Promise<Row>}
@@ -395,7 +395,7 @@ export interface AnalyticsService {
 export const ANALYTICS='analytics';
 
 // Credentials (src/vault.ts, always present) -----------------------------------------------------
-/** Per-Agent identity, Grants and audit (agent/agent/GRANTS.md), kept by the Agent runtime: identities and Grants with
+/** Per-Agent identity, Grants and audit (agent/agents/GRANTS.md), kept by the Agent runtime: identities and Grants with
  * Fox's setup choices (`agent_settings`), token hashes in the vault, audit entries in the World's ledger. */
 export interface AgentAccess {
  /** The Agent's identity, made on first use; its default Grants are written again each run. A revoked one stays revoked. */

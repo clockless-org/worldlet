@@ -5,7 +5,7 @@ import type {WorldItem} from '../../contracts/world.ts';
 import {notionFingerprint,notionPage,notionPageId,notionPayload,notionWriteArgs,type McpSession,type PosthogSettings} from '../../context/accounts/index.ts';
 import {looksSecret} from './agent-profile.ts';
 
-/** PostHog and Notion drafts (contracts/service-drafts.ts, agent/agent/GRANTS.md#posthog-and-notion-drafts), the same
+/** PostHog and Notion drafts (contracts/service-drafts.ts, agent/agents/GRANTS.md#posthog-and-notion-drafts), the same
  * rules as GitHub drafts (github-drafts.ts). Hosts supply the stored drafts, the calling Agent's ID (from its token),
  * new IDs, the clock and the World's own connection to each Service: a PostHog request function over the person's
  * personal API key (its settings, never the key) and a Notion MCP session. Every refusal throws an Error whose message

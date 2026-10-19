@@ -1,4 +1,4 @@
-// Settings › Context (issue #674, context/context/world-context.ts): how much each kind of context the World keeps holds,
+// Settings › Context (issue #674, context/sources/world-context.ts): how much each kind of context the World keeps holds,
 // in plain words (only past conversations are counted), each Service named and the largest first, and the host's sizes
 // read from a real temporary SQLite ledger (WorldLedger.contextSizes): conversations and their notes, each Service's
 // synced pages and snapshot, the Journal's cards apart from what Agents saved, and the board. Synthetic records only.
@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import {withTempDir} from './test-temp.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {contextAmount,contextServiceName,readWorldContextSizes,worldContextRows,worldContextServices} from '../context/context/index.ts';
+import {contextAmount,contextServiceName,readWorldContextSizes,worldContextRows,worldContextServices} from '../context/sources/index.ts';
 import {CONNECTOR_TECHNICAL_WORDS} from '../context/accounts/index.ts';
 
 assert.deepEqual([0,-5,Number.NaN,1,1023,1024,1536,10_240,1_048_576,1_400_000,12*1024**3].map(contextAmount),

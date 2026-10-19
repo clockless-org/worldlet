@@ -5,7 +5,7 @@ import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
 import type {WorldItem} from '../../contracts/world.ts';
 import {looksSecret} from './agent-profile.ts';
 
-/** GitHub drafts (contracts/github-drafts.ts, agent/agent/GRANTS.md#github-drafts). Pure: hosts supply the stored
+/** GitHub drafts (contracts/github-drafts.ts, agent/agents/GRANTS.md#github-drafts). Pure: hosts supply the stored
  * drafts, the calling Agent's ID (from its token), the target as GitHub returned it, new IDs and the clock; they make the
  * requests this plans and save what comes back. Every refusal throws an Error whose message the Agent or the page is
  * shown, and never repeats a credential. */
@@ -382,7 +382,7 @@ export function githubDraftAttentionItem(draft:GithubDraft,agentName:string):Wor
   githubDraftUrl:draft.resultUrl??draft.target.url,githubDraftText:githubDraftText(draft),...draft.reason?{githubDraftReason:draft.reason}:{},createdAt:draft.createdAt,updatedAt:draft.updatedAt};
 }
 
-// Standing GitHub writes (agent/agent/GRANTS.md#standing-github-writes): a comment or a label transition one Agent runs
+// Standing GitHub writes (agent/agents/GRANTS.md#standing-github-writes): a comment or a label transition one Agent runs
 // on one repository without a card, under a Grant the person gave it in Settings. The same checks as a draft, then the
 // same kind of check as Approve against the target read right before writing.
 

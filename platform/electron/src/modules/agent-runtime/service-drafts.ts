@@ -1,14 +1,14 @@
 import crypto from 'node:crypto';
 import {AGENT_AUDIT_KEEP,SERVICE_DRAFT_MESSAGES,SERVICE_DRAFT_REASONS,makeServiceDraft,readServiceDraftCreate,readServiceDraftTarget,readServiceDrafts,readStoredServiceDraft,serviceDraftAttentionItem,
- serviceDraftChange,serviceDraftItemId,serviceDraftPending,settleServiceDraft,writeServiceDraft,type ServiceDraftIO} from '../../../../../agent/agent/index.ts';
+ serviceDraftChange,serviceDraftItemId,serviceDraftPending,settleServiceDraft,writeServiceDraft,type ServiceDraftIO} from '../../../../../agent/agents/index.ts';
 import {SERVICE_DRAFT_PROVIDERS,serviceDraftTarget,type ServiceDraft,type ServiceDraftProvider} from '../../../../../contracts/service-drafts.ts';
 import type {AgentAuditEntry} from '../../../../../contracts/agent-identity.ts';
 import type {McpSession} from '../../../../../context/accounts/index.ts';
-import type {PosthogRequest} from '../../../../../agent/agent/index.ts';
+import type {PosthogRequest} from '../../../../../agent/agents/index.ts';
 import type {PosthogSettings} from '../../../../../context/accounts/index.ts';
 import type {Row} from './types.ts';
 
-// PostHog and Notion drafts (agent/agent/GRANTS.md#posthog-and-notion-drafts), as GitHub drafts are kept
+// PostHog and Notion drafts (agent/agents/GRANTS.md#posthog-and-notion-drafts), as GitHub drafts are kept
 // (github-drafts.ts). Core decides and plans each read and write; this keeps the records and lends Core the World's own
 // connections: each draft in the World's ledger (`state.service-drafts` in world.sqlite) beside its Attention item
 // (provider `agents`), PostHog's requests over the personal API key the World keeps (sources/service-source.ts) and

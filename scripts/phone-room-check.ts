@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
-import {PUSH_BOX_PLACE,channelJoiner,channelPieces,boxPlace,openBox,pairKeys,readPairLink,readRoomFrame,roomEntry,sealBox,type PairKeys,type PhoneMessage} from '../agent/phone/index.ts';
+import {PUSH_BOX_PLACE,channelJoiner,channelPieces,boxPlace,openBox,pairKeys,readPairLink,readRoomFrame,roomEntry,sealBox,type PairKeys,type PhoneMessage} from '../agent/windows/index.ts';
 import {createLocalRelay} from '../platform/electron/src/modules/phone/local-relay.ts';
 import {createPhoneRelay} from '../platform/electron/src/modules/phone/relay.ts';
 import {memoryRoom} from './memory-room.ts';
 
-// The phone's pairing in the pairing room (agent/phone/README.md#room): the computer's code says `m=room` and the computer
+// The phone's pairing in the pairing room (agent/windows/README.md#room): the computer's code says `m=room` and the computer
 // waits in the room as well as on the relay. An older app pairs on the relay as before. An app that comes to the room
 // moves the pairing there, also one paired on the relay before: the relay's pairing is deleted, and slots, the phone's
 // name and its messages pass only while both are connected; a phone that comes back gets everything at once. The
@@ -131,7 +131,7 @@ await until(()=>mac.status().state==='none','the computer forgets the pairing');
 ws.close();app.close();
 assert.equal(PUSH_BOX_PLACE,'push');
 
-// A direct line's frames (agent/phone rtc.ts) go in pieces small enough for every browser and join back in order; one too
+// A direct line's frames (agent/windows rtc.ts) go in pieces small enough for every browser and join back in order; one too
 // big is dropped whole, and the next one still joins. An `r` frame reads like the others.
 {
  const big='x'.repeat(300_000)+'é',pieces=channelPieces(big),join=channelJoiner();

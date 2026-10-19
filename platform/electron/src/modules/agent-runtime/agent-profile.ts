@@ -1,11 +1,11 @@
-import {AGENT_PROFILE_DIGEST,AGENT_PROFILE_TIMEOUT_MS,agentProfilePrompt,type AgentConversationDigest,parseAgentProfile,type AgentProfile} from '../../../../../agent/agent/index.ts';
+import {AGENT_PROFILE_DIGEST,AGENT_PROFILE_TIMEOUT_MS,agentProfilePrompt,type AgentConversationDigest,parseAgentProfile,type AgentProfile} from '../../../../../agent/agents/index.ts';
 import {WORLD_APPS} from '../../../../../context/applets/index.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 import type {AgentRuntime} from './types.ts';
 import {hermesThread,hermesThreads} from './agent-files.ts';
 import {openClawThread,openClawThreads} from './openclaw-files.ts';
 
-// The person's own Agent describes itself once it is chosen (agent/agent/agent-profile.ts). One background turn on that
+// The person's own Agent describes itself once it is chosen (agent/agents/agent-profile.ts). One background turn on that
 // Agent, in Worldlet's setup home, with no World tools; the answer is kept in the World's database beside the other
 // Agent settings and never leaves this computer. Any failure only means setup goes on with what its files held.
 

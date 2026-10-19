@@ -4,9 +4,9 @@
 // the Center's ordinary synthesis shows it, usually as Worth Knowing, quoting what the Agent was asked and answered;
 // once an item cites one that matters, the phone hears of it. A new message in a shared channel thread that may need the
 // person (it asks something, names a date, mentions someone) joins them as a `channel` event as soon as the World reads
-// it (agent/agent/PORTABILITY.md#history-read-continuously). These rules know no Harness by name.
+// it (agent/agents/PORTABILITY.md#history-read-continuously). These rules know no Harness by name.
 import type {HarnessExternalEvent} from '../../contracts/harness-services.ts';
-import type {PhonePushRequest} from '../phone/index.ts';
+import type {PhonePushRequest} from '../windows/index.ts';
 import {digest,ongoingTurnText} from './ongoing.ts';
 
 export const EXTERNAL_EVENTS=Object.freeze({
@@ -66,7 +66,7 @@ export const externalEventOriginal=(record:{title?:unknown;text?:unknown})=>({ti
 export const externalEventMatters=(event:Pick<HarnessExternalEvent,'source'>)=>event.source==='webhook'||event.source==='email'||event.source==='channel';
 
 /** The push for an item that cites a pending event, or null. Coming Up and Worth Doing items reach the phone through
- * agent/phone phoneAttentionPushes already, so only a Worth Knowing (`update`) item is pushed here. */
+ * agent/windows phoneAttentionPushes already, so only a Worth Knowing (`update`) item is pushed here. */
 export function externalEventPush(item:{id?:unknown;kind?:unknown;title?:unknown;reason?:unknown;context?:unknown;sources?:unknown},pending:ReadonlySet<string>):PhonePushRequest|null {
  if(typeof item.id!=='string'||item.kind!=='update'||!Array.isArray(item.sources))return null;
  if(!item.sources.some((ref:any)=>ref?.provider==='conversations'&&pending.has(String(ref?.id))))return null;

@@ -1,9 +1,9 @@
-import {agentLiveness,listAgents,makeAgentReport,readStoredReport} from '../../../../../agent/agent/index.ts';
+import {agentLiveness,listAgents,makeAgentReport,readStoredReport} from '../../../../../agent/agents/index.ts';
 import type {AgentIdentity} from '../../../../../contracts/agent-identity.ts';
 import type {AgentListEntry,AgentLiveness,AgentReport} from '../../../../../contracts/agent-reports.ts';
 import type {Row} from './types.ts';
 
-// Agent reports (agent/agent/GRANTS.md#agent-reports). Core decides; this keeps each Agent's one report in the World's
+// Agent reports (agent/agents/GRANTS.md#agent-reports). Core decides; this keeps each Agent's one report in the World's
 // ledger (`state.agent-reports` in world.sqlite, keyed by the Agent). The calling Agent is always the one whose token
 // made the call (world-tool-bridge.ts), never one the model names. No model is involved.
 
