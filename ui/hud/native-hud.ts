@@ -319,7 +319,7 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
   tracked=[...all,...later.filter(m=>m.snoozed)];resolvePlaces(s);
   const groups=ATTENTION_GROUPS.map(([state,title])=>({state,title,items:s.data.sample?items.filter(m=>m.state===state).sort((a,b)=>attentionLevel(b)-attentionLevel(a)):attentionOrder(items.filter(m=>m.state===state),{mode:root.dataset.attentionFocus||'auto',region:m=>matterRegion(s,m),importance:attentionLevel})}));
   // The paired phone mirrors the same Now and Later (ui/companion/phone-bridge.ts); it dedupes unchanged views.
-  // Ongoing proposals (core/tasks/README.md): Fox asks whether a brought conversation that looks like one job
+  // Ongoing proposals (agent/tasks/README.md): Fox asks whether a brought conversation that looks like one job
   // should become an Applet. They are Worth Doing, after the items, here and on the phone (as `ongoing:<id>`).
   const proposals:any[]=s.data.sample?[]:(ongoing()||[]);
   const proposalItems=proposals.map(p=>({id:'ongoing:'+p.id,worldItemId:'ongoing:'+p.id,state:'needsAction',title:p.title,actionTitle:p.title,fullAction:p.title,context:p.context,fullContext:p.context,provider:'ongoing',level:2}));

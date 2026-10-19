@@ -1,8 +1,8 @@
-// Ongoing things' rules (core/tasks/README.md) without a host: what looks like one job carried on, proposing and
+// Ongoing things' rules (agent/tasks/README.md) without a host: what looks like one job carried on, proposing and
 // its limits, decisions, forgetting, names and lines, and how the phone receives kept things and proposals.
 import assert from 'node:assert/strict';
-import {ONGOING_APPLET,ONGOING_LIMITS,ongoingId,validOngoingId,ongoingName,ongoingLooksLikeJob,ongoingProposal,readOngoing,ongoingOpen,ongoingRefresh,ongoingFromAgent,ongoingCandidates,ongoingDecide,ongoingLine,ongoingThemes,ongoingThemeRequest,isOngoingThemeId,ongoingRecent,ongoingTurnText,orderOngoing,ongoingRegion,ongoingApplet,ongoingKind,ongoingKindOf,ongoingTemplate,ONGOING_KINDS,type BroughtConversation} from '../core/tasks/index.ts';
-import {attentionFromAgent,conversationAttentionId,foxSessions,foxSessionLine,foxSessionPlace,foxSessionOf,foxSessionCards,FOX_SESSION_LIMIT} from '../core/tasks/index.ts';
+import {ONGOING_APPLET,ONGOING_LIMITS,ongoingId,validOngoingId,ongoingName,ongoingLooksLikeJob,ongoingProposal,readOngoing,ongoingOpen,ongoingRefresh,ongoingFromAgent,ongoingCandidates,ongoingDecide,ongoingLine,ongoingThemes,ongoingThemeRequest,isOngoingThemeId,ongoingRecent,ongoingTurnText,orderOngoing,ongoingRegion,ongoingApplet,ongoingKind,ongoingKindOf,ongoingTemplate,ONGOING_KINDS,type BroughtConversation} from '../agent/tasks/index.ts';
+import {attentionFromAgent,conversationAttentionId,foxSessions,foxSessionLine,foxSessionPlace,foxSessionOf,foxSessionCards,FOX_SESSION_LIMIT} from '../agent/tasks/index.ts';
 import {harnessSessionThread,harnessChatThread,harnessThreadPlace,harnessOriginId} from '../core/agent/harness-sessions.ts';
 import {processedAttentionContent} from '../agent/attention/attention-content.ts';
 import {validateWorldItem} from '../context/items/world-item-validation.ts';
@@ -241,7 +241,7 @@ assert.equal(ongoingTurnText('Weigh in on Friday.'),'Weigh in on Friday.');
  const later=ongoingFromAgent([{title:'Taxes',threads:['#taxes']}],[alone],[...brought,conversation('OpenClaw · Discord · #taxes')],now,undefined,'openclaw');
  assert.deepEqual(later.map(t=>[t.title,t.session,t.state]),[['Taxes','Taxes','declined'],['Taxes','OpenClaw · Discord · #taxes','kept']],'its conversation, brought later, takes its place');
 }
-// What the person's Agent picked out for the Attention Center at setup (core/tasks attentionFromAgent): each cites the
+// What the person's Agent picked out for the Attention Center at setup (agent/tasks attentionFromAgent): each cites the
 // busiest conversation of that name and passes the Center's own checks; one with no conversation here waits.
 {
  const brought=[conversation('OpenClaw · Discord · #work',{userTurns:3}),conversation('OpenClaw · Discord · #work-notes',{userTurns:9}),conversation('OpenClaw · Discord · #health'),conversation('OpenClaw · Discord · #travel')];
@@ -263,7 +263,7 @@ assert.equal(ongoingTurnText('Weigh in on Friday.'),'Weigh in on Friday.');
  assert.deepEqual(attentionFromAgent([{group:'doing',title:'Send the deck to Sam',why:'x',thread:'#work'}],brought,now,'openclaw')[0].key,made[1].key,'the same entry keeps its key, so it is made once');
 }
 {
- // Fox's sessions (core/tasks/fox-sessions.ts): Things and other conversations, latest first, each once, a bounded list.
+ // Fox's sessions (agent/tasks/fox-sessions.ts): Things and other conversations, latest first, each once, a bounded list.
  const thing=(id:string,last:number,extra={})=>({id,source:'openclaw',session:'s-'+id,title:'#'+id,where:'OpenClaw · Discord',state:'kept',proposedAt:now,decidedAt:now,laterUntil:null,turns:9,userTurns:6,first:ago(9),last:ago(last),...extra}) as any;
  const list=foxSessions([thing('job-a',3),thing('job-b',1,{named:'Diet'})],[thing('job-c',0,{state:'proposed'}),thing('job-a',0)]);
  assert.deepEqual(list.map(s=>[s.id,s.thing]),[['job-c',false],['job-b',true],['job-a',true]],'latest first; a Thing stays a Thing and is listed once');

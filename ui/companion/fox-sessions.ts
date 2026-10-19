@@ -1,10 +1,10 @@
-/** Fox's sessions beside its conversation (owner request 2026-10-12, core/tasks/fox-sessions.ts): a narrow column left
+/** Fox's sessions beside its conversation (owner request 2026-10-12, agent/tasks/fox-sessions.ts): a narrow column left
  * of the card while it shows in the World. The main session is a primary card of its own; under it, a second card
  * scrolls the person's other sessions, latest first, packed tight, each only its name (where it lives and when, on
  * hover: the owner asked for little detail).
  * A Thing's row opens its Applet; any other row switches Fox to that session right in the World. The row of the
  * session Fox is in is marked. */
-import {foxSessionLine,type FoxSession} from '../../core/tasks/index.ts';
+import {foxSessionLine,type FoxSession} from '../../agent/tasks/index.ts';
 
 export type FoxSessionColumn={element:HTMLElement;show(state:{visible:boolean;sessions:readonly FoxSession[];here:string;name:string}):void};
 

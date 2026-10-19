@@ -3,7 +3,7 @@
 // in its conversations: things they promised and have not done, replies they are waiting on, dates they planned,
 // topics they keep raising. Each recently active conversation becomes one observation of the `conversations`
 // provider; the Attention Center's ordinary synthesis reads it, and an item it finds quotes the conversation and
-// opens back to it (core/tasks/README.md#attention). These are the rules every host applies.
+// opens back to it (agent/tasks/README.md#attention). These are the rules every host applies.
 import {MIGRATION_SOURCE_TITLES,isMigrationSource} from '../../contracts/agent.ts';
 import {conversationNamed,digest,ongoingBusier,ongoingName,type BroughtConversation} from './ongoing.ts';
 

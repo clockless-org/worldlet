@@ -142,7 +142,7 @@ export function mountFirstValue({root,view,call,state:initial,arriving=false}){
   if(!same('pick:'+id)){shown='pick:'+id;guide(first?'I made your first card from what you’ve been working on'+(title?': **'+title+'**.':'.'):'Let’s try one together. '+(title?'I picked this one for you: **'+title+'**.':'I picked one for you.'),[button('Show me',()=>void open())]);}
   box('pick:'+id,{target:()=>elementBox(root,'.world-matter[data-world-item-id="'+CSS.escape(id)+'"]'),act:()=>void open()});
  }
- // 6 for a brought Agent: Fox boxes a theme of the conversations it brought (core/tasks/themes.ts) and offers to pull it
+ // 6 for a brought Agent: Fox boxes a theme of the conversations it brought (agent/tasks/themes.ts) and offers to pull it
  // together on one page; the artifact Fox shows is the first win (Kelvin 2026-10-07: an artifact, not an Applet).
  function pickOngoing(theme:{id:string,title:string,say:string}){
   waitingSince=0;

@@ -1,4 +1,4 @@
-import {CONVERSATION_ATTENTION,attentionFromAgent,conversationObservation,conversationsForAttention,ONGOING_LIMITS,ongoingDecide,ongoingKindOf,ongoingTemplate,ongoingRecent,ongoingRefresh,ongoingFromAgent,ongoingCandidates,ongoingTurnText,orderOngoing,readOngoing,validOngoingId,type OngoingThing} from '../../../../../core/tasks/index.ts';
+import {CONVERSATION_ATTENTION,attentionFromAgent,conversationObservation,conversationsForAttention,ONGOING_LIMITS,ongoingDecide,ongoingKindOf,ongoingTemplate,ongoingRecent,ongoingRefresh,ongoingFromAgent,ongoingCandidates,ongoingTurnText,orderOngoing,readOngoing,validOngoingId,type OngoingThing} from '../../../../../agent/tasks/index.ts';
 import {WorldletError} from '../../files.ts';
 import {ONGOING,WORLD_TOOLS,type OngoingService,type WorldToolsService} from '../../host/services.ts';
 import type {Host} from '../../host/types.ts';
@@ -12,7 +12,7 @@ const HOUR=3_600_000;
 /** The Attention items the person's Agent picked out at setup that were already made, by Agent: never made twice. */
 const AGENT_ATTENTION='agent-attention-seeded';
 
-/** Ongoing things (core/tasks/README.md). Brought conversations that look like one job carried on are proposed
+/** Ongoing things (agent/tasks/README.md). Brought conversations that look like one job carried on are proposed
  * as something worth doing; the person's yes makes one an Applet, listed in the Ongoing Applet and on the phone.
  * The records live in this World's `ongoing` table; the conversations stay where they were brought. */
 export function installOngoing(host:Host){
@@ -37,14 +37,14 @@ export function installOngoing(host:Host){
    const {save,forget}=ongoingRefresh(things(),ledger.broughtConversations(),now(),c=>ledger.ownText(c.source,c.session,60));
    if(save.length||forget.length){store.ledger().saveOngoing(save as any[],forget);changed();}
    // The things the chosen Agent said the person handles most (core/agent/agent-profile.ts) become their own Applets once
-   // their conversations are here; a removed one stays removed (core/tasks ongoingFromAgent).
+   // their conversations are here; a removed one stays removed (agent/tasks ongoingFromAgent).
    const chosen=readSelection(host.profile.root),said=chosen?readAgentProfile(host.profile.root,chosen)?.things??[]:[];
    const keep=said.length?ongoingFromAgent(said,things(),ledger.broughtConversations(),now(),c=>ledger.ownText(c.source,c.session,60),chosen??undefined):[];
    if(keep.length){store.ledger().saveOngoing(keep as any[]);changed();store.changed();}
   }catch(error){host.diagnostics.record(error,'ongoing');}
   observe();
  }
- // Conversations active lately are Attention context too (core/tasks/attention.ts): what the person promised,
+ // Conversations active lately are Attention context too (agent/tasks/attention.ts): what the person promised,
  // waits on or planned there reaches the Center, read by its ordinary synthesis on the person's own model.
  function observe(){
   if(!own()||store.state.cloudConsent!==true)return;
@@ -75,7 +75,7 @@ export function installOngoing(host:Host){
  // person, and the phone calls it made or took, stand beside its conversations.
  const external=installExternalEvents(host);
  host.provide<OngoingService>(ONGOING,{refresh,channelEvents:events=>external.channel(events)});
- // Each kept thing is a device of its own in the World (core/tasks ongoingApplet): the snapshot carries them, and
+ // Each kept thing is a device of its own in the World (agent/tasks ongoingApplet): the snapshot carries them, and
  // keeping or removing one changes the World, so the page projects it again.
  const extras=store.snapshotExtras;
  store.snapshotExtras=()=>({...extras(),ongoing:things().filter(t=>t.state==='kept').map(({id,source,session,title,where,region,kind})=>({id,source,session,title,where,region,kind}))});
@@ -86,7 +86,7 @@ export function installOngoing(host:Host){
    if(operation==='list'){
     const all=orderOngoing(things());
     // `candidates`: every other conversation that looks like a job, waiting or not yet recorded, for the phone's list of
-    // things (core/tasks ongoingCandidates); saying something in one keeps it.
+    // things (agent/tasks ongoingCandidates); saying something in one keeps it.
     return {proposals:all.filter(t=>t.state==='proposed'),kept:all.filter(t=>t.state==='kept'),candidates:[...all.filter(t=>t.state==='proposed'),...unrecorded(all)]};
    }
    if(!own())throw new WorldletError('Ongoing things live in your own world. The practice world has none.');
@@ -97,12 +97,12 @@ export function installOngoing(host:Host){
    if(!thing)throw new WorldletError('That is not in this world any more.');
    if(operation==='turns'){
     const limit=Math.min(40,Math.max(1,Math.round(Number(request.limit)||12)));
-    // What the person and their Agent wrote, without the gateway's reply pointers and thread context (core/tasks).
+    // What the person and their Agent wrote, without the gateway's reply pointers and thread context (agent/tasks).
     const said=<T extends {text:string}>(rows:T[])=>rows.flatMap(row=>{const text=ongoingTurnText(row.text);return text?[{...row,text}]:[];});
     const turns=said(store.ledger().conversationTurns(thing.source,thing.session,limit));
     // The phone's tile: the latest lines, each with its time.
     const recent=turns.slice(-ONGOING_LIMITS.recent).flatMap(turn=>{const text=ongoingRecent(thing,[turn])[0];return text?[{text,at:turn.createdAt}]:[];});
-    // Its panel asks for its page too: a thing of a kind opens on that kind's page, filled from the person's own messages (core/tasks kinds).
+    // Its panel asks for its page too: a thing of a kind opens on that kind's page, filled from the person's own messages (agent/tasks kinds).
     const kind=ongoingKindOf(thing);
     const template=kind==='general'||request.template!==true?null:ongoingTemplate(kind,said(store.ledger().conversationTurns(thing.source,thing.session,400)),now());
     return {turns,recent,template};

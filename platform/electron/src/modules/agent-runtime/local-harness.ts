@@ -497,7 +497,7 @@ export class LocalHarnessRuntime implements AgentRuntime {
    if(conversation.noted!==reason){conversation.noted=reason;await emit({type:'progress',name:`${this.install.title} is not keeping this conversation: ${reason}. Fox starts it for each message, so it is slower and sees only the last few messages.`});}
   }
   // A brought conversation the person switched Fox to, or a kept one's Applet, goes on in that conversation's own
-  // Claude Code session (core/tasks/fox-sessions.ts).
+  // Claude Code session (agent/tasks/fox-sessions.ts).
   const resume=id==='claude-code'&&body._background!==true&&body.mode!=='setup'?this.resumeOf(home,body.thread,agent):null;
   const turn=localHarnessTurn(body,{worldTools:tools,own:localHarness(id).connect,harnessTools,resident:resume!==null});
   const key=JSON.stringify([home,turn.system,tools,sample,agent,model]);

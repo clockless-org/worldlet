@@ -4,7 +4,7 @@ import path from 'node:path';
 import {openAgentDatabase,type AgentDatabase} from './agent-database.ts';
 import type {HarnessCall,HarnessCalls,HarnessEvents,HarnessExternalEvent,HarnessTools,HarnessTool} from '../../../../../contracts/harness-services.ts';
 import {OPENCLAW_CALL_NAMESPACES,harnessService,openClawCallArgs,openClawCallPlacing,openClawCallResult,openClawHangUpArgs,hermesExternalEvent,openClawCallChunkKey,openClawCallRecord,openClawHarnessCalls,openClawVoiceCallStore,hermesHarnessTools,openClawExternalEvent,openClawHarnessTools,openClawTurn,type OpenClawSessionFacts} from '../../../../../core/agent/index.ts';
-import {callLive} from '../../../../../core/tasks/index.ts';
+import {callLive} from '../../../../../agent/tasks/index.ts';
 import {inside,json,readFile} from './agent-files.ts';
 import {discoverHermes} from './hermes-files.ts';
 import {openClawState} from './local-memory.ts';

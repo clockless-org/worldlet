@@ -4,7 +4,7 @@
 // … 正在做的 task 放右边"), each one small card in the same style:
 // its picture, a short name and one line of what it is doing or when it runs. A running card has a turning ring and a
 // thin bar under it (how far along when that is known); a coming routine has a clock. What is finished lives only in
-// the Journal. Core decides every row and its words (core/tasks/task-panel.ts); this only draws them:
+// the Journal. Core decides every row and its words (agent/tasks/task-panel.ts); this only draws them:
 // - Up to two cards a side in a wide World, one in a narrower one, then "+N" for the rest; under 820px wide only the
 //   count, which opens the whole list.
 // - A card moves to where its work is: a Routine that starts runs across from the left to the right, and a turn in
@@ -22,7 +22,7 @@
 // onboarding and the tour (ui/components/layout.css).
 import {FOX_STATUS_EVENT,routineTimePicker,routineWhenLine,scheduleWhen} from '../companion/index.ts';
 import {companionStill,themeAppletIcon} from '../themes/index.ts';
-import {taskPanel,routineClock,type TaskPanel,type TaskRow,type TaskPanelInput} from '../../core/tasks/index.ts';
+import {taskPanel,routineClock,type TaskPanel,type TaskRow,type TaskPanelInput} from '../../agent/tasks/index.ts';
 import {callHost} from '../../platform/bridge/host.ts';
 
 const REFRESH_MS=30_000;

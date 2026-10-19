@@ -22,7 +22,7 @@ export function harnessSessionThread(thread:unknown):string {
  try{const value=JSON.parse(String(thread??''));if(Array.isArray(value)&&typeof value[0]==='string')place=value[0];}catch{}
  if(place.startsWith('attention:')&&place.length>10)return 'item:'+clip(place.slice(10),200);
  if(place.startsWith('object:app-')&&place.length>11)return 'applet:'+clip(place.slice(11),120);
- // A brought conversation the person switched Fox to (core/tasks/fox-sessions.ts): a session of its own.
+ // A brought conversation the person switched Fox to (agent/tasks/fox-sessions.ts): a session of its own.
  if(place.startsWith('session:')&&place.length>8)return 'session:'+clip(place.slice(8),120);
  return 'main';
 }
@@ -43,7 +43,7 @@ export function harnessThreadPlace(thread:string):string {
  if(thread.startsWith('session:')&&thread.length>8)return JSON.stringify(['session:'+clip(thread.slice(8),120),'']);
  return JSON.stringify(['','']);
 }
-/** The brought conversation a session thread continues (core/tasks ongoingId `job-…`): one the person switched Fox to
+/** The brought conversation a session thread continues (agent/tasks ongoingId `job-…`): one the person switched Fox to
  * (`session:job-…`) or a kept one's Applet (`app-job-…`, so `applet:job-…`); '' for any other thread. The host continues
  * that conversation's own session when the Agent can (local-harness.ts `resumeOf`). */
 export function harnessOriginId(thread:string):string {

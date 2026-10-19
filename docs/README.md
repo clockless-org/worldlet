@@ -343,6 +343,7 @@ Indexed: **284 Markdown documents** and **747 supporting documentation files**.
 <details><summary>Module and service documentation (38)</summary>
 
 - [agent/attention/README.md](../agent/attention/README.md)
+- [agent/tasks/README.md](../agent/tasks/README.md)
 - [android/README.md](../android/README.md)
 - [context/applets/INTEGRATIONS.md](../context/applets/INTEGRATIONS.md)
 - [context/applets/MY-APPLETS.md](../context/applets/MY-APPLETS.md)
@@ -361,7 +362,6 @@ Indexed: **284 Markdown documents** and **747 supporting documentation files**.
 - [core/agent/WORLD-ADDRESS.md](../core/agent/WORLD-ADDRESS.md)
 - [core/diagnostics/ANALYTICS.md](../core/diagnostics/ANALYTICS.md)
 - [core/phone/README.md](../core/phone/README.md)
-- [core/tasks/README.md](../core/tasks/README.md)
 - [harness/README.md](../harness/README.md)
 - [harness/example/README.md](../harness/example/README.md)
 - [harness/skills/README.md](../harness/skills/README.md)

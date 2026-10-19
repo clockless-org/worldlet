@@ -165,14 +165,14 @@ export class AttentionCenter {
   if(typeof text!=='string')throw new WorldletError('Invalid weather observation.');
   this.observeAttention('weather',[{id:'current',title:'Current weather',observedAt:observed/1000,text,url:''}]);
  }
- /** Brought conversations active lately (core/tasks/attention.ts), read again by the Ongoing module after each
+ /** Brought conversations active lately (agent/tasks/attention.ts), read again by the Ongoing module after each
   * bring and every hour. An unchanged conversation renews its freshness without a model pass; one no longer
   * offered expires with its freshness, and items it supported leave the Center without being called done. */
  observeConversations(records:Row[]){
   if(!this.writable||!this.consent||this.sample()||!records.length)return;
   this.observeAttention('conversations',records.slice(0,50));
  }
- /** What the person's own Agent picked out at setup (core/tasks attentionFromAgent), before any synthesis pass: each item
+ /** What the person's own Agent picked out at setup (agent/tasks attentionFromAgent), before any synthesis pass: each item
   * is checked as any finding is and depends on the conversation it cites, which the Center already reads. Returns the
   * keys of the ones saved; one that does not fit yet is left for a later call. */
  seedFromAgent(entries:{key:string;item:Row}[]):string[] {

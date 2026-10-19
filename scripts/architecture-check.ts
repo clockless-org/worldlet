@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import {checkEdge,checkSource,checkRepository} from './architecture-boundaries.ts';
-checkEdge('ui/hud/example.ts','core/tasks/index.ts');
-checkEdge('core/tasks/example.ts','core/tasks/runtime-tasks.ts');
+checkEdge('ui/hud/example.ts','agent/tasks/index.ts');
+checkEdge('agent/tasks/example.ts','agent/tasks/runtime-tasks.ts');
 for(const source of [
  "import x from '../../core/tasks/runtime-tasks.ts'",
- "export * from 'core/tasks/runtime-tasks'",
- "const x=import('core/tasks/runtime-tasks')",
- "type T=import('core/tasks/runtime-tasks').T",
+ "export * from 'agent/tasks/runtime-tasks'",
+ "const x=import('agent/tasks/runtime-tasks')",
+ "type T=import('agent/tasks/runtime-tasks').T",
  "const x=require('../../core/tasks/index.ts')",
  "import x = require('../../core/tasks/index.ts')",
  "const x=import(name)",

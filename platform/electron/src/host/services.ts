@@ -160,9 +160,9 @@ export interface WorldToolsService {
  readConnectedApps():void;
  startOnboardingMailCheck():void;
  observeWeather(value:Row):void;
- /** Brought conversations recently active, as Attention context (core/tasks/attention.ts). */
+ /** Brought conversations recently active, as Attention context (agent/tasks/attention.ts). */
  observeConversations(records:Row[]):void;
- /** What the person's own Agent picked out for the Center at setup (core/tasks attentionFromAgent); the keys saved. */
+ /** What the person's own Agent picked out for the Center at setup (agent/tasks attentionFromAgent); the keys saved. */
  seedFromAgent(entries:{key:string;item:Row}[]):string[];
  runtimeTaskReport():Row;
  /** Cancels a provider's background reader and analysis lane (a check was paused/removed). */
@@ -247,7 +247,7 @@ export interface FoxService {
  converse?(text:string,place?:{thread:string,location:string}):Promise<{user:string,text:string}>;
  /** Answers the Agent's permission prompt (as the `harnessApproval` action does), for a phone or browser without the page. */
  answerApproval?(id:string,choice:string):Promise<void>;
- /** What the Task panel draws from (core/tasks TaskPanelInput: the Agent's scheduled jobs, the Applet tasks working now),
+ /** What the Task panel draws from (agent/tasks TaskPanelInput: the Agent's scheduled jobs, the Applet tasks working now),
   * for the host's own Center while the World page is not there (modules/phone). */
  taskPanel?():Promise<Row>;
 }
@@ -293,9 +293,9 @@ export interface WidgetsService {
 }
 export const WIDGETS='widgets';
 export interface OngoingService {
- /** Reads the brought conversations again and proposes what looks like one job (core/tasks ongoingRefresh). */
+ /** Reads the brought conversations again and proposes what looks like one job (agent/tasks ongoingRefresh). */
  refresh():void;
- /** New channel messages that may need the person (core/tasks channelMessageEvent), as Attention context. */
+ /** New channel messages that may need the person (agent/tasks channelMessageEvent), as Attention context. */
  channelEvents?(events:import('../../../../contracts/harness-services.ts').HarnessExternalEvent[]):void;
 }
 export const ONGOING='ongoing';

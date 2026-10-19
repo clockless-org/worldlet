@@ -1359,7 +1359,7 @@ export class WorldLedger {
  }
 
  // Ongoing things --------------------------------------------------------------------------------
- // Brought conversations the person made into Applets (core/tasks): `conversation` rows of the person's own
+ // Brought conversations the person made into Applets (agent/tasks): `conversation` rows of the person's own
  // Applets, one record per thing. The conversation itself stays in companion_turns.
  ongoingRows():Row[] {return this.myApplets('conversation').map(row=>row.record);}
  /** Saves and forgets records in one transaction. */
@@ -1379,7 +1379,7 @@ export class WorldLedger {
    .map(row=>({source:String(row.source),session:String(row.session),turns:Number(row.turns),userTurns:Number(row.userTurns??0),first:String(row.first),last:String(row.last)}));
  }
  /** The person's own newest `limit` messages in one brought conversation, oldest first, one per line (to tell what
-  * it is about, core/tasks kinds). */
+  * it is about, agent/tasks kinds). */
  ownText(source:string,session:string,limit:number):string {
   this.ensureCompanion();
   return this.all(`SELECT text FROM (SELECT text,created_at,rowid AS r FROM companion_turns WHERE source=? AND session=? AND role='user' ORDER BY created_at DESC,rowid DESC LIMIT ?) ORDER BY created_at,r`,source,session,limit)

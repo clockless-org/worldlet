@@ -15,7 +15,7 @@ An Applet is either **built in** (the [catalog](catalog.ts): Gmail, Calendar, th
 | --- | --- | --- |
 | `site` | A website | **Make Applet** at the top of the Browser ([site-applet.ts](site-applet.ts)), or asking Fox ("把这个网站做成 Applet": `make_applet` with `website`, added at once) |
 | `page` | A page Fox made, or any card from the conversation | Asking Fox ("make me a packing list for Tahoe"): the person's own Applet while its moment lasts, and **Keep it** keeps it ([made pages](../../context/artifacts/README.md)). Or **★ Keep as Applet** on a card Fox laid out in conversation: the card becomes a kept page Applet at once (below) |
-| `conversation` | A conversation brought from another Agent | Fox proposes it; the person's yes makes it one ([ongoing](../../core/tasks/README.md)) |
+| `conversation` | A conversation brought from another Agent | Fox proposes it; the person's yes makes it one ([ongoing](../../agent/tasks/README.md)) |
 
 Each is placed in the World beside the catalog's Applets (`world.dynamicApplets`, built in `ui/world/world-projection.ts`) and carries `mine` with its kind (`myAppletKind`, `isMyApplet`). Everything stays local: nothing about them goes to a server, and a World backup carries them all.
 

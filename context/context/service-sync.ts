@@ -1,5 +1,5 @@
 // Service collection reuses the shared source-check schedule and failure policy. IO, timers and leases stay in Platform.
-import {configureSourceCheck,finishSourceCheck,startSourceCheck} from '../../core/tasks/index.ts';
+import {configureSourceCheck,finishSourceCheck,startSourceCheck} from '../../agent/tasks/index.ts';
 import {readStoredServicePreset,servicePresetRead} from '../accounts/index.ts';
 import type {ServicePreset} from '../../contracts/service-presets.ts';
 import type {ServiceRead,ServiceRecords,ServiceRecord} from '../../contracts/services.ts';
