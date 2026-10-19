@@ -331,7 +331,7 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
   // Keep the live model fresh, but do not rebuild or measure identical rows on
   // every navigation/status sync. Click handlers resolve the latest model by ID.
   const reading=introducing&&!items.length&&sourcesReading(s.data.moduleConnections||[]);
-  // Applets Fox made for this moment (core/artifacts/README.md) lead Now; each row opens its Applet.
+  // Applets Fox made for this moment (context/artifacts/README.md) lead Now; each row opens its Applet.
   const forNow=s.data.sample?[]:(widgets()||[]);
   const signature=JSON.stringify([ownItems.map(m=>[m.id,m.title,m.context,m.when?.factor,m.level]),proposals.map(p=>[p.id,p.title,p.context]),forNow.map(w=>[w.id,w.title,w.blurb,w.color,momentLine(w)]),expanded,introducing,reading,later.map(m=>m.id+':'+(m.snoozed?1:0)+':'+(m.when?.factor||'')),groups.map(g=>[g.state,g.items.map(m=>[m.id,m.worldItemId,m.actionTitle,m.context,m.fullAction,m.fullContext,m.title,m.state,m.when,m.requiresChoice,m.priority,attentionLevel(m),s.attentionItemId?m.worldItemId===s.attentionItemId:m.active])])]);
   if(signature===matterSignature)return;

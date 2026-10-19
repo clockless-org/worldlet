@@ -70,7 +70,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  // The one setup page keeps every way in but the local Agents under More options (owner request 2026-10-09).
  await js("document.querySelector('.setup-more-toggle').click();true");
  await press('Use mock Google (Dev)');
- // The two default Routines (core/artifacts/daily.ts) are on with no row on setup (owner decision 2026-10-11).
+ // The two default Routines (context/artifacts/daily.ts) are on with no row on setup (owner decision 2026-10-11).
  await wait('no Routines row beside Enter your world',"!!document.querySelector('.setup-footer .setup-next')&&!document.querySelector('.setup-routines')",120);
  // No fog after setup (owner request 2026-10-12): the loading screen's painting fades slowly into the World instead.
  await js("window.__fog=false;new MutationObserver((_,o)=>{if(document.querySelector('.startup-mist')){window.__fog=true;o.disconnect();}}).observe(document.body,{childList:true,subtree:true});true");

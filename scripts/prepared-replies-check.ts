@@ -1,11 +1,11 @@
-// Replies Fox prepares by itself (owner decision 2026-10-09, core/artifacts/replies.ts): which Attention items qualify,
+// Replies Fox prepares by itself (owner decision 2026-10-09, context/artifacts/replies.ts): which Attention items qualify,
 // each once, a few a day, for someone who used Worldlet lately, never in the practice world, onboarding, the first-run
 // tour or an automated browser, never beside other background work; what Fox is asked (read the thread, prepare a
 // draft, send nothing); the lines the World's Task panel shows; and that the page only executes these rules. No model,
 // no browser.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,readDailyArtifactsState,markDailyUse,PREPARED_REPLIES_PER_DAY,PREPARED_REPLIES_WAITING,PREPARED_REPLY_SETTLE_MINUTES,MORNING_BRIEF_REPLIES} from '../core/artifacts/index.ts';
+import {readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,readDailyArtifactsState,markDailyUse,PREPARED_REPLIES_PER_DAY,PREPARED_REPLIES_WAITING,PREPARED_REPLY_SETTLE_MINUTES,MORNING_BRIEF_REPLIES} from '../context/artifacts/index.ts';
 
 const now=new Date(2026,9,9,10,0),hours=(h:number)=>new Date(now.getTime()-h*3600000).toISOString();
 const mail=(id:string,thread:string,extra:Record<string,unknown>={})=>({id,kind:'task',status:'open',ready:true,title:'Answer '+id,sources:[{provider:'gmail',id:'thread:'+thread}],receivedAt:hours(3),...extra});

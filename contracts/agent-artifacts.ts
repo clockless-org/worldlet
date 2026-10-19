@@ -1,6 +1,6 @@
 /** Agent artifacts (core/agent/GRANTS.md#agent-artifacts): an artifact an Agent saves to the person's Journal on its own,
  * outside any Fox turn (an hourly summary from a Scheduled routine), and that the person and other Agents read
- * again. Each is an ordinary `answer` artifact (core/artifacts/artifacts.ts) in the World's `artifacts` table, its
+ * again. Each is an ordinary `answer` artifact (context/artifacts/artifacts.ts) in the World's `artifacts` table, its
  * `agentId` host-stamped from the token that saved it, never from what the model sent. Hosts own IDs, clocks and
  * storage; Core decides (core/agent/agent-artifacts.ts). */
 

@@ -5,12 +5,12 @@
  * (agent-change.ts), and so does New routine (a name, what to do and when; owner request 2026-10-11: more control in
  * Settings). Changing what one does is still a request to Fox, done in the conversation by the Agent's own tools. After a change the
  * Task panel's Routines read again (`worldlet:routines`). Plain words only: no cron, no prompts.
- * Above them, Worldlet's own two default Routines (core/artifacts/daily.ts): Today's prep and Wrap up today, which
+ * Above them, Worldlet's own two default Routines (context/artifacts/daily.ts): Today's prep and Wrap up today, which
  * Worldlet runs by asking the Agent at that time. Pause and Resume change only Worldlet's setting (host
  * `foxPreferenceChange` `daily_routines`), never the Agent. */
 import {nextCronRun,routineClock,taskHowOften,taskPlannedWhen} from '../../core/tasks/index.ts';
 import type {HarnessJob,RoutineSchedule} from '../../contracts/harness-services.ts';
-import {DAILY_PLAN_HOUR,DAILY_SUMMARY_HOUR,DAILY_ROUTINE_NAMES,readDailyRoutines} from '../../core/artifacts/index.ts';
+import {DAILY_PLAN_HOUR,DAILY_SUMMARY_HOUR,DAILY_ROUTINE_NAMES,readDailyRoutines} from '../../context/artifacts/index.ts';
 import {agentButton,agentDay,agentEl as el,confirmAgentChange,type AgentCall} from './agent-change.ts';
 
 type Job={id:string;name:string;paused:boolean;when:HarnessJob['when'];delivery?:string;last?:{at:number;status:'ok'|'failed'|'silent'}};

@@ -22,7 +22,7 @@ import {mountAttentionPreview,taskReviewLine} from '../attention/index.ts';
 import {attentionPreviewData,attentionLaterUntil} from '../../core/attention/index.ts';
 import {mountPhoneBridge} from '../companion/index.ts';
 import {attentionBrief} from '../../core/attention/index.ts';
-import {artifactFollowUpSent,artifactFollowUpRequest,type ArtifactFollowUpDraft,artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,dayKey,dailyArtifactDue,dailyPlanned,dailyArtifactRequest,firstPrepRequest,readDailyRoutines,DAILY_ROUTINES_ON,DAILY_ROUTINE_NAMES,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../core/artifacts/index.ts';
+import {artifactFollowUpSent,artifactFollowUpRequest,type ArtifactFollowUpDraft,artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,dayKey,dailyArtifactDue,dailyPlanned,dailyArtifactRequest,firstPrepRequest,readDailyRoutines,DAILY_ROUTINES_ON,DAILY_ROUTINE_NAMES,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../context/artifacts/index.ts';
 import {timingBucket} from '../../core/diagnostics/index.ts';
 import {applyRegionLayout,lastUse,readRegionLayout,parseRegionLayout,moveRegionApplet,pinRegionApplet,pinnedPlace,recordAppletUse,regionId,recentlyUsedFirst,storedRegionLayout} from '../world/index.ts';
 import {resolvePlacements,lampLabels,lampNeeds} from '../world/index.ts';
@@ -146,26 +146,26 @@ export function mountNotionWorld(data: World, native: any) {
   }
   // A card the person closes goes into the Journal on its way out (owner request 2026-10-08).
   const attentionPreview=mountAttentionPreview({root,onClose:()=>{flyIntoJournal(root,$('attentionPreview'));closeAttentionPreview();},onOriginal:openAttentionOriginal,onLink:href=>{const page=attentionPage;closeAttentionPreview(false);openWorldURL(href,{attention:page});}});
-  // Every card Fox shows is kept as an artifact (core/artifacts/README.md); the person finds it again in Fox's panel.
+  // Every card Fox shows is kept as an artifact (context/artifacts/README.md); the person finds it again in Fox's panel.
   let shownArtifact:any=null,artifactsShown=0,nextArtifactLabel:string|null=null;
   // The last save, so a page is asked for only once its artifact is kept.
   let keeping:Promise<unknown>=Promise.resolve();
   const keepArtifact=(artifact)=>{if(native?.artifacts)keeping=Promise.resolve(native.artifacts({operation:'save',artifact})).then(()=>window.dispatchEvent(new Event('worldlet:journal-changed'))).catch(()=>{});};
   const foxArtifact=mountFoxArtifact(root,renderMarkdown,putArtifactAway,href=>openWorldURL(href),size=>{if(shownArtifact){shownArtifact={...shownArtifact,size};keepArtifact(shownArtifact);}},
    // A next step on the card drafts the person's request in Fox's message bar; it goes to Fox only when they send it,
-   // so a card made from untrusted content can never speak for them (core/artifacts/README.md#actions).
+   // so a card made from untrusted content can never speak for them (context/artifacts/README.md#actions).
    action=>draftRequest(action),
    // What the person ticks or sets on the card's blocks is kept with it, so the Journal and a reopened card show it.
    blocks=>{if(shownArtifact){shownArtifact={...shownArtifact,blocks};keepArtifact(shownArtifact);}},
    native?.artifactPages);
   function putArtifactAway(){flyIntoJournal(root,$('foxArtifact'));foxArtifact.close();delete root.dataset.attentionPreview;voice?.sync();}
   // The next step picked on the open card, until it is sent: sent while the card is still open, it runs in the
-  // background as a follow-up beside Fox (core/artifacts/follow-up.ts, followUp below).
+  // background as a follow-up beside Fox (context/artifacts/follow-up.ts, followUp below).
   // An emptied bar drops it.
   let followUpDraft:ArtifactFollowUpDraft|null=null,followUpWatched=false;
   function draftRequest(action:{request:string}){if(shownArtifact&&foxArtifact.visible)followUpDraft={id:String(shownArtifact.id),title:String(shownArtifact.title||''),request:action.request};const input=root.querySelector('#notionInput') as HTMLTextAreaElement|HTMLInputElement|null;if(!input)return;
    if(!followUpWatched){followUpWatched=true;input.addEventListener('input',()=>{if(!input.value.trim())followUpDraft=null;});}input.value=action.request;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();input.setSelectionRange?.(input.value.length,input.value.length);}
-  // Theme-driven Artifacts (core/artifacts/README.md#theme-driven-artifacts): an answer shown at medium or large size in
+  // Theme-driven Artifacts (context/artifacts/README.md#theme-driven-artifacts): an answer shown at medium or large size in
   // the World is laid out as a page in the theme's style by a quiet background task; the template card shows until then.
   async function requestArtifactPage(artifact:{id:string;kind:'answer'|'attention';size:'small'|'medium'|'large'},inApplet=insideApplet()){
    if(!native?.artifactPages||artifactRenderMode(artifact,{theme:true,generator:true,inApplet})!=='page')return;
@@ -1633,7 +1633,7 @@ export function mountNotionWorld(data: World, native: any) {
   // nothing in the practice world or before the first run is over, which makes neither.
   const announceDaily=()=>{const none=!!data.sample||!!native?.firstRun?.();window.dispatchEvent(new CustomEvent('worldlet:daily-planned',{detail:{planned:none?[]:dailyPlanned(daily,new Date(),routinesOn),paused:none?[]:(['plan','summary'] as const).filter(kind=>!routinesOn[kind])}}));};
   setTimeout(announceDaily,0);
-  // The one gate for work Fox starts by itself (core/artifacts/replies.ts backgroundBlocked): never in the practice
+  // The one gate for work Fox starts by itself (context/artifacts/replies.ts backgroundBlocked): never in the practice
   // world, an automated browser, onboarding, the first-run tour (its phone step included) or beside another request.
   const backgroundMoment=()=>backgroundBlocked({sample:!!data.sample,automated:!!navigator.webdriver,onboarding:root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true',tour:!!root.dataset.tourStep,firstRun:!!native?.firstRun?.(),asking:dailyAsking||replyAsking||followUpAsking});
   const dailyPoll=setInterval(()=>{
@@ -1707,7 +1707,7 @@ export function mountNotionWorld(data: World, native: any) {
     firstCardEvent('first_card_ready',{first_card_result:result},timingBucket(performance.now()-firstCardStarted));
   }
   if(!data.sample)void Promise.resolve(native?.dailyRoutines?.()).catch(()=>null).finally(()=>{routinesKnown=true;setTimeout(startFirstCard,0);});
-  // A follow-up on an Artifact (core/artifacts/follow-up.ts, owner request 2026-10-11): the card turns over and drops into
+  // A follow-up on an Artifact (context/artifacts/follow-up.ts, owner request 2026-10-11): the card turns over and drops into
   // the Doing now side beside Fox, and its request runs in a background session beside the conversation; what it makes
   // comes back as a new card. Busy with other background work, it is an ordinary turn instead.
   function followUp(sent:string){
@@ -1726,7 +1726,7 @@ export function mountNotionWorld(data: World, native: any) {
      .finally(()=>{work.end(ok);followUpAsking=false;if(ok)reportProductEvent('task_completed',{task_kind:'fox'});});
     return true;
   }
-  // Replies Fox prepares by itself (owner decision 2026-10-09; rules in core/artifacts/replies.ts): a new Worth Doing
+  // Replies Fox prepares by itself (owner decision 2026-10-09; rules in context/artifacts/replies.ts): a new Worth Doing
   // item from a Gmail thread that waits for the person gets a reply draft in a background session, a reply card in
   // today's Journal that only the person sends. Each item once, a few a day, for someone who used Worldlet lately.
   const repliesKey='worldlet-prepared-replies-'+(data.workspaceId||data.workspace);
@@ -1993,7 +1993,7 @@ export function mountNotionWorld(data: World, native: any) {
       // actions follow what is selected.
       settings:part=>voice?.openSettings?.(part),connect:provider=>{if(native?.setup&&!data.sample)native.setup('connection','work',provider);},
       connected:provider=>{const link=data.moduleConnections?.find(c=>c.provider===provider);return link?connectionLive(link):false;},openLink:url=>openWorldURL(url),onContext:()=>voice?.sync()};
-    // An Applet Fox made for a moment (core/artifacts/README.md): one panel shows whichever is opened.
+    // An Applet Fox made for a moment (context/artifacts/README.md): one panel shows whichever is opened.
     if(r.moment&&native){
       let applet=appletPanels.get('moment');if(!applet){applet=createAppletPanel('moment',panelContext);appletPanels.set('moment',applet);}
       header(r.title,buildingFor(r.id)?.title||'World');content.querySelector('.notion-reader-head')?.remove();content.dataset.template='moment';content.append(applet.element);sceneState();
@@ -2344,7 +2344,7 @@ export function mountNotionWorld(data: World, native: any) {
     if(phone)root.addEventListener('worldlet:fox-live',(event:any)=>phone.live(event.detail));
     if(phone)window.addEventListener('worldlet:harness-approval',(event:any)=>phone.approval(event.detail));
     if(phone){root.addEventListener('worldlet:source-issues',(event:any)=>phone.accounts(event.detail||[]));sourceIssueSignature='';publishSourceIssues();}
-    // Widgets for now lead the Center (core/artifacts/README.md); the first one Fox makes puts the Widgets Thing on the
+    // Widgets for now lead the Center (context/artifacts/README.md); the first one Fox makes puts the Widgets Thing on the
     // ground, and the panel opens it next.
 
     const loadWidgets=()=>{if(data.sample||!native.widgets)return;void native.widgets({operation:'list'}).then(result=>{widgetsNow=Array.isArray(result?.now)?result.now:[];nativeHUD?.sync();phone?.world();}).catch(()=>{});};

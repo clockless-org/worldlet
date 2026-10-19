@@ -103,7 +103,7 @@ internal val worldShadow = Shadow(Palette.inkShadow, Offset(0f, 1.5f), 3f)
  * and 10-12, replacing the Applet world, Now and Later layers): **Today**, where it opens, is one scroll from the date and
  * today's Journal through Now to Later; **Applets** lists the World's Applets; **Tasks** is what the person's Agent is
  * doing now and its Routines. Fox stays below on every tab. Tapping a row opens its card; a long press offers Done,
- * Later and Remove, and the computer settles the item and sends the new Center. The widgets for now (core/artifacts)
+ * Later and Remove, and the computer settles the item and sends the new Center. The widgets for now (context/artifacts)
  * lead Now; tapping one, or its row in Applets, opens its page over everything.
  */
 @Composable

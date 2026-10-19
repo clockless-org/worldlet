@@ -4,7 +4,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {MIGRATION_SOURCES,MIGRATION_SOURCE_TITLES,migrationMemoryNote,migrationNotesSession,migrationSession,migrationSkillMarkdown,migrationSkillName,migrationSkillPath,openClawAgentSkill,openClawChannelPrompts,openClawConversationSkill,openClawPromptFor,openClawRoutine,
  type MigrationRoutine,type MigrationSource} from '../../../../../core/agent/index.ts';
-import {dailyNoteArtifacts,journalOrigin,orderArtifacts,readArtifact} from '../../../../../core/artifacts/index.ts';
+import {dailyNoteArtifacts,journalOrigin,orderArtifacts,readArtifact} from '../../../../../context/artifacts/index.ts';
 import {ensureDirectory,isLink,isoSeconds,writeAtomic} from '../../files.ts';
 import {readClaudeCode,readCodex,readOwnHermes,readPi,type AgentHistory,type BroughtSkill} from '../agent-runtime/agent-files.ts';
 import {readOpenClaw,type OpenClawData} from '../agent-runtime/openclaw-files.ts';

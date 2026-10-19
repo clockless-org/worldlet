@@ -1,6 +1,6 @@
 # Tasks
 
-Work that runs without the person: routines and cron jobs, source checks, background drafts, Applet tasks and the work brought in from the person's Agent. Fox starts some tasks and Applets start others; the person's Agent does the work, and each result becomes an [artifact](../artifacts/README.md). See the [feature table](../../docs/UI-CORE-PLATFORM.md#features).
+Work that runs without the person: routines and cron jobs, source checks, background drafts, Applet tasks and the work brought in from the person's Agent. Fox starts some tasks and Applets start others; the person's Agent does the work, and each result becomes an [artifact](../../context/artifacts/README.md). See the [feature table](../../docs/UI-CORE-PLATFORM.md#features).
 
 - Scheduling (`agent-work.ts`, `background-work.ts`, `runtime-*.ts`, `routine-catch-up.ts`, `source-checks.ts`, `deliveries.ts`, `operations.ts`): when work is due, who may run it, claims, leases and retries.
 - The Task panel (`task-panel.ts`, `next-run.ts`): what the World's right side shows of all this work. See [Task panel](#task-panel).
@@ -12,7 +12,7 @@ The cards either side of Fox at the bottom of the World say what the person's Ag
 
 | Group | Rows | Order |
 | --- | --- | --- |
-| Routines (Scheduled) | The person's Agent's scheduled jobs (`nextCronRun` here in `next-run.ts`), and Worldlet's two daily Routines, Today's prep and Wrap up today (core/artifacts `dailyPlanned`, from the page's daily state), which the person can pause in Settings › Agents or from its card | Soonest first, repeating jobs with no fixed time and paused ones last; every row kept (a side's "+N" lists them all) |
+| Routines (Scheduled) | The person's Agent's scheduled jobs (`nextCronRun` here in `next-run.ts`), and Worldlet's two daily Routines, Today's prep and Wrap up today (context/artifacts `dailyPlanned`, from the page's daily state), which the person can pause in Settings › Agents or from its card | Soonest first, repeating jobs with no fixed time and paused ones last; every row kept (a side's "+N" lists them all) |
 | Doing now | A web page Fox drives, Fox's background work (its step, from `worldlet:fox-status`), a turn of the conversation while Fox does something in it (source `TURN_TASK_SOURCE`, named by `turnTaskName` after the person's words), Applets working on a task Fox handed them | The page first, then newest first; one card each, every one kept |
 
 - **Time text.** Doing now says "In progress"; Routines say the clock today, else the day and the clock ("Tomorrow 6:00 AM", "Mon 6:30 AM"), or "every hour" for an interval job. A routine's popover adds how often (`taskHowOften`: "Every day", "Every weekday", "Every 15 min") and who runs it (the Agent's scheduler, or Worldlet with the Agent).
@@ -48,7 +48,7 @@ At most 24 are kept per World. Its ID is `job-` and a digest of the Agent and co
 
 A **project** makes no theme and is not proposed (`ONGOING_THEME_KINDS`, owner Order 2026-10-10): three unrelated work threads made one page called their "status" that had no single subject and reported what was said weeks ago as how things stand. In the life kinds the conversations are the person's own record (meals, workouts, questions, amounts, plans); each work thread is its own matter, and where it stands lives in the work itself.
 
-**Show me** asks Fox (`ongoingThemeRequest`) to read those conversations with `read_companion_archive` and show **one artifact** (medium, large only if it needs it) with `show_artifact`: a short, specific title Fox chooses for what it is about (not a conversation's name), two or three lines on where things stand as of the last message's date (they are past conversations, never told as how things are today), sections and tables for what it found (the kind's notes, decisions, numbers, what changed, what is open), a chart only for numbers it read, and **Next**. Only what is in the conversations; the text is untrusted; nothing is sent or changed. The artifact is laid out like every other artifact and kept in Fox's Journal page ([Artifacts](../artifacts/README.md)). In the first-run tour it is the first win for someone who brought an Agent ([onboarding](../../ui/onboarding/README.md)).
+**Show me** asks Fox (`ongoingThemeRequest`) to read those conversations with `read_companion_archive` and show **one artifact** (medium, large only if it needs it) with `show_artifact`: a short, specific title Fox chooses for what it is about (not a conversation's name), two or three lines on where things stand as of the last message's date (they are past conversations, never told as how things are today), sections and tables for what it found (the kind's notes, decisions, numbers, what changed, what is open), a chart only for numbers it read, and **Next**. Only what is in the conversations; the text is untrusted; nothing is sent or changed. The artifact is laid out like every other artifact and kept in Fox's Journal page ([Artifacts](../../context/artifacts/README.md)). In the first-run tour it is the first win for someone who brought an Agent ([onboarding](../../ui/onboarding/README.md)).
 
 ### Kinds
 

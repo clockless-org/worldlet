@@ -13,7 +13,7 @@ import {bringAgent,broughtFile,placeBrought,readBrought,restoreBrought} from '..
 import {allowed as inBackup,validate as validateBackup} from '../platform/electron/src/modules/shell/backup.ts';
 import {digest} from '../platform/electron/src/files.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {journalOrigin,readArtifact} from '../core/artifacts/index.ts';
+import {journalOrigin,readArtifact} from '../context/artifacts/index.ts';
 // What the World's database receives, as one list: each conversation's messages, then the notes.
 const flat=(history:any)=>[...history.conversations.flatMap((c:any)=>c.turns.map((t:any)=>({...t,session:c.session}))),...history.notes.map((n:any)=>({...n,role:'assistant',text:n.date?`Notes for ${n.date}\n\n${n.text}`:n.text}))];
 
