@@ -10,7 +10,8 @@ and rename its folders without a change there ([#714](https://github.com/clockle
 | [world.ts](world.ts) | The sample World the website's demo draws | browser bundle |
 | [download.ts](download.ts) | Release links and the visitor's system for the download pages | browser bundle |
 | [games.ts](games.ts) | The games the website lets visitors play | browser bundle |
-| [build.ts](build.ts) | Brand, tokens, themes, the World's layout, the Applet catalog, release versions and the World page's CSP for the website build | Node |
+| [build.ts](build.ts) | Brand, tokens, themes, the World's layout, the Applet catalog and release versions for the website build | Node |
+| [worker.ts](worker.ts) | The World page's Content Security Policy, for the website's Worker | Worker bundle |
 | [checks.ts](checks.ts) | Phone pairing, remote Agents, Agent reports, boards, update channels and setup, for the checks that test the website Worker against the app | Node |
 | [release.ts](release.ts) | The release check, update acceptance and the Windows release manifest, for the release hosts | Node |
 | [files.ts](files.ts) | The paths of the files the website and the release hosts read or bundle | Node |

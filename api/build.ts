@@ -12,4 +12,3 @@ export type {ThemeSpriteRig} from '../ui/companion/animation/theme-sprite-rig.ts
 export {APP_DEFINITIONS,WORLD_APPS} from '../context/applets/catalog.ts';
 export {MOMENT_ART} from '../context/applets/moment.ts';
 export {calendarParts,nativeReleaseVersion} from '../agent/distribution/index.ts';
-export {WORLD_PAGE_CSP,WORLD_PAGE_CSP_META,worldRoomCsp} from '../contracts/web-world.ts';
