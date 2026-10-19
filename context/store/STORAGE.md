@@ -37,11 +37,10 @@ Every Context domain is read, written and searched through one entry, `context/s
 
 The host modules for artifacts and their pages, Moment Applets, made games, Ongoing things, local calendar events, Agent artifacts and reports, the board, Service presets, Service sync snapshots, Attention items and reviews (Fox's World tools, the page's status changes and undo, routines and scheduled results), Agent asks, GitHub, PostHog and Notion drafts, service requests, conversations and chat by place, the companion's stored profile, brought Agents, website recordings and meeting transcripts, Moment Applet pages and state, made-game pages and the library (sources and Knowledge, `WorldStore.libraryContext()`, which needs no database) go through the entry. A domain's own named reads and changes (a thread's turns, a visit's records, adding turns, recording a visit) keep the ledger's types through `contextReads` and `contextChanges` (`platform/host/store/context-storage.ts`), which call the entry's `query` and `write`; only the names listed there are let through. A source is Synced: a file the person imports or an X bookmark is ingested through `connectorWriter`. `node scripts/context-entry-check.ts` (in `test:core`) checks it with fictional records.
 
-**Next steps**, not built yet:
+**Next steps**, not built yet. Storage needs no move: everything in the World is already in `world.sqlite`, and only imported originals (`sources/`), this computer's preferences and the encrypted vault stay files (see the table below).
 
 1. **Grants and audit in the entry.** The Gate still admits each Agent call before the host module writes, and the audit is written there. `world_context` reads its snapshots through the entry and keeps its own per-record ranking. Bookkeeping that is not Context (source checks, runtime tasks, Harness history cursors, my-Applet site records and pictures) still uses the ledger directly.
-2. **Storage.** One SQLite database for every envelope plus `blobs/<sha256>` for bodies, with a migration that keeps the old files as a backup.
-3. **Drafts and pins.** A new Made record starts as a draft until it is used or pinned. Drafts are not deleted on their own; the person may delete them.
+2. **Drafts and pins.** A new Made record starts as a draft until it is used or pinned. Drafts are not deleted on their own; the person may delete them.
 
 ## One durable copy, several appropriate formats
 
