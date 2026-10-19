@@ -155,7 +155,7 @@ const silence=(seconds:number)=>new Int16Array(Math.round(seconds*RATE));
  assert.match(page,/const deferred=!!parsed&&publicPage\(parsed\);\n  const start='about:blank';/,'a meeting page starts blank');
  assert.match(page,/if\(deferred\)this\.load\(parsed!\.href\);/,'its first load goes through load()');
  assert.match(page,/try\{await this\.installMeetingAudio\(\);this\.meetingReady=true;\}/,'and loads after its hooks are installed');
- const world=read('ui/shell/notion-world.ts');
+ const world=read('ui/frame/notion-world.ts');
  assert.match(world,/'meeting:transcript:start',label:'Transcribe'/);
  // A call page that can be heard starts its transcript; Stop (or a failed start) keeps it off for that call.
  assert.match(device,/else if\(!this\.transcript&&view instanceof CefPageView&&view\.meetingAudioReady&&meetingPage\(view\.url\)&&this\.browser===view&&!view\.hidden\)this\.emit\(\{phase:'meeting-ready'\}\);/,'the host says when a call page can be heard');

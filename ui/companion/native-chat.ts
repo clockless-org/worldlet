@@ -1,5 +1,5 @@
 import {ACTIVE_THEME} from '../style/index.ts';
-import {firstWinCandidate} from '../shell/index.ts';
+import {firstWinCandidate} from '../frame/index.ts';
 import {mountCompanionLife} from './companion-life.ts';
 import {companionPosition} from './companion-position.ts';
 import {uiIcon} from '../style/index.ts';
@@ -8,7 +8,7 @@ import {watchModelNeeded} from './model-needed.ts';
 import {mountAppletTaskResults} from './applet-task-results.ts';
 import {mountFoxProactive,arriveProactive} from './fox-proactive.ts';
 import {isDesktopCompanion,requireWorldSurface} from './world-surface.ts';
-import {errorFields,isRequestCancellation,reportEngagement,reportProductEvent} from '../shell/index.ts';
+import {errorFields,isRequestCancellation,reportEngagement,reportProductEvent} from '../frame/index.ts';
 import {FOX_RETRY_ACTION,FOX_RETRY_DELAY_MS,foxTurnFailureText,foxTurnRetry} from '../../agent/companion/index.ts';
 import {contextThread,cleanRecall,FOX_MAIN_THREAD,restoredMainHistory} from '../attention/index.ts';
 import {foxVisibleText,guidedVisibleText} from './fox-visible-text.ts';
@@ -19,7 +19,7 @@ import {TURN_TASK_SOURCE,turnTaskName,foxSessionCards,foxSessionDetail,foxSessio
 import {mountFoxSessions} from './fox-sessions.ts';
 import {mountFoxChatWindow,type FoxChatMessage} from './fox-chat-window.ts';
 import type {FoxActivitySignal} from '../../contracts/companion-activity.ts';
-import {worldNow} from '../shell/index.ts';
+import {worldNow} from '../frame/index.ts';
 import {foxGreeting} from './fox-greeting.ts';
 import {THREAD_ROW,renderThreadCards,threadTopicKey,showQuestion,restoreThread,segmentOf,threadCards,threadFinish,threadInterrupt,threadLine,threadRow,threadStart,threadStep,threadSteer,threadUsage,workingText,type ThreadEntry} from './fox-thread.ts';
 // Optional model-authored drafts; malformed metadata never becomes an action.
@@ -683,7 +683,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   const icon=editable?'send':'microphone';if(speechButton.dataset.icon!==icon){speechButton.dataset.icon=icon;speechButton.innerHTML=editable?SEND_ICON:uiIcon('microphone');}
   state.textContent='';
   // The bar always says “Message <Agent>” (owner Order 2026-10-12), resting, pointed at or typing, in a website too
-  // (where it still takes a web address, ui/shell/notion-world.ts); only voice and Talk say what they are doing.
+  // (where it still takes a web address, ui/frame/notion-world.ts); only voice and Talk say what they are doing.
   const website=!reader.hidden&&reader.dataset.template==='browser';
   entry.dataset.website=String(website);
   input.placeholder=talk.phase==='speaking'?companionName+(talk.overhearing?' is speaking · talk or click the microphone to interrupt':' is speaking · click the microphone to interrupt'):talk.phase==='thinking'&&!speech?companionName+' is thinking · Talk is on':speech&&(recording||starting)?(talk.on?'Talk is on · listening…':'Listening…'):speech&&transcribing?'Understanding your voice…':'Message '+companionName+(sessionHere?' · '+sessionHere.title:'');

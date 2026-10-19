@@ -1,7 +1,7 @@
 // Compile-only contract regression. Never sends a request.
 import type {HostCall} from '../contracts/platform.ts';
 import {callHost} from '../platform/bridge/host.ts';
-import {withProductAnalytics} from '../ui/shell/product-analytics.ts';
+import {withProductAnalytics} from '../ui/frame/product-analytics.ts';
 async function check(call:HostCall){
  void call('agentChat',{id:'turn',text:'Hello'});
  void call('agentCancel');

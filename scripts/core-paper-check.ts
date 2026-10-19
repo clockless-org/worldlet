@@ -1,6 +1,6 @@
 /** The production paper views: saved originals, filtering, host actions and compact navigation. */
 import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {bundleScript,withBrowser,pageErrors} from './browser-test.ts';
-const css=(await Promise.all(['dist/WorldletWeb/worldlet-ui.css','ui/shell/pixi-world.css','ui/applets/scene/applet-scene.css','ui/applets/gmail/focus.css',...['gmail','google-calendar','apple-reminders'].map(id=>'ui/applets/'+id+'/open.css')].map(p=>readFile(p,'utf8')))).join('\n');
+const css=(await Promise.all(['dist/WorldletWeb/worldlet-ui.css','ui/frame/pixi-world.css','ui/applets/scene/applet-scene.css','ui/applets/gmail/focus.css',...['gmail','google-calendar','apple-reminders'].map(id=>'ui/applets/'+id+'/open.css')].map(p=>readFile(p,'utf8')))).join('\n');
 const script=await bundleScript({entryPoints:['scripts/fixtures/core-paper-applets/main.ts']});
 await withBrowser(async browser=>{
  const page=await browser.newPage({viewport:{width:1672,height:941}}),errors=pageErrors(page);

@@ -24,7 +24,7 @@ import {createWorldAddressHost,type WorldAddressHost} from './world-address.ts';
 import {createAgentArtifacts,type AgentArtifacts} from './agent-artifacts.ts';
 import {createServiceDrafts,type ServiceDrafts} from './service-drafts.ts';
 import type {AskDrafts} from './agent-asks.ts';
-import {GITHUB_APP,type PosthogSettings} from '../../../../../context/sources/index.ts';
+import {GITHUB_APP,type PosthogSettings} from '../../../../../context/connectors/index.ts';
 import {moveFoxProfile} from './fox-move.ts';
 import {HERMES_WINDOW_DONE,endHermesInstall,hermesInstallWindow,hermesSessionModels,hermesStarts,installHermes,workingHermesAgent,installedHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
 import {UPDATED,backgroundSignIn,claudeCodeSignedIn,openSignIn} from './provider-sign-in.ts';
@@ -761,7 +761,7 @@ export function installAgentRuntime(host:Host){
   return sources.readNotionContext(request);
  }));
  savedContext=(args,canRead)=>host.optional<SourcesService>(SOURCES)?.serviceContext?.(args,canRead);
- // The board (context/sources/BOARD.md): in the person's own World with private context allowed, as asks are. Each preset is
+ // The board (context/connectors/BOARD.md): in the person's own World with private context allowed, as asks are. Each preset is
  // read through the World's own Service readers, as the Attention Center reads a source: no Agent, no turn, no model; an
  // `agents` preset from the Agents' own reports, as `agents/list` answers.
  worldBoard=createWorldBoard({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},

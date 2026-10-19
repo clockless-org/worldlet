@@ -3,7 +3,7 @@
  * `worldlet` MCP server; the host reads the target as it is now and keeps that beside the draft. Nothing is written
  * until the person chooses Approve on the draft's Attention card. Then the host reads the target again, refuses when it
  * changed since the draft, and otherwise writes once through the World's own connection to that Service: PostHog's
- * personal API key (context/sources/services/posthog.ts) or the Notion connection (context/sources/mcp/notion.ts). Hosts own
+ * personal API key (context/connectors/services/posthog.ts) or the Notion connection (context/connectors/mcp/notion.ts). Hosts own
  * IDs, clocks, storage and the network; Core decides (agent/gate/service-drafts.ts). */
 
 /** The Services a draft writes to, each its own Grant ("Can draft PostHog changes", "Can draft Notion changes"). */

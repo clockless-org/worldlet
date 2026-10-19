@@ -2,7 +2,7 @@ import DOMPurify from 'dompurify';
 import {renderArtifactBlocks,artifactPicture} from './artifact-blocks.ts';
 import {fitArtifact} from './artifact-fit.ts';
 import {modelMarkdown} from '../style/index.ts';
-import {artifactBrief,artifactFitSteps,journalDays,madeArtifacts,readArtifact,type Artifact,type JournalDay,type MadeArtifact} from '../../context/artifacts/index.ts';
+import {artifactBrief,artifactFitSteps,journalDays,madeArtifacts,readArtifact,type Artifact,type JournalDay,type MadeArtifact} from '../../context/store/index.ts';
 /** The Journal (owner decisions 2026-10-06 and 2026-10-07; a book of its own, 2026-10-08; a timeline, 2026-10-11):
  * everything Fox produced in this World, one kind of thing, an artifact, kept day by day. Inside the book one page
  * scrolls through the days, newest first: each day has its date on the left and its cards in time order on the right,
@@ -11,7 +11,7 @@ import {artifactBrief,artifactFitSteps,journalDays,madeArtifacts,readArtifact,ty
  * (`journalOrigin`). Older days come in as the person scrolls. Opening one shows it again in the World; × forgets it (a
  * made page's own Applet deletes it). It reads again while it is open and something changes.
  * The morning brief (owner Order 2026-10-07), and Fox by itself for a new mail task (owner decision 2026-10-09,
- * context/artifacts/replies.ts), leave a reply draft for each mail that waits for the person, a card of its own on today's page: Send sends that exact draft, Edit changes its words in place, Skip drops it. Morning brief
+ * context/store/replies.ts), leave a reply draft for each mail that waits for the person, a card of its own on today's page: Send sends that exact draft, Edit changes its words in place, Skip drops it. Morning brief
  * in the head says, in the person's words, what the 6 AM brief holds. */
 type Reply={id:string;kind:'reply';title:string;to:string;draft:Record<string,string>;createdAt:number;updatedAt:number};
 type Entry=Artifact|MadeArtifact|Reply;

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import {tmpdir} from 'node:os';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
-// A reply Fox prepares by itself (owner decision 2026-10-09, context/artifacts/replies.ts) on the World page: a new Worth
+// A reply Fox prepares by itself (owner decision 2026-10-09, context/store/replies.ts) on the World page: a new Worth
 // Doing item from a Gmail thread that waits for the person gets a background request (no card, no reply line, a label in
 // the archive) that reads that thread and prepares a draft; a card beside Fox says what Fox is doing
 // that goes when it is done, and the Journal in the top-right corner holds the draft as a reply card; the item's Attention card says Fox drafted

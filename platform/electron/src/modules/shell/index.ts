@@ -50,7 +50,7 @@ export function installShell(host:Host){
  store.snapshotExtras=()=>({...extras(),appUpdate:updates.snapshot()});
  updates.onChange(()=>{void page.call('worldletAppUpdate',updates.snapshot());});
  analytics.onChange(buildMenus);
- // Sharing switched on or off: the World page starts or stops its PostHog web client (ui/shell/web-analytics.ts).
+ // Sharing switched on or off: the World page starts or stops its PostHog web client (ui/frame/web-analytics.ts).
  analytics.onChange(()=>host.page.event('worldlet:analytics-changed'));
  loginItem.onChange(buildMenus);
  // Crashed renderer, GPU and helper processes reach PostHog as an allowlisted type and Electron reason only.

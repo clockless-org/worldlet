@@ -2,9 +2,9 @@
 
 Every artifact is drawn in one design system, the Attention card's (owner Orders 2026-10-08: "artifact一定一定一定要统一设计system，attention card就是我们标准的design system" and "你要做一套 design system，比较丰富的，用来渲染这个 artifact"). An Attention card, an answer Fox shows, a meeting's summary, the day's plan and a card in the Journal are all made of the parts below, and nothing on an artifact brings a look of its own. Fox chooses parts and fills them with words and numbers; Worldlet draws them. Fox never writes HTML or styles.
 
-This card is the **template mode** of [theme-driven Artifacts](../../context/artifacts/README.md#theme-driven-artifacts): the same content, laid out by the Agent as a page in the theme's style, replaces it at medium and large size in the World once the page is ready. The tones here are the theme's colour roles (the Village's `artifact.colors`).
+This card is the **template mode** of [theme-driven Artifacts](../../context/store/ARTIFACTS.md#theme-driven-artifacts): the same content, laid out by the Agent as a page in the theme's style, replaces it at medium and large size in the World once the page is ready. The tones here are the theme's colour roles (the Village's `artifact.colors`).
 
-The card is defined in [artifact-card.css](artifact-card.css) (in the World, on the Attention card's parts in [attention-preview.css](./attention-preview.css)) and [journal.css](journal.css) (the Journal's smaller version). The parts are drawn by [artifact-blocks.ts](artifact-blocks.ts) and [fox-artifact.ts](fox-artifact.ts). The rules for what Fox may send are in [context/artifacts](../../context/artifacts/README.md#blocks).
+The card is defined in [artifact-card.css](artifact-card.css) (in the World, on the Attention card's parts in [attention-preview.css](./attention-preview.css)) and [journal.css](journal.css) (the Journal's smaller version). The parts are drawn by [artifact-blocks.ts](artifact-blocks.ts) and [fox-artifact.ts](fox-artifact.ts). The rules for what Fox may send are in [context/artifacts](../../context/store/ARTIFACTS.md#blocks).
 
 ## Foundations
 
@@ -57,8 +57,8 @@ A card is a head (origin label, title, picture), a short Markdown body, up to th
 | `choice` | Two to four answers | Outline buttons that draft the request |
 | `parts` | A whole made of named parts | Outline buttons, with the chosen one filled, and its detail below |
 
-The last four are the parts the person works with ([Blocks](../../context/artifacts/README.md#blocks)). Blocks count toward the one-card budget, so a card with several stays one card.
+The last four are the parts the person works with ([Blocks](../../context/store/ARTIFACTS.md#blocks)). Blocks count toward the one-card budget, so a card with several stays one card.
 
 ## In the Journal
 
-A Journal card keeps the card as it was shown (owner request 2026-10-08: "journal 里保留卡片"), only smaller. It keeps the World card's paper and corners, its tone, its painted picture across the head, and every part: figures stay in the accent with their notes, steps keep their marks and details, and the recommended option stays outlined with its points. Its blocks are drawn at 11–15px. It never scrolls (owner Order 2026-10-09): it shows the fullest version its cell holds, down to the one-sentence brief, and says More when it left something out ([Fits its card](../../context/artifacts/README.md#fits-its-card)).
+A Journal card keeps the card as it was shown (owner request 2026-10-08: "journal 里保留卡片"), only smaller. It keeps the World card's paper and corners, its tone, its painted picture across the head, and every part: figures stay in the accent with their notes, steps keep their marks and details, and the recommended option stays outlined with its points. Its blocks are drawn at 11–15px. It never scrolls (owner Order 2026-10-09): it shows the fullest version its cell holds, down to the one-sentence brief, and says More when it left something out ([Fits its card](../../context/store/ARTIFACTS.md#fits-its-card)).

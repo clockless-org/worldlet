@@ -15,7 +15,7 @@ import {WORLD_APPS} from '../../../../../context/applets/index.ts';
 import {PROACTIVE_MOMENTS} from '../../../../../agent/companion/index.ts';
 
 // Explicit product events and account/installation profiles from the host. The World page adds PostHog's standard web
-// capture (webConfig and ingest below; ui/shell/posthog-web.ts): autocapture, pageleave, sessions and session replay,
+// capture (webConfig and ingest below; ui/frame/posthog-web.ts): autocapture, pageleave, sessions and session replay,
 // with every text, input and attribute masked, so mail, chat and Fox content never leave the device readable.
 // Identity and delivery markers keep the Mac host's UserDefaults names in preferences.json.
 const ENABLED='WorldletUsageAnalyticsEnabled',ACCOUNT='WorldletUsageAccount',ANONYMOUS='WorldletUsageAnonymousID',INSTALLATION='WorldletUsageInstallID';
@@ -33,7 +33,7 @@ export function ingestPath(pathname:string){
  const rest=pathname.slice(INGEST_PREFIX.length);
  return INGEST_PATHS.some(pattern=>pattern.test(rest))?rest:null;
 }
-/** What the World page's PostHog web client starts with (ui/shell/posthog-web.ts): the same project, identity and
+/** What the World page's PostHog web client starts with (ui/frame/posthog-web.ts): the same project, identity and
  * properties as the host's own events, so both count as one person on one installation. */
 export interface WebAnalyticsConfig {key:string,apiHost:string,distinctId:string,identified:boolean,properties:Row}
 /** This computer's analytics choice and identity: kept across World backup restores (preferences.json is not World data). */
@@ -94,9 +94,9 @@ const ALLOWED:Record<string,string[]>={
  proactive_card:['yes','no'],
  // How the chosen Agent's description of itself ended (agent/gate/agent-profile.ts).
  profile_result:['ok','timeout','invalid','failed'],
- // tour_skipped: the step of the first run's eight-step tour it was skipped on (ui/shell/ONBOARDING.md).
+ // tour_skipped: the step of the first run's eight-step tour it was skipped on (ui/frame/ONBOARDING.md).
  tour_step:['1','2','3','4','5','6','7','8'],
- // first_card_ready: how a new person's first Today's prep ended (ui/shell/notion-world.ts startFirstCard).
+ // first_card_ready: how a new person's first Today's prep ended (ui/frame/notion-world.ts startFirstCard).
  first_card_result:['ok','no_card','failed'],
  // attention_shown: how many items the Center showed (at most nine). attention_approved: where the person settled one
  // (its card or row on this computer, or the phone) and the item's kind. Never a title or a source.

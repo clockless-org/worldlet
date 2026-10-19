@@ -8,7 +8,7 @@ import {harnessConnections,hermesConnectionsService,openClawConnectionsService} 
 import type {HarnessEnvironment} from '../platform/electron/src/modules/agents/local-harness.ts';
 import {createHarnessConnections} from '../platform/electron/src/modules/companion/harness-connections.ts';
 import {AGENT} from '../platform/electron/src/host/services.ts';
-import {connectionLine,connectionUseLine,showAgentConnections} from '../ui/settings/agent-connections.ts';
+import {connectionLine,connectionUseLine,showAgentConnections} from '../ui/frame/agent-connections.ts';
 import {withTempDir} from './test-temp.ts';
 
 // The Agent's connections in the World (agent/gate/PORTABILITY.md#the-agents-connections-in-the-world): the declared

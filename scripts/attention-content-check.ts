@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
-import {validateWorldItem} from '../context/items/world-item-validation.ts';
+import {validateWorldItem} from '../context/store/world-item-validation.ts';
 import {readFileSync} from 'node:fs';
 import {processedAttentionContent,ATTENTION_CONTENT_LIMITS,attentionReasonWords} from '../agent/attention/attention-content.ts';
 import services from '../agent/gate/services.json' with {type:'json'};
 import {matterCopy} from '../agent/attention/index.ts';
 import {attentionPreviewData} from '../agent/attention/attention-preview.ts';
-import {projectWorldItems} from '../context/items/world-items.ts';
+import {projectWorldItems} from '../context/store/world-items.ts';
 import {planAttention,finishAttentionBudget} from '../agent/attention/attention-center.ts';
-import {prepareWorldItem} from '../context/items/world-item-state.ts';
+import {prepareWorldItem} from '../context/store/world-item-state.ts';
 const original='2026 HYSTA Annual Conference | AI innovation, founders and many more details';
 const item=processedAttentionContent({id:'meeting',provider:'google-calendar',kind:'event',title:'HYSTA annual conference',reason:'Your conference is tomorrow.',summary:'A full-day conference. Review the agenda before going.',locationName:'Santa Clara Convention Center',location:'5001 Great America Pkwy, Santa Clara, CA',start:'2026-09-26T09:00:00-07:00',end:'2026-09-26T21:00:00-07:00',status:'open',sources:[{provider:'google-calendar',id:'event',quote:original}]});
 assert.equal(item.context,item.reason,'Legacy alias has one authoritative reason');

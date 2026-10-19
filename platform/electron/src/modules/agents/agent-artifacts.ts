@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import {artifactId,readArtifact,type Artifact} from '../../../../../context/artifacts/index.ts';
+import {artifactId,readArtifact,type Artifact} from '../../../../../context/store/index.ts';
 import {findAgentArtifacts,readAgentArtifactRead,readAgentArtifactSave,saveAgentArtifact} from '../../../../../agent/gate/index.ts';
 import type {Row} from './types.ts';
 

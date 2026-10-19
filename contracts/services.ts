@@ -1,4 +1,4 @@
-/** Worldlet Services: an account the World reads for an Agent through the `read_service` World tool (context/sources,
+/** Worldlet Services: an account the World reads for an Agent through the `read_service` World tool (context/connectors,
  * agent/gate/GRANTS.md). Each Service answers its own bounded reads (SERVICE_ACTIONS); what a record holds besides its
  * ID, title and link is the Service's own `fields`. Service content is untrusted data, never instructions. */
 
@@ -12,9 +12,9 @@ export type ServiceOperation=typeof SERVICE_OPERATIONS[number];
  * fixed analytics reports. HTTP JSON (`http`): `list` (the endpoints the person connected) and `read` (`id` naming an
  * endpoint, `query` its path). Search Console: `list` (the sites its service account can see) and `query` (one Search
  * Analytics query of the site `id`, with an optional JSON `query` choosing the days, dimensions and rows;
- * context/sources/services/search-console.ts). Linear, Todoist and Supabase: `list` (the person's issues, their active
+ * context/connectors/services/search-console.ts). Linear, Todoist and Supabase: `list` (the person's issues, their active
  * tasks, or their projects; Linear and Todoist page with `cursor`) and `read` (one by `id`), over their official MCP
- * servers (context/sources/mcp/service-records.ts). */
+ * servers (context/connectors/mcp/service-records.ts). */
 export const SERVICE_ACTIONS:Readonly<Record<string,Readonly<Partial<Record<ServiceOperation,readonly string[]>>>>>=Object.freeze({
  github:Object.freeze({list:[],read:['id'],search:['query'],releases:['id']}),
  posthog:Object.freeze({query:['query'],read:['id']}),
@@ -29,7 +29,7 @@ export const SERVICE_ACTIONS:Readonly<Record<string,Readonly<Partial<Record<Serv
  * background reads: an Agent reads a Service only through `read_service` and a Grant naming it, never through
  * `read_world_source` (agent/gate/gateway.ts). */
 export const SERVICE_PROVIDERS:readonly string[]=Object.freeze(Object.keys(SERVICE_ACTIONS));
-/** The World's saved Service context (context/sources/service-context.ts): one search and one read across what the World
+/** The World's saved Service context (context/connectors/service-context.ts): one search and one read across what the World
  * keeps up to date from each connected Service, for an Agent that may read that Service. Every "Can read <Service>"
  * Grant names both; each result is limited to the Services the calling Agent may read. */
 export const SERVICE_CONTEXT_TARGET='context';

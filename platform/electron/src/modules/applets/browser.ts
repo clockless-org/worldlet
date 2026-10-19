@@ -10,7 +10,7 @@ import {YouTubePlayer,YouTubeService} from './youtube.ts';
 import {StripeService} from './stripe.ts';
 import {parse} from './rules.ts';
 import type {Host,Row} from '../../host/types.ts';
-import {battleSite} from '../../../../../context/artifacts/index.ts';
+import {battleSite} from '../../../../../context/store/index.ts';
 
 /** Website Applets, the YouTube player and Stripe (Mac BrowserDevice, YouTube*, Stripe*). */
 export function installBrowser(host:Host){

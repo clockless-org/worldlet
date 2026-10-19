@@ -14,7 +14,7 @@ import {readModelSource} from './model-source.ts';
 import {app,powerMonitor} from 'electron';
 import {installFox} from './index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
-import {worldLogLines} from '../../../../../context/activity/index.ts';
+import {worldLogLines} from '../../../../../context/applets/index.ts';
 
 const root=fs.mkdtempSync(path.join(process.env.WORLDLET_CHECK_DIR??os.tmpdir(),'worldlet-fox-'));
 const preferences=Preferences.at(root);

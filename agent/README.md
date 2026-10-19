@@ -1,13 +1,13 @@
 # Agent
 
-Who does the work: Fox, Tasks, Asks, Agents and the Gate, one of the four [layers](../docs/UI-CORE-PLATFORM.md#see-do-know). Platform-independent product behavior. Components, by [feature](../docs/UI-CORE-PLATFORM.md#features):
+Who does the work: the companion, Tasks, Applets, Attention and the Gate, one of the four [layers](../docs/UI-CORE-PLATFORM.md#see-do-know). Platform-independent product behavior. Components, by [feature](../docs/UI-CORE-PLATFORM.md#features):
 
-- Companion: companion
-- Attention: attention
-- Tasks: tasks (work that runs without the person)
-- Agents & Gate: agents, tools (the Agents connected to the World, World tools, Grants, approvals and audit)
-- Windows: windows (the World in a web browser and on the phone)
-- Base: onboarding, diagnostics, distribution
+- Companion: companion (turns through the person's own Agent, memory, setup)
+- Tasks: tasks (work that runs without the person: routines, checks, drafts)
+- Applets: applets (running Applets and driving the browser for them)
+- Attention: attention (deciding and ranking what needs the person)
+- Gate: gate (every Agent, its Grants, World tools, approvals and audit; local and remote MCP)
+- App rules: base (what the app reports, update channels)
 
 Agent imports [Context](../context/README.md) and `contracts/`, nothing else ([layer and dependency contract](../docs/UI-CORE-PLATFORM.md#repository-layers)).
 

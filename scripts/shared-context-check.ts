@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {contextLayout} from '../context/sources/context-layout.ts';
+import {contextLayout} from '../context/connectors/context-layout.ts';
 import {validateConversationHistory} from '../agent/companion/conversation-history.ts';
 const original=contextLayout({themes:[{theme:'library'},{theme:'studio'}]});
 assert.deepEqual(original.places.map(p=>p.position),[[0,0,2],[0,0,17],[0,0,-13]]);
@@ -42,7 +42,7 @@ assert.deepEqual(reconcileSourceCheck(finished,paused),{...finished,enabled:fals
 assert.equal(reconcileSourceCheck(finished,{...active,nextAt:1}).nextAt,3700,'unchanged configuration keeps scheduled next run');
 assert.equal(active.nextAt,9000,'rules never mutate stored input');
 console.log('PASS source schedule defaults, eligibility, due time and concurrent pause/reconfiguration');
-const {worldEvent}=await import('../context/items/world-events.ts');
+const {worldEvent}=await import('../context/store/world-events.ts');
 assert.equal(worldEvent('snapshot',{text:'private'}),null);
 assert.equal(worldEvent('browser',{operation:'status'}),null);
 assert.equal(worldEvent('worldAudio',{operation:'start'}),null);
@@ -50,7 +50,7 @@ assert.deepEqual(worldEvent('agentChat',{text:'private',apiKey:'secret',target:'
 assert.deepEqual(worldEvent('worldItemStatus',{id:'item-1',enabled:false,level:0,region:'x'.repeat(121)}),{body:{id:'item-1',enabled:false,level:0}});
 assert.equal(worldEvent('open',{provider:'🦊'.repeat(120)}).applet,'🦊'.repeat(120));
 console.log('PASS event privacy allowlist, bounded identifiers, transport exclusion and scalar state');
-const {recentWorldHistory}=await import('../context/items/world-events.ts');
+const {recentWorldHistory}=await import('../context/store/world-events.ts');
 const history=[{kind:'open',body:{provider:'gmail',status:'open'},at:'newest'},{kind:'agentChat',body:{},at:'chat'},{kind:'open',body:{status:'open',provider:'gmail'},at:'duplicate'},{kind:'done',body:{itemId:'one'},at:'older'},{kind:'open',body:{provider:'gmail',status:'open'},at:'oldest'}];
 assert.deepEqual(recentWorldHistory(history,2),[{provider:'gmail',status:'open',kind:'open',at:'newest'},{itemId:'one',kind:'done',at:'older'}]);
 assert.equal(recentWorldHistory(history,8).length,3,'only consecutive events are collapsed');
@@ -66,7 +66,7 @@ assert.deepEqual(validateAgentEvent({type:'delta',text:'Hello',privateTransport:
 assert.deepEqual(validateAgentEvent({type:'model_required'}),{type:'model_required'});
 assert.throws(()=>validateAgentEvent({type:'tool',id:'t',name:'read',args:[]}));
 console.log('PASS shared Agent capability/event validation and transport metadata exclusion');
-const {validateContextAnalysis,validateContextLayout,contextChunks}=await import('../context/sources/context-validation.ts');
+const {validateContextAnalysis,validateContextLayout,contextChunks}=await import('../context/connectors/context-validation.ts');
 const knowledge={sourceId:'s',theme:'home',topic:'Mail',summary:'Summary',facts:[{text:'Fact',quote:'Evidence'}]};
 assert.equal(validateContextAnalysis([knowledge],[{id:'s',revision:'v2'}],['s'],['home'])[0].sourceRevision,'v2');
 assert.throws(()=>validateContextAnalysis([], [{id:'s',revision:'v2'}],['s'],['home']));

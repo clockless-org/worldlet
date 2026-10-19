@@ -52,7 +52,7 @@ export function answerServiceRequest(request:ServiceRequest|null|undefined,outco
 
 /** The request's Attention card: "Claude Code wants to look at your PostHog." with Allow and Not now, or, when it is not
  * connected, "Claude Code wants to use Cloudflare. It isn't connected yet." with Connect Cloudflare. `title` is the
- * Service's own name; `signIn`: the Service connects with its own sign-in from the card (context/sources/connectors.ts),
+ * Service's own name; `signIn`: the Service connects with its own sign-in from the card (context/connectors/connectors.ts),
  * landing in `region`, where its Thing lives; otherwise the card sends the person to Settings › Connectors. */
 export function serviceRequestItem(request:ServiceRequest,title:string,{signIn=true,region}:{signIn?:boolean;region?:string}={}):WorldItem {
  const agent=request.agentName,service=name(title,request.provider);

@@ -111,7 +111,7 @@ for(const file of readdirSync(path.join(root,'scripts')).filter(f=>/\.(?:ts|mjs|
 // meeting 2026-09-24, fixed in e31e3562). The packaged app, its web engine and the download page all say 14.0.
 assert.match(pkg,/LSMinimumSystemVersion:'14\.0'/,'the packaged Mac app supports macOS 14');
 assert.match(readFileSync(path.join(root,'scripts/build-web-engine.ts'),'utf8'),/LSMinimumSystemVersion:'14\.0'/,'the web engine supports macOS 14');
-assert.match(readFileSync(path.join(root,'ui/shell/mac-release.ts'),'utf8'),/\? minimum : '14\.0'/,'the download page falls back to macOS 14');
+assert.match(readFileSync(path.join(root,'ui/frame/mac-release.ts'),'utf8'),/\? minimum : '14\.0'/,'the download page falls back to macOS 14');
 console.log('PASS Dev and packaged apps share scripts/mac-app-info.ts; macOS 14 or later');
 
 // Electron fuses: the packaged app (Mac, Windows and Linux) refuses NODE_OPTIONS and --inspect, and keeps RunAsNode for

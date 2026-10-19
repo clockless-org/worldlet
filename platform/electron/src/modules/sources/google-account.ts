@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
-import {GoogleRestError,SEARCH_CONSOLE_SCOPE,type GoogleQuery,type GoogleRest,type MailReceipts} from '../../../../../context/sources/index.ts';
+import {GoogleRestError,SEARCH_CONSOLE_SCOPE,type GoogleQuery,type GoogleRest,type MailReceipts} from '../../../../../context/connectors/index.ts';
 import {WorldletError,ensureDirectory,readJSON,writeJSON} from '../../files.ts';
 import type {VaultService} from '../../host/services.ts';
 
@@ -17,7 +17,7 @@ export const GOOGLE_SCOPES={
  // The reader uses only calendars/primary; shared calendars are not imported.
  'google-calendar':'https://www.googleapis.com/auth/calendar.events.owned.readonly',
  'google-drive':'https://www.googleapis.com/auth/drive.readonly',
- // Read only, asked for only from Search Console's tile (context/sources/services/search-console.ts, read by service-source.ts).
+ // Read only, asked for only from Search Console's tile (context/connectors/services/search-console.ts, read by service-source.ts).
  'search-console':SEARCH_CONSOLE_SCOPE,
 } as const;
 export type GoogleService=keyof typeof GOOGLE_SCOPES;

@@ -6,7 +6,7 @@ import {WorldletError} from '../../files.ts';
 import {listWorldTools} from '../../../../../agent/gate/index.ts';
 import {GOOGLE_SIGN_IN,GOOGLE_SIGN_IN_SERVICES,curatedConnection,curatedSourceRead} from '../../../../../context/applets/index.ts';
 import {harnessAuthHandoff} from '../../../../../agent/gate/index.ts';
-import {GoogleRestError,MOCK_GOOGLE_EMAIL,discover,mockGoogle,normalizeSource as normalize,prepareMail as prepare,readCalendar,readDrive,readDriveList,readPage,reconcileMail as reconcile,sendMail as send,sourceFailure,type GoogleRest} from '../../../../../context/sources/index.ts';
+import {GoogleRestError,MOCK_GOOGLE_EMAIL,discover,mockGoogle,normalizeSource as normalize,prepareMail as prepare,readCalendar,readDrive,readDriveList,readPage,reconcileMail as reconcile,sendMail as send,sourceFailure,type GoogleRest} from '../../../../../context/connectors/index.ts';
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
 import {ExecutionJournal} from '../agents/journal.ts';

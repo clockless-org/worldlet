@@ -1,5 +1,5 @@
 // My Applets (owner decision 2026-10-06, "最后就两个概念，一个是Applet，一个是Artifact"): the person's World has two
-// kinds of thing. An artifact is something Fox shows (context/artifacts); an Applet is a place they go back to. An Applet
+// kinds of thing. An artifact is something Fox shows (context/store); an Applet is a place they go back to. An Applet
 // is either built in (the catalog's) or the person's own: a website they made into one, a page Fox made that they keep,
 // or a conversation they brought and kept. Their own carry a small mark on their device so they read as theirs
 // (context/applets/MY-APPLETS.md).

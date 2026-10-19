@@ -55,11 +55,9 @@
 <text x="1539.0" y="180" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">设置 › Connectors</text>
 <text x="1691.0" y="180" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">在 Platform：platform/web/</text>
 <rect x="1774" y="164" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#B6CCFE"/>
-<text x="1843.0" y="179" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/shell/</text>
+<text x="1843.0" y="179" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/frame/</text>
 <rect x="1774" y="190" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#B6CCFE"/>
-<text x="1843.0" y="205" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/settings/</text>
-<rect x="1774" y="216" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#B6CCFE"/>
-<text x="1843.0" y="231" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/style/</text>
+<text x="1843.0" y="205" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/style/</text>
 <rect x="20" y="330" width="1906" height="170" rx="14" fill="#F1F8F3" stroke="#A9D8B8"/>
 <text x="36" y="362" font-size="20" font-weight="800" fill="#1A7F37">2 · Agent</text>
 <text x="36" y="384" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A">agent/</text>
@@ -87,21 +85,18 @@
 <text x="36" y="542" font-size="20" font-weight="800" fill="#9A6700">3 · Context</text>
 <text x="36" y="564" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A">context/</text>
 <text x="36" y="586" font-size="12" fill="#57606A">World 知道的一切</text>
-<rect x="254" y="524" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
-<text x="323.0" y="539" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/activity/</text>
+<text x="323.0" y="540" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">World 日志在 applets/</text>
 <rect x="406" y="524" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
 <text x="475.0" y="539" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/applets/</text>
 <text x="627.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
 <text x="779.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
 <text x="931.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<rect x="1014" y="524" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
-<text x="1083.0" y="539" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/artifacts/</text>
+<text x="1083.0" y="540" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">记录在 store/</text>
 <text x="1235.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
 <rect x="1318" y="524" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
-<text x="1387.0" y="539" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/sources/</text>
-<rect x="1318" y="550" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
-<text x="1387.0" y="565" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/items/</text>
-<text x="1539.0" y="540" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">在 Context sources 里</text>
+<text x="1387.0" y="539" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/store/</text>
+<rect x="1470" y="524" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
+<text x="1539.0" y="539" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/connectors/</text>
 <text x="1691.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
 <text x="1843.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
 <rect x="250" y="646" width="1666" height="26" rx="7" fill="#FFFFFF" stroke="#F0CF8E"/>

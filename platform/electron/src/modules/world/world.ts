@@ -2,7 +2,7 @@ import {WorldletError} from '../../files.ts';
 import type {Host} from '../../host/types.ts';
 import {SOURCES,WORLD_TOOLS} from '../../host/services.ts';
 import type {SourcesService,WorldToolsService} from '../../host/services.ts';
-import {WORLD_LOG_KINDS,worldLogKeeps} from '../../../../../context/activity/index.ts';
+import {WORLD_LOG_KINDS,worldLogKeeps} from '../../../../../context/applets/index.ts';
 import {CONVERSATION_ATTENTION,callOriginal,conversationAttentionId,conversationOriginal,externalEventOriginal,validCallAttentionId,validConversationAttentionId,validExternalEventAttentionId} from '../../../../../agent/tasks/index.ts';
 // The World library itself: snapshot, presentation, items, history and onboarding.
 export function installWorld(host:Host){

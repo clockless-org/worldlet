@@ -64,7 +64,7 @@ export async function encodeVillageArt(root:string){
   index.areas[key]={day:`areas/${key}-day.webp`,night:`areas/${key}-night.webp`};
   await copy(index.areas[key].day,`resources/worlds/village/areas/${key}-day.webp`);await copy(index.areas[key].night,`resources/worlds/village/areas/${key}-night.webp`);
  }
- // Every catalog Applet's device, and the one every moment Applet stands on (context/artifacts/README.md).
+ // Every catalog Applet's device, and the one every moment Applet stands on (context/store/ARTIFACTS.md).
  for(const key of [...WORLD_APPS.map(a=>a.key),MOMENT_ART]){
   const src=`devices/${key}.webp`,device=await emit(src,themeAppletArt(entry,key).peek,'device:768:webp-92-100',f=>sharp(f).resize({width:768,withoutEnlargement:true}).webp({quality:92,alphaQuality:100}).toBuffer());
   index.devices[key]={src,box:await paintedBox(device)};

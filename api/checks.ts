@@ -3,8 +3,8 @@ export {PHONE_DESKTOP_ONLY,PHONE_PUSH_LIMITS,PHONE_SEEN_LIMIT,PUSH_BOX_PLACE,REM
 export type {PhoneMessage} from '../platform/web/index.ts';
 export {harnessSessionThread,harnessThreadPlace} from '../agent/gate/index.ts';
 export {agentBoardRecords,agentLiveness,makeAgentReport} from '../agent/gate/reports.ts';
-export {boardPresetIds,defineBoard,readBoardDefinition,resolveBoard} from '../context/sources/board.ts';
-export {readServicePresetSave} from '../context/sources/services/presets.ts';
+export {boardPresetIds,defineBoard,readBoardDefinition,resolveBoard} from '../context/connectors/board.ts';
+export {readServicePresetSave} from '../context/connectors/services/presets.ts';
 export {BOARD_DEFINE_PRESETS,BOARD_LIMITS} from '../contracts/board.ts';
 export {APP_DEFINITIONS} from '../context/applets/catalog.ts';
 export {UPDATE_CHANNELS,demotedChannel,followedChannel,pickUpdate,switchUpdateChannel,updateChannelOptions,updateChannelSwitchable} from '../agent/base/index.ts';

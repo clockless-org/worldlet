@@ -13,7 +13,7 @@ export async function buildUI(root,output){
  // The bundled theme package's assets (theme-assets/<id>/).
  await buildThemeSource(root,output);
  // Historical styles stay below the current system, even if they use more specific selectors.
- const legacy=(await Promise.all(['room.css','notion.css','homestead.css'].map(n=>readFile(path.join(root,'ui/shell',n),'utf8')))).join('\n').replace(/!important/g,'');
+ const legacy=(await Promise.all(['room.css','notion.css','homestead.css'].map(n=>readFile(path.join(root,'ui/frame',n),'utf8')))).join('\n').replace(/!important/g,'');
  const layers=await Promise.all(['foundations','components','layout','states','hud'].map(async n=>`@layer ${n}{\n${await readFile(path.join(root,'ui/style',n+'.css'),'utf8')}
 ${n==='components'?(await Promise.all([...['youtube','stripe','weather','moment','ongoing','board'].map(key=>key+'/panel.css'),'_shared/games.css'].map(file=>readFile(path.join(root,'ui/applets',file),'utf8')))).join('\n'):''}
 ${n==='states'?(await Promise.all(STATE_STYLES.map(file=>readFile(path.join(root,file),'utf8')))).join('\n'):''}\n}`));

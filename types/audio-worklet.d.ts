@@ -1,4 +1,4 @@
-// The AudioWorklet global scope, for ui/shell/pcm-worklet.ts.
+// The AudioWorklet global scope, for ui/frame/pcm-worklet.ts.
 //
 // A worklet runs in its own scope with these globals; the DOM library does not
 // declare them, and the worklet is the only file that uses them.

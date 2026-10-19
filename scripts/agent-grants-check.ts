@@ -5,8 +5,8 @@ import {HERMES_CHANNEL_READ_ONLY,hermesChannelToolAllowed} from '../agent/gate/h
 import {resolveAction,worldActionOf,worldActions} from '../agent/gate/gateway.ts';
 import {turnWriteAdmission,writeDecision} from '../agent/gate/turn-trust.ts';
 import {GITHUB_DRAFT_REASONS,GITHUB_WRITE_REASONS,readGithubWriteRun,readGithubWriteScope} from '../agent/gate/github-drafts.ts';
-import {prepareWorldItem} from '../context/items/world-item-state.ts';
-import {mergeArtifact,readArtifact} from '../context/artifacts/artifacts.ts';
+import {prepareWorldItem} from '../context/store/world-item-state.ts';
+import {mergeArtifact,readArtifact} from '../context/store/artifacts.ts';
 
 const now='2026-10-15T12:00:00.000Z',earlier='2026-10-15T11:00:00.000Z',later='2026-10-15T13:00:00.000Z';
 const hermes:AgentIdentity={id:'hermes',name:'Hermes Agent',harness:'hermes',kind:'local',createdAt:earlier};

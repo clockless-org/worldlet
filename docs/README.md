@@ -35,7 +35,7 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | Where Applet code lives | [Worldlet Applets](../ui/applets/README.md) |
 | How an Applet should look and behave | [Applet design guide](../ui/applets/DESIGN-GUIDE.md) · [motion](../ui/applets/MOTION.md) |
 | How to build one | [Applet implementation guide](../ui/applets/IMPLEMENTATION-GUIDE.md) · [integrations](../context/applets/INTEGRATIONS.md) |
-| A board of Service numbers: tabs, funnels, trends | [The board](../context/sources/BOARD.md) |
+| A board of Service numbers: tabs, funnels, trends | [The board](../context/connectors/BOARD.md) |
 | Cards Fox makes | [Card system](../ui/attention/CARD-SYSTEM.md) |
 | Worlds, styles and artwork | [Resources](../resources/README.md) · [Village world](../resources/worlds/village/README.md) |
 
@@ -247,9 +247,9 @@ Indexed: **286 Markdown documents** and **749 supporting documentation files**.
 - [ui/attention/CARD-SYSTEM.md](../ui/attention/CARD-SYSTEM.md)
 - [ui/companion/ANIMATION.md](../ui/companion/ANIMATION.md)
 - [ui/companion/CONVERSATION.md](../ui/companion/CONVERSATION.md)
-- [ui/shell/DISCOVERY.md](../ui/shell/DISCOVERY.md)
-- [ui/shell/ONBOARDING.md](../ui/shell/ONBOARDING.md)
-- [ui/shell/README.md](../ui/shell/README.md)
+- [ui/frame/DISCOVERY.md](../ui/frame/DISCOVERY.md)
+- [ui/frame/ONBOARDING.md](../ui/frame/ONBOARDING.md)
+- [ui/frame/SHELL.md](../ui/frame/SHELL.md)
 - [ui/style/INTERACTION.md](../ui/style/INTERACTION.md)
 - [ui/style/theme-packages/village/assets/README.md](../ui/style/theme-packages/village/assets/README.md)
 - [ui/style/theme-packages/village/assets/artifact/HOST-PROMPT.md](../ui/style/theme-packages/village/assets/artifact/HOST-PROMPT.md)
@@ -356,10 +356,10 @@ Indexed: **286 Markdown documents** and **749 supporting documentation files**.
 - [context/applets/INTEGRATIONS.md](../context/applets/INTEGRATIONS.md)
 - [context/applets/MY-APPLETS.md](../context/applets/MY-APPLETS.md)
 - [context/applets/RUNTIME.md](../context/applets/RUNTIME.md)
-- [context/artifacts/GAMES.md](../context/artifacts/GAMES.md)
-- [context/artifacts/README.md](../context/artifacts/README.md)
-- [context/items/STORAGE.md](../context/items/STORAGE.md)
-- [context/sources/BOARD.md](../context/sources/BOARD.md)
+- [context/connectors/BOARD.md](../context/connectors/BOARD.md)
+- [context/store/ARTIFACTS.md](../context/store/ARTIFACTS.md)
+- [context/store/GAMES.md](../context/store/GAMES.md)
+- [context/store/STORAGE.md](../context/store/STORAGE.md)
 - [contracts/COMPONENTS.md](../contracts/COMPONENTS.md)
 - [contracts/HARNESS.md](../contracts/HARNESS.md)
 - [contracts/README.md](../contracts/README.md)

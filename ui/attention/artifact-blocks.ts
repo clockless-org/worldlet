@@ -1,4 +1,4 @@
-import {scaledAmount,type ArtifactBlock,type ArtifactAction} from '../../context/artifacts/index.ts';
+import {scaledAmount,type ArtifactBlock,type ArtifactAction} from '../../context/store/index.ts';
 import {uiIcon} from '../style/index.ts';
 import {attentionSceneArt,attentionSceneIds} from './scene-art.ts';
 import {ACTIVE_THEME,attentionPicture} from '../style/index.ts';
@@ -12,7 +12,7 @@ export function artifactPicture({title='',body='',art,tone}:{title?:string;body?
 }
 // A fact row's icon is the Attention card's own line icon for its time and venue lines (ui/attention/CARD-SYSTEM.md).
 const FACT_ICONS={time:'clock',place:'map',cost:'coins',person:'people',link:'link',note:'note'};
-// The parts of an artifact the person works with in place (context/artifacts/README.md#blocks). They are Worldlet's own
+// The parts of an artifact the person works with in place (context/store/ARTIFACTS.md#blocks). They are Worldlet's own
 // components in the Attention card's design (owner Order 2026-10-08: "attention card就是我们标准的design system"): the
 // accent label, the card's ink and paper, and its outline and filled buttons. Fox only fills them in; nothing here is
 // HTML Fox wrote, and nothing changes the World. `live` is the card in the World; the Journal draws them still.

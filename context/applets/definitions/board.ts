@@ -1,4 +1,4 @@
-// The board (context/sources/BOARD.md): the numbers the person tracks, as tabs of blocks, each a saved Service read. The
+// The board (context/connectors/BOARD.md): the numbers the person tracks, as tabs of blocks, each a saved Service read. The
 // Applet only shows it: its panel reads the host action `board` (`read`), and an Agent or Fox sets it up. Nothing here
 // reads an account itself, and no model is involved.
 export default {

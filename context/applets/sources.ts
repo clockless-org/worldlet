@@ -9,10 +9,10 @@ export interface TokenField {key:string;label:string;hint?:string;value?:string;
  * for; PostHog and Cloudflare take an API key; Search Console a service account's JSON key), each with the one line saying what the token needs, what the token is
  * called there, the settings it also needs, and a token shape that is a common mistake. The token is checked with
  * one read before it is kept. `optional`: the source also connects with no token (an open HTTP JSON endpoint). */
-/** `signIn`: the source also connects with no token, through its own sign-in (context/sources/connectors.ts); its
+/** `signIn`: the source also connects with no token, through its own sign-in (context/connectors/connectors.ts); its
  * settings may then be partly given (a project chosen after signing in). */
 export const TOKEN_PROVIDERS:Readonly<Record<string,{hint:string;token:RegExp;label?:string;optional?:boolean;signIn?:boolean;fields?:readonly TokenField[];wrong?:{token:RegExp;message:string}}>>=Object.freeze({
- // With no token, GitHub signs in with the official Worldlet GitHub App's device code (context/sources/github-device.ts).
+ // With no token, GitHub signs in with the official Worldlet GitHub App's device code (context/connectors/github-device.ts).
  github:{hint:'Paste a fine-grained token with read-only access to Issues, Pull requests and Metadata.',token:/^[A-Za-z0-9_]{20,255}$/,signIn:true},
  posthog:{hint:'Paste a personal API key with read access to Project, Query, Insight, Dashboard, Feature flag and Annotation.',token:/^[A-Za-z0-9_-]{20,255}$/,label:'personal API key',signIn:true,
   fields:Object.freeze([
@@ -31,7 +31,7 @@ export const TOKEN_PROVIDERS:Readonly<Record<string,{hint:string;token:RegExp;la
    {key:'name',label:'Name',placeholder:'status',hint:'A short name Agents and presets use: lowercase letters, digits and -.',maxLength:32},
    {key:'url',label:'Base address',placeholder:'https://api.example.com/v1/',hint:'Reads are GET requests to paths under this HTTPS address.',maxLength:300},
   ])},
- // The whole JSON key file; the host checks what is in it (context/sources/services/search-console.ts). With no key,
+ // The whole JSON key file; the host checks what is in it (context/connectors/services/search-console.ts). With no key,
  // it signs in with Worldlet's Google sign-in instead.
  'search-console':{hint:'Paste the JSON key of a Google service account that you added as a user of your sites in Search Console.',token:/^\{[\s\S]{50,7998}\}$/,label:'service account key',signIn:true,
   wrong:{token:/^\{\s*"(?:installed|web)"\s*:/,message:'That is an OAuth client file, not a service account key. Create a JSON key for a service account instead.'}},

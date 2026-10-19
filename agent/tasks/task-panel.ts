@@ -9,10 +9,10 @@
 // own regular checks (Mail, Notes, Notion) and Worldlet's housekeeping are not the person's tasks and never show here;
 // what they find comes up as Artifacts. Names and schedules only, never prompts or source contents.
 import type {HarnessJob} from '../../contracts/harness-services.ts';
-import {worldLogApplet} from '../../context/activity/index.ts';
+import {worldLogApplet} from '../../context/applets/index.ts';
 import {getApp} from '../../context/applets/index.ts';
 import {nextCronRun} from './next-run.ts';
-import {DAILY_ROUTINE_NAMES} from '../../context/artifacts/index.ts';
+import {DAILY_ROUTINE_NAMES} from '../../context/store/index.ts';
 
 export type TaskGroup='routines'|'now';
 /** Who does it: the person's Agent's scheduler, Fox (its background work and Worldlet's daily Routines), or an Applet
@@ -61,7 +61,7 @@ export type TaskPanelInput={
  /** Fox's background work the page heard of, running now (ms), with the name its card goes by when it has one (a
   * follow-up on an Artifact goes by that Artifact's title). */
  fox?:readonly {source:string;text:string;at:number;name?:string}[];
- /** When Fox makes the next morning brief and today's summary (context/artifacts `dailyPlanned`, ms). */
+ /** When Fox makes the next morning brief and today's summary (context/store `dailyPlanned`, ms). */
  daily?:readonly {kind:'plan'|'summary';at:number}[];
  /** Which of those two the person paused: each stays, saying so, so it can be resumed from its card. */
  dailyPaused?:readonly ('plan'|'summary')[];
@@ -148,7 +148,7 @@ export function taskPanel(input:TaskPanelInput,now:number,locale?:string):TaskPa
   routines.push({id:'job:'+job.id,group:'routines',source:'agent-job',title:clip(job.name),detail:'',when:time.when,at,every:taskHowOften(job.when),by,open:{routine:job.id},
    day:time.day,clock:time.clock,name:clip(job.name,40),status:time.when,icon:'clock',routine:{job:job.id,when:job.when,kind:job.kind,paused:false}});
  }
- // The two default Routines (Today's prep, Wrap up today; context/artifacts/daily.ts), from the page's daily state: Worldlet
+ // The two default Routines (Today's prep, Wrap up today; context/store/daily.ts), from the page's daily state: Worldlet
  // asks the person's Agent at that time. A paused one is not planned: it stands last, saying so, so its card can resume it.
  const DAILY_EVERY={plan:'Every morning, while you use Worldlet',summary:'Every evening of a day you use Worldlet'} as const;
  for(const made of input.daily??[]){

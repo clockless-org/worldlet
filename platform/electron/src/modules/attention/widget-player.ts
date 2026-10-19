@@ -1,5 +1,5 @@
 import {WebContentsView} from 'electron';
-import {readWidgetConsole,widgetDocument,type WidgetSeed} from '../../../../../context/artifacts/index.ts';
+import {readWidgetConsole,widgetDocument,type WidgetSeed} from '../../../../../context/store/index.ts';
 import {Surface} from '../applets/surface.ts';
 import {closeGameView,gameURL,gameWebPreferences,lockGameContents,placeGameView} from '../applets/trial.ts';
 import type {Row} from '../../host/types.ts';

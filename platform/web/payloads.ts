@@ -1,6 +1,6 @@
 // What the desktop shows the paired phone, and what the phone may ask of the desktop (README.md in this folder).
-import {WIDGET_LIMITS,widgetDocument,readWidgetState,type Widget,type WidgetState} from '../../context/artifacts/index.ts';
-import {worldLogApplet} from '../../context/activity/index.ts';
+import {WIDGET_LIMITS,widgetDocument,readWidgetState,type Widget,type WidgetState} from '../../context/store/index.ts';
+import {worldLogApplet} from '../../context/applets/index.ts';
 import {httpsAddress} from './phone-web.ts';
 // The phone renders exactly these shapes (ios/Worldlet/Models.swift); bump PAIR_PROTOCOL in pairing.ts when one
 // changes incompatibly.
@@ -38,7 +38,7 @@ export type PhoneApplet={key:string,title:string,section:'live'|'accounts'|'jobs
 export type PhoneTask={id:string,name:string,status:string,when:string,icon:string,progress?:number,applet?:string,every?:string,by?:string,lines?:string[]};
 /** Doing now (newest first) and Routines (soonest first), as the computer orders them. */
 export type PhoneTasks={now:PhoneTask[],routines:PhoneTask[]};
-/** One of today's cards in the Journal (context/artifacts), newest first: an answer Fox showed or an Attention card the
+/** One of today's cards in the Journal (context/store), newest first: an answer Fox showed or an Attention card the
  * person closed. `text` is its one-sentence brief, else its body, clipped. */
 export type PhoneJournalEntry={id:string,title:string,kind:'answer'|'attention',at:string,text?:string,category?:string};
 // `applets`, `tasks` and `journal` are optional, so an older phone ignores them.
@@ -61,13 +61,13 @@ export type PhoneLive={v:1,at:string,id:string,item?:string,applet?:string,user:
  * moves the pairing there, and the relay keeps nothing more. */
 export type PhoneDesktop={v:1,at:string,name:string,version:string,order?:true,push?:true,room?:true};
 export type PhoneAction='done'|'later'|'remove';
-/** A widget for now (context/artifacts): `page` is the whole document with the widget prelude but no seed (the phone
+/** A widget for now (context/store): `page` is the whole document with the widget prelude but no seed (the phone
  * injects its stored values); it is absent when the slot has no room for it, and the phone keeps the page it has. */
 export type PhoneWidget={id:string,title:string,blurb:string,color:string,endsAt:string,pinned:boolean,updatedAt:string,version:number,page?:string,state:WidgetState};
 export type PhoneWidgets={v:1,at:string,widgets:PhoneWidget[]};
 // A chat line with `item` was said with that item's card open and joins its conversation; `option` chooses the option
 // Fox offers on the item's card.
-// `widget` carries the entries the person changed in a widget on the phone (context/artifacts mergeWidgetState).
+// `widget` carries the entries the person changed in a widget on the phone (context/store mergeWidgetState).
 // A chat line with `applet` was said inside that Applet's page on the phone: the computer opens the Applet, so the line
 // joins its thread. `applet` with action `open` opens the Applet on the computer.
 // `order` was what the person said with the phone's Order button. Orders were retired on 2026-10-18: the computer drops
@@ -113,7 +113,7 @@ function itemFox(value:any):{fox?:PhoneItemFox}{
  return fox.say||fox.option||turns.length?{fox}:{};
 }
 const optional=(fields:Record<string,string>)=>Object.fromEntries(Object.entries(fields).filter(([,value])=>value));
-// Accounts come from the World page's source issues (ui/shell/notion-world.ts publishSourceIssues).
+// Accounts come from the World page's source issues (ui/frame/notion-world.ts publishSourceIssues).
 // `world` (optional) is the Applet world: the Applets in the World with their lamps, what they are doing now, the world
 // log, the widgets for now and each Applet's thread (phoneApplets). Without it the payload is the Center alone.
 export function phoneAttention({now,later,accounts=[],world,tasks,journal}:{now:any[],later:any[],accounts?:any[],world?:PhoneWorld,tasks?:any,journal?:any[]},at:number):PhoneAttention{
@@ -143,7 +143,7 @@ export function phoneTasks(panel:any):PhoneTasks{
  return {now:group(panel?.now?.rows),routines:group(panel?.routines?.rows)};
 }
 
-/** Today's Journal cards (context/artifacts Artifact, `createdAt` in seconds), newest first: what the phone's Today tab
+/** Today's Journal cards (context/store Artifact, `createdAt` in seconds), newest first: what the phone's Today tab
  * shows under the date. "Today" is the computer's own day. */
 export function phoneJournal(artifacts:any[],at:number):PhoneJournalEntry[]{
  const day=new Date(at);day.setHours(0,0,0,0);const start=day.getTime()/1000;
@@ -156,7 +156,7 @@ export function phoneJournal(artifacts:any[],at:number):PhoneJournalEntry[]{
 /** What the World page knows about its Applets, for the phone's Applet world. `places` are the Applets in the World
  * (key, title, provider, lamp `state`, status `label`, `source` true for one that reads an account, `url` the website
  * the phone opens, phoneWebAddress; a place without one stays on the computer); `now` what each is
- * doing this moment ("Reading Mail…", context/activity worldLogNow); `log` the world log (context/activity WorldLogLine);
+ * doing this moment ("Reading Mail…", context/applets worldLogNow); `log` the world log (context/applets WorldLogLine);
  * `widgets` the widgets for now; `jobs` the ongoing things kept (agent/tasks: id, title, line and the conversation's latest
  * lines); `thread` an Applet's own turns of Fox's conversation (native-chat threadOf). */
 export type PhoneWorld={places:any[],now?:{applet:string,text:string}[],log?:{at:number,text:string,applet?:string}[],
@@ -284,7 +284,7 @@ function phoneWebRecord(value:any):PhoneWebRecord|null{
 }
 const appletKey=(value:unknown)=>{const key=clip(value,60);return /^[a-z0-9][a-z0-9-]*$/.test(key)?key:'';};
 
-// The item status the desktop card writes for the same choice (ui/shell/notion-world.ts showAttentionGuide):
+// The item status the desktop card writes for the same choice (ui/frame/notion-world.ts showAttentionGuide):
 // Done for a task, Got it (read) for an update or event, Later keeps it open until the later time, Remove dismisses.
 export function phoneActionStatus(action:PhoneAction,kind:string):{status:'done'|'read'|'open'|'dismissed',later:boolean}{
  if(action==='remove')return {status:'dismissed',later:false};

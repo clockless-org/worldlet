@@ -1,5 +1,5 @@
 import {isPresentationAction} from '../../contracts/presentation.ts';
-import {readPresentationRequest} from '../../context/sources/index.ts';
+import {readPresentationRequest} from '../../context/connectors/index.ts';
 import {isItemHostAction,readItemHostRequest} from '../../contracts/item-actions.ts';
 import {readBrowserOutcomeRequest} from '../../contracts/browser-receipt.ts';
 import {isBrowserSurfaceAction,readBrowserSurfaceRequest} from '../../contracts/browser-surface.ts';

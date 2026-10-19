@@ -21,7 +21,7 @@
 // short window and beside an open Applet or reader, and keeps only Routines during
 // onboarding and the tour (ui/style/layout.css).
 import {FOX_STATUS_EVENT} from '../companion/index.ts';
-import {routineTimePicker,routineWhenLine,scheduleWhen} from '../settings/index.ts';
+import {routineTimePicker,routineWhenLine,scheduleWhen} from '../frame/index.ts';
 import {companionStill,themeAppletIcon} from '../style/index.ts';
 import {taskPanel,routineClock,type TaskPanel,type TaskRow,type TaskPanelInput} from '../../agent/tasks/index.ts';
 import {callHost} from '../../platform/bridge/host.ts';
@@ -335,7 +335,7 @@ export function mountTaskPanel(root:HTMLElement,{call=callHost,openApplet=(_id:s
   if(said)fox.set(source,{source,text:said,at:fox.get(source)?.at??Date.now(),...(name?{name}:{})});else fox.delete(source);
   render();
  });
- // When Fox makes the next morning brief and today's summary, from the page that asks for them (ui/shell/notion-world.ts).
+ // When Fox makes the next morning brief and today's summary, from the page that asks for them (ui/frame/notion-world.ts).
  window.addEventListener('worldlet:daily-planned',(e:any)=>{
   const next=(Array.isArray(e.detail?.planned)?e.detail.planned:[]).filter((p:any)=>(p?.kind==='plan'||p?.kind==='summary')&&Number.isFinite(p.at)).slice(0,2);
   const off=(Array.isArray(e.detail?.paused)?e.detail.paused:[]).filter((k:any)=>k==='plan'||k==='summary');

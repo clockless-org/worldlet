@@ -223,10 +223,10 @@ export const STANDING_LEGACY_ENDPOINT_FILE='worldlet-mcp-endpoint.json',STANDING
 export const standingEndpointFile=(agentId:string)=>`worldlet-mcp-endpoint.${agentId}.json`;
 /** `asks`: an Agent ask call (`agent_asks`, agent/gate/GRANTS.md#agent-asks) by the Agent whose token made it. It is
  * always that Agent's own, under its own Grants: never a Fox turn's, and never routed to one. */
-/** `board`: a board call (`world_board`, context/sources/BOARD.md) by the Agent whose token made it, the same way: its own
+/** `board`: a board call (`world_board`, context/connectors/BOARD.md) by the Agent whose token made it, the same way: its own
  * Grants decide it, and `canRead` says whether they let it read a Service, so the board never shows an Agent a Service
  * its own `read_service` call would be refused, nor other Agents' reports its own `agents/list` call would be. */
-/** `context`: a search or read of the World's saved Service context (`world_context`, context/sources/service-context.ts)
+/** `context`: a search or read of the World's saved Service context (`world_context`, context/connectors/service-context.ts)
  * by the Agent whose token made it, the same way: `canRead` says whether its own Grants let it read a Service, so an
  * answer never holds a Service its own `read_service` call would be refused. */
 /** `drafts`: a GitHub draft call (`github_drafts`, agent/gate/GRANTS.md#github-drafts) by the Agent whose token made it,

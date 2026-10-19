@@ -1,7 +1,7 @@
-import {ARTIFACT_PAGE_CONTROLS,ARTIFACT_TONES,artifactBrief,artifactFitSteps,artifactInputProblem,artifactSizeFor,readArtifactActions,readArtifactBlocks,type ArtifactSize,type ArtifactBlock,type ArtifactFitStep} from '../../context/artifacts/index.ts';
+import {ARTIFACT_PAGE_CONTROLS,ARTIFACT_TONES,artifactBrief,artifactFitSteps,artifactInputProblem,artifactSizeFor,readArtifactActions,readArtifactBlocks,type ArtifactSize,type ArtifactBlock,type ArtifactFitStep} from '../../context/store/index.ts';
 import {renderArtifactBlocks,artifactPicture} from './artifact-blocks.ts';
 import {fitArtifact} from './artifact-fit.ts';
-// An artifact is one card with a size (context/artifacts/README.md): small and medium sit above Fox in the middle; large takes the
+// An artifact is one card with a size (context/store/ARTIFACTS.md): small and medium sit above Fox in the middle; large takes the
 // main stage while Fox and the conversation stand in the right-hand column (owner decision 2026-10-06). It never pages
 // (owner Order 2026-10-07) and never scrolls (owner Order 2026-10-09): the card shows the fullest version that fits its
 // size, down to Fox's one-sentence brief, and Show all gives it the room for the rest.
@@ -27,7 +27,7 @@ body.setAttribute('aria-label','Artifact contents');
   else panel.dataset.expanded='true';
   layout();
  };
- // Next steps Fox offered: a click asks Fox in the person's name (context/artifacts/README.md#actions).
+ // Next steps Fox offered: a click asks Fox in the person's name (context/store/ARTIFACTS.md#actions).
  const actions=document.createElement('div');actions.className='attention-preview-actions fox-artifact-actions';actions.setAttribute('role','group');actions.setAttribute('aria-label','Next steps');actions.hidden=true;
  // The card system (ui/attention/CARD-SYSTEM.md): an answer has the Attention card's painted picture, here a band across
  // its head behind the paper scrim, and a tone that colours its labels, rules and buttons.
@@ -70,7 +70,7 @@ body.setAttribute('aria-label','Artifact contents');
   });
   panel.dataset.fit=shown.step.text;fitted=room();
  }
- // Page mode (context/artifacts/README.md#theme-driven-artifacts): when the Agent has laid this card out as a page in the
+ // Page mode (context/store/ARTIFACTS.md#theme-driven-artifacts): when the Agent has laid this card out as a page in the
  // theme's style, the page shows in a sandboxed view of its own over the card, below the row of the card's own controls.
  // A small card, a card over an Applet or a page that cannot show keeps the template card.
  let pageId='';

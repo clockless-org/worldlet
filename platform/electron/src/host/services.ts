@@ -4,7 +4,7 @@ import type {Row} from './types.ts';
 import type {HarnessApprovals,HarnessCalls,HarnessEvents,HarnessSend,HarnessSkills,HarnessTools,HarnessVoice} from '../../../../contracts/harness-services.ts';
 import type {PhonePushRequest} from '../../../web/index.ts';
 import type {AgentAuditEntry,AgentIdentity,Grant} from '../../../../contracts/agent-identity.ts';
-import type {McpSession,PosthogSettings} from '../../../../context/sources/index.ts';
+import type {McpSession,PosthogSettings} from '../../../../context/connectors/index.ts';
 import type {PosthogRequest} from '../../../../agent/gate/index.ts';
 // Cross-module service contracts inside the Electron host. A module provides one with
 // `host.provide(NAME, impl)` and others reach it with `host.use(NAME)` / `host.optional(NAME)`.
@@ -176,7 +176,7 @@ export const WORLD_TOOLS='worldTools';
 export interface SourcesService {
  /** Persisted owner-collected Notion context. No live provider fallback. Caller keeps ordinary World Grants. */
  readNotionContext?(request:Row):Row;
- /** `context/search` and `context/read` (context/sources/service-context.ts) over the World's saved Service context,
+ /** `context/search` and `context/read` (context/connectors/service-context.ts) over the World's saved Service context,
   * limited to the Services `canRead` allows. */
  serviceContext?(request:Row,canRead:(provider:string)=>boolean):Row;
  /** `world-item:` original reads (Gmail thread, Notion page, local source). */
@@ -230,7 +230,7 @@ export interface FoxService {
  /** The same, started by Worldlet itself when the person stops playing games in the browser (#1598):
   * no person's words are behind it, so it starts untrusted (reads and answers, no guarded writes). */
  reviewGames(request:{applet:string,task:string,request:string}):Row;
- /** The task that writes an Artifact page (context/artifacts/artifact-render.ts), started by Worldlet after a card is
+ /** The task that writes an Artifact page (context/store/artifact-render.ts), started by Worldlet after a card is
   * shown: untrusted like a review, and quiet, so its result never joins the conversation. */
  makeArtifactPage(request:{task:string,request:string}):Row;
  /** The Applet ID of a running Applet task, or null once it has ended. */
@@ -288,7 +288,7 @@ export interface UserActivityService {
 }
 export const USER_ACTIVITY='userActivity';
 export interface WidgetsService {
- /** Merges what the person changed in a widget on the phone (context/artifacts mergeWidgetState). */
+ /** Merges what the person changed in a widget on the phone (context/store mergeWidgetState). */
  applyPhoneState(widget:string,state:unknown):void;
 }
 export const WIDGETS='widgets';
@@ -316,11 +316,11 @@ export interface BrowserService {
  /** What a website page's recorder saved: kept in the World and followed for game reviews (the release-gate
   * game review check records Showdown battles through it). */
  recorded(visits:import('../modules/applets/recorder.ts').RecordedVisit[],records:(import('../../../../agent/applets/index.ts').WebRecord&{visit:string})[]):void;
- /** Starts a proactive game review if one is due (context/artifacts battleReviewDue); the games handed to Fox, if any. */
- reviewGamesNow():import('../../../../context/artifacts/index.ts').FinishedBattle[]|null;
+ /** Starts a proactive game review if one is due (context/store battleReviewDue); the games handed to Fox, if any. */
+ reviewGamesNow():import('../../../../context/store/index.ts').FinishedBattle[]|null;
  /** The game on the page on screen, when it is one Worldlet can follow (a Showdown battle): what is being played now and
   * how the person's games there went today, for Fox's tips while they play. Null on any other page. */
- gameNow():({site:string}&ReturnType<typeof import('../../../../context/artifacts/index.ts').battleNow>)|null;
+ gameNow():({site:string}&ReturnType<typeof import('../../../../context/store/index.ts').battleNow>)|null;
 }
 export const BROWSER='browser';
 

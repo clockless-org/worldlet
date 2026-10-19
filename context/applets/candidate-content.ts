@@ -1,4 +1,4 @@
-import {validateWorldItem} from '../items/index.ts';
+import {validateWorldItem} from '../store/index.ts';
 type Row=Record<string,any>;
 /** Extraction candidates are private staging; M owns final card copy constraints. */
 export function appletCandidateContent(raw:Row):Row {

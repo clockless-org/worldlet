@@ -1,7 +1,7 @@
 import {analysisSourceContent,mergeAnalysisCandidates,orderAnalysisRecords} from './analysis-candidates.ts';
 import {sourceEvidenceIssues} from './evidence-issues.ts';
 import {appletCandidateContent,canonicalSourceQuotes} from './candidate-content.ts';
-import {agentReplyFailed} from '../items/index.ts';
+import {agentReplyFailed} from '../store/index.ts';
 
 type Row=Record<string,any>;
 // Native hosts may retain existing content hashes; equality/queue policy is shared.

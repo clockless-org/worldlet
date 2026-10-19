@@ -12,7 +12,7 @@ export const FILES=Object.freeze({
  worlds:'resources/worlds/',
  immersiveComposition:'resources/styles/builtin/references/immersive/composition.json',
  install:'platform/install/',
- macReleasePage:'ui/shell/mac-release.ts',
+ macReleasePage:'ui/frame/mac-release.ts',
  webOpenScript:'platform/web/page/open.ts',
  webOpenPage:'platform/web/page/open.html',
  webOpenStyle:'platform/web/page/open.css',

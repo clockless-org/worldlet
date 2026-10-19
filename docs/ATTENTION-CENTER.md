@@ -114,7 +114,7 @@ thread that waits for the person's reply, Fox prepares a reply in the background
 asked, a reply card in today's Journal that only the person sends. While a draft for the item's
 thread waits, its card carries one quiet line, "Fox drafted a reply · Review", which opens the
 Journal on the draft. Which items qualify and how many is in
-[replies Fox prepares](../context/artifacts/README.md#replies-fox-prepares). Fox provides contextual help and authorized actions; content
+[replies Fox prepares](../context/store/ARTIFACTS.md#replies-fox-prepares). Fox provides contextual help and authorized actions; content
 text itself cannot grant execution rights. Keep reading and external writes distinct.
 
 ## Scheduled results
@@ -126,7 +126,7 @@ the same result reaches the paired phone while it is fresh (twelve hours):
 
 | Result | Becomes | Opens |
 | --- | --- | --- |
-| The morning brief and the day's summary ([the day's plan and summary](../context/artifacts/README.md#the-days-plan-and-summary)) | Worth Knowing, "Today’s prep · Oct 7" or "Wrap up today · Oct 7", owned by `worldlet`; a run that made no card is Worth Doing, saying so | Its card's line "In your Journal · Open" (and its Source) opens the Journal on that card |
+| The morning brief and the day's summary ([the day's plan and summary](../context/store/ARTIFACTS.md#the-days-plan-and-summary)) | Worth Knowing, "Today’s prep · Oct 7" or "Wrap up today · Oct 7", owned by `worldlet`; a run that made no card is Worth Doing, saying so | Its card's line "In your Journal · Open" (and its Source) opens the Journal on that card |
 | A run of Worldlet's own routine | Worth Knowing; one that did not finish, Worth Doing | Its card, with what the Agent returned when it returned text |
 | A run of a job on the person's Agent's own scheduler ([scheduled jobs](../agent/gate/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)) | Worth Knowing with its output; a failed run, Worth Doing; a silent run, nothing | Its card |
 

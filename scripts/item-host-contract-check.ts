@@ -10,7 +10,7 @@ await callHost('worldItemStatus',{id:'one',status:'done'});
 await assert.rejects(()=>callHost('worldItemStatus',{id:'one',status:'sent'} as any));
 assert.deepEqual(sent,[done]);
 console.log('PASS item wire contract: unknown fields, wrong types and source-service status rejected before dispatch');
-const {worldItemMutation}=await import('../context/items/index.ts');
+const {worldItemMutation}=await import('../context/store/index.ts');
 const item:any={id:'one',kind:'task',status:'open'},now='2026-09-28T00:00:00Z';
 assert.equal(worldItemMutation(item,'read',now,undefined,true).changed,false);
 const update={...item,kind:'update'};

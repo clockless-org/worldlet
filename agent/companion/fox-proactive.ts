@@ -1,4 +1,4 @@
-import {agentReplyFailed,characters} from '../../context/items/index.ts';
+import {agentReplyFailed,characters} from '../../context/store/index.ts';
 export {agentReplyFailed};
 
 /** Fox speaks first (owner request 2026-10-06: "更主动更 helpful", modelled on Poke). At a natural pause
@@ -45,7 +45,7 @@ export const PROACTIVE={
   game:{againSeconds:30,gapSeconds:20,perVisit:80}},
  /** Wrap up (owner 2026-10-13): back in the World after at least `minStaySeconds` in an Applet or page, Fox may sum it
   * up in one line (what the person got out of it, what is left), at most `perDay` a day and `gapSeconds` after any
-  * other line. A game Worldlet follows has its own reviews (context/artifacts/battle-review.ts) instead. */
+  * other line. A game Worldlet follows has its own reviews (context/store/battle-review.ts) instead. */
  wrapup:{minStaySeconds:60,perDay:60,gapSeconds:60}
 } as const;
 

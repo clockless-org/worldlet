@@ -1,4 +1,4 @@
-import {BATTLE_REVIEW,battleNow,battleReviewDue,battleReviewTask,battleSite,battleSummaryDue,battleWatch,battlesReviewed,battlesSummarized,observeBattleMessage,type FinishedBattle} from '../../../../../context/artifacts/index.ts';
+import {BATTLE_REVIEW,battleNow,battleReviewDue,battleReviewTask,battleSite,battleSummaryDue,battleWatch,battlesReviewed,battlesSummarized,observeBattleMessage,type FinishedBattle} from '../../../../../context/store/index.ts';
 import type {RecordedVisit} from './recorder.ts';
 import type {WebRecord} from '../../../../../agent/applets/index.ts';
 
@@ -14,7 +14,7 @@ export interface BattleReviewHost {
 }
 
 /** Proactive game review (#1598): follows the battle messages the website recorders keep, hands each game to Fox
- * for a short review once it ends, and every few games a summary (context/artifacts/battle-review.ts decides when).
+ * for a short review once it ends, and every few games a summary (context/store/battle-review.ts decides when).
  * In memory only: games from before a restart are left for the person to ask about. */
 export class BattleReviews {
  private watch=battleWatch();

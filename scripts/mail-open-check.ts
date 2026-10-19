@@ -20,7 +20,7 @@ const browser=await launchTestBrowser();
 try{
  const page=await browser.newPage({viewport:{width:1440,height:950}});
  await page.setContent('<div id="notionWorld" style="position:absolute;inset:0;font-family:system-ui"><section class="pixi-applet-stage" data-scene="gmail" data-applet="gmail"></section></div>');
- for(const file of ['ui/shell/pixi-world.css','ui/applets/scene/applet-scene.css','ui/applets/gmail/focus.css','ui/applets/gmail/open.css'])await page.addStyleTag({content:await readFile(file,'utf8')});
+ for(const file of ['ui/frame/pixi-world.css','ui/applets/scene/applet-scene.css','ui/applets/gmail/focus.css','ui/applets/gmail/open.css'])await page.addStyleTag({content:await readFile(file,'utf8')});
  await page.addScriptTag({content:bundle.outputFiles[0].text});
  const render=(items,value)=>page.evaluate(([items,value])=>{const w=window as any;w.scene?.destroy();w.scene=w.MailOpen.mountAppletScene(document.querySelector('section'),'gmail',{source:w.MailOpen.PLAIN_SCENE});w.MailOpen.renderMailOpen(w.scene.primary.element,items,value,item=>w.picked=item.id);},[items,value]);
  const items=Array.from({length:13},(_,i)=>({id:String(i),title:['Review the launch plan','Confirm Friday’s meeting','Feedback on the proposal'][i%3],attention:i<12?{state:'task',priority:'high'}:null,record:{title:['Review the launch plan','Confirm Friday’s meeting','Feedback on the proposal'][i%3],from:['Alice Chen <alice@example.com>','Sam Miller <sam@example.com>','Jamie Lee <jamie@example.com>'][i%3],date:new Date(Date.now()-3600000*(i+1)).toISOString(),threadId:String(i)}}));

@@ -1,4 +1,4 @@
-import {worldLogLines,worldLogNow,type WorldLogLine} from '../../context/activity/index.ts';
+import {worldLogLines,worldLogNow,type WorldLogLine} from '../../context/applets/index.ts';
 /** The World's saved history as plain lines. Nothing of it shows in the World's corners any more:
  * the bottom-right "next check" line is gone too (owner Order 2026-10-10), and so is the History page
  * (owner request 2026-10-10). They are still read here and handed to `onLines`, because the phone's

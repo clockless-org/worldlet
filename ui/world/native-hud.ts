@@ -1,6 +1,6 @@
 import {mountDevBuildUpdate,commitAge} from './dev-build-update.ts';
 import {hostFeatures} from '../../platform/bridge/features.ts';
-import {refreshItemPage} from '../../context/items/index.ts';
+import {refreshItemPage} from '../../context/store/index.ts';
 import {sourcesReading} from '../../context/applets/index.ts';
 import {fitAttentionPanel} from './fit-attention-panel.ts';
 import {mountWorldLog} from './world-log.ts';
@@ -9,12 +9,12 @@ import {agentVersionLine} from './agent-version.ts';
 import {summarizeRequest} from '../../agent/gate/index.ts';
 import {callHost} from '../../platform/bridge/host.ts';
 import {isDesktopCompanion,requireWorldSurface} from '../companion/index.ts';
-import {displayReleaseVersion} from '../shell/index.ts';
+import {displayReleaseVersion} from '../frame/index.ts';
 import {attentionOrder,attentionFocusSet,attentionFocusFit,attentionFocusEvidence,attentionRelevant,attentionRankSignals,attentionLevel} from '../../agent/attention/index.ts';
 import {appHudIcon,momentLine,AGENT_ICONS} from '../applets/index.ts';
 import {collectMatters,attentionIcon,attentionReturnWhen,attentionGroupWhen} from '../attention/index.ts';
 import {roomObjects} from './sample-hierarchy.ts';
-import {collectNativeActions,upcomingEvents} from '../shell/index.ts';
+import {collectNativeActions,upcomingEvents} from '../frame/index.ts';
 import {WORLD_UI,worldletMark,uiIcon as hudIcon,actionButton,node,taskRow} from '../style/index.ts';
 const el:(tag:string,cls?:string,text?:unknown)=>any=node;
 // The groups are named the way a person would say them, not after the kinds they
@@ -131,7 +131,7 @@ export function mountNativeHUD({root,updates,connectApplet,snapshot,open,visitAr
  let updateBusy=false;
  const syncUpdate=()=>{const value=updates?.snapshot();updateButton.hidden=!value?.visible;updateButton.disabled=updateBusy||!value?.enabled;updateButton.textContent=value?.label||'Update';updateButton.title=value?.detail||'Update Worldlet';};
  updateButton.onclick=async()=>{if(updateBusy||updateButton.disabled)return;updateBusy=true;syncUpdate();try{await updates.activate();}catch(error){updates.failure?.(error);}finally{updateBusy=false;syncUpdate();}};
- // Settings live in the companion panel (ui/settings/companion-settings.ts); the World lends it the
+ // Settings live in the companion panel (ui/frame/companion-settings.ts); the World lends it the
  // sample world switch and which host features exist.
  root.companionSettingsHost={toggleSample,sample:()=>!!sample(),localDataDeletion:()=>!!hostFeatures(snapshot().data).localDataDeletion};
  root.append(brand);
@@ -331,7 +331,7 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
   // Keep the live model fresh, but do not rebuild or measure identical rows on
   // every navigation/status sync. Click handlers resolve the latest model by ID.
   const reading=introducing&&!items.length&&sourcesReading(s.data.moduleConnections||[]);
-  // Applets Fox made for this moment (context/artifacts/README.md) lead Now; each row opens its Applet.
+  // Applets Fox made for this moment (context/store/ARTIFACTS.md) lead Now; each row opens its Applet.
   const forNow=s.data.sample?[]:(widgets()||[]);
   const signature=JSON.stringify([ownItems.map(m=>[m.id,m.title,m.context,m.when?.factor,m.level]),proposals.map(p=>[p.id,p.title,p.context]),forNow.map(w=>[w.id,w.title,w.blurb,w.color,momentLine(w)]),expanded,introducing,reading,later.map(m=>m.id+':'+(m.snoozed?1:0)+':'+(m.when?.factor||'')),groups.map(g=>[g.state,g.items.map(m=>[m.id,m.worldItemId,m.actionTitle,m.context,m.fullAction,m.fullContext,m.title,m.state,m.when,m.requiresChoice,m.priority,attentionLevel(m),s.attentionItemId?m.worldItemId===s.attentionItemId:m.active])])]);
   if(signature===matterSignature)return;

@@ -1,5 +1,5 @@
-// Connecting GitHub from the World (ui/shell/world-onboarding.ts): by default it signs in with GitHub's code, shown
-// in Fox's bubble with Copy and open GitHub (ui/settings/sign-in-code.ts). Under Advanced, GitHub with a key
+// Connecting GitHub from the World (ui/frame/world-onboarding.ts): by default it signs in with GitHub's code, shown
+// in Fox's bubble with Copy and open GitHub (ui/frame/sign-in-code.ts). Under Advanced, GitHub with a key
 // (TOKEN_PROVIDERS) shows one password field with the access it needs; what is pasted goes to the host's `connect`
 // once, is cleared from the page at once and never shows in the guide; a refused token says why and asks again.
 import assert from 'node:assert/strict';
@@ -9,7 +9,7 @@ declare global {var TokenSetup:any;var tokenGuide:any;var tokenState:any;var tok
 const PASTED='github_pat_'+'Ab1'.repeat(20);
 await withBrowser(async browser=>{
  const page=await browser.newPage(),errors=pageErrors(page);
- const bundle=await bundleScript({entryPoints:['ui/shell/world-onboarding.ts'],globalName:'TokenSetup'});
+ const bundle=await bundleScript({entryPoints:['ui/frame/world-onboarding.ts'],globalName:'TokenSetup'});
  await page.setContent('<main><div id="guide"></div></main>');await page.addScriptTag({content:bundle});
  await page.evaluate(()=>{
   tokenCalls=[];tokenRefuse=true;copied=[];Object.defineProperty(navigator,'clipboard',{value:{writeText:async(text:string)=>{copied.push(text);}}});tokenState={platform:'mac',onboarding:{completed:true},sources:[],knowledge:[],connections:[],cloudConsent:true};

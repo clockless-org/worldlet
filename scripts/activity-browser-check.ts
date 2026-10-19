@@ -1,7 +1,7 @@
 import {launchTestBrowser} from './browser-test.ts';
 import {installActivityCollector} from '../platform/bridge/activity-collector.js';
 import assert from 'node:assert/strict';
-import {activityObserve,activityEvent} from '../context/activity/index.ts';
+import {activityObserve,activityEvent} from '../context/applets/index.ts';
 import type {ActivityPage} from '../contracts/activity.ts';
 type Observation={text:string;clicks:unknown[];edits:Array<{characters:number}>;omitted?:string};
 const browser=await launchTestBrowser();

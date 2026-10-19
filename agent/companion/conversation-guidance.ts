@@ -1,5 +1,5 @@
 import {APP_DEFINITIONS} from '../../context/applets/index.ts';
-import {READY_APPLETS} from '../../context/artifacts/index.ts';
+import {READY_APPLETS} from '../../context/store/index.ts';
 /** Host capabilities are facts, not grants. Actual reads/writes remain authorized by the host. */
 export function conversationGuidance(input:{scope:string;localOriginals?:boolean;connectedSources?:string[];backgroundSources?:string[];routines?:boolean;driveMetadata?:boolean}):string {
  if(input.scope!=='private')return '';
@@ -21,7 +21,7 @@ export function conversationGuidance(input:{scope:string;localOriginals?:boolean
  // Reviewing games the person played in the built-in browser (owner promise to a VGC player,
  // 2026-10-03 recording, #1598): every site, never one game's special case.
  lines.push('When the person asks you to review games they played in the built-in browser (“帮我复盘最近几局”, my last battles, how I played): find the visit with browser/records (by site, or words such as won the battle), read its first page for the list of pages, where each game is its own address with a #, then read each game from its # with only "network", where a game\'s turn-by-turn log arrives as WebSocket messages; stop reading a game at its result. Read every game asked for (the newest ones when they say last few, up to ten) before answering. Answer as a coach, in their language, covering the three things a player asks: team building (the team they had and the ones they brought each game, what it lacks or keeps failing at, and concrete changes: a member, move, item, Tera type or what to bring against what); matchups (the opposing teams, Pokémon or strategies they lose to, with their record against each); and turn choices (for each game the turns where their choice decided it or cost them: turn number, what each side chose, what happened, what would have been better and why). Close with what repeats across games and one to three changes to make. Use only what the records show and say what they cannot show, such as the opponent\'s hidden moves or items.');
- // Worldlet also starts a review by itself once the person stops playing (context/artifacts/battle-review.ts):
+ // Worldlet also starts a review by itself once the person stops playing (context/store/battle-review.ts):
  // that Applet task names the games, and its answer is short.
  if(input.routines===true)lines.push('After a game review, you may offer once to look up newer strategies for their format each morning and say what to change (a routine with manage_routines); create it only when they say yes.');
  lines.push('history is what happened in the World itself (Applets opened, settings changed, your own actions); it is not the web pages the person browsed and not the conversation. When an answer could come from more than one of these, say which one it comes from.');
