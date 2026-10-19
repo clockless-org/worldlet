@@ -23,8 +23,8 @@ if(website)assert.equal(packageScripts['build:website'],'node scripts/build-webs
 assert.equal(packageScripts.test,'node scripts/run-steps.mjs test:core && npm run test:worktrees');
 if(website)assert.match(await readFile('scripts/build-app.ts','utf8'),/WORKERS_CI==='1'/,'Cloudflare Git builds must compile the website, not the desktop app');
 const hostWatcher=await readFile('scripts/dev-electron.ts','utf8');
-if(website)assert((await readFile('scripts/dev-website.ts','utf8')).includes("['website','ui','agent','context','core','contracts','resources']"));
-assert(hostWatcher.includes("['ui','agent','context','core','contracts','resources','platform/bridge','platform/electron','platform/local-tools','platform/browser','platform/web-engine','scripts']"));
+if(website)assert((await readFile('scripts/dev-website.ts','utf8')).includes("['website','ui','agent','context','contracts','resources']"));
+assert(hostWatcher.includes("['ui','agent','context','contracts','resources','platform/bridge','platform/electron','platform/local-tools','platform/browser','platform/web-engine','scripts']"));
 // Ignore old local caches, but never retain executable sources in retired roots.
 const {execFileSync}=await import('node:child_process');
 const tracked=execFileSync('git',['ls-files','--cached','--others','--exclude-standard','-z'],{encoding:'utf8'}).split('\0');
@@ -41,10 +41,10 @@ async function sources(dir:string):Promise<string[]> {
  const entries=await readdir(dir,{withFileTypes:true});
  return (await Promise.all(entries.map(e=>e.isDirectory()?sources(dir+'/'+e.name):Promise.resolve(/\.(ts|js|mjs)$/.test(e.name)?[dir+'/'+e.name]:[])))).flat();
 }
-// agent/ and context/ are the two halves core/ is moving into (#681); all three are pure.
+// agent/, context/ and contracts/ are pure (#681).
 const {existsSync}=await import('node:fs');
-const pureRoots=['agent','context','core','contracts'].filter(dir=>existsSync(dir));
-const PURE=/^(agent|context|core|contracts)\//;
+const pureRoots=['agent','context','contracts'].filter(dir=>existsSync(dir));
+const PURE=/^(agent|context|contracts)\//;
 for(const file of (await Promise.all(pureRoots.map(sources))).flat()){
  const {metafile}=await build({entryPoints:[file],bundle:true,write:false,platform:'neutral',format:'esm',metafile:true,logLevel:'silent'});
  for(const dependency of Object.keys(metafile.inputs)){
@@ -62,7 +62,7 @@ for(const file of await sources('ui')){
  assert(!/messageHandlers\s*(?:\?\.)?\s*\.?(?:worldlet|\[)|chrome\.webview/.test(source),`${file} must use platform/host, not a native transport`);
  assert(!/platform\s*={2,3}\s*['"](?:windows|macos)['"]/.test(source),`${file} must use host capabilities, not OS branches`);
 }
-console.log('PASS pure core/contracts and centralized platform transport/capability boundaries.');
+console.log('PASS pure agent/context/contracts and centralized platform transport/capability boundaries.');
 
 for(const file of await sources('resources'))assert(false,`Executable code belongs in a component, not resources: ${file}`);
 console.log('PASS direct layer roots, independent Applet catalog and non-executable resources.');

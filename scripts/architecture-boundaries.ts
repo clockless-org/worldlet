@@ -6,14 +6,13 @@ import ts from 'typescript';
 const root=process.cwd();
 const config=ts.readConfigFile('tsconfig.json',ts.sys.readFile);
 const options=ts.parseJsonConfigFileContent(config.config,ts.sys,root).options;
-// core/ moved into agent/ and context/ (#681); the shared dispatcher the Platform calls is agent/index.ts. What is left
-// in core/ is re-exports of old paths, for the operations repository. Nothing here may import it.
-const layers=['platform/bridge','ui','agent','context','core','contracts','models','harness','platform','website','worker'];
-const PURE=['agent','context','core','contracts'];
+// Agent and Context (#681): context/ imports only itself and contracts/, agent/ imports context/ and contracts/.
+const layers=['platform/bridge','ui','agent','context','contracts','models','harness','platform','website','worker'];
+const PURE=['agent','context','contracts'];
 const allowed:Record<string,string[]>={
  ui:['ui','agent','context','contracts','platform/bridge','resources'],
  agent:['agent','context','contracts'], context:['context','contracts'],
- core:['core','agent','context','contracts'], contracts:['contracts'],
+ contracts:['contracts'],
  'platform/bridge':['platform/bridge','agent','context','contracts'],
  'models':['models','contracts','agent','context'],
  harness:['harness','contracts'], platform:['platform','platform/bridge','agent','context','contracts'],
@@ -29,23 +28,13 @@ const exceptions=new Map([
  ['context/accounts/services/presets.ts -> agent/agents/index.ts','A board preset of the agents source reads Agent reports with the reports\' own reader (#681).'],
  ['context/sources/service-sync.ts -> agent/tasks/index.ts','Service sync keeps Synced Context fresh on the shared source-check schedule, which Tasks owns (#681).'],
 ]);
-// Folders renamed after they left core/ (#714): the old core/ path of a file in one of them keeps the old folder name.
-export const RENAMED_FROM_CORE:Readonly<Record<string,string>>=Object.freeze({'agent/agents':'core/agent','agent/windows':'core/phone','context/sources':'core/context'});
-/** The path a file of agent/ or context/ had in core/, or null. */
-export function oldCorePath(target:string){
- if(!/^(agent|context)\//.test(target))return null;
- const folder=target.split('/').slice(0,2).join('/');
- return RENAMED_FROM_CORE[folder]?RENAMED_FROM_CORE[folder]+target.slice(folder.length):target.replace(/^(agent|context)\//,'core/');
-}
 const used=new Set<string>();
 function layer(file:string){return layers.find(x=>file.startsWith(x+'/'))??file.split('/')[0];}
 export function checkEdge(file:string,target:string){
  const edge=`${file} -> ${target}`;
  if(exceptions.has(edge)){used.add(edge);return;}
  assert(allowed[layer(file)]?.includes(layer(target)),`Forbidden layer dependency: ${edge}`);
- const component=/^(core|ui|agent|context)\/([^/]+)\/(.+)$/.exec(target);
- // A file left at its old core/ path re-exports the same file at its new place.
- if(oldCorePath(target)===file)return;
+ const component=/^(ui|agent|context)\/([^/]+)\/(.+)$/.exec(target);
  if(component&&!file.startsWith(`${component[1]}/${component[2]}/`))
   assert.equal(component[3],'index.ts',`${file} bypasses public component entry: ${target}`);
 }
@@ -88,6 +77,6 @@ function scan(dir:string){
 }
 export function checkRepository(){
  // The open-source export (scripts/oss-export.mjs) leaves out the hosted services, so a missing root is skipped.
- for(const dir of ['ui','agent','context','core','contracts','platform/bridge','platform/electron','platform/node','website','models','worker','harness'])if(fs.existsSync(dir))scan(dir);
+ for(const dir of ['ui','agent','context','contracts','platform/bridge','platform/electron','platform/node','website','models','worker','harness'])if(fs.existsSync(dir))scan(dir);
  for(const edge of exceptions.keys())assert(used.has(edge)||!fs.existsSync(edge.split(' -> ')[0]),`Remove stale architecture exception: ${edge}`);
 }

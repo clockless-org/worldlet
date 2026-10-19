@@ -50,8 +50,8 @@ export function selectChecks(files){
  // Unknown paths and unavailable diffs run everything. Markdown alone does not change execution.
  const operational=files===null||files.some(p=>!p.endsWith('.md')&&!productPath(p)&&(
   /^(scripts|\.github|platform)\//.test(p)||
-  !/^(ui|core|agent|context|contracts|resources|harness|models|worker|website|migrations)\//.test(p)));
- const trust=files===null||files.some(p=>!p.endsWith('.md')&&/^(ui|core|agent|context|contracts|platform|harness|scripts)\//.test(p))||operational;
+  !/^(ui|agent|context|contracts|resources|harness|models|worker|website|migrations)\//.test(p)));
+ const trust=files===null||files.some(p=>!p.endsWith('.md')&&/^(ui|agent|context|contracts|platform|harness|scripts)\//.test(p))||operational;
  return [...(operational?operationalChecks:[]),...(trust?trustChecks:[])];
 }
 export function changedFiles(eventName,event,run=spawnSync){

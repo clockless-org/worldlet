@@ -17,7 +17,7 @@ runtime stack remains **UI → Core → Platform → Harness → Models/Services
 | Layer | Components / directories | Public interface | Must not own |
 | --- | --- | --- | --- |
 | UI | `ui/world`, `ui/applets`, `ui/companion`, `ui/attention`, `ui/shell` | Versioned semantic World actions in `contracts/ui.ts`; component functions; host transport | OS branches, provider protocols, independent scheduling policy |
-| Core | `agent/agents`, `context/applets`, `agent/attention`, `agent/tasks`, `agent/companion`, `context/sources`, `context/items`, `context/browser`, `agent/tools`, `agent/diagnostics`, `agent/onboarding` | Each component's `index.ts`; serialized native entry in `agent/index.ts` | DOM, filesystem, clocks, sockets, Electron/Node types, platform conditions |
+| Agent and Context | `agent/agents`, `context/applets`, `agent/attention`, `agent/tasks`, `agent/companion`, `context/sources`, `context/items`, `context/browser`, `agent/tools`, `agent/diagnostics`, `agent/onboarding` | Each component's `index.ts`; serialized native entry in `agent/index.ts` | DOM, filesystem, clocks, sockets, Electron/Node types, platform conditions |
 | Platform | `platform/bridge`, `platform/electron`, `platform/browser`, `platform/local-tools` | `contracts/platform.ts`; shared Core requests/results; negotiated Harness contract | A second copy of onboarding, source processing, retry/priority or model-selection rules |
 | Harness | `harness/hermes` or an external adapter | `contracts/harness.ts`, capability discovery, tasks/events/cancellation | World UI implementation or ownership of portable user records |
 | Models/Services | `models` and provider APIs | Harness/provider protocols | UI navigation and OS permissions |
@@ -132,7 +132,7 @@ Directory ownership follows the [component table](#components-and-interfaces). E
 
 ### Dependency rules
 
-1. `contracts/` depends only on itself. `core/` depends only on core/contracts; no DOM, OS/host APIs or runtime libraries.
+1. `contracts/` depends only on itself. `context/` depends only on context/contracts and `agent/` only on agent/context/contracts; no DOM, OS/host APIs or runtime libraries.
 2. `ui/` consumes core, contracts and resources. OS communication uses `platform/bridge/`; it cannot import Platform implementations or Harness internals.
 3. `platform/` owns permissions, processes, browser integration and persistence. It composes the selected Harness through the negotiated protocol.
 4. `harness/` owns backend-specific configuration and execution. Replacing it does not transfer ownership of Worldlet records or bypass host authorization.
@@ -145,7 +145,7 @@ For recurring review criteria and the current migration gaps, use [the architect
 
 ### Shared-first implementation rule
 
-Business behavior is shared by default. A new condition, state transition, retry, priority, normalization, report shape or privacy allowlist belongs in `core/`; presentation belongs in `ui/`. Host modules collect OS facts, enforce actual permissions, run processes, persist data and execute shared decisions. They must not invent an alternate product flow. Keep host code small by removing duplicated decisions, not by moving code into another host module.
+Business behavior is shared by default. A new condition, state transition, retry, priority, normalization, report shape or privacy allowlist belongs in `agent/` or `context/`; presentation belongs in `ui/`. Host modules collect OS facts, enforce actual permissions, run processes, persist data and execute shared decisions. They must not invent an alternate product flow. Keep host code small by removing duplicated decisions, not by moving code into another host module.
 
 | Concern | Single rule owner | Host responsibility |
 | --- | --- | --- |
@@ -165,7 +165,7 @@ The old `app/`, `shared/`, `adapters/`, `applets/`, `worlds/` and `services/` so
 
 Installed `WorldletWeb` resource names, Agent profile locations, bundle IDs, host callback names, storage schemas and user data do not change. This is a source-layout migration, not a user-data migration or release.
 
-The proposed open-source scope is `ui/`, `core/`, `platform/`, contracts/resources and adapter examples. Existing external Harnesses need compatible adapters; no license change or repository split is made here.
+The proposed open-source scope is `ui/`, `agent/`, `context/`, `platform/`, contracts/resources and adapter examples. Existing external Harnesses need compatible adapters; no license change or repository split is made here.
 
 Validation: `check:source`, `check:style` and `test:core` enforce dependency boundaries, retired source roots, imports, platform contracts and world assets. UI/website builds and `npm run test:electron` exercise the rewritten build paths. Device results belong to the owning Issue/PR; new changes need proportional checks.
 

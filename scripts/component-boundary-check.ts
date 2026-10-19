@@ -3,17 +3,14 @@ import {readdir,readFile} from 'node:fs/promises';
 import {existsSync} from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
-import {oldCorePath} from './architecture-boundaries.ts';
 
 // Native/Python bridges consume agent/index.ts. Production TypeScript consumers
-// enter other Core/UI components through their explicit public APIs.
+// enter other Agent, Context and UI components through their explicit public APIs.
 export function assertComponentImport(file:string,specifier:string) {
  if(!specifier.startsWith('.'))return;
  const target=path.posix.normalize(path.posix.join(path.posix.dirname(file),specifier));
- const match=/^(core|ui|agent|context)\/([^/]+)\/(.+)$/.exec(target);
+ const match=/^(ui|agent|context)\/([^/]+)\/(.+)$/.exec(target);
  if(!match||file.startsWith(`${match[1]}/${match[2]}/`))return;
- // A file left at its old core/ path while core/ moves into agent/ and context/ (#681) re-exports the same file.
- if(oldCorePath(target)===file)return;
  assert.equal(match[3],'index.ts',`${file} bypasses ${match[1]}/${match[2]}'s public API: ${target}`);
 }
 async function scan(dir:string):Promise<void>{
@@ -34,18 +31,16 @@ async function scan(dir:string):Promise<void>{
   visit(ast);
  }
 }
-assert.throws(()=>assertComponentImport('ui/hud/example.ts','../../core/tasks/runtime-tasks.ts'),/bypasses/);
+assert.throws(()=>assertComponentImport('ui/hud/example.ts','../../agent/tasks/runtime-tasks.ts'),/bypasses/);
 assert.throws(()=>assertComponentImport('agent/attention/example.ts','../tasks/runtime-tasks.ts'),/bypasses/);
 assertComponentImport('agent/tasks/example.ts','./runtime-tasks.ts');
-assertComponentImport('ui/hud/example.ts','../../core/tasks/index.ts');
+assertComponentImport('ui/hud/example.ts','../../agent/tasks/index.ts');
 assert.throws(()=>assertComponentImport('ui/companion/example.ts','../browser/browser-device.ts'),/bypasses/);
 assert.throws(()=>assertComponentImport('website/main.ts','../ui/shell/notion-world.ts'),/bypasses/);
 assertComponentImport('ui/companion/example.ts','../browser/index.ts');
 assertComponentImport('ui/browser/example.ts','./browser-device.ts');
 // The open-source export leaves out the hosted services (website, models, worker).
-assertComponentImport('core/example/file.ts','../../context/example/file.ts');
-assert.throws(()=>assertComponentImport('core/example/other.ts','../../context/example/file.ts'),/bypasses/);
-for(const root of ['ui','agent','context','core','platform/bridge','website','models','worker'])if(existsSync(root))await scan(root);
+for(const root of ['ui','agent','context','platform/bridge','website','models','worker'])if(existsSync(root))await scan(root);
 console.log('PASS Core/UI public component entry points, including type and dynamic imports; internal access stays within its owner.');
 
 // The Electron window coordinators dispatch domain operations; the World store owns persistence.

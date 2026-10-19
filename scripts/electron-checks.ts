@@ -35,7 +35,7 @@ function uiActions(){
   for(const match of source.matchAll(/\b(?:callHost|call|host|nativeCall\??\.?)\(\s*'([a-zA-Z]+)'/g))found.add(match[1]);
   for(const match of source.matchAll(/action\s*:\s*'([a-zA-Z]+)'/g))if(/worldletHost|request\(/.test(source))found.add(match[1]);
  }};
- for(const dir of ['ui','agent','context','core','platform/bridge'])if(existsSync(path.join(root,dir)))walk(dir);
+ for(const dir of ['ui','agent','context','platform/bridge'])if(existsSync(path.join(root,dir)))walk(dir);
  return [...found].filter(name=>!UI_INTERNAL.has(name)).sort();
 }
 if(wanted('host-contract')){

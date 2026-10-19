@@ -1,6 +1,6 @@
 # Shared contracts
 
-Versioned Host/Agent interfaces, data shapes and policy declarations. Contracts depend only on other contracts. Business behavior belongs in `core/`; serialization, storage and final permission gates belong to the Platform host ([`platform/electron`](../platform/electron/README.md)). See [repository layers](../docs/UI-CORE-PLATFORM.md#repository-layers).
+Versioned Host/Agent interfaces, data shapes and policy declarations. Contracts depend only on other contracts. Business behavior belongs in `agent/` and `context/`; serialization, storage and final permission gates belong to the Platform host ([`platform/electron`](../platform/electron/README.md)). See [repository layers](../docs/UI-CORE-PLATFORM.md#repository-layers).
 
 See the [Platform–Harness contract](HARNESS.md) for the stable v1 boundary and shared browser command flow.
 

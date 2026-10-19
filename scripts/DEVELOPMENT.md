@@ -8,7 +8,7 @@ Worldlet ships one desktop app built on the [Electron host](../platform/electron
 
 ## Daily development
 
-The shared interface lives in `ui/`, product rules in `core/`, and the desktop host in `platform/electron/`. Cross-layer interfaces live in `contracts/`, artwork and bundled media in `resources/`, and Agent integrations in `harness/`. Root `npm run dev` prepares main-backed Dev candidates; `npm run dev:worktree` prepares isolated feature candidates; `npm run build` builds the interface and host without launching; `npm test` runs shared app checks. Website commands use the `:website` suffix.
+The shared interface lives in `ui/`, product rules in `agent/` and `context/`, and the desktop host in `platform/electron/`. Cross-layer interfaces live in `contracts/`, artwork and bundled media in `resources/`, and Agent integrations in `harness/`. Root `npm run dev` prepares main-backed Dev candidates; `npm run dev:worktree` prepares isolated feature candidates; `npm run build` builds the interface and host without launching; `npm test` runs shared app checks. Website commands use the `:website` suffix.
 
 ```sh
 npm ci

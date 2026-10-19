@@ -63,13 +63,13 @@ const components={
 };
 const layers=[
  ['01','UI','ui/',['worldui','appletui','foxui','attentionui','artifactui','webui','shellui']],
- ['02','Core · Agent & Context','core/',['worldrules','appletrules','foxrules','attentionrules','taskrules','artifactrules','agentrules','records','connectorrules','phonerules','setup']],
+ ['02','Agent & Context','agent/ · context/',['worldrules','appletrules','foxrules','attentionrules','taskrules','artifactrules','agentrules','records','connectorrules','phonerules','setup']],
  ['03','Platform','platform/',['chromium','storage','host','agenthost','sourcehost','phonehost']],
  ['04','Harness','the person’s Agent',['agent']],
  ['05','Models / services','the person’s provider',['model']]
 ];
 // The ten features and the base, each a vertical slice through the layers. Every
-// core/ and ui/ component belongs to exactly one of them (UI-CORE-PLATFORM.md#features).
+// ui/, agent/ and context/ component belongs to exactly one of them (UI-CORE-PLATFORM.md#features).
 const flows={
  world:{title:'World',color:'#4e8a3e',components:['worldui','worldrules','chromium','storage'],steps:[['Draw the World','Areas, HUD and the theme.'],['Log what happens','The World log and its history.'],['Show it','The trusted World view.'],['—','Not involved.',1],['—','Not involved.',1]],sequence:'Theme package → World / HUD → World log → world.sqlite',description:'The place everything sits in: areas, the HUD and themes. It is the shell the other three features are drawn in.',interfaces:'ui/world/index.ts · ui/themes/index.ts · resources/themes/CONTRACT.md · context/activity/index.ts',records:'World layout and the activity log, in world.sqlite.',boundary:'A theme is static resources; the host draws and supplies data and actions. Fox, loading and first-run pages are never part of a theme.'},
  applets:{title:'Applets',color:'var(--browser)',components:['appletui','appletrules','chromium','storage','contract','agent'],steps:[['Peek / Open / Focus','Applet screens and the real website.'],['Define and act','Catalog, source reads, actions, website policy.'],['Websites and storage','Sandboxed website views; records in world.sqlite.'],['Read and act for Fox','The Agent reaches Applets through World tools.'],['When asked','Only for interpretation.']],sequence:'Source → Applet rules → world.sqlite → Applet screen; Agent → World tools → Applet action',description:'Where the person’s data and actions live: Mail, Calendar, Notes, the browser and the rest, each a place in the World.',interfaces:'context/applets/index.ts · context/browser/index.ts · ui/applets/index.ts · contracts/browser-surface.ts',records:'Each Applet’s records stay in world.sqlite; originals stay in World storage.',boundary:'Website scripts never get the Host bridge. Actions that send, pay or delete wait for the person.'},

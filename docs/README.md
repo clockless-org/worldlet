@@ -56,7 +56,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **284 Markdown documents** and **749 supporting documentation files**.
+Indexed: **285 Markdown documents** and **749 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -65,7 +65,7 @@ Indexed: **284 Markdown documents** and **749 supporting documentation files**.
 | Applet runtime descriptions | 120 |
 | UI and Applet authoring references | 30 |
 | Resource and artwork records | 74 |
-| Module and service documentation | 38 |
+| Module and service documentation | 39 |
 | Website documentation and articles | 0 |
 | Documentation diagrams, previews and evidence | 749 |
 
@@ -340,8 +340,9 @@ Indexed: **284 Markdown documents** and **749 supporting documentation files**.
 
 </details>
 
-<details><summary>Module and service documentation (38)</summary>
+<details><summary>Module and service documentation (39)</summary>
 
+- [agent/README.md](../agent/README.md)
 - [agent/agents/GRANTS.md](../agent/agents/GRANTS.md)
 - [agent/agents/PORTABILITY.md](../agent/agents/PORTABILITY.md)
 - [agent/agents/REMOTE-MCP.md](../agent/agents/REMOTE-MCP.md)
@@ -351,6 +352,7 @@ Indexed: **284 Markdown documents** and **749 supporting documentation files**.
 - [agent/tasks/README.md](../agent/tasks/README.md)
 - [agent/windows/README.md](../agent/windows/README.md)
 - [android/README.md](../android/README.md)
+- [context/README.md](../context/README.md)
 - [context/applets/INTEGRATIONS.md](../context/applets/INTEGRATIONS.md)
 - [context/applets/MY-APPLETS.md](../context/applets/MY-APPLETS.md)
 - [context/applets/RUNTIME.md](../context/applets/RUNTIME.md)
@@ -361,7 +363,6 @@ Indexed: **284 Markdown documents** and **749 supporting documentation files**.
 - [contracts/COMPONENTS.md](../contracts/COMPONENTS.md)
 - [contracts/HARNESS.md](../contracts/HARNESS.md)
 - [contracts/README.md](../contracts/README.md)
-- [core/README.md](../core/README.md)
 - [harness/README.md](../harness/README.md)
 - [harness/example/README.md](../harness/example/README.md)
 - [harness/skills/README.md](../harness/skills/README.md)

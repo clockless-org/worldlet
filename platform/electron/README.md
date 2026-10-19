@@ -2,7 +2,7 @@
 
 The desktop app's Platform layer is one Electron host in TypeScript, for macOS,
 Windows and Linux. It replaced the Swift/CEF Mac host and the C#/WebView2 Windows
-host (#996). Product rules stay in shared `core/` and `ui/`; this host supplies OS
+host (#996). Product rules stay in shared `agent/`, `context/` and `ui/`; this host supplies OS
 facts, permissions, persistence, processes and browser IO, and executes Core
 decisions. See the [five-layer standard](../../docs/UI-CORE-PLATFORM.md).
 

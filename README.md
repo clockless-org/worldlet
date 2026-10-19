@@ -163,7 +163,8 @@ No account, secret or hosted service is needed to build. Checks: `npm run check:
 | Directory | Responsibility |
 | --- | --- |
 | `ui/` | Shared rendering and interaction: World, Applets, Fox, Attention Center |
-| `core/` | Platform-independent product rules and data |
+| `agent/` | Who does the work: Fox, Tasks, Agents and the Gate (platform-independent rules) |
+| `context/` | Everything the World knows: records, storage and Connectors (platform-independent rules) |
 | `platform/` | The Electron host and the Node host (no display): OS integration, browser engine, controlled execution |
 | `harness/` | Agent backends and the reference Harness adapter |
 | `contracts/` | Shared Host/Agent interfaces and data shapes |
