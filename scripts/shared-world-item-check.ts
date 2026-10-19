@@ -139,8 +139,8 @@ assert.equal(needsTaskContinuityReview(base,existing,'new','old'),false);
 console.log('PASS changed task evidence requires review; only host-saved aliases authorize continuity');
 
 // Synthetic grouped findings retain a finite deferral across serialization and synthesis.
-const {attentionLaterUntil}=await import('../core/attention/attention-time.ts');
-const {matchingAttentionID}=await import('../core/attention/attention-center.ts');
+const {attentionLaterUntil}=await import('../agent/attention/attention-time.ts');
+const {matchingAttentionID}=await import('../agent/attention/attention-center.ts');
 const deferredUntil=attentionLaterUntil(Date.parse(now),'UTC');
 assert.equal(deferredUntil,'2026-09-25T10:00:00.000Z');
 const group=updateWorldItem({...base,id:'group',attentionContentVersion:1},'open',now,deferredUntil);

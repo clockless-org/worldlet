@@ -1,7 +1,7 @@
 declare global { var Env:any; var saved:any; var mount:any; var env:any; }
 import assert from 'node:assert/strict';
 import {contextThread,cleanRecall} from '../ui/attention/context-recall.ts';
-import {attentionFocus,attentionOrder} from '../core/attention/attention-focus.ts';
+import {attentionFocus,attentionOrder} from '../agent/attention/attention-focus.ts';
 import {bundleScript,fileAccess,launchTestBrowser,pageErrors,worldUrl} from './browser-test.ts';
 assert.notEqual(contextThread('mail','1'),contextThread('mail','2'));
 assert.deepEqual(cleanRecall([{key:'mail',view:'1',text:'Hi',history:[{role:'system',text:'bad'},{role:'assistant',text:'okay'}]}])[0].history,[{role:'assistant',text:'okay'}]);

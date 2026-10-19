@@ -1,7 +1,7 @@
-import {attentionImageURL} from '../../../../../core/attention/index.ts';
+import {attentionImageURL} from '../../../../../agent/attention/index.ts';
 import {readImage} from './mail-avatar.ts';
 import type {Row} from '../../host/types.ts';
-// An email's own picture for its Attention card (core/attention/source-image.ts). Read only when the card
+// An email's own picture for its Attention card (agent/attention/source-image.ts). Read only when the card
 // opens, with no cookies or referrer, and returned as a data: image (the World page loads no remote image).
 // Results stay in memory for this app session, like sender portraits; the practice world never reads one.
 const LIMIT=2_500_000,MAX_ENTRIES=60;

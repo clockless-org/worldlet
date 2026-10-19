@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-import {attentionFailure} from '../core/attention/attention-failure.ts';
+import {attentionFailure} from '../agent/attention/attention-failure.ts';
 import {firstValueCandidate,firstValueLinks,firstValueRequest,updateOnboarding} from '../agent/onboarding/index.ts';
 import {helpNarration,narrateHelp} from '../ui/companion/help-narration.ts';
 import {bundleScript} from './browser-test.ts';

@@ -1061,7 +1061,7 @@ private struct FoxDialogue: View {
         return cards
     }
 
-    /// What the computer's card says for an item from a computer older than the item dialogue (core/attention/attention-preview.ts).
+    /// What the computer's card says for an item from a computer older than the item dialogue (agent/attention/attention-preview.ts).
     static func say(_ group: AttentionGroup) -> String {
         switch group {
         case .event: "Shall we get ready for this?"

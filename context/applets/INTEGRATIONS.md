@@ -113,7 +113,7 @@ The native Focus view retains the village backdrop. The parent Peek device remai
 
 Use the existing `upsert_world_items` schema and stored findings. Rendering never starts a second model request.
 
-- Copy, lengths, classification and marker policy follow the [Attention contract](../../core/attention/README.md#presentation-and-item-lifecycle); do not duplicate its limits here.
+- Copy, lengths, classification and marker policy follow the [Attention contract](../../agent/attention/README.md#presentation-and-item-lifecycle); do not duplicate its limits here.
 - Preserve provider/source identity, exact evidence and URLs. Titles are never identity keys.
 - Calendar retains original start/end/timezone/all-day fields; never invent dates.
 - Findings match originals by provider/source ID, not equal titles. Focus labels interpretation

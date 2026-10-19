@@ -918,7 +918,7 @@ private fun mainCards(model: AppModel): List<DialogueCard> {
     return cards
 }
 
-/** What the computer's card says for an item from a computer older than the item dialogue (core/attention/attention-preview.ts). */
+/** What the computer's card says for an item from a computer older than the item dialogue (agent/attention/attention-preview.ts). */
 private fun say(group: AttentionGroup) = when (group) {
     AttentionGroup.Event -> "Shall we get ready for this?"
     AttentionGroup.NeedsAction -> "Want me to help with the next step?"

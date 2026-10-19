@@ -1,7 +1,7 @@
-// The host's Attention Center for a phone or a browser without the World page (core/attention hostAttention,
+// The host's Attention Center for a phone or a browser without the World page (agent/attention hostAttention,
 // core/phone/README.md#web): the same rows, in the same groups, as the desktop builds from the same World items.
 import assert from 'node:assert/strict';
-import {hostAttention,collectMatters,collectNativeActions,upcomingEvents} from '../core/attention/index.ts';
+import {hostAttention,collectMatters,collectNativeActions,upcomingEvents} from '../agent/attention/index.ts';
 import {projectNativeWorld} from '../ui/world/world-projection.ts';
 import {hostAppletPlaces,threadPairs,phoneAttention} from '../core/phone/index.ts';
 

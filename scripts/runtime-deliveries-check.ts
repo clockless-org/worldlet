@@ -41,7 +41,7 @@ assert.equal(reconcile(failed,[fact],{},10,subscribers)[0].status,'quarantined')
 assert.equal(reconcile(failed,[{...fact,revision:'b'}],{},10,subscribers)[0].status,'pending','new evidence revision gets a fresh attempt');
 assert.equal(retry(failed,'attention:center')[0].attempts,0);
 assert.equal(retry(failed,'attention:center')[0].isolate,true);
-const {planAttention}=await import('../core/attention/attention-center.ts');
+const {planAttention}=await import('../agent/attention/attention-center.ts');
 const context=(id:string)=>({...fact,id,sourceId:id,title:'Fixture',text:'Fixture evidence',keys:['shared'],attributes:{},removed:false,changedAt:1,observedAt:1}) as any;
 const contexts=[context(fact.id),context('gmail:healthy')];
 const plan=planAttention(contexts,{},20,['gmail'],[],failed)!;
@@ -66,7 +66,7 @@ assert.throws(()=>attentionCoverage({...input,processed:['invented']}));
 const settled=ack(reconcile([], [fact],{},1),[{id:fact.id,revision:fact.revision}],2);
 assert.deepEqual(fail(settled,[{id:fact.id,revision:fact.revision}],'attention:center','unverified_output',true),settled,'Later batch failure must not resurrect acknowledged input');
 
-const {recordAttentionProgress}=await import('../core/attention/attention-center.ts');
+const {recordAttentionProgress}=await import('../agent/attention/attention-center.ts');
 const progressFacts=[{id:'a',revision:2},{id:'b',revision:3},{id:'related',revision:1}] as any;
 const progressPlan={facts:progressFacts,seeds:[{id:'a',revision:2},{id:'b',revision:3}],sweep:true};
 const initial={contentVersion:1,seen:{old:1},nextAt:999,attempts:7,lastSweepAt:12,sweepOffset:4};

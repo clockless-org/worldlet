@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import {observeAttention,projectAttention,attentionDependencies,attentionOrder,attentionFocusSet,attentionLevel,attentionRankSignals,attentionRankWeights,attentionSignalScore} from '../core/attention/index.ts';
+import {observeAttention,projectAttention,attentionDependencies,attentionOrder,attentionFocusSet,attentionLevel,attentionRankSignals,attentionRankWeights,attentionSignalScore} from '../agent/attention/index.ts';
 import {projectWorldItems,refreshItemPage} from '../context/items/world-items.ts';
-import {collectNativeActions} from '../core/attention/index.ts';
+import {collectNativeActions} from '../agent/attention/index.ts';
 import {collectMatters} from '../ui/attention/index.ts';
 // Controlled synthetic-mail evaluation for #1152: fictional threads only, no account or model.
 // Owner decision: deadlines, obligations, importance, unread state and inbox/archive placement

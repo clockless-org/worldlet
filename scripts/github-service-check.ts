@@ -19,8 +19,8 @@ import {McpSource,McpSourceAccess,McpSourceConnections} from '../platform/electr
 import {GoogleAccount} from '../platform/electron/src/modules/sources/google-account.ts';
 import {GoogleSource,GoogleSourceAccess} from '../platform/electron/src/modules/sources/google-source.ts';
 import {APP_DEFINITIONS,connectToken} from '../context/applets/index.ts';
-import {validateAttentionRegistrations} from '../core/attention/attention-center.ts';
-import {attentionFollowupReads,attentionReads} from '../core/attention/index.ts';
+import {validateAttentionRegistrations} from '../agent/attention/attention-center.ts';
+import {attentionFollowupReads,attentionReads} from '../agent/attention/index.ts';
 import {validateAppletRuntimes} from '../context/applets/runtime.ts';
 import {conversationGuidance} from '../core/companion/conversation-guidance.ts';
 import {listWorldTools} from '../core/tools/index.ts';

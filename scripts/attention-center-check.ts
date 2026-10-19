@@ -1,10 +1,10 @@
-import {attentionWhen} from '../core/attention/index.ts';
-import {processedAttentionContent} from '../core/attention/attention-content.ts';
+import {attentionWhen} from '../agent/attention/index.ts';
+import {processedAttentionContent} from '../agent/attention/attention-content.ts';
 import {finishSourceCheck,startSourceCheck} from '../core/tasks/source-checks.ts';
 import {interruptsBackground} from '../core/tasks/background-work.ts';
 import assert from 'node:assert/strict';
 import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
-import {attentionCompletion,attentionPlanCurrent,discardedAttentionRemovals,matchingAttentionID,observeAttention,attentionDependencies,attentionCurrent,projectAttention,planAttention,startAttentionBudget,finishAttentionBudget,suppressedAttention,weatherObservationText,validateAttentionRegistrations,ATTENTION_BACKLOG_SECONDS,ATTENTION_COALESCE_SECONDS,ATTENTION_FULL_SEEDS} from '../core/attention/attention-center.ts';
+import {attentionCompletion,attentionPlanCurrent,discardedAttentionRemovals,matchingAttentionID,observeAttention,attentionDependencies,attentionCurrent,projectAttention,planAttention,startAttentionBudget,finishAttentionBudget,suppressedAttention,weatherObservationText,validateAttentionRegistrations,ATTENTION_BACKLOG_SECONDS,ATTENTION_COALESCE_SECONDS,ATTENTION_FULL_SEEDS} from '../agent/attention/attention-center.ts';
 import {updateWorldItem} from '../context/items/world-item-state.ts';
 import type {AttentionRegistration,AttentionFact,AttentionBudget} from '../contracts/attention.ts';
 const now=Date.parse('2026-09-24T12:00:00Z')/1000;
@@ -152,7 +152,7 @@ const late=observeAttention(timestamped,registration('weather'),[{id:'current',t
 assert.equal(late[0].text,'Clear','out-of-order observations cannot replace newer facts');
 
 // The observation contract accepts 12k; do not silently discard evidence after 4k.
-const {attentionReads}=await import('../core/attention/attention-reads.ts');
+const {attentionReads}=await import('../agent/attention/attention-reads.ts');
 const reads=attentionReads('gmail');
 assert.equal(reads.length,4);assert.equal(reads.reduce((n,r)=>n+r.limit,0),50);
 assert.ok(reads.some(r=>r.query?.includes('90d')));
@@ -160,7 +160,7 @@ const longFact=observeAttention([],{version:1,provider:'gmail',reader:'source-re
 assert.ok(longFact[0].text.includes('October 15'));assert.equal(longFact[0].attributes.partial,true);
 console.log('PASS bounded mail search coverage and late-body evidence preservation');
 
-const {attentionFailure}=await import('../core/attention/attention-failure.ts');
+const {attentionFailure}=await import('../agent/attention/attention-failure.ts');
 assert.equal(attentionFailure('The included model allowance for this day is used. It resets at 2026-09-27T00:00:00.000Z.',Date.parse('2026-09-26T20:00:00Z')/1000).nextAt,Date.parse('2026-09-27T00:00:00Z')/1000+5);
 assert.deepEqual(attentionFailure('Private provider failure',100),{code:'synthesis_failed'});
 console.log('PASS allowance retries wait for reset and diagnostics omit raw errors');
@@ -176,7 +176,7 @@ console.log('PASS current commitments outrank unrelated completed history; relev
 const meetings=observeAttention([],registration('google-calendar'),Array.from({length:12},(_,i)=>({id:'meeting-'+i,text:'Confirmed team meeting',attributes:{start:new Date((now+(12-i)*3600)*1000).toISOString(),end:new Date((now+(13-i)*3600)*1000).toISOString()}})),now);
 const meetingPlan=planAttention(meetings,{},now,['google-calendar'])!;
 assert.deepEqual(meetingPlan.facts.slice(0,3).map(f=>f.sourceId),['meeting-11','meeting-10','meeting-9'],'Nearest meetings must reach synthesis before later commitments');
-const {attentionOrder}=await import('../core/attention/attention-focus.ts');
+const {attentionOrder}=await import('../agent/attention/attention-focus.ts');
 const ordered=attentionOrder([3,1,2].map(day=>({state:'event',start:(now+day*86400)*1000})),{region:()=>'',importance:()=>1});
 assert.deepEqual(ordered.map(i=>i.start),[1,2,3].map(day=>(now+day*86400)*1000),'Meetings with equal urgency still sort chronologically');
 console.log('PASS nearest meetings prioritized for synthesis and Coming Up display');
@@ -288,7 +288,7 @@ assert.equal(attentionCompletion({...input,deliveries:[],facts:facts.map(f=>({..
  console.log('PASS shared completion requires current input and committed receipts');
 }
 
-const {attentionExecution,attentionFollowupReads}=await import('../core/attention/index.ts');
+const {attentionExecution,attentionFollowupReads}=await import('../agent/attention/index.ts');
 assert.equal(attentionExecution('synthesis').timeoutSeconds,600);
 assert.ok(attentionExecution('synthesis').prompt?.includes('Reuse existing IDs'));
 assert.match(attentionExecution('synthesis').prompt!,/read it[\s\S]*using query_world_items, then submit with upsert_world_items/,'the synthesis prompt names the tools that read and submit the context');
@@ -313,7 +313,7 @@ assert.equal(processedAttentionContent({...conciseBrief,occurredAt:'2026-09-27T1
 console.log('PASS three-section timestamp semantics and missing-time omission');
 {
  // An email's own picture: one verified HTTPS address carried as a fact attribute and on its reference (owner Order 2026-10-08).
- const {attentionImageURL,attentionPictureFits,attentionSourceImage}=await import('../core/attention/source-image.ts');
+ const {attentionImageURL,attentionPictureFits,attentionSourceImage}=await import('../agent/attention/source-image.ts');
  assert.equal(attentionImageURL('https://cdn.example.com/launch/hero.jpg?w=1200'),'https://cdn.example.com/launch/hero.jpg?w=1200');
  for(const bad of ['http://cdn.example.com/a.jpg','https://127.0.0.1/a.jpg','https://localhost/a.jpg','https://cdn.example.com:8443/a.jpg','https://u:p@cdn.example.com/a.jpg','https://open.example.com/a.jpg','https://cdn.example.com/pixel.gif','https://cdn.example.com/brand-logo.png','javascript:alert(1)',42,'https://x.example.com/'+'a'.repeat(2000)])assert.equal(attentionImageURL(bad),'',String(bad).slice(0,60));
  assert(attentionPictureFits(1200,600)&&!attentionPictureFits(120,60)&&!attentionPictureFits(1600,200)&&!attentionPictureFits(400,900));

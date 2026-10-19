@@ -47,7 +47,7 @@ runtime colors can align to the actual socket at every zoom level.
 
 The approved states are off (signed out and unusable), white (signed in or usable without login),
 deeply breathing white with a Running label (processing; every 2.4 seconds, so running reads from the overview) and red (error); unread saved findings have no
-lamp state. See [Attention Center](../../core/attention/README.md#deferred-device-lamps)
+lamp state. See [Attention Center](../../agent/attention/README.md#deferred-device-lamps)
 for priority. The current generic dot overlay is hidden.
 All 112 built-in Applet sprites, including Mac application launchers, author
 this socket directly into the sprite: a small brass rim around a charcoal-black, unlit lens. Keep the existing device,

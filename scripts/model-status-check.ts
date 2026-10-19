@@ -74,7 +74,7 @@ assert.equal(foregroundAgentWork({action:'chat'}),true);
 assert.equal(preemptAgentWork({body:{action:'chat',_background:true},foregroundPending:true}),true);
 assert.equal(preemptAgentWork({body:{action:'warmup',_background:true},foregroundPending:true}),false);
 assert.equal(preemptAgentWork({body:{action:'chat'},foregroundPending:true}),false);
-const {finishAttentionBudget}=await import('../core/attention/attention-center.ts');
+const {finishAttentionBudget}=await import('../agent/attention/attention-center.ts');
 const budget={failures:2,attempts:3,seen:{a:'r'},nextAt:900};
 const interrupted=finishAttentionBudget(budget as any,{} as any,100,false,[],true);
 assert.equal(interrupted.nextAt,160);assert.equal(interrupted.failures,2);assert.deepEqual(interrupted.seen,{a:'r'});assert.equal(interrupted.attempts,3);

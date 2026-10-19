@@ -1,4 +1,4 @@
-import {safeAttentionURL} from '../../core/attention/index.ts';
+import {safeAttentionURL} from '../../agent/attention/index.ts';
 const kinds:Record<string,[string,string]>={gmail:['mail','Mail'],'google-calendar':['calendar','Calendar'],note:['file','Notes'],file:['file','File'],notion:['book','Notion'],weather:['file','Weather'],strava:['file','Strava'],'google-maps':['file','Maps'],conversations:['chat','Conversation'],worldlet:['book','Journal']};
 export function attentionSources(page){
  const seen=new Set<string>();

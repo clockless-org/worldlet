@@ -81,7 +81,7 @@ Only this built-in style is supported. No user style loader, executable pack or 
 Reserve an artwork-integrated status-lamp socket when generating new Applets,
 using the existing Discord lamp as the visual reference. Keep its position and
 emission mask with the asset for later runtime coloring. The four-state policy
-is recorded in `core/attention/README.md`; its generic overlay is currently hidden
+is recorded in `agent/attention/README.md`; its generic overlay is currently hidden
 and visual implementation is deferred. Do not repaint existing devices yet.
 
 Ground devices, including logo sculptures, mascots and direct Mac launchers, use compact low bases to sit naturally in the village. Use warm timber throughout the base, with rounded wooden edges and sparse brass fasteners matching the existing devices. No stone or ivory rim. The device should read as a solid tabletop figurine firmly resting on its wooden base. A functional cabinet or dock can already provide the base. Preserve logo prominence, visible support/contact shading, shared perspective and the saved foot anchor; do not add landscape islands or tall display pedestals. See the Applet design guide for proportions and acceptance criteria.

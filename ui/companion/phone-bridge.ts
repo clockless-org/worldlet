@@ -1,5 +1,5 @@
 import {phoneAttention,phoneActionStatus,phoneLive,type PhoneMessage,type PhoneWorld} from '../../core/phone/index.ts';
-import {attentionLaterUntil} from '../../core/attention/index.ts';
+import {attentionLaterUntil} from '../../agent/attention/index.ts';
 import {attentionSceneArt} from '../attention/index.ts';
 
 // The World page's half of phone pairing (core/phone/README.md). It sends the Attention Center's Now and Later to the

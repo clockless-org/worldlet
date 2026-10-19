@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {ONGOING_APPLET,ONGOING_LIMITS,ongoingId,validOngoingId,ongoingName,ongoingLooksLikeJob,ongoingProposal,readOngoing,ongoingOpen,ongoingRefresh,ongoingFromAgent,ongoingCandidates,ongoingDecide,ongoingLine,ongoingThemes,ongoingThemeRequest,isOngoingThemeId,ongoingRecent,ongoingTurnText,orderOngoing,ongoingRegion,ongoingApplet,ongoingKind,ongoingKindOf,ongoingTemplate,ONGOING_KINDS,type BroughtConversation} from '../core/tasks/index.ts';
 import {attentionFromAgent,conversationAttentionId,foxSessions,foxSessionLine,foxSessionPlace,foxSessionOf,foxSessionCards,FOX_SESSION_LIMIT} from '../core/tasks/index.ts';
 import {harnessSessionThread,harnessChatThread,harnessThreadPlace,harnessOriginId} from '../core/agent/harness-sessions.ts';
-import {processedAttentionContent} from '../core/attention/attention-content.ts';
+import {processedAttentionContent} from '../agent/attention/attention-content.ts';
 import {validateWorldItem} from '../context/items/world-item-validation.ts';
 import {phoneAttention,phoneTasks,phoneJournal,readPhoneMessage} from '../core/phone/index.ts';
 import {APP_DEFINITIONS} from '../context/applets/index.ts';

@@ -129,7 +129,7 @@ There is no universal installed-Applet loader implied by this guide. The histori
 
 ## Attention registration
 
-An optional typed `attention` declaration registers a trusted source reader or observation producer with the central runtime. See [Applet context and center synthesis](../../core/attention/README.md) for the contract, cost limits and lifecycle. Applets submit source facts; the center synthesizes and decides visibility. Registration alone does not implement a connector, create a background process or grant model access. Observations require stable source identity, original evidence and freshness. Keep acquisition, proposal and user completion separate.
+An optional typed `attention` declaration registers a trusted source reader or observation producer with the central runtime. See [Applet context and center synthesis](../../agent/attention/README.md) for the contract, cost limits and lifecycle. Applets submit source facts; the center synthesizes and decides visibility. Registration alone does not implement a connector, create a background process or grant model access. Observations require stable source identity, original evidence and freshness. Keep acquisition, proposal and user completion separate.
 
 ## Autonomous work contract
 

@@ -10,7 +10,7 @@ import {summarizeRequest} from '../../core/agent/index.ts';
 import {callHost} from '../../platform/bridge/host.ts';
 import {isDesktopCompanion,requireWorldSurface} from '../companion/index.ts';
 import {displayReleaseVersion} from '../distribution/index.ts';
-import {attentionOrder,attentionFocusSet,attentionFocusFit,attentionFocusEvidence,attentionRelevant,attentionRankSignals,attentionLevel} from '../../core/attention/index.ts';
+import {attentionOrder,attentionFocusSet,attentionFocusFit,attentionFocusEvidence,attentionRelevant,attentionRankSignals,attentionLevel} from '../../agent/attention/index.ts';
 import {appHudIcon,momentLine,AGENT_ICONS} from '../applets/index.ts';
 import {collectMatters,attentionIcon,attentionReturnWhen,attentionGroupWhen} from '../attention/index.ts';
 import {roomObjects} from '../world/index.ts';
