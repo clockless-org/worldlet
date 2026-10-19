@@ -42,7 +42,7 @@ public struct PhoneUpdate: Sendable {
     public var computerSeenAt: Double?
 }
 
-/// The phone's side of a pairing, against the relay in worker/pairing.ts or in the pairing room (agent/phone/README.md#room).
+/// The phone's side of a pairing, against the relay in worker/pairing.ts or in the pairing room (agent/windows/README.md#room).
 /// It keeps the poll cursor or the room socket; the app keeps the link in the Keychain and calls `sync()` while it is
 /// open. A relay pairing moves to the room once the computer's desktop slot says `room` (`inRoom` then turns true, and
 /// the app keeps the link that says so). In the room the computer sends everything it has when the phone arrives, then
@@ -280,7 +280,7 @@ public actor PhoneSession {
     /// Where this iPhone's notifications go: the APNs device token in hex, "apns" for App Store and TestFlight builds,
     /// "apns-dev" for debug builds (Apple's sandbox). With `direct` (the computer's desktop slot says `push`) the token
     /// goes to the computer in a sealed message and the relay's registration is removed, so the relay keeps none
-    /// (agent/phone/README.md#push); otherwise the relay keeps it, as older computers need.
+    /// (agent/windows/README.md#push); otherwise the relay keeps it, as older computers need.
     public func registerPush(platform: String, token: String, direct: Bool = false) async throws {
         guard direct else {
             _ = try await request("api/pair/\(keys.id)/push", method: "PUT", body: PushToken(platform: platform, token: token))

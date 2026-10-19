@@ -438,7 +438,7 @@ export class LocalHarnessRuntime implements AgentRuntime {
   if(agent)return null;
   try{return this.route();}catch{return null;}
  }
- /** `harnessWorld`: a turn another Worldlet sent (agent/phone remoteTurnBody) keeps its threads apart from this World's. */
+ /** `harnessWorld`: a turn another Worldlet sent (agent/windows remoteTurnBody) keeps its threads apart from this World's. */
  private world(body:Row){return body.sample!==true&&typeof body.harnessWorld==='string'&&/^remote:[A-Za-z0-9._-]{1,60}$/.test(body.harnessWorld)?body.harnessWorld:body.sample===true?'sample':'private';}
  status():Row {
   if(!fs.existsSync(this.install.command))return {ready:false,name:this.install.title,provider:localHarnessAdapterId(this.install.id),error:`${this.install.title} is no longer installed.`};

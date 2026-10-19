@@ -108,7 +108,7 @@ const ALLOWED:Record<string,string[]>={
  // agent_settings_changed: which part of Settings › Agents changed; never what it changed to.
  agent_setting:['model','permission','account','routine','skill'],
  // owner 2026-10-11 20:21 PDT: Production metrics. phone_paired: the phone's system, from its notification platform, or
- // `web` for a web browser (agent/phone/README.md#web).
+ // `web` for a web browser (agent/windows/README.md#web).
  // attention_item_opened: where the person opened the item's card. task_completed: which kind of background work finished.
  phone_platform:['ios','android','web','unknown'],open_surface:['computer','phone'],task_kind:['routine','fox','applet'],
  // local_data_size (agent/diagnostics/data-size.ts): how much this computer keeps, in bands; never a name or path.

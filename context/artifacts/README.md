@@ -239,7 +239,7 @@ A made Applet's page is untrusted code and never sees World data, accounts or cr
 
 ### Phone
 
-The computer publishes the slot `widgets` ([phone payloads](../../agent/phone/README.md#payloads)): the made Applets for now, newest first, at most six, each with `id`, `title`, `blurb`, `color`, `endsAt`, `pinned`, `updatedAt`, `version`, `state` and `page` (the document with the prelude and no seed). Pages ride along while the sealed box stays under the relay's limit; the oldest page is left out first, and the phone keeps the page it already has for that version. The phone keeps the last slot on the device, so a made Applet works at the museum while the computer sleeps at home. Each is its own tile in the phone's Applet world.
+The computer publishes the slot `widgets` ([phone payloads](../../agent/windows/README.md#payloads)): the made Applets for now, newest first, at most six, each with `id`, `title`, `blurb`, `color`, `endsAt`, `pinned`, `updatedAt`, `version`, `state` and `page` (the document with the prelude and no seed). Pages ride along while the sealed box stays under the relay's limit; the oldest page is left out first, and the phone keeps the page it already has for that version. The phone keeps the last slot on the device, so a made Applet works at the museum while the computer sleeps at home. Each is its own tile in the phone's Applet world.
 
 When the person changes something on the phone, the phone stamps the changed keys with its clock, keeps them, and sends a `widget` message `{type:"widget", id, widget, state}` with only those entries; it applies the computer's later slot by the same newest-wins merge, so its own unsent or newer edits stay. The computer merges the message, saves it and publishes the slot again.
 

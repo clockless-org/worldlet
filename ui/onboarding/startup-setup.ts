@@ -33,7 +33,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // More options (owner request 2026-10-09): the Agents not on this computer, Google and ChatGPT (coming soon), an Agent
  // on another computer and an API key, folded under the cards.
  let more=false;
- // "My Agent is on another computer" (agent/phone/README.md#another-computers-agent): the code Worldlet there shows,
+ // "My Agent is on another computer" (agent/windows/README.md#another-computers-agent): the code Worldlet there shows,
  // pasted here, pairs this Worldlet with it and Fox's conversation runs on its Agent.
  let remoteForm=false,remoteCode='',pairingRemote=false;
  // No Agent here (Codex alone included): Worldlet installs stock Hermes Agent the official way (`install-hermes`), then

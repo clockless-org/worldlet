@@ -77,7 +77,7 @@ export function installHarnessCalls(host:Host){
   try{stop=source.subscribe(received);}catch(error){host.diagnostics.record(error,'harnessCalls');}
  }
  // A Worth Knowing item that cites a pending call goes to the phone once (the same rule as outside events); Worth
- // Doing ones, such as a missed call, reach it through agent/phone phoneAttentionPushes already.
+ // Doing ones, such as a missed call, reach it through agent/windows phoneAttentionPushes already.
  store.onChange(()=>{
   if(!pending.size||!own())return;
   const now=Date.now();

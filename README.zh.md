@@ -141,7 +141,7 @@ Fox 是你用文字或语音对话的伙伴。它通过你的 Agent 干活，把
 
 - 只有你的电脑开着、Worldlet 在上面运行时才能用：World、你的记录和 Fox 都留在你的电脑上，浏览器只是显示它们。**Run in background** 让 Worldlet 不开窗口也继续运行。
 - 页面来自 worldlet.ai，每个 Worldlet 版本一份，不含你的任何数据。你的电脑和浏览器之间的通信端到端加密，经过一个只转发、什么都不存的中继。
-- 链接请别外传：拿到链接的人能看到你的 World 并在里面操作。**Turn off** 会让它失效。设置、连接和配对只能在你的电脑上改。[工作原理](agent/phone/README.md#the-world-on-another-device)
+- 链接请别外传：拿到链接的人能看到你的 World 并在里面操作。**Turn off** 会让它失效。设置、连接和配对只能在你的电脑上改。[工作原理](agent/windows/README.md#the-world-on-another-device)
 
 ## 隐私
 

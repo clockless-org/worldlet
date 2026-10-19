@@ -1,6 +1,6 @@
-import {sha256Hex} from '../agent/phone/index.ts';
+import {sha256Hex} from '../agent/windows/index.ts';
 
-// The pairing room (agent/phone room.ts) for checks: a room that answers like worker/room.ts in the operations repository
+// The pairing room (agent/windows room.ts) for checks: a room that answers like worker/room.ts in the operations repository
 // (a side gets in with its token and the other side's hash, messages pass only while both are there, nothing is kept),
 // here in memory, and a WebSocket on it for the code under test (scripts/web-open-check.ts, phone-room-check.ts).
 export function memoryRoom(){

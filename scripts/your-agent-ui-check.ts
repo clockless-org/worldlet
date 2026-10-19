@@ -540,7 +540,7 @@ try{
  await broken.waitFor({state:'detached'});
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&['install-hermes','select'].includes(c.operation)).slice(-2).map(c=>c.operation+(c.id?':'+c.id:''))),['install-hermes','select:hermes']);
  await page.evaluate(()=>{(window as any).agentInUse=null;});
- // An Agent on another computer (agent/phone/README.md#another-computers-agent): its code pairs, Settings says where Fox
+ // An Agent on another computer (agent/windows/README.md#another-computers-agent): its code pairs, Settings says where Fox
  // runs, and Stop using ends the pairing.
  // Both are folded under Other ways to connect, few people need them (owner request 2026-10-10).
  await local.getByText('Other ways to connect',{exact:true}).click();
@@ -553,7 +553,7 @@ try{
  await remote.getByRole('button',{name:'Stop using',exact:true}).click();
  await remote.getByRole('button',{name:'Pair',exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&['pair','clear'].includes(c.operation)).map(c=>c.operation)),['clear','pair','clear']);
- // An OpenClaw Gateway on another computer, reached directly (agent/phone/README.md#an-agent-gateway-on-another-computer):
+ // An OpenClaw Gateway on another computer, reached directly (agent/windows/README.md#an-agent-gateway-on-another-computer):
  // its address and token connect, Settings says it is reached directly, Stop using keeps it to Use again without the
  // token, and Forget removes it.
  const gateway=local.locator('[data-agent=gateway]');

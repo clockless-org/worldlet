@@ -141,7 +141,7 @@ Open your whole World, not only the Attention Center and Fox, in a web browser o
 
 - It works while your computer is on and Worldlet runs there: the World, your records and Fox all stay on your computer, and the browser only shows them. **Run in background** keeps Worldlet running with no window open.
 - The page comes from worldlet.ai, one copy per Worldlet version, and holds none of your data. What your computer and the browser say to each other is end-to-end encrypted and passes through a relay that only forwards it and stores nothing.
-- Keep the link private: anyone who has it can see and act in your World. **Turn off** ends it. Settings, connections and pairing stay on your computer. [How it works](agent/phone/README.md#the-world-on-another-device)
+- Keep the link private: anyone who has it can see and act in your World. **Turn off** ends it. Settings, connections and pairing stay on your computer. [How it works](agent/windows/README.md#the-world-on-another-device)
 
 ## Privacy
 

@@ -1,4 +1,4 @@
-// The page that holds the computer's side of browsers' direct lines (agent/phone rtc.ts, rtc-host.ts): Node has no WebRTC,
+// The page that holds the computer's side of browsers' direct lines (agent/windows rtc.ts, rtc-host.ts): Node has no WebRTC,
 // so a hidden window runs RTCPeerConnection and the host drives it with executeJavaScript. It answers offers, passes
 // the data channel's pieces both ways and says when a line opens or closes. Kept apart from Electron so checks can load
 // it in a plain browser.

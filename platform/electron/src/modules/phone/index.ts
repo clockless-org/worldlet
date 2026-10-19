@@ -5,7 +5,7 @@ import {app} from 'electron';
 import type {Host,Row} from '../../host/types.ts';
 import {AGENT,ANALYTICS,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,PHONE,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,WIDGETS,WORLD_ROOM_PAGE,WORLD_WEB,type WorldRoomPageService,type WorldWebService,type AgentService,type RtcPageFactory,type DesktopCompanionService,type AnalyticsService,type BrowserService,type CompanionService,type FoxService,type PhoneService,type VaultService,type WidgetsService} from '../../host/services.ts';
 import {WorldletError} from '../../files.ts';
-import {withWorldLink,PHONE_LIMITS,hostAppletPlaces,threadPairs,readRemoteToHost,remoteHostInfo,phoneActionStatus,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,pairKeys,fromBase64url,sha256Hex,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../agent/phone/index.ts';
+import {withWorldLink,PHONE_LIMITS,hostAppletPlaces,threadPairs,readRemoteToHost,remoteHostInfo,phoneActionStatus,phoneAttention,phoneAttentionPushes,phoneConversation,phoneDesktop,phoneFoxPush,phonePush,phonePlatform,pairKeys,fromBase64url,sha256Hex,type PhoneAttention,type PhoneMessage,type PhonePushRequest} from '../../../../../agent/windows/index.ts';
 import {createPhoneRelay} from './relay.ts';
 import {createLocalRelay,serveLocalRelay,type LocalServer} from './local-relay.ts';
 import {createRoomLink} from './room-link.ts';
@@ -21,17 +21,17 @@ import {taskPanel} from '../../../../../agent/tasks/index.ts';
 import {APP_DEFINITIONS} from '../../../../../context/applets/index.ts';
 import {readArtifact} from '../../../../../context/artifacts/index.ts';
 
-// Phone pairing (agent/phone/README.md): the iPhone app mirrors the Attention Center and Fox's main conversation.
+// Phone pairing (agent/windows/README.md): the iPhone app mirrors the Attention Center and Fox's main conversation.
 // This module owns the pairing secret and the relay connection; the World page supplies the Attention snapshot
 // (`phonePublish`, sent the moment the Center changes) and carries out the phone's messages (`worldletPhoneMessage`),
 // because Center ordering and Fox turns live there. While the phone is open (it reached the relay in the last two
 // minutes, or any time in the last week; see LISTENING) the desktop long-polls the relay, so a chat line or a Done from
 // the phone arrives within about a second; while the app is open it re-reads Fox's conversation every two seconds while
 // Fox works. Otherwise it checks every 15 seconds.
-// Notifications (agent/phone/README.md#push) go out only while the phone is not showing the app: it reached the relay in
+// Notifications (agent/windows/README.md#push) go out only while the phone is not showing the app: it reached the relay in
 // the last 45 seconds (an open app long-polls every 20), a shorter window than the two minutes that keep this loop quick, so
 // a reply that lands just after the person put the phone away still reaches them. New Coming Up and Worth Doing items
-// (agent/phone phoneAttentionPushes, diffed against the previous snapshot) and Fox's finished reply to a line said on the
+// (agent/windows phoneAttentionPushes, diffed against the previous snapshot) and Fox's finished reply to a line said on the
 // phone are pushed here; other modules call PhoneService.notify.
 // A phone seen in the last week keeps the desktop long-polling even while the app is closed (owner 2026-10-12: Fox
 // slower on the phone). A short check every 15 seconds left the first line typed after opening the app waiting up to 15
@@ -57,7 +57,7 @@ export function installPhone(host:Host){
  const asked=new Map<string,{item?:string,applet?:string,at:number}>();
  const askedKey=(text:unknown)=>typeof text==='string'?text.trim().slice(0,PHONE_LIMITS.field):'';
  const attachments=phoneAttachments(()=>path.join(app.getPath('userData'),'Phone files'));
- // What the phone or a paired browser (agent/phone/README.md#web) asked; both are carried out alike.
+ // What the phone or a paired browser (agent/windows/README.md#web) asked; both are carried out alike.
  const deliver=async(message:PhoneMessage,key:string)=>{
    // A widget edit is the host's own (modules/artifacts): it is merged and saved even while the page reloads.
    if(message.type==='widget'){
@@ -203,7 +203,7 @@ export function installPhone(host:Host){
   if(push)void notify(push).catch(e=>host.diagnostics.record(e,'phonePush'));
  }
  const phoneOpen=()=>{const seen=relay.status().seenAt;return !!seen&&Date.now()-seen<ACTIVE||Date.now()-lastActive<ACTIVE;};
- // Another Worldlet that runs Fox's turns on this computer's Agent (agent/phone/README.md#another-computers-agent):
+ // Another Worldlet that runs Fox's turns on this computer's Agent (agent/windows/README.md#another-computers-agent):
  // a second pairing on the same relay with a `worldlet://agent` code. Its turns run here on the Agent service's own
  // runtime (remote-host.ts), never through the World page: in that computer's own sessions, with its instructions and
  // view, and every World tool call goes back to run in its World. It gets nothing of this World (no Attention Center,
@@ -234,7 +234,7 @@ export function installPhone(host:Host){
   deliver:message=>remoteHost.receive(message),
   onChange:status=>{if(status.state!=='paired')remoteHost.stop();host.page.event('worldlet:agent-pair-status',status);},
  });
- // The full World on another device (agent/phone/README.md#the-world-on-another-device): a `world` pairing of its own,
+ // The full World on another device (agent/windows/README.md#the-world-on-another-device): a `world` pairing of its own,
  // met in the pairing room. Each page that joins is the host's remote World page (WORLD_ROOM_PAGE), with only what
  // ROOM_ALLOWED lets through; a host without one closes it.
  const worldRoom=createWorldRoomLink({
@@ -242,10 +242,10 @@ export function installPhone(host:Host){
   accept:socket=>{const pages=host.optional<WorldRoomPageService>(WORLD_ROOM_PAGE);if(pages)pages.accept(socket);else socket.close(1011,'No World here');},
   onChange:status=>host.page.event('worldlet:world-pair-status',status),
  });
- // The browser link carries the World's pairing too (agent/phone withWorldLink), so it opens the full World on a device
+ // The browser link carries the World's pairing too (agent/windows withWorldLink), so it opens the full World on a device
  // that can draw it and the Center on one that cannot.
  const webStatus=(status:PhoneStatus):PhoneStatus=>status.link?{...status,link:withWorldLink(status.link,worldRoom.status().link)}:status;
- // A web browser on another device (agent/phone/README.md#web): the page at `<relay>/open/` meets this computer in the
+ // A web browser on another device (agent/windows/README.md#web): the page at `<relay>/open/` meets this computer in the
  // pairing room (room-link.ts), which stores nothing, and gets the same Center, conversation and live turn as a phone,
  // over a direct line when the two can reach each other.
  // It takes no notifications; a tab seen in the last hour keeps the loop listening, so a Done from it lands at once.
@@ -253,7 +253,7 @@ export function installPhone(host:Host){
  const rtcPage=host.optional<RtcPageFactory>(RTC_PAGE);
  const browser=createRoomLink({
   vault,vaultName:'web-room',name:computerName,relay:process.env.WORLDLET_PAIR_RELAY||undefined,deliver,
-  // A browser that offers a direct line gets one (agent/phone rtc.ts), run on the page the host opens for it (a hidden
+  // A browser that offers a direct line gets one (agent/windows rtc.ts), run on the page the host opens for it (a hidden
   // window in the Electron host, rtc-window.ts). A host with none (the Node host, platform/node) runs the room only.
   rtc:rtcPage?createRtcHost(rtcPage):undefined,
   onChange:status=>{
@@ -268,7 +268,7 @@ export function installPhone(host:Host){
  if(vault.get('web-pairing'))void createPhoneRelay({fetch:(input,init)=>fetch(input,init),vault,name:computerName,userAgent:`Worldlet/${version} (web pairing)`,kind:'web',
   relay:process.env.WORLDLET_PAIR_RELAY||undefined,deliver:async()=>false}).end().catch(error=>host.diagnostics.record(error,'phonePairing'));
  webPaired=browser.status().state==='paired';
- // A browser on this computer (agent/phone/README.md#web): a pairing of its own, served by this app on 127.0.0.1
+ // A browser on this computer (agent/windows/README.md#web): a pairing of its own, served by this app on 127.0.0.1
  // (local-relay.ts) with the page and a relay in memory, so what it shows never leaves the computer. The server starts
  // with the first link and with a launch that kept one, on the port the last one used, so the browser's saved link and
  // bookmark keep working; a link made for another port is ended, since that browser storage is gone with its origin.
@@ -427,7 +427,7 @@ export function installPhone(host:Host){
    }
    throw new WorldletError('Unknown pairing request.');
   },
-  // The page's current Attention Center (Now and Later), already shaped by agent/phone phoneAttention, and the turn Fox
+  // The page's current Attention Center (Now and Later), already shaped by agent/windows phoneAttention, and the turn Fox
   // is streaming (phoneLive), which only an open phone needs. Both go only to the phone.
   phonePublish:async request=>{
    if(!['attention','live'].includes(request.slot)||!request.value||typeof request.value!=='object')throw new WorldletError('Unknown phone update.');
@@ -451,7 +451,7 @@ export function installPhone(host:Host){
  host.onQuit(()=>{stopped=true;if(pairedReport)reportPaired(relay.status().push);clearInterval(watch);remoteHost.stop();for(const link of links)link.stop();});
 }
 
-// Photos and files attached on the phone (agent/phone PhoneMessage `file`): parts are held until the file is whole, then
+// Photos and files attached on the phone (agent/windows PhoneMessage `file`): parts are held until the file is whole, then
 // saved under Phone files/<date>/ with a name no earlier file has; a line's `files` read back the saved paths. Parts of a
 // file that never completes are dropped after an hour.
 function phoneAttachments(folder:()=>string){

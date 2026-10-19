@@ -1,6 +1,6 @@
-import {RTC_CHANNEL,RTC_GATHER_MS,RTC_ICE_SERVERS,channelJoiner,channelPieces} from '../../../../../agent/phone/index.ts';
+import {RTC_CHANNEL,RTC_GATHER_MS,RTC_ICE_SERVERS,channelJoiner,channelPieces} from '../../../../../agent/windows/index.ts';
 
-// The computer's side of browsers' direct lines (agent/phone rtc.ts), on the page in rtc-page.ts: a hidden window that
+// The computer's side of browsers' direct lines (agent/windows rtc.ts), on the page in rtc-page.ts: a hidden window that
 // is open only while a browser has a line or is offering one. `open` gives that page (rtc-window.ts in the app, a plain
 // browser page in checks); the host joins the data channel's pieces into frames and splits frames into pieces.
 export type RtcPage={run(code:string):Promise<unknown>,close():void};
