@@ -1,5 +1,5 @@
-import {MADE_GAME_LIMITS} from '../../context/games/index.ts';
-// The Game Factory (context/games/README.md). make_game hands the work to the Factory as an Applet task;
+import {MADE_GAME_LIMITS} from '../../context/artifacts/index.ts';
+// The Game Factory (context/artifacts/GAMES.md). make_game hands the work to the Factory as an Applet task;
 // save_game and read_made_game belong to that task only.
 const id={type:'string',pattern:'^game-[a-z0-9]{10}$'};
 export const gameTools=[

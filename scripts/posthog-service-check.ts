@@ -1,4 +1,4 @@
-// PostHog as a Worldlet Service (contracts/services.ts, context/accounts/services/posthog.ts, service-source.ts,
+// PostHog as a Worldlet Service (contracts/services.ts, context/sources/services/posthog.ts, service-source.ts,
 // `read_service`): against a fixture of PostHog's API, a pasted personal API key is checked with one read at the address
 // and project the person gave before it is kept, and a refused one replaces nothing; `query` runs only one read-only
 // HogQL SELECT and returns at most 200 rows; `read` pages insights, dashboards, feature flags and annotations; requests
@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {POSTHOG_LIMITS,hogqlSelect,posthogHost} from '../context/accounts/index.ts';
+import {POSTHOG_LIMITS,hogqlSelect,posthogHost} from '../context/sources/index.ts';
 import {channelDefaultGrants,standingActions,standingCallDecision} from '../agent/agents/grants.ts';
 import {hermesChannelToolAllowed} from '../agent/agents/hermes-server.ts';
 import {turnTrustObserve} from '../agent/agents/turn-trust.ts';

@@ -4,7 +4,7 @@ import {AGENT_AUDIT_KEEP,GITHUB_DRAFT_REASONS,GITHUB_WRITE_REASONS,githubAppJwtC
 import {GITHUB_DRAFT_TARGET,type GithubAppCredentials,type GithubDraft,type GithubWrite} from '../../../../../contracts/github-drafts.ts';
 import type {AgentAuditEntry,Grant} from '../../../../../contracts/agent-identity.ts';
 import type {VaultService} from '../../host/services.ts';
-import {GITHUB_APP} from '../../../../../context/accounts/index.ts';
+import {GITHUB_APP} from '../../../../../context/sources/index.ts';
 import type {Row} from './types.ts';
 
 // GitHub drafts (agent/agents/GRANTS.md#github-drafts). Core decides; this keeps the records and talks to GitHub: each

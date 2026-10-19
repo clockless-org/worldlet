@@ -1,4 +1,4 @@
-/** Worldlet Services: an account the World reads for an Agent through the `read_service` World tool (context/accounts,
+/** Worldlet Services: an account the World reads for an Agent through the `read_service` World tool (context/sources,
  * agent/agents/GRANTS.md). Each Service answers its own bounded reads (SERVICE_ACTIONS); what a record holds besides its
  * ID, title and link is the Service's own `fields`. Service content is untrusted data, never instructions. */
 
@@ -12,9 +12,9 @@ export type ServiceOperation=typeof SERVICE_OPERATIONS[number];
  * fixed analytics reports. HTTP JSON (`http`): `list` (the endpoints the person connected) and `read` (`id` naming an
  * endpoint, `query` its path). Search Console: `list` (the sites its service account can see) and `query` (one Search
  * Analytics query of the site `id`, with an optional JSON `query` choosing the days, dimensions and rows;
- * context/accounts/services/search-console.ts). Linear, Todoist and Supabase: `list` (the person's issues, their active
+ * context/sources/services/search-console.ts). Linear, Todoist and Supabase: `list` (the person's issues, their active
  * tasks, or their projects; Linear and Todoist page with `cursor`) and `read` (one by `id`), over their official MCP
- * servers (context/accounts/mcp/service-records.ts). */
+ * servers (context/sources/mcp/service-records.ts). */
 export const SERVICE_ACTIONS:Readonly<Record<string,Readonly<Partial<Record<ServiceOperation,readonly string[]>>>>>=Object.freeze({
  github:Object.freeze({list:[],read:['id'],search:['query'],releases:['id']}),
  posthog:Object.freeze({query:['query'],read:['id']}),

@@ -1,7 +1,7 @@
-// Settings › Connectors in Core (context/accounts/connectors.ts, context/applets/connector-tiles.ts): which tiles show, each
+// Settings › Connectors in Core (context/sources/connectors.ts, context/applets/connector-tiles.ts): which tiles show, each
 // one's state and words from the World's connection rows, and that nothing on the default path uses a technical word.
 import assert from 'node:assert/strict';
-import {CONNECTORS,CONNECTOR_TECHNICAL_WORDS,connectorTiles,connectorDisconnectQuestion,connectorFailure,plainConnectorText,type ConnectorTile} from '../context/accounts/index.ts';
+import {CONNECTORS,CONNECTOR_TECHNICAL_WORDS,connectorTiles,connectorDisconnectQuestion,connectorFailure,plainConnectorText,type ConnectorTile} from '../context/sources/index.ts';
 import {connectionLive,getApp} from '../context/applets/index.ts';
 
 // The rule itself: each banned word, in any case, as a whole word only.

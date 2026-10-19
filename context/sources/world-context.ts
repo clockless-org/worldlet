@@ -1,4 +1,4 @@
-import {CONNECTORS} from '../accounts/index.ts';
+import {CONNECTORS} from './connectors.ts';
 
 /** What Settings › Context shows (issue #674): everything this World keeps, in one place, each kind with how much it holds
  * in plain words. The host reads the sizes (`worldContext`, WorldLedger.contextSizes); memory is read where it lives (Fox's

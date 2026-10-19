@@ -19,7 +19,7 @@ import {worldAnswers} from '../ui/web/index.ts';
 import {memoryRoom} from './memory-room.ts';
 import {launchTestBrowser,pageErrors,waitForWorld} from './browser-test.ts';
 import {createWorldBoard} from '../platform/electron/src/modules/agent-runtime/board.ts';
-import {BOARD_REASONS} from '../context/board/index.ts';
+import {BOARD_REASONS} from '../context/sources/index.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {acceptWebSocket} from '../platform/electron/src/modules/phone/web-socket.ts';
 import {resolveWorldFile} from '../platform/electron/src/world/world-file.ts';

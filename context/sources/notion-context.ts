@@ -1,5 +1,6 @@
 // The World collects explicitly selected pages through its own Notion MCP connection. Agents read these snapshots.
-import {notionPageId,notionPage,notionPayload,type McpSession} from '../accounts/index.ts';
+import {notionPageId,notionPage,notionPayload} from './mcp/notion.ts';
+import type {McpSession} from './mcp/session.ts';
 import type {ServiceRecords} from '../../contracts/services.ts';
 import type {ServiceSyncSnapshot} from '../../contracts/service-sync.ts';
 

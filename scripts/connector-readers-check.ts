@@ -5,7 +5,7 @@
 // tile lists (serviceReaders), against a real Agent access store.
 import assert from 'node:assert/strict';
 import path from 'node:path';
-import {connectorWhoMayUse,plainConnectorText} from '../context/accounts/index.ts';
+import {connectorWhoMayUse,plainConnectorText} from '../context/sources/index.ts';
 import {serviceGranted} from '../agent/agents/index.ts';
 import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/agent-access.ts';
 import {serviceReadDefaults,serviceReaders} from '../platform/electron/src/modules/agent-runtime/service-readers.ts';

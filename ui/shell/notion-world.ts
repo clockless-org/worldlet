@@ -54,7 +54,7 @@ import {localCalendarItems} from '../applets/index.ts';
 import {alertAt,upcomingCalendarEvents} from '../../context/applets/index.ts';
 import type {World,WorldPage} from '../../contracts/world.ts';
 import {createAppletPanel,BOARD_READ_EVENT} from '../applets/index.ts';
-import {boardNorthStar,formatBoardNumber} from '../../context/board/index.ts';
+import {boardNorthStar,formatBoardNumber} from '../../context/sources/index.ts';
 import {SERVICE_DRAFT_TITLES} from '../../contracts/service-drafts.ts';
 /** The Services a PostHog or Notion draft writes to, by provider, as the card names them. */
 const DRAFT_SERVICES:Record<string,string>=SERVICE_DRAFT_TITLES;
@@ -518,7 +518,7 @@ export function mountNotionWorld(data: World, native: any) {
    const header=element('header','region-shelf-header');header.append(element('h2','',building.title));
    shelf.append(header);
    // The Games area's landmark is its game workshop (owner decision 2026-10-03): this panel is where games
-   // are discovered (the lists below) and made. Making a game is coming soon (context/games/README.md).
+   // are discovered (the lists below) and made. Making a game is coming soon (context/artifacts/GAMES.md).
    if(id==='health'){
     const factory=element('section','region-shelf-factory'),title=element('div','region-shelf-factory-title');
     title.append(element('h3','','Make a game'),element('span','region-shelf-soon','Coming soon'));

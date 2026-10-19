@@ -1,5 +1,5 @@
 import {connectionLive,getApp,TOKEN_PROVIDERS} from '../../context/applets/index.ts';
-import {CONNECTORS} from '../../context/accounts/index.ts';
+import {CONNECTORS} from '../../context/sources/index.ts';
 import {SERVICE_TITLES} from '../../contracts/services.ts';
 import {showServiceCollection} from './service-collection.ts';
 import {showAgentConnections} from './agent-connections.ts';

@@ -377,7 +377,7 @@ try{
  assert.deepEqual([await asking.isChecked(),await working.isChecked()],[true,false]);
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Asks$/.test(c.operation))),
   [{action:'agentAccess',operation:'grantAsks',id:'hermes',kind:'ask'},{action:'agentAccess',operation:'ungrantAsks',id:'hermes',kind:'work'}],'only the Agent and which, never targets');
- // "Can see your board" and "Can set up your board" (context/board/README.md): the same way.
+ // "Can see your board" and "Can set up your board" (context/sources/BOARD.md): the same way.
  const seeing=hermesAccess.getByRole('checkbox',{name:'Can see your board',exact:true}),defining=hermesAccess.getByRole('checkbox',{name:'Can set up your board',exact:true});
  assert.deepEqual([await seeing.isChecked(),await defining.isChecked()],[true,false]);
  await defining.click();

@@ -1,5 +1,5 @@
 import {dialog} from 'electron';
-import {GAME_FACTORY_APPLET,MADE_GAME_LIMITS,betterBest,checkMadeGameSource,gameFactoryModel,madeGameDocument,madeGameId,madeGameRecord,madeGameTask,orderMadeGames,readMadeGame,validMadeGameId,type MadeGame} from '../../../../../context/games/index.ts';
+import {GAME_FACTORY_APPLET,MADE_GAME_LIMITS,betterBest,checkMadeGameSource,gameFactoryModel,madeGameDocument,madeGameId,madeGameRecord,madeGameTask,orderMadeGames,readMadeGame,validMadeGameId,type MadeGame} from '../../../../../context/artifacts/index.ts';
 import {WorldletError} from '../../files.ts';
 import {FOX,type FoxService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
@@ -10,7 +10,7 @@ import {tryMadeGame} from './trial.ts';
 /** One Game Factory request in flight: the Applet task that works on it and what it may replace. */
 interface Job {idea:string;replaces:string|null;saved:string|null}
 
-/** The Game Factory (context/games/README.md). Fox hands a game to the Factory as an Applet task; its
+/** The Game Factory (context/artifacts/GAMES.md). Fox hands a game to the Factory as an Applet task; its
  * model saves one HTML page, which is checked, tried offline and kept in this World's database
  * (`made_games`, before 2026-10-05 the folder `games/<id>/`, which store/moved-in.ts moves in).
  * Made games play in their own sandboxed view and lead the Games area, newest first. */

@@ -1,4 +1,4 @@
-// PostHog's own sign-in (context/accounts/connectors.ts `mcp-oauth`, service-source.ts signIn, mcp-account.ts): against
+// PostHog's own sign-in (context/sources/connectors.ts `mcp-oauth`, service-source.ts signIn, mcp-account.ts): against
 // fixtures of PostHog's MCP metadata, its authorization server and its Cloud API, Connect with no key registers Worldlet,
 // signs in on a loopback address asking only the connector's read scopes, finds the Cloud (US, then EU) and the
 // project the account is on, checks it with one read and keeps no key; reads send the sign-in's access token, renewed
@@ -6,7 +6,7 @@
 // project without signing in again; the first approved change asks for the write scopes in the browser; a key under
 // Advanced replaces the sign-in, a cancelled sign-in leaves a kept key, and Disconnect forgets both.
 import assert from 'node:assert/strict';
-import {connectorScopes} from '../context/accounts/index.ts';
+import {connectorScopes} from '../context/sources/index.ts';
 import {ServiceSource} from '../platform/electron/src/modules/sources/service-source.ts';
 
 const MCP='https://mcp.posthog.com/mcp',ISSUER='https://oauth.posthog.com',US='https://us.posthog.com',EU='https://eu.posthog.com';

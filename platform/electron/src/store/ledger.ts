@@ -152,7 +152,7 @@ export class WorldLedger {
  /** One request and its Attention item, saved together, as a draft is: the item is the host's own (provider `agents`),
   * its status the request's, set by the person's answer (`user`) or by the refused call that asked (`agent`). */
  saveServiceRequest(request:Row,item:Row,origin:'user'|'agent'){this.saveDraft('service-requests',request,item,origin);}
- // Service presets (context/accounts/services/presets.ts, context/applets/INTEGRATIONS.md#service-presets) ---------------
+ // Service presets (context/sources/services/presets.ts, context/applets/INTEGRATIONS.md#service-presets) ---------------
  /** Every saved Service preset (`state.service-presets`), by ID. */
  servicePresets():Row[]{return this.records('service-presets');}
  saveServicePreset(preset:Row){this.put('service-presets',preset.id,preset);}
@@ -168,7 +168,7 @@ export class WorldLedger {
  /** Each Agent's one report (`state.agent-reports`, keyed by the Agent). */
  agentReports():Row[]{return this.records('agent-reports');}
  saveAgentReport(report:Row){this.put('agent-reports',report.agentId,report);}
- // The board (context/board/README.md) -------------------------------------------------------------------------------
+ // The board (context/sources/BOARD.md) -------------------------------------------------------------------------------
  /** The board's current definition and revision (`state.board`), or null with none. */
  board():Row|null{return this.value('board','board');}
  saveBoard(board:Row){this.put('board','board',board);}

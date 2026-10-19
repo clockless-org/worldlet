@@ -2,7 +2,7 @@ import {SERVICE_DRAFT_LIMITS,SERVICE_DRAFT_PROVIDERS,SERVICE_DRAFT_STATUSES,SERV
 import {AGENT_ASK_PROVIDER} from '../../contracts/agent-asks.ts';
 import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
 import type {WorldItem} from '../../contracts/world.ts';
-import {notionFingerprint,notionPage,notionPageId,notionPayload,notionWriteArgs,type McpSession,type PosthogSettings} from '../../context/accounts/index.ts';
+import {notionFingerprint,notionPage,notionPageId,notionPayload,notionWriteArgs,type McpSession,type PosthogSettings} from '../../context/sources/index.ts';
 import {looksSecret} from './agent-profile.ts';
 
 /** PostHog and Notion drafts (contracts/service-drafts.ts, agent/agents/GRANTS.md#posthog-and-notion-drafts), the same

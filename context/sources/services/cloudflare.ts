@@ -1,7 +1,7 @@
 // Bounded, read-only analytics of the person's own Cloudflare account through Cloudflare's GraphQL Analytics API: a
 // fixed set of reads over the last 24 hours (`read` with `id` `workers`: invocations and errors per Worker; `zones`:
 // requests per zone). No writes, and nothing but these reads: an Agent picks which, never the query. By default the
-// person signs in to Cloudflare (context/accounts/connectors.ts): its sign-in belongs to Cloudflare's own MCP server, which
+// person signs in to Cloudflare (context/sources/connectors.ts): its sign-in belongs to Cloudflare's own MCP server, which
 // runs a short program against Cloudflare's API with it, so each read goes there as one fixed request built here
 // (cloudflareExecute), never code an Agent wrote. With an API token pasted under Advanced the Platform sends each
 // request only to Cloudflare's API address (service-source.ts). Every answer is cut to a fixed size before it reaches

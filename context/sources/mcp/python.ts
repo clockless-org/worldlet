@@ -1,5 +1,5 @@
 // More of the Python semantics the MCP connector readers were written with (exception kinds, attribute access on
-// provider JSON, urllib.parse.urlparse, uuid.UUID, json.dumps), on top of ../google/python.ts. Private to context/accounts.
+// provider JSON, urllib.parse.urlparse, uuid.UUID, json.dumps), on top of ../google/python.ts. Private to context/sources.
 import {pyType,pyFloat,pyRepr,pySorted,chars,head,strip} from '../google/python.ts';
 
 /** Python's ValueError: bad input the reader refused (an invalid ID, URL, cursor or operation). Other failures are

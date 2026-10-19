@@ -253,7 +253,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
 }
 
 interface MailContext {host:CheckContext['host'];js:(code:string)=>Promise<any>;wait:(what:string,code:string,seconds:number)=>Promise<void>;mark:(step:string)=>void;press:(label:string,seconds?:number)=>Promise<void>;seen:()=>Promise<string>}
-/** After the journey, two real conversations about the mock Gmail inbox (context/accounts/google/mock.ts:
+/** After the journey, two real conversations about the mock Gmail inbox (context/sources/google/mock.ts:
  * only the Google API client is fictional; paging, normalization and Fox are the real ones): Fox
  * fetches the unread mail and names who needs a reply, then drafts a reply that waits for review
  * and is cancelled, never sent. Judged on the tools the turn used and their effects, not wording;
