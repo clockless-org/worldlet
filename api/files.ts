@@ -25,5 +25,8 @@ export const FILES=Object.freeze({
  windowsInstaller:'platform/electron/distribution/windows/installer.nsi',
  updatesModule:'platform/electron/src/modules/shell/updates.ts',
  onboardingPaths:'platform/electron/src/checks/onboarding-paths.ts',
+ // The phone release jobs (Play, TestFlight) build these projects.
+ iosProject:'ios/',
+ androidProject:'android/',
 });
 export type PublicFile=keyof typeof FILES;
