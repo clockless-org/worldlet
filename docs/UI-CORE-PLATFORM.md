@@ -53,17 +53,18 @@ across all four kinds, and draft and pin state for Made records are next steps
 <a id="folders-by-layer"></a>
 ### Folders by layer
 
-Every folder of `ui/`, `core/` and `platform/` belongs to exactly one layer; each `core/` folder is in Agent or Context.
+Every folder of `ui/`, `agent/`, `context/` and `platform/` belongs to exactly one layer.
 `npm run check:docs` fails when a folder is missing or listed twice.
 
-The `core/` folders move one at a time. A moved folder is listed at its new place, and `core/` keeps a
-re-export at its old `index.ts` (and at any other file used from outside this repository) until nothing imports it.
+`core/` holds no component any more: its folders moved to `agent/` and `context/` ([#681](https://github.com/clockless-org/worldlet/issues/681)).
+What is left is `core/index.ts`, the shared dispatcher the Platform calls, and re-exports at old paths (each folder's
+`index.ts`, and files used from outside this repository). A re-export goes once nothing imports it.
 
 | Layer | Folders |
 | --- | --- |
 | UI | `ui/applets/` `ui/artifacts/` `ui/attention/` `ui/browser/` `ui/companion/` `ui/components/` `ui/distribution/` `ui/games/` `ui/hud/` `ui/onboarding/` `ui/practice/` `ui/shell/` `ui/theme-packages/` `ui/themes/` `ui/web/` `ui/world/` |
-| Agent (to `agent/`) | `agent/agent/` `agent/tasks/` `agent/companion/` `agent/tools/` `agent/attention/` `agent/onboarding/` `agent/phone/` `agent/diagnostics/` `agent/distribution/` |
-| Context (to `context/`) | `context/context/` `context/items/` `context/artifacts/` `context/activity/` `context/accounts/` `context/applets/` `context/board/` `context/browser/` `context/games/` |
+| Agent (`agent/`) | `agent/agent/` `agent/tasks/` `agent/companion/` `agent/tools/` `agent/attention/` `agent/onboarding/` `agent/phone/` `agent/diagnostics/` `agent/distribution/` |
+| Context (`context/`) | `context/context/` `context/items/` `context/artifacts/` `context/activity/` `context/accounts/` `context/applets/` `context/board/` `context/browser/` `context/games/` |
 | Platform | `platform/bridge/` `platform/browser/` `platform/distribution/` `platform/electron/` `platform/install/` `platform/local-tools/` `platform/node/` `platform/web-engine/` |
 
 <a id="features"></a>
