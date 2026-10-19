@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {HARNESS_SERVICES,worldToolsCommands,isWorldToolsRegistrar,commandLine,commandReason,commandWords,connectionId,dotenvNames,harnessService,hermesConnectionCommand,hermesConnections,hermesMcpPrefixes,isConnectionId,maskSecrets,
- openClawConnectionCommand,openClawConnections,openClawMcpPrefixes,readConnectionAdd,withLastUse} from '../agent/agent/index.ts';
+ openClawConnectionCommand,openClawConnections,openClawMcpPrefixes,readConnectionAdd,withLastUse} from '../agent/agents/index.ts';
 import {harnessConnections,hermesConnectionsService,openClawConnectionsService} from '../platform/electron/src/modules/agent-runtime/harness-connections.ts';
 import type {HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
 import {createHarnessConnections} from '../platform/electron/src/modules/fox/harness-connections.ts';
@@ -11,7 +11,7 @@ import {AGENT} from '../platform/electron/src/host/services.ts';
 import {connectionLine,connectionUseLine,showAgentConnections} from '../ui/companion/agent-connections.ts';
 import {withTempDir} from './test-temp.ts';
 
-// The Agent's connections in the World (agent/agent/PORTABILITY.md#the-agents-connections-in-the-world): the declared
+// The Agent's connections in the World (agent/agents/PORTABILITY.md#the-agents-connections-in-the-world): the declared
 // `connections` service, Hermes Agent's mcp_servers and chat tokens and OpenClaw's mcp status and channels read without
 // a secret, each server's last use matched from its own tool naming, the exact command of each change, the host
 // services against fixture `hermes` and `openclaw` commands that behave like their own `mcp add/remove/unset` (their
@@ -234,7 +234,7 @@ else process.exit(2);
  let answer:any={harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,changes:true,connections:[{id:listed[0].id,kind:'mcp',name:'github',where:'https://api.githubcopilot.com/mcp/',enabled:true,sign:'token',agent:'default',main:true,removable:true,lastUsed:{at:Date.UTC(2026,9,8,12),tool:'search_issues',thread:'Discord · Release notes'}},
   {id:listed[4].id,kind:'account',name:'Telegram',where:'telegram',enabled:true,sign:'token',agent:'default',main:true}]},{harness:'other',title:'Other Agent',changes:false,connections:[{id:'conn-0000000000000000',kind:'mcp',name:'x',where:'y',enabled:false,removable:true}]}]};
  const call=async(action:string,args:any)=>{
-  // What Hermes Agent said about itself at setup (agent/agent/agent-profile.ts); Other Agent said nothing.
+  // What Hermes Agent said about itself at setup (agent/agents/agent-profile.ts); Other Agent said nothing.
   if(action==='agentHarness')return {profile:args.id==='hermes'?{connections:[{name:'1Password vault',kind:'password_vault',usedFor:'Logs in to shopping sites'},{name:'Telegram',kind:'channel'}],channels:[{provider:'discord',place:'#groceries'}]}:null};
   requests.push([action,args]);if(args.operation==='preview')return {command:args.remove?'hermes mcp remove github':'hermes mcp add fetch --url https://f.example.com',confirm:'c-1'};
   if(args.operation==='change'){answer={harnesses:[{...answer.harnesses[0],connections:answer.harnesses[0].connections.slice(1)}]};return {ok:true};}return answer;};

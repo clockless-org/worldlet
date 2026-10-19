@@ -27,7 +27,7 @@ import {onboardingUnfinished} from '../agent/onboarding/index.ts';
 import {mountNotionWorld} from './shell/index.ts';
 import {setMailAvatarLookup} from './applets/index.ts';
 import {setAttentionImageLookup} from './attention/index.ts';
-import {EMPTY_OVERLAY,validateOverlay} from '../context/context/index.ts';
+import {EMPTY_OVERLAY,validateOverlay} from '../context/sources/index.ts';
 const savedLanguage=localStorage.getItem('worldlet-interface-language');
 if(savedLanguage&&['en','zh','ja','es'].includes(savedLanguage))document.documentElement.lang=savedLanguage;
 const {call,track}=withProductAnalytics(callHost,()=>!sample);

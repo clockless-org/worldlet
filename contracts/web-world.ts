@@ -40,7 +40,7 @@ export function worldWebCsp(origin:string):string {
  return `default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self' ${socket}${WORLD_SOCKET_PATH}; worker-src blob:; media-src 'self' data:; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`;
 }
 
-/** The World bundle's policy where the relay hosts it for another device (agent/phone/README.md#the-world-on-another-device,
+/** The World bundle's policy where the relay hosts it for another device (agent/windows/README.md#the-world-on-another-device,
  * `bundle`: its folder's address, `https://worldlet.ai/world/<version>/`), sent as a header in place of the meta tag.
  * The page loads only that folder's files and talks only to them and to the pairing room on the same origin
  * (`wss://…/api/room/`): not to the rest of the site, and to no other site. No other site may frame it. */
@@ -158,7 +158,7 @@ export function webEventDetail(name:string,detail:unknown):unknown {
  return PAIRING_EVENT.test(name)?withoutLink(detail):detail;
 }
 
-/** What a World page on another device may ask for, met through the pairing room (agent/phone/world-room.ts): the
+/** What a World page on another device may ask for, met through the pairing room (agent/windows/world-room.ts): the
  * World, Fox, the Attention Center, artifacts and Applets, and nothing else. Settings, connections, pairing, the
  * Harness's configuration, local tools, deletion and native views stay with this computer. The host checks this before
  * the request reaches the router, after WEB_DENIED and WEB_PAGE_ACTIONS; `true` allows the action, a list allows only

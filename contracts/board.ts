@@ -84,7 +84,7 @@ export interface BoardView {title:string;tabs:BoardTabView[];
  resolvedAt:string}
 
 /** The World gateway targets (`board/<action>`), each its own Grant target. Only an Agent's own "Can see your board"
- * and "Can set up your board" Grants name them; a Fox turn's Grant never does (agent/agent/GRANTS.md#the-board). */
+ * and "Can set up your board" Grants name them; a Fox turn's Grant never does (agent/agents/GRANTS.md#the-board). */
 export const BOARD_TARGET='board';
 export const BOARD_ACTIONS=Object.freeze({read:'board/read',define:'board/define'} as const);
 /** The board as the World keeps it (`state.board` in world.sqlite): its definition, a revision each define raises by

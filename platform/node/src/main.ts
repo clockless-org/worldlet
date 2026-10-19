@@ -24,7 +24,7 @@ import {roomDenied} from '../../../contracts/web-world.ts';
 import {AGENT,PHONE,VAULT,WORLD_ROOM_PAGE,WORLD_WEB,type AgentService,type PhoneService,type VaultService,type WorldRoomPageService,type WorldWebService} from '../../electron/src/host/services.ts';
 import type {Host,PageBridge} from '../../electron/src/host/types.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
-import {isWorldToolsRegistrar} from '../../../agent/agent/index.ts';
+import {isWorldToolsRegistrar} from '../../../agent/agents/index.ts';
 import {onboardingUnfinished} from '../../../agent/onboarding/index.ts';
 import {ALREADY_RUNNING,controlSocketPath,serveControl,type ControlReply,type ControlRequest} from './control.ts';
 import {mcpHome,openMcpHome,registerAgent,registeredAgents} from './mcp-home.ts';
@@ -172,11 +172,11 @@ async function keepLink(file:string,what:string,operation:string,make:()=>Promis
   log(`${what} ready in ${path.join(profile.root,file)}`);
  }catch(error){diagnostics.record(error,operation);log(`${what} failed: ${errorMessage(error)}`);}
 }
-/** The browser link (agent/phone/README.md#web), made once and kept: a phone or any browser opens it to reach this
+/** The browser link (agent/windows/README.md#web), made once and kept: a phone or any browser opens it to reach this
  * computer. Room only here: browsers' direct lines need WebRTC, which this host does not have yet. It carries the full
  * World's pairing too (PhoneService.worldLink, as `world/link`). */
 void keepLink(ROOM_LINK_FILE,'room link','roomLink',()=>host.use<PhoneService>(PHONE).worldLink?.());
-/** The full World's link for another device (agent/phone/world-room.ts, `kind: 'world'`), made once and kept beside it:
+/** The full World's link for another device (agent/windows/world-room.ts, `kind: 'world'`), made once and kept beside it:
  * the World bundle opens it and meets this host in the pairing room. */
 void keepLink(WORLD_ROOM_LINK_FILE,'World link for another device','worldRoomLink',()=>host.use<PhoneService>(PHONE).worldRoomLink?.());
 
@@ -212,7 +212,7 @@ async function answer(request:ControlRequest):Promise<ControlReply> {
    'Allow what it may do in Settings › Agents in the World.']};
  }
  if(request.command==='register')return {lines:await registerAgent(request.agent!)};
- // Remote access (agent/agent/REMOTE-MCP.md), the same as Settings › Agents: each connector still asks the
+ // Remote access (agent/agents/REMOTE-MCP.md), the same as Settings › Agents: each connector still asks the
  // person on a card in Attention.
  if(request.command==='remote'&&request.remote==='token'){
   const made=await router.dispatch({action:'remoteMcp',operation:'token',name:request.name}) as {ok:boolean;error?:string;token?:string;address?:string;agent?:{name:string}};

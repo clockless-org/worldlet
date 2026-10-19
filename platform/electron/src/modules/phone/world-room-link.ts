@@ -1,8 +1,8 @@
-import {DEFAULT_PAIR_RELAY,base64url,fromBase64url,newPairSecret,openJoin,pairKeys,readWorldRoomFrame,roomEntry,sealHello,worldBundlePath,worldRoomLink,worldRoomNonce,worldRoomSession,type PairKeys,type RoomSocketFactory,type WorldRoomSession} from '../../../../../agent/phone/index.ts';
+import {DEFAULT_PAIR_RELAY,base64url,fromBase64url,newPairSecret,openJoin,pairKeys,readWorldRoomFrame,roomEntry,sealHello,worldBundlePath,worldRoomLink,worldRoomNonce,worldRoomSession,type PairKeys,type RoomSocketFactory,type WorldRoomSession} from '../../../../../agent/windows/index.ts';
 import type {PhoneNotifyResult,PhoneStatus} from './relay.ts';
 import type {TextSocket} from './web-socket.ts';
 
-// The full World on another device (agent/phone/README.md#the-world-on-another-device, agent/phone/world-room.ts): a
+// The full World on another device (agent/windows/README.md#the-world-on-another-device, agent/windows/world-room.ts): a
 // `world` pairing of its own, met in the pairing room, which only forwards and stores nothing. Each browser tab in the
 // room is one World page: once it answered this computer's hello, it is handed to `accept` as a socket, which the host
 // treats as it treats a browser's World page on this computer (host/web-page.ts), with only what ROOM_ALLOWED lets

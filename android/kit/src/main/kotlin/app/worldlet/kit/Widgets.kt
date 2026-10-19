@@ -73,7 +73,7 @@ data class WidgetStateEntry(val v: String?, val at: Double) {
 
 typealias WidgetState = Map<String, WidgetStateEntry>
 
-/** A widget for now, as the computer sends it (agent/phone/payloads.ts PhoneWidget). [page] is the whole document with
+/** A widget for now, as the computer sends it (agent/windows/payloads.ts PhoneWidget). [page] is the whole document with
  * the widget prelude but no seed; it is absent when the slot had no room for it, and the phone keeps the page it
  * already has for that version. Times are ISO dates. */
 @Serializable

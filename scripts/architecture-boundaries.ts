@@ -26,9 +26,17 @@ const exceptions=new Map([
  
  ['platform/bridge/world-tool-runtime.ts -> ui/shell/index.ts','Host tool dispatcher invokes the public semantic World UI.'],
  ['platform/bridge/agent-client.ts -> ui/companion/index.ts','Presentation status copy is still exported by Companion.'],
- ['context/accounts/services/presets.ts -> agent/agent/index.ts','A board preset of the agents source reads Agent reports with the reports\' own reader (#681).'],
- ['context/context/service-sync.ts -> agent/tasks/index.ts','Service sync keeps Synced Context fresh on the shared source-check schedule, which Tasks owns (#681).'],
+ ['context/accounts/services/presets.ts -> agent/agents/index.ts','A board preset of the agents source reads Agent reports with the reports\' own reader (#681).'],
+ ['context/sources/service-sync.ts -> agent/tasks/index.ts','Service sync keeps Synced Context fresh on the shared source-check schedule, which Tasks owns (#681).'],
 ]);
+// Folders renamed after they left core/ (#714): the old core/ path of a file in one of them keeps the old folder name.
+export const RENAMED_FROM_CORE:Readonly<Record<string,string>>=Object.freeze({'agent/agents':'core/agent','agent/windows':'core/phone','context/sources':'core/context'});
+/** The path a file of agent/ or context/ had in core/, or null. */
+export function oldCorePath(target:string){
+ if(!/^(agent|context)\//.test(target))return null;
+ const folder=target.split('/').slice(0,2).join('/');
+ return RENAMED_FROM_CORE[folder]?RENAMED_FROM_CORE[folder]+target.slice(folder.length):target.replace(/^(agent|context)\//,'core/');
+}
 const used=new Set<string>();
 function layer(file:string){return layers.find(x=>file.startsWith(x+'/'))??file.split('/')[0];}
 export function checkEdge(file:string,target:string){
@@ -37,7 +45,7 @@ export function checkEdge(file:string,target:string){
  assert(allowed[layer(file)]?.includes(layer(target)),`Forbidden layer dependency: ${edge}`);
  const component=/^(core|ui|agent|context)\/([^/]+)\/(.+)$/.exec(target);
  // A file left at its old core/ path re-exports the same file at its new place.
- if(file.startsWith('core/')&&/^(agent|context)\//.test(target)&&target.replace(/^(agent|context)\//,'core/')===file)return;
+ if(oldCorePath(target)===file)return;
  if(component&&!file.startsWith(`${component[1]}/${component[2]}/`))
   assert.equal(component[3],'index.ts',`${file} bypasses public component entry: ${target}`);
 }

@@ -1,5 +1,5 @@
 import {mergeArtifact,orderArtifacts,readArtifact,validArtifactId,type Artifact} from '../../../../../context/artifacts/index.ts';
-import {dailyScheduleFailure,dailyScheduleResult,type ScheduleResult} from '../../../../../agent/agent/index.ts';
+import {dailyScheduleFailure,dailyScheduleResult,type ScheduleResult} from '../../../../../agent/agents/index.ts';
 import {WorldletError} from '../../files.ts';
 import {PHONE,type PhoneService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
@@ -17,7 +17,7 @@ export function installArtifacts(host:Host){
  };
  const changed=(id='')=>page.event('worldlet:artifacts',{id});
  /** A kept morning brief or day summary (`scheduled` with its `day`) also arrives as an Attention item that opens the
-  * Journal on it, and on the phone while fresh. Core decides what it says (agent/agent/harness-schedule.ts). */
+  * Journal on it, and on the phone while fresh. Core decides what it says (agent/agents/harness-schedule.ts). */
  function scheduledResult(kind:unknown,day:unknown,artifact:Artifact,at:number){
   if(kind!=='plan'&&kind!=='summary'||typeof day!=='string')return;
   keep(dailyScheduleResult({kind,day,artifact:artifact as any,at,now:Date.now()}));

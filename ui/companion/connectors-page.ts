@@ -1,5 +1,5 @@
 import {TOKEN_PROVIDERS} from '../../context/applets/index.ts';
-import {SERVICE_SYNC_DEFAULTS,serviceSyncLine} from '../../context/context/index.ts';
+import {SERVICE_SYNC_DEFAULTS,serviceSyncLine} from '../../context/sources/index.ts';
 import {connector,connectorTiles,connectorDisconnectQuestion,connectorFailure,connectorWhoMayUse,type ConnectorReaders,type ConnectorTile} from '../../context/accounts/index.ts';
 import {SERVICE_PROVIDERS} from '../../contracts/services.ts';
 import {agentButton as button,agentEl as el} from './agent-change.ts';

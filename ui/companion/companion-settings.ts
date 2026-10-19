@@ -171,7 +171,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     providers.scrollIntoView({block:'nearest'});(providers.querySelector('button') as HTMLButtonElement|null)?.focus();
    },{primary:true,id:'fix-connect'})
    :action('Restart Fox',()=>restartFox(said),{primary:true,id:'fix-restart'});
-  // The provider the Agent in use answers with (agent/agent/model-providers.ts, owner decisions 2026-10-10): only a
+  // The provider the Agent in use answers with (agent/agents/model-providers.ts, owner decisions 2026-10-10): only a
   // provider is chosen, never a model; each maps to small, balanced and large models and Fox's turns use the balanced
   // one. Every provider the Agent supports is listed, signed in or not; signing in happens in the Agent itself.
   const drawProviders=async()=>{
@@ -227,7 +227,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     text.append(el('strong','',agent.title+(using?' · In use':'')),el('span','',agent.id==='codex'?(agent.model===false?'Sign in to Codex on this computer first.':'Your ChatGPT plan through Codex.'):agent.memory?.model?'Runs on its own API key.':'Answers for Fox on its own sign-in.'),
      // What the Agent can do beyond World tools, which Fox offers in conversation (its own tools, under its own approvals).
      ...using&&typeof agent.canAlso==='string'&&agent.canAlso?[el('span','companion-settings-quiet',agent.canAlso)]:[]);
-    // Older than Worldlet works with (agent/agent/agent-versions.ts): its own update command opens in Terminal instead of
+    // Older than Worldlet works with (agent/agents/agent-versions.ts): its own update command opens in Terminal instead of
     // Use; Worldlet never updates it by itself. Check again reads its version afresh.
     const version=agent.version&&typeof agent.version==='object'?agent.version:null,old=version?.outdated===true;
     if(old)text.append(el('span','companion-settings-model-problem',`Version ${version.current} is too old. Worldlet needs ${version.minimum} or newer.`),...version.update?[]:[el('span','companion-settings-quiet',String(version.howTo||''))]);
@@ -266,7 +266,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    // An Agent on another computer and an OpenClaw Gateway are for few people: folded away unless one is in use.
    const elsewhere=el('details','companion-settings-elsewhere') as HTMLDetailsElement;elsewhere.append(el('summary','','Other ways to connect'));
    elsewhere.ontoggle=()=>{showElsewhere=elsewhere.open;};
-   // An Agent on another computer (agent/phone/README.md#another-computers-agent): the code from Worldlet there pairs
+   // An Agent on another computer (agent/windows/README.md#another-computers-agent): the code from Worldlet there pairs
    // this one with it, and Fox's conversation runs on it; this World stays here.
    const remote=found?.remote,row=el('div','companion-settings-row'),text=el('div');row.dataset.agent='remote';
    if(remote&&typeof remote.computer==='string'){
@@ -284,7 +284,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    }
    elsewhere.append(row);
    // An OpenClaw Gateway on another computer, reached directly with its address and token, nothing of Worldlet there
-   // (agent/phone/README.md#an-agent-gateway-on-another-computer). The token goes to the host's vault and never comes back.
+   // (agent/windows/README.md#an-agent-gateway-on-another-computer). The token goes to the host's vault and never comes back.
    const gateway=found?.gateway&&typeof found.gateway.host==='string'?found.gateway:null,gRow=el('div','companion-settings-row'),gText=el('div');gRow.dataset.agent='gateway';
    const connect=async(request:Record<string,unknown>)=>{
     said.textContent='Connecting to your Gateway…';
@@ -351,7 +351,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   const remote=el('details','companion-settings-elsewhere companion-settings-remote-access') as HTMLDetailsElement;remote.dataset.part='remote';
   remote.append(el('summary','','Remote access'));
   const claude=el('div');claude.dataset.part='use-in-claude';
-  // Your World's address (agent/agent/WORLD-ADDRESS.md): its own web page, the browsers allowed there and what is shared.
+  // Your World's address (agent/agents/WORLD-ADDRESS.md): its own web page, the browsers allowed there and what is shared.
   const address=el('div');address.dataset.part='world-address';
   target.append(list,claude,address,remote);
   const own=await ownAgent();if(!live())return;

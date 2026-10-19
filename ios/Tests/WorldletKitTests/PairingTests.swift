@@ -31,7 +31,7 @@ final class PairingTests: XCTestCase {
         }
     }
 
-    /// A box the desktop sealed (WebCrypto, agent/phone/pairing.ts) opens here, and only in its own place.
+    /// A box the desktop sealed (WebCrypto, agent/windows/pairing.ts) opens here, and only in its own place.
     func testOpensDesktopBox() throws {
         let keys = PairKeys(secret: secret)
         let box = "KvY1jbTWsmixcULkEw9_MqP93SnK3epd-wIVvqzLF2VCnWuLZrDxqr01u0VOxXgWXSnRdVcGvt-5HyPO5EBaWbuADs5AXD7CKqoG2hYWmX78EqC8gjALgz6uEGmLN9njJ9LF5tOxgRPmF6uj5DroQlggl86hpGmVWdn28in7DqQnIZfI87A02GUSe7ZWeMHfZ35XS23COXHILSLli7fB7W0T0O8QVZQEKjRCzwg_EAZbdJS-VDJ3M54CxKKzW4LCgkhH6ywdYczpLYBJejlhjhVSlTK9sAo-Nm4XGtrI46wXPXywqinFEmxqFdSVmjxKOkjtapkgZvxZzJnloVUNTik4Jv2P3Cay6UKSovPNReVKB2imwypZTnp-WlwI4Dxe"

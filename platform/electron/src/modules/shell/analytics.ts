@@ -92,7 +92,7 @@ const ALLOWED:Record<string,string[]>={
  proactive_moment:[...PROACTIVE_MOMENTS],proactive_status:['spoke','passed'],
  // fox_proactive_shown: whether the line pointed to an open Attention card.
  proactive_card:['yes','no'],
- // How the chosen Agent's description of itself ended (agent/agent/agent-profile.ts).
+ // How the chosen Agent's description of itself ended (agent/agents/agent-profile.ts).
  profile_result:['ok','timeout','invalid','failed'],
  // tour_skipped: the step of the first run's eight-step tour it was skipped on (ui/onboarding/README.md).
  tour_step:['1','2','3','4','5','6','7','8'],
@@ -108,7 +108,7 @@ const ALLOWED:Record<string,string[]>={
  // agent_settings_changed: which part of Settings › Agents changed; never what it changed to.
  agent_setting:['model','permission','account','routine','skill'],
  // owner 2026-10-11 20:21 PDT: Production metrics. phone_paired: the phone's system, from its notification platform, or
- // `web` for a web browser (agent/phone/README.md#web).
+ // `web` for a web browser (agent/windows/README.md#web).
  // attention_item_opened: where the person opened the item's card. task_completed: which kind of background work finished.
  phone_platform:['ios','android','web','unknown'],open_surface:['computer','phone'],task_kind:['routine','fox','applet'],
  // local_data_size (agent/diagnostics/data-size.ts): how much this computer keeps, in bands; never a name or path.

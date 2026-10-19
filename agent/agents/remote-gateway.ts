@@ -1,4 +1,4 @@
-// Fox on a remote OpenClaw Gateway, reached directly (agent/phone/README.md#an-agent-gateway-on-another-computer):
+// Fox on a remote OpenClaw Gateway, reached directly (agent/windows/README.md#an-agent-gateway-on-another-computer):
 // the person types its address and token in Settings › Agents, and Fox's conversation goes to that Gateway's
 // `/v1/responses` (the same path a local OpenClaw uses) with no Worldlet running there. Shared rules only: which
 // addresses are accepted, the WebSocket address its approvals use, and the token's shape. The host keeps the token in

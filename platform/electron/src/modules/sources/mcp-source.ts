@@ -4,7 +4,7 @@ import {WorldletError,ensureDirectory,writeAtomic,digest} from '../../files.ts';
 import {curatedSourceRead} from '../../../../../context/applets/index.ts';
 import {GITHUB_GATE,LINEAR_GATE,NOTION_GATE,PAYPAL_GATE,SUPABASE_GATE,TODOIST_GATE,MCP_POLICY,enabledMcpTools,mcpConfiguration,notion,readGithub,readLinear,readPaypal,readSupabase,todoist,todoistTimeoutSeconds,
  mcpServiceRecords,type McpGate,type McpSession,type NotionReviewStore} from '../../../../../context/accounts/index.ts';
-import {collectNotionPage} from '../../../../../context/context/index.ts';
+import {collectNotionPage} from '../../../../../context/sources/index.ts';
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
 import type {McpAccounts,McpConnection} from './mcp-account.ts';
@@ -51,7 +51,7 @@ export class McpSource {
   try{return await collectNotionPage(session,id);}finally{void session.close();}
  }
  /** The Notion connection Notion's reviewed writes use (the official address, NOTION_GATE), for a Notion draft the
-  * person approved (agent/agent/service-drafts.ts); null when Notion is not connected there. The caller closes it. */
+  * person approved (agent/agents/service-drafts.ts); null when Notion is not connected there. The caller closes it. */
  notionSession():(McpSession&{close():Promise<void>})|null {
   const connection=this.accounts.connection('notion');
   return connection&&NOTION_GATE.urls.includes(connection.url)?this.accounts.session(connection,'Notion'):null;

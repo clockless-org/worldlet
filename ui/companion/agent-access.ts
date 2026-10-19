@@ -1,17 +1,17 @@
-/** Settings › Agents, its list (issue #674): your own Agent first, with Open for its page (`own`), then each Agent that reaches this World's tools on its own (agent/agent/GRANTS.md, host
+/** Settings › Agents, its list (issue #674): your own Agent first, with Open for its page (`own`), then each Agent that reaches this World's tools on its own (agent/agents/GRANTS.md, host
  * `agentAccess`), with when it was last used, what it may do and what it last asked for, and Revoke, which asks once
  * more in the page, then removes that Agent's key so it can no longer reach the World; and, for each connected
  * Service, "Can read <Service>", which gives or takes back that Service's read Grant at once; "Can ask you" and "Can
- * take work" (Agent asks, agent/agent/GRANTS.md#agent-asks), "Can see your board" and "Can set up your board"
+ * take work" (Agent asks, agent/agents/GRANTS.md#agent-asks), "Can see your board" and "Can set up your board"
  * (context/board/README.md), and "Can report its work" and "Can see other Agents"
- * (agent/agent/GRANTS.md#agent-reports), and "Can save to your Journal" and "Can read Agents' Journal artifacts"
- * (agent/agent/GRANTS.md#agent-artifacts), and "Can draft <Service> changes" for PostHog and Notion while connected
- * (agent/agent/GRANTS.md#posthog-and-notion-drafts), the same way; once a GitHub App is connected, "Can update Issues in <repo>
- * without asking" (agent/agent/GRANTS.md#standing-github-writes), one per repository with Remove; what each Agent last
- * reported it is doing; and "Add an Agent for a script" (agent/agent/GRANTS.md#agents-for-scripts), which sends only the
+ * (agent/agents/GRANTS.md#agent-reports), and "Can save to your Journal" and "Can read Agents' Journal artifacts"
+ * (agent/agents/GRANTS.md#agent-artifacts), and "Can draft <Service> changes" for PostHog and Notion while connected
+ * (agent/agents/GRANTS.md#posthog-and-notion-drafts), the same way; once a GitHub App is connected, "Can update Issues in <repo>
+ * without asking" (agent/agents/GRANTS.md#standing-github-writes), one per repository with Remove; what each Agent last
+ * reported it is doing; and "Add an Agent for a script" (agent/agents/GRANTS.md#agents-for-scripts), which sends only the
  * name the person typed; "Give new work to", the Agent that work posted for no Agent in particular goes to, and each
  * Agent's wake command, the program the host runs on this computer when work is given to it, sent as a list of words
- * (agent/agent/GRANTS.md#orders-and-waking-an-agent). Plain words: the page names
+ * (agent/agents/GRANTS.md#orders-and-waking-an-agent). Plain words: the page names
  * places in the World and what was allowed, never tokens, endpoints or MCP. */
 import {agentButton as button,agentEl as el} from './agent-change.ts';
 /** The Agent Fox works through (companion-settings.ts): first in the list, with Open for its own page. `harness` names
@@ -33,9 +33,9 @@ const ASK_TOGGLES=[['ask','Can ask you','can now ask you things in Attention','c
 /** "Can see your board" and "Can set up your board" (core boardGrant, context/board/README.md), the same way. */
 const BOARD_TOGGLES=[['read','Can see your board','can now see your board','can no longer see your board'],['define','Can set up your board','can now set up your board','can no longer set up your board']] as const;
 /** "Can save to your Journal" and "Can read Agents' Journal artifacts" (core artifactGrant,
- * agent/agent/GRANTS.md#agent-artifacts), the same way. */
+ * agent/agents/GRANTS.md#agent-artifacts), the same way. */
 const ARTIFACT_TOGGLES=[['save','Can save to your Journal','can now save to your Journal','can no longer save to your Journal'],['read','Can read Agents\' Journal artifacts','can now read what Agents saved to your Journal','can no longer read what other Agents saved to your Journal']] as const;
-/** "Can draft GitHub changes" (core githubDraftGrant, agent/agent/GRANTS.md#github-drafts): shown once GitHub is
+/** "Can draft GitHub changes" (core githubDraftGrant, agent/agents/GRANTS.md#github-drafts): shown once GitHub is
  * connected (the sign-in, or the person's own GitHub App) to write what the person approves. */
 const DRAFT_TOGGLES=[['draft','Can draft GitHub changes','can now draft GitHub changes for you to approve','can no longer draft GitHub changes']] as const;
 /** "Can report its work" and "Can see other Agents" (core reportGrant), the same way. */

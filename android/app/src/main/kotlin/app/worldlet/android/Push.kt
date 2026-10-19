@@ -120,7 +120,7 @@ object Push {
     }
 }
 
-/** A notification's button (agent/phone/README.md, Push › Actions): sends the same sealed message as the app's own button
+/** A notification's button (agent/windows/README.md, Push › Actions): sends the same sealed message as the app's own button
  * (PhonePush.message) to the computer through the relay, without bringing the app up. The notification goes once the
  * message is out; when it could not go, it comes back with its buttons and says so. A push from an earlier pairing does
  * nothing. */

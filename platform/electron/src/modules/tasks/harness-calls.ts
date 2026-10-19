@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import type {HarnessCall,HarnessCalls} from '../../../../../contracts/harness-services.ts';
-import {harnessChatThread,harnessNoCallsNote} from '../../../../../agent/agent/index.ts';
+import {harnessChatThread,harnessNoCallsNote} from '../../../../../agent/agents/index.ts';
 import {HARNESS_CALLS,callAttentionId,callBrief,callLine,callLive,callMatters,callObservation,callOpening,callReportDue,callsForAttention,callThread,externalEventPush,type CallBrief} from '../../../../../agent/tasks/index.ts';
 import {WorldletError} from '../../files.ts';
 import {AGENT,FOX,PHONE,WORLD_TOOLS,type AgentService,type FoxService,type PhoneService,type WorldToolsService} from '../../host/services.ts';
@@ -11,7 +11,7 @@ import type {Host} from '../../host/types.ts';
  * Knowing item cites a call someone made to the Agent, the paired phone hears of it; a call one of Fox's resident
  * sessions placed is reported back to that thread in one line, once (world.sqlite `harness-calls-reported:<id>`).
  * A Harness with no `calls` service simply has none.
- * Calling from an Applet (agent/agent/PORTABILITY.md#calling-from-an-applet): the Applet's Call fills in a brief
+ * Calling from an Applet (agent/agents/PORTABILITY.md#calling-from-an-applet): the Applet's Call fills in a brief
  * (`harnessCall` `prepare`), Fox's card shows it to edit (ui/companion/fox-call.ts), and only the person's Call places
  * it through the Harness's `calls.place`; every call in progress, placed here or not, then streams to the page as it
  * changes (`worldlet:harness-call`: its status and transcript), until it ends with how it went. */
@@ -77,7 +77,7 @@ export function installHarnessCalls(host:Host){
   try{stop=source.subscribe(received);}catch(error){host.diagnostics.record(error,'harnessCalls');}
  }
  // A Worth Knowing item that cites a pending call goes to the phone once (the same rule as outside events); Worth
- // Doing ones, such as a missed call, reach it through agent/phone phoneAttentionPushes already.
+ // Doing ones, such as a missed call, reach it through agent/windows phoneAttentionPushes already.
  store.onChange(()=>{
   if(!pending.size||!own())return;
   const now=Date.now();

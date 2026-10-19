@@ -1,7 +1,7 @@
 import {AGENT,type AgentService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {WorldletError} from '../../files.ts';
-import {approvalGrantFor,approvalThreadLabel,harnessApprovalFeatures,harnessService,isStandingRuleId,readApprovalGrants,rememberApprovalGrant} from '../../../../../agent/agent/index.ts';
+import {approvalGrantFor,approvalThreadLabel,harnessApprovalFeatures,harnessService,isStandingRuleId,readApprovalGrants,rememberApprovalGrant} from '../../../../../agent/agents/index.ts';
 import type {HarnessApprovalChoice,HarnessApprovalRequest} from '../../../../../contracts/harness-services.ts';
 
 // Standing approvals (owner goal 2026-10-08: approvals better than OpenClaw / Hermes Agent; shown in Settings › Agents since 2026-10-11): one list of the standing
@@ -9,7 +9,7 @@ import type {HarnessApprovalChoice,HarnessApprovalRequest} from '../../../../../
 // granted, each revoked in one click the Harness's own way (agent-runtime/harness-approvals.ts). The Harness keeps what
 // is allowed; the World keeps who said Always and where (world.sqlite setting `approval-grants`, core
 // rememberApprovalGrant), from the requests its approval cards showed. Nothing here knows which Harness it is: what each
-// keeps and how it forgets is its declared `approvalFeatures` (agent/agent/harness-services.ts).
+// keeps and how it forgets is its declared `approvalFeatures` (agent/agents/harness-services.ts).
 
 const KEY='approval-grants';
 const ASKS=50;

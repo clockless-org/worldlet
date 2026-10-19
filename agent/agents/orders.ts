@@ -2,7 +2,7 @@ import {AGENT_ASK_TARGET,AGENT_WAKE_LIMITS,WAKE_ASK_ID,type AgentAsk,type AgentO
 import {AGENT_ID_PATTERN,type AgentAuditEntry} from '../../contracts/agent-identity.ts';
 import {looksSecret} from './agent-profile.ts';
 
-/** Orders and waking an Agent (agent/agent/GRANTS.md#orders-and-waking-an-agent). Pure: the World's order target ("Give
+/** Orders and waking an Agent (agent/agents/GRANTS.md#orders-and-waking-an-agent). Pure: the World's order target ("Give
  * new work to") and each Agent's wake command as the person typed them in Settings, checked; which Agent a new piece
  * of work wakes, and when. Hosts keep the setting and run the program. */
 

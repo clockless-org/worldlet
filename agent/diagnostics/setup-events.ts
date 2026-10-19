@@ -1,6 +1,6 @@
 // Setup's product events for people who bring their own Agent (agent/diagnostics/ANALYTICS.md#bringing-an-agent):
 // which supported Agent, coarse counts and outcomes only. Never a name, title, path or text.
-import {LOCAL_HARNESSES} from '../agent/index.ts';
+import {LOCAL_HARNESSES} from '../agents/index.ts';
 
 /** Coarse counts, the only form an amount from setup leaves the device in. */
 export const COUNT_BUCKETS=['0','1_9','10_99','100_999','1000_plus'] as const;
@@ -27,12 +27,12 @@ export function agentBringDimensions(agent:string,brought:{conversations?:number
   integrations_reconnect:countBucket(outcomes.filter(o=>o==='reconnect').length)
  };
 }
-/** `agent_profile_result`: whether the chosen Agent described itself (agent/agent/agent-profile.ts) and how many
+/** `agent_profile_result`: whether the chosen Agent described itself (agent/agents/agent-profile.ts) and how many
  * connections it reported. */
 export function agentProfileDimensions(agent:string,result:string,connections:number):Record<string,string> {
  return {local_agent:agent,profile_result:result,bring_connections:countBucket(connections)};
 }
-/** Setup without an Agent (agent/agent/hermes-setup.ts): Worldlet installs Hermes Agent, then ChatGPT is signed in inside
+/** Setup without an Agent (agent/agents/hermes-setup.ts): Worldlet installs Hermes Agent, then ChatGPT is signed in inside
  * it. `hermes_setup` is which half (`terminal`: the person ran the official installer in a window Worldlet opened after
  * the quiet one failed); a failure says, as fixed words, where it stopped (`hermes_failure`), the installer's step it was
  * on (`install_step`, `0` before the first one), that step by name (`hermes_stage`) and why (`hermes_reason`), never the

@@ -3,7 +3,7 @@ import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
 import type {WorldItem} from '../../contracts/world.ts';
 import {looksSecret} from './agent-profile.ts';
 
-/** Agent asks (contracts/agent-asks.ts, agent/agent/GRANTS.md#agent-asks). Pure: hosts supply the stored asks, the
+/** Agent asks (contracts/agent-asks.ts, agent/agents/GRANTS.md#agent-asks). Pure: hosts supply the stored asks, the
  * calling Agent's ID (from its token), new IDs and the clock, and save what comes back. Every refusal throws an Error
  * whose message the Agent or the page is shown. */
 
