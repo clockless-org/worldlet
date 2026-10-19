@@ -15,18 +15,18 @@ Platform host thin; the Harness and model service are replaceable through explic
 an extra execution hop. Resources contain assets and declarations, not product logic.
 See the [diagram](architecture.html).
 
-The product in four layers with their components: UI (`ui/`), Agent and Context (the two halves of `core/`: who does the work through the Gate, and everything the World knows) and Platform (`platform/`): [four-layers.svg](four-layers.svg) ([中文](four-layers.zh.svg)).
+The product in four layers with their components: UI (`ui/`), Agent (`agent/`: who does the work through the Gate), Context (`context/`: everything the World knows) and Platform (`platform/`): [four-layers.svg](four-layers.svg) ([中文](four-layers.zh.svg)).
 
 <a id="see-do-know"></a>
 ## Four layers: UI, Agent, Context, Platform
 
-Inside the app there are four layers ([#677](https://github.com/clockless-org/worldlet/issues/677)), in plain words See, Do, Know and Host. UI is `ui/`, Agent and Context are the two halves of today's `core/` (moving to `agent/` and `context/`, [#681](https://github.com/clockless-org/worldlet/issues/681)), and Platform is `platform/`.
+Inside the app there are four layers ([#677](https://github.com/clockless-org/worldlet/issues/677)), in plain words See, Do, Know and Host. UI is `ui/`, Agent is `agent/` and Context is `context/` (both were `core/` until [#681](https://github.com/clockless-org/worldlet/issues/681)), and Platform is `platform/`.
 
 | # | Layer | What it is | Code |
 | --- | --- | --- | --- |
 | 1 | **UI** (See) | What a person sees and touches. Windows (the desktop window, the World in a browser at its own address, the phone: all show the same World), World, Applets, Fox's face and conversation panel, Attention, Journal, Settings (Connectors, Agents, Context, General), Onboarding | `ui/` |
-| 2 | **Agent** (Do) | Who does the work. Fox (talks through the person's own Agent), Tasks (routines, checks, drafts, Applet jobs), Asks (handing work to someone and waking them; Agents' questions to the person), Agents (one list of local Agents, cloud Agents and scripts, each with its own identity, revocable). Its edge is the **Gate**, the only door: World tools, per-Agent Grants, approval and an audit of every call | `core/` today, moving to `agent/` |
-| 3 | **Context** (Know) | Everything the World knows. Context store (one store, four kinds: Synced, Recorded, Made, Known; [#676](https://github.com/clockless-org/worldlet/issues/676)), Storage, Search, and **Connectors**, its intake: sign-in to Services, sync into Synced, and writes the person approved | `core/` today, moving to `context/` |
+| 2 | **Agent** (Do) | Who does the work. Fox (talks through the person's own Agent), Tasks (routines, checks, drafts, Applet jobs), Asks (handing work to someone and waking them; Agents' questions to the person), Agents (one list of local Agents, cloud Agents and scripts, each with its own identity, revocable). Its edge is the **Gate**, the only door: World tools, per-Agent Grants, approval and an audit of every call | `agent/` |
+| 3 | **Context** (Know) | Everything the World knows. Context store (one store, four kinds: Synced, Recorded, Made, Known; [#676](https://github.com/clockless-org/worldlet/issues/676)), Storage, Search, and **Connectors**, its intake: sign-in to Services, sync into Synced, and writes the person approved | `context/` |
 | 4 | **Platform** (Host) | The machine: Electron (computers with a screen) or Node (no screen). OS permissions, SQLite and files, the keychain, processes, network, pairing and relay connections. It runs things and makes no product decisions | `platform/` |
 
 Someone asks in UI (or an Agent asks directly) → Agent runs it through the Gate, reading
