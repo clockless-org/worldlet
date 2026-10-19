@@ -35,6 +35,10 @@ and writing Context → the result is a Made record (an Artifact) → shown in A
 Rules:
 
 - Calls go downward only.
+- Imports follow the layers: `context/` imports only itself and `contracts/`; `agent/` imports `context/` and `contracts/`;
+  `ui/` imports the public `index.ts` of both. Nothing but the Platform imports what is left of `core/` (its shared
+  dispatcher and old-path re-exports). `npm run check:arch` enforces this; the few exact exceptions are named in
+  [scripts/architecture-boundaries.ts](../scripts/architecture-boundaries.ts).
 - UI only reads Context; to change anything it hands the work to Agent.
 - Everyone in Agent passes the Gate, Fox included. Agents reach Context only through World tools and their Grants.
 - Only Connectors write Synced.
