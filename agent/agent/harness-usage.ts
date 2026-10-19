@@ -77,7 +77,7 @@ export function harnessUsageLabel(value:HarnessUsage|null,{detail=false}:{detail
  return parts.length?head+' ('+parts.join(' · ')+')':head;
 }
 
-/** A turn's timings for the World's Fox timing record (core/diagnostics/fox-timing.ts allowlist; logs/fox-timing.jsonl,
+/** A turn's timings for the World's Fox timing record (agent/diagnostics/fox-timing.ts allowlist; logs/fox-timing.jsonl,
  * and only buckets in `fox_timing`): `sessionMs` opening the thread's session (near 0 once warmed), `firstTextMs`
  * from send to the first word of the reply, `toolsMs` the summed time of the turn's World tool calls, and the reported tokens. */
 export function harnessTurnTimings({sessionMs,firstTextMs,toolsMs,usage:used}:{sessionMs?:number;firstTextMs?:number|null;toolsMs?:number;usage?:HarnessUsage|null}):Record<string,number> {

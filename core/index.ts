@@ -23,9 +23,9 @@ import {agentWorkPriority,nextAgentWork,admitBackgroundWork,userIdle,preemptAgen
 import {agentRequestDeadline,agentDeadlineRemaining} from '../agent/tasks/index.ts';
 import {conversationGuidance,onScreenText,placeContext,recentBrowsing} from '../agent/companion/index.ts';
 import {modelStatusFresh} from '../agent/companion/index.ts';
-import {diagnosticReport,diagnosticError,exceptionReport,nativeCrashReport} from './diagnostics/index.ts';
+import {diagnosticReport,diagnosticError,exceptionReport,nativeCrashReport} from '../agent/diagnostics/index.ts';
 import {interruptsBackground,readSourceChecksNow} from '../agent/tasks/index.ts';
-import {foxTiming} from './diagnostics/index.ts';
+import {foxTiming} from '../agent/diagnostics/index.ts';
 import {attentionFailure} from '../agent/attention/index.ts';
 import {attentionExecution,attentionFollowupReads,attentionReads} from '../agent/attention/index.ts';
 import {applyMemoryEdits} from '../agent/companion/index.ts';

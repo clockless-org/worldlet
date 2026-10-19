@@ -43,7 +43,7 @@ recorded visits so the person can keep talking meanwhile, owner Order 2026-10-10
   (`ui/companion/applet-task-results.ts`). Agents without a task lane (external and local
   Harnesses) refuse the hand-off and Fox does the work in the turn.
 - Usage analytics count each task's start and outcome (`applet_task_*`: the Applet's key, a duration
-  bucket and a failure's error code, never the task or its result; [events](../core/diagnostics/ANALYTICS.md)).
+  bucket and a failure's error code, never the task or its result; [events](../agent/diagnostics/ANALYTICS.md)).
 
 ## Models and configuration
 

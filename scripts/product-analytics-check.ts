@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {withProductAnalytics,withFoxTurnAnalytics} from '../ui/shell/product-analytics.ts';
-import {foxTiming,foxTimingEvent,replyBucket,timingBucket,updateWaitBucket} from '../core/diagnostics/index.ts';
+import {foxTiming,foxTimingEvent,replyBucket,timingBucket,updateWaitBucket} from '../agent/diagnostics/index.ts';
 let enabled=true,fail=false,telemetryFails=false;
 const events:any[]=[];
 const {call,track}=withProductAnalytics(async(action:string,body:any={})=>{
@@ -126,7 +126,7 @@ console.log('PASS confirmed outcomes are separate from tool success, receipt IDs
  console.log('PASS trigger user only after a trusted gesture and outside Fox\'s tools; user_engaged from the World page needs a fresh gesture');
 }
 
-const {exceptionReport}=await import('../core/diagnostics/index.ts');
+const {exceptionReport}=await import('../agent/diagnostics/index.ts');
 const thrown=new TypeError('Cannot read properties of undefined (reading secret@example.com)');
 thrown.stack=`TypeError: Cannot read properties of undefined (reading secret@example.com)
     at WorldStore.snapshot (/Users/alex/Applications/Worldlet.app/Contents/Resources/app.asar/out/main.js:812:19)
@@ -196,9 +196,9 @@ console.log('PASS exception projection: type, failure code and sanitized frames 
  console.log('PASS Fox and startup timings leave the device only as buckets of finished, allowlisted rows');
 }
 
-// Setup with a local Agent (core/diagnostics/setup-events.ts): product IDs, coarse counts and outcomes only.
+// Setup with a local Agent (agent/diagnostics/setup-events.ts): product IDs, coarse counts and outcomes only.
 {
- const {agentBringDimensions,agentsDetectedDimensions,countBucket}=await import('../core/diagnostics/index.ts');
+ const {agentBringDimensions,agentsDetectedDimensions,countBucket}=await import('../agent/diagnostics/index.ts');
  assert.deepEqual([0,-3,NaN,'9',1,9,10,99,100,999,1000,25000].map(countBucket),['0','0','0','0','1_9','1_9','10_99','10_99','100_999','100_999','1000_plus','1000_plus']);
  assert.deepEqual(agentsDetectedDimensions([],null),{agents_found:'0',recommended_agent:'none'});
  assert.deepEqual(agentsDetectedDimensions([{id:'openclaw'},{id:'codex'},{id:'claude-code'},{id:'pi'}],'codex'),{agents_found:'3_plus',recommended_agent:'codex'});
@@ -206,7 +206,7 @@ console.log('PASS exception projection: type, failure code and sanitized frames 
  const bring=agentBringDimensions('openclaw',{conversations:412,notes:31,skills:4,routines:0,model:true,memory:true,list:[{title:'#diet-and-health'}]} as any,[{outcome:'ported'},{outcome:'reconnect'},{outcome:'stays'},{outcome:'connected'}]);
  assert.deepEqual(bring,{local_agent:'openclaw',bring_conversations:'100_999',bring_notes:'10_99',bring_skills:'1_9',bring_routines:'0',bring_model:'yes',bring_memory:'yes',integrations_came_over:'1_9',integrations_reconnect:'1_9'});
  assert.ok(!JSON.stringify(bring).includes('diet'),'Conversation titles never leave the device');
- const {hermesSetupDimensions}=await import('../core/diagnostics/index.ts');
+ const {hermesSetupDimensions}=await import('../agent/diagnostics/index.ts');
  assert.deepEqual(hermesSetupDimensions('install',0),{hermes_setup:'install',install_step:'0'});
  assert.deepEqual(hermesSetupDimensions('install',0,new Error('Hermes Agent could not be installed. Check your internet connection and try again.')),{hermes_setup:'install',install_step:'0',hermes_failure:'download'});
  assert.equal(hermesSetupDimensions('install',0,new Error('Hermes Agent could not be installed. Check your internet connection and try again. (exit 1)')).hermes_failure,'manifest');
@@ -227,7 +227,7 @@ console.log('PASS exception projection: type, failure code and sanitized frames 
  assert.ok(!JSON.stringify(failedAt("Create Python environment: Cannot find path 'C:\\Users\\alex\\x'")).includes('alex'),'Installer output never leaves the device');
  assert.deepEqual(hermesSetupDimensions('terminal',0),{hermes_setup:'terminal',install_step:'0'});
  // Choosing an Agent that cannot be used says why as a fixed rule (Windows Beta 4384, 2026-10-13).
- const {diagnosticError}=await import('../core/diagnostics/index.ts');
+ const {diagnosticError}=await import('../agent/diagnostics/index.ts');
  for(const [message,rule] of [['Hermes Agent did not start. Open it once in Terminal, then try again.','notStarted'],['Hermes Agent 0.20.6 is too old for Worldlet, which needs 0.21.4 or newer. Choose Update Hermes Agent, then try again.','outdated'],['That Agent is no longer on this computer.','missing']])
   assert.deepEqual([diagnosticError({message}).code,diagnosticError({message}).rule],['operationFailed',rule],message);
  assert.ok(!JSON.stringify(stage).includes('Users'),'Installer output never leaves the device');

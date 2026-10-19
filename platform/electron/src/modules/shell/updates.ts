@@ -5,7 +5,7 @@ import {execFile,execFileSync,spawn} from 'node:child_process';
 import {app} from 'electron';
 import {ensureDirectory,readJSON,writeJSON,WorldletError} from '../../files.ts';
 import {AGENT,ANALYTICS,type AgentService,type AnalyticsService,type AppUpdatesService} from '../../host/services.ts';
-import {timingBucket,updateWaitBucket} from '../../../../../core/diagnostics/index.ts';
+import {timingBucket,updateWaitBucket} from '../../../../../agent/diagnostics/index.ts';
 import {demotedChannel,followedChannel,isUpdateChannel,pickUpdate,switchUpdateChannel,updateChannelOptions,updateChannelSwitchable,type UpdateChannel} from '../../../../../core/distribution/index.ts';
 import {outliveQuit,relaunchAfterQuit} from '../../host/quit.ts';
 import type {Host,Row} from '../../host/types.ts';
@@ -86,7 +86,7 @@ export abstract class Updates implements AppUpdatesService {
  start(){}
  check(){}
  quit(){}
- // Analytics (core/diagnostics/ANALYTICS.md): Builds and coarse buckets only, never a URL or an error text.
+ // Analytics (agent/diagnostics/ANALYTICS.md): Builds and coarse buckets only, never a URL or an error text.
  protected report(event:string,duration='',dimensions:Row={}){try{this.host.optional<AnalyticsService>(ANALYTICS)?.recordProductEvent(event,duration,dimensions);}catch{}}
  /** An update is downloaded, verified and waits for Update: `update_prepared` once per Build, timed from the start of
   * the check (Mac) or download (Windows) that found it. */

@@ -1,9 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {app} from 'electron';
-import {afterGpuCrash,graphicsMode,type GraphicsMode,type GraphicsState} from '../../../core/diagnostics/index.ts';
+import {afterGpuCrash,graphicsMode,type GraphicsMode,type GraphicsState} from '../../../agent/diagnostics/index.ts';
 
-// Software graphics after a crashing GPU process (core/diagnostics/graphics-mode.ts). The state lives in the library's
+// Software graphics after a crashing GPU process (agent/diagnostics/graphics-mode.ts). The state lives in the library's
 // logs/graphics.json, written at each GPU crash, so a run Chromium ends right after still counts at the next launch.
 let current:GraphicsMode='hardware';
 const file=(root:string)=>path.join(root,'logs','graphics.json');

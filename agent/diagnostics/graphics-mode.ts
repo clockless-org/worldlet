@@ -1,4 +1,4 @@
-/** Software graphics after a crashing GPU process (core/diagnostics/ANALYTICS.md#graphics-fallback). A computer whose
+/** Software graphics after a crashing GPU process (agent/diagnostics/ANALYTICS.md#graphics-fallback). A computer whose
  * graphics driver keeps ending Chromium's GPU process crashes the World page with it, and Chromium ends the whole app
  * once the GPU process is not usable: one Windows computer restarted into that every twenty seconds (Build 4384,
  * 2026-10-14). The second GPU process crash within five minutes, in one run or across restarts, switches this

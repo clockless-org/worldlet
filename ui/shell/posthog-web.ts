@@ -1,6 +1,6 @@
 // PostHog's standard web client for the World page, a bundle of its own (posthog-web.js) that the page loads only when
 // the host allows it (startWebAnalytics in product-analytics.ts). Owner decision 2026-10-10: follow PostHog's best
-// practice for product analytics, session replay included. What it sends (core/diagnostics/ANALYTICS.md, "World page
+// practice for product analytics, session replay included. What it sends (agent/diagnostics/ANALYTICS.md, "World page
 // web capture"):
 // - autocapture (clicks, changes, submits) with every element's text and attributes masked, one $pageview and
 //   $pageleave so sessions have a length, heatmaps and dead clicks;

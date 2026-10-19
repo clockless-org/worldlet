@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
-import {redactDiagnosticText,diagnosticLineCapture} from '../core/diagnostics/index.ts';
+import {redactDiagnosticText,diagnosticLineCapture} from '../agent/diagnostics/index.ts';
 import {sendOAuthCallbackPage} from '../platform/electron/src/modules/sources/oauth-callback.ts';
 import {createDiagnostics} from '../platform/electron/src/host/diagnostics.ts';
 import {assertOAuthCallback} from './oauth-callback-fixture.ts';

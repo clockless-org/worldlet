@@ -10,7 +10,7 @@ import {AGENT,type AgentService,type AnalyticsService} from '../../host/services
 import type {Host,Row} from '../../host/types.ts';
 import {buildInfo,distribution,releaseBuild} from './release.ts';
 import {currentGraphics} from '../../graphics.ts';
-import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,ERROR_RULES,HERMES_FAILURES,HERMES_REASONS,HERMES_SETUP,HERMES_STAGES,INSTALL_STEPS,EXIT_CODE_NAMES,LOCAL_AGENT_IDS,MAIN_STALL_LIMIT,REPLY_BUCKETS,ROW_BUCKETS,SIZE_BUCKETS,UPDATE_WAIT_BUCKETS,localDataDimensions,deviceClass,stallTask,timingBucket,type DeviceClass,type LocalDataFacts} from '../../../../../core/diagnostics/index.ts';
+import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,ERROR_RULES,HERMES_FAILURES,HERMES_REASONS,HERMES_SETUP,HERMES_STAGES,INSTALL_STEPS,EXIT_CODE_NAMES,LOCAL_AGENT_IDS,MAIN_STALL_LIMIT,REPLY_BUCKETS,ROW_BUCKETS,SIZE_BUCKETS,UPDATE_WAIT_BUCKETS,localDataDimensions,deviceClass,stallTask,timingBucket,type DeviceClass,type LocalDataFacts} from '../../../../../agent/diagnostics/index.ts';
 import {WORLD_APPS} from '../../../../../context/applets/index.ts';
 import {PROACTIVE_MOMENTS} from '../../../../../agent/companion/index.ts';
 
@@ -43,7 +43,7 @@ const EVENTS=new Set(['external_outcome_confirmed','content_opened','world_tool_
  // owner 2026-10-11 20:21 PDT: Production metrics.
  'attention_item_opened','task_completed','world_active_time']);
 /** Coarse timing only: turn and tool buckets, the longer ones of Applet tasks (`taskDuration` in modules/fox) and
- * Fox and startup timings (`timingBucket` in core/diagnostics). */
+ * Fox and startup timings (`timingBucket` in agent/diagnostics). */
 const DURATIONS=['under_1s','1_5s','5_15s','over_15s','15_60s','1_5m','5_15m','over_15m'];
 const ALLOWED:Record<string,string[]>={
  applet:['google','gmail','google-drive','google-calendar','apple-notes','apple-reminders','notion','obsidian','browser','youtube','x','github','codex','claude-code','weather','meetings','voice-memos','messages','stripe','paypal','airbnb','doordash','oura','strava','folder',
@@ -57,16 +57,16 @@ const ALLOWED:Record<string,string[]>={
  trigger:['user','background'],
  // user_engaged: what the person did first that day.
  engagement_kind:['input','fox_message','applet_open'],
- // Core's classified failure (core/diagnostics/report.ts); never the error text.
+ // Core's classified failure (agent/diagnostics/report.ts); never the error text.
  error_code:ERROR_CODES,
- // Its fixed rule when Core has one (core/diagnostics/report.ts ERROR_RULES); never the error text.
+ // Its fixed rule when Core has one (agent/diagnostics/report.ts ERROR_RULES); never the error text.
  error_rule:ERROR_RULES,
  // Electron render-process-gone / child-process-gone; a clean exit is not reported.
  process_type:['renderer','gpu','utility','other','web_engine','web_page'],
  exit_reason:['abnormal-exit','killed','crashed','oom','launch-failed','integrity-failure','memory-eviction'],
- // Its exit code as a fixed name: a known Windows status, a small code, else other (core/diagnostics/graphics-mode.ts).
+ // Its exit code as a fixed name: a known Windows status, a small code, else other (agent/diagnostics/graphics-mode.ts).
  exit_code:EXIT_CODE_NAMES,
- // fox_timing / app_startup_timing: parts of a turn or a start, bucketed (core/diagnostics/fox-timing.ts foxTimingEvent).
+ // fox_timing / app_startup_timing: parts of a turn or a start, bucketed (agent/diagnostics/fox-timing.ts foxTimingEvent).
  timing_outcome:['complete','error','cancelled'],
  first_text_bucket:DURATIONS,model_bucket:DURATIONS,tools_bucket:DURATIONS,first_frame_bucket:DURATIONS,
  // app_startup_timing: this start went through setup first, so its time includes the person's setup minutes.
@@ -75,7 +75,7 @@ const ALLOWED:Record<string,string[]>={
  reply_bucket:[...REPLY_BUCKETS],first_text_reply_bucket:[...REPLY_BUCKETS],
  // app_unclean_exit: whether Crashpad wrote a crash report during that run (the report itself stays on the device).
  native_crash:['yes','no'],
- // Setup with a local Agent (core/diagnostics/setup-events.ts): its public product ID, coarse counts and outcomes.
+ // Setup with a local Agent (agent/diagnostics/setup-events.ts): its public product ID, coarse counts and outcomes.
  local_agent:LOCAL_AGENT_IDS,recommended_agent:[...LOCAL_AGENT_IDS,'none'],agents_found:[...AGENTS_FOUND],
  // No Agent here: Worldlet installs Hermes Agent and signs ChatGPT in inside it; where a failure stopped, never its text.
  hermes_setup:[...HERMES_SETUP],hermes_failure:[...HERMES_FAILURES],install_step:[...INSTALL_STEPS],hermes_stage:[...HERMES_STAGES],hermes_reason:[...HERMES_REASONS],hermes_broken:['yes'],
@@ -111,7 +111,7 @@ const ALLOWED:Record<string,string[]>={
  // `web` for a web browser (agent/phone/README.md#web).
  // attention_item_opened: where the person opened the item's card. task_completed: which kind of background work finished.
  phone_platform:['ios','android','web','unknown'],open_surface:['computer','phone'],task_kind:['routine','fox','applet'],
- // local_data_size (core/diagnostics/data-size.ts): how much this computer keeps, in bands; never a name or path.
+ // local_data_size (agent/diagnostics/data-size.ts): how much this computer keeps, in bands; never a name or path.
  world_db_size:[...SIZE_BUCKETS],recordings_size:[...SIZE_BUCKETS],hermes_db_size:[...SIZE_BUCKETS],openclaw_db_size:[...SIZE_BUCKETS],disk_free:[...SIZE_BUCKETS],history_rows:[...ROW_BUCKETS]
 };
 /** world_active_time: whole seconds, at most an hour per event. */
@@ -331,7 +331,7 @@ export class UsageAnalytics implements AnalyticsService {
   }
   this.record(event,uuid(),'1',false,timing,safe);
  }
- /** The kind of computer, on every event (core/diagnostics/device-class.ts): chip family, memory band, architecture and
+ /** The kind of computer, on every event (agent/diagnostics/device-class.ts): chip family, memory band, architecture and
   * whether the app runs translated. Never the CPU's model string or the exact memory. */
  private device():DeviceClass {
   if(!this.deviceInfo){
@@ -346,7 +346,7 @@ export class UsageAnalytics implements AnalyticsService {
   this.stalls+=1;
   this.recordProductEvent('main_stall',timingBucket(stall.ms),{stall_task:stall.task});
  }
- /** How much this computer keeps (core/diagnostics/data-size.ts), once per UTC day; `facts` is read only when due. */
+ /** How much this computer keeps (agent/diagnostics/data-size.ts), once per UTC day; `facts` is read only when due. */
  recordLocalData(facts:()=>LocalDataFacts|null){
   if(!this.config||!this.enabled())return;
   const day=isoSeconds(new Date(this.now())).slice(0,10);

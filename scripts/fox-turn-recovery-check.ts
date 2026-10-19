@@ -2,7 +2,7 @@
 // itself, and what Fox says when it still fails. No model, no browser.
 import assert from 'node:assert/strict';
 import {FOX_CHOOSE_AGENT_ACTION,FOX_RETRY_ACTION,FOX_RETRY_FAST_MS,foxTurnFailureText,foxTurnRetry} from '../agent/companion/index.ts';
-import {diagnosticError} from '../core/diagnostics/index.ts';
+import {diagnosticError} from '../agent/diagnostics/index.ts';
 import {replyAction} from '../ui/companion/reply-actions.ts';
 
 // The rule the UI passes, as analytics classifies it (ui/shell errorFields).

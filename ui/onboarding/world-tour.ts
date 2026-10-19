@@ -125,7 +125,7 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false,conn
   },
    actions:()=>{if(!phoneOffered())return [button('Continue',next)];const state=phoneState();return state==='paired'?[button('Continue',next)]:state==='waiting'?[button('Not now',skipPhone,true)]:[button('Not now',skipPhone,true),button('I have the app',()=>void pairPhone())];}},
  ];
- // `tour_skipped`'s step (core/diagnostics/ANALYTICS.md): the five steps here, 6–8 in first value.
+ // `tour_skipped`'s step (agent/diagnostics/ANALYTICS.md): the five steps here, 6–8 in first value.
  const TOUR_STEP:Record<string,number>={hello:1,attention:2,applets:3,dock:4,fox:5};
  function introduce(on:boolean){
   if((root.dataset.attentionIntroduced==='true')===on)return;

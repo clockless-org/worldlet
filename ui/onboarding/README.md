@@ -113,7 +113,7 @@ any Today's prep, so step 6 boxes it (“I made your first card from what you've
 “Does it look right?”: **Looks good** settles it as the first win, with no Google needed. It runs once per World, never in
 the practice world or an automated browser, not with Today's prep paused, and not with Mail connected (the mail brings
 the first thing to do, and a card made beside it competed with Fox's help on it); a failure adds no Worth Doing item (step 6
-would pick it), and Fox goes on as before. Its steps are [product events](../../core/diagnostics/ANALYTICS.md#the-first-card).
+would pick it), and Fox goes on as before. Its steps are [product events](../../agent/diagnostics/ANALYTICS.md#the-first-card).
 
 Steps 1–5 persist as `journeyStage=world-tour` and resume at the same step; a place opened another
 way lifts the spotlight until the person is back in the overview. The last choice on step 5 hands over to

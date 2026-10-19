@@ -114,7 +114,7 @@ version and component scope.
 | Source content in model requests | This computer → the person's own Codex sign-in, API-key provider or local Agent (Worldlet runs no model service since 2026-10-05) | Only after private-content processing is allowed. Nothing passes through a Worldlet server |
 | Fox's recorded activity (execution journal) | Local only (`execution/*.json`, owner-only files) | Credentials are redacted before writing, both as structured keys and as text such as `refresh_token=…` or Python dicts ([`journalPayload`](../context/items/execution-journal.ts)). Content Fox read stays until Reset; source deletion keeps it and says so |
 | Phone app payloads | Computer → worldlet.ai relay → paired phone | End-to-end encrypted (HKDF-SHA256, AES-256-GCM); the relay keeps ciphertext and hashed tokens, queued messages expire after seven days, unpairing deletes them ([phone pairing](../agent/phone/README.md)) |
-| Analytics | App → PostHog | Own Google email, display name and derived account ID after sign-in; never credentials, message bodies or conversations ([analytics](../core/diagnostics/ANALYTICS.md)) |
+| Analytics | App → PostHog | Own Google email, display name and derived account ID after sign-in; never credentials, message bodies or conversations ([analytics](../agent/diagnostics/ANALYTICS.md)) |
 
 Regression checks: `scripts/execution-journal-check.ts` (credential text in the
 journal), `scripts/google-token-files-check.py` (token and profile file modes,

@@ -72,7 +72,7 @@ startGraphics(profile.root);
 app.setPath('userData',path.join(profile.root,'Browser','Electron'));
 // Native crashes of the installed app leave a Crashpad report in the library's logs, never uploaded whole; the next
 // launch reports that one exists (`native_crash` on app_unclean_exit, modules/shell) and, on Windows, its crash address
-// (core/diagnostics/ANALYTICS.md#native-crashes); an Order can name it.
+// (agent/diagnostics/ANALYTICS.md#native-crashes); an Order can name it.
 if(app.isPackaged&&profile.channel==='release'){
  try{app.setPath('crashDumps',path.join(profile.root,'logs','crashes'));crashReporter.start({uploadToServer:false});}catch{}
 }

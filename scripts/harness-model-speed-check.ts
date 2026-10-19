@@ -4,7 +4,7 @@ import http from 'node:http';
 import path from 'node:path';
 import {acpModels,acpPromptUsage,acpUsageUpdate,addHarnessUsage,appletModelFor,chooseAppletModel,harnessService,harnessTurnTimings,harnessUsageLabel,isHarnessModelId,openClawModels,
  readAppletModels,readHarnessUsage,readResponsesChunk,responsesStream,responsesUsage,usageSince} from '../agent/agent/index.ts';
-import {foxTiming,foxTimingEvent} from '../core/diagnostics/index.ts';
+import {foxTiming,foxTimingEvent} from '../agent/diagnostics/index.ts';
 import {restoreThread,threadFinish,threadRow,threadStart,threadUsage} from '../ui/companion/fox-thread.ts';
 import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
 import {createHarnessModels} from '../platform/electron/src/modules/fox/harness-models.ts';
