@@ -13,6 +13,13 @@ for(const source of [
  '/// <reference path="../../core/tasks/index.ts" />',
 ])assert.throws(()=>checkSource('ui/hud/example.ts',source),undefined,source);
 assert.throws(()=>checkEdge('agent/agent/example.ts','platform/bridge/index.ts'),/Forbidden/);
+// Context imports only itself and contracts; Agent imports Context and contracts; neither reaches back into core/ (#681).
+assert.throws(()=>checkEdge('context/items/example.ts','agent/tasks/index.ts'),/Forbidden/);
+assert.throws(()=>checkEdge('context/items/example.ts','core/index.ts'),/Forbidden/);
+assert.throws(()=>checkEdge('agent/tasks/example.ts','core/index.ts'),/Forbidden/);
+assert.throws(()=>checkEdge('ui/hud/example.ts','core/tasks/index.ts'),/Forbidden/);
+checkEdge('agent/tasks/example.ts','context/items/index.ts');
+checkEdge('platform/electron/src/example.ts','core/index.ts');
 assert.throws(()=>checkEdge('ui/hud/example.ts','harness/example/agent.ts'),/Forbidden/);
 assert.throws(()=>checkSource('contracts/example.ts',"import fs from 'node:fs'"),/pure layer/);
 assert.throws(()=>checkSource('agent/agent/example.ts','process.env.TOKEN'),/host global/);
