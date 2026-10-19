@@ -9,7 +9,7 @@ import {hermesAcpAnnouncement,type HermesAnnouncedCall} from './hermes-server.ts
 import {piModelArguments} from './model-providers.ts';
 import {acpModels} from './harness-models.ts';
 import {record} from './values.ts';
-import {worldToolAliases,worldToolIndex} from '../../agent/tools/index.ts';
+import {worldToolAliases,worldToolIndex} from '../tools/index.ts';
 
 export type LocalHarnessId='claude-code'|'codex'|'hermes'|'openclaw'|'pi';
 export interface LocalHarnessDefinition {
@@ -92,7 +92,7 @@ const clip=(text:string,limit:number)=>text.length>limit?text.slice(0,limit):tex
 const clipEnd=(text:string,limit:number)=>text.length>limit?text.slice(text.length-limit):text;
 
 /** The Fox chat body as instructions plus one prompt. A turn of its own process keeps no session, so the recent
- * visible conversation and the current view ride along in the prompt; a `resident` session (core/agent/harness-sessions.ts)
+ * visible conversation and the current view ride along in the prompt; a `resident` session (agent/agent/harness-sessions.ts)
  * keeps the conversation itself, so only the current view and the new line go. `harnessTools`: what the Agent can do
  * beyond World tools (its `tools` service), named in one line so Fox offers it; `harnessCalls`: its calls come back
  * (its `calls` service), so a call Fox places is reported in the thread. */
@@ -216,7 +216,7 @@ export function localHarnessInvocation(id:LocalHarnessId,turn:{system:string;pro
 /** Running state of one turn's output reader. */
 /** `outbox`: lines to write back to the Harness (an `acp` turn); `done`: the turn has its answer, so the host stops
  * reading and ends the process; `asks`: permission prompts the host puts to the person (null: declined at once);
- * `changes`: their tool calls, so `results` says what an allowed one changed (core/agent/harness-approvals.ts). */
+ * `changes`: their tool calls, so `results` says what an allowed one changed (agent/agent/harness-approvals.ts). */
 /** `announced`: calls to Worldlet's standing server Hermes announced before running them (HermesOwnCalls). */
 export interface LocalHarnessStream {text:string;final:string|null;error:string|null;buffered:string;outbox:string[];done:boolean;acp:{prompt:string;model:string|null;session:string|null;tentative?:boolean}|null;asks:{rpc:unknown;params:unknown}[]|null;changes:ApprovalChanges|null;results:HarnessApprovalResult[];announced:HermesAnnouncedCall[];session:string|null}
 export const localHarnessStream=(acp?:{prompt:string;model?:string},{ask=false}:{ask?:boolean}={}):LocalHarnessStream=>({text:'',final:null,error:null,buffered:'',outbox:[],done:false,acp:acp?{prompt:acp.prompt,model:acp.model??null,session:null}:null,asks:ask?[]:null,changes:ask?approvalChanges():null,results:[],announced:[],session:null});

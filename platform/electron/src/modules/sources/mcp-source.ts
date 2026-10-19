@@ -51,7 +51,7 @@ export class McpSource {
   try{return await collectNotionPage(session,id);}finally{void session.close();}
  }
  /** The Notion connection Notion's reviewed writes use (the official address, NOTION_GATE), for a Notion draft the
-  * person approved (core/agent/service-drafts.ts); null when Notion is not connected there. The caller closes it. */
+  * person approved (agent/agent/service-drafts.ts); null when Notion is not connected there. The caller closes it. */
  notionSession():(McpSession&{close():Promise<void>})|null {
   const connection=this.accounts.connection('notion');
   return connection&&NOTION_GATE.urls.includes(connection.url)?this.accounts.session(connection,'Notion'):null;

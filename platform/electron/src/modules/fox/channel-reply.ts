@@ -1,11 +1,11 @@
 import crypto from 'node:crypto';
-import {CHANNEL_REPLY,channelReplyText,isMigrationSource} from '../../../../../core/agent/index.ts';
+import {CHANNEL_REPLY,channelReplyText,isMigrationSource} from '../../../../../agent/agent/index.ts';
 import {conversationAttentionId,ongoingName} from '../../../../../agent/tasks/index.ts';
 import {WorldletError} from '../../files.ts';
 import {AGENT,type AgentService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 
-// Replying in a channel (core/agent/PORTABILITY.md#replying-in-a-channel): Fox offers a reply in the Discord channel or
+// Replying in a channel (agent/agent/PORTABILITY.md#replying-in-a-channel): Fox offers a reply in the Discord channel or
 // Telegram chat a brought conversation came from (`reply_in_channel`), and the person's own Agent sends it through its
 // Harness's `send` service (contracts/harness-services.ts), only after the person pressed Send on the exact text shown.
 // The offer is a card in Fox (ui/companion/fox-channel-reply.ts): Send, Edit, Skip. A conversation whose Agent declares

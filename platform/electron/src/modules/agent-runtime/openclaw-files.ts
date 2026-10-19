@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import zlib from 'node:zlib';
 import {openAgentDatabase,type AgentDatabase} from './agent-database.ts';
-import {openClawConversationIncluded,openClawConversationTitle,openClawRoutine,openClawSharedSession,openClawTurn,type OpenClawTurn} from '../../../../../core/agent/index.ts';
+import {openClawConversationIncluded,openClawConversationTitle,openClawRoutine,openClawSharedSession,openClawTurn,type OpenClawTurn} from '../../../../../agent/agent/index.ts';
 import {realPath as real} from '../../files.ts';
 import {directories,inside,json,keep,newBudget,readFile,skillsIn,type Budget,type BroughtSkill} from './agent-files.ts';
 import {declaredName} from './hermes-files.ts';
@@ -26,7 +26,7 @@ export interface OpenClawData {
  problems:string[];truncated:boolean;
 }
 
-/** The workspaces the OpenClaw Agent itself said it keeps (core/agent/agent-profile.ts `workspaces`), for an agent whose
+/** The workspaces the OpenClaw Agent itself said it keeps (agent/agent/agent-profile.ts `workspaces`), for an agent whose
  * folder its configuration does not lead to (owner question 2026-10-12, Kelvin: "有的数据不在默认目录 怎么搞"). */
 let reportedWorkspaces:{agent?:string;path:string}[]=[];
 export function reportOpenClawWorkspaces(list:readonly {agent?:string;path:string}[]|null|undefined){reportedWorkspaces=(list??[]).filter(w=>w&&typeof w.path==='string').slice(0,20);}

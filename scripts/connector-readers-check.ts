@@ -1,4 +1,4 @@
-// Who may use a connected service (core/agent/GRANTS.md#settings--connectors): the sentences under its tile in plain
+// Who may use a connected service (agent/agent/GRANTS.md#settings--connectors): the sentences under its tile in plain
 // words (core connectorWhoMayUse), reading on by default for the Agent Fox uses when a Service becomes connected
 // (agent-runtime/service-readers.ts serviceReadDefaults) and nothing on a restart, a Grant the person took back staying
 // off until the Service is connected anew, nothing for a revoked Agent or before anything was seen, and the Agents the
@@ -6,7 +6,7 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import {connectorWhoMayUse,plainConnectorText} from '../context/accounts/index.ts';
-import {serviceGranted} from '../core/agent/index.ts';
+import {serviceGranted} from '../agent/agent/index.ts';
 import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/agent-access.ts';
 import {serviceReadDefaults,serviceReaders} from '../platform/electron/src/modules/agent-runtime/service-readers.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';

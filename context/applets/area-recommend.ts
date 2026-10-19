@@ -4,7 +4,7 @@
  * its own catalog category, and also, more weakly, to the categories of the Applets the person moved into it. Within
  * those, an Applet installed on this computer comes first, then one whose website the person visits in Worldlet's
  * browser, then catalog order. Ahead of all of them come the Applets the person's own Agent suggested when it described
- * itself (core/agent/agent-profile.ts, owner request 2026-10-11), in their own Area. */
+ * itself (agent/agent/agent-profile.ts, owner request 2026-10-11), in their own Area. */
 export type AreaCandidate={id:string;key:string;category:string;host?:string|null};
 export type AreaRecommendInput={
  area:string;

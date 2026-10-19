@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {openAgentDatabase,type AgentDatabase} from './agent-database.ts';
-import {afterScheduleCursor,hermesScheduleJob,hermesScheduleRun,openClawScheduleJob,openClawScheduleRun,scheduleCursor,scheduleRunsAfter,type LocalHarnessId} from '../../../../../core/agent/index.ts';
+import {afterScheduleCursor,hermesScheduleJob,hermesScheduleRun,openClawScheduleJob,openClawScheduleRun,scheduleCursor,scheduleRunsAfter,type LocalHarnessId} from '../../../../../agent/agent/index.ts';
 import type {HarnessJobRun,HarnessSchedule} from '../../../../../contracts/harness-services.ts';
 import {directories,hermesJobs,inside,json,readFile} from './agent-files.ts';
 import {discoverHermes} from './hermes-files.ts';
@@ -119,5 +119,5 @@ export function hermesSchedule(home=os.homedir(),environment=process.env):Harnes
  };
 }
 
-/** The Harnesses whose own scheduler Worldlet reads (`schedule: 'files'` in core/agent/harness-services.ts). */
+/** The Harnesses whose own scheduler Worldlet reads (`schedule: 'files'` in agent/agent/harness-services.ts). */
 export const HARNESS_SCHEDULES:Partial<Record<LocalHarnessId,(home?:string,environment?:NodeJS.ProcessEnv)=>HarnessSchedule>>={openclaw:openClawSchedule,hermes:hermesSchedule};

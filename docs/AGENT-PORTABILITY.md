@@ -43,6 +43,6 @@ results, support cancellation and never auto-replay uncertain external writes.
 Local browser, speech and coding tools remain host capabilities rather than requiring
 a specific Harness's private implementation.
 
-[Portable records and adapter details](../core/agent/PORTABILITY.md) defines transfer,
+[Portable records and adapter details](../agent/agent/PORTABILITY.md) defines transfer,
 archive and attachment semantics. [Wire contract](../contracts/HARNESS.md) defines the
 stable interface; [architecture](UI-CORE-PLATFORM.md) defines ownership and imports.

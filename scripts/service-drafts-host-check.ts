@@ -10,13 +10,13 @@ import {createAgentAsks} from '../platform/electron/src/modules/agent-runtime/ag
 import {ServiceSource} from '../platform/electron/src/modules/sources/service-source.ts';
 import {McpAccounts} from '../platform/electron/src/modules/sources/mcp-account.ts';
 import {McpSource} from '../platform/electron/src/modules/sources/mcp-source.ts';
-import {askItemId} from '../core/agent/asks.ts';
+import {askItemId} from '../agent/agent/asks.ts';
 import {roomDenied} from '../contracts/web-world.ts';
-import {STANDING_OUTSIDE_TURN} from '../core/agent/grants.ts';
-import {SERVICE_DRAFT_MESSAGES,SERVICE_DRAFT_REASONS,SERVICE_DRAFT_STALE,serviceDraftItemId} from '../core/agent/service-drafts.ts';
+import {STANDING_OUTSIDE_TURN} from '../agent/agent/grants.ts';
+import {SERVICE_DRAFT_MESSAGES,SERVICE_DRAFT_REASONS,SERVICE_DRAFT_STALE,serviceDraftItemId} from '../agent/agent/service-drafts.ts';
 import type {PosthogSettings} from '../context/accounts/index.ts';
 
-// PostHog and Notion drafts on the host (core/agent/GRANTS.md#posthog-and-notion-drafts), the same modules the Electron
+// PostHog and Notion drafts on the host (agent/agent/GRANTS.md#posthog-and-notion-drafts), the same modules the Electron
 // and Node hosts run, on a real world.sqlite through the standing server, against a stubbed PostHog API (the World's
 // PostHog key, sources/service-source.ts) and a stubbed Notion MCP server (the Notion connection, sources/mcp-source.ts):
 // an Agent drafts only under its own "Can draft PostHog changes" or "Can draft Notion changes" Grant; the draft keeps the

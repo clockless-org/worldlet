@@ -115,7 +115,7 @@ sign-in page, each on a fresh library: mock Google, Codex, and each local Agent 
 answering in the World ([details](../../scripts/DEVELOPMENT.md)).
 `npm run test:agent:local` (Mac and Windows gates) runs `--check local-agent-flow`: the practice
 world with this computer's Codex CLI as Fox's local Agent, three real conversations judged by the
-World tool calls they made and their effects ([local Harnesses](../../core/agent/PORTABILITY.md#world-tools-through-mcp));
+World tool calls they made and their effects ([local Harnesses](../../agent/agent/PORTABILITY.md#world-tools-through-mcp));
 without a Codex sign-in it reports SKIP. Its log is `.local/electron-checks/local-agent-flow.log`.
 
 ### RC UI review

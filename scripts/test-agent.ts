@@ -5,7 +5,7 @@ import {spawnSync} from 'node:child_process';
 import {existsSync} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {CLAUDE_CODE_STATUS,claudeCodeLoggedIn} from '../core/agent/index.ts';
+import {CLAUDE_CODE_STATUS,claudeCodeLoggedIn} from '../agent/agent/index.ts';
 
 export interface TestAgent {
  id:'codex'|'claude-code';

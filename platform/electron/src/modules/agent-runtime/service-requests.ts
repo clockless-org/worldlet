@@ -1,9 +1,9 @@
-import {answerServiceRequest,readServiceRequest,serviceRequestDue,serviceRequestItem,serviceRequestRefusal,type ServiceRequest} from '../../../../../core/agent/index.ts';
+import {answerServiceRequest,readServiceRequest,serviceRequestDue,serviceRequestItem,serviceRequestRefusal,type ServiceRequest} from '../../../../../agent/agent/index.ts';
 import {connector} from '../../../../../context/accounts/index.ts';
 import type {AgentAccess} from '../../host/services.ts';
 import type {Row} from './types.ts';
 
-// When an Agent first needs a Service (core/agent/GRANTS.md#when-an-agent-first-needs-a-service). Core decides; this
+// When an Agent first needs a Service (agent/agent/GRANTS.md#when-an-agent-first-needs-a-service). Core decides; this
 // keeps each request in the World's ledger (`state.service-requests`) beside its Attention card (provider `agents`),
 // written together with no model, and answers the card: Allow gives the read Grant, Not now leaves it.
 

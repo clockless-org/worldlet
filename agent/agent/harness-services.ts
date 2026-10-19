@@ -5,24 +5,24 @@ import {validateHarnessServices,type HarnessApprovalFeatures,type HarnessService
 const row=(harness:string,services:HarnessServices['services'],approvalFeatures?:HarnessApprovalFeatures)=>validateHarnessServices({version:2,harness,services,...approvalFeatures?{approvalFeatures}:{}});
 export const HARNESS_SERVICES:Readonly<Record<string,HarnessServices>>=Object.freeze({
  // History in mode `files` for every Harness below: its own folder read again by agent-runtime/agent-history.ts and
- // appended by fox/history-sync.ts (core/agent/PORTABILITY.md#history-read-continuously).
+ // appended by fox/history-sync.ts (agent/agent/PORTABILITY.md#history-read-continuously).
  // One resident `hermes acp` process, an ACP session per Fox thread on the person's own Hermes home, its permission
  // prompts answered in the World (agent-runtime/harness-sessions.ts; also on a turn that falls back to a process of its
  // own, local-harness.ts TurnApprovals); history from state.db; webhook runs from state.db
- // (`source` webhook); tools from config.yaml's ACP toolsets (core/agent/harness-events.ts, harness-tools.ts); its cron jobs run on its own
+ // (`source` webhook); tools from config.yaml's ACP toolsets (agent/agent/harness-events.ts, harness-tools.ts); its cron jobs run on its own
  // ticker (`hermes gateway`), each run read from cron/output (Worldlet's own routines in the attached profile share
- // Hermes' claim, so they never run twice; core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent).
+ // Hermes' claim, so they never run twice; agent/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent).
  // Its profiles (`agents`, files: ~/.hermes and profiles/<name>/, each with its SOUL.md and config.yaml); a chosen one
  // answers an Applet's thread through `hermes -p <name>` (agent-runtime/harness-agents.ts).
  // A reply the person approved goes into the Telegram or Discord chat a conversation came from through `hermes send
  // --to <platform>:<chat>[:<thread>]`, with its gateway's own credentials (`send`, agent-runtime/harness-send.ts).
  // No `voice`: its speech is an Agent tool (`text_to_speech`) and the dashboard's `/api/audio/speak`, with no command
- // that speaks one line, so Fox's replies are read by a system voice (core/agent/harness-voice.ts).
+ // that speaks one line, so Fox's replies are read by a system voice (agent/agent/harness-voice.ts).
  // Its standing rules: each profile's `command_allowlist` in config.yaml (where an Always is saved), revoked with its own
  // `hermes config set`; a running Hermes reads the list only when it starts, so Worldlet restarts its own ACP process.
- // What an approved command or edit changed: the ACP tool call's diff content (core/agent/harness-approvals.ts).
+ // What an approved command or edit changed: the ACP tool call's diff content (agent/agent/harness-approvals.ts).
  // Its models (`models`): the ones its `session/new` lists, an Applet's thread switched with ACP `session/set_model`
- // (core/agent/harness-models.ts); each turn's tokens from the `session/prompt` result's usage, never a cost (it sends none).
+ // (agent/agent/harness-models.ts); each turn's tokens from the `session/prompt` result's usage, never a cost (it sends none).
  // Its connections (`connections`, files): each profile's `mcp_servers` in config.yaml and the chat tokens its .env names
  // (names only), each server's last use from the `mcp__<server>__` tool rows in state.db; a server added or removed with
  // its own `hermes mcp add` / `hermes mcp remove` in that profile's HERMES_HOME (agent-runtime/harness-connections.ts).
@@ -31,21 +31,21 @@ export const HARNESS_SERVICES:Readonly<Record<string,HarnessServices>>=Object.fr
  // `skill_manage` creates one, since its command line installs only from a hub or a URL (agent-runtime/harness-skills.ts).
  // Settings › Agents turns a skill off or on with its own `hermes config set skills.disabled`, removes a hub skill
  // with `hermes skills uninstall`, and pauses, resumes, runs or removes a job with `hermes cron pause|resume|run|remove`
- // (core/agent/harness-controls.ts).
+ // (agent/agent/harness-controls.ts).
  hermes:row('hermes',{conversation:'native',history:'files',schedule:'files',approvals:'native',events:'files',tools:'files',agents:'files',models:'native',send:'native',connections:'files',skills:'files',memory:'files'},
   {rules:'files',revoke:'restart',revokeNote:'Hermes Agent reads these when it starts, so Worldlet restarts its own conversation with it. If Hermes Agent also runs for your chat apps, restart that too.',changes:'diffs'}),
  // A session per Fox thread on its running Gateway (`/v1/responses`, World tools as client function tools), else
  // `openclaw agent exec` per turn in the person's workspace; history from openclaw-agent.sqlite; its automations run in
  // its Gateway, each run read from task_runs in state/openclaw.sqlite; hook, Gmail and IMAP runs from its `hook:` sessions;
  // tools from openclaw.json's tool policy and plugins; phone calls from the voice-call plugin's own store (`calls`,
- // core/agent/harness-calls.ts). Its agents (`agents`, files: openclaw.json and each agent's workspace instructions); a
+ // agent/agent/harness-calls.ts). Its agents (`agents`, files: openclaw.json and each agent's workspace instructions); a
  // chosen one answers an Applet's thread on the Gateway as `openclaw/<id>`. Its exec approvals for the session a Fox
  // turn runs on come from the Gateway's WebSocket while the turn runs and are answered there (`exec.approval.resolve`,
  // agent-runtime/harness-sessions.ts GatewayApprovals). A reply the person approved goes to the channel a session was
  // delivered to (its `deliveryContext`) through `openclaw message send` (`send`, agent-runtime/harness-send.ts). Hermes
  // Agent above keeps no call record (its optional telephony skill logs none), so it declares no `calls`.
  // Fox's spoken replies in its own text-to-speech provider and voice: `openclaw infer tts convert` (`voice`,
- // core/agent/harness-voice.ts, agent-runtime/harness-voice.ts).
+ // agent/agent/harness-voice.ts, agent-runtime/harness-voice.ts).
  // Its standing rules through its own CLI: `openclaw approvals get --json` (allow-always allowlist entries and MCP tool
  // grants per agent) and `approvals grants list` (automation grants), revoked with `approvals set --stdin` and
  // `approvals grants revoke`, which take effect at the next command. An approved command's result arrives as the
@@ -65,7 +65,7 @@ export const HARNESS_SERVICES:Readonly<Record<string,HarnessServices>>=Object.fr
  // Claude Code and pi: their session files; Codex: its rollout files and session_index.jsonl.
  // What each remembers (`memory`, files, every Agent above and below): Hermes Agent's memories/USER.md and MEMORY.md,
  // OpenClaw's workspace USER.md and MEMORY.md, Claude Code's CLAUDE.md, Codex's and pi's AGENTS.md, shown read-only in
- // Settings › Context (agent-runtime/harness-memory.ts, core/agent/harness-memory.ts); forgetting is a
+ // Settings › Context (agent-runtime/harness-memory.ts, agent/agent/harness-memory.ts); forgetting is a
  // request in Fox's conversation, since none has a command that forgets one entry.
  // Claude Code, Codex and pi have no scheduler of their own. Their skills (`skills`, files: `<home>/skills/<name>/SKILL.md`)
  // are listed only: none has a command that turns one off or removes it. Claude Code's and Codex's MCP servers
@@ -82,7 +82,7 @@ export const HARNESS_SERVICES:Readonly<Record<string,HarnessServices>>=Object.fr
  // calls back, and its permission prompts come here as approval cards; its `status` names the computer, and that Worldlet's `desktop` slot lists the person's agents there.
  remote:row('remote',{conversation:'worldlet',location:'worldlet',agents:'worldlet',approvals:'worldlet'}),
  // An OpenClaw Gateway on another computer, reached directly with the address and token the person typed (no Worldlet
- // there; core/agent/remote-gateway.ts, agent-runtime/remote-gateway.ts): a session per Fox thread on its `/v1/responses`,
+ // there; agent/agent/remote-gateway.ts, agent-runtime/remote-gateway.ts): a session per Fox thread on its `/v1/responses`,
  // World tool calls as client function tools that run here, and its exec approvals over its WebSocket while a turn runs
  // (its device must be approved there: `openclaw devices`). Its files are not here, so no history, schedule, agents or models.
  'remote-openclaw':row('remote-openclaw',{conversation:'native',location:'native',approvals:'native'}),

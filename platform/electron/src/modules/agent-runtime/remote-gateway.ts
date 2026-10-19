@@ -1,4 +1,4 @@
-import {REMOTE_GATEWAY_HARNESS_ID,harnessSessionThread,harnessTurnTimings,localHarnessTurn,readRemoteGatewayToken,readRemoteGatewayUrl,type RemoteGatewayAddress} from '../../../../../core/agent/index.ts';
+import {REMOTE_GATEWAY_HARNESS_ID,harnessSessionThread,harnessTurnTimings,localHarnessTurn,readRemoteGatewayToken,readRemoteGatewayUrl,type RemoteGatewayAddress} from '../../../../../agent/agent/index.ts';
 import {WorldletError} from '../../files.ts';
 import {ExecutionJournal} from './journal.ts';
 import {idleStop} from './external.ts';

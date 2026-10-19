@@ -2,7 +2,7 @@ import {randomUUID} from 'node:crypto';
 import {AGENT,type AgentService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {WorldletError} from '../../files.ts';
-import {harnessReadOnlyNote,readJobChange,readJobCreate,readSkillChange,skillLastRuns} from '../../../../../core/agent/index.ts';
+import {harnessReadOnlyNote,readJobChange,readJobCreate,readSkillChange,skillLastRuns} from '../../../../../agent/agent/index.ts';
 import type {HarnessJobChange,HarnessJobCreate,HarnessJobRun,HarnessSkillChange} from '../../../../../contracts/harness-services.ts';
 
 // Settings › Agents › Your Agent › Skills and Routines (owner plan 2026-10-11, PR 2; “做”): each Agent on this computer
@@ -14,7 +14,7 @@ import type {HarnessJobChange,HarnessJobCreate,HarnessJobRun,HarnessSkillChange}
 // service offers `change`. Never in the practice world; never a job's prompt or a skill's steps on the page. The page
 // names the change `change` (pause, resume, run, remove; disable, enable, remove): `action` is the host action's own name.
 // Memory (PR 3, owner decision 2026-10-11): what each Agent remembers, read only; forgetting is a request in Fox's
-// conversation, which the page sends for the Agent in use (core/agent/harness-memory.ts memoryForgetRequest).
+// conversation, which the page sends for the Agent in use (agent/agent/harness-memory.ts memoryForgetRequest).
 
 const CONFIRM_MS=5*60_000;
 type Pending<C>={harness:string;change:C;command:string;until:number};

@@ -1,6 +1,6 @@
 import {callBrief,callOpening,callStatus} from '../../agent/tasks/index.ts';
 
-/** Calling from an Applet (core/agent/PORTABILITY.md#calling-from-an-applet), in Fox's card. An Applet's Call sends its
+/** Calling from an Applet (agent/agent/PORTABILITY.md#calling-from-an-applet), in Fox's card. An Applet's Call sends its
  * brief (`worldlet:call-request`: number, name, why, what to ask); the host checks the Agent can dial (`harnessCall`
  * `prepare`) and Fox shows whom it calls, why and what to find out to edit, what the Agent will say first, and Call and
  * Cancel. Only Call dials, through the person's own Agent. When their Agent cannot call, Fox says plainly how to get

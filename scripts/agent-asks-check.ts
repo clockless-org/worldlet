@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import {AGENT_ASK_LIMITS,AGENT_ASK_PROVIDER,type AgentAsk} from '../contracts/agent-asks.ts';
-import {ASK_REASONS,askApprovesDrafts,answerAsk,askAttachmentIsImage,askAttachmentName,askAttentionItem,askClaimable,askItemId,claimAsks,postAsk,readAskAttachment,readAskPost,readAsks,readStoredAsk,resolveAsk} from '../core/agent/asks.ts';
+import {ASK_REASONS,askApprovesDrafts,answerAsk,askAttachmentIsImage,askAttachmentName,askAttentionItem,askClaimable,askItemId,claimAsks,postAsk,readAskAttachment,readAskPost,readAsks,readStoredAsk,resolveAsk} from '../agent/agent/asks.ts';
 import {validateWorldItem} from '../context/items/world-item-validation.ts';
-import {ORDER_REASONS,askWakes,orderAuditEntry,readOrders,readWakeCommand,wakeArgv,wakeAuditEntry,wakeDelay} from '../core/agent/orders.ts';
+import {ORDER_REASONS,askWakes,orderAuditEntry,readOrders,readWakeCommand,wakeArgv,wakeAuditEntry,wakeDelay} from '../agent/agent/orders.ts';
 import {AGENT_WAKE_LIMITS} from '../contracts/agent-asks.ts';
 
-// Agent asks (contracts/agent-asks.ts, core/agent/asks.ts): validation, the open cap, claims and their lease, resolve
+// Agent asks (contracts/agent-asks.ts, agent/agent/asks.ts): validation, the open cap, claims and their lease, resolve
 // with a stale revision refused, the person's answer and the Attention item the host writes.
 const now='2026-10-15T12:00:00.000Z',soon='2026-10-15T12:30:00.000Z',later='2026-10-15T13:00:01.000Z';
 const id=(n:number)=>'ask-'+String(n).padStart(8,'0');
@@ -223,7 +223,7 @@ assert.equal(askAttentionItem(posted,'bad\u0007name').agentName,'claude-code','a
  assert.equal(askAttachmentIsImage('image/webp'),true);assert.equal(askAttachmentIsImage('application/zip'),false);
 }
 
-// Orders (core/agent/GRANTS.md#orders-and-waking-an-agent): work may name the Agent it is for, one of the World's
+// Orders (agent/agent/GRANTS.md#orders-and-waking-an-agent): work may name the Agent it is for, one of the World's
 // Agents not revoked; work naming none is for the World's order target; that Agent reads it, claims it first and is
 // the one woken. A question for the person names no Agent.
 {

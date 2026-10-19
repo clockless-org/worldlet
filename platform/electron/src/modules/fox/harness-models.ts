@@ -1,7 +1,7 @@
 import {AGENT,type AgentService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {WorldletError} from '../../files.ts';
-import {appletAgentThread,appletModelFor,chooseAppletModel,harnessService,harnessSessionThread,isHarnessModelId,readAppletModels} from '../../../../../core/agent/index.ts';
+import {appletAgentThread,appletModelFor,chooseAppletModel,harnessService,harnessSessionThread,isHarnessModelId,readAppletModels} from '../../../../../agent/agent/index.ts';
 import type {HarnessModel} from '../../../../../contracts/harness-services.ts';
 
 // Which of the same Agent's models answers in an Applet's thread (owner parity plan, 2026-10-08: Fox uses the Agent's

@@ -1,8 +1,8 @@
-/** Agent reports (core/agent/GRANTS.md#agent-reports): what each Agent says it is doing, so the person and the other
+/** Agent reports (agent/agent/GRANTS.md#agent-reports): what each Agent says it is doing, so the person and the other
  * Agents in the World can see who is working on what, who is free and who has gone quiet. An Agent reports through the
  * `worldlet` MCP server; the host stamps its `agentId` from the token that made the call and the time it arrived, never
  * from what the model sent. Each Agent has one report, replaced by its next; it counts as live for its `ttlMinutes`.
- * Hosts own clocks and storage; Core decides (core/agent/reports.ts). */
+ * Hosts own clocks and storage; Core decides (agent/agent/reports.ts). */
 
 /** `working` on something; `idle` and ready for work; `blocked` waiting on someone or something; `offline` on purpose
  * (stopping, paused). */

@@ -1,12 +1,12 @@
 import os from 'node:os';
 import {spawn as spawnProcess} from 'node:child_process';
-import {AGENT_AUDIT_KEEP,ORDER_REASONS,agentRevoked,askWakes,orderAuditEntry,readOrders,readWakeCommand,wakeArgv,wakeAuditEntry,wakeDelay} from '../../../../../core/agent/index.ts';
+import {AGENT_AUDIT_KEEP,ORDER_REASONS,agentRevoked,askWakes,orderAuditEntry,readOrders,readWakeCommand,wakeArgv,wakeAuditEntry,wakeDelay} from '../../../../../agent/agent/index.ts';
 import {AGENT_WAKE_LIMITS,type AgentAsk,type AgentOrders} from '../../../../../contracts/agent-asks.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 import type {AgentAccess} from '../../host/services.ts';
 import type {Row} from './types.ts';
 
-// Orders and waking an Agent (core/agent/GRANTS.md#orders-and-waking-an-agent), on the Electron and Node hosts alike.
+// Orders and waking an Agent (agent/agent/GRANTS.md#orders-and-waking-an-agent), on the Electron and Node hosts alike.
 // Core checks; this keeps the World's setting (`agent_settings`, `agent-orders` in world.sqlite) and runs an Agent's
 // wake command, the one the person typed in Settings, when work is posted for that Agent: the program itself with its
 // arguments (never a shell), detached, stdin and output ignored, stopped after a timeout, at most once a minute per

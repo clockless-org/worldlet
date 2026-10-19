@@ -121,14 +121,14 @@ text itself cannot grant execution rights. Keep reading and external writes dist
 
 What Worldlet or the person's Agent made on a schedule, while nobody watched, arrives in the Center; nothing
 opens by itself and no passing notice says it ran (owner plan 2026-10-11). One rule, in
-[core/agent/harness-schedule.ts](../core/agent/harness-schedule.ts); the host only saves what it returns, and
+[agent/agent/harness-schedule.ts](../agent/agent/harness-schedule.ts); the host only saves what it returns, and
 the same result reaches the paired phone while it is fresh (twelve hours):
 
 | Result | Becomes | Opens |
 | --- | --- | --- |
 | The morning brief and the day's summary ([the day's plan and summary](../context/artifacts/README.md#the-days-plan-and-summary)) | Worth Knowing, "Today’s prep · Oct 7" or "Wrap up today · Oct 7", owned by `worldlet`; a run that made no card is Worth Doing, saying so | Its card's line "In your Journal · Open" (and its Source) opens the Journal on that card |
 | A run of Worldlet's own routine | Worth Knowing; one that did not finish, Worth Doing | Its card, with what the Agent returned when it returned text |
-| A run of a job on the person's Agent's own scheduler ([scheduled jobs](../core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)) | Worth Knowing with its output; a failed run, Worth Doing; a silent run, nothing | Its card |
+| A run of a job on the person's Agent's own scheduler ([scheduled jobs](../agent/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)) | Worth Knowing with its output; a failed run, Worth Doing; a silent run, nothing | Its card |
 
 These items have no source fact behind them, so they stay current until the person settles them (Got it, Done,
 Later), and opening one keeps no second copy in the Journal when the result already is a Journal card. The Task

@@ -7,4 +7,4 @@ The desktop host (`platform/electron/src/modules/agent-runtime/`) consumes these
 
 World tool definitions remain in `agent/tools/`; wire types remain in `contracts/`. Framework-specific model configuration belongs to its adapter.
 
-Worldlet has no built-in Hermes since the owner decisions of 2026-10-09: a person's own Hermes Agent reaches the World through the `worldlet` MCP server like any other Agent ([no Agent](../core/agent/PORTABILITY.md#no-agent)). Build/check commands must resolve repository sources from this directory, never from an installed user's profile.
+Worldlet has no built-in Hermes since the owner decisions of 2026-10-09: a person's own Hermes Agent reaches the World through the `worldlet` MCP server like any other Agent ([no Agent](../agent/agent/PORTABILITY.md#no-agent)). Build/check commands must resolve repository sources from this directory, never from an installed user's profile.

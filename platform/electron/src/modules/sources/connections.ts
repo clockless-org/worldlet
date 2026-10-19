@@ -9,7 +9,7 @@ import {APPLE_PROVIDERS,connectApple} from './apple.ts';
 import {nativeFirst} from './content.ts';
 import {GOOGLE_SIGN_IN,SOURCE_PROVIDERS,WORLD_APPS,connectSettings,connectToken} from '../../../../../context/applets/index.ts';
 import {SIGN_IN_CODE_EVENT} from '../../../../../contracts/platform.ts';
-import {isMigrationSource} from '../../../../../core/agent/index.ts';
+import {isMigrationSource} from '../../../../../agent/agent/index.ts';
 import {agentIntegrationPlans} from '../agent-runtime/agent-integrations.ts';
 import {IMPORT_REGIONS} from './context.ts';
 import type {SourcesContext} from './context.ts';

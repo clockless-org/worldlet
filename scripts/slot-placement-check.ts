@@ -99,7 +99,7 @@ assert.throws(()=>updateOnboarding({version:1,presets:['home'],completed:true},{
  const moved=recommendForArea({area:'work',apps,mine:new Map([...mine,['app-spotify','work']])});
  assert.ok(moved.includes('app-youtube')&&moved.indexOf('app-youtube')>moved.indexOf('app-zoom'),'moved-in categories follow the Area\'s own');
  assert.ok(!recommendForArea({area:'work',apps,mine}).includes('app-youtube'),'unrelated categories stay out');
- // What the person's own Agent suggested comes first in its own Area, and only there (core/agent/agent-profile.ts).
+ // What the person's own Agent suggested comes first in its own Area, and only there (agent/agent/agent-profile.ts).
  const suggested=new Set(['jira','youtube']);
  assert.deepEqual(recommendForArea({area:'work',apps,mine,installed:new Set(['zoom']),suggested}).slice(0,2),['app-jira','app-zoom'],'suggested, then installed');
  assert.ok(!recommendForArea({area:'work',apps,mine,suggested}).includes('app-youtube'),'a suggestion stays in its own Area');

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
-// An Agent's PostHog or Notion draft on its Attention card (core/agent/GRANTS.md#posthog-and-notion-drafts): the card
+// An Agent's PostHog or Notion draft on its Attention card (agent/agent/GRANTS.md#posthog-and-notion-drafts): the card
 // names the Agent and where it writes, shows exactly what will be written (as plain text, not rendered) and a link to
 // the target, and Approve and Dismiss go to the host's `serviceDraft` with only the draft's ID, never the ordinary item
 // status. A stale target's refusal is said in the card's own words. Bundled UI, faked bridge, fictional drafts.

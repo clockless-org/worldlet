@@ -299,7 +299,7 @@ export class ServiceSource {
   }finally{clearTimeout(timer);}
  }
  /** A connected Service's settings and a request function over its key, for a write the person approved (PostHog
-  * drafts, core/agent/service-drafts.ts): each request answers its status and JSON instead of throwing for a refusal,
+  * drafts, agent/agent/service-drafts.ts): each request answers its status and JSON instead of throwing for a refusal,
   * so Core can say why. It still goes only to the connection's one origin, follows no redirect and stops at the gate's
   * time and size; the key stays here. Null when the Service is not connected. */
  writer(provider:string):{settings:unknown;request(method:'GET'|'POST'|'PATCH',path:string,body?:Record<string,unknown>):Promise<{status:number;json:unknown}>}|null {
@@ -442,7 +442,7 @@ async function bounded(response:Response,gate:ServiceGate,controller:AbortContro
 
 /** `read_service`'s own gate, for every Service whichever transport reads it: the call is checked against the tool's
  * schema, must name one of `providers` and an operation that Service has (SERVICE_ACTIONS), and is admitted by the
- * turn (whose Grants name `<provider>/<operation>`, core/agent/GRANTS.md; the read makes the turn untrusted). Returns
+ * turn (whose Grants name `<provider>/<operation>`, agent/agent/GRANTS.md; the read makes the turn untrusted). Returns
  * the one read to make. */
 export async function admitServiceRead(args:Row,providers:readonly string[],onEvent:AgentEventHandler|undefined):Promise<{provider:string;body:Row}> {
  validateWorldTool('read_service',args);

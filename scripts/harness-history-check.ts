@@ -1,4 +1,4 @@
-// The `history` Harness service read continuously (core/agent/PORTABILITY.md "History, read continuously"): every
+// The `history` Harness service read continuously (agent/agent/PORTABILITY.md "History, read continuously"): every
 // Harness with a reader (OpenClaw, Hermes Agent, Claude Code, Codex, pi) declares it in mode `files`, and the World's
 // one Harness-neutral sync adds only the turns written after its cursor, with the IDs bringing gave, under the
 // conversation they were brought into. Fox's own sessions (remembered by the World, or run in Worldlet's folders) never
@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
-import {HARNESS_SERVICES,harnessService,MIGRATION_SOURCES,type MigrationSource} from '../core/agent/index.ts';
+import {HARNESS_SERVICES,harnessService,MIGRATION_SOURCES,type MigrationSource} from '../agent/agent/index.ts';
 import {filesHistory} from '../platform/electron/src/modules/agent-runtime/agent-history.ts';
 import {writeSelection} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
 import {bringAgent,broughtTurnId} from '../platform/electron/src/modules/fox/migration.ts';

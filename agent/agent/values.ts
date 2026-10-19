@@ -1,4 +1,4 @@
-// Small readers the Agent rules here share for values read from an Agent's files and streams. Internal to core/agent
+// Small readers the Agent rules here share for values read from an Agent's files and streams. Internal to agent/agent
 // (not re-exported from index.ts). Kept ES-compatible for JavaScriptCore and Jint.
 
 /** An object's fields, or `{}` for anything that is not a plain object. */

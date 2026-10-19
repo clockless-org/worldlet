@@ -1,4 +1,4 @@
-// An Agent's first need of a Service (core/agent/GRANTS.md#when-an-agent-first-needs-a-service): when its `read_service`
+// An Agent's first need of a Service (agent/agent/GRANTS.md#when-an-agent-first-needs-a-service): when its `read_service`
 // call is refused because it may not read that Service, or the Service is not connected, the host asks the person once
 // on an Attention card from provider `agents`, written with no model, at most once a day for that Agent and Service.
 // Allow gives the Agent the Service's read Grant (`serviceReadGrant`); Connect signs in to the Service first. Pure

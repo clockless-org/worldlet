@@ -1,5 +1,5 @@
 import {core} from '../../core.ts';
-import {readHarnessApprovalRequest,readHarnessApprovalResult} from '../../../../../core/agent/index.ts';
+import {readHarnessApprovalRequest,readHarnessApprovalResult} from '../../../../../agent/agent/index.ts';
 import {WorldletError} from '../../files.ts';
 import {end} from '../media/io.ts';
 // One executable test for every host module (on Windows X_OK is only existence, so a file is enough).

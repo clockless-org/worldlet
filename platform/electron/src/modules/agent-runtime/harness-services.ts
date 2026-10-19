@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {openAgentDatabase,type AgentDatabase} from './agent-database.ts';
 import type {HarnessCall,HarnessCalls,HarnessEvents,HarnessExternalEvent,HarnessTools,HarnessTool} from '../../../../../contracts/harness-services.ts';
-import {OPENCLAW_CALL_NAMESPACES,harnessService,openClawCallArgs,openClawCallPlacing,openClawCallResult,openClawHangUpArgs,hermesExternalEvent,openClawCallChunkKey,openClawCallRecord,openClawHarnessCalls,openClawVoiceCallStore,hermesHarnessTools,openClawExternalEvent,openClawHarnessTools,openClawTurn,type OpenClawSessionFacts} from '../../../../../core/agent/index.ts';
+import {OPENCLAW_CALL_NAMESPACES,harnessService,openClawCallArgs,openClawCallPlacing,openClawCallResult,openClawHangUpArgs,hermesExternalEvent,openClawCallChunkKey,openClawCallRecord,openClawHarnessCalls,openClawVoiceCallStore,hermesHarnessTools,openClawExternalEvent,openClawHarnessTools,openClawTurn,type OpenClawSessionFacts} from '../../../../../agent/agent/index.ts';
 import {callLive} from '../../../../../agent/tasks/index.ts';
 import {inside,json,readFile} from './agent-files.ts';
 import {discoverHermes} from './hermes-files.ts';
@@ -11,8 +11,8 @@ import {openClawState} from './local-memory.ts';
 import {openClawAgents,readOpenClawConfig} from './openclaw-files.ts';
 
 // The `tools`, `events` and `calls` Harness services (contracts/harness-services.ts) that local Harnesses provide by
-// reading their own folders (mode `files`, core/agent/harness-services.ts). Only read, never written; what the rows mean
-// is Core's (core/agent/harness-tools.ts, harness-events.ts, harness-calls.ts). The World asks for a service, never for a Harness by name:
+// reading their own folders (mode `files`, agent/agent/harness-services.ts). Only read, never written; what the rows mean
+// is Core's (agent/agent/harness-tools.ts, harness-events.ts, harness-calls.ts). The World asks for a service, never for a Harness by name:
 // a Harness that declares neither gets null here.
 
 type Env=NodeJS.ProcessEnv;
@@ -36,7 +36,7 @@ export function harnessTools(id:string,home=os.homedir(),env:Env=process.env):Ha
 }
 
 const toolCache=new Map<string,{at:number;tools:HarnessTool[]}>();
-/** The same list, read again at most every few minutes: each Fox turn names it (core/agent localHarnessTurn), and an
+/** The same list, read again at most every few minutes: each Fox turn names it (agent/agent localHarnessTurn), and an
  * unchanged list keeps the turn's instructions, and so a waiting spare process, the same. */
 export async function currentHarnessTools(id:string,home=os.homedir(),env:Env=process.env,maxAge=5*60_000):Promise<HarnessTool[]> {
  const key=id+'\u0000'+home,cached=toolCache.get(key);
@@ -136,7 +136,7 @@ export function harnessEvents(id:string,home=os.homedir(),env:Env=process.env,ev
 
 /** The newest snapshots read from the voice-call plugin's store; older ones of a long history are left. */
 const CALL_SNAPSHOTS=400;
-/** OpenClaw's voice-call plugin store (core/agent/harness-calls.ts): its configured `store` (`~` is the home), else
+/** OpenClaw's voice-call plugin store (agent/agent/harness-calls.ts): its configured `store` (`~` is the home), else
  * `voice-calls` in the OpenClaw state folder. */
 export function openClawVoiceCallDir(home:string,env:Env):string {
  const store=openClawVoiceCallStore(readOpenClawConfig(home,env));

@@ -7,11 +7,11 @@ import {githubWriteScope,githubWriteScopeCovers,readGithubWriteScope} from './gi
 import {AGENT_REPORT_ACTIONS,AGENT_REPORT_TARGET} from '../../contracts/agent-reports.ts';
 import {AGENT_ARTIFACT_ACTIONS,AGENT_ARTIFACT_TARGET} from '../../contracts/agent-artifacts.ts';
 import {SERVICE_DRAFT_OPERATIONS,SERVICE_DRAFT_PROVIDERS,SERVICE_DRAFT_TARGETS,SERVICE_DRAFT_TITLES,serviceDraftTarget,type ServiceDraftProvider} from '../../contracts/service-drafts.ts';
-import {grantedActions,worldActions,type WorldAction} from '../../agent/tools/index.ts';
+import {grantedActions,worldActions,type WorldAction} from '../tools/index.ts';
 import {turnGuardedWrite,turnWriteAdmission} from './turn-trust.ts';
 import {HERMES_CHANNEL_LINK_TOOL,HERMES_CHANNEL_READ_ONLY,HERMES_CHANNEL_TOOLS,hermesChannelTrust} from './hermes-server.ts';
 
-/** Per-Agent Grants (core/agent/GRANTS.md). Pure: hosts supply the identity, its Grants, the turn's own admission and
+/** Per-Agent Grants (agent/agent/GRANTS.md). Pure: hosts supply the identity, its Grants, the turn's own admission and
  * the clock, and record the result as an audit entry. The turn rule (turn-trust.ts) always comes first: a Grant never
  * admits a write the turn has refused. */
 
@@ -143,7 +143,7 @@ export function worldCallWrites(tool:string,args:Record<string,unknown>={}):bool
  return turnGuardedWrite({type:'tool',name:tool,args})!==null||tool==='start_applet_task'||tool==='github_writes';
 }
 
-/** An Agent's default Grants: what a call outside any Fox turn could do before Grants existed (core/agent/hermes-server.ts
+/** An Agent's default Grants: what a call outside any Fox turn could do before Grants existed (agent/agent/hermes-server.ts
  * HERMES_CHANNEL_TOOLS: reads and a draft for the person's review, as a standing read Grant; and the World's browser link,
  * as a standing write Grant). Hosts write them again each run so new Applet sources are covered; a revoked one stays
  * revoked. */
@@ -198,7 +198,7 @@ export function serviceGrantAuditEntry(agentId:string,provider:string,granted:bo
 export type AskGrantKind='ask'|'work';
 export const ASK_GRANT_KINDS:readonly AskGrantKind[]=Object.freeze(['ask','work']);
 export function askGrantTargets(kind:string):string[] {
- // Both read an ask's attachments: the Agent that posted it, and the one that claimed it (core/agent/asks.ts decides which).
+ // Both read an ask's attachments: the Agent that posted it, and the one that claimed it (agent/agent/asks.ts decides which).
  return kind==='ask'?[AGENT_ASK_ACTIONS.post,AGENT_ASK_ACTIONS.read,AGENT_ASK_ACTIONS.attachment]:kind==='work'?[AGENT_ASK_ACTIONS.claim,AGENT_ASK_ACTIONS.resolve,AGENT_ASK_ACTIONS.attachment]:[];
 }
 export const askGrantId=(agentId:string,kind:string)=>agentId+'-asks-'+kind;
@@ -245,7 +245,7 @@ export function boardGrantAuditEntry(agentId:string,kind:string,granted:boolean,
  return {at,agentId,target:BOARD_TARGET,action:(granted?'grant-':'ungrant-')+kind,decision:'allowed',grantId:boardGrantId(agentId,kind),
   reason:granted?`The person let this Agent ${what} in Settings.`:`The person stopped this Agent being able to ${what} in Settings.`};
 }
-/** "Can draft GitHub changes" in Settings › Agents (core/agent/GRANTS.md#github-drafts): `github-drafts/create`
+/** "Can draft GitHub changes" in Settings › Agents (agent/agent/GRANTS.md#github-drafts): `github-drafts/create`
  * and `github-drafts/read`. Never part of the default Grants, and never given by a Fox turn. Access is `read`: a draft
  * only shows the person a change, and nothing is written to GitHub until they approve it on its card. */
 export const githubDraftGrantTargets=():string[]=>[GITHUB_DRAFT_ACTIONS.create,GITHUB_DRAFT_ACTIONS.read];
@@ -264,7 +264,7 @@ export function githubDraftGrantAuditEntry(agentId:string,granted:boolean,at:str
   reason:granted?'The person let this Agent draft GitHub changes in Settings.':'The person stopped this Agent drafting GitHub changes in Settings.'};
 }
 /** "Can report its work" (`report`: agents/report) and "Can see other Agents" (`list`: agents/list) in Settings › Agents
- * › Access (core/agent/GRANTS.md#agent-reports). Never part of the default Grants, and never given by a Fox turn. Access
+ * › Access (agent/agent/GRANTS.md#agent-reports). Never part of the default Grants, and never given by a Fox turn. Access
  * is `read`: a report only changes what the person and other Agents see of this Agent, and is not a guarded write. */
 export type ReportGrantKind='report'|'list';
 export const REPORT_GRANT_KINDS:readonly ReportGrantKind[]=Object.freeze(['report','list']);
@@ -287,7 +287,7 @@ export function reportGrantAuditEntry(agentId:string,kind:string,granted:boolean
  return {at,agentId,target:AGENT_REPORT_TARGET,action:(granted?'grant-':'ungrant-')+kind,decision:'allowed',grantId:reportGrantId(agentId,kind),
   reason:granted?`The person let this Agent ${what} in Settings.`:`The person stopped this Agent being able to ${what} in Settings.`};
 }
-/** "Can update Issues in <repo> without asking" in Settings › Agents (core/agent/GRANTS.md#standing-github-writes):
+/** "Can update Issues in <repo> without asking" in Settings › Agents (agent/agent/GRANTS.md#standing-github-writes):
  * `github-writes/run` on one repository, only the writes the person chose (a comment, labels under one prefix, or both).
  * Never part of the default Grants, never given by a Fox turn. Access is `write`, standing: each call writes to GitHub
  * without a card, so a `read` Grant never covers it. The page sends only the Agent, the repository and the choice (with
@@ -319,7 +319,7 @@ export function githubWriteGrantAuditEntry(agentId:string,scope:GithubWriteScope
 }
 /** "Can save to your Journal" (`save`: agent-artifacts/save, and agent-artifacts/read of what it saved) and
  * "Can read Agents' Journal artifacts" (`read`: agent-artifacts/read of every Agent's) in Settings › Agents
- * (core/agent/GRANTS.md#agent-artifacts). Never part of the default Grants, and never given by a Fox turn. */
+ * (agent/agent/GRANTS.md#agent-artifacts). Never part of the default Grants, and never given by a Fox turn. */
 export type ArtifactGrantKind='save'|'read';
 export const ARTIFACT_GRANT_KINDS:readonly ArtifactGrantKind[]=Object.freeze(['save','read']);
 export function artifactGrantTargets(kind:string):string[] {
@@ -344,7 +344,7 @@ export function artifactGrantAuditEntry(agentId:string,kind:string,granted:boole
   reason:granted?`The person let this Agent ${what} in Settings.`:`The person stopped this Agent being able to ${what} in Settings.`};
 }
 /** "Can draft PostHog changes" and "Can draft Notion changes" in Settings › Agents
- * (core/agent/GRANTS.md#posthog-and-notion-drafts): `<provider>-drafts/create` and `read`, the same way as GitHub
+ * (agent/agent/GRANTS.md#posthog-and-notion-drafts): `<provider>-drafts/create` and `read`, the same way as GitHub
  * drafts. Never part of the default Grants, never given by a Fox turn, and not given by reading the Service. */
 export const isServiceDraftProvider=(value:unknown):value is ServiceDraftProvider=>SERVICE_DRAFT_PROVIDERS.includes(value as ServiceDraftProvider);
 export const serviceDraftGrantTargets=(provider:ServiceDraftProvider):string[]=>SERVICE_DRAFT_OPERATIONS.map(operation=>`${serviceDraftTarget(provider)}/${operation}`);

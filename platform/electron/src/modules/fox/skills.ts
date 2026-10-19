@@ -1,9 +1,9 @@
 import {AGENT,type AgentService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {WorldletError} from '../../files.ts';
-import {migrationSkillPath,skillDraftProblem,skillFrontmatter,skillLastRuns,skillMarkdown,skillRepeats,worldSkills,type SkillTurn} from '../../../../../core/agent/index.ts';
+import {migrationSkillPath,skillDraftProblem,skillFrontmatter,skillLastRuns,skillMarkdown,skillRepeats,worldSkills,type SkillTurn} from '../../../../../agent/agent/index.ts';
 
-// The Agent's skills in the World (core/agent/PORTABILITY.md#the-agents-skills-in-the-world; owner parity plan
+// The Agent's skills in the World (agent/agent/PORTABILITY.md#the-agents-skills-in-the-world; owner parity plan
 // 2026-10-08, approved 2026-10-08 “做”): Fox's Harness's own skills (its `skills` service) beside the World's copy of
 // every skill (`brought_skills`, Fox's own under source `fox`), each with when it last ran, and an offer to save one
 // when Fox has done the same multi-step task again and again (core skillRepeats over the cards Fox's turns left). A

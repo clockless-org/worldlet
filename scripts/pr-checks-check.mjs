@@ -17,7 +17,7 @@ for(const file of ['scripts/machine-capacity.mjs','scripts/dev-workspace.ts',
  'platform/electron/distribution/mac/publish-release.py','scripts/release-label-check.ts','scripts/machine-health-check.ts']){
  assert.deepEqual(selectChecks([file]),all,file);
 }
-for(const file of ['core/agent/turn-trust.ts','harness/example/agent.py','contracts/agent.ts'])assert.deepEqual(selectChecks([file]),trustChecks,file);
+for(const file of ['agent/agent/turn-trust.ts','harness/example/agent.py','contracts/agent.ts'])assert.deepEqual(selectChecks([file]),trustChecks,file);
 const pkg=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8'));
 for(const platform of ['darwin','win32','linux']){
  const gates=gateCommands(platform);

@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
-import {AGENT_VERSIONS,LOCAL_HARNESSES,agentTooOldMessage,agentVersionStatus,compareAgentVersions,parseAgentVersion} from '../core/agent/index.ts';
+import {AGENT_VERSIONS,LOCAL_HARNESSES,agentTooOldMessage,agentVersionStatus,compareAgentVersions,parseAgentVersion} from '../agent/agent/index.ts';
 import {UPDATED,signInScript} from '../platform/electron/src/modules/agent-runtime/provider-sign-in.ts';
 
-// The oldest version of each Agent Worldlet works with (core/agent/agent-versions.ts): read from its `--version` line,
+// The oldest version of each Agent Worldlet works with (agent/agent/agent-versions.ts): read from its `--version` line,
 // compared part by part, turned away below the minimum with its own update command, never when it cannot be read.
 
 // Every Agent has a minimum, a reason and a way to update ------------------------------------------------------------
