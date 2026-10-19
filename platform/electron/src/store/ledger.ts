@@ -997,7 +997,7 @@ export class WorldLedger {
  companionSession(id:string):string|null {this.ensureCompanion();const row=this.all('SELECT session FROM companion_turns WHERE id=?',id)[0];return row?String(row.session):null;}
  /** The text `source` keeps, in bytes. */
  companionBytes(source:string):number {this.ensureCompanion();return Number(this.all('SELECT coalesce(sum(length(CAST(text AS BLOB))),0) AS n FROM companion_turns WHERE source=?',source)[0]?.n??0);}
- /** How much each kind of context this World keeps holds, for Settings › Context (core/context/world-context.ts): the
+ /** How much each kind of context this World keeps holds, for Settings › Context (context/context/world-context.ts): the
   * past conversations (how many, and their text), each Service's synced context, the Journal's cards and what Agents
   * saved there (with their pages), and the board's definition. Bytes of what is kept now, not of older revisions. */
  contextSizes():{conversations:{count:number;bytes:number};services:{provider:string;bytes:number}[];journal:{bytes:number};agentOutputs:{bytes:number};board:{bytes:number}} {

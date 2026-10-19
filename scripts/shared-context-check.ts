@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {contextLayout} from '../core/context/context-layout.ts';
+import {contextLayout} from '../context/context/context-layout.ts';
 import {validateConversationHistory} from '../core/companion/conversation-history.ts';
 const original=contextLayout({themes:[{theme:'library'},{theme:'studio'}]});
 assert.deepEqual(original.places.map(p=>p.position),[[0,0,2],[0,0,17],[0,0,-13]]);
@@ -66,7 +66,7 @@ assert.deepEqual(validateAgentEvent({type:'delta',text:'Hello',privateTransport:
 assert.deepEqual(validateAgentEvent({type:'model_required'}),{type:'model_required'});
 assert.throws(()=>validateAgentEvent({type:'tool',id:'t',name:'read',args:[]}));
 console.log('PASS shared Agent capability/event validation and transport metadata exclusion');
-const {validateContextAnalysis,validateContextLayout,contextChunks}=await import('../core/context/context-validation.ts');
+const {validateContextAnalysis,validateContextLayout,contextChunks}=await import('../context/context/context-validation.ts');
 const knowledge={sourceId:'s',theme:'home',topic:'Mail',summary:'Summary',facts:[{text:'Fact',quote:'Evidence'}]};
 assert.equal(validateContextAnalysis([knowledge],[{id:'s',revision:'v2'}],['s'],['home'])[0].sourceRevision,'v2');
 assert.throws(()=>validateContextAnalysis([], [{id:'s',revision:'v2'}],['s'],['home']));

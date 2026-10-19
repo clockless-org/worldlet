@@ -1,4 +1,4 @@
-import {characters,utf8Length} from '../companion/index.ts';
+import {characters,utf8Length} from '../../core/companion/index.ts';
 import type {ContextLayout} from './context-layout.ts';
 interface Fact {text:string;quote:string}
 interface Activity {kind:string;title:string;quote:string;start?:string;end?:string;allDay?:boolean}
