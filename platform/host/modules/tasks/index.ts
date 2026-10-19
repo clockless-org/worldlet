@@ -1,4 +1,5 @@
 import {CONVERSATION_ATTENTION,attentionFromAgent,conversationObservation,conversationsForAttention,ONGOING_LIMITS,ongoingDecide,ongoingKindOf,ongoingTemplate,ongoingRecent,ongoingRefresh,ongoingFromAgent,ongoingCandidates,ongoingTurnText,orderOngoing,readOngoing,validOngoingId,type OngoingThing} from '../../../../agent/tasks/index.ts';
+import {contextReader,contextWriter} from '../../../../context/store/index.ts';
 import {WorldletError} from '../../files.ts';
 import {ONGOING,WORLD_TOOLS,type OngoingService,type WorldToolsService} from '../../services.ts';
 import type {Host} from '../../types.ts';
@@ -21,7 +22,7 @@ export function installOngoing(host:Host){
  const own=()=>store.writable&&!store.sampleEnabled();
  const things=():OngoingThing[]=>{
   if(!own())return [];
-  try{return store.ledger().ongoingRows().flatMap(row=>{const thing=readOngoing(row);return thing?[thing]:[];});}
+  try{return contextReader(store.context()).bodies('ongoing').flatMap(row=>{const thing=readOngoing(row);return thing?[thing]:[];});}
   catch(error){host.diagnostics.record(error,'ongoing');return [];}
  };
  const changed=(id='')=>page.event('worldlet:ongoing',{id});
@@ -35,12 +36,12 @@ export function installOngoing(host:Host){
   try{
    const ledger=store.ledger();
    const {save,forget}=ongoingRefresh(things(),ledger.broughtConversations(),now(),c=>ledger.ownText(c.source,c.session,60));
-   if(save.length||forget.length){store.ledger().saveOngoing(save as any[],forget);changed();}
+   if(save.length||forget.length){contextWriter(store.context(),'world').write('ongoing',{save:save as any[],forget});changed();}
    // The things the chosen Agent said the person handles most (agent/gate/agent-profile.ts) become their own Applets once
    // their conversations are here; a removed one stays removed (agent/tasks ongoingFromAgent).
    const chosen=readSelection(host.profile.root),said=chosen?readAgentProfile(host.profile.root,chosen)?.things??[]:[];
    const keep=said.length?ongoingFromAgent(said,things(),ledger.broughtConversations(),now(),c=>ledger.ownText(c.source,c.session,60),chosen??undefined):[];
-   if(keep.length){store.ledger().saveOngoing(keep as any[]);changed();store.changed();}
+   if(keep.length){contextWriter(store.context(),'agent').write('ongoing',{save:keep as any[]});changed();store.changed();}
   }catch(error){host.diagnostics.record(error,'ongoing');}
   observe();
  }
@@ -93,7 +94,7 @@ export function installOngoing(host:Host){
    const id=String(request.id??''),known=things();
    let thing=validOngoingId(id)?known.find(t=>t.id===id):undefined;
    // A thing the phone listed that is not recorded yet: keeping it records it first.
-   if(!thing&&validOngoingId(id)){thing=unrecorded(known).find(t=>t.id===id);if(thing&&operation==='keep')store.ledger().saveOngoing([thing as any]);}
+   if(!thing&&validOngoingId(id)){thing=unrecorded(known).find(t=>t.id===id);if(thing&&operation==='keep')contextWriter(store.context(),'person').write('ongoing',{save:[thing as any]});}
    if(!thing)throw new WorldletError('That is not in this world any more.');
    if(operation==='turns'){
     const limit=Math.min(40,Math.max(1,Math.round(Number(request.limit)||12)));
@@ -111,7 +112,7 @@ export function installOngoing(host:Host){
     if(operation==='keep'&&thing.state!=='kept'&&things().filter(t=>t.state==='kept').length>=ONGOING_LIMITS.kept)
      throw new WorldletError(`This world already keeps ${ONGOING_LIMITS.kept} ongoing things. Remove one in the Ongoing Applet first.`);
     const next=ongoingDecide(thing,operation as 'keep'|'later'|'decline',now());
-    store.ledger().saveOngoing([next as any]);changed(id);
+    contextWriter(store.context(),'person').write('ongoing',{save:[next as any]});changed(id);
     if(thing.state==='kept'||next.state==='kept')store.changed();
     // A decided proposal makes room for the next one.
     if(operation!=='keep'||thing.state==='proposed')refresh();

@@ -19,7 +19,7 @@ import {attentionLaterUntil,hostAttention} from '../../../../agent/attention/ind
 import {onboardingUnfinished} from '../../../../agent/companion/index.ts';
 import {taskPanel} from '../../../../agent/tasks/index.ts';
 import {APP_DEFINITIONS} from '../../../../context/applets/index.ts';
-import {readArtifact} from '../../../../context/store/index.ts';
+import {contextReader,readArtifact} from '../../../../context/store/index.ts';
 
 // Phone pairing (platform/web/README.md): the iPhone app mirrors the Attention Center and Fox's main conversation.
 // This module owns the pairing secret and the relay connection; the World page supplies the Attention snapshot
@@ -155,7 +155,7 @@ export function installPhone(host:Host){
   const panel=await fox.taskPanel?.().catch(error=>{host.diagnostics.record(error,'phoneTasks');return null;});
   const tasks=panel&&!panel.sample?taskPanel({jobs:panel.jobs,harness:panel.harness,working:panel.working},Date.now()):undefined;
   let journal:any[]|undefined;
-  try{journal=host.store.writable?host.store.ledger().artifactRows().flatMap(row=>{const artifact=readArtifact(row);return artifact?[artifact]:[];}):undefined;}
+  try{journal=host.store.writable?contextReader(host.store.context()).bodies('artifacts').flatMap(row=>{const artifact=readArtifact(row);return artifact?[artifact]:[];}):undefined;}
   catch(error){host.diagnostics.record(error,'phoneJournal');}
   hostFocus=center.saved;
   const kinds=new Map(items.map(item=>[String(item.id),String(item.kind||'task')]));

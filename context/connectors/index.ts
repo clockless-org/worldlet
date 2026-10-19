@@ -49,3 +49,5 @@ export {PRESET_REASONS,SERVICE_PRESET_ID,readServicePresetRead,readServicePreset
 export {OAUTH_CALLBACK_SCRIPT,oauthCallbackPage,type OAuthCallbackStatus} from './oauth-callback.ts';
 // What was the board folder (#714).
 export {BOARD_PROVIDERS,BOARD_REASONS,BOARD_TONE_WORDS,boardNorthStar,boardNumber,formatBoardNumber,formatBoardRate,boardPresetIds,defineBoard,readBoardDefinition,readBoardReadArgs,readStoredBoard,resolveBoard,type BoardRead} from './board.ts';
+// The only writer of Synced Context (#676).
+export {connectorWriter} from './synced.ts';

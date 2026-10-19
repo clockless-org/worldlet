@@ -1,4 +1,4 @@
-import {mergeArtifact,orderArtifacts,readArtifact,validArtifactId,type Artifact} from '../../../../context/store/index.ts';
+import {contextReader,contextWriter,mergeArtifact,orderArtifacts,readArtifact,validArtifactId,type Artifact} from '../../../../context/store/index.ts';
 import {dailyScheduleFailure,dailyScheduleResult,type ScheduleResult} from '../../../../agent/gate/index.ts';
 import {WorldletError} from '../../files.ts';
 import {PHONE,type PhoneService} from '../../services.ts';
@@ -12,7 +12,7 @@ export function installArtifacts(host:Host){
  const own=()=>store.writable&&!store.sampleEnabled();
  const all=():Artifact[]=>{
   if(!own())return [];
-  try{return store.ledger().artifactRows().flatMap(row=>{const artifact=readArtifact(row);return artifact?[artifact]:[];});}
+  try{return contextReader(store.context()).bodies('artifacts').flatMap(row=>{const artifact=readArtifact(row);return artifact?[artifact]:[];});}
   catch(error){host.diagnostics.record(error,'artifacts');return [];}
  };
  const changed=(id='')=>page.event('worldlet:artifacts',{id});
@@ -44,7 +44,8 @@ export function installArtifacts(host:Host){
     if(!next)throw new WorldletError('That is not an artifact.');
     const list=all(),saved=mergeArtifact(list.find(a=>a.id===next.id),next,now);
     const {forget}=orderArtifacts([saved,...list.filter(a=>a.id!==saved.id)]);
-    store.ledger().saveArtifacts([saved as any],forget);if(forget.length)store.ledger().deleteArtifactPages(forget);changed(saved.id);
+    const context=contextWriter(store.context(),'fox');
+    context.write('artifacts',{save:[saved as any],forget});context.remove('artifact-pages',forget);changed(saved.id);
     if(request.scheduled)scheduledResult(request.scheduled,request.day,saved,now*1000);
     return {ok:true,artifact:saved};
    }
@@ -57,7 +58,8 @@ export function installArtifacts(host:Host){
    if(operation==='delete'){
     const id=String(request.id??'');
     if(!validArtifactId(id))throw new WorldletError('That is not an artifact.');
-    store.ledger().saveArtifacts([],[id]);store.ledger().deleteArtifactPages([id]);changed(id);
+    const context=contextWriter(store.context(),'person');
+    context.remove('artifacts',[id]);context.remove('artifact-pages',[id]);changed(id);
     return {ok:true};
    }
    throw new WorldletError('Unknown request.');

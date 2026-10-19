@@ -1,7 +1,7 @@
 # World-owned storage
 
 Chapters:
-- [Four kinds of Context](#four-kinds)
+- [Four kinds of Context](#four-kinds) and [one way in](#one-way-in)
 - [World, Fox and Hermes: interaction and persistent items](#world-interaction)
 - [World tools](#world-tools)
 
@@ -24,10 +24,23 @@ Configuration, not Context: Orders and wake commands and Fox's setup choices (`a
 
 Nothing is deleted automatically; only a retention period the person sets removes data. Known records stay when the evidence they came from is deleted. The bounds some records have today (website network records, artifact pages, execution receipts, expiring source facts, safety copies of moved files) are described with each domain below and are unchanged.
 
+<a id="one-way-in"></a>
+### One way in
+
+Every Context domain is read, written and searched through one entry, `context/store/context.ts` (exported by `context/store/index.ts`; step 1 of #676). Formats on disk are unchanged and nothing was migrated: the entry reads each record where it is kept today.
+
+- **Envelope.** Each record comes back as `{id, kind, domain, origin, createdAt, updatedAt, revision, derivedFrom, body}`. `body` is the record exactly as stored; the envelope is read from the fields it already has (`agentId`, `origin`, `provider`, `updatedAt`, `version`, `sources` …), with times in milliseconds. `CONTEXT_DOMAINS` names every domain above with its kind and table.
+- **Reading.** `contextReader(storage)`: `read(domain)`, `bodies(domain)`, `get(domain, id)` and `search(query, {kinds, domains, limit})`, one full-text search across the four kinds (every term must appear; title matches first, then the newest). Conversations and website recordings are searched in their own indexes.
+- **Writing.** `contextWriter(storage, author)` writes Recorded, Made and Known records and refuses Synced. Synced records are written only by `connectorWriter` (`context/connectors/synced.ts`), which writes nothing else. `transaction` keeps several writes together.
+- **Storage.** Platform gives the entry a `ContextStorage`: `ledgerContext(ledger)` (`platform/host/store/context-storage.ts`, `WorldStore.context()`) maps each domain to the ledger's tables, unchanged.
+- **Rules**, enforced by `npm run check:arch` (`scripts/architecture-boundaries.ts`): `ui/` never imports a Context writer (UI only reads; writes go through `agent/`), and only `context/connectors/` imports the Synced writer.
+
+The host modules for artifacts and their pages, Moment Applets, made games, Ongoing things, local calendar events, Agent artifacts and reports, the board, Service presets and Service sync snapshots go through the entry. `node scripts/context-entry-check.ts` (in `test:core`) checks it with fictional records.
+
 **Next steps**, not built yet:
 
-1. **One envelope.** Every record carries the same envelope: source, author, time, version, derived-from and visibility.
-2. **One entry and one search.** A single read/write entry applies Grants and writes the audit, and one search covers all four kinds. Today `world_context` (`context/connectors/service-context.ts`) searches Synced Service snapshots only, and conversations and website recordings have their own indexes.
+1. **The rest through the entry.** Attention items and reviews, Agent asks, drafts, service requests, conversations, website recordings, the companion and the library still use the ledger's own methods; the Grants check and audit move into the entry with them, and `world_context` searches through it.
+2. **Storage.** One SQLite database for every envelope plus `blobs/<sha256>` for bodies, with a migration that keeps the old files as a backup.
 3. **Drafts and pins.** A new Made record starts as a draft until it is used or pinned. Drafts are not deleted on their own; the person may delete them.
 
 ## One durable copy, several appropriate formats

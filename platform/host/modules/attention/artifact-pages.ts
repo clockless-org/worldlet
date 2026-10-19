@@ -1,5 +1,5 @@
 import {WebContentsView} from 'electron';
-import {ARTIFACT_PAGE_LIMITS,ARTIFACT_PAGE_MAKER,ARTIFACT_PAGE_ROOM,artifactPageActions,artifactPageBrief,artifactPageBudget,artifactPageDocument,artifactPageProblems,artifactPageTask,artifactPageTrialProblems,placeArtifactMaterials,readArtifact,readArtifactPage,readArtifactPageConsole,readArtifactPageSpec,validArtifactId,type Artifact,type ArtifactPage,type ArtifactPageSpec} from '../../../../context/store/index.ts';
+import {contextReader,contextWriter,ARTIFACT_PAGE_LIMITS,ARTIFACT_PAGE_MAKER,ARTIFACT_PAGE_ROOM,artifactPageActions,artifactPageBrief,artifactPageBudget,artifactPageDocument,artifactPageProblems,artifactPageTask,artifactPageTrialProblems,placeArtifactMaterials,readArtifact,readArtifactPage,readArtifactPageConsole,readArtifactPageSpec,validArtifactId,type Artifact,type ArtifactPage,type ArtifactPageSpec} from '../../../../context/store/index.ts';
 import {WorldletError} from '../../files.ts';
 import {FOX,type FoxService} from '../../services.ts';
 import type {Host,Row} from '../../types.ts';
@@ -23,8 +23,8 @@ export function installArtifactPages(host:Host){
  const own=()=>store.writable&&!store.sampleEnabled();
  const jobs=new Map<string,Job>();
  let waiting:Job|null=null,made:{day:string;count:number}|null=null;
- const artifact=(id:string):Artifact|null=>validArtifactId(id)?store.ledger().artifactRows().map(readArtifact).find(a=>a?.id===id)??null:null;
- const kept=(id:string):ArtifactPage|null=>{try{return validArtifactId(id)?readArtifactPage(store.ledger().artifactPage(id)):null;}catch(error){host.diagnostics.record(error,'artifactPages');return null;}};
+ const artifact=(id:string):Artifact|null=>validArtifactId(id)?contextReader(store.context()).bodies('artifacts').map(readArtifact).find(a=>a?.id===id)??null:null;
+ const kept=(id:string):ArtifactPage|null=>{try{return validArtifactId(id)?readArtifactPage(contextReader(store.context()).get('artifact-pages',id)?.body??null):null;}catch(error){host.diagnostics.record(error,'artifactPages');return null;}};
  const prune=()=>{for(const id of jobs.keys())if(fox().appletTask(id)!==ARTIFACT_PAGE_MAKER.id)jobs.delete(id);};
  const today=()=>new Date().toLocaleDateString('sv');
 
@@ -56,7 +56,7 @@ export function installArtifactPages(host:Host){
   contents.on('console-message',details=>{
    if(view!==next)return;
    const report=readArtifactPageConsole(details.message);if(!report)return;
-   if(report.state)try{const current=kept(id);if(current&&own())store.ledger().saveArtifactPage({...current,state:report.state,updatedAt:Date.now()/1000});}catch(error){host.diagnostics.record(error,'artifactPages');}
+   if(report.state)try{const current=kept(id);if(current&&own())contextWriter(store.context(),'person').write('artifact-pages',{save:[{...current,state:report.state,updatedAt:Date.now()/1000}]});}catch(error){host.diagnostics.record(error,'artifactPages');}
    if(typeof report.action==='number')page.event('worldlet:artifact-page',{id,action:report.action});
    // A page taller than its rectangle is scaled down until it fits; it never scrolls.
    if(report.fit&&report.fit.height&&report.fit.scrollHeight>report.fit.height+2&&zoom>.5){zoom=Math.max(.5,Math.floor(zoom*report.fit.height/report.fit.scrollHeight*100)/100);contents.setZoomFactor(zoom);}
@@ -111,8 +111,9 @@ export function installArtifactPages(host:Host){
    }
    if(problems.length)return {ok:false,problems,message:'Not saved yet. Fix every problem, then save the whole page again.'};
    const t=Date.now()/1000;
-   store.ledger().saveArtifactPage({id:job.id,html,size:job.size,theme:job.spec.theme,state:{},createdAt:t,updatedAt:t});
-   const ids=store.ledger().artifactPageIds();if(ids.length>ARTIFACT_PAGE_LIMITS.pages)store.ledger().deleteArtifactPages(ids.slice(ARTIFACT_PAGE_LIMITS.pages));
+   const context=contextWriter(store.context(),'fox');
+   context.write('artifact-pages',{save:[{id:job.id,html,size:job.size,theme:job.spec.theme,state:{},createdAt:t,updatedAt:t}]});
+   const ids=store.ledger().artifactPageIds();if(ids.length>ARTIFACT_PAGE_LIMITS.pages)context.remove('artifact-pages',ids.slice(ARTIFACT_PAGE_LIMITS.pages));
    if(shown===job.id)hide();
    page.event('worldlet:artifact-page',{id:job.id,ready:true});
    return {ok:true,message:'Saved and tried at the card’s size. The World shows it now. Reply with the single word Done.'};

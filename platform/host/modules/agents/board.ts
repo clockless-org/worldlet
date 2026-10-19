@@ -1,5 +1,7 @@
 import {BOARD_PROVIDERS,BOARD_REASONS,boardPresetIds,defineBoard,readBoardReadArgs,readStoredBoard,resolveBoard,type BoardRead} from '../../../../context/connectors/index.ts';
 import {servicePresetRead} from '../../../../context/connectors/index.ts';
+import {contextReader,contextWriter} from '../../../../context/store/index.ts';
+import {ledgerContext} from '../../store/context-storage.ts';
 import {agentBoardRecords} from '../../../../agent/gate/index.ts';
 import type {AgentListEntry} from '../../../../contracts/agent-reports.ts';
 import type {BoardRecord} from '../../../../contracts/board.ts';
@@ -37,7 +39,7 @@ const PARALLEL=4;
 export function createWorldBoard({ledger,read,agents=()=>null,now=()=>new Date().toISOString(),clock=()=>Date.now()}:
  {ledger:()=>BoardLedger|null;read:ServiceReader;agents?:AgentLister;now?:()=>string;clock?:()=>number}):WorldBoard {
  const reused=new Map<string,{at:number;records:ServiceRecords}>();
- const stored=(db:BoardLedger):BoardRecord|null=>readStoredBoard(db.board());
+ const stored=(db:BoardLedger):BoardRecord|null=>readStoredBoard(contextReader(ledgerContext(db)).bodies('board')[0]??null);
  /** Each named preset's read: from a recent read, or the Service now; why not, when it cannot be read. */
  async function reads(presets:readonly ServicePreset[],ids:readonly string[],canRead:(provider:string,operation:string)=>boolean):Promise<Record<string,BoardRead>> {
   const out:Record<string,BoardRead>={},queue=ids.flatMap(id=>{const preset=presets.find(item=>item.id===id);return preset?[preset]:[];});
@@ -84,7 +86,8 @@ export function createWorldBoard({ledger,read,agents=()=>null,now=()=>new Date()
     if(operation==='define'){
      const before=loadServicePresets(db),current=stored(db);
      const defined=defineBoard(current,before,input,agentId,now());
-     db.transaction(()=>{storeServicePresets(db,before,defined.presets);db.saveBoard(defined.board as unknown as Row);});
+     const context=contextWriter(ledgerContext(db),{by:'agent',id:agentId});
+     context.transaction(()=>{storeServicePresets(db,before,defined.presets,{by:'agent',id:agentId});context.write('board',{save:[defined.board as unknown as Row]});});
      return {ok:true,revision:defined.board.revision,guidance:'The person\'s board now shows this. Read it with board/read to see each block\'s value or error.'};
     }
     return {error:'Unknown board operation.'};

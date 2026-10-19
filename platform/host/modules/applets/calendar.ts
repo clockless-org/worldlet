@@ -1,5 +1,6 @@
 import {Notification} from 'electron';
 import {calendarAlerts,mergeCalendarEvent,orderCalendarEvents,readCalendarEvent,validCalendarEventId,type CalendarOccurrence,type LocalCalendarEvent} from '../../../../context/applets/index.ts';
+import {contextReader,contextWriter} from '../../../../context/store/index.ts';
 import {WorldletError} from '../../files.ts';
 import type {Host} from '../../types.ts';
 
@@ -13,7 +14,7 @@ export function installCalendar(host:Host){
  const own=()=>store.writable&&!store.sampleEnabled();
  const all=():LocalCalendarEvent[]=>{
   if(!own())return [...practice.values()];
-  try{return store.ledger().calendarEventRows().flatMap(row=>{const event=readCalendarEvent(row);return event?[event]:[];});}
+  try{return contextReader(store.context()).bodies('calendar-events').flatMap(row=>{const event=readCalendarEvent(row);return event?[event]:[];});}
   catch(error){host.diagnostics.record(error,'calendar');return [];}
  };
  const changed=(id='')=>{page.event('worldlet:calendar-events',{id});alerts();};
@@ -47,7 +48,7 @@ export function installCalendar(host:Host){
     if(!next)throw new WorldletError('That event needs a valid date.');
     const list=all(),saved=mergeCalendarEvent(list.find(e=>e.id===next.id),next,now);
     const {forget}=orderCalendarEvents([saved,...list.filter(e=>e.id!==saved.id)]);
-    if(own())store.ledger().saveCalendarEvents([saved as any],forget);
+    if(own())contextWriter(store.context(),'person').write('calendar-events',{save:[saved as any],forget});
     else{practice.set(saved.id,saved);for(const id of forget)practice.delete(id);}
     changed(saved.id);
     return {ok:true,event:saved};
@@ -55,7 +56,7 @@ export function installCalendar(host:Host){
    if(operation==='delete'){
     const id=String(request.id??'');
     if(!validCalendarEventId(id))throw new WorldletError('That is not an event.');
-    if(own())store.ledger().saveCalendarEvents([],[id]);else practice.delete(id);
+    if(own())contextWriter(store.context(),'person').remove('calendar-events',[id]);else practice.delete(id);
     changed(id);
     return {ok:true};
    }

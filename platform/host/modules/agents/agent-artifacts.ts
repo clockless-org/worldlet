@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
-import {artifactId,readArtifact,type Artifact} from '../../../../context/store/index.ts';
+import {artifactId,contextReader,contextWriter,readArtifact,type Artifact} from '../../../../context/store/index.ts';
+import {ledgerContext} from '../../store/context-storage.ts';
 import {findAgentArtifacts,readAgentArtifactRead,readAgentArtifactSave,saveAgentArtifact} from '../../../../agent/gate/index.ts';
 import type {Row} from './types.ts';
 
@@ -20,7 +21,7 @@ export const agentArtifactId=(agentId:string,key:string)=>'art-'+crypto.createHa
 
 export function createAgentArtifacts({ledger,name,changed,clock=()=>Date.now(),newId=()=>artifactId()}:
  {ledger:()=>ArtifactLedger|null;name:(agentId:string)=>string;changed:(id:string)=>void;clock?:()=>number;newId?:()=>string}):AgentArtifacts {
- const load=(db:ArtifactLedger):Artifact[]=>db.artifactRows().flatMap(row=>{const artifact=readArtifact(row);return artifact?[artifact]:[];});
+ const load=(db:ArtifactLedger):Artifact[]=>contextReader(ledgerContext(db)).bodies('artifacts').flatMap(row=>{const artifact=readArtifact(row);return artifact?[artifact]:[];});
  const failure=(error:unknown)=>({error:error instanceof Error&&error.message?error.message:'Could not do that.'});
  return {
   call(agentId,args,readsAll){
@@ -31,8 +32,9 @@ export function createAgentArtifacts({ledger,name,changed,clock=()=>Date.now(),n
     if(operation==='save'){
      const save=readAgentArtifactSave(input),list=load(db);
      const {artifact,forget}=saveAgentArtifact(list,save,{agentId,agentName:name(agentId),id:save.key?agentArtifactId(agentId,save.key):newId(),now:clock()/1000});
-     db.saveArtifacts([artifact as unknown as Row],forget);
-     if(forget.length)db.deleteArtifactPages(forget);
+     const context=contextWriter(ledgerContext(db),{by:'agent',id:agentId});
+     context.write('artifacts',{save:[artifact as unknown as Row],forget});
+     context.remove('artifact-pages',forget);
      changed(artifact.id);
      return {ok:true,id:artifact.id,savedAt:new Date(artifact.updatedAt*1000).toISOString(),guidance:'The person sees this artifact in their Journal. Save again with the same key to replace it.'};
     }

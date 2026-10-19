@@ -201,7 +201,7 @@ Shared companion limits and timestamp/UUID policy live in
 | Core Scheduling | `agent/tasks/index.ts` | Claims, leases, fencing, retries, pools, deliveries and operation outcomes |
 | Core Attention | `agent/attention/index.ts` | Visibility, relevance inputs, suppression, synthesis budgets |
 | Core Activity | `context/applets/activity.ts`, `contracts/activity.ts` | Local observation schemas, visit correlation, sampled foreground dwell, snapshot changes and redaction; no IO |
-| Core Items | `context/store/index.ts` | Identity, validation, state transitions, evidence projections; `worldHistoryQuery` and `worldHistoryPage` own shared history filtering and bounded retrieval |
+| Core Items | `context/store/index.ts` | Identity, validation, state transitions, evidence projections; `worldHistoryQuery` and `worldHistoryPage` own shared history filtering and bounded retrieval; `contextReader` and `contextWriter` are the one way in to every Context domain, with its envelope and one search across kinds ([one way in](../context/store/STORAGE.md#one-way-in)) |
 | Core Context | `context/connectors/index.ts` | Source context, validation, schema and layout; Service sync snapshots, the saved Service context search (`world_context`) and selected Notion pages |
 | Core Companion / Agent | `agent/companion/index.ts`, `agent/gate/index.ts` | Portable memory/history, guidance, model freshness and response classification |
 | Core Browser / Tools | `agent/applets/index.ts`, `agent/gate/index.ts` | Browser action policy and declared tools; no browser IO |
