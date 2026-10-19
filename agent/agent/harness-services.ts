@@ -77,7 +77,7 @@ export const HARNESS_SERVICES:Readonly<Record<string,HarnessServices>>=Object.fr
  codex:row('codex',{conversation:'native',history:'files',skills:'files',connections:'files',memory:'files'},
   {rules:'files',revokeNote:'Codex keeps these in the rules folder of its home (~/.codex/rules). Delete a line there to have it ask again.'}),
  pi:row('pi',{conversation:'native',history:'files',skills:'files',memory:'files'}),
- // Fox's Agent on another computer (core/phone/README.md#another-computers-agent): each turn goes sealed to the paired
+ // Fox's Agent on another computer (agent/phone/README.md#another-computers-agent): each turn goes sealed to the paired
  // Worldlet there, which runs it on that computer's own Harness in a session per Fox thread and sends its World tool
  // calls back, and its permission prompts come here as approval cards; its `status` names the computer, and that Worldlet's `desktop` slot lists the person's agents there.
  remote:row('remote',{conversation:'worldlet',location:'worldlet',agents:'worldlet',approvals:'worldlet'}),

@@ -51,7 +51,7 @@ private val paperInk = Color(0xFF203B30)
  * An Applet's website, opened in this app rather than a browser or the site's own app (owner request 2026-10-07: "不要
  * 跳转，在我们自己的app里做"): a bar with ✕, the page's title, back, forward and reload, and the page below. Sign-ins
  * made here stay on this phone, in this app's own website storage. What happens on the page goes to the computer,
- * which keeps it in the World by its browser's rules (core/phone/README.md); the observer is the computer's own
+ * which keeps it in the World by its browser's rules (agent/phone/README.md); the observer is the computer's own
  * (assets/web-record.js, made by scripts/phone-web-record.mjs). Back goes back in the page, then closes it.
  */
 @SuppressLint("SetJavaScriptEnabled")

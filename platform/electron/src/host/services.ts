@@ -2,7 +2,7 @@ import type {ServiceRead} from '../../../../contracts/services.ts';
 import type {NativeImage} from 'electron';
 import type {Row} from './types.ts';
 import type {HarnessApprovals,HarnessCalls,HarnessEvents,HarnessSend,HarnessSkills,HarnessTools,HarnessVoice} from '../../../../contracts/harness-services.ts';
-import type {PhonePushRequest} from '../../../../core/phone/index.ts';
+import type {PhonePushRequest} from '../../../../agent/phone/index.ts';
 import type {AgentAuditEntry,AgentIdentity,Grant} from '../../../../contracts/agent-identity.ts';
 import type {McpSession,PosthogSettings} from '../../../../context/accounts/index.ts';
 import type {PosthogRequest} from '../../../../agent/agent/index.ts';
@@ -259,16 +259,16 @@ export interface PhoneService {
  publish(slot:'widgets',value:unknown):Promise<boolean>;
  /** Seconds since the paired phone was last open or sent something; null when it never was. */
  idleSeconds():number|null;
- /** Notifies the paired phone (core/phone PhonePush), only while it is paired and not open and never in setup or the
+ /** Notifies the paired phone (agent/phone PhonePush), only while it is paired and not open and never in setup or the
   * sample world; resolves whether the relay sent it. Routines and background task reports call it directly. */
  notify(push:PhonePushRequest):Promise<boolean>;
- /** The turn Fox is streaming (core/phone phoneLive) for an open phone or browser, from a turn the host runs without the
+ /** The turn Fox is streaming (agent/phone phoneLive) for an open phone or browser, from a turn the host runs without the
   * World page (FoxService.converse); the done update also pushes the reply to a phone that is put away. */
  live?(value:Row):Promise<boolean>;
- /** The browser link to this World for another device (core/phone/README.md#web, `kind: 'web'`): the one there is, or a
+ /** The browser link to this World for another device (agent/phone/README.md#web, `kind: 'web'`): the one there is, or a
   * new one when there is none. The Agent's `world/link` hands it to the person; it needs no World page. */
  worldLink?():Promise<Row>;
- /** The full World's link for another device (`kind: 'world'`, core/phone/world-room.ts): the one there is, or a new one. */
+ /** The full World's link for another device (`kind: 'world'`, agent/phone/world-room.ts): the one there is, or a new one. */
  worldRoomLink?():Promise<Row>;
  /** A new full World link in place of the old one, whose pages close (a browser signed out of the World's address). */
  worldRoomRenew?():Promise<Row>;
@@ -372,7 +372,7 @@ export interface DesktopCompanionService {
  backdropImage?():NativeImage|null;
 }
 export const DESKTOP_COMPANION='desktopCompanion';
-/** Run in background (core/phone/README.md#web): a preference set from the browser link's section (modules/phone) and
+/** Run in background (agent/phone/README.md#web): a preference set from the browser link's section (modules/phone) and
  * cleared when that link ends. Closing the World then leaves no window, not even Fox, and a login launch opens none. */
 export const RUN_IN_BACKGROUND='worldlet.runInBackground';
 export interface AppUpdatesService {snapshot():Row;activate():Promise<Row>}

@@ -648,7 +648,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='onboarding'&&c.operation==='setup')),false,'onboarding setup is not redone');
   assert.deepEqual(errors,[]);await page.close();
  }
- // My Agent is on another computer (core/phone/README.md#another-computers-agent): the code from Worldlet there pairs
+ // My Agent is on another computer (agent/phone/README.md#another-computers-agent): the code from Worldlet there pairs
  // this one with it, and setup goes on to the second half; a refused code says why and the code box stays.
  {
   const page=await browser.newPage({viewport:{width:1024,height:700},reducedMotion:'reduce'});const errors=pageErrors(page);

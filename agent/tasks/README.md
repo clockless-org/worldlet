@@ -26,7 +26,7 @@ The host action `taskPanel` (Electron `modules/fox/index.ts`) reads everything i
 
 ## Ongoing things
 
-An **ongoing thing** is a conversation brought from another Agent that is really one job carried on over days, made into its own Applet (owner design 2026-10-03, the [mobile Applet world](../../core/phone/README.md#payloads)). An OpenClaw channel such as "Discord · #diet-and-health" or a long Claude Code session such as "worldlet · Sign-in fix" is not a one-off chat: the person keeps coming back to it. Once brought into Worldlet it can have a place of its own instead of hiding in Fox's past conversations.
+An **ongoing thing** is a conversation brought from another Agent that is really one job carried on over days, made into its own Applet (owner design 2026-10-03, the [mobile Applet world](../phone/README.md#payloads)). An OpenClaw channel such as "Discord · #diet-and-health" or a long Claude Code session such as "worldlet · Sign-in fix" is not a one-off chat: the person keeps coming back to it. Once brought into Worldlet it can have a place of its own instead of hiding in Fox's past conversations.
 
 On the computer Fox **proposes**; it never makes anything on its own. On the paired phone every such conversation is listed as a **thing** under Applets, of any kind and whether or not Fox proposed it (`ongoingCandidates`, owner request 2026-10-11); the first line the person says in one there keeps it, so it becomes an Applet with its own thread. Since 2026-10-07 what Fox offers is a page about a **theme**, not an Applet (Kelvin: "这个 applet 本身它得是有一个主题 … 你就做 artifact 吧，先别做 applet 了"): see [Themes](#themes). Conversations kept as Applets before then stay Applets.
 

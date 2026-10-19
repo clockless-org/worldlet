@@ -39,7 +39,7 @@ export function installExternalEvents(host:Host):{channel(events:HarnessExternal
   void agent.status(agent.home('private')).then(status=>{agentName=typeof status?.name==='string'?status.name:'';}).catch(()=>{});
   try{stop=source.subscribe(received);}catch(error){host.diagnostics.record(error,'externalEvents');}
  }
- // A Worth Knowing item that cites a pending event goes to the phone once (core/phone notify keeps it quiet while the
+ // A Worth Knowing item that cites a pending event goes to the phone once (agent/phone notify keeps it quiet while the
  // phone is open, during setup and in the practice world).
  store.onChange(()=>{
   if(!pending.size||!own())return;

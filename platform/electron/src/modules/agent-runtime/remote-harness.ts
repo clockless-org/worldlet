@@ -7,7 +7,7 @@ import type {HarnessApprovalChoice} from '../../../../../contracts/harness-servi
 import {NO_ROUTINES,PortableAdapter} from './external.ts';
 import type {Adapter,AgentEventHandler,AgentRoutines,AgentRuntime,Row,RuntimeContext} from './types.ts';
 
-// Fox's Agent on another computer (core/phone/README.md#another-computers-agent; Harness service `location` remote):
+// Fox's Agent on another computer (agent/phone/README.md#another-computers-agent; Harness service `location` remote):
 // the person's always-on computer runs Worldlet with their Agent, and this Worldlet is paired with it. Fox's turns go
 // there (the main conversation, an item card's and an Applet's thread, each its own session there) with this
 // companion's instructions and the current view, and their World tool calls come back to run here, so Fox still acts in

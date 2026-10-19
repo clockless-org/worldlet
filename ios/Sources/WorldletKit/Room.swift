@@ -8,7 +8,7 @@ import CryptoKit
 import Crypto
 #endif
 
-/// One WebSocket to the pairing room (core/phone room.ts); tests replace it.
+/// One WebSocket to the pairing room (agent/phone room.ts); tests replace it.
 public protocol RoomSocket: Sendable {
     func send(_ text: String) async throws
     /// The next message; throws once the socket closed.
@@ -45,7 +45,7 @@ private struct URLSessionRoomSocket: RoomSocket, @unchecked Sendable {
     func close() { task.cancel(with: .normalClosure, reason: nil) }
 }
 
-/// The room's address on the relay and the subprotocols the phone opens it with (core/phone room.ts roomEntry): the room
+/// The room's address on the relay and the subprotocols the phone opens it with (agent/phone room.ts roomEntry): the room
 /// is named by the hash of both token hashes, and the phone gets in with its own token and the computer's hash.
 public func roomEntry(keys: PairKeys, relay: URL) -> (url: URL, protocols: [String]) {
     func hex(_ text: String) -> String { SHA256.hash(data: Data(text.utf8)).map { String(format: "%02x", $0) }.joined() }

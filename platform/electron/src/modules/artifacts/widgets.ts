@@ -1,6 +1,6 @@
 import {dialog} from 'electron';
 import {artifactPage,readWidgetData,readyApplet,widgetWithData,WIDGET_APPLET,WIDGET_LIMITS,checkWidgetSource,mergeWidgetState,orderWidgets,readWidget,readWidgetConsole,readWidgetState,validWidgetId,widgetActive,widgetDocument,widgetHousekeeping,widgetId,widgetRecord,widgetStateChanges,widgetTask,widgetTrialProblems,widgetValues,type Widget,type WidgetState} from '../../../../../context/artifacts/index.ts';
-import {phoneWidgets} from '../../../../../core/phone/index.ts';
+import {phoneWidgets} from '../../../../../agent/phone/index.ts';
 import {readArtifact,validArtifactId} from '../../../../../context/artifacts/index.ts';
 import {WorldletError} from '../../files.ts';
 import {FOX,PHONE,WIDGETS,type FoxService,type PhoneService,type WidgetsService} from '../../host/services.ts';

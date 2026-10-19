@@ -456,7 +456,7 @@ try{
   desktop.stop();
   console.log('PASS another app in front puts Fox on the desktop; the World coming back brings it home');
  }
- // Run in background (core/phone/README.md#web): no window stays, not even Fox, while the app keeps running for a browser link.
+ // Run in background (agent/phone/README.md#web): no window stays, not even Fox, while the app keeps running for a browser link.
  {
   const world=new BaseWindow({width:400,height:300,show:false}),view=new WebContentsView();
   world.contentView.addChildView(view);view.setBounds({x:0,y:0,width:400,height:300});
