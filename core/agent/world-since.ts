@@ -4,7 +4,7 @@
 // as one short note that leads the next turn's input (contracts/harness-services.ts HarnessTurnInput.world). The
 // Harness keeps it in the session's context like any line, so Fox remembers what happened beside the chat. Only lines
 // the History page already shows; the person's own page steps (`activity.*`: Applets opened, sites visited) stay out, as
-// they do of every turn's recent history (core/items recentWorldHistory). Kept ES-compatible for JavaScriptCore and Jint.
+// they do of every turn's recent history (context/items recentWorldHistory). Kept ES-compatible for JavaScriptCore and Jint.
 import {WORLD_LOG_KINDS,worldLogLines} from '../../context/activity/index.ts';
 import {harnessSessionThread} from './harness-sessions.ts';
 

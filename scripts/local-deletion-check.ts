@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-import {localDeletionRequest,localDeletionRecord,localDeletionSources,localDeletionTrail} from '../core/items/index.ts';
+import {localDeletionRequest,localDeletionRecord,localDeletionSources,localDeletionTrail} from '../context/items/index.ts';
 import {hostFeatures} from '../platform/bridge/features.ts';
 import {bundleScript} from './browser-test.ts';
 

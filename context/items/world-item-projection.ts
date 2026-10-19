@@ -1,5 +1,5 @@
 import type {WorldItem} from '../../contracts/world-item.ts';
-import {characters} from '../companion/index.ts';
+import {characters} from '../../core/companion/index.ts';
 const string=(value:unknown)=>typeof value==='string'?value:'';
 const equal=(a:unknown,b:string)=>typeof a==='string'&&a.normalize('NFC')===b.normalize('NFC');
 function refs(item:WorldItem):WorldItem[]{

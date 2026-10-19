@@ -267,7 +267,7 @@ async function mailConversation({host,js,wait,mark,press,seen}:MailContext){
   for(const row of db.history({since:Math.floor(since)-1,limit:2000})){
    if(!['tool.requested','harness.event'].includes(row.kind))continue;
    let payload=db.queryWorldHistory({seq:row.seq}).events?.[0]?.payload;
-   // A payload over 4000 characters comes back as a stub (core/items/world-history.ts): `_source_result` carries the
+   // A payload over 4000 characters comes back as a stub (context/items/world-history.ts): `_source_result` carries the
    // Mail records, so a full read of four unread threads hid the receipt (4427: Fox read Mail, the check missed it).
    if(payload?.truncated===true&&payload.useContentOffset===true){
     let text='',offset:number|undefined=0;

@@ -5,7 +5,7 @@ import {interruptsBackground} from '../core/tasks/background-work.ts';
 import assert from 'node:assert/strict';
 import {APP_DEFINITIONS} from '../core/applets/catalog.ts';
 import {attentionCompletion,attentionPlanCurrent,discardedAttentionRemovals,matchingAttentionID,observeAttention,attentionDependencies,attentionCurrent,projectAttention,planAttention,startAttentionBudget,finishAttentionBudget,suppressedAttention,weatherObservationText,validateAttentionRegistrations,ATTENTION_BACKLOG_SECONDS,ATTENTION_COALESCE_SECONDS,ATTENTION_FULL_SEEDS} from '../core/attention/attention-center.ts';
-import {updateWorldItem} from '../core/items/world-item-state.ts';
+import {updateWorldItem} from '../context/items/world-item-state.ts';
 import type {AttentionRegistration,AttentionFact,AttentionBudget} from '../contracts/attention.ts';
 const now=Date.parse('2026-09-24T12:00:00Z')/1000;
 const registration=(provider:string):AttentionRegistration=>({version:1,provider,reader:'source-reader',intervalMinutes:30,freshnessMinutes:120});

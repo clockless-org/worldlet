@@ -1,6 +1,6 @@
 import type {World,WorldPage} from '../../contracts/world.ts';
 import dataset from './sample-persona.json' with {type:'json'};
-import {projectWorldItems} from '../../core/items/index.ts';
+import {projectWorldItems} from '../../context/items/index.ts';
 
 export const SAMPLE_DATASET_ID=dataset.id;
 // The trip diorama binds to four pages by id; the ids live with the data.

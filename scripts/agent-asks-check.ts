@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {AGENT_ASK_LIMITS,AGENT_ASK_PROVIDER,type AgentAsk} from '../contracts/agent-asks.ts';
 import {ASK_REASONS,askApprovesDrafts,answerAsk,askAttachmentIsImage,askAttachmentName,askAttentionItem,askClaimable,askItemId,claimAsks,postAsk,readAskAttachment,readAskPost,readAsks,readStoredAsk,resolveAsk} from '../core/agent/asks.ts';
-import {validateWorldItem} from '../core/items/world-item-validation.ts';
+import {validateWorldItem} from '../context/items/world-item-validation.ts';
 import {ORDER_REASONS,askWakes,orderAuditEntry,readOrders,readWakeCommand,wakeArgv,wakeAuditEntry,wakeDelay} from '../core/agent/orders.ts';
 import {AGENT_WAKE_LIMITS} from '../contracts/agent-asks.ts';
 

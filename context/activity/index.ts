@@ -1,5 +1,5 @@
 import type {ActivityObservation,ActivityState,ActivityFact} from '../../contracts/activity.ts';
-import {journalPayload} from '../../core/items/index.ts';
+import {journalPayload} from '../items/index.ts';
 const id=(s:unknown):s is string=>typeof s==='string'&&/^[a-zA-Z0-9_.:-]{1,180}$/.test(s);
 const short=(s:unknown,n:number)=>typeof s==='string'?s.slice(0,n):'';
 /** URLs lose credentials, query and fragment values; originals are not telemetry. */

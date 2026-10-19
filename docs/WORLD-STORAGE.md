@@ -49,7 +49,7 @@ UI and Harness use domain operations through public contracts, never direct ledg
 mutation. Source text cannot instruct writes. External action outcomes are recorded
 separately from local state changes; cancellation is not rollback.
 
-[Storage and tool implementation](../core/items/STORAGE.md) owns schemas, retention,
+[Storage and tool implementation](../context/items/STORAGE.md) owns schemas, retention,
 backup and commands. [Portability](AGENT-PORTABILITY.md) owns Harness replacement;
 [Attention](ATTENTION-CENTER.md) owns user-facing item lifecycle. Validate transactions,
 restart, failure and restoration with fictional records before real-account acceptance.

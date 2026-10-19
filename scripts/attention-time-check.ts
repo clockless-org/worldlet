@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {attentionLaterUntil,validAttentionTime} from '../core/attention/index.ts';
 import {attentionTimeRows,attentionGroupWhen} from '../core/attention/index.ts';
-import {prepareWorldItem,updateWorldItem} from '../core/items/world-item-state.ts';
-import {projectWorldItems,refreshItemPage} from '../core/items/world-items.ts';
+import {prepareWorldItem,updateWorldItem} from '../context/items/world-item-state.ts';
+import {projectWorldItems,refreshItemPage} from '../context/items/world-items.ts';
 const zone='America/Los_Angeles';
 for(const [from,to,hours] of [
  ['2026-03-07T12:00:00-08:00','2026-03-08T19:00:00.000Z',23],

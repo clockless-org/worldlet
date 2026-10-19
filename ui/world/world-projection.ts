@@ -1,5 +1,5 @@
 import {sourceContextRows,compileWorld} from '../../core/context/index.ts';
-import {projectWorldItems} from '../../core/items/index.ts';
+import {projectWorldItems} from '../../context/items/index.ts';
 import type {World} from '../../contracts/world.ts';
 import {applyPersonalWorld} from './world-presets.ts';
 import {applyModuleWorld} from './world-modules.ts';

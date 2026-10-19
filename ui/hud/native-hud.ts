@@ -1,6 +1,6 @@
 import {mountDevBuildUpdate,commitAge} from './dev-build-update.ts';
 import {hostFeatures} from '../../platform/bridge/features.ts';
-import {refreshItemPage} from '../../core/items/index.ts';
+import {refreshItemPage} from '../../context/items/index.ts';
 import {sourcesReading} from '../../core/applets/index.ts';
 import {fitAttentionPanel} from './fit-attention-panel.ts';
 import {mountWorldLog} from './world-log.ts';

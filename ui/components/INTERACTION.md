@@ -22,7 +22,7 @@ This is the current specification. The UI system lives in code; this document ex
 | Content templates | `ui/components/templates.ts`, `ui/world/travel-experiment.ts` |
 | Current 2.5D style and shared lighting | [Style and lighting contract](../../resources/styles/builtin/STYLE.md), [Sprite world](../world/COMPOSITION.md) |
 | Regions and Applets | [Applet presentation](INTERACTION.md#applet-presentation), `core/applets/catalog.ts`, `ui/world/world-presets.ts` |
-| World data and Fox tools | [World interaction](../../core/items/STORAGE.md#world-interaction) |
+| World data and Fox tools | [World interaction](../../context/items/STORAGE.md#world-interaction) |
 | Sky, weather and audio | [Sky and weather](../world/ENVIRONMENT.md#sky-and-weather), [Background music](../world/ENVIRONMENT.md#background-music) |
 | Acceptance | `scripts/village-camera-check.ts`, `scripts/world-scene-check.ts` (both in `npm run test:ui`), [runtime resource record](../../resources/styles/builtin/assets/world/README.md) |
 

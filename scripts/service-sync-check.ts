@@ -5,7 +5,7 @@ import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {createServicePresets} from '../platform/electron/src/modules/sources/service-presets.ts';
 import {createServiceSync,SERVICE_SYNC_BUCKETS} from '../platform/electron/src/modules/sources/service-sync.ts';
 import {finishServiceSyncPage,serviceSyncPage,SERVICE_SYNC_LIMITS} from '../core/context/index.ts';
-import {localDeletionRecord,localDeletionRequest} from '../core/items/local-deletion.ts';
+import {localDeletionRecord,localDeletionRequest} from '../context/items/local-deletion.ts';
 import {roomDenied,ROOM_DENIED_MESSAGE} from '../contracts/web-world.ts';
 import type {ServiceRead} from '../contracts/services.ts';
 
