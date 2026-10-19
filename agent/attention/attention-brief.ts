@@ -13,7 +13,7 @@ export function attentionBrief(page){
  const location=signal.location||String(signal.summary||'').match(/^(?:Location|Where|地点):\s*(.+)$/im)?.[1];
  if(location){const href=url(location);lines.push('**Where:** '+(href?'[Join / view location]('+href+')':escape(short(location,100))));}
  // The saved summary is model-written for every provider, Calendar included
- // (core/attention/README.md content contract); show only its first sentence.
+ // (agent/attention/README.md content contract); show only its first sentence.
  const summary=signal.summary;
  if(summary&&plain(summary)!==plain(page.title)){
   const first=String(summary).split(/\n|(?<=[.!?。！？])\s+/).map(s=>s.trim()).find(s=>s&&!/^(?:Start|End|Location|Where|When|Title|Subject|From|To):/i.test(s));

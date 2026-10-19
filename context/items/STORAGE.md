@@ -336,7 +336,7 @@ A date validation failure or any invalid entry rolls back the whole batch. A fai
 ### Periodic checks
 
 [Applet runtime](../applets/RUNTIME.md) owns trigger policy, collection windows,
-claims, retries and checkpoints. [Attention Center](../../core/attention/README.md) owns
+claims, retries and checkpoints. [Attention Center](../../agent/attention/README.md) owns
 synthesis and publication. Do not duplicate fixed tick/provider lists here.
 Authorization and private-processing consent remain separate. Failed reads do
 not delete old findings; expired evidence becomes uncertain, not completed.

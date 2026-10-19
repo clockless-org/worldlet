@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {attentionBrief} from '../core/attention/attention-brief.ts';
+import {attentionBrief} from '../agent/attention/attention-brief.ts';
 import {dailyScheduleResult} from '../core/agent/index.ts';
 const page={title:'Annual conference',sourceProvider:'google-calendar',sourceURL:'https://example.com/event',worldItemKind:'event',worldItemSources:[],worldItemSignal:{start:'2026-09-26T09:00:00-07:00',end:'2026-09-26T21:00:00-07:00',location:'Convention Center',summary:'Very long original description. '.repeat(100)}};
 const brief=attentionBrief(page);

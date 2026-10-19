@@ -59,7 +59,7 @@ re-export at its old `index.ts` (and at any other file used from outside this re
 | Layer | Folders |
 | --- | --- |
 | UI | `ui/applets/` `ui/artifacts/` `ui/attention/` `ui/browser/` `ui/companion/` `ui/components/` `ui/distribution/` `ui/games/` `ui/hud/` `ui/onboarding/` `ui/practice/` `ui/shell/` `ui/theme-packages/` `ui/themes/` `ui/web/` `ui/world/` |
-| Agent (to `agent/`) | `core/agent/` `core/tasks/` `core/companion/` `core/tools/` `core/attention/` `agent/onboarding/` |
+| Agent (to `agent/`) | `core/agent/` `core/tasks/` `core/companion/` `core/tools/` `agent/attention/` `agent/onboarding/` |
 | Context (to `context/`) | `context/context/` `context/items/` `context/artifacts/` `context/activity/` `context/accounts/` `context/applets/` `context/board/` `context/browser/` `context/games/` |
 | Agent and Context, split per file | `core/phone/` `core/diagnostics/` `core/distribution/` |
 | Platform | `platform/bridge/` `platform/browser/` `platform/distribution/` `platform/electron/` `platform/install/` `platform/local-tools/` `platform/node/` `platform/web-engine/` |
@@ -77,7 +77,7 @@ component is missing or listed twice. Which layer each folder is in: [folders by
 | World | The place everything sits in: areas, HUD, themes | `ui/world/` `ui/hud/` `ui/themes/` `ui/theme-packages/` | `context/activity/` | `platform/electron/src/modules/world.ts` `platform/electron/src/modules/world-audio/` |
 | Applets | Where the person's data and actions live, with the real website beside them | `ui/applets/` `ui/browser/` `ui/games/` `ui/practice/` | `context/applets/` `context/board/` `context/browser/` `context/games/` | `platform/electron/src/modules/applet-art/` `platform/electron/src/modules/applet-tools/` `platform/electron/src/modules/browser/` `platform/electron/src/modules/calendar/` `platform/electron/src/modules/games/` |
 | Companion | Fox: the one conversation, voice, memory and what Fox is doing | `ui/companion/` | `core/companion/` | `platform/electron/src/modules/fox/` `platform/electron/src/modules/voice/` |
-| Attention | What needs the person now: ranked, at most nine, each waiting for Done, Send or Later | `ui/attention/` | `core/attention/` | `platform/electron/src/modules/attention/` |
+| Attention | What needs the person now: ranked, at most nine, each waiting for Done, Send or Later | `ui/attention/` | `agent/attention/` | `platform/electron/src/modules/attention/` |
 | Tasks | Work that runs without the person: routines, cron jobs, source checks, background drafts and Applet tasks. Fox starts some, Applets start others; the person's Agent does them | (no folder of its own: its status shows in Fox, on Applets and in the Ongoing Applet) | `core/tasks/` | `platform/electron/src/modules/tasks/` |
 | Artifacts & Journal | What work produces: one artifact for every card, draft, page and brief, shown wherever it is needed (Attention, Fox, Applets), and the Journal that keeps them by day | `ui/artifacts/` | `context/artifacts/` | `platform/electron/src/modules/artifacts/` |
 | Agents & Gate | The Agents connected to the World and the one door they pass: the connection to the person's Agent (adapters), World tools over the `worldlet` MCP server (local and remote), per-Agent Grants, approvals and the audit | (no folder of its own: Allow cards show in Attention, Settings › Agents beside Fox) | `core/agent/` `core/tools/` | `platform/electron/src/modules/agent-runtime/` |

@@ -15,7 +15,7 @@ import {createRtcHost} from './rtc-host.ts';
 import {createRemoteAgentHost} from './remote-host.ts';
 import {phoneWebRecording} from './web.ts';
 import {openInBrowser} from '../../system-browser.ts';
-import {attentionLaterUntil,hostAttention} from '../../../../../core/attention/index.ts';
+import {attentionLaterUntil,hostAttention} from '../../../../../agent/attention/index.ts';
 import {onboardingUnfinished} from '../../../../../agent/onboarding/index.ts';
 import {taskPanel} from '../../../../../core/tasks/index.ts';
 import {APP_DEFINITIONS} from '../../../../../context/applets/index.ts';
@@ -137,7 +137,7 @@ export function installPhone(host:Host){
  });
  paired=relay.status().state==='paired';
  let lastActive=0,stopped=false;
- // The Center for a phone or browser while the World page is not there (core/attention hostAttention): the same rows
+ // The Center for a phone or browser while the World page is not there (agent/attention hostAttention): the same rows
  // the desktop builds from the saved World items, published when they change. The page publishes its own whenever it
  // is there. `hostRows` maps each published card to its item's kind and the items it settles.
  let hostFocus:Row|null=null,hostCenterAt=0,hostCenterRevision='',hostSent='';

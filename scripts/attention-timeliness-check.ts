@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
-import {observeAttention,projectAttention,attentionDependencies,attentionOrder,attentionFocusSet,attentionLevel,attentionRankSignals,attentionRankWeights,attentionSignalScore,attentionTimelyLevel,attentionOver,attentionReceivedAt} from '../core/attention/index.ts';
+import {observeAttention,projectAttention,attentionDependencies,attentionOrder,attentionFocusSet,attentionLevel,attentionRankSignals,attentionRankWeights,attentionSignalScore,attentionTimelyLevel,attentionOver,attentionReceivedAt} from '../agent/attention/index.ts';
 import {projectWorldItems,refreshItemPage} from '../context/items/world-items.ts';
 import {prepareWorldItem} from '../context/items/world-item-state.ts';
-import {collectNativeActions} from '../core/attention/index.ts';
+import {collectNativeActions} from '../agent/attention/index.ts';
 import {collectMatters} from '../ui/attention/index.ts';
-import {attentionTimeRows,attentionTimeline} from '../core/attention/index.ts';
+import {attentionTimeRows,attentionTimeline} from '../agent/attention/index.ts';
 // Timeliness in the Attention Center (owner decision 2026-10-04): every item says when its mail
 // arrived and, when it has one, how far away its due date is; fresh and soon-due items rank
 // higher, stale and finished ones lower. Fictional mail only, no account or model.

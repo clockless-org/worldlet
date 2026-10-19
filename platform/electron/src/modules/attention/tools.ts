@@ -1,6 +1,6 @@
 import {AGENT_ASK_PROVIDER} from '../../../../../contracts/agent-asks.ts';
 import {core} from '../../core.ts';
-import {attentionImageURL} from '../../../../../core/attention/index.ts';
+import {attentionImageURL} from '../../../../../agent/attention/index.ts';
 import {WorldletError} from '../../files.ts';
 import type {Row} from '../../host/types.ts';
 import type {AttentionCenter} from './center.ts';
@@ -224,7 +224,7 @@ async function upsertWorldItems(center:AttentionCenter,args:Row,turn:string,moni
     if(!center.attentionSourceAuthorized(p,turn))throw new WorldletError(EVIDENCE.unauthorized);
     if(!read||typeof read.text!=='string')throw new WorldletError(EVIDENCE.unread);
     if(!read.text.includes(quote))throw new WorldletError(EVIDENCE.quote);
-    // The email's own picture travels with its reference, for the card (core/attention/source-image.ts).
+    // The email's own picture travels with its reference, for the card (agent/attention/source-image.ts).
     const image=attentionImageURL(read.image);
     canonical.push({provider:p,id,quote,url:read.url??'',...(image?{image}:{})});
     // Preserve destinations from verified source text, never model-invented links.

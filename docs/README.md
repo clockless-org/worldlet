@@ -342,6 +342,7 @@ Indexed: **284 Markdown documents** and **747 supporting documentation files**.
 
 <details><summary>Module and service documentation (38)</summary>
 
+- [agent/attention/README.md](../agent/attention/README.md)
 - [android/README.md](../android/README.md)
 - [context/applets/INTEGRATIONS.md](../context/applets/INTEGRATIONS.md)
 - [context/applets/MY-APPLETS.md](../context/applets/MY-APPLETS.md)
@@ -358,7 +359,6 @@ Indexed: **284 Markdown documents** and **747 supporting documentation files**.
 - [core/agent/PORTABILITY.md](../core/agent/PORTABILITY.md)
 - [core/agent/REMOTE-MCP.md](../core/agent/REMOTE-MCP.md)
 - [core/agent/WORLD-ADDRESS.md](../core/agent/WORLD-ADDRESS.md)
-- [core/attention/README.md](../core/attention/README.md)
 - [core/diagnostics/ANALYTICS.md](../core/diagnostics/ANALYTICS.md)
 - [core/phone/README.md](../core/phone/README.md)
 - [core/tasks/README.md](../core/tasks/README.md)

@@ -1,5 +1,5 @@
 import {sourceReadAction} from '../../context/applets/index.ts';
-import {attentionFailure} from '../attention/index.ts';
+import {attentionFailure} from '../../agent/attention/index.ts';
 const serviceCodes:Record<string,string>={service_paused:'worldlet_model_paused',service_credits:'worldlet_service_credits',update_required:'worldlet_update_required'};
 /** Error text is classification input only. Persist the code, never the text. */
 export function runtimeFailure(input:{message?:string;cancelled?:boolean;madeProgress?:boolean;now:number;failures:number}){

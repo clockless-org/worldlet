@@ -1,7 +1,7 @@
 // The machine's own zone must not decide what the viewer's zone shows: pin it away from the zones under test.
 process.env.TZ='UTC';
 import assert from 'node:assert/strict';
-import {attentionTimeRows} from '../core/attention/index.ts';
+import {attentionTimeRows} from '../agent/attention/index.ts';
 // An all-day date's heading names its year only when that year is not the viewer's current year, counted in the
 // viewer's zone (not the machine's) near New Year.
 const heading=(value:string,now:string,timeZone:string)=>attentionTimeRows({dueAt:value},{now:new Date(now),locale:'en-US',timeZone})[0].date;

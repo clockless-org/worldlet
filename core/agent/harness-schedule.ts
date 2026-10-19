@@ -4,7 +4,7 @@
 // and, the same for every Harness, how a new run becomes an Attention item and a phone notification and which
 // brought copies Worldlet's own routines leave to the Harness. Kept ES-compatible for JavaScriptCore and Jint.
 import type {HarnessJob,HarnessJobKind,HarnessJobRun,HarnessServiceMode} from '../../contracts/harness-services.ts';
-import {processedAttentionContent} from '../attention/index.ts';
+import {processedAttentionContent} from '../../agent/attention/index.ts';
 import {record,text} from './values.ts';
 
 const clip=(value:string,limit:number)=>[...value].length>limit?[...value].slice(0,limit-1).join('').trimEnd()+'…':value;

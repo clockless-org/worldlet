@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {attentionLevel} from '../core/attention/attention-level.ts';
+import {attentionLevel} from '../agent/attention/attention-level.ts';
 import {attentionIcon} from '../ui/attention/icon.ts';
 const now=Date.now();
 for(const [i,minutes] of [1500,1440,360,60,15].entries())assert.equal(attentionLevel({state:'event',start:now+minutes*60000},now),i+1);
@@ -10,8 +10,8 @@ for(const state of ['needsAction','unseen'])for(const [i,priority] of ['normal',
 }
 console.log('PASS Attention five-level boundaries and pure shape markers.');
 
-const {eventWhen,matterCopy}=await import('../core/attention/index.ts');
-const {upcomingEvents}=await import('../core/attention/index.ts');
+const {eventWhen,matterCopy}=await import('../agent/attention/index.ts');
+const {upcomingEvents}=await import('../agent/attention/index.ts');
 const morning=new Date('2026-09-24T08:43:00');
 const event={title:'Planning',start:'2026-09-24T09:30:00',end:'2026-09-24T10:30:00'};
 const when=eventWhen(event.start,{end:event.end,now:morning});
@@ -29,7 +29,7 @@ assert.equal(matterCopy({title:'Calendar'},signals,pages).when.clock,'9:30 AM–
 console.log('PASS event start/end range, minutes/hours/tomorrow, active/all-day and invalid end.');
 
 {
- const {attentionFocusSet,attentionFocusFit,attentionFocusEvidence,attentionReviewStart,attentionRelevant,attentionFocusMax,attentionFocusFloor}=await import('../core/attention/attention-focus.ts');
+ const {attentionFocusSet,attentionFocusFit,attentionFocusEvidence,attentionReviewStart,attentionRelevant,attentionFocusMax,attentionFocusFloor}=await import('../agent/attention/attention-focus.ts');
  const at=(h:number,m=0)=>new Date(2026,8,29,h,m).getTime();
  const item=(id:string,level=1,state='needsAction',relevant=false)=>({id,level,state,relevant});
  const ids=(f:{ids:string[]})=>f.ids.slice().sort();

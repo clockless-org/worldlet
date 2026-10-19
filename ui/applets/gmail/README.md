@@ -30,7 +30,7 @@ The native adapter supplies Gmail headers and MIME attachment names/sizes when
 available. Attachments are read-only metadata, not download buttons. The
 sender's own HTML styling, remote images, CID images and attachment previews are
 not shown here; only an Attention card may show one picture from the email
-([email pictures](../../../core/attention/README.md#email-pictures)). Missing dates remain explicitly unavailable. No contact lookup or
+([email pictures](../../../agent/attention/README.md#email-pictures)). Missing dates remain explicitly unavailable. No contact lookup or
 invented profile picture is used.
 
 Open and Focus are drawn in the theme's Mail scene by the shared
