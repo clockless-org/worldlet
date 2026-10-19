@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import {listWorldTools,publicWorldToolNames} from '../core/tools/catalog.ts';
 import {worldModules} from '../core/tools/modules.ts';
-import {APP_DEFINITIONS} from '../core/applets/index.ts';
+import {APP_DEFINITIONS} from '../context/applets/index.ts';
 import {CALENDAR_REQUIRED} from '../core/tools/calendar.ts';
 import {SERVICE_ACTIONS,SERVICE_PROVIDERS} from '../contracts/services.ts';
 import {worldActions,describeActions,resolveAction,type WorldAction} from '../core/tools/gateway.ts';

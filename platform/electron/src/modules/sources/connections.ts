@@ -7,7 +7,7 @@ import {digest,WorldletError} from '../../files.ts';
 import {referenceDate} from '../../store/world-store.ts';
 import {APPLE_PROVIDERS,connectApple} from './apple.ts';
 import {nativeFirst} from './content.ts';
-import {GOOGLE_SIGN_IN,SOURCE_PROVIDERS,WORLD_APPS,connectSettings,connectToken} from '../../../../../core/applets/index.ts';
+import {GOOGLE_SIGN_IN,SOURCE_PROVIDERS,WORLD_APPS,connectSettings,connectToken} from '../../../../../context/applets/index.ts';
 import {SIGN_IN_CODE_EVENT} from '../../../../../contracts/platform.ts';
 import {isMigrationSource} from '../../../../../core/agent/index.ts';
 import {agentIntegrationPlans} from '../agent-runtime/agent-integrations.ts';

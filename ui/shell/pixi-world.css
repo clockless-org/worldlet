@@ -291,7 +291,7 @@
 
 .applet-hover-name{position:fixed;z-index:100;pointer-events:none;padding:6px 10px;border-radius:8px;background:rgba(30,43,36,.94);color:#fff;font:600 13px/1.3 var(--ui-font-ui);box-shadow:0 2px 8px #15271f30;white-space:nowrap;max-width:calc(100vw - 16px);overflow:hidden;text-overflow:ellipsis}
 .applet-hover-name[hidden]{display:none}
-/* The person's own Applets (core/applets/MY-APPLETS.md): the device mark's star, then "Yours". */
+/* The person's own Applets (context/applets/MY-APPLETS.md): the device mark's star, then "Yours". */
 .applet-hover-name[data-mine]::after{content:'\2605  Yours';margin-left:8px;color:#f2c56b;font-weight:600}
 
 /* Reuse the approved sculpted exclamation; runtime stays in the base lamp. */

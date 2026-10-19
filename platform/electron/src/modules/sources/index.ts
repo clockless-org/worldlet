@@ -133,7 +133,7 @@ export function installSources(host:Host){
   mailAvatar:body=>mailAvatar(body,store.sampleEnabled()),
   attentionImage:body=>attentionImage(body,store.sampleEnabled()),
   messages:body=>messages.handle(body),
-  // Named, saved Service reads (core/applets/INTEGRATIONS.md#service-presets). Not in ROOM_ALLOWED: a World page on
+  // Named, saved Service reads (context/applets/INTEGRATIONS.md#service-presets). Not in ROOM_ALLOWED: a World page on
   // another device does not change them.
   servicePresets:body=>presets.handle(body),
   serviceSync:body=>sync.handle(body)

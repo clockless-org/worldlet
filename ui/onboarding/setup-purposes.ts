@@ -1,4 +1,4 @@
-// What each app is for (core/applets purpose), in setup's other languages: zh, ja, es as in setup-language.ts.
+// What each app is for (context/applets purpose), in setup's other languages: zh, ja, es as in setup-language.ts.
 export const purposeCopy:Record<string,string[]>={
  'Fox reads and sorts your mail and drafts replies':['Fox 帮你阅读、整理邮件并起草回复','Fox がメールを読んで整理し、返信の下書きを作ります','Fox lee y ordena tu correo y redacta respuestas'],
  'Fox keeps an eye on what’s coming up on your calendar':['Fox 帮你留意日历上的近期安排','Fox がカレンダーのこれからの予定に目を配ります','Fox está atento a lo que viene en tu calendario'],

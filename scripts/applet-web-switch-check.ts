@@ -1,7 +1,7 @@
-import {appletSupport} from '../core/applets/applet-support.ts';
+import {appletSupport} from '../context/applets/applet-support.ts';
 import {hostFeatures} from '../platform/bridge/features.ts';
 import assert from 'node:assert/strict';
-import {APP_DEFINITIONS} from '../core/applets/catalog.ts';
+import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
 // A native Applet whose service also has a website declares that site as `fullView.original`, which is what shows the
 // Native / Web switch in its top bar (ui/shell/notion-world.ts syncAppletMode). Only Applets with no website of
 // their own, or whose website is a different product from the native view, are listed here.

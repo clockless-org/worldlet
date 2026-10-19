@@ -18,10 +18,10 @@ import {McpAccounts} from '../platform/electron/src/modules/sources/mcp-account.
 import {McpSource,McpSourceAccess,McpSourceConnections} from '../platform/electron/src/modules/sources/mcp-source.ts';
 import {GoogleAccount} from '../platform/electron/src/modules/sources/google-account.ts';
 import {GoogleSource,GoogleSourceAccess} from '../platform/electron/src/modules/sources/google-source.ts';
-import {APP_DEFINITIONS,connectToken} from '../core/applets/index.ts';
+import {APP_DEFINITIONS,connectToken} from '../context/applets/index.ts';
 import {validateAttentionRegistrations} from '../core/attention/attention-center.ts';
 import {attentionFollowupReads,attentionReads} from '../core/attention/index.ts';
-import {validateAppletRuntimes} from '../core/applets/runtime.ts';
+import {validateAppletRuntimes} from '../context/applets/runtime.ts';
 import {conversationGuidance} from '../core/companion/conversation-guidance.ts';
 import {listWorldTools} from '../core/tools/index.ts';
 import {withTempDir} from './test-temp.ts';

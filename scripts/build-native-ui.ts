@@ -8,7 +8,7 @@ import {installLoginWatch} from '../platform/bridge/login-watch.js';
 import {installPasskeyWatch} from '../platform/bridge/passkey-watch.js';
 import {installMeetingAudio} from '../platform/bridge/meeting-audio.js';
 import {buildAppletRuntime} from './build-applet-runtime.ts';
-import {APP_DEFINITIONS} from '../core/applets/catalog.ts';
+import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
 import {validateAttentionRegistrations} from '../core/attention/attention-center.ts';
 import {buildWorldAssets} from './build-world-assets.ts';
 import {BUILTIN_STYLE} from '../ui/components/style.ts';

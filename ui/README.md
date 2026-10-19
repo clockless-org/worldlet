@@ -18,4 +18,4 @@ This is UI, the top of the four [layers](../docs/UI-CORE-PLATFORM.md#see-do-know
 
 See the [layer and dependency contract](../docs/UI-CORE-PLATFORM.md#repository-layers).
 
-`index.ts` composes the native application. `shell/` contains application-wide lifecycle, media and page composition. Applet registrations live in `core/applets/`; visual implementations live here.
+`index.ts` composes the native application. `shell/` contains application-wide lifecycle, media and page composition. Applet registrations live in `context/applets/`; visual implementations live here.

@@ -1,6 +1,6 @@
 import type {BrowserSurfaceAction,BrowserSurfaceBodies,SurfaceRect} from '../../contracts/browser-surface.ts';
 import {appletForWebsite} from './applet-match.ts';
-import {getApp,inAppletCatalog,siteAppletPage} from '../../core/applets/index.ts';
+import {getApp,inAppletCatalog,siteAppletPage} from '../../context/applets/index.ts';
 import {uiIcon} from '../components/index.ts';
 import {BROWSER_TABS,appletSite,appletHomeLanding,atAppletHome,atBrowserHome,browserStartsHome,createBrowserHome,createBrowserTabs,createPageMemory,canAddTab,isBrowserTab,tabApplet,tabLabel,pageAddress,typedAddress,livePagePlan,pictureInPictureApplet,foxCopyPlacement,foxStepsStart,foxStepsAdd,foxStepsFinish,foxStepsView,foxStepsWorthShowing,loginSite,loginSavedText,loginFillText} from '../../context/browser/index.ts';
 import {createPictureInPictureOffer,createPictureInPictureWindow} from './picture-in-picture.ts';
@@ -153,7 +153,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  });
  // The panel is open on its page's viewport (it may still be covered).
  function browserInPanel(){return opened&&!!slot?.isConnected&&!content.hidden&&content.dataset.template==='browser';}
- // A catalog Applet (core/applets/applet-support.ts), or one already in the World, is offered for its site; a site
+ // A catalog Applet (context/applets/applet-support.ts), or one already in the World, is offered for its site; a site
  // with no Applet gets Make Applet below instead.
  const offeredMatch=()=>matchedApplet&&(inAppletCatalog(matchedApplet)||root.appletLayout?.has(matchedApplet.id))?matchedApplet:null;
  function syncAppletOffer(url?:string){
@@ -364,7 +364,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   finally{focusBusy=false;syncFocus();}
  };
  // Make Applet, at the top of the Browser (owner request 2026-10-05): the web app open here becomes an Applet of its
- // own (core/applets/site-applet.ts), on the Home ground at once; a site that already has one opens it instead. A site
+ // own (context/applets/site-applet.ts), on the Home ground at once; a site that already has one opens it instead. A site
  // with an offered catalog Applet keeps the offer above, which adds or opens that one.
  const makeOffer=document.createElement('button');makeOffer.type='button';makeOffer.className='scene-control browser-make-applet';makeOffer.hidden=true;
  makeOffer.innerHTML=uiIcon('makeApplet');const makeLabel=document.createElement('span');makeOffer.append(makeLabel);

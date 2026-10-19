@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {LOCAL_CALENDAR_LIMITS,calendarAlerts,calendarEventId,calendarOccurrences,mergeCalendarEvent,orderCalendarEvents,readCalendarEvent,upcomingCalendarEvents,validCalendarEventId} from '../core/applets/index.ts';
+import {LOCAL_CALENDAR_LIMITS,calendarAlerts,calendarEventId,calendarOccurrences,mergeCalendarEvent,orderCalendarEvents,readCalendarEvent,upcomingCalendarEvents,validCalendarEventId} from '../context/applets/index.ts';
 import {runCalendarTool,worldActions} from '../core/tools/index.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 // The person's own calendar events (ui/applets/google-calendar/applet.md#local-events): IDs, reading a stored or

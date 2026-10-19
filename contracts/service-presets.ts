@@ -1,4 +1,4 @@
-/** Service presets (core/applets/INTEGRATIONS.md#service-presets): a named, saved read of one Worldlet Service, such as
+/** Service presets (context/applets/INTEGRATIONS.md#service-presets): a named, saved read of one Worldlet Service, such as
  * a PostHog HogQL query or a GitHub search over a set of repositories, kept in the person's own World so a board block
  * (or anything else) names the preset instead of repeating the read. A preset holds only what to read: the Service's
  * key stays in the vault (`mcp:github`, `service:<name>`) and the Service's connection keeps its own settings (PostHog's

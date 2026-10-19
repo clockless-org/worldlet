@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
 import {nativeImage} from 'electron';
-import {APPLET_ART_LIMITS,artToPaint,codexArtTask,readAppletArt,readArtSubject,validArtApplet,type AppletArt,type AppletArtAttempt,type AppletArtSubject} from '../../../../../core/applets/index.ts';
+import {APPLET_ART_LIMITS,artToPaint,codexArtTask,readAppletArt,readArtSubject,validArtApplet,type AppletArt,type AppletArtAttempt,type AppletArtSubject} from '../../../../../context/applets/index.ts';
 import {WorldletError} from '../../files.ts';
 import type {Host} from '../../host/types.ts';
 import {currentEnvironment,harnessEnvironment,locateLocalHarnesses,type LocalHarnessInstall} from '../agent-runtime/local-harness.ts';
@@ -12,7 +12,7 @@ import {stopChild} from '../agent-runtime/protocol.ts';
 const ATTEMPTS='applet-art-attempts';
 const DAY=86_400_000;
 
-/** Pictures for the person's own Applets (core/applets/MY-APPLETS.md#pictures). The World page names the Applets it
+/** Pictures for the person's own Applets (context/applets/MY-APPLETS.md#pictures). The World page names the Applets it
  * placed that are the person's own; those with no pictures are painted one at a time by Codex's image generation on
  * this computer, with the person's own Codex sign-in or key. The icon (small) rides in the snapshot; the background
  * is read when its Applet opens. Without Codex, nothing is painted and the painted devices stay. */

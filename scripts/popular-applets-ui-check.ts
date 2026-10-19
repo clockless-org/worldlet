@@ -3,10 +3,10 @@ import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser
 import path from 'node:path';
 import {tmpdir} from 'node:os';
 const platform=process.platform==='win32'?'windows':'macos';
-import {APP_DEFINITIONS} from '../core/applets/catalog.ts';
-import {POPULAR_APPS} from '../core/applets/popular-apps.ts';
-import {WEB_GAME_APPLETS} from '../core/applets/definitions/web-games.ts';
-import {inAppletCatalog} from '../core/applets/applet-support.ts';
+import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
+import {POPULAR_APPS} from '../context/applets/popular-apps.ts';
+import {WEB_GAME_APPLETS} from '../context/applets/definitions/web-games.ts';
+import {inAppletCatalog} from '../context/applets/applet-support.ts';
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1440,height:940},reducedMotion:'reduce'}),errors=pageErrors(page);
  await page.addInitScript(({ids,platform})=>{

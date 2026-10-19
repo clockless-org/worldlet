@@ -87,7 +87,7 @@ export function createWorldToolRuntime({execute,call,codex,audio,backend,sample=
    // Moment Applets are made by an Applet task (context/artifacts): only the person's own words start one.
    if(appletTask)return {error:'This is already an Applet task. Finish it here.'};
    if(!authority.trim())return {error:'The person did not ask for a new Applet in their own words this turn. Ask them first.'};
-   // A website made into an Applet is a record, not a page to write (core/applets/site-applet.ts): it is added at once.
+   // A website made into an Applet is a record, not a page to write (context/applets/site-applet.ts): it is added at once.
    if(typeof args.website==='string'&&args.website.trim()){
     result=call?await call('siteApplets',{operation:'make',url:args.website.trim(),title:''}):{error:'Making Applets is unavailable here.'};
     if(result?.ok)result={...result,message:result.existing?`“${result.title}” is already an Applet in their World. Tell them in one short sentence.`:`“${result.title}” is now their own Applet on the Home ground; it opens the site with their sign-ins. Tell them in one short sentence.`};

@@ -38,7 +38,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.deepEqual(result.calls.map(c=>c.action),['connect','snapshot'],'one connection request, without enabling private processing');
   assert.equal(result.calls[0].body.provider,provider);
   assert.equal(result.consent,consent);
-  // Mac connects Calendar with local EventKit access (core/applets/INTEGRATIONS.md), not Google sign-in.
+  // Mac connects Calendar with local EventKit access (context/applets/INTEGRATIONS.md), not Google sign-in.
   if(provider==='google-calendar'){assert.ok(!result.guides.some(g=>[signIn.text,connecting.text].includes(g?.text)),'Mac Calendar never opens Google sign-in');continue;}
   assert.deepEqual(result.guides,expected[mode],mode+': browser steps only while consent is open, Cancel throughout, then a brief success');
  }

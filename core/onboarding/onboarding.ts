@@ -1,4 +1,4 @@
-import {APP_DEFINITIONS,AREA_LAYOUT_VERSION} from '../applets/index.ts';
+import {APP_DEFINITIONS,AREA_LAYOUT_VERSION} from '../../context/applets/index.ts';
 import type {Onboarding} from '../../contracts/onboarding.ts';
 import {characters,utf8Length} from '../companion/index.ts';
 const regions=['home','work','development','library','money','health','travel','people'];

@@ -1,4 +1,4 @@
-// Service presets (contracts/service-presets.ts, core/applets/INTEGRATIONS.md#service-presets): named, saved reads of a
+// Service presets (contracts/service-presets.ts, context/applets/INTEGRATIONS.md#service-presets): named, saved reads of a
 // Worldlet Service. Pure: hosts supply the stored presets and the clock, and save what comes back. Each read is checked
 // as its Service's reader would check it before anything is sent (a HogQL SELECT only, a GitHub search of up to 256
 // characters, one of Cloudflare's fixed reports, an HTTP JSON endpoint's name and path, a Search Console site and

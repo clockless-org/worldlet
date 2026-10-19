@@ -9,7 +9,7 @@ export type OngoingKindOrGeneral=OngoingKind|'general';
 export interface OngoingKindSpec {
  /** Its name on the page and in Fox's pitch ("Fitness"). */
  title:string;
- /** The area of the World its device stands in (storage IDs, core/applets regions). */
+ /** The area of the World its device stands in (storage IDs, context/applets regions). */
  region:string;color:string;
  /** Words that say a conversation is about it. */
  words:RegExp;

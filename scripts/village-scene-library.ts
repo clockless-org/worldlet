@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import {readFile,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {APP_DEFINITIONS} from '../core/applets/catalog.ts';
-import {GAME_APPLETS} from '../core/applets/definitions/games.ts';
+import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
+import {GAME_APPLETS} from '../context/applets/definitions/games.ts';
 import {importBuildTheme} from './build-theme-source.ts';
 
 const utilityKeys=new Set(['gmail','google-calendar','apple-notes','apple-reminders','weather','meetings','voice-memos','messages','browser']);

@@ -1,4 +1,4 @@
-import {appletSupport,inAppletCatalog,CURATED_READERS,HOME_NATIVE,WORLD_APPS,getApp,connectionLive,TOKEN_PROVIDERS} from '../../core/applets/index.ts';
+import {appletSupport,inAppletCatalog,CURATED_READERS,HOME_NATIVE,WORLD_APPS,getApp,connectionLive,TOKEN_PROVIDERS} from '../../context/applets/index.ts';
 import {hostFeatures,hostCopy,googleSignInStart} from '../../platform/bridge/features.ts';
 import {GOOGLE_SIGN_IN_EVENT,googleSignInStage} from '../../contracts/platform.ts';
 import {googleConsentActions,googleConsentUrl} from './google-consent.ts';

@@ -1,4 +1,4 @@
-import {MEETING_SPEAKER,MEETING_TRANSCRIPT,TranscriptWindows,transcriptLine,transcriptText,type MeetingSide,type TranscriptWindow} from '../../../../../core/applets/index.ts';
+import {MEETING_SPEAKER,MEETING_TRANSCRIPT,TranscriptWindows,transcriptLine,transcriptText,type MeetingSide,type TranscriptWindow} from '../../../../../context/applets/index.ts';
 import type {Row} from '../../host/types.ts';
 
 export interface TranscriptLine {side:MeetingSide;speaker:string;text:string;start:number;end:number}
@@ -12,7 +12,7 @@ export interface MeetingTranscriberOptions {
  now?:()=>number;
  onError?:(error:unknown)=>void;
 }
-/** One call's live transcript (core/applets/meeting-transcript.ts): audio from the page's two sides
+/** One call's live transcript (context/applets/meeting-transcript.ts): audio from the page's two sides
  * arrives about once a second, is cut into windows and transcribed one window at a time on this
  * device. Each window's audio is released when its text is known (or when it is dropped); only text
  * leaves this class. Native IO only through `options`. */

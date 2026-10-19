@@ -25,9 +25,9 @@ try{
  await page.waitForFunction(()=>((document.querySelector('#notionWorld') as any)?.sceneMetrics?.modules||[]).some(m=>m.id==='app-wgt-getty2abcd'&&m.visible!==false));
  const modules=await page.evaluate(()=>(document.querySelector('#notionWorld') as any).sceneMetrics.modules.map(m=>m.id));
  assert.ok(!modules.includes('app-widgets'),'no Widgets Applet');
- // It is the person's own Applet: the World marks it (core/applets/MY-APPLETS.md).
+ // It is the person's own Applet: the World marks it (context/applets/MY-APPLETS.md).
  assert.equal(await page.evaluate(()=>(document.querySelector('#notionWorld') as any).sceneMetrics.modules.find(m=>m.id==='app-wgt-getty2abcd')?.mine),'page');
- // Its pictures are asked of the host's painter by name and kind (core/applets/MY-APPLETS.md#pictures).
+ // Its pictures are asked of the host's painter by name and kind (context/applets/MY-APPLETS.md#pictures).
  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='appletArt'&&c.operation==='ensure'&&c.applets.some(a=>a.applet==='app-wgt-getty2abcd'&&a.kind==='page'&&a.title==='Getty Center today')));
  await page.screenshot({path:'/tmp/moment-world.png'});
  const row=page.locator('.world-task-group[data-group=widget] .world-widget');

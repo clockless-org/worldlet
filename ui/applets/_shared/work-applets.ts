@@ -1,5 +1,5 @@
 import {localPathName} from '../../../context/context/index.ts';
-import {CODING_SESSIONS} from '../../../core/applets/index.ts';
+import {CODING_SESSIONS} from '../../../context/applets/index.ts';
 import {practiceJobSession,practiceJobDetail} from '../../practice/index.ts';
 // CLI records remain local UI data. Listing or reading never resumes an agent.
 export const WORK_APPLETS=['github',...CODING_SESSIONS];

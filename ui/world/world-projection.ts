@@ -5,7 +5,7 @@ import {applyPersonalWorld} from './world-presets.ts';
 import {applyModuleWorld} from './world-modules.ts';
 import {attachBrowserDevice} from './browser-sample.ts';
 import {ongoingApplet,readOngoing} from '../../core/tasks/index.ts';
-import {isMyApplet,momentApplet,readSiteApplet,siteApplet} from '../../core/applets/index.ts';
+import {isMyApplet,momentApplet,readSiteApplet,siteApplet} from '../../context/applets/index.ts';
 
 /** Data-only World presentation projection. No DOM, storage or Host access. */
 export function projectNativeWorld(state):World{
@@ -21,9 +21,9 @@ export function projectNativeWorld(state):World{
  world.dynamicApplets=(Array.isArray(state.ongoing)?state.ongoing:[]).flatMap(row=>{const thing=readOngoing({...row,state:'kept'});return thing?[ongoingApplet(thing)]:[];});
  // So is each Applet Fox made for a moment that is now (context/artifacts/README.md).
  world.dynamicApplets.push(...(Array.isArray(state.momentApplets)?state.momentApplets:[]).map(momentApplet));
- // And each website the person made an Applet of from the Browser (core/applets/site-applet.ts).
+ // And each website the person made an Applet of from the Browser (context/applets/site-applet.ts).
  world.dynamicApplets.push(...(Array.isArray(state.siteApplets)?state.siteApplets:[]).flatMap(row=>{const record=readSiteApplet(row);return record?[siteApplet(record)]:[];}));
- // The person's own Applets wear the icon painted for them on this computer, when there is one (core/applets/MY-APPLETS.md#pictures).
+ // The person's own Applets wear the icon painted for them on this computer, when there is one (context/applets/MY-APPLETS.md#pictures).
  const painted=state.appletArt&&typeof state.appletArt==='object'?state.appletArt:{};
  for(const app of world.dynamicApplets){const icon=painted[app.id];if(isMyApplet(app)&&typeof icon==='string'&&icon.startsWith('data:image/'))app.icon=icon;}
  return applyModuleWorld(attachBrowserDevice(world));

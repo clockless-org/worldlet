@@ -33,7 +33,7 @@ const EMAIL=/^[^\s@]{1,64}@[^\s@]{1,190}$/;
 function owned(item:Connector,connections:readonly ConnectionRow[]){
  return connections.filter(row=>typeof row.provider==='string'&&(item.providers.includes(row.provider)||(item.id==='google'&&row.provider==='google'))&&!(item.mechanism==='google'&&row.transport==='native'));
 }
-/** Connected: the World snapshot says so (`connected`, core/applets connectionFacts), or a stored row's status does. */
+/** Connected: the World snapshot says so (`connected`, context/applets connectionFacts), or a stored row's status does. */
 function live(row:ConnectionRow){
  if(typeof row.connected==='boolean')return row.connected;
  return ['connected','syncing','reading','attention','sync_error'].includes(String(row.status??row.syncStatus??''));

@@ -5,7 +5,7 @@
 // storage a made Applet's record is still called a widget.
 import {offlinePageProblems,madeGameTrialProblems,sandboxDocument,SANDBOX_POLICY} from '../games/index.ts';
 
-/** The Applet task that makes moment Applets (MOMENT_MAKER in core/applets); it has no device of its own. */
+/** The Applet task that makes moment Applets (MOMENT_MAKER in context/applets); it has no device of its own. */
 export const WIDGET_APPLET='app-moment-maker';
 export const WIDGET_LIMITS=Object.freeze({
  bytes:120_000,widgets:40,title:40,blurb:160,idea:2000,
@@ -15,7 +15,7 @@ export const WIDGET_LIMITS=Object.freeze({
  maxDays:14,keepDays:30,
  /** The phone's slot: at most this many active widgets, and pages while the sealed box stays under the relay's limit. */
  phoneWidgets:6,phoneBytes:185_000,
- /** Its data (core/applets/MY-APPLETS.md#data-and-page): one JSON value Fox writes and the page shows, serialized. */
+ /** Its data (context/applets/MY-APPLETS.md#data-and-page): one JSON value Fox writes and the page shows, serialized. */
  dataBytes:40_000,
 });
 export interface Widget {
@@ -31,7 +31,7 @@ export interface Widget {
  /** What the page shows, apart from the page itself: Fox updates it without rewriting the page (absent: none). */
  data?:WidgetData;
 }
-/** A JSON object or array (core/applets/MY-APPLETS.md#data-and-page). */
+/** A JSON object or array (context/applets/MY-APPLETS.md#data-and-page). */
 export type WidgetData=Record<string,unknown>|unknown[];
 /** What the widget keeps through its own local storage: each key's value (null once removed) and when it was
  * written (milliseconds since 1970), so the computer and the phone merge edits key by key, newest wins. */

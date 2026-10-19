@@ -157,7 +157,7 @@ Generate art without baked-in readable records, dates or UI buttons. Those belon
 
 ## 6. Content is useful, source-backed and honest
 
-Fox may organize the content displayed in Open instead of copying noisy original titles. Use a short action/fact title, brief context (at most two visible lines), and the real date/status when relevant. Follow the precise field budgets in [Core Applet content](../../core/applets/INTEGRATIONS.md#core-applet-content).
+Fox may organize the content displayed in Open instead of copying noisy original titles. Use a short action/fact title, brief context (at most two visible lines), and the real date/status when relevant. Follow the precise field budgets in [Core Applet content](../../context/applets/INTEGRATIONS.md#core-applet-content).
 
 Keep provider IDs, source IDs, timestamps, evidence and original links separate from rewritten text. Focus distinguishes a Fox summary from the original. If there is no summary, show the original honestly. Never merge records solely because their titles match.
 
@@ -180,7 +180,7 @@ Sample replaces data only. It uses the same navigation, renderer and interaction
 | Obsidian | Purple crystal linking notebook leaves | Notes from the selected local vault | Original Markdown at left; selected leaf and device at right |
 | YouTube | Recognizable cinema screen | Skipped until a useful native Open exists | Real website at left; related cinema scenery at right |
 
-These are design intentions. [Core content](../../core/applets/INTEGRATIONS.md#core-applet-content) and [Work Applets](../../core/applets/INTEGRATIONS.md#work-applets) record actual capabilities and gaps, including incomplete physical Peek animation and provider-specific session execution limits.
+These are design intentions. [Core content](../../context/applets/INTEGRATIONS.md#core-applet-content) and [Work Applets](../../context/applets/INTEGRATIONS.md#work-applets) record actual capabilities and gaps, including incomplete physical Peek animation and provider-specific session execution limits.
 
 ## 8. Authoring and acceptance checklist
 
@@ -216,7 +216,7 @@ Hybrid Applets expose a Native / Web switch in the Applet's [top bar](../compone
 
 ## Health, Travel and Money
 
-Use the [route and capability matrix](../../core/applets/INTEGRATIONS.md#health-travel-money-applets). Native readers require a working, authorized data path. A published MCP is not enough if the client or account is ineligible. Stripe customer folios and PayPal merchant invoices use native Open/Focus; the remaining seven devices open websites directly. Never present decorative activity marks or coins as live health/financial measurements.
+Use the [route and capability matrix](../../context/applets/INTEGRATIONS.md#health-travel-money-applets). Native readers require a working, authorized data path. A published MCP is not enough if the client or account is ineligible. Stripe customer folios and PayPal merchant invoices use native Open/Focus; the remaining seven devices open websites directly. Never present decorative activity marks or coins as live health/financial measurements.
 
 ### Open conversation clearance
 

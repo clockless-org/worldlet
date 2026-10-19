@@ -7,7 +7,7 @@ corner decoration, borders and spacing. Mail supplies only message anatomy.
 The original subject is the fixed header. Sender, address, To/Cc and received
 time sit above the original in one bounded scrolling body. A portrait stamp
 shows the sender's public picture, read by the host (`mailAvatar`, rules in
-`core/applets/mail-avatar.ts`): their Gravatar, else the organization's BIMI logo
+`context/applets/mail-avatar.ts`): their Gravatar, else the organization's BIMI logo
 or website icon (never for personal mail domains), else their initials on a
 fixed muted tint. Images arrive as data: URLs and stay in memory for the app
 session; the practice world and fixture domains never look one up. Previous/next email

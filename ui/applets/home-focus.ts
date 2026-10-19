@@ -1,4 +1,4 @@
-import {HOME_RECORDS} from '../../core/applets/index.ts';
+import {HOME_RECORDS} from '../../context/applets/index.ts';
 /** Each Home reader keeps the source body intact inside its device's paper leaf. */
 export function renderHomeFocus(key,value,record,renderBody){
  if(!HOME_RECORDS.includes(key))return renderBody(value.text,{title:value.title,path:'original.md'});

@@ -18,7 +18,7 @@ import {openInBrowser} from '../../system-browser.ts';
 import {attentionLaterUntil,hostAttention} from '../../../../../core/attention/index.ts';
 import {onboardingUnfinished} from '../../../../../core/onboarding/index.ts';
 import {taskPanel} from '../../../../../core/tasks/index.ts';
-import {APP_DEFINITIONS} from '../../../../../core/applets/index.ts';
+import {APP_DEFINITIONS} from '../../../../../context/applets/index.ts';
 import {readArtifact} from '../../../../../context/artifacts/index.ts';
 
 // Phone pairing (core/phone/README.md): the iPhone app mirrors the Attention Center and Fox's main conversation.

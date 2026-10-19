@@ -8,7 +8,7 @@ import {ONGOING_KINDS,isOngoingKind,ongoingKind,ongoingOffered,type OngoingKindO
 
 /** The Applet whose panel shows an ongoing thing (and whose device art each one's device wears). */
 export const ONGOING_APPLET='app-ongoing';
-/** The World's areas, by their stable storage IDs (core/applets regions). */
+/** The World's areas, by their stable storage IDs (context/applets regions). */
 const REGIONS=['home','work','library','money','health','travel'];
 export const ONGOING_LIMITS=Object.freeze({
  /** What makes a brought conversation look like one job carried on: enough of the person's own messages, over

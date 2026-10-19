@@ -1,5 +1,5 @@
 import {promises as dns} from 'node:dns';
-import {bimiLogoURL,gravatarURL,mailAvatarPlan,mailIconURL,mailLogoURL} from '../../../../../core/applets/index.ts';
+import {bimiLogoURL,gravatarURL,mailAvatarPlan,mailIconURL,mailLogoURL} from '../../../../../context/applets/index.ts';
 import {digest} from '../../files.ts';
 import type {Row} from '../../host/types.ts';
 // Sender portraits for Mail. Core decides which public sources may picture a sender; this

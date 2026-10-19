@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {bundleScript,withBrowser,pageErrors} from './browser-test.ts';
-import {APPLET_REGION_TITLES} from '../core/applets/regions.ts';
+import {APPLET_REGION_TITLES} from '../context/applets/regions.ts';
 declare global {var FolderUI:any;var folderCalls:any[];var folderState:any;var folderGuide:any;var cancelFolder:boolean;var finishOrganization:any;}
 await withBrowser(async browser=>{
  const page=await browser.newPage(),errors=pageErrors(page);

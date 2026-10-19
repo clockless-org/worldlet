@@ -30,7 +30,7 @@ export function installWidgets(host:Host){
  };
  const find=(id:string)=>validWidgetId(id)?rows().find(row=>row.widget.id===id)??null:null;
  const rawPage=(id:string)=>{const value=store.ledger().widgetPage(id);if(value===null)throw new WorldletError('That Applet is not in this world.');return value;};
- // The page as it is shown, here and on the phone: with its data ahead of its own code (core/applets/MY-APPLETS.md#data-and-page).
+ // The page as it is shown, here and on the phone: with its data ahead of its own code (context/applets/MY-APPLETS.md#data-and-page).
  const html=(id:string)=>widgetWithData(rawPage(id),find(id)?.widget.data);
  const list=()=>orderWidgets(rows().map(row=>row.widget));
 
@@ -98,7 +98,7 @@ export function installWidgets(host:Host){
     return {now:all.filter(w=>widgetActive(w,t)).map(shape),finished:all.filter(w=>!widgetActive(w,t)).map(shape)};
    }
    personal();
-   // An artifact kept as an Applet (core/applets/MY-APPLETS.md): the card the person sees becomes one of their own
+   // An artifact kept as an Applet (context/applets/MY-APPLETS.md): the card the person sees becomes one of their own
    // page Applets, kept with no end. The page renders the card's body; the artifact itself stays in its list.
    if(operation==='keepArtifact'){
     const artifact=validArtifactId(request.artifact)?store.ledger().artifactRows().map(readArtifact).find(a=>a?.id===request.artifact)??null:null;

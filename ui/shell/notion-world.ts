@@ -3,7 +3,7 @@ import {themeAppletIcon,ACTIVE_THEME,themeAmbientTrack,createMailArrivalObserver
 import {renderHomeFocus,createPanelScene,appletSceneKey} from '../applets/index.ts';
 import {mailMetadata} from '../applets/index.ts';
 import {safeAttentionURL as safeAttentionSourceURL} from '../../core/attention/index.ts';
-import {getApp,inAppletCatalog,recommendForArea,appletHost,curatedConnection,CURATED_READERS,HOME_NATIVE,CODING_SESSIONS,MONEY_READERS,ORIGINAL_READERS} from '../../core/applets/index.ts';
+import {getApp,inAppletCatalog,recommendForArea,appletHost,curatedConnection,CURATED_READERS,HOME_NATIVE,CODING_SESSIONS,MONEY_READERS,ORIGINAL_READERS} from '../../context/applets/index.ts';
 import {observeWorldActivity,recordWorldActivity} from '../../platform/bridge/activity.ts';
 import {curatedOriginal,renderCuratedTable} from '../applets/index.ts';
 import {recordWorldCommand} from '../../platform/bridge/host.ts';
@@ -14,7 +14,7 @@ import {createWorldUI} from './public-interface.ts';
 import {eventTrigger,reportAppletOpened,reportEngagement,reportProductEvent} from './product-analytics.ts';
 import {mountFoxArtifact,flyIntoJournal,artifactPageSpec,turnIntoDock} from '../artifacts/index.ts';
 import {node,textButton,worldletMark,uiIcon} from '../components/index.ts';
-import {readRetryDelay,sourceReadAction} from '../../core/applets/index.ts';
+import {readRetryDelay,sourceReadAction} from '../../context/applets/index.ts';
 import {attentionRequest,journalTarget} from '../../core/agent/index.ts';
 import {FOCUS_RULES_REQUEST,browserEffectDecision,browserFinalStep,browserFollowThrough,typedAddress,webSite} from '../../context/browser/index.ts';
 import {quietSourceReader} from '../applets/index.ts';
@@ -36,7 +36,7 @@ import {installTextReaderHUD} from '../components/index.ts';
 import {createPracticeWalkthrough} from '../practice/index.ts';
 import {createPracticeJob,practiceJobSession,practiceJobDetail,PRACTICE_BUILD_MS} from '../practice/index.ts';
 import {mountPracticeTimer,practiceTimerHTML} from '../practice/index.ts';
-import {MEETING_BRIEF_REQUEST,meetingSummaryRequest,calendarMeetings,dueMeeting,meetingContextDetail,meetingsStage} from '../../core/applets/index.ts';
+import {MEETING_BRIEF_REQUEST,meetingSummaryRequest,calendarMeetings,dueMeeting,meetingContextDetail,meetingsStage} from '../../context/applets/index.ts';
 import {inspectBrowserOutcome} from '../browser/index.ts';
 import {presentEmailReview} from '../companion/index.ts';
 import {tennisDemo} from '../practice/index.ts';
@@ -51,7 +51,7 @@ import {WORK_APPLETS,workItems,workError,renderWorkDetail,sampleWork,sampleWorkD
 import {attentionIcon} from '../attention/index.ts';
 import {coreAppletItems} from '../world/index.ts';
 import {localCalendarItems} from '../applets/index.ts';
-import {alertAt,upcomingCalendarEvents} from '../../core/applets/index.ts';
+import {alertAt,upcomingCalendarEvents} from '../../context/applets/index.ts';
 import type {World,WorldPage} from '../../contracts/world.ts';
 import {createAppletPanel,BOARD_READ_EVENT} from '../applets/index.ts';
 import {boardNorthStar,formatBoardNumber} from '../../context/board/index.ts';
@@ -62,8 +62,8 @@ import {createAppDevice} from './app-device.ts';
 import {createCodexApplet} from '../applets/index.ts';
 import {appLogoSource} from '../applets/index.ts';
 import {eventWhen} from '../attention/index.ts';
-import {appletIndicator,myAppletKind,momentAppletId,siteAppletId,siteAppletPage,websiteAppletFor} from '../../core/applets/index.ts';
-import {appletStatus as appStatus,connectionLive} from '../../core/applets/index.ts';
+import {appletIndicator,myAppletKind,momentAppletId,siteAppletId,siteAppletPage,websiteAppletFor} from '../../context/applets/index.ts';
+import {appletStatus as appStatus,connectionLive} from '../../context/applets/index.ts';
 import {phoneWebAddress} from '../../core/phone/index.ts';
 import {applyModuleWorld,moduleStatus} from '../world/index.ts';
 import {createModuleScene} from '../world/index.ts';
@@ -245,7 +245,7 @@ export function mountNotionWorld(data: World, native: any) {
   const browserPanel=createBrowserPanel({root,content,native,notify,openApplet:id=>visitObject(id),openPage:url=>openWorldURL(url),leave:()=>back(),sample:!!data.sample,
     // A page opened from something in its Applet (a link in an email, a meeting) goes back there from its first page.
     canReturn:()=>!!libraryWebReturn&&depth==='object'&&current===libraryWebReturn.app.moduleId,
-    // Make Applet at the top of the Browser (core/applets/site-applet.ts): the made Applets are the World's own.
+    // Make Applet at the top of the Browser (context/applets/site-applet.ts): the made Applets are the World's own.
     madeApplets:native?.siteApplets&&!data.sample?{
       find:url=>{const host=siteAppletPage(url)?.hostname.toLowerCase().replace(/^www\./,''),made=host?sections.find(r=>r.site?.host===host):null;return made?{id:made.moduleId,title:made.title}:null;},
       make:async page=>{const result=await native.siteApplets({operation:'make',url:page.url,title:page.title});return {id:siteAppletId(result.id),title:result.title};},
@@ -504,7 +504,7 @@ export function mountNotionWorld(data: World, native: any) {
   function areaContents(id:string){
    readAreaSignals();
    const apps=sections.filter(r=>r.entity==='app'&&r.region===id&&root.appletLayout.has(r.moduleId)).sort((a,b)=>recentlyUsedFirst(a,b,regionLayout));
-   // Only Applets that work once added, and that this computer supports (core/applets/applet-support.ts).
+   // Only Applets that work once added, and that this computer supports (context/applets/applet-support.ts).
    const catalog=sections.filter(r=>r.entity==='app'&&r.key&&!['ongoing','weather'].includes(r.key)&&!r.ongoing&&!r.moment&&!r.site&&inAppletCatalog(r)&&native?.appletSupported?.(r.key)!==false);
    const mine=new Map<string,string>(sections.filter(r=>r.entity==='app'&&root.appletLayout.has(r.moduleId)).map(r=>[r.moduleId,r.region]));
    const recommended=recommendForArea({area:id,mine,removed:new Set(data.hiddenApplets||[]),installed:areaSignals.installed,suggested:areaSignals.suggested,visits:areaSignals.visits,
@@ -1969,7 +1969,7 @@ export function mountNotionWorld(data: World, native: any) {
     };
   }
   // The person's own page or conversation Applet sits on the background painted for it on this computer, when there
-  // is one (core/applets/MY-APPLETS.md#pictures); a website Applet shows the site itself.
+  // is one (context/applets/MY-APPLETS.md#pictures); a website Applet shows the site itself.
   function ownBackground(r,element:HTMLElement){
     delete element.dataset.ownBackground;element.style.removeProperty('--own-applet-background');
     const kind=myAppletKind(r);if(!native?.appletArt||data.sample||(kind!=='page'&&kind!=='conversation'))return;
@@ -2397,7 +2397,7 @@ export function mountNotionWorld(data: World, native: any) {
   window.addEventListener('worldlet:search',()=>showSearch(''));window.addEventListener('hashchange',followLocation);followLocation();if(contentStore.error)notify(contentStore.error);
   if(native&&!nativeHUD&&data.pages.length<=1){$('notionWorldMeta').textContent='Connect sources and let your world grow';$('notionNext').textContent='Connect your sources →';$('notionNext').onclick=()=>native.settings()}
   // The person's own Things are named to the host, which paints those with no pictures yet one at a time with the
-  // image model on this computer (core/applets/MY-APPLETS.md#pictures). Each set is asked for once per session.
+  // image model on this computer (context/applets/MY-APPLETS.md#pictures). Each set is asked for once per session.
   function askForPictures(){
     if(!native?.appletArt||data.sample)return;
     const applets=(data.spaces||[]).flatMap(s=>{const kind=myAppletKind(s);return kind&&s.moduleId?[{applet:s.moduleId,title:s.title,about:s.description||'',kind}]:[];});

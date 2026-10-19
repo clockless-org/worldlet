@@ -1,7 +1,7 @@
 // Applet artwork is static (4c6b36d1): hover stays interactive and foreground presentations settle without rig motion.
 import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
-import {WORLD_APPS} from '../core/applets/catalog.ts';
+import {WORLD_APPS} from '../context/applets/catalog.ts';
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce',...(process.env.MOTION_VIDEO?{recordVideo:{dir:process.env.MOTION_VIDEO,size:{width:1280,height:850}}}:{})}),errors=pageErrors(page);
  page.setDefaultTimeout(20000);

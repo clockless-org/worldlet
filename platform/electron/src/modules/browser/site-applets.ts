@@ -1,12 +1,12 @@
 import crypto from 'node:crypto';
-import {SITE_APPLET_LIMITS,mailIconURL,readSiteApplet,siteAppletFor,siteAppletPage,siteAppletRecord,validSiteAppletId,type SiteAppletRecord} from '../../../../../core/applets/index.ts';
+import {SITE_APPLET_LIMITS,mailIconURL,readSiteApplet,siteAppletFor,siteAppletPage,siteAppletRecord,validSiteAppletId,type SiteAppletRecord} from '../../../../../context/applets/index.ts';
 import {WorldletError} from '../../files.ts';
 import type {Host} from '../../host/types.ts';
 import {readImage} from '../sources/mail-avatar.ts';
 
-/** Website Applets made from the Browser (core/applets/site-applet.ts). The Browser's Make Applet button sends the
+/** Website Applets made from the Browser (context/applets/site-applet.ts). The Browser's Make Applet button sends the
  * page it shows; the record (name, page, the site's icon as a data: image) is kept as a `site` row of the
- * person's own Applets (core/applets/MY-APPLETS.md#one-table), and the World page builds a device for each one from the snapshot. */
+ * person's own Applets (context/applets/MY-APPLETS.md#one-table), and the World page builds a device for each one from the snapshot. */
 export function installSiteApplets(host:Host){
  const {store}=host;
  const own=()=>store.writable&&!store.sampleEnabled();

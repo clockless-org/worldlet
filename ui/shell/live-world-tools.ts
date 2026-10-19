@@ -1,5 +1,5 @@
 import {searchNotes} from '../applets/index.ts';
-import {WORLD_APPS} from '../../core/applets/index.ts';
+import {WORLD_APPS} from '../../context/applets/index.ts';
 import {turnWriteAdmission} from '../../core/agent/index.ts';
 // The content writes, each with the words that show the person asked for it this turn.
 const WRITE_INTENT: Record<string,RegExp>={create_content:/新增|增加|添加|创建|新建|记下|记一|记录|写一|建一|保存|create|add|write|save|\bnote\s*:/i,patch_content:/修改|改成|改为|改名|更新|替换|追加|补充|加上|改一|change|update|edit|rename|append/i,delete_content:/删除|删掉|删了|移除|扔掉|放.*回收站|delete|remove|trash/i,restore_content:/恢复|还原|找回|restore/i,undo_content:/撤销|撤回|撤消|undo/i};

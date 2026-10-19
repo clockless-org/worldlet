@@ -1,4 +1,4 @@
-import {CALENDAR_ALERT_MINUTES,CALENDAR_REPEATS,LOCAL_CALENDAR_LIMITS,calendarEventId,calendarOccurrences,localDay,occurrenceStart,readCalendarEvent,validCalendarEventId,type LocalCalendarEvent} from '../applets/index.ts';
+import {CALENDAR_ALERT_MINUTES,CALENDAR_REPEATS,LOCAL_CALENDAR_LIMITS,calendarEventId,calendarOccurrences,localDay,occurrenceStart,readCalendarEvent,validCalendarEventId,type LocalCalendarEvent} from '../../context/applets/index.ts';
 // Fox works with the person's own calendar events (ui/applets/google-calendar/applet.md#local-events), the ones they
 // make in the Calendar Applet: it sees them, adds them, changes them and deletes them. They stay on this computer.
 const when={type:'string',maxLength:40,description:'A local date-time like 2026-10-09T13:00 (or with a UTC offset); for an all-day event a date like 2026-10-09.'};

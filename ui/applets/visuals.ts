@@ -22,7 +22,7 @@ import tripitLogo from './tripit/logo.ts';
 // Generic Home Applets (Mail, Calendar, Notes, Reminders, Weather, Browser) have no brand logo here.
 const logoDrawers={'voice-memos':voiceMemosLogo,'doordash':doordashLogo,'stripe':stripeLogo,'plaid':plaidLogo,'oura':ouraLogo,'airbnb':airbnbLogo,'codex':codexLogo,'claude-code':claudeCodeLogo,'github':githubLogo,'notion':notionLogo,'x':xLogo,'youtube':youtubeLogo,'tiktok':tiktokLogo,'discord':discordLogo,'strava':stravaLogo,'google-maps':google_mapsLogo,'obsidian':obsidianLogo,'paypal':paypalLogo,'fitbit':fitbitLogo,'tripit':tripitLogo};
 
-// A website made into an Applet from the Browser carries its own site's icon (core/applets/site-applet.ts).
+// A website made into an Applet from the Browser carries its own site's icon (context/applets/site-applet.ts).
 export function appLogoSource(app){return popularLogos[app.key]||logoDrawers[app.key]?.source||(app.site&&app.icon)||undefined;}
 /** Each Agent's own mark, shared by setup's Agent cards and the World's bottom-right corner. */
 export const AGENT_ICONS:Record<string,string>={'claude-code':appLogoSource({key:'claude-code'})||'','codex':appLogoSource({key:'codex'})||'',hermes:'brands/hermes.png',openclaw:'brands/openclaw.svg',pi:'brands/pi.svg'};

@@ -1,4 +1,4 @@
-import {connectionLive,getApp} from '../../core/applets/index.ts';
+import {connectionLive,getApp} from '../../context/applets/index.ts';
 import {tourInProgress} from '../../core/onboarding/index.ts';
 import {appletBox,createCoachMark,createTourSpotlight,elementBox} from './tour-spotlight.ts';
 import {createTourLock} from './tour-lock.ts';

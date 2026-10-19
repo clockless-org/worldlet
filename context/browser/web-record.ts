@@ -1,7 +1,7 @@
 /** What the built-in browser records of a website, and how a recording reads back (owner decision
  * 2026-10-04: Worldlet is the browser, so it keeps what happens in its pages, as text and data, never
  * pixels or sound). A Meetings call the person chose to transcribe adds its transcript as text
- * (`transcript` records, core/applets/meeting-transcript.ts); its audio is never kept. Hosts do the DevTools IO and storage; these rules decide what is kept, what is
+ * (`transcript` records, context/applets/meeting-transcript.ts); its audio is never kept. Hosts do the DevTools IO and storage; these rules decide what is kept, what is
  * never kept, and how the records read for Fox. Pure: no clock, no IO. */
 
 export const WEB_RECORD={

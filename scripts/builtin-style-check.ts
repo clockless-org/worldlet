@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 import path from 'node:path';
 import {BUILTIN_STYLE,BUILTIN_STYLE_REF,STYLE_TOKENS,appletStyle,assertBuiltinStyle} from '../ui/components/style.ts';
 import {WORLD_LAYOUT} from '../ui/world/world-layout.ts';
-import {WORLD_APPS} from '../core/applets/catalog.ts';
+import {WORLD_APPS} from '../context/applets/catalog.ts';
 import {UI_TOKENS,UI_NIGHT_TOKENS,WORLD_UI} from '../ui/components/tokens.ts';
 import {deviceSource} from './build-world-assets.ts';
 import {worldPackPath,parseWorldPack} from '../ui/world/world-pack.ts';

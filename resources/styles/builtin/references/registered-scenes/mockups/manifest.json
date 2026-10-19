@@ -27,7 +27,7 @@
     "ui/applets/apple-reminders/open.ts": "cedfc3d3ee6bd889c958d9d7f6b534db3527181ade236b5e13fce6d44b08cf38",
     "ui/applets/apple-reminders/open.css": "811808b2a7d33ad95f76c819e9081acbd0496a1321155521e25d976c9cfc8e10",
     "ui/applets/google-calendar/open.css": "b0714880007589c51f3158fdb5bcc97cf28fc0ec2cd37ba97e31965684a6976d",
-    "ui/applets/google-calendar/grid.ts": "ab2ec41c8c8b78a29ebc38c314ac454c8efc3bf8a423bbfbb7a094114bce57bf",
+    "ui/applets/google-calendar/grid.ts": "b70b2e1d0bd2c078258b00f05ca3209630c1c0f0ff0f9eb5bcf891fd19938f95",
     "ui/applets/home-open.ts": "b96568220d6ae6e7641926a94bbb768c1d191c9d049f08f67e8052dd532fd386"
   },
   "images": [

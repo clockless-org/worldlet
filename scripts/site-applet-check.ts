@@ -1,8 +1,8 @@
-// Website Applets made from the Browser (core/applets/site-applet.ts) without a host: which pages qualify, the site's
+// Website Applets made from the Browser (context/applets/site-applet.ts) without a host: which pages qualify, the site's
 // name taken from the page title, the record's checks, one Applet per site, and the World placing each made one on
 // the Home ground, unlocked at once, with its own page and icon.
 import assert from 'node:assert/strict';
-import {APP_DEFINITIONS,isMyApplet,momentApplet,myAppletKind,readSiteApplet,siteApplet,siteAppletFor,siteAppletName,siteAppletPage,siteAppletRecord,validSiteAppletId} from '../core/applets/index.ts';
+import {APP_DEFINITIONS,isMyApplet,momentApplet,myAppletKind,readSiteApplet,siteApplet,siteAppletFor,siteAppletName,siteAppletPage,siteAppletRecord,validSiteAppletId} from '../context/applets/index.ts';
 import {projectNativeWorld} from '../ui/world/world-projection.ts';
 
 for(const bad of ['http://example.com/','https://localhost/','https://127.0.0.1/','https://user:pw@example.com/','https://example.com:8443/','https://example.com/login','https://example.com/oauth/authorize','file:///x','not a url'])
@@ -37,7 +37,7 @@ assert.ok(space,'the made Applet is in the World');
 assert.equal(world.spaces.filter(s=>s.site).length,1,'an invalid record is skipped');
 assert.equal(space.buildingId,'building-home');
 assert.ok(world.unlockedApplets.includes(app.id)&&!world.hiddenApplets.includes(app.id),'it stands in the World at once');
-// The person's own Applets carry their kind (core/applets/MY-APPLETS.md); the catalog's never do.
+// The person's own Applets carry their kind (context/applets/MY-APPLETS.md); the catalog's never do.
 assert.equal(myAppletKind(app),'site');assert.equal(myAppletKind(momentApplet(moment)),'page');
 assert.equal(space.mine,'site','the World keeps the mark');assert.equal(world.spaces.find(s=>s.moduleId==='app-'+moment.id)?.mine,'page');
 assert.ok(APP_DEFINITIONS.every(a=>!isMyApplet(a)),'no catalog Applet is the person\'s own');

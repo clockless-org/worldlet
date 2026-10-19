@@ -26,7 +26,7 @@ export type PhoneAccount={provider:string,title:string,action:'reconnect'|'permi
  * it is doing or its status, `recent` its latest world log lines (newest last), `widget` the widget a moment Applet opens,
  * `fox` its own thread of Fox's conversation (what was said inside it), and `mine` where one of the person's own Applets
  * came from (a website, a page Fox made, a conversation), so its tile carries the same mark as its device
- * (core/applets/MY-APPLETS.md). `url` is the website the phone opens when its tile is tapped (phone-web.ts); only
+ * (context/applets/MY-APPLETS.md). `url` is the website the phone opens when its tile is tapped (phone-web.ts); only
  * moment Applets and ongoing things, which work on the phone in their own page, come without one. */
 export type PhoneApplet={key:string,title:string,section:'live'|'accounts'|'jobs'|'places',state:'busy'|'ready'|'failed'|'off',
  line?:string,recent?:{text:string,at:string}[],widget?:string,fox?:PhoneItemFox,mine?:'site'|'page'|'conversation',url?:string};

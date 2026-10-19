@@ -7,7 +7,7 @@ import {harnessSessionThread,harnessChatThread,harnessThreadPlace,harnessOriginI
 import {processedAttentionContent} from '../core/attention/attention-content.ts';
 import {validateWorldItem} from '../context/items/world-item-validation.ts';
 import {phoneAttention,phoneTasks,phoneJournal,readPhoneMessage} from '../core/phone/index.ts';
-import {APP_DEFINITIONS} from '../core/applets/index.ts';
+import {APP_DEFINITIONS} from '../context/applets/index.ts';
 
 const DAY=86400,now=Date.parse('2026-10-04T12:00:00Z')/1000;
 const ago=(days:number)=>new Date((now-days*DAY)*1000).toISOString();

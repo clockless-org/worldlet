@@ -1,4 +1,4 @@
-import {APP_DEFINITIONS} from '../applets/index.ts';
+import {APP_DEFINITIONS} from '../../context/applets/index.ts';
 import {projectWorldItems,refreshItemPage} from '../../context/items/index.ts';
 import {attentionFocusEvidence,attentionFocusSet,attentionOrder,attentionRankSignals,attentionRelevant,type AttentionFocusState} from './attention-focus.ts';
 import {attentionLevel} from './attention-level.ts';

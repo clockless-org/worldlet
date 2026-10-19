@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 await mkdir('output/applet-layout',{recursive:true});
 import {withBrowser,fileAccess,pageErrors,worldUrl,leaveApplet} from './browser-test.ts';
-import {WORLD_APPS} from '../core/applets/catalog.ts';
-import {inAppletCatalog} from '../core/applets/applet-support.ts';
+import {WORLD_APPS} from '../context/applets/catalog.ts';
+import {inAppletCatalog} from '../context/applets/applet-support.ts';
 import {appHudIcon} from '../ui/applets/visuals.ts';
 const OPENED=['gmail','google-calendar','apple-notes','apple-reminders','weather','messages','github','notion','youtube','airbnb','browser','game-2048'];
 await withBrowser(fileAccess,async browser=>{

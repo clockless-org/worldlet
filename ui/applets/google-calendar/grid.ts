@@ -1,6 +1,6 @@
 import {node} from '../../components/index.ts';
 import {calendarDay} from '../../world/index.ts';
-import {calendarEventId,calendarOccurrences,localDay,CALENDAR_ALERT_MINUTES,LOCAL_CALENDAR_NAME,LOCAL_EVENT_TITLE,type LocalCalendarEvent} from '../../../core/applets/index.ts';
+import {calendarEventId,calendarOccurrences,localDay,CALENDAR_ALERT_MINUTES,LOCAL_CALENDAR_NAME,LOCAL_EVENT_TITLE,type LocalCalendarEvent} from '../../../context/applets/index.ts';
 // Calendar's day and week pages are a time grid, like Apple Calendar: drag on empty time to make an event, drag an
 // event to move it, drag its lower edge to change when it ends, click it to edit, Delete to remove it. Only the
 // person's own events (applet.md#local-events) move; synced events open their original as before. A repeating event

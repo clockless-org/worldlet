@@ -1,4 +1,4 @@
-// Sync on by default (core/applets/INTEGRATIONS.md#scheduled-service-collection): once a Service is connected its default
+// Sync on by default (context/applets/INTEGRATIONS.md#scheduled-service-collection): once a Service is connected its default
 // read is saved and kept fresh on its own, every hour; the person's "off" on its tile stays off, through a reconnect
 // too; a reconnect while it is on binds it to the new connection; a Service that is not connected gets nothing; a
 // preset of the person's own under the default's name is never replaced; the tile's line says when it was updated.

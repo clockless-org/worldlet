@@ -1,11 +1,11 @@
-import {seedShelf,enterShelf,shelfRing,SHELF_SIZE,type ShelfState} from '../../core/applets/index.ts';
+import {seedShelf,enterShelf,shelfRing,SHELF_SIZE,type ShelfState} from '../../context/applets/index.ts';
 import {uiIcon} from '../components/index.ts';
 
 // The Applet shelf (owner request 2026-10-09: "applet之间要可以丝滑切换，进入applet后，上方显示最近使用的applets，像一个
 // 一个tab，开新tab是进入browser"): inside an Applet, the recently used Applets stand at the top of Fox's lane, centered over Fox (owner request
 // 2026-10-13: top right, not above the Applet), each
 // its World device, the open one's name in plain text below it, the others' on hover (owner request 2026-10-11: no bar, no name tags). The open Applet stands in the middle, largest and lit ("当前 applet 要在中间");
-// the others grow smaller and fainter the further they stand from it, in one order around it (core/applets/shelf.ts), so
+// the others grow smaller and fainter the further they stand from it, in one order around it (context/applets/shelf.ts), so
 // picking one slides the shelf to bring it to the middle. A Thing on the shelf cannot be closed from it (owner request
 // 2026-10-11: no close mark). "+N" at the lane's left end holds the ones used longest ago; + at its right end opens a new
 // page in the Browser. The shelf stands beside the Applet's panel and never over a website's

@@ -3,7 +3,7 @@ import {processedAttentionContent} from '../core/attention/attention-content.ts'
 import {finishSourceCheck,startSourceCheck} from '../core/tasks/source-checks.ts';
 import {interruptsBackground} from '../core/tasks/background-work.ts';
 import assert from 'node:assert/strict';
-import {APP_DEFINITIONS} from '../core/applets/catalog.ts';
+import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
 import {attentionCompletion,attentionPlanCurrent,discardedAttentionRemovals,matchingAttentionID,observeAttention,attentionDependencies,attentionCurrent,projectAttention,planAttention,startAttentionBudget,finishAttentionBudget,suppressedAttention,weatherObservationText,validateAttentionRegistrations,ATTENTION_BACKLOG_SECONDS,ATTENTION_COALESCE_SECONDS,ATTENTION_FULL_SEEDS} from '../core/attention/attention-center.ts';
 import {updateWorldItem} from '../context/items/world-item-state.ts';
 import type {AttentionRegistration,AttentionFact,AttentionBudget} from '../contracts/attention.ts';

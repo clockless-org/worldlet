@@ -8,7 +8,7 @@ import {MIGRATION_SOURCE_TITLES,isMigrationSource} from '../../contracts/agent.t
 import {conversationNamed,digest,ongoingBusier,ongoingName,type BroughtConversation} from './ongoing.ts';
 
 export const CONVERSATION_ATTENTION=Object.freeze({
- /** The Attention provider brought conversations stand in for (core/applets/definitions/ongoing.ts). */
+ /** The Attention provider brought conversations stand in for (context/applets/definitions/ongoing.ts). */
  provider:'conversations',
  /** Conversations active in the past three weeks are read, the most recently active 40 (the Center keeps at most
   * 80 facts a provider and takes 50 at a time). */

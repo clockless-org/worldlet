@@ -311,7 +311,7 @@ export function createModuleScene(host,rooms,onProject,options:VillageOptions):a
   updateThemes();
   const loaded=await Promise.all(rooms.map(async(room)=>{
    // The person's own Applet shows its icon over its device: the one painted for it, or a website's own
-   // (core/applets/MY-APPLETS.md#pictures).
+   // (context/applets/MY-APPLETS.md#pictures).
    const icon=room.mine&&typeof room.icon==='string'?await image(room.icon).catch(()=>null):null;
    return {room,icon,tex:room.device?await image(room.device.src):null};
   }));
@@ -328,7 +328,7 @@ export function createModuleScene(host,rooms,onProject,options:VillageOptions):a
    if(icon){const size=width*.34,badge=new Container(),mark=new Sprite(icon);mark.anchor.set(.5);mark.width=mark.height=size;
     badge.addChild(new Graphics().roundRect(-size/2-3,-size/2-3,size+6,size+6,7).fill({color:0xfff8ea,alpha:.95}).stroke({color:0x6b5a3e,alpha:.45,width:1}),mark);
     badge.position.set(0,-sprite.height*.58);badge.eventMode='none';body.addChild(badge);}
-   // The person's own Applets carry a small honey mark at the device's lower right (core/applets/MY-APPLETS.md).
+   // The person's own Applets carry a small honey mark at the device's lower right (context/applets/MY-APPLETS.md).
    const mine=room.mine?myAppletMark(width):null;if(mine)body.addChild(mine);
    // The authored cinema sprite includes its painted mark; the official logo
    // remains in the context title and the separate Focus scenery.

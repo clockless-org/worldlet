@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {appletAnalysisInput,appletAnalysisRefresh,appletAnalysisCommit,appletAnalysisPending} from '../core/applets/index.ts';
+import {appletAnalysisInput,appletAnalysisRefresh,appletAnalysisCommit,appletAnalysisPending} from '../context/applets/index.ts';
 import {attentionBatchInput,sourceEvidenceContext,observeAttention,planAttention,attentionCurrent} from '../core/attention/index.ts';
 const now=Date.parse('2026-09-28T12:00:00Z')/1000;
 const records=[{id:'promo',text:'Your subscription renews tomorrow for $20.',labelIds:['CATEGORY_PROMOTIONS']},{id:'spam',text:'Known spam',allMessagesExcluded:true},{id:'partial',text:'Incomplete mixed thread',allMessagesExcluded:true,partial:true}];
@@ -72,7 +72,7 @@ assert.match(attentionExecution('synthesis').prompt!,/Output only new findings a
 console.log('PASS script → S checkpoints → M evidence projection: promotions preserved, deterministic skips, times, revision gating, withdrawals, compact cross-Applet evidence, in-context citations only and unchanged-item marking');
 
 // S staging must not enforce M's final-card typography.
-const {appletCandidateContent,canonicalSourceQuotes}=await import('../core/applets/index.ts');
+const {appletCandidateContent,canonicalSourceQuotes}=await import('../context/applets/index.ts');
 const candidate={provider:'gmail',kind:'task',title:'A long source-derived title that exceeds the forty character card limit',reason:'Review this useful source before the upcoming renewal deadline',summary:'Check the renewal terms.',location:'123 Example Avenue',sources:[{provider:'gmail',id:'thread:test',quote:'Renewal   deadline'}]};
 const staged=appletCandidateContent(candidate);
 assert.equal(staged.location,'123 Example Avenue');

@@ -480,7 +480,7 @@
    legible over bright meadow, water or night (RC UI reviews 2737/2743, #1699). The host narrows it
    to the space right of Fox's actions and message bar, and sets it aside when none is left. */
 /* An open panel, typing or a floating video owns the right side; the log steps back. */
-/* The person's own Applet on the background painted for it (core/applets/MY-APPLETS.md#pictures): a cream wash keeps its words readable. */
+/* The person's own Applet on the background painted for it (context/applets/MY-APPLETS.md#pictures): a cream wash keeps its words readable. */
 [data-own-background]{background:linear-gradient(#fbf7ecd9,#fbf7ecf2),var(--own-applet-background) center/cover no-repeat;border-radius:14px}
 
 /* The computer's own music (ui/world/local-music.ts) takes the World's sound line itself: the same note,

@@ -1,7 +1,7 @@
 import {mountDevBuildUpdate,commitAge} from './dev-build-update.ts';
 import {hostFeatures} from '../../platform/bridge/features.ts';
 import {refreshItemPage} from '../../context/items/index.ts';
-import {sourcesReading} from '../../core/applets/index.ts';
+import {sourcesReading} from '../../context/applets/index.ts';
 import {fitAttentionPanel} from './fit-attention-panel.ts';
 import {mountWorldLog} from './world-log.ts';
 import {mountTaskPanel} from './task-panel.ts';
@@ -323,7 +323,7 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
   // should become an Applet. They are Worth Doing, after the items, here and on the phone (as `ongoing:<id>`).
   const proposals:any[]=s.data.sample?[]:(ongoing()||[]);
   const proposalItems=proposals.map(p=>({id:'ongoing:'+p.id,worldItemId:'ongoing:'+p.id,state:'needsAction',title:p.title,actionTitle:p.title,fullAction:p.title,context:p.context,fullContext:p.context,provider:'ongoing',level:2}));
-  // The person's own Calendar events (core/applets/calendar-events.ts) are Coming Up from a day before, here and on
+  // The person's own Calendar events (context/applets/calendar-events.ts) are Coming Up from a day before, here and on
   // the phone (as `calendar:<id>`), in time order with the synced ones; their alert time puts them at the top.
   const own:any[]=s.data.sample?[]:(calendar()||[]);
   const ownItems=own.map(e=>{const m:any={id:'calendar:'+e.key,worldItemId:'calendar:'+e.key,state:'event',title:e.title,actionTitle:e.title,fullAction:e.title,context:e.context,fullContext:e.context,provider:'google-calendar',start:e.start,end:e.end,allDay:e.allDay,alerting:!!e.alerting,when:attentionGroupWhen([{start:e.allDay?e.start:Date.parse(e.start),end:e.allDay?undefined:Date.parse(e.end),allDay:e.allDay}])};m.level=e.alerting?5:attentionLevel(m);return m;});

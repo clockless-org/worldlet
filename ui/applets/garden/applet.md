@@ -2,7 +2,7 @@
 
 Plant vegetables that ripen on the real clock, from half an hour to a day, and come back to harvest them.
 
-**Not released** (owner decision 2026-10-03: "这个游戏先不上线"): the Garden is not in the catalog, so no world shows it. The board, artwork and this contract stay for when it ships; adding it back to `GAME_APPLETS` in `core/applets/definitions/games.ts` brings it in.
+**Not released** (owner decision 2026-10-03: "这个游戏先不上线"): the Garden is not in the catalog, so no world shows it. The board, artwork and this contract stay for when it ships; adding it back to `GAME_APPLETS` in `context/applets/definitions/games.ts` brings it in.
 
 The Games area's slow game (owner request 2026-10-03: a farm game where a crop takes a day to ripen, so people come back twelve or twenty-four hours later). The other games are over in a few minutes; the garden gives a reason to return. The board is our own code ([ui/games/garden.ts](../../games/garden.ts)): it runs offline, needs no account and reads nothing.
 

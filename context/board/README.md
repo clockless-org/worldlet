@@ -1,6 +1,6 @@
 # The board
 
-The board shows numbers the person tracks: a north-star number, a funnel, the pull requests waiting, signups over time, the state of a release. It is laid out as tabs of blocks. Each block shows one preset: a [Service preset](../../core/applets/INTEGRATIONS.md#service-presets), a saved read of GitHub, PostHog, Cloudflare or an HTTP JSON endpoint, or a saved read of the World's own records, [the Agents' reports](#the-agents-source). The board is general: anyone can define their own. A team's board and its presets are data in that person's own World, never code.
+The board shows numbers the person tracks: a north-star number, a funnel, the pull requests waiting, signups over time, the state of a release. It is laid out as tabs of blocks. Each block shows one preset: a [Service preset](../applets/INTEGRATIONS.md#service-presets), a saved read of GitHub, PostHog, Cloudflare or an HTTP JSON endpoint, or a saved read of the World's own records, [the Agents' reports](#the-agents-source). The board is general: anyone can define their own. A team's board and its presets are data in that person's own World, never code.
 
 The shapes are in [`contracts/board.ts`](../../contracts/board.ts) and the rules in [`board.ts`](board.ts). `node scripts/board-check.ts` checks both.
 
@@ -28,13 +28,13 @@ For example, a funnel from one PostHog preset whose HogQL returns one row with t
 
 A preset names where its records come from (`provider`) and the one read it makes (`read`). Every source answers the same bounded records (an ID, a title, a link, plain fields), so any kind of block can show any of them.
 
-- **Services** (`github`, `posthog`, `cloudflare`): one of the Service's own reads, under its reader's rules and the calling Agent's own "Can read <Service>" ([Service presets](../../core/applets/INTEGRATIONS.md#service-presets)).
+- **Services** (`github`, `posthog`, `cloudflare`): one of the Service's own reads, under its reader's rules and the calling Agent's own "Can read <Service>" ([Service presets](../applets/INTEGRATIONS.md#service-presets)).
 - **The Agents' reports** (`agents`): the World's own records, read with no Service and no network ([below](#the-agents-source)).
 - A collected Notion page is a preset too, but it is not read live, so the board refuses it.
 
 ### GitHub releases
 
-`github` with `{"operation":"releases","id":"owner/repo"}` reads one repository's newest 10 releases, newest first, through the same GitHub reader and the same "Can read GitHub" Grant as GitHub's other reads ([GitHub as a Worldlet Service](../../core/applets/INTEGRATIONS.md#github-as-a-worldlet-service)). Each record is `owner/repo@<tag>`, titled with the release's name (its tag when it has none), linked to the release on github.com, with the fields `repository`, `tag`, `name`, `publishedAt` (none for a draft), `prerelease`, `draft`, `assetCount`, `assets` (the first 20 asset names, separated by commas) and `author`. Release notes are not read.
+`github` with `{"operation":"releases","id":"owner/repo"}` reads one repository's newest 10 releases, newest first, through the same GitHub reader and the same "Can read GitHub" Grant as GitHub's other reads ([GitHub as a Worldlet Service](../applets/INTEGRATIONS.md#github-as-a-worldlet-service)). Each record is `owner/repo@<tag>`, titled with the release's name (its tag when it has none), linked to the release on github.com, with the fields `repository`, `tag`, `name`, `publishedAt` (none for a draft), `prerelease`, `draft`, `assetCount`, `assets` (the first 20 asset names, separated by commas) and `author`. Release notes are not read.
 
 ### The agents source
 

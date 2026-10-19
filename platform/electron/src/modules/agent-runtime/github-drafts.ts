@@ -10,7 +10,7 @@ import type {Row} from './types.ts';
 // GitHub drafts (core/agent/GRANTS.md#github-drafts). Core decides; this keeps the records and talks to GitHub: each
 // draft in the World's ledger (`state.github-drafts` in world.sqlite) beside its Attention item (provider `agents`), and
 // each GitHub request over GitHub's REST API as the person, through their GitHub sign-in with the Worldlet GitHub App
-// (core/applets/INTEGRATIONS.md#github-sign-in; `userToken`), or, when they connected one under Settings › Connectors ›
+// (context/applets/INTEGRATIONS.md#github-sign-in; `userToken`), or, when they connected one under Settings › Connectors ›
 // Advanced, as their own GitHub App. That App's ID, installation ID and private key are kept only in the vault
 // (`github-app`); they, the token the App signs, the installation token GitHub gives for it and the sign-in's user token
 // never leave this module: not to a page, an Agent, an audit entry, a log or an event. Every error here is one of this

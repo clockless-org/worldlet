@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import {PAGE_FEATURES} from '../contracts/platform.ts';
 import {WEB_PAGE_FEATURES,WEB_PAGE_UNAVAILABLE,webDenied} from '../contracts/web-world.ts';
 import {hostFeatures,pageFeatures} from '../platform/bridge/features.ts';
-import {appletSupport,appletsOffPage} from '../core/applets/applet-support.ts';
+import {appletSupport,appletsOffPage} from '../context/applets/applet-support.ts';
 import {pageToolFeature} from '../core/tools/page-features.ts';
 import {createWorldToolRuntime} from '../platform/bridge/world-tool-runtime.ts';
 import {createWebPage,type PageSocket} from '../platform/electron/src/host/web-page.ts';

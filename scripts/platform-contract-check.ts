@@ -1,6 +1,6 @@
 import './source-snapshot-check.ts';
 import {readCompanionProfile} from '../contracts/companion.ts';
-import {appletSupport} from '../core/applets/applet-support.ts';
+import {appletSupport} from '../context/applets/applet-support.ts';
 import assert from 'node:assert/strict';
 import {resolveHost} from '../platform/bridge/host.ts';
 import {hostFeatures,googleSignInStart} from '../platform/bridge/features.ts';

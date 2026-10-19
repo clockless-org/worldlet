@@ -1,5 +1,5 @@
 import {AGENT_PROFILE_DIGEST,AGENT_PROFILE_TIMEOUT_MS,agentProfilePrompt,type AgentConversationDigest,parseAgentProfile,type AgentProfile} from '../../../../../core/agent/index.ts';
-import {WORLD_APPS} from '../../../../../core/applets/index.ts';
+import {WORLD_APPS} from '../../../../../context/applets/index.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 import type {AgentRuntime} from './types.ts';
 import {hermesThread,hermesThreads} from './agent-files.ts';

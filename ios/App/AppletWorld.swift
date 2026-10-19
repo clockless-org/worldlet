@@ -136,7 +136,7 @@ struct AppletTileFace: View {
             }
             .overlay(alignment: .bottomTrailing) {
                 // The person's own Applet carries the honey star its device has on the computer
-                // (core/applets/MY-APPLETS.md).
+                // (context/applets/MY-APPLETS.md).
                 if applet.isMine {
                     Image(systemName: "star.fill")
                         .font(.system(size: 7, weight: .bold))

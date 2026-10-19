@@ -1,4 +1,4 @@
-import {APP_DEFINITIONS} from '../../core/applets/index.ts';
+import {APP_DEFINITIONS} from '../../context/applets/index.ts';
 import {WORLD_WIDTH,WORLD_HEIGHT} from './world-design.ts';
 import {BUILTIN_STYLE,BUILTIN_STYLE_REF} from '../components/index.ts';
 import {ACTIVE_THEME} from '../themes/index.ts';

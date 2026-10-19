@@ -20,4 +20,4 @@ Opening this Applet loads its original website in Worldlet's isolated browser su
 
 Fixture-verified; real OAuth/account acceptance remains pending. Google client verification still applies to external users.
 
-See [integration status](../../../core/applets/INTEGRATIONS.md) and [runtime](../../../core/applets/RUNTIME.md).
+See [integration status](../../../context/applets/INTEGRATIONS.md) and [runtime](../../../context/applets/RUNTIME.md).

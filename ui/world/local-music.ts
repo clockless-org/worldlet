@@ -2,9 +2,9 @@
 // Apple Music, Spotify, 汽水音乐 or a browser tab is playing takes that one line, as its title and who made
 // it, with previous, play or pause, and next beside it. No cover, no shelf. While nothing outside Worldlet
 // plays, or it is paused while the World's own sound plays, the line is the World's sound again
-// (world-audio.ts). Worldlet's own radio never shows here (core/applets/local-music.ts). The host looks
+// (world-audio.ts). Worldlet's own radio never shows here (context/applets/local-music.ts). The host looks
 // only while the World is in front; the practice world never shows the person's music.
-import {nowPlayingLine,type LocalMusicState} from '../../core/applets/index.ts';
+import {nowPlayingLine,type LocalMusicState} from '../../context/applets/index.ts';
 import {uiIcon} from '../components/index.ts';
 import {windowActive} from './index.ts';
 

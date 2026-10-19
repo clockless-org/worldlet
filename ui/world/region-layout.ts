@@ -1,5 +1,5 @@
 import {WORLD_LAYOUT} from './world-layout.ts';
-import {AREA_LAYOUT_VERSION,migrateAreaLayout} from '../../core/applets/index.ts';
+import {AREA_LAYOUT_VERSION,migrateAreaLayout} from '../../context/applets/index.ts';
 import {activeBuildTheme,selectThemePins,storedThemePins} from '../themes/index.ts';
 
 export {regionId,lastUse,recentlyUsedFirst,type RegionLayout} from './region-core.ts';

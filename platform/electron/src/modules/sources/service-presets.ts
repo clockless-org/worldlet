@@ -3,7 +3,7 @@ import type {ServicePreset} from '../../../../../contracts/service-presets.ts';
 import {WorldletError} from '../../files.ts';
 import type {Row} from '../../host/types.ts';
 
-// Service presets (core/applets/INTEGRATIONS.md#service-presets): named, saved reads of a Worldlet Service, kept in the
+// Service presets (context/applets/INTEGRATIONS.md#service-presets): named, saved reads of a Worldlet Service, kept in the
 // World's ledger (`state.service-presets` in world.sqlite). Core checks each one; this keeps the records. A preset
 // holds no key: the Service's key stays in the vault with its connection.
 

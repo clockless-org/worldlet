@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {WORLD_LAYOUT} from '../ui/world/world-layout.ts';
 import {APPLET_SPRITES} from '../ui/world/applet-sprites.ts';
 import {WORLD_PRESETS} from '../ui/world/world-presets.ts';
-import {WORLD_APPS} from '../core/applets/catalog.ts';
+import {WORLD_APPS} from '../context/applets/catalog.ts';
 import {extraPlacements,resolvePlacements} from '../ui/world/slot-placement.ts';
 import {emptyRegionLayout} from '../ui/world/region-layout.ts';
 const r=WORLD_LAYOUT.regions;

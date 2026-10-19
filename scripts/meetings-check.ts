@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {calendarMeetings,dueMeeting,meetingLink,meetingSummaryRequest} from '../core/applets/meetings.ts';
+import {calendarMeetings,dueMeeting,meetingLink,meetingSummaryRequest} from '../context/applets/meetings.ts';
 import {readFile} from 'node:fs/promises';
 const now=Date.now(),start=new Date(now-1000).toISOString();
 const rows=[{id:'a',title:'Review',start,conferenceData:{entryPoints:[{entryPointType:'video',uri:'https://meet.google.com/abc-defg-hij'}]}},{id:'cancel',start,status:'cancelled',hangoutLink:'https://meet.google.com/abc-defg-hij'},{id:'declined',start,hangoutLink:'https://meet.google.com/abc-defg-hij',attendees:[{self:true,responseStatus:'declined'}]},{id:'day',start,allDay:true,hangoutLink:'https://meet.google.com/abc-defg-hij'}];
@@ -46,7 +46,7 @@ console.log('PASS due meetings are offered with an explicit Join action; nothing
 
 // Calendar calls carry who is invited and what the invite says, as plain bounded text for Fox's brief.
 {
- const {meetingContextDetail,meetingsStage,meetingWhen,MEETING_SERVICES,MEETING_BRIEF_REQUEST}=await import('../core/applets/meetings.ts');
+ const {meetingContextDetail,meetingsStage,meetingWhen,MEETING_SERVICES,MEETING_BRIEF_REQUEST}=await import('../context/applets/meetings.ts');
  const start=Date.now()+3600000,end=start+1800000;
  const [call]=calendarMeetings([{id:'sync',summary:'Design sync',start:{dateTime:new Date(start).toISOString()},end:{dateTime:new Date(end).toISOString()},hangoutLink:'https://meet.google.com/abc-defg-hij',
   organizer:{email:'emily@example.com',displayName:'Emily'},location:'Room 4',description:'<p>Agenda:<br>1. Board</p><script>x</script>',
@@ -84,7 +84,7 @@ console.log('PASS due meetings are offered with an explicit Join action; nothing
 {
  const {chromium}=await import('playwright');
  const {bundleScript}=await import('./browser-test.ts');
- const {meetingsStage}=await import('../core/applets/meetings.ts');
+ const {meetingsStage}=await import('../context/applets/meetings.ts');
  const script=await bundleScript({entryPoints:['ui/applets/meetings/open.ts'],globalName:'Meetings'});
  const now=Date.now(),soon=now+3600000;
  const calls=calendarMeetings([
