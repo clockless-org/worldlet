@@ -272,7 +272,7 @@
 #notionWorld .browser-applet-offer[hidden]{display:none}
 #notionWorld .browser-applet-offer:disabled{opacity:.6;cursor:wait}
 #notionWorld .browser-sign-in-offer{top:38%}
-/* Saved sign-ins (context/browser/saved-logins.ts): the same paper card as the page's other offers, beside the page. */
+/* Saved sign-ins (agent/browser/saved-logins.ts): the same paper card as the page's other offers, beside the page. */
 #notionWorld .browser-login-fill{position:absolute;z-index:20;right:16.5%;top:24%;transform:translateX(50%);width:min(29%,340px);display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 #notionWorld .browser-login-fill button{padding:7px 13px;border:1px solid #3d594933;border-radius:16px;background:#fffaf0;color:#3d5949;font:600 13px/1.2 system-ui;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #notionWorld .browser-login-fill button{padding:9px 16px;border-color:#f5e7c280;border-radius:20px;background:#f5eddbed;font-size:14px;box-shadow:0 3px 10px #39422e20}

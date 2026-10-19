@@ -1412,7 +1412,7 @@ export class WorldLedger {
  }
 
  // Website recordings ------------------------------------------------------------------------------
- // What happened in the built-in browser's pages (context/browser/web-record.ts): one row per visit (a
+ // What happened in the built-in browser's pages (agent/browser/web-record.ts): one row per visit (a
  // stay on one site) and its records in order. Text is searchable through a trigram index.
  private webReady=false;
  private webSearchable=false;

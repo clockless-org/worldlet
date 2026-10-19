@@ -1,4 +1,4 @@
-// What the website panel manages its pages by (context/browser/page-resume.ts PAGE_MEMORY, budget.ts): memory the
+// What the website panel manages its pages by (agent/browser/page-resume.ts PAGE_MEMORY, budget.ts): memory the
 // system can hand out, its pressure level, and the app's whole footprint (owner Order 2026-10-07: "要把内存管理好").
 // - Electron's free memory on macOS counts only free pages, which macOS keeps near zero by design (the rest is
 //   inactive or purgeable cache it hands out at once), so pages were released while the Mac had gigabytes to give.
@@ -8,7 +8,7 @@
 // Probes run in the background every reading; `readMemory` answers at once from the last ones.
 import {execFile} from 'node:child_process';
 import {app} from 'electron';
-import type {MemoryReading} from '../../../../../context/browser/index.ts';
+import type {MemoryReading} from '../../../../../agent/browser/index.ts';
 
 let engineKB=0,availableMB=NaN,pressure:MemoryReading['pressure'];
 

@@ -585,7 +585,7 @@ export function recordedFailures(root:string,db:WorldLedger,notes:DiagnosticNote
   return found;
  };
  // 4. Persisted diagnostics (logs/diagnostics.jsonl): any failure code except a cancellation and
- // a kept page released under memory pressure (context/browser/page-resume.ts PAGE_MEMORY), which is
+ // a kept page released under memory pressure (agent/browser/page-resume.ts PAGE_MEMORY), which is
  // the host relieving memory as designed, not failed work. A tool-level rejection (the tool reply told the model to correct and resubmit) is a normal
  // self-correction only when a later call of that tool in the same run was accepted and the run
  // succeeded; otherwise the work was never saved and it fails.

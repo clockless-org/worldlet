@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {MEETING_TRANSCRIPT,TranscriptWindows,pcmLevel,transcriptText} from '../context/applets/meeting-transcript.ts';
-import {webTranscript,type WebRecord} from '../context/browser/index.ts';
+import {webTranscript,type WebRecord} from '../agent/browser/index.ts';
 import {MeetingTranscriber} from '../platform/electron/src/modules/browser/meeting-transcript.ts';
 import {WebRecorder,readRecordings} from '../platform/electron/src/modules/browser/recorder.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';

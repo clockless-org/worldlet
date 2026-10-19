@@ -24,7 +24,7 @@ flowchart TD
 | Serialization facade | `agent/index.ts`: `harnessHandshake`, `harnessReceive`, `harnessAuthHandoff` | JSON envelopes for the host's in-process Core (`platform/electron/src/core.ts`) |
 | Executable adapter | `platform/electron/src/modules/agent-runtime/external.ts` | Spawn, bounded JSONL IO, deadline, cancellation, execute accepted tool callbacks |
 | Reference Harness | `harness/example/agent.py` | Independent executable example; no Hermes dependency |
-| Browser policy and flow | `context/browser/index.ts` | Observation projection, element policy, command sequencing and snapshot consumption |
+| Browser policy and flow | `agent/browser/index.ts` | Observation projection, element policy, command sequencing and snapshot consumption |
 | Browser transport | `platform/browser/agent_browser.py` | Private provider endpoint and pinned upstream driver process; no model or planner |
 | Host browser endpoints | `platform/electron/src/modules/browser/agent.ts` (driver process), `page.ts` (CDP through `webContents.debugger`) | Selected page, navigation generation, cancellation, CDP IO |
 

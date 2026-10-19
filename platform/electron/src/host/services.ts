@@ -315,7 +315,7 @@ export interface BrowserService {
  resetHistory():void;
  /** What a website page's recorder saved: kept in the World and followed for game reviews (the release-gate
   * game review check records Showdown battles through it). */
- recorded(visits:import('../modules/browser/recorder.ts').RecordedVisit[],records:(import('../../../../context/browser/index.ts').WebRecord&{visit:string})[]):void;
+ recorded(visits:import('../modules/browser/recorder.ts').RecordedVisit[],records:(import('../../../../agent/browser/index.ts').WebRecord&{visit:string})[]):void;
  /** Starts a proactive game review if one is due (context/games battleReviewDue); the games handed to Fox, if any. */
  reviewGamesNow():import('../../../../context/games/index.ts').FinishedBattle[]|null;
  /** The game on the page on screen, when it is one Worldlet can follow (a Showdown battle): what is being played now and

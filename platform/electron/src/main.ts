@@ -1,6 +1,6 @@
 import {sharedEnginePid,stopSharedEngine,websiteEngine} from './modules/browser/engine/process.ts';
 import {readMemory,refreshMemory} from './modules/browser/memory.ts';
-import {browserBudget} from '../../../context/browser/index.ts';
+import {browserBudget} from '../../../agent/browser/index.ts';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';

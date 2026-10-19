@@ -1,4 +1,4 @@
-// What the built-in browser records (context/browser/web-record.ts): a real Chromium page on a local
+// What the built-in browser records (agent/browser/web-record.ts): a real Chromium page on a local
 // site with a JSON API, a form and a WebSocket, recorded through DevTools by the host recorder into a
 // World database, then searched and read back as Fox would. Secrets never reach the database.
 import assert from 'node:assert/strict';
@@ -11,7 +11,7 @@ import {launchTestBrowser} from './browser-test.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {WebRecorder,manageRecordings} from '../platform/electron/src/modules/browser/recorder.ts';
 import {installWebRecorder} from '../platform/bridge/web-record.js';
-import {typedAddress,cleanHeaders,cleanMessage,cleanRequestBody,cleanResponseBody,cleanWebAddress,privateWebAddress,scrubSent,secretField,SECRET_NAME,WEB_RECORD,webSearchPlan,webSite,webTranscript,RAW_KINDS,type WebRecord} from '../context/browser/index.ts';
+import {typedAddress,cleanHeaders,cleanMessage,cleanRequestBody,cleanResponseBody,cleanWebAddress,privateWebAddress,scrubSent,secretField,SECRET_NAME,WEB_RECORD,webSearchPlan,webSite,webTranscript,RAW_KINDS,type WebRecord} from '../agent/browser/index.ts';
 import {CARRY,carriesConversation,placeContext,recentBrowsing} from '../agent/companion/index.ts';
 
 // Rules ------------------------------------------------------------------------------------------

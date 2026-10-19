@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {browserElementPolicy,browserDriverSnapshot} from '../context/browser/agent-browser.ts';
+import {browserElementPolicy,browserDriverSnapshot} from '../agent/browser/agent-browser.ts';
 const link={role:'link',name:'Read article',url:'https://example.com/page',href:'/article'};
 assert.equal(browserElementPolicy(link).receipt,false);
 for(const href of ['https://outside.example/path','//outside.example/','\\\\outside.example/','javascript:alert(1)'])assert.equal(browserElementPolicy({...link,href}).receipt,true);
