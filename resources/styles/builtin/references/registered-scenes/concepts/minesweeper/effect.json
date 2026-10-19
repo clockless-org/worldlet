@@ -6,11 +6,11 @@
   "purpose": "Image-generated visual target based on the current large-surface background; not a runtime screenshot.",
   "generatedAt": "2026-10-13T04:28:40.465Z",
   "sourceBackground": {
-    "path": "ui/theme-packages/village/assets/applet-scenes/minesweeper/background.webp",
+    "path": "ui/style/theme-packages/village/assets/applet-scenes/minesweeper/background.webp",
     "sha256": "5beb17ac5687d46621dbed2ec815da1ccb7421fac2536937d6b89b93ae14df5a"
   },
   "sourceFrame": {
-    "path": "ui/theme-packages/village/assets/applet-scenes/minesweeper/frame-mask.png",
+    "path": "ui/style/theme-packages/village/assets/applet-scenes/minesweeper/frame-mask.png",
     "sha256": "fcafe2a1f38c354d88d6c63ff40877410c19b01f3c08a635c8696619373a65e1"
   },
   "sourceImageSha256": "6b1d927f3bb94695740a7c803ed5db21c55c2fd2543898753674ca6e9d9ebedc",

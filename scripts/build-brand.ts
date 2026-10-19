@@ -1,7 +1,7 @@
 // Deterministic vector exports; Swift reads the same polygon master directly.
 import {writeFile,mkdir,readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
-import {brandAssets} from '../ui/components/primitives/brand.ts';
+import {brandAssets} from '../ui/style/primitives/brand.ts';
 export async function buildBrand(output=new URL('../resources/styles/builtin/assets/brand/',import.meta.url)) {
  // Read on each build so the website watcher sees edits to the shared master.
  const master=JSON.parse(await readFile(new URL('../resources/styles/builtin/assets/brand/mark.json',import.meta.url),'utf8'));

@@ -104,7 +104,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.evaluate(()=>document.querySelector('#notionWorld')!.scrollTop),0,'the World never scrolls out of place');
   await restore(saved);}
  await page.evaluate(()=>location.hash='object=app-browser');await page.locator('#notionContent[data-template=browser]').waitFor();await page.waitForTimeout(400);assert((await avatar.boundingBox()).x>moved.x+100,'Applet reader positions Fox in its reserved right lane');
- // The page panel sits on the theme Browser scene's screen region (#427), beside the Applet shelf in Fox’s lane (ui/hud/applet-shelf.ts).
+ // The page panel sits on the theme Browser scene's screen region (#427), beside the Applet shelf in Fox’s lane (ui/world/applet-shelf.ts).
  {const {reader,region,shelfLeft}=await page.evaluate(()=>{const w=getComputedStyle(document.querySelector('#notionWorld')!),v=(k:string)=>parseFloat(w.getPropertyValue('--applet-scene-primary-'+k));return {shelfLeft:document.querySelector('.applet-shelf:not([hidden])')!.getBoundingClientRect().left,reader:document.querySelector('#notionContent')!.getBoundingClientRect().toJSON(),region:{left:v('left'),top:v('top'),width:v('width'),height:v('height')}};});
   assert(Math.abs(reader.left-region.left)<1&&Math.abs(reader.width-region.width)<1&&Math.abs(reader.bottom-region.top-region.height)<1,'the browser panel takes the Browser scene\'s screen region: '+JSON.stringify({reader,region}));
   assert(Math.abs(reader.top-region.top)<1&&reader.right<=shelfLeft+1&&reader.bottom<=850,'the panel matches its frame, stays beside the Applet shelf and inside the window');}

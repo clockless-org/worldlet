@@ -70,7 +70,7 @@ export async function onboardingPaths({host,window,view}:CheckContext){
   if(store.state.onboarding?.journeyStage!=='finish')throw Error('Turning the Tutorial switch off did not finish the journey: '+(store.state.onboarding?.journeyStage??'none'));
  };
  // Agent detection is done once the loading cards are gone and a tile is choosable or marked missing
- // (ui/onboarding/startup-setup.ts): while it runs, More options already lists every Agent as missing.
+ // (ui/shell/startup-setup.ts): while it runs, More options already lists every Agent as missing.
  const available="[...document.querySelectorAll(':is(.setup-agent-default,.setup-agent-button):not(.is-missing)')].filter(b=>!b.disabled).map(b=>b.dataset.agent)";
  const detected=`(!document.querySelector('.setup-agent-cards.is-loading')&&(${available}.length>0||!!document.querySelector('.setup-agent-button.is-missing')))`;
  const quitCompletely=async(what:string)=>{
@@ -128,7 +128,7 @@ export async function onboardingPaths({host,window,view}:CheckContext){
   await wait('world arrival',"!!document.querySelector('#notionWorld')?.sceneMetrics?.renderer",90);
   const step=(key:string,seconds=30)=>wait(`tour step ${key}`,`document.querySelector('#notionWorld')?.dataset.tourStep===${JSON.stringify(key)}`,seconds);
   await step('hello',90);await press('Continue');
-  // The tour in the owner's order of 2026-10-11 (ui/onboarding/world-tour.ts): Fox's hello, the Attention Center, the
+  // The tour in the owner's order of 2026-10-11 (ui/shell/world-tour.ts): Fox's hello, the Attention Center, the
   // Applets, the tasks and Routines beside Fox, then Fox's settings and the phone. Nothing is connected here, so the
   // Applets step offers Connect Mail or Later; Later goes on without Google.
   await step('attention');await press('Continue');
@@ -152,7 +152,7 @@ export async function onboardingPaths({host,window,view}:CheckContext){
   await advisory('Mail from the World',MAIL_FROM_WORLD_BLOCKING,async()=>{
    // Opening Mail from the World offers to connect (the 10-03 meeting): it starts Google's sign-in.
    const starts=()=>events.filter(event=>event==='google_connect_started').length,before=starts();
-   // Mail's Applet in the World, where ui/onboarding/tour-spotlight.ts appletBox finds it.
+   // Mail's Applet in the World, where ui/shell/tour-spotlight.ts appletBox finds it.
    await clickAt(web,js,'Mail in the World',"(()=>{const r=document.querySelector('#notionWorld'),m=(r?.sceneMetrics?.modules||[]).find(m=>m.id==='app-gmail'&&m.visible!==false),b=m?.peekBounds,c=r?.querySelector('canvas[data-renderer=\"pixi-webgl\"]');if(!b||!c||!(b.width>0&&b.height>0))return null;const base=c.getBoundingClientRect(),sx=c.clientWidth?base.width/c.clientWidth:1,sy=c.clientHeight?base.height/c.clientHeight:1;return {x:base.left+b.x*sx,y:base.top+b.y*sy,width:b.width*sx,height:b.height*sy};})()");
    mark('opened Mail from the World');
    for(let i=0;i<150&&starts()===before;i++)await sleep(200);

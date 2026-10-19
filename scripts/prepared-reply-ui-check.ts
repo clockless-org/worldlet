@@ -62,7 +62,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(sent.background,true,'a background session beside the conversation, never in it');
  assert.equal(sent.shown,'Prepared reply','the archive keeps a label, never the request in the person’s name');
  assert.ok(sent.text.includes('id "thread:18c2a1"')&&sent.text.includes('prepare_email once with threadId "18c2a1"')&&sent.text.includes('you never send it'),'it reads the item’s own thread and prepares one draft, never sending');
- // Beside Fox, on its right, a card says what Fox is doing (ui/hud/task-panel.ts; Scheduled on its left).
+ // Beside Fox, on its right, a card says what Fox is doing (ui/world/task-panel.ts; Scheduled on its left).
  const panel=page.locator('.task-panel');
  const working=panel.locator('.task-group[data-group=now] .task-card[data-task-id="fox:reply"]');
  await working.locator('.task-when',{hasText:'Drafting a reply: Answer Priya about the venue…'}).waitFor();

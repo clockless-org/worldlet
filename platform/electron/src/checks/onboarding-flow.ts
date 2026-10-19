@@ -88,7 +88,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  // and no Open card pointing to an Attention item (owner decision 2026-10-10), can pull the person off a tour step.
  await js("window.__foxFirst=[];window.addEventListener('worldlet:fox-proactive',e=>window.__foxFirst.push({card:!!e.detail?.card,tour:!!document.querySelector('#notionWorld')?.dataset.tourStep}));true");
  // A real mouse click at the middle of an element: the tour's spotlight catches every click and
- // acts only on one inside its box (ui/onboarding/tour-spotlight.ts).
+ // acts only on one inside its box (ui/shell/tour-spotlight.ts).
  const clickAt=async(what:string,selector:string)=>{
   const at=await js(`(()=>{const b=document.querySelector(${JSON.stringify(selector)})?.getBoundingClientRect();return b&&b.width&&b.height?{x:Math.round(b.x+b.width/2),y:Math.round(b.y+b.height/2)}:null;})()`);
   if(!at)throw Error(`Nothing to click for ${what}: ${selector}\n  screen: ${await seen()}`);
@@ -98,10 +98,10 @@ export async function onboardingFlow({host,window,view}:CheckContext){
   mark(`click on ${what}`);
  };
  const spotlit="document.querySelector('#notionWorld')?.dataset.tourSpotlight==='true'";
- // The tour (ui/onboarding/world-tour.ts), in the owner's order of 2026-10-11: Fox's hello, the Attention Center, the
+ // The tour (ui/shell/world-tour.ts), in the owner's order of 2026-10-11: Fox's hello, the Attention Center, the
  // Applets (Mail, connected by mock Google, so no Connect Mail), the tasks and Routines beside Fox, then Fox's settings
  // and the phone, each step proven by its spotlight. The phone's Not now registers nothing with the relay.
- // The World's tasks beside Fox (ui/hud/task-panel.ts) keep out of each step's way: during the tour they show only
+ // The World's tasks beside Fox (ui/world/task-panel.ts) keep out of each step's way: during the tour they show only
  // Routines, never Doing now, and never covers the spotlight's middle.
  const panelClear=`(()=>{const p=document.querySelector('.task-panel');if(p&&[...p.querySelectorAll('.task-group[data-group=now]')].some(g=>g.getClientRects().length))return false;
   const r=document.querySelector('.tour-spotlight:not([hidden]) .tour-spotlight-ring:not([hidden])')?.getBoundingClientRect();return !r||!r.width||!document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('.task-panel');})()`;
@@ -120,7 +120,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  await step('fox');
  // With phone pairing on this host it offers the app and the pairing code (Not now); without it, Continue.
  await wait('the phone’s Not now, or Continue',`(()=>{const b=${button('Not now')}||${button('Continue')};if(!b)return false;b.click();return true;})()`,30);
- // First value (ui/onboarding/first-value.ts). 5. Fox boxes the item it picked; a click on it opens its card.
+ // First value (ui/shell/first-value.ts). 5. Fox boxes the item it picked; a click on it opens its card.
  // The items come from this host's own model reading the mock inbox, which on a loaded release host can
  // take minutes: Fox says it is still reading and waits for the item instead of ending the tour first
  // (Mac RCs 2961, 2963, 2968, 2980 ended it with “Nothing needs you right now” and never picked; #1970).

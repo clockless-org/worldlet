@@ -17,7 +17,7 @@ function regionLayout(value:unknown):Record<string,unknown>{
  const pins=(v:unknown)=>Array.isArray(v)&&v.length<=5&&v.every(id=>id===null||text(id));
  return {version:value.version===2||value.version===AREA_LAYOUT_VERSION?value.version:1,names:map(value.names,text),themes:map(value.themes,text),assignments:map(value.assignments,text),
   pins:map(value.pins,pins),usage:map(value.usage,number),lastUsedAt:map(value.lastUsedAt,number),
-  // Pinned places of the themes not shown now (ui/themes/theme-placements.ts).
+  // Pinned places of the themes not shown now (ui/style/themes/theme-placements.ts).
   ...plain(value.themePins)?{themePins:Object.fromEntries(Object.entries(value.themePins).filter(([key,v])=>key.length<=100&&plain(v)).slice(0,20).map(([key,v])=>[key,map(v,pins)]))}:{}};
 }
 /** Host authorizes referenced sources/items and performs note ingestion before persisting this result. */

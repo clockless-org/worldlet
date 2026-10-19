@@ -1,7 +1,7 @@
 // Export the shared brand master as Windows-compatible 32-bit DIB icon frames.
 import sharp from 'sharp';
 import {writeFile} from 'node:fs/promises';
-import {brandAssets} from '../ui/components/primitives/brand.ts';
+import {brandAssets} from '../ui/style/primitives/brand.ts';
 const sizes=[16,20,24,32,40,48,64,128,256];
 const frames:Buffer[]=[];
 for(const size of sizes){

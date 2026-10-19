@@ -1,4 +1,4 @@
-import {uiIcon} from '../components/index.ts';
+import {uiIcon} from '../style/index.ts';
 
 // Dictation into any text field of the World (an Applet's box, a note, a reply), not only Fox's own bar: ⌘⇧D (Ctrl+Shift+D
 // elsewhere) in a focused field listens through the same local Whisper as Fox's microphone, with the World's names

@@ -719,7 +719,7 @@ private struct DottedWave: View {
     }
 }
 
-/// The sound wave while the microphone listens, as on the computer (ui/components/components.css companion-input-wave):
+/// The sound wave while the microphone listens, as on the computer (ui/style/components.css companion-input-wave):
 /// seventeen bars that rise with how loud the person speaks, every third one tallest.
 private struct SoundWave: View {
     let level: Double

@@ -66,7 +66,7 @@ function fixture(login:{status:string,offered:boolean,platform?:string}){
  };
  return {calls,view,call,root:new Root()};
 }
-const {mountLoginItemOffer}=await import('../ui/onboarding/login-item-offer.ts');
+const {mountLoginItemOffer}=await import('../ui/shell/login-item-offer.ts');
 const offered=(view:any)=>view.guideSource==='login-item';
 try{
  // During the journey nothing is asked; finishing it (the first win) waits for its moment.

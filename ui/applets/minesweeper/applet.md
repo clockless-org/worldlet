@@ -2,7 +2,7 @@
 
 Clear the field without digging up a mine. The numbers tell you how many are near.
 
-A game in the Games area. The board is our own code ([ui/games/minesweeper.ts](../../games/minesweeper.ts)): it runs offline, needs no account and reads nothing. It is built when the Applet opens and dropped when it closes, so nothing renders or ticks while it is closed. The best score stays in this window's local storage.
+A game in the Games area. The board is our own code ([ui/applets/minesweeper.ts](../minesweeper.ts)): it runs offline, needs no account and reads nothing. It is built when the Applet opens and dropped when it closes, so nothing renders or ticks while it is closed. The best score stays in this window's local storage.
 
 ## Runtime
 

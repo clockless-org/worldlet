@@ -1,4 +1,4 @@
-import {node,textButton as button} from '../../components/index.ts';
+import {node,textButton as button} from '../../style/index.ts';
 import {widgetUntil,type Widget} from '../../../context/artifacts/index.ts';
 
 const el:(tag:string,cls?:string,text?:unknown)=>any=node;

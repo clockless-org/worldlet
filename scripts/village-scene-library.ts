@@ -10,7 +10,7 @@ const utilityKeys=new Set(['gmail','google-calendar','apple-notes','apple-remind
 const gameKeys=new Set(GAME_APPLETS.map(a=>a.key));
 // These remain runtime Applets; this is the curated art library, not an installation policy.
 const excludedKeys=new Set(['ongoing','board','sekai-rogue-ai-tic-tac-toe','sekai-mixing-colors','sekai-roller-coaster']);
-const packagePath='ui/theme-packages/village';
+const packagePath='ui/style/theme-packages/village';
 /** Art-library classification is independent of account providers and runtime installation. */
 export async function villageSceneLibrary(root:string){
  const presentation=JSON.parse(await readFile(path.join(root,packagePath,'presentation.json'),'utf8'));

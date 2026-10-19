@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {tennisDemo} from '../ui/practice/tennis-demo.ts';
+import {tennisDemo} from '../ui/applets/tennis-demo.ts';
 let guide:any,body='Date: 2026-09-26\nGuest: Sam <sam.okafor@example.com>',writes=0,opened='',settled=0;
 (globalThis as any).document={createElement:()=>({append(){}})};
 const config={read:()=>body,save:(_id,value)=>{body=value;writes++;return {ok:true};},show:value=>guide=value,open:id=>opened=id,onConfirmed:()=>settled++};

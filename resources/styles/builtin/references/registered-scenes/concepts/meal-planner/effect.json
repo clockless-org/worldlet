@@ -6,11 +6,11 @@
   "purpose": "Image-generated visual target based on the current large-surface background; not a runtime screenshot.",
   "generatedAt": "2026-10-13T04:36:00.654Z",
   "sourceBackground": {
-    "path": "ui/theme-packages/village/assets/applet-presets/meal-planner/background.webp",
+    "path": "ui/style/theme-packages/village/assets/applet-presets/meal-planner/background.webp",
     "sha256": "2a862dd588f6b5d6af53a69bfadd171fd6d8d35a50ab76c30b5c3f5cef767db0"
   },
   "sourceFrame": {
-    "path": "ui/theme-packages/village/assets/applet-presets/meal-planner/frame-mask.png",
+    "path": "ui/style/theme-packages/village/assets/applet-presets/meal-planner/frame-mask.png",
     "sha256": "171ea796d8e29ebaa654416767db41a7d68d388e7b93cf0c82c83dac0b7c6f7f"
   },
   "sourceImageSha256": "f1af7108ffdfb75599346ed563d857094e0e497870102f2e1b246eef4357a2ed",

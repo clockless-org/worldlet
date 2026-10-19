@@ -1,4 +1,4 @@
-import {themeData} from '../../themes/index.ts';
+import {themeData} from '../../style/index.ts';
 /** The theme's index of its Village art (`assets/art.json`, written by scripts/village-art.ts). */
 interface VillageArt {
  world:{day:string;night:string};landmarks:Record<string,{day:string;night:string}>;

@@ -1,4 +1,4 @@
-// The guided tour after first arrival (ui/onboarding/world-tour.ts), in the owner's order of 2026-10-11: Fox, boxed where
+// The guided tour after first arrival (ui/shell/world-tour.ts), in the owner's order of 2026-10-11: Fox, boxed where
 // it always stands, says hello (we finally meet, nothing was left behind); the Attention Center with what Fox already
 // pulled out; the Applets, whose use Fox remembers, offering Connect Mail while Mail is not connected; the tasks and
 // Routines beside Fox; then Fox's settings and the phone, a code to get the app first, then the pairing code. Esc does

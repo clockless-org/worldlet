@@ -1,4 +1,4 @@
-import {node,textButton as button} from '../../components/index.ts';
+import {node,textButton as button} from '../../style/index.ts';
 const el:(tag:string,cls?:string,text?:unknown)=>any=node;
 export function stripeMoney(amount,currency='usd') {
   try { const code=String(currency).toUpperCase(),fmt=new Intl.NumberFormat('en-US',{style:'currency',currency:code});const digits=['ISK','UGX'].includes(code)?2:fmt.resolvedOptions().maximumFractionDigits;return fmt.format(Number(amount)/10**digits); }

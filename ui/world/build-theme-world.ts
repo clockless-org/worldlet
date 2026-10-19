@@ -1,4 +1,4 @@
-import {themeAppletIcon,activeBuildTheme,themeAssetURL} from '../themes/index.ts';
+import {themeAppletIcon,activeBuildTheme,themeAssetURL} from '../style/index.ts';
 import type {WorldState,WorldMark,WorldApplet,WorldLampState} from './world-renderer.ts';
 import {renderVillageWorld} from './village/village-world.ts';
 import {createAppletStage} from './pixi-stage.ts';

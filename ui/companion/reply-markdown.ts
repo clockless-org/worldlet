@@ -1,5 +1,5 @@
 import {replyAction} from './reply-actions.ts';
-import {modelMarkdown,uiIcon} from '../components/index.ts';
+import {modelMarkdown,uiIcon} from '../style/index.ts';
 import DOMPurify from 'dompurify';
 
 export function replyMarkdown(text: string,{resolveLink=(_title: string): string|null=>null,actions=false}: {resolveLink?: (title: string)=>string|null;actions?: boolean}={}){

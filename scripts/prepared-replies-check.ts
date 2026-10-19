@@ -85,7 +85,7 @@ assert.match(world,/if\(backgroundMoment\(\)\|\|foxArtifact\.visible\|\|\$\('not
 assert.match(world,/replyPrepareDue\(replies,\{now,daily,waiting:drafts\.length\}\)\.due\)return;/);
 assert.match(world,/replies=markReplyPrepared\(replies,next\.id,now,\{thread:next\.thread\}\);saveReplies\(\);[\s\S]*voice\.background\(request\.text,\{displayText:request\.displayText\}\)[\s\S]*\/busy\/i[\s\S]*replies=before;saveReplies\(\);/,'Marked before asking; asked again only when other background work held it');
 assert.match(fs.readFileSync('ui/index.ts','utf8'),/emailReviews:sample\?undefined:/,'No drafts are read in the practice world');
-assert.match(fs.readFileSync('ui/components/layout.css','utf8'),/\.notion-world:is\(\[data-onboarding=true\],\[data-onboarding-locked=true\],\[data-tour-step\]\) \.task-panel \.task-group\[data-group=now\]\{display:none\}/,'Doing now in the Task panel stays out of onboarding and the tour');
+assert.match(fs.readFileSync('ui/style/layout.css','utf8'),/\.notion-world:is\(\[data-onboarding=true\],\[data-onboarding-locked=true\],\[data-tour-step\]\) \.task-panel \.task-group\[data-group=now\]\{display:none\}/,'Doing now in the Task panel stays out of onboarding and the tour');
 // The host still refuses background work outside the person's own World and beside other background work.
 const host=fs.readFileSync('platform/electron/src/modules/companion/index.ts','utf8');
 assert.match(host,/if\(scope\.sample\|\|scope\.setup\|\|store\.sampleEnabled\(\)\|\|store\.state\.cloudConsent!==true\|\|!runtime\|\|!make\)throw new WorldletError\('Background work runs in your own world\.'\);/);

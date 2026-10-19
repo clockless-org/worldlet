@@ -1,6 +1,6 @@
 /** The code a service gives while it signs in on its own page (GitHub's device code, contracts/platform.ts
  * SIGN_IN_CODE_EVENT): shown large, with one button that copies it and opens the page to paste it on. Used by Settings ›
- * Connectors and by Connect anywhere else in the World (ui/onboarding/world-onboarding.ts). */
+ * Connectors and by Connect anywhere else in the World (ui/shell/world-onboarding.ts). */
 import {SIGN_IN_CODE_EVENT,signInCode,type SignInCode} from '../../contracts/platform.ts';
 import {GITHUB_INSTALL_URL} from '../../context/sources/index.ts';
 import {agentButton as button,agentEl as el} from './agent-change.ts';

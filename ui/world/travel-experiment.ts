@@ -1,4 +1,4 @@
-import {node,facts,notice,actionButton} from '../components/index.ts';
+import {node,facts,notice,actionButton} from '../style/index.ts';
 import {travelState} from './travel-state.ts';
 // Fictional, device-local plan choices. The world displays; the companion dock acts.
 export const STAY_OPTIONS=[

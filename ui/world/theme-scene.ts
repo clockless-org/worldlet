@@ -1,4 +1,4 @@
-import {ACTIVE_THEME,activeBuildTheme,theme,themeAssetURL,themeData} from '../themes/index.ts';
+import {ACTIVE_THEME,activeBuildTheme,theme,themeAssetURL,themeData} from '../style/index.ts';
 
 /** What the shell needs of the active theme pack's scene: whether entering an area zooms into it (the pack's own
  * `motion.transitions.area`) or opens its Area view. The World draws the rest itself (ui/world/village/village-scene.ts). */

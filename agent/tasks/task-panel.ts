@@ -1,4 +1,4 @@
-// The World's tasks beside Fox (ui/hud/task-panel.ts): what the person's Agent is doing now on Fox's left and the
+// The World's tasks beside Fox (ui/world/task-panel.ts): what the person's Agent is doing now on Fox's left and the
 // Routines about to run on its right, each one small card in the same style (owner request 2026-10-11: tasks either
 // side of Fox, Fox and its message bar between them as the way to talk to the Agent; finished work lives only in the
 // Journal). The panel only draws; every decision is here: which rows, in which group and order, and each card's text.

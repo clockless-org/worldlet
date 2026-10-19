@@ -3,11 +3,11 @@ import {readFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {bundleScript} from './browser-test.ts';
 // Render real Center rows (taskRow plus the HUD's marker swap), not a hand-copied markup.
-const bundle=await bundleScript({stdin:{contents:"export {taskRow} from './ui/components/primitives/components.ts';export {attentionIcon} from './ui/attention/icon.ts';",resolveDir:process.cwd(),loader:'ts'},globalName:'rows'});
+const bundle=await bundleScript({stdin:{contents:"export {taskRow} from './ui/style/primitives/components.ts';export {attentionIcon} from './ui/attention/icon.ts';",resolveDir:process.cwd(),loader:'ts'},globalName:'rows'});
 const browser=await chromium.launch();
 try{
  const page=await browser.newPage({viewport:{width:900,height:700}});
- await page.setContent('<style>'+await readFile('ui/shell/homestead.css','utf8')+':root{--ui-text-body:14px;--ui-text-caption:11px;--ui-font-ui:Arial}'+await readFile('ui/components/components.css','utf8')+'</style><div class="native-console radial-pet-console companion-console" style="width:310px"><div class="world-task-tracker"><div class="world-task-list"></div></div></div>');
+ await page.setContent('<style>'+await readFile('ui/shell/homestead.css','utf8')+':root{--ui-text-body:14px;--ui-text-caption:11px;--ui-font-ui:Arial}'+await readFile('ui/style/components.css','utf8')+'</style><div class="native-console radial-pet-console companion-console" style="width:310px"><div class="world-task-tracker"><div class="world-task-list"></div></div></div>');
  await page.addScriptTag({content:bundle});
  await page.evaluate(()=>{
   const {taskRow,attentionIcon}=(window as any).rows,list=document.querySelector('.world-task-list');

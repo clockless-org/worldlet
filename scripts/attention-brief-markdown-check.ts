@@ -1,6 +1,6 @@
 // Bold in an Attention brief is bold, not asterisks (owner report 2026-10-04): the model writes `**` right against
 // Chinese text and punctuation, where CommonMark leaves it literal. The card and Fox's replies share the parser
-// (ui/components/markdown.ts); both still render only safe inline formatting.
+// (ui/style/markdown.ts); both still render only safe inline formatting.
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {bundleScript} from './browser-test.ts';

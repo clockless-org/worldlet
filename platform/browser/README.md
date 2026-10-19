@@ -127,7 +127,7 @@ when it moves or resizes. The host declares `browserFoxOverlay`; a host without 
 the page inside the colored ring, labelled with the step Fox is on. Fox's control belongs
 to its turn, not to one rendering of the panel: a World refresh that re-renders the
 open page keeps the card, the pointer and the frame's turn until the turn ends or the
-90-second quiet timeout (#967, `ui/browser/browser-device.ts`). Before a click, fill or
+90-second quiet timeout (#967, `ui/applets/browser-device.ts`). Before a click, fill or
 focus the host asks agent-browser for the control's box and glides the pointer there;
 reduced motion places it without gliding. `node scripts/browser-fox-glow-check.ts`
 covers the World side with a faked host and renders the overlay page (`glow-page.ts`) to check

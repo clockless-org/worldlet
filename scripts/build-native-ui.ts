@@ -1,4 +1,4 @@
-import {ACTIVE_THEME} from '../ui/themes/index.ts';
+import {ACTIVE_THEME} from '../ui/style/index.ts';
 import {installActivityCollector} from '../platform/bridge/activity-collector.js';
 import {holdMedia} from '../platform/bridge/media-hold.js';
 import {pictureInPicture} from '../platform/bridge/picture-in-picture.js';
@@ -11,7 +11,7 @@ import {buildAppletRuntime} from './build-applet-runtime.ts';
 import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
 import {validateAttentionRegistrations} from '../agent/attention/attention-center.ts';
 import {buildWorldAssets} from './build-world-assets.ts';
-import {BUILTIN_STYLE} from '../ui/components/style.ts';
+import {BUILTIN_STYLE} from '../ui/style/style.ts';
 import {buildBrand} from './build-brand.ts';
 import {buildUI} from './build-ui.ts';
 import {buildWebOpen} from './build-web-open.ts';
@@ -48,7 +48,7 @@ const projectionWorker=await build({entryPoints:[path.join(root,'ui/world/world-
 await writeFile(path.join(output,'world-projection-worker.js'),projectionWorker.outputFiles[0].text);
 // Plain scripts the page and the native browser load by name: written in TypeScript, emitted as the files those loaders expect.
 // The bundles are independent, so they build together; dev-electron reruns this for every candidate.
-const bundles=[build({entryPoints:[path.join(root,'ui/browser/paper-edge.ts')],outfile:path.join(output,'paper-edge.js'),bundle:true,format:'iife',minify:true}),build({entryPoints:[path.join(root,'agent/index.ts')],outfile:path.join(output,'shared-core.js'),bundle:true,format:'iife',globalName:'WorldletCore',target:'es2022'}),// PostHog's web client (ui/shell/posthog-web.ts), loaded by the page only in a release app with sharing on.
+const bundles=[build({entryPoints:[path.join(root,'ui/applets/paper-edge.ts')],outfile:path.join(output,'paper-edge.js'),bundle:true,format:'iife',minify:true}),build({entryPoints:[path.join(root,'agent/index.ts')],outfile:path.join(output,'shared-core.js'),bundle:true,format:'iife',globalName:'WorldletCore',target:'es2022'}),// PostHog's web client (ui/shell/posthog-web.ts), loaded by the page only in a release app with sharing on.
  build({entryPoints:[path.join(root,'ui/shell/posthog-web.ts')],outfile:path.join(output,'posthog-web.js'),bundle:true,format:'iife',minify:true,target:'es2022'}),
  ...['world-startup','browser-observer','pcm-worklet'].map(name=>build({entryPoints:[path.join(root,name==='browser-observer'?'platform/bridge':'ui/shell',name+'.ts')],outfile:path.join(output,name+'.js'),bundle:true,format:'iife',minify:true})),
  build({entryPoints:[path.join(root,'ui/index.ts')],outfile:path.join(output,'worldlet.js'),define:{...defines,__WORLDLET_PROJECTION_WORKER__:JSON.stringify(projectionWorker.outputFiles[0].text)},bundle:true,format:'iife',minify:true,plugins:devChannel?[]:[draftAnatomy]})];
@@ -121,7 +121,7 @@ await writeFile(path.join(output,'audio/theme-tracks.json'),JSON.stringify(theme
 
 
 await copyFile(path.join(root,'ui/applets/youtube/player.html'),path.join(output,'youtube-player.html'));
-await copyFile(path.join(root,'ui/browser/paper-edge.html'),path.join(output,'paper-edge.html'));
+await copyFile(path.join(root,'ui/applets/paper-edge.html'),path.join(output,'paper-edge.html'));
 
 // Publish only after every runtime helper and asset has been staged.
 const previous=published+`.previous-${process.pid}`;

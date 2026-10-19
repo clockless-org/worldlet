@@ -120,7 +120,7 @@ export function installShell(host:Host){
   // A website Applet's page goes back and forward through its own history, with the platform's keys (owner request 2026-10-06).
   const pageBack:MenuItemConstructorOptions={label:'Back',accelerator:mac?'Command+[':'Alt+Left',click:()=>{void page.call('worldletBrowserNavigate','back');}};
   const pageForward:MenuItemConstructorOptions={label:'Forward',accelerator:mac?'Command+]':'Alt+Right',click:()=>{void page.call('worldletBrowserNavigate','forward');}};
-  // The Browser's tabs (owner request 2026-10-07, ui/browser/browser-device.ts): the page answers whether it took the key.
+  // The Browser's tabs (owner request 2026-10-07, ui/applets/browser-device.ts): the page answers whether it took the key.
   // ⌘W closes the Browser's tab there and the window everywhere else, as it did; Close Window keeps ⇧⌘W.
   const tab=(action:string)=>page.call('worldletBrowserNavigate',action).then(taken=>taken===true,()=>false);
   const newTab:MenuItemConstructorOptions={label:'New Tab',accelerator:'CommandOrControl+T',click:()=>{void tab('new-tab');}};

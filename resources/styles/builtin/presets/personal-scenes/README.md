@@ -14,7 +14,7 @@ These curated examples establish plausible uses, not market share, customer freq
 
 ## Use the assets
 
-- Host code reads `themeAppletPresets()` from `ui/themes/index.ts`, selects a stable preset ID, and uses the returned `icon` and `background` URLs. The original PNG paths remain in `catalog.json` for authoring.
+- Host code reads `themeAppletPresets()` from `ui/style/themes/index.ts`, selects a stable preset ID, and uses the returned `icon` and `background` URLs. The original PNG paths remain in `catalog.json` for authoring.
 - Icons are transparent PNGs. Keep their proportions and full base; do not flatten against a white background. Their little brass inset is decorative artwork, not a live status indicator.
 - Backgrounds have no baked-in data, labels or controls. Layer real Applet content above the left side; keep the lower right available for Fox and speech.
 - `layout` records normalized composition guidance, not a runtime API. At narrow widths, reflow content instead of blindly cropping an assumed safe region.

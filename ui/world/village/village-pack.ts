@@ -1,4 +1,4 @@
-import {themeData} from '../../themes/index.ts';
+import {themeData} from '../../style/index.ts';
 /** Where an opened Applet's device stands, as fractions of the window (the Village theme package's pack.json). */
 export const ROOM_FOREGROUND=themeData<{layout:{room:{foreground:[number,number]}}}>('pack.json').layout.room.foreground as readonly [number,number];
 /** The scenery's colour grade (tokens.json); Applets and the HUD are never graded. */

@@ -8,7 +8,7 @@ Chapters:
 - [Art verification](#art-quality)
 
 
-`ui/theme-packages/village/world.json` owns region bounds, camera centers, labels and named Applet ground slots; `ui/world/world-layout.ts` projects that portable pack for rendering and navigation. Persisted region and slot IDs remain stable.
+`ui/style/theme-packages/village/world.json` owns region bounds, camera centers, labels and named Applet ground slots; `ui/world/world-layout.ts` projects that portable pack for rendering and navigation. Persisted region and slot IDs remain stable.
 
 Current defaults: Home central; Social upper-left; Life upper-right; Games right; Work lower-right; Entertainment at the left dock. Region names and assignments are customizable.
 
@@ -293,7 +293,7 @@ No whole-product GPU time, memory or energy certification is established here, a
 
 ### Startup feedback
 
-The shared boot surface and milestones are defined in [onboarding](../onboarding/README.md).
+The shared boot surface and milestones are defined in [onboarding](../shell/ONBOARDING.md).
 Do not maintain another loader design here. Startup timings are numeric diagnostic
 facts, not fabricated percentages or proof that content is ready.
 

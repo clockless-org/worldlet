@@ -20,7 +20,7 @@ The live `ui/world/world-layout.ts` owns authored region bounds and slots; `vill
 
 Applet identity and user placement survive reconnects. Capacity must follow actual supported ground, not a rectangle over water or a roof. The existing catalog can be added/removed/repositioned through Fox's panel; general installation of arbitrary new Applets is not implemented.
 
-World covers the viewport independently of Attention Center. Theme scene adapters choose region framing: a theme with `motion.transitions.area: zoom` fits a selected Area and its independent Applets (up to 3×); Village retains the overview. HUD size stays fixed and Back returns to the overview. Native Open/Focus and website Focus follow [Applet presentation](../components/INTERACTION.md#applet-presentation); the style pack does not alter navigation or permissions. No arbitrary camera rotation or free zoom.
+World covers the viewport independently of Attention Center. Theme scene adapters choose region framing: a theme with `motion.transitions.area: zoom` fits a selected Area and its independent Applets (up to 3×); Village retains the overview. HUD size stays fixed and Back returns to the overview. Native Open/Focus and website Focus follow [Applet presentation](../style/INTERACTION.md#applet-presentation); the style pack does not alter navigation or permissions. No arbitrary camera rotation or free zoom.
 
 Alpha-tested devices have silhouette feedback; transparent padding does not steal clicks. Region feedback belongs to its label, never a tinted rectangular tile. Hover/keyboard focus must remain readable. Click exposed ground to return; drags are not clicks.
 

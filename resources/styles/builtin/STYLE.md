@@ -38,7 +38,7 @@ grades the material or reading text.
 
 ### Weather icon family
 
-`ui/components/weather-icons.ts` owns the scalable colored SVG family shared by the upper-right
+`ui/style/weather-icons.ts` owns the scalable colored SVG family shared by the upper-right
 weather control and forecast Applet: warm-gold sun, pale-gold moon, gray-white
 clouds, blue rain, ice-blue snow, fog and amber lightning. Partly cloudy variants
 combine a cloud with the sun or moon. Unknown data uses a neutral dash in the
@@ -72,7 +72,7 @@ Painted cast shadows cannot physically rotate with the sun. Registered day/night
 
 ## Ownership
 
-[`style.json`](../../../ui/theme-packages/village/style.json) registers references and World/Applet/companion/brand resources. [`tokens.json`](../../../ui/theme-packages/village/tokens.json) holds world/HUD appearance values. `../../../ui/components/style.ts` is the shared immutable code entry point. Functional render/interaction code, capability adapters, permissions and user records remain outside the pack.
+[`style.json`](../../../ui/style/theme-packages/village/style.json) registers references and World/Applet/companion/brand resources. [`tokens.json`](../../../ui/style/theme-packages/village/tokens.json) holds world/HUD appearance values. `../../../ui/style/style.ts` is the shared immutable code entry point. Functional render/interaction code, capability adapters, permissions and user records remain outside the pack.
 
 Only this built-in style is supported. No user style loader, executable pack or override mechanism is enabled.
 

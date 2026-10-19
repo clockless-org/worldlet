@@ -2,7 +2,7 @@
 // every capture path: the browser recorders here and the Electron media surface, which receives
 // the choice with `speechStart`. A choice that is not present falls back to the default device
 // and says so once per page session; the choice is kept so a re-plugged dock works again.
-import {setupText} from '../onboarding/index.ts';
+import {setupText} from '../shell/index.ts';
 
 export type Microphone={id:string,label:string};
 const KEY='worldlet-microphone';

@@ -36,7 +36,7 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | How an Applet should look and behave | [Applet design guide](../ui/applets/DESIGN-GUIDE.md) · [motion](../ui/applets/MOTION.md) |
 | How to build one | [Applet implementation guide](../ui/applets/IMPLEMENTATION-GUIDE.md) · [integrations](../context/applets/INTEGRATIONS.md) |
 | A board of Service numbers: tabs, funnels, trends | [The board](../context/sources/BOARD.md) |
-| Cards Fox makes | [Card system](../ui/artifacts/CARD-SYSTEM.md) |
+| Cards Fox makes | [Card system](../ui/attention/CARD-SYSTEM.md) |
 | Worlds, styles and artwork | [Resources](../resources/README.md) · [Village world](../resources/worlds/village/README.md) |
 
 ## Contributing and releasing
@@ -231,6 +231,7 @@ Indexed: **286 Markdown documents** and **749 supporting documentation files**.
 - [ui/DESIGN-STANDARDS.md](../ui/DESIGN-STANDARDS.md)
 - [ui/README.md](../ui/README.md)
 - [ui/applets/BRAND-ASSETS.md](../ui/applets/BRAND-ASSETS.md)
+- [ui/applets/DEMO.md](../ui/applets/DEMO.md)
 - [ui/applets/DESIGN-GUIDE.md](../ui/applets/DESIGN-GUIDE.md)
 - [ui/applets/IMPLEMENTATION-GUIDE.md](../ui/applets/IMPLEMENTATION-GUIDE.md)
 - [ui/applets/MOTION.md](../ui/applets/MOTION.md)
@@ -242,19 +243,18 @@ Indexed: **286 Markdown documents** and **749 supporting documentation files**.
 - [ui/applets/messages/README.md](../ui/applets/messages/README.md)
 - [ui/applets/scene/README.md](../ui/applets/scene/README.md)
 - [ui/applets/voice-memos/README.md](../ui/applets/voice-memos/README.md)
-- [ui/artifacts/CARD-SYSTEM.md](../ui/artifacts/CARD-SYSTEM.md)
-- [ui/artifacts/README.md](../ui/artifacts/README.md)
+- [ui/attention/ARTIFACTS.md](../ui/attention/ARTIFACTS.md)
+- [ui/attention/CARD-SYSTEM.md](../ui/attention/CARD-SYSTEM.md)
 - [ui/companion/ANIMATION.md](../ui/companion/ANIMATION.md)
 - [ui/companion/CONVERSATION.md](../ui/companion/CONVERSATION.md)
-- [ui/components/INTERACTION.md](../ui/components/INTERACTION.md)
-- [ui/onboarding/DISCOVERY.md](../ui/onboarding/DISCOVERY.md)
-- [ui/onboarding/README.md](../ui/onboarding/README.md)
-- [ui/practice/DEMO.md](../ui/practice/DEMO.md)
+- [ui/shell/DISCOVERY.md](../ui/shell/DISCOVERY.md)
+- [ui/shell/ONBOARDING.md](../ui/shell/ONBOARDING.md)
 - [ui/shell/README.md](../ui/shell/README.md)
-- [ui/theme-packages/village/assets/README.md](../ui/theme-packages/village/assets/README.md)
-- [ui/theme-packages/village/assets/artifact/HOST-PROMPT.md](../ui/theme-packages/village/assets/artifact/HOST-PROMPT.md)
-- [ui/theme-packages/village/assets/artifact/README.md](../ui/theme-packages/village/assets/artifact/README.md)
-- [ui/theme-packages/village/assets/artifact/STYLE.md](../ui/theme-packages/village/assets/artifact/STYLE.md)
+- [ui/style/INTERACTION.md](../ui/style/INTERACTION.md)
+- [ui/style/theme-packages/village/assets/README.md](../ui/style/theme-packages/village/assets/README.md)
+- [ui/style/theme-packages/village/assets/artifact/HOST-PROMPT.md](../ui/style/theme-packages/village/assets/artifact/HOST-PROMPT.md)
+- [ui/style/theme-packages/village/assets/artifact/README.md](../ui/style/theme-packages/village/assets/artifact/README.md)
+- [ui/style/theme-packages/village/assets/artifact/STYLE.md](../ui/style/theme-packages/village/assets/artifact/STYLE.md)
 - [ui/world/COMPOSITION.md](../ui/world/COMPOSITION.md)
 - [ui/world/ENVIRONMENT.md](../ui/world/ENVIRONMENT.md)
 - [ui/world/README.md](../ui/world/README.md)

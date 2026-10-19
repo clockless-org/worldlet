@@ -7,9 +7,9 @@
 // for a spoken programme, and for ambience the thing itself: waves, rain, trees,
 // open air -- and names it alongside.
 import {celebrationSound} from './celebration-sound.ts';
-import {uiIcon} from '../components/index.ts';
-import {ACTIVE_THEME,themeAmbientTrack,syncThemeSounds} from '../themes/index.ts';
-import {windowActive} from './index.ts';
+import {uiIcon} from '../style/index.ts';
+import {ACTIVE_THEME,themeAmbientTrack,syncThemeSounds} from '../style/index.ts';
+import {windowActive} from './frame-budget.ts';
 
 const AMBIENCE_ICONS={ocean:'wave',rain:'drop',forest:'tree',village:'breeze'};
 const QUIET_ICON='breeze';
@@ -49,7 +49,7 @@ export function mountWorldAudio(call){
   // WebView2 can deliver a command reply after a newer native playback event.
   if(Number.isSafeInteger(value.revision)&&Number.isSafeInteger(current.revision)&&value.revision<current.revision)return;
   current=value;
-  // A theme's own sounds follow the World sounds switch (ui/themes/theme-surfaces.ts).
+  // A theme's own sounds follow the World sounds switch (ui/style/themes/theme-surfaces.ts).
   document.documentElement.dataset.worldSounds=value.ambience?.state==='playing'&&value.ambience.volume>0&&!value.ambience.suspended?'on':'off';
   document.documentElement.dataset.worldSoundVolume=String((value.ambience?.volume||0)*(value.ambience?.ducked ? .12 : 1));syncThemeSounds();
   const error=value.error||value.music?.error||value.ambience?.error;

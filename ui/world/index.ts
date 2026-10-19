@@ -31,3 +31,6 @@ export {mountWorldEnvironment} from './world-environment.ts';
 export {WORLD_FACTS,worldNow} from './world-now.ts';
 export {WORLD_REVEAL_MS,dissolveWorldSurface} from './world-reveal.ts';
 export {bindWorldViewport} from './world-viewport.ts';
+// What was the hud folder (#714).
+export {mountNativeHUD} from './native-hud.ts';
+export {mountAppletShelf,type ShelfApplet} from './applet-shelf.ts';

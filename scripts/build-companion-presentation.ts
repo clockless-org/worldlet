@@ -1,6 +1,6 @@
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
-import {ACTIVE_THEME,type RegisteredTheme} from '../ui/themes/index.ts';
+import {ACTIVE_THEME,type RegisteredTheme} from '../ui/style/index.ts';
 import type {AnatomyRuntimeSources} from '../ui/companion/animation/fox-anatomy-runtime.ts';
 import type {ThemeSpriteRig} from '../ui/companion/animation/theme-sprite-rig.ts';
 

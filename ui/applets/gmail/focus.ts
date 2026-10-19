@@ -1,5 +1,5 @@
 import {mailIdentity,mailTime,mailAvatar} from './presentation.ts';
-import {appletSurface} from '../../components/index.ts';
+import {appletSurface} from '../../style/index.ts';
 /** Mail owns its stable Focus layout. Source text stays separate from Fox summaries. */
 export function parseMail(text:string){
  const lines=String(text||'').replace(/\r\n/g,'\n').split('\n'),headers:Record<string,string>={};let end=0,found=false;

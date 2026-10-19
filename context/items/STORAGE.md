@@ -305,7 +305,7 @@ Focused checks: `scripts/world-history-query-check.ts` and `scripts/world-histor
 <a id="world-interaction"></a>
 ## World, Fox and Hermes: interaction and persistent items
 
-Presentation follows [Peek → Open → Focus](../../ui/components/INTERACTION.md#applet-presentation).
+Presentation follows [Peek → Open → Focus](../../ui/style/INTERACTION.md#applet-presentation).
 Worldlet owns durable source, item and event records; Fox is the conversational
 entry point. The selected Harness owns execution through the negotiated contract.
 Portable companion identity and memory checkpoints remain Worldlet-owned; live

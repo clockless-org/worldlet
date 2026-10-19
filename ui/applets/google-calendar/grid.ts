@@ -1,4 +1,4 @@
-import {node} from '../../components/index.ts';
+import {node} from '../../style/index.ts';
 import {calendarDay} from '../../world/index.ts';
 import {calendarEventId,calendarOccurrences,localDay,CALENDAR_ALERT_MINUTES,LOCAL_CALENDAR_NAME,LOCAL_EVENT_TITLE,type LocalCalendarEvent} from '../../../context/applets/index.ts';
 // Calendar's day and week pages are a time grid, like Apple Calendar: drag on empty time to make an event, drag an

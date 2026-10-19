@@ -1,7 +1,7 @@
 // One way to make every Artifact (owner decision 2026-10-10: "现在的 html attention 模板算个特例 生成文字然后填进去 也是一样的逻辑").
 // Fox writes the content; the theme says how an Artifact looks (presentation.json `artifact`, resources/themes/CONTRACT.md);
 // the host makes the card in one of two modes:
-// - template: the host fills its own card (ui/artifacts/CARD-SYSTEM.md) with the words Fox wrote. Attention cards, small
+// - template: the host fills its own card (ui/attention/CARD-SYSTEM.md) with the words Fox wrote. Attention cards, small
 //   cards, a card over an Applet, the practice world and any host without a generator stay here. It shows at once.
 // - page: the Agent writes the whole card as one HTML page following the theme's rules, prompt and pictures, from the same
 //   content. The host checks it, tries it at the card's size and shows it isolated; until it is ready, and wherever it

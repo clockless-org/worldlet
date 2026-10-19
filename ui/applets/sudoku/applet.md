@@ -2,7 +2,7 @@
 
 Fill the grid so every row, column and box holds 1 to 9. A new puzzle every game.
 
-A game in the Games area. The board is our own code ([ui/games/sudoku.ts](../../games/sudoku.ts)): it runs offline, needs no account and reads nothing. It is built when the Applet opens and dropped when it closes, so nothing renders or ticks while it is closed. The best score stays in this window's local storage.
+A game in the Games area. The board is our own code ([ui/applets/sudoku.ts](../sudoku.ts)): it runs offline, needs no account and reads nothing. It is built when the Applet opens and dropped when it closes, so nothing renders or ticks while it is closed. The best score stays in this window's local storage.
 
 ## Runtime
 

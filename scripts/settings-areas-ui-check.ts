@@ -17,7 +17,7 @@ await withBrowser(async browser=>{
  const page=await browser.newPage({viewport:{width:1100,height:900}}),errors=pageErrors(page,{console:true});
  await page.setContent('<!doctype html><title>Worldlet settings areas check</title><main class="native-console" style="font:14px system-ui;--control-fill:#f0f3ed;--control-ink:#203b30;--hud-paper-ink:#203b30;--hud-muted:#5b6b60;--ui-font-ui:system-ui"><div class="companion-info-panel" open style="inset:12px;transform:none;width:auto;height:auto;max-height:none"><div class="companion-info-body" id="settings"></div></div></main>');
  await page.addStyleTag({content:fs.readFileSync('ui/companion/companion-panel.css','utf8')});
- await page.addStyleTag({content:fs.readFileSync('ui/components/hud.css','utf8')});
+ await page.addStyleTag({content:fs.readFileSync('ui/style/hud.css','utf8')});
  await page.addScriptTag({content:await bundleScript({entryPoints:['ui/settings/companion-settings.ts'],globalName:'CompanionSettings'})});
  await page.evaluate(()=>{
   const w=window as any;w.calls=[];w.copied=[];w.closes=0;w.journalOpened=0;

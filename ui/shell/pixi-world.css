@@ -433,7 +433,7 @@ html:has(#setupArrivingDevices) .notion-pin[data-kind=region-add],
 #notionWorld>.browser-pip .browser-pip-back svg{width:14px;height:14px}
 #notionWorld>.browser-pip:hover .browser-pip-back,#notionWorld>.browser-pip .browser-pip-back:is(:hover,:focus-visible){background:#3d5949;border-color:#3d5949;color:#fffaeb}
 #notionWorld>.browser-pip .browser-pip-back:focus-visible{outline:2px solid #3d5949;outline-offset:1px}
-/* A running Applet in the World (ui/browser/applet-task-screen.ts): Fox's page in a small screen over
+/* A running Applet in the World (ui/applets/applet-task-screen.ts): Fox's page in a small screen over
    the device, a tail pointing down at it, then a Done mark there once Fox's turn ends. */
 #notionWorld>.applet-task-screen{position:absolute;left:0;top:0;z-index:26;box-sizing:border-box;display:flex;flex-direction:column;padding:0 var(--task-screen-rim) var(--task-screen-rim);border:1.5px solid #e9a63c;border-radius:12px;background:#fff8e8;box-shadow:0 0 0 3px #ffb45a33,0 6px 18px #14251b47;pointer-events:auto}
 #notionWorld>.applet-task-screen[hidden]{display:none}
@@ -527,7 +527,7 @@ html:has(#setupArrivingDevices) .notion-pin[data-kind=region-add],
 .applet-lamp-label[data-foreground=true]{transform:translate(-50%,0)}
 .applet-lamp-label[hidden]{display:none}
 @media(max-width:600px){.applet-lamp-label{width:150px;font-size:12px}.applet-lamp-label>button{min-height:36px}}
-/* The guided tour's spotlight and coach mark (ui/onboarding/tour-spotlight.ts): above the World,
+/* The guided tour's spotlight and coach mark (ui/shell/tour-spotlight.ts): above the World,
    Fox and its bubble stay bright, one ringed box shows what Fox talks about. */
 .tour-spotlight{position:fixed;inset:0;z-index:2147483000;pointer-events:none}
 .tour-spotlight-catcher{position:absolute;inset:0;pointer-events:auto;cursor:pointer}
@@ -547,7 +547,7 @@ html:has(#setupArrivingDevices) .notion-pin[data-kind=region-add],
 .tour-coach-ring{position:fixed;z-index:2147483000;box-sizing:border-box;border-radius:24px;border:2px solid var(--tour-ring);pointer-events:none;animation:tour-ring 1.6s ease-in-out infinite}
 :is(.tour-coach,.tour-coach-ring)[hidden]{display:none}
 @media (prefers-reduced-motion:reduce){.tour-spotlight-ring,.tour-coach-ring{animation:none}}
-/* Until the first run is over only the tour responds (ui/onboarding/tour-lock.ts): a clear layer
+/* Until the first run is over only the tour responds (ui/shell/tour-lock.ts): a clear layer
    under the spotlight takes the clicks between its steps, and the tour's Tutorial switch (on; off skips) stays in the World's corner above both. */
 .tour-lock{position:fixed;inset:0;z-index:2147482990;background:transparent;cursor:default}
 .tour-lock[hidden]{display:none}

@@ -1,10 +1,10 @@
 import {chromium} from 'playwright';import {build} from 'esbuild';import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
 
- const bundle=await build({entryPoints:['ui/hud/dev-build-update.ts'],bundle:true,format:'iife',globalName:'DevBuildUI',write:false});
+ const bundle=await build({entryPoints:['ui/world/dev-build-update.ts'],bundle:true,format:'iife',globalName:'DevBuildUI',write:false});
  const browser=await chromium.launch({headless:true});try{
  const page=await browser.newPage({viewport:{width:1100,height:760}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.setContent('<style>body{margin:0;background:#c8d4bd;font:14px system-ui}.native-console{position:relative;width:100vw;height:100vh}.ui-button{font:inherit;padding:8px 12px;border-radius:9px;border:1px solid #9baa8e;background:#f4eedc;color:#293c28}</style><main class="native-console"><input aria-label="Unfinished work" value="Unsaved message"><div class="world-update-dock" aria-label="App update"><button type="button" class="world-footer-update ui-button" hidden>Update</button></div></main>');
- await page.addStyleTag({content:fs.readFileSync('ui/components/layout.css','utf8')});await page.addScriptTag({content:bundle.outputFiles[0].text});
+ await page.addStyleTag({content:fs.readFileSync('ui/style/layout.css','utf8')});await page.addScriptTag({content:bundle.outputFiles[0].text});
  await page.evaluate(()=>{(window as any).requests=[];(window as any).state={supported:true,online:true,candidate:null};(window as any).dispose=(window as any).DevBuildUI.mountDevBuildUpdate(document.querySelector('.world-update-dock'),async(action,body)=>{if(action==='devBuildStatus')return (window as any).state;(window as any).requests.push({action,body});return {accepted:true};});});
  if(await page.locator('.dev-build-update').isVisible())throw Error('No candidate must stay hidden');
  const age=await page.evaluate(()=>{const now=Date.parse('2026-09-30T12:00:00Z'),at=m=>new Date(now-m*60000).toISOString();return [(window as any).DevBuildUI.commitAge(at(0),now),(window as any).DevBuildUI.commitAge(at(12),now),(window as any).DevBuildUI.commitAge(at(180),now),(window as any).DevBuildUI.commitAge(at(60*72),now),(window as any).DevBuildUI.commitAge('bad',now)];});

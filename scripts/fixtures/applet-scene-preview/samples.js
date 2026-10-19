@@ -1,5 +1,5 @@
 // Fictional, deterministic compositions for artwork review. No account or runtime integration.
-const base='/ui/theme-packages/village/assets/';
+const base='/ui/style/theme-packages/village/assets/';
 const materials='/resources/styles/builtin/references/registered-scenes/mockup-materials/';
 const art={village:base+'world/day.webp',...Object.fromEntries(['garden','orchard','market','supper','library','lake'].map(id=>[id,materials+id+'-photo.webp']))};
 art.soup=art.supper;

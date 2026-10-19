@@ -6,11 +6,11 @@
   "purpose": "Image-generated visual target based on the current large-surface background; not a runtime screenshot.",
   "generatedAt": "2026-10-13T04:39:55.166Z",
   "sourceBackground": {
-    "path": "ui/theme-packages/village/assets/applet-presets/garden/background.webp",
+    "path": "ui/style/theme-packages/village/assets/applet-presets/garden/background.webp",
     "sha256": "e413d77576a53e5d5d134a793fb1743e3df0410b7dc7a99121c74ebcb2075e21"
   },
   "sourceFrame": {
-    "path": "ui/theme-packages/village/assets/applet-presets/garden/frame-mask.png",
+    "path": "ui/style/theme-packages/village/assets/applet-presets/garden/frame-mask.png",
     "sha256": "66782cecaa1f9cc68c034dab631c159084206c6d148b01a05ae9445d78593f51"
   },
   "sourceImageSha256": "2295eeab48f7b4098f5383c41ba18f12eb6bbc9bb080fbdca8dd187ee20b8bdc",

@@ -6,11 +6,11 @@
   "purpose": "Image-generated visual target based on the current large-surface background; not a runtime screenshot.",
   "generatedAt": "2026-10-13T04:28:40.774Z",
   "sourceBackground": {
-    "path": "ui/theme-packages/village/assets/applet-scenes/sudoku/background.webp",
+    "path": "ui/style/theme-packages/village/assets/applet-scenes/sudoku/background.webp",
     "sha256": "33ed2c97e7e96324f6f55cec297f334c2908b0ed6b6172e88fa1805beb478833"
   },
   "sourceFrame": {
-    "path": "ui/theme-packages/village/assets/applet-scenes/sudoku/frame-mask.png",
+    "path": "ui/style/theme-packages/village/assets/applet-scenes/sudoku/frame-mask.png",
     "sha256": "19f9ca7a3189ee9bc67285f102608d7ea66a7dff802b5de3d1ee707fa9d1e3e6"
   },
   "sourceImageSha256": "b47c122dc3c5e8a1c68df42bf8fcd78b40942fb928e925cdc94952548fbe7f8d",

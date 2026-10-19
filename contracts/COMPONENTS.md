@@ -137,7 +137,7 @@ Directory ownership follows the [component table](#components-and-interfaces). E
 3. `platform/` owns permissions, processes, browser integration and persistence. It composes the selected Harness through the negotiated protocol.
 4. `harness/` owns backend-specific configuration and execution. Replacing it does not transfer ownership of Worldlet records or bypass host authorization.
 5. `models/` holds the independently deployed included-model API; provider configuration that requires Hermes stays with Hermes.
-6. `resources/` contains assets and declarations, not executable application logic. `ui/components/style.ts` is the read-only style lookup.
+6. `resources/` contains assets and declarations, not executable application logic. `ui/style/style.ts` is the read-only style lookup.
 
 The Electron host is one TypeScript project under `platform/electron/`, with one module per domain (`src/modules/*`); modules do not represent extra product layers. It consumes shared rules through in-process Core (`src/core.ts`) with the same JSON envelope the retired native hosts used. This does not establish complete behavioral parity: the [parity ratchet](README.md#parity-vectors) and device acceptance remain explicit audit items.
 
@@ -222,9 +222,9 @@ project, not separately packaged libraries. Paths are under `platform/electron/s
 
 | Component | Shared owner / interface | Electron effect adapter |
 | --- | --- | --- |
-| Page presentation | `ui/browser/index.ts`, `contracts/browser-surface.ts` | `modules/applets/device.ts` (panel, layout), `page.ts` (website `WebContentsView`), `surface.ts` (session partitions) |
+| Page presentation | `ui/applets/index.ts`, `contracts/browser-surface.ts` | `modules/applets/device.ts` (panel, layout), `page.ts` (website `WebContentsView`), `surface.ts` (session partitions) |
 | [Page resume](../platform/browser/INTEGRATION.md#resuming-a-website-applet) | `agent/applets/page-resume.ts`, `platform/bridge/media-hold.js` | `device.ts` keeps, shows and releases pages as `live` lists; kept pages are hidden, muted and media-held |
-| [Picture in picture](../platform/browser/INTEGRATION.md#picture-in-picture) | `agent/applets/picture-in-picture.ts`, `ui/browser/picture-in-picture.ts`, `platform/bridge/picture-in-picture.js` | `device.ts` places the page as `browserPip` says and lays a transparent press view over it to report a press; Chromium's `AudioFocusEnforcement` (enabled in `main.ts`) keeps one page playing sound |
+| [Picture in picture](../platform/browser/INTEGRATION.md#picture-in-picture) | `agent/applets/picture-in-picture.ts`, `ui/applets/picture-in-picture.ts`, `platform/bridge/picture-in-picture.js` | `device.ts` places the page as `browserPip` says and lays a transparent press view over it to report a press; Chromium's `AudioFocusEnforcement` (enabled in `main.ts`) keeps one page playing sound |
 | Browser action decisions | `agent/applets/index.ts`, `agent/gate/index.ts` | `device.ts` executes shared decisions |
 | Element interaction | Bundled upstream `agent-browser`; `platform/browser/agent_browser.py` transport | `modules/applets/agent.ts` (driver process), `page.ts` (agent CDP transport) |
 | Selected-target CDP | Private commands/events; no browser-wide access | `page.ts` through `webContents.debugger`; `Target.*`/`Browser.*` refused |
@@ -283,13 +283,13 @@ entry is an explicit supported surface, not permission to bypass host grants.
 | `ui/applets/index.ts` | Applet views and specialized content panels |
 | `ui/companion/index.ts` | Fox conversation, history, review and companion presentation |
 | `ui/attention/index.ts` | Attention presentation, markers, copy and preview |
-| `ui/browser/index.ts` | Embedded page panel and outcome inspection UI |
-| `ui/onboarding/index.ts` | Setup, arrival and introductory presentation |
-| `ui/components/index.ts` | Visual primitives, styles, typography and reader controls |
-| `ui/hud/index.ts` | Desktop-app HUD composition |
+| `ui/applets/index.ts` | Embedded page panel and outcome inspection UI |
+| `ui/shell/index.ts` | Setup, arrival and introductory presentation |
+| `ui/style/index.ts` | Visual primitives, styles, typography and reader controls |
+| `ui/world/index.ts` | Desktop-app HUD composition |
 | `ui/shell/index.ts` | World UI assembly, audio integration and shared UI analytics hooks |
-| `ui/practice/index.ts` | Fictional demo presentation |
-| `ui/distribution/index.ts` | Download metadata and version presentation |
+| `ui/applets/index.ts` | Fictional demo presentation |
+| `ui/shell/index.ts` | Download metadata and version presentation |
 
 Keep exported contracts close to their owner. Host requests still use the
 Platform bridge; domain rules still use Core public entry points. Do not import
@@ -394,4 +394,4 @@ completed visible messages; interrupted streams live in the World ledger.
 
 ## Theme packages
 
-`ui/theme-packages/index.ts` is the generated registry of the static packages copied by `theme:import`, one directory per theme. A package is pictures, sounds, fonts and JSON; it holds no code, host data or native IO, and the host reads it through `ui/themes/index.ts`. See the [build theme contract](../resources/themes/CONTRACT.md).
+`ui/style/theme-packages/index.ts` is the generated registry of the static packages copied by `theme:import`, one directory per theme. A package is pictures, sounds, fonts and JSON; it holds no code, host data or native IO, and the host reads it through `ui/style/themes/index.ts`. See the [build theme contract](../resources/themes/CONTRACT.md).

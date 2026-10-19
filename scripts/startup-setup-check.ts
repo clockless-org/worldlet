@@ -612,7 +612,7 @@ await withBrowser(fileAccess,async browser=>{
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-no-agent-'+platform+'.png')});
   assert.deepEqual(errors,[]);await page.close();
  }
- // Moving off Fox's own Hermes (ui/onboarding/README.md#moving-off-foxs-own-hermes-2026-10-09): a finished World whose Fox
+ // Moving off Fox's own Hermes (ui/shell/ONBOARDING.md#moving-off-foxs-own-hermes-2026-10-09): a finished World whose Fox
  // still runs on it gets the first page once; Google does not stand in for an Agent, an Agent it only copied from is not
  // taken as chosen, the pick answers for Fox itself, the right side shows every tile, nothing about
  // onboarding is redone, and Enter your world opens the World as it was.

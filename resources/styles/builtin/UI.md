@@ -72,7 +72,7 @@ buttons keep a thin edge and forest fill, not a thick wooden frame.
 See the [accepted HUD references and provenance](references/village-hud/README.md).
 The gallery's interactive Notes specimen and `ui/applets/weather/panel.ts`
 demonstrate the shared shell. Native source/document readers share the shell via
-`ui/components/text-reader.ts`: Notes, Calendar, Reminders, Notion, Obsidian,
+`ui/style/text-reader.ts`: Notes, Calendar, Reminders, Notion, Obsidian,
 Voice Memos transcripts, Stripe/PayPal records, GitHub and coding conversations.
 Mail uses `appletSurface` directly, with the original subject in its standard
 header and sender/recipient metadata in the scrolling body. It has no separate
@@ -86,7 +86,7 @@ or scene, then separate actions. They do not inherit the reading shell or a
 corner close button; Applet navigation remains discoverable. External websites keep a stationary, gently grained timber
 rim outside the host viewport, with no ornament covering their content.
 
-Use `actionButton` from `ui/components/primitives/components.ts`. Default
+Use `actionButton` from `ui/style/primitives/components.ts`. Default
 `material: 'content'` supports `primary`, `secondary`, `quiet` and `danger`.
 Use one primary action per decision. `material: 'glass'` is for scene overlays,
 not reading content. Task actions still belong to Fox, not competing toolbars.
@@ -127,7 +127,7 @@ with a waveform rather than partial transcript text. Thinking uses head dots;
 observed work/status text appears above the head, never in the input.
 The bar uses the shared glass variant so they remain
 legible when dragged over light documents. Reduced transparency removes blur.
-The controls of an Applet's [top bar](../../../ui/components/INTERACTION.md#top-bar)
+The controls of an Applet's [top bar](../../../ui/style/INTERACTION.md#top-bar)
 (Back, World, the Applet's actions, Picture in picture, the Native / Web switch) wear the same dark glass.
 User-dragged positions persist across navigation and restart, clamped only to
 the visible window. Initial layout anchors apply only before a user drags Fox;
