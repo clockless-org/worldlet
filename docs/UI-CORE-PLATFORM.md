@@ -17,6 +17,8 @@ See the [diagram](architecture.html).
 
 The product in four layers with their components: UI (`ui/`), Agent (`agent/`: who does the work through the Gate), Context (`context/`: everything the World knows) and Platform (`platform/`): [four-layers.svg](four-layers.svg) ([中文](four-layers.zh.svg)).
 
+Every layer with its components, feature by feature (the tables below as one picture): [layers-and-components.svg](layers-and-components.svg) ([中文](layers-and-components.zh.svg)).
+
 <a id="see-do-know"></a>
 ## Four layers: UI, Agent, Context, Platform
 

@@ -56,7 +56,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **284 Markdown documents** and **747 supporting documentation files**.
+Indexed: **284 Markdown documents** and **749 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -67,7 +67,7 @@ Indexed: **284 Markdown documents** and **747 supporting documentation files**.
 | Resource and artwork records | 74 |
 | Module and service documentation | 38 |
 | Website documentation and articles | 0 |
-| Documentation diagrams, previews and evidence | 747 |
+| Documentation diagrams, previews and evidence | 749 |
 
 <details><summary>Root entry points (6)</summary>
 
@@ -388,7 +388,7 @@ Indexed: **284 Markdown documents** and **747 supporting documentation files**.
 
 </details>
 
-<details><summary>Documentation diagrams, previews and evidence (747)</summary>
+<details><summary>Documentation diagrams, previews and evidence (749)</summary>
 
 - [agent/diagnostics/analytics-insights.json](../agent/diagnostics/analytics-insights.json)
 - [docs/architecture.html](architecture.html)
@@ -398,6 +398,8 @@ Indexed: **284 Markdown documents** and **747 supporting documentation files**.
 - [docs/assets/readme/world.jpg](assets/readme/world.jpg)
 - [docs/four-layers.svg](four-layers.svg)
 - [docs/four-layers.zh.svg](four-layers.zh.svg)
+- [docs/layers-and-components.svg](layers-and-components.svg)
+- [docs/layers-and-components.zh.svg](layers-and-components.zh.svg)
 - [docs/stack-in-computer-terms.svg](stack-in-computer-terms.svg)
 - [docs/stack-in-computer-terms.zh.svg](stack-in-computer-terms.zh.svg)
 - [platform/distribution/index.html](../platform/distribution/index.html)
