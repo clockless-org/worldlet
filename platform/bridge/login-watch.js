@@ -1,5 +1,5 @@
 /** Self-contained: serialized into the built-in browser's isolated world by the resource builder.
- * Saved sign-ins (context/browser/saved-logins.ts decides; owner request 2026-10-07): reports to the host that the
+ * Saved sign-ins (agent/browser/saved-logins.ts decides; owner request 2026-10-07): reports to the host that the
  * page shows a sign-in form, the account typed on its own step, and the account and password at the moment the
  * person signs in (a trusted submit, Enter or press on the sign-in button with a password typed). Fills a saved
  * account in when the host asks. It reads nothing else on the page and never runs on account sign-in hosts

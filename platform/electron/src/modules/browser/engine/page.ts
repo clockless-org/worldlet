@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import path from 'node:path';
 import {app,dialog,screen,type BaseWindow,type Rectangle,type View,type WebContents} from 'electron';
 import {WorldletError} from '../../../files.ts';
-import {PROPRIETARY_VIDEO,TASK_PICTURE_IN_PICTURE,pageFrameRate} from '../../../../../../context/browser/index.ts';
+import {PROPRIETARY_VIDEO,TASK_PICTURE_IN_PICTURE,pageFrameRate} from '../../../../../../agent/browser/index.ts';
 import {Cancelled,DEMO_HOST,DEMO_PAGES,type AgentLink,type PermissionRequest} from '../page.ts';
 import {publicPage,signInPage} from '../rules.ts';
 import {downloadPath} from '../download-path.ts';
@@ -26,7 +26,7 @@ export interface CefPageOptions {
  tabs?:boolean;
  /** Settles when the page may open: the engine has the World's cookies from Electron's storage (cookie-bridge.ts). */
  before?:Promise<unknown>;
- /** A document script the first document gets before its own, once (the storage a moved page carries, context/browser/storage-carry.ts). */
+ /** A document script the first document gets before its own, once (the storage a moved page carries, agent/browser/storage-carry.ts). */
  early?:string;
 }
 /** The refresh rate (Hz) of the display a page shows on, for its full frame rate (pageFrameRate).
@@ -565,7 +565,7 @@ export class CefPageView {
    const source=pageScript(this.webRoot,'browser-observer.js',this.demo);
    await this.evaluateExpression(`if(!window.worldletXReader){${source}\n}`,context);
    if(this.recorder)await this.evaluateExpression(pageScript(this.webRoot,'browser/web-record.js',this.demo),context);
-   // Saved sign-ins (context/browser/saved-logins.ts): an older build without the script still browses.
+   // Saved sign-ins (agent/browser/saved-logins.ts): an older build without the script still browses.
    try{await this.evaluateExpression(pageScript(this.webRoot,'browser/login-watch.js',this.demo),context);}catch{}
    if(this.contextTask===task)this.isolatedContext=context;
    return context;
@@ -589,7 +589,7 @@ export class CefPageView {
  }
 
  // Document scripts -------------------------------------------------------------------------------
- /** Video formats (video-formats.js, context/browser/video-formats.ts): the page's main world counts
+ /** Video formats (video-formats.js, agent/browser/video-formats.ts): the page's main world counts
   * what it was told about H.264/AAC, so the panel can move a page that needs them (device.ts). */
  private async installDocumentScripts(){
   if(this.videoWatch)return;

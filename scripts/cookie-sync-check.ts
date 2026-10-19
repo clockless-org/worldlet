@@ -1,8 +1,8 @@
-// One sign-in across both website engines (context/browser/cookie-sync.ts, owner report 2026-10-08): how cookies are read
+// One sign-in across both website engines (agent/browser/cookie-sync.ts, owner report 2026-10-08): how cookies are read
 // from either storage, and what a look at one storage changes in the other. The engine and Electron themselves are
 // checked in platform/electron/src/modules/browser/engine/check.ts (1b).
 import assert from 'node:assert/strict';
-import {COOKIE_SYNC,cookieKey,cookiePlan,cookieUrl,isHostCookie,queueCookieChange,readSyncCookie,type SyncCookie} from '../context/browser/index.ts';
+import {COOKIE_SYNC,cookieKey,cookiePlan,cookieUrl,isHostCookie,queueCookieChange,readSyncCookie,type SyncCookie} from '../agent/browser/index.ts';
 
 // Electron marks a host cookie with hostOnly; the engine by a domain without a leading dot.
 const electronHost=readSyncCookie({name:'auth_token',value:'a',domain:'x.com',hostOnly:true,path:'/',secure:true,httpOnly:true,sameSite:'no_restriction',expirationDate:2_000_000_000});

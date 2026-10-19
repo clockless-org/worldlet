@@ -1,7 +1,7 @@
-// Focus on website pages (context/browser/page-focus.ts) without a host: which pages it applies to, each site's rules, which
+// Focus on website pages (agent/browser/page-focus.ts) without a host: which pages it applies to, each site's rules, which
 // sites may become their article, the person's choice per site, and saved rules that could escape their CSS refused.
 import assert from 'node:assert/strict';
-import {FOCUS_EVERYWHERE,FOCUS_RULES_REQUEST,focusHost,focusSelector,pageFocusPlan,readSiteFocus,siteFocusFor,siteFocusId,siteFocusRecord} from '../context/browser/index.ts';
+import {FOCUS_EVERYWHERE,FOCUS_RULES_REQUEST,focusHost,focusSelector,pageFocusPlan,readSiteFocus,siteFocusFor,siteFocusId,siteFocusRecord} from '../agent/browser/index.ts';
 
 for(const bad of ['file:///x','about:blank','chrome://settings','https://localhost/','https://127.0.0.1/','not a url'])assert.equal(pageFocusPlan(bad),null,bad);
 assert.equal(focusHost('https://www.NYTimes.com/2026/10/05/a.html'),'nytimes.com','one site, www or not');

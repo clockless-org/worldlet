@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import {WEB_RECORD,webSearchPlan,webTranscript,clip,cleanHeaders,cleanMessage,cleanRequestBody,cleanResponseBody,cleanWebAddress,continuesVisit,keptRequest,keptResponse,privateWebAddress,scrubCards,secretField,webSite,type WebRecord,type WebRecordKind} from '../../../../../context/browser/index.ts';
+import {WEB_RECORD,webSearchPlan,webTranscript,clip,cleanHeaders,cleanMessage,cleanRequestBody,cleanResponseBody,cleanWebAddress,continuesVisit,keptRequest,keptResponse,privateWebAddress,scrubCards,secretField,webSite,type WebRecord,type WebRecordKind} from '../../../../../agent/browser/index.ts';
 import {WorldletError} from '../../files.ts';
 import type {Row} from '../../host/types.ts';
 
@@ -10,7 +10,7 @@ export interface RecordedPage {readonly url:string;readonly title:string;cdp(met
 export interface RecordedVisit {id:string;site:string;url:string;title:string;applet:string;startedAt:number;endedAt:number}
 export type RecordSink=(visits:RecordedVisit[],records:(WebRecord&{visit:string})[])=>void;
 
-/** What one website page does, kept as it happens (context/browser/web-record.ts decides what is kept):
+/** What one website page does, kept as it happens (agent/browser/web-record.ts decides what is kept):
  * network responses and requests, WebSocket and event-stream messages from DevTools, and the page's
  * text, typing and clicks from the isolated observer (`web-record.js`). Records join a visit, one stay
  * on one site; they are saved in small batches and never hold up the page. Native IO only. */

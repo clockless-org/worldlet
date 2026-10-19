@@ -7,7 +7,7 @@ See the [Platform–Harness contract](HARNESS.md) for the stable v1 boundary and
 <a id="parity-vectors"></a>
 ## Parity vectors and host Core usage
 
-`fixtures/parity/*.json` holds golden Core vectors (`operation`, `input`, canonical `expected` envelope). `node scripts/parity-vectors.ts` replays them through the Electron host's in-process Core entry (`platform/electron/src/core.ts`; `--write` regenerates `expected`), pinned to `America/Los_Angeles`. `browser-public-page.json` (`allowed`/`refused` URLs, and `upgraded`: each `http://` address and the `https://` page it opens at, or null) and `browser-popup.json` (user gesture, `maxWindows`, public-page, upgraded `http://` or blank start) are not Core vectors: they are the golden contracts for the website panel's destination and popup rules, replayed by the same script against `platform/electron/src/modules/browser/rules.ts`. `browser-applet-site.json` lists site-locked Applet URLs, replayed by `scripts/page-resume-check.ts` through `context/browser`.
+`fixtures/parity/*.json` holds golden Core vectors (`operation`, `input`, canonical `expected` envelope). `node scripts/parity-vectors.ts` replays them through the Electron host's in-process Core entry (`platform/electron/src/core.ts`; `--write` regenerates `expected`), pinned to `America/Los_Angeles`. `browser-public-page.json` (`allowed`/`refused` URLs, and `upgraded`: each `http://` address and the `https://` page it opens at, or null) and `browser-popup.json` (user gesture, `maxWindows`, public-page, upgraded `http://` or blank start) are not Core vectors: they are the golden contracts for the website panel's destination and popup rules, replayed by the same script against `platform/electron/src/modules/browser/rules.ts`. `browser-applet-site.json` lists site-locked Applet URLs, replayed by `scripts/page-resume-check.ts` through `agent/browser`.
 
 `host-core-usage.json` records, once, every Core operation the retired Swift and C# hosts invoked. `node scripts/parity-core-usage.ts` requires the Electron host (`core(…)`/`coreEnvelope(…)` outside module `check.ts` files) to invoke each of them; `electronPending` names those not yet routed and may only shrink; `electronShared` records, each with a reason, operations Electron reaches through a different shared Core path instead. Both scripts run in `npm run check:arch`.
 
@@ -99,7 +99,7 @@ recorded; Core, adapter-stub and standalone Chromium fixtures do not replace it.
 
 ### Website recording for Fox
 
-Owner decision 2026-10-04: everything that happens in the built-in browser is recorded so that Fox can later find it and analyse it ("look at my last two games"), for every site, not one site's special case. The host recorder (`platform/electron/src/modules/browser/recorder.ts`, rules in `context/browser/web-record.ts`) follows each personal website page through DevTools on both engines, and an isolated observer (`platform/bridge/web-record.js`) reports what the page shows and what the person does:
+Owner decision 2026-10-04: everything that happens in the built-in browser is recorded so that Fox can later find it and analyse it ("look at my last two games"), for every site, not one site's special case. The host recorder (`platform/electron/src/modules/browser/recorder.ts`, rules in `agent/browser/web-record.ts`) follows each personal website page through DevTools on both engines, and an isolated observer (`platform/bridge/web-record.js`) reports what the page shows and what the person does:
 
 | Kind | What is kept |
 | --- | --- |

@@ -1,4 +1,4 @@
-// The task picture-in-picture window beside the desktop Companion (#1175, context/browser/picture-in-picture.ts).
+// The task picture-in-picture window beside the desktop Companion (#1175, agent/browser/picture-in-picture.ts).
 // While the World window is closed or minimized, Fox's page shows here smaller, at its own size, and
 // keeps working. A transparent overlay above the page takes the person's input: a press brings the
 // World back with the page's Applet, and once Fox's turn has ended a close control leaves the page.

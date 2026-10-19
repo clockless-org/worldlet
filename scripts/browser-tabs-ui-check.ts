@@ -1,4 +1,4 @@
-// The Browser's tabs (owner request 2026-10-07, ui/browser/browser-device.ts, context/browser/browser-tabs.ts), driven
+// The Browser's tabs (owner request 2026-10-07, ui/browser/browser-device.ts, agent/browser/browser-tabs.ts), driven
 // through the real World UI with a faked native bridge: the strip above the page and outside its rect, + and the File
 // menu's keys, each tab its own kept page ('browser', 'browser--2'…) shown, kept and released by the live budget, a
 // released tab reopening at its last address, a link opened for a new tab, closing hand-over, the last tab leaving a home tab, the tabs kept

@@ -87,7 +87,8 @@
 <text x="36" y="384" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A">agent/</text>
 <text x="36" y="406" font-size="12" fill="#57606A">who does the work</text>
 <text x="323.0" y="360" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<text x="475.0" y="360" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
+<rect x="406" y="344" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="475.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/browser/</text>
 <rect x="558" y="344" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
 <text x="627.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/companion/</text>
 <rect x="710" y="344" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
@@ -122,9 +123,7 @@
 <rect x="406" y="550" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
 <text x="475.0" y="565" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/board/</text>
 <rect x="406" y="576" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
-<text x="475.0" y="591" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/browser/</text>
-<rect x="406" y="602" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
-<text x="475.0" y="617" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/games/</text>
+<text x="475.0" y="591" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/games/</text>
 <text x="627.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
 <text x="779.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
 <text x="931.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>

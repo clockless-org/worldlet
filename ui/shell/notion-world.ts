@@ -16,7 +16,7 @@ import {mountFoxArtifact,flyIntoJournal,artifactPageSpec,turnIntoDock} from '../
 import {node,textButton,worldletMark,uiIcon} from '../components/index.ts';
 import {readRetryDelay,sourceReadAction} from '../../context/applets/index.ts';
 import {attentionRequest,journalTarget} from '../../agent/agents/index.ts';
-import {FOCUS_RULES_REQUEST,browserEffectDecision,browserFinalStep,browserFollowThrough,typedAddress,webSite} from '../../context/browser/index.ts';
+import {FOCUS_RULES_REQUEST,browserEffectDecision,browserFinalStep,browserFollowThrough,typedAddress,webSite} from '../../agent/browser/index.ts';
 import {quietSourceReader} from '../applets/index.ts';
 import {mountAttentionPreview,taskReviewLine} from '../attention/index.ts';
 import {attentionPreviewData,attentionLaterUntil} from '../../agent/attention/index.ts';
@@ -1054,7 +1054,7 @@ export function mountNotionWorld(data: World, native: any) {
       // The conversation shows an action's icon and title, never the prompt behind it.
       for(const [label,request]of suggestions)actions.push({id:'applet:assist:'+r.moduleId+':'+label,label,icon:'spark',placement:'contextual',kind:'navigation',run:()=>{voice?.setGuide?.(null);return voice?.ask(request,{displayText:label,icon:'spark'});}});
       // Clean up, on every website page in the personal world (owner request 2026-10-05): Fox saves which parts of the
-      // site Focus hides (context/browser/page-focus.ts), at once and for every later visit.
+      // site Focus hides (agent/browser/page-focus.ts), at once and for every later visit.
       if(website&&native?.browser&&!data.sample)actions.push({id:'applet:focus-rules:'+r.moduleId,label:'Clean up',icon:'focus',placement:'contextual',kind:'navigation',run:()=>{voice?.setGuide?.(null);return voice?.ask(FOCUS_RULES_REQUEST,{displayText:'Clean up this page',icon:'focus'});}});
       if(data.sample&&r.key==='google-calendar')actions.push({id:'practice:tennis',label:'Plan tennis',icon:'calendar',placement:'contextual',kind:'navigation',run:reviewTennis});
       if(MONEY_READERS.includes(r.key)&&content.hidden){actions.push({id:'money:refresh:'+r.key,label:'Refresh',icon:'refresh',placement:'contextual',kind:'navigation',run:()=>showMoney(r)});if(r.key==='stripe'&&moneyConnections.get(r.key))actions.push({id:'stripe:disconnect',label:'Disconnect',icon:'link',placement:'contextual',kind:'navigation',run:async()=>{await native.stripe({operation:'disconnect'});localStageRecords.delete(r.key);showMoney(r);}});}

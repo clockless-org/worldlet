@@ -10,7 +10,7 @@ const {coreEnvelope}=await import('../platform/electron/src/core.ts');
 const {publicPage,httpsUpgrade,popupAllowed,opensAsTab,MAX_POPUPS}=await import('../platform/electron/src/modules/browser/rules.ts');
 const dir='contracts/fixtures/parity';
 // Not Core vectors: the host-usage baseline, the native URL contracts below, and the
-// site-locked Applet list that scripts/page-resume-check.ts replays through context/browser.
+// site-locked Applet list that scripts/page-resume-check.ts replays through agent/browser.
 const contracts=['host-core-usage.json','browser-public-page.json','browser-popup.json','browser-tab.json','browser-applet-site.json'];
 type Case={name:string;operation:string;input:unknown;expected:unknown};
 const canonical=(value:unknown):unknown=>Array.isArray(value)?value.map(canonical)
