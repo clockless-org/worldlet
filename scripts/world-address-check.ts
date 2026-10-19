@@ -20,7 +20,9 @@ import {projectWorldItems} from '../core/items/world-items.ts';
 // unknown challenge, a wrong signature, a copied passkey, a visitor outside what was shared, a request for a name this
 // World gave up, a signed-out browser. Nothing a browser could reuse reaches an item, the ledger or the log.
 const say=(line:string)=>{process.stdout.write(line+'\n');};
-const watchdog=setTimeout(()=>{process.stderr.write(`FAIL world-address-check: no result after 90 s\n`);process.exit(1);},90_000);watchdog.unref();
+// A hard stop that names what was still open (scripts/remote-mcp-check.ts does the same): a check waiting on
+// something that never comes fails here instead of holding a release host's lane.
+const watchdog=setTimeout(()=>{process.stderr.write(`FAIL world-address-check: no result after 90 s; still open: ${process.getActiveResourcesInfo().join(', ')}\n`);process.exit(1);},90_000);watchdog.unref();
 const b64=(bytes:Uint8Array|Buffer)=>Buffer.from(bytes).toString('base64url');
 const sha=(data:string|Uint8Array)=>crypto.createHash('sha256').update(data).digest();
 class FakeSocket {
@@ -132,9 +134,13 @@ await withTempDir('worldlet-world-address-',async dir=>{
   assert.deepEqual((await page('GET','/hello')).json(),{v:1,name:'kelvin'});
   assert.equal((await page('GET','/hello',{base:'https://other.worldlet.ai'})).status,404,'another name is no one\'s here');
   // An MCP client's request never reaches the address server, nor the page's the MCP server.
+  // Its answer by id, not whatever was sent last; a slow host gets 10 s, as in page().
   const before=ws.sent.length;ws.onmessage!({data:JSON.stringify({...frame,id:'m',kind:undefined,path:'/hello'})});
-  for(let i=0;i<100&&ws.sent.length===before;i++)await new Promise(r=>setTimeout(r,5));
-  assert.equal(JSON.parse(ws.sent.at(-1)!).status,404);
+  const mcpAnswer=()=>ws.sent.slice(before).map(d=>JSON.parse(d)).find(f=>f.t==='res'&&f.id==='m');
+  const mcpStarted=Date.now();let mcp=mcpAnswer();
+  while(!mcp&&Date.now()-mcpStarted<10_000){await new Promise(r=>setTimeout(r,5));mcp=mcpAnswer();}
+  assert.ok(mcp,'no answer to the MCP client\'s request');
+  assert.equal(mcp.status,404);
   say('PASS the page\'s requests reach only the address server, for the name this World holds.');
 
   // The owner's new browser: a passkey made for this address, a code, a card; Allow; then the passkey signs in.
@@ -288,6 +294,7 @@ await withTempDir('worldlet-world-address-',async dir=>{
   say('PASS sessions and tokens are in no item, ledger row or log line; the vault keeps only public keys.');
  }finally{
   for(const name of ['log','error','warn'] as const)console[name]=original[name];
-  remote.close();standing.close?.();
+  // Windows keeps an open database locked, so the temporary folder could not be removed and the run never ended.
+  remote.close();standing.close?.();ledger.close();
  }
 });
