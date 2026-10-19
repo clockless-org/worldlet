@@ -1,4 +1,6 @@
 import {readStoredServicePreset,removeServicePreset,saveServicePreset} from '../../../../context/connectors/index.ts';
+import {contextReader,contextWriter,type ContextOrigin} from '../../../../context/store/index.ts';
+import {ledgerContext} from '../../store/context-storage.ts';
 import type {ServicePreset} from '../../../../contracts/service-presets.ts';
 import {WorldletError} from '../../files.ts';
 import type {Row} from '../../types.ts';
@@ -18,13 +20,15 @@ const NOT_READY='Service presets are kept in your own World: finish setting it u
 
 /** Every stored preset that still passes Core's checks, by ID. */
 export function loadServicePresets(db:PresetLedger):ServicePreset[] {
- return db.servicePresets().flatMap(row=>{const preset=readStoredServicePreset(row);return preset?[preset]:[];}).sort((a,b)=>a.id.localeCompare(b.id));
+ return contextReader(ledgerContext(db)).bodies('service-presets').flatMap(row=>{const preset=readStoredServicePreset(row);return preset?[preset]:[];}).sort((a,b)=>a.id.localeCompare(b.id));
 }
 /** Saves the presets that changed and removes those that went, in one transaction. */
-export function storeServicePresets(db:PresetLedger,before:readonly ServicePreset[],after:readonly ServicePreset[]){
- db.transaction(()=>{
-  for(const preset of after)if(JSON.stringify(before.find(item=>item.id===preset.id))!==JSON.stringify(preset))db.saveServicePreset(preset as unknown as Row);
-  for(const preset of before)if(!after.some(item=>item.id===preset.id))db.deleteServicePreset(preset.id);
+export function storeServicePresets(db:PresetLedger,before:readonly ServicePreset[],after:readonly ServicePreset[],author:ContextOrigin={by:'person'}){
+ const context=contextWriter(ledgerContext(db),author);
+ context.transaction(()=>{
+  const save=after.filter(preset=>JSON.stringify(before.find(item=>item.id===preset.id))!==JSON.stringify(preset));
+  const forget=before.filter(preset=>!after.some(item=>item.id===preset.id)).map(preset=>preset.id);
+  if(save.length||forget.length)context.write('service-presets',{save:save as unknown as Row[],forget});
  });
 }
 

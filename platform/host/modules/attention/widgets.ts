@@ -1,7 +1,7 @@
 import {dialog} from 'electron';
 import {artifactPage,readWidgetData,readyApplet,widgetWithData,WIDGET_APPLET,WIDGET_LIMITS,checkWidgetSource,mergeWidgetState,orderWidgets,readWidget,readWidgetConsole,readWidgetState,validWidgetId,widgetActive,widgetDocument,widgetHousekeeping,widgetId,widgetRecord,widgetStateChanges,widgetTask,widgetTrialProblems,widgetValues,type Widget,type WidgetState} from '../../../../context/store/index.ts';
 import {phoneWidgets} from '../../../web/index.ts';
-import {readArtifact,validArtifactId} from '../../../../context/store/index.ts';
+import {contextReader,contextWriter,readArtifact,validArtifactId} from '../../../../context/store/index.ts';
 import {WorldletError} from '../../files.ts';
 import {FOX,PHONE,WIDGETS,type FoxService,type PhoneService,type WidgetsService} from '../../services.ts';
 import type {Host,Row} from '../../types.ts';
@@ -28,6 +28,9 @@ export function installWidgets(host:Host){
   try{return store.ledger().widgetRows().flatMap(row=>{const widget=readWidget(row.record);return widget?[{widget,state:readWidgetState(row.state)}]:[];});}
   catch(error){host.diagnostics.record(error,'widgets');return [];}
  };
+ // Writes go through the one way in to Context (#676); the page and its state ride along with the record.
+ const saveWidget=(id:string,record:Row,extra:{html?:string;state?:Row}={},author:'fox'|'person'|'world'='fox')=>contextWriter(store.context(),author).write('widgets',{save:[record],with:{id,...extra}});
+ const forgetWidget=(id:string,author:'person'|'world'='person')=>contextWriter(store.context(),author).remove('widgets',[id]);
  const find=(id:string)=>validWidgetId(id)?rows().find(row=>row.widget.id===id)??null:null;
  const rawPage=(id:string)=>{const value=store.ledger().widgetPage(id);if(value===null)throw new WorldletError('That Applet is not in this world.');return value;};
  // The page as it is shown, here and on the phone: with its data ahead of its own code (context/applets/MY-APPLETS.md#data-and-page).
@@ -49,8 +52,8 @@ export function installWidgets(host:Host){
  function housekeeping(){
   if(store.sampleEnabled()||!store.writable)return;
   const t=now(),{archive,forget}=widgetHousekeeping(list(),t);
-  for(const id of archive){const row=find(id);if(row){store.ledger().saveWidget(id,{...row.widget,archivedAt:Math.max(row.widget.endsAt,t-1)});if(player.current===id)player.stop();}}
-  for(const id of forget){store.ledger().deleteWidget(id);if(player.current===id)player.stop();}
+  for(const id of archive){const row=find(id);if(row){saveWidget(id,{...row.widget,archivedAt:Math.max(row.widget.endsAt,t-1)},{},'world');if(player.current===id)player.stop();}}
+  for(const id of forget){forgetWidget(id,'world');if(player.current===id)player.stop();}
   if(archive.length||forget.length)changed(archive[0]??forget[0]);
  }
  // Prune jobs whose task ended (finished, failed or stopped).
@@ -58,7 +61,7 @@ export function installWidgets(host:Host){
  function saveState(id:string,incoming:WidgetState){
   const row=find(id);if(!row||!Object.keys(incoming).length)return false;
   const merged=mergeWidgetState(row.state,incoming);if(!merged.changed)return false;
-  store.ledger().saveWidget(id,row.widget,{state:merged.state});
+  saveWidget(id,row.widget,{state:merged.state},'person');
   return merged.state;
  }
  const player=new WidgetPlayer(new Surface(host),(id,values)=>{
@@ -101,26 +104,26 @@ export function installWidgets(host:Host){
    // An artifact kept as an Applet (context/applets/MY-APPLETS.md): the card the person sees becomes one of their own
    // page Applets, kept with no end. The page renders the card's body; the artifact itself stays in its list.
    if(operation==='keepArtifact'){
-    const artifact=validArtifactId(request.artifact)?store.ledger().artifactRows().map(readArtifact).find(a=>a?.id===request.artifact)??null:null;
+    const artifact=validArtifactId(request.artifact)?contextReader(store.context()).bodies('artifacts').map(readArtifact).find(a=>a?.id===request.artifact)??null:null;
     if(!artifact||artifact.kind!=='answer')throw new WorldletError('Only a card Fox laid out in conversation can be kept as an Applet.');
     const kept=list().find(w=>w.ideas.includes('artifact:'+artifact.id));
-    if(kept){if(!kept.pinned||kept.archivedAt)store.ledger().saveWidget(kept.id,{...kept,pinned:true,archivedAt:null});changed(kept.id);return {ok:true,id:kept.id,title:kept.title,existing:true};}
+    if(kept){if(!kept.pinned||kept.archivedAt)saveWidget(kept.id,{...kept,pinned:true,archivedAt:null});changed(kept.id);return {ok:true,id:kept.id,title:kept.title,existing:true};}
     if(list().length>=WIDGET_LIMITS.widgets)throw new WorldletError(`This world already has ${WIDGET_LIMITS.widgets} Applets made from pages. Delete one first.`);
     const html=artifactPage({title:artifact.title,origin:'Kept from a conversation with Fox',fragment:request.html});
     const problems=checkWidgetSource(html);if(problems.length)throw new WorldletError('This card could not become an Applet: '+problems[0]);
     const t=now(),id=widgetId(),record={...widgetRecord({title:artifact.title,blurb:'Kept from a conversation with Fox'},{id,idea:'artifact:'+artifact.id,now:t}),pinned:true};
-    store.ledger().saveWidget(id,record,{html,state:{}});changed(id,{made:true});
+    saveWidget(id,record,{html,state:{}});changed(id,{made:true});
     return {ok:true,id,title:record.title};
    }
    const id=String(request.id??''),row=find(id);
    if(!row)throw new WorldletError('That Applet is not in this world.');
-   const save=(widget:Widget)=>{store.ledger().saveWidget(id,widget);changed(id);return {ok:true};};
+   const save=(widget:Widget)=>{saveWidget(id,widget);changed(id);return {ok:true};};
    if(operation==='pin')return save({...row.widget,pinned:true,archivedAt:null});
    // Fox updates what the page shows without rewriting it; the page loads again with it, here and on the phone.
    if(operation==='data'){
     const read=readWidgetData(request.data);if('error' in read)throw new WorldletError(read.error);
     const widget={...row.widget,data:read.data,updatedAt:now(),version:row.widget.version+1};
-    store.ledger().saveWidget(id,widget);
+    saveWidget(id,widget);
     if(player.current===id)player.refresh(id,html(id),widgetValues(row.state),{page:true});
     changed(id);
     return {ok:true,id,title:widget.title,message:`“${widget.title}” shows the new data now, on the computer and the phone.`};
@@ -133,7 +136,7 @@ export function installWidgets(host:Host){
     const answer=(parent?await dialog.showMessageBox(parent,options):await dialog.showMessageBox(options)).response;
     if(answer!==0)return {cancelled:true};
     if(player.current===id)player.stop();
-    store.ledger().deleteWidget(id);changed(id);
+    forgetWidget(id);changed(id);
     return {ok:true};
    }
    throw new WorldletError('Unknown Applet request.');
@@ -156,7 +159,7 @@ export function installWidgets(host:Host){
      // A copy added before its page was redrawn takes the new page and keeps what was ticked.
      if(store.ledger().widgetPage(existing.id)!==ready.html){
       const record=widgetRecord({title:existing.title,blurb:ready.blurb,color:ready.color},{id:existing.id,idea,now:t,previous:existing});
-      store.ledger().saveWidget(existing.id,record,{html:ready.html});
+      saveWidget(existing.id,record,{html:ready.html});
       if(player.current===existing.id)player.refresh(existing.id,ready.html,widgetValues(find(existing.id)?.state??{}),{page:true});
       changed(existing.id);
      }
@@ -165,7 +168,7 @@ export function installWidgets(host:Host){
     // With no end given it lasts the rest of the local day: a museum day, not twelve hours from now.
     const evening=new Date();evening.setHours(23,59,0,0);
     const id=widgetId(),record=widgetRecord({title:ready.title,blurb:ready.blurb,color:ready.color,endsAt:endsAt??evening.toISOString()},{id,idea,now:t});
-    store.ledger().saveWidget(id,record,{html:ready.html,state:{}});
+    saveWidget(id,record,{html:ready.html,state:{}});
     changed(id,{made:true});
     return {ok:true,id,title:record.title,message:`“${record.title}” is now a new Applet in their World (on the Home ground), at the top of Now and on the paired phone. It puts itself away when its moment is over. Tell the person in one short sentence that it is ready.`};
    }
@@ -190,7 +193,7 @@ export function installWidgets(host:Host){
    const id=replaces??widgetId(),previous=replaces?find(replaces):null;
    const record=widgetRecord({title:request.title,blurb:request.blurb,color:request.color,endsAt:request.endsAt??job.endsAt,...data?{data:data.data}:{}},{id,idea:job.idea,now:now(),previous:previous?.widget});
    // A changed page keeps what the person already ticked.
-   store.ledger().saveWidget(id,record,{html:source,...previous?{}:{state:{}}});
+   saveWidget(id,record,{html:source,...previous?{}:{state:{}}});
    job.saved=id;
    if(player.current===id)player.refresh(id,html(id),widgetValues(previous?.state??{}),{page:true});
    changed(id,{made:!previous});

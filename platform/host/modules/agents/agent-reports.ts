@@ -1,4 +1,6 @@
 import {agentLiveness,listAgents,makeAgentReport,readStoredReport} from '../../../../agent/gate/index.ts';
+import {contextReader,contextWriter} from '../../../../context/store/index.ts';
+import {ledgerContext} from '../../store/context-storage.ts';
 import type {AgentIdentity} from '../../../../contracts/agent-identity.ts';
 import type {AgentListEntry,AgentLiveness,AgentReport} from '../../../../contracts/agent-reports.ts';
 import type {Row} from './types.ts';
@@ -21,7 +23,7 @@ export interface AgentReports {
 const NOT_READY='Worldlet is not ready for this yet: the person has not finished setting up their own World.';
 
 export function createAgentReports({ledger,identities,now=()=>new Date().toISOString()}:{ledger:()=>ReportLedger|null;identities:()=>AgentIdentity[];now?:()=>string}):AgentReports {
- const load=(db:ReportLedger)=>db.agentReports().flatMap(row=>{const report=readStoredReport(row);return report?[report]:[];});
+ const load=(db:ReportLedger)=>contextReader(ledgerContext(db)).bodies('agent-reports').flatMap(row=>{const report=readStoredReport(row);return report?[report]:[];});
  return {
   call(agentId,args){
    const db=ledger();
@@ -30,7 +32,7 @@ export function createAgentReports({ledger,identities,now=()=>new Date().toISOSt
     const at=now(),{operation,...input}=args??{};
     if(operation==='report'){
      const report=makeAgentReport(agentId,input,at);
-     db.saveAgentReport(report as unknown as Row);
+     contextWriter(ledgerContext(db),{by:'agent',id:agentId}).write('agent-reports',{save:[report as unknown as Row]});
      return {ok:true,liveness:agentLiveness(report,at),guidance:`The person and the Agents allowed to see other Agents now see this. Report again within ${report.ttlMinutes} minutes while it holds, or it reads stale; report offline when stopping.`};
     }
     if(operation==='list')return {agents:listAgents(identities(),load(db),input,at),untrustedContent:true};

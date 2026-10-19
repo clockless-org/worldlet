@@ -1,6 +1,9 @@
 import crypto from 'node:crypto';
 import {readStoredServicePreset,servicePresetRead} from '../../../../context/connectors/index.ts';
 import {SERVICE_SYNC_DEFAULTS,SERVICE_SYNC_DEFAULT_MINUTES,serviceSyncDefaultId,serviceSyncDefaultPreset,serviceSyncDefaultStep,configureServiceSync,finishServiceSyncPage,readNotionContext,serviceContext as searchServiceContext,serviceSyncFailure,serviceSyncPage,serviceSyncReadKey,serviceSyncStart,SERVICE_SYNC_LIMITS} from '../../../../context/connectors/index.ts';
+import {connectorWriter} from '../../../../context/connectors/index.ts';
+import {contextReader} from '../../../../context/store/index.ts';
+import {ledgerContext} from '../../store/context-storage.ts';
 import {dueSourceCheck,nextSourceWake} from '../../../../agent/tasks/index.ts';
 import type {ServicePreset} from '../../../../contracts/service-presets.ts';
 import type {ServiceRead} from '../../../../contracts/services.ts';
@@ -12,7 +15,8 @@ import type {Row} from '../../types.ts';
 // Uses the existing World ledger and source-io claims. A connected Service's default read (core SERVICE_SYNC_DEFAULTS)
 // is scheduled on its own (`ensureDefaults`); the person turns it off on the Service's tile, and off stays off.
 export {SERVICE_SYNC_BUCKETS};
-const [JOBS,PAGES,SNAPSHOTS]=SERVICE_SYNC_BUCKETS;
+// Jobs and page checkpoints are the sync's own bookkeeping; the snapshots (the third bucket) are Synced Context.
+const [JOBS,PAGES]=SERVICE_SYNC_BUCKETS;
 const owner=(id:string)=>'service-sync:'+id;
 const task=(id:string)=>owner(id)+':check';
 export interface SyncAuthorization {binding:string;version:string}
@@ -24,6 +28,8 @@ export function createServiceSync({ledger,authorize,read,changed=()=>{},now=()=>
  const db=()=>{const value=ledger();if(!value)throw Error('Service sync is available only in your own writable World.');return value;};
  const replace=(store:WorldLedger,bucket:string,id:string,value:Row)=>{store.delete(bucket,id);store.put(bucket,id,value);};
  const jobs=(store:WorldLedger)=>store.records(JOBS) as ServiceSyncJob[];
+ // A finished snapshot is Synced Context: read through the one way in, written only by its Connector (#676).
+ const snapshot=(store:WorldLedger,id:string)=>contextReader(ledgerContext(store)).get<ServiceSyncSnapshot>('service-sync',id)?.body??null;
  const preset=(store:WorldLedger,id:string)=>readStoredServicePreset(store.servicePresets().find(row=>row.id===id));
  function current(store:WorldLedger,job:ServiceSyncJob,version?:string):boolean {
   if(ledger()!==store)return false;
@@ -35,12 +41,12 @@ export function createServiceSync({ledger,authorize,read,changed=()=>{},now=()=>
   const store=db(),operation=request.operation;
   if(operation==='list')return {jobs:jobs(store).map(job=>({id:job.id,provider:job.provider,revision:job.revision,check:job.check,available:current(store,job),
    ...job.id===serviceSyncDefaultId(job.provider)?{default:true}:{},
-   snapshotAt:store.value(SNAPSHOTS,job.id)?.collectedAt??null,pendingPages:store.value(PAGES,job.id)?.pages??0}))};
+   snapshotAt:snapshot(store,job.id)?.collectedAt??null,pendingPages:store.value(PAGES,job.id)?.pages??0}))};
   if(typeof request.id!=='string')throw Error('Choose a saved Service preset.');
   const previous=store.value(JOBS,request.id) as ServiceSyncJob|undefined;
   if(operation==='read'){
    if(!previous||!current(store,previous))throw Error('This Service sync is paused, changed or no longer authorized.');
-   return {snapshot:store.value(SNAPSHOTS,request.id),check:previous.check,untrustedContent:true};
+   return {snapshot:snapshot(store,request.id),check:previous.check,untrustedContent:true};
   }
   if(operation==='restart'){
    if(!previous||!current(store,previous))throw Error('Enable this sync with its current connection and preset first.');
@@ -51,7 +57,7 @@ export function createServiceSync({ledger,authorize,read,changed=()=>{},now=()=>
   }
   if(operation==='delete'){
    active.get(request.id)?.abort();
-   store.transaction(()=>{store.invalidateRuntimeTasks(owner(request.id));for(const bucket of SERVICE_SYNC_BUCKETS)store.delete(bucket,request.id);});changed();return {ok:true};
+   store.transaction(()=>{store.invalidateRuntimeTasks(owner(request.id));store.delete(JOBS,request.id);store.delete(PAGES,request.id);connectorWriter(ledgerContext(store),previous?.provider??'').remove('service-sync',[request.id]);});changed();return {ok:true};
   }
   if(operation!=='configure')throw Error('Unknown Service sync operation.');
   const live=preset(store,request.id);
@@ -65,7 +71,7 @@ export function createServiceSync({ledger,authorize,read,changed=()=>{},now=()=>
   active.get(request.id)?.abort();
   store.transaction(()=>{
    store.invalidateRuntimeTasks(owner(request.id));
-   if(scopeChanged){store.delete(PAGES,request.id);store.delete(SNAPSHOTS,request.id);}
+   if(scopeChanged){store.delete(PAGES,request.id);connectorWriter(ledgerContext(store),live.provider).remove('service-sync',[request.id]);}
    replace(store,JOBS,request.id,next);
   });changed();return {ok:true,id:next.id,check:next.check};
  }
@@ -99,7 +105,7 @@ export function createServiceSync({ledger,authorize,read,changed=()=>{},now=()=>
    store.withRuntimeOutput(task(job.id),run,()=>{
     replace(store,JOBS,job.id,result.job);
     if(result.checkpoint)replace(store,PAGES,job.id,{...result.checkpoint,provider:job.provider});
-    else{store.delete(PAGES,job.id);replace(store,SNAPSHOTS,job.id,result.snapshot!);}
+    else{store.delete(PAGES,job.id);connectorWriter(ledgerContext(store),job.provider).write('service-sync',{save:[result.snapshot as unknown as Row]});}
     if(!store.finishRuntimeTask(task(job.id),run,result.checkpoint?'yielded':'succeeded',0))throw Error('Service sync lease expired.');
    });changed();return true;
   }catch(error){
@@ -150,8 +156,8 @@ export function createServiceSync({ledger,authorize,read,changed=()=>{},now=()=>
  function notionContext(request:Row):Row {
   const store=db();
   const snapshots=jobs(store).filter(job=>job.provider==='notion'&&current(store,job)).flatMap(job=>{
-   const snapshot=store.value(SNAPSHOTS,job.id) as ServiceSyncSnapshot|null;
-   return snapshot?[snapshot]:[];
+   const saved=snapshot(store,job.id);
+   return saved?[saved]:[];
   });
   return readNotionContext(snapshots,request);
  }
@@ -161,8 +167,8 @@ export function createServiceSync({ledger,authorize,read,changed=()=>{},now=()=>
   try{
    const store=db();
    const snapshots=jobs(store).filter(job=>job.provider!=='notion'&&current(store,job)).flatMap(job=>{
-    const snapshot=store.value(SNAPSHOTS,job.id) as ServiceSyncSnapshot|null;
-    return snapshot?[snapshot]:[];
+    const saved=snapshot(store,job.id);
+    return saved?[saved]:[];
    });
    return searchServiceContext(snapshots,request,canRead);
   }catch(error){return {error:error instanceof Error&&error.message?error.message:'Could not search the saved context.'};}

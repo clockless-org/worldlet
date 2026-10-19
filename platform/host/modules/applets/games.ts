@@ -1,5 +1,5 @@
 import {dialog} from 'electron';
-import {GAME_FACTORY_APPLET,MADE_GAME_LIMITS,betterBest,checkMadeGameSource,gameFactoryModel,madeGameDocument,madeGameId,madeGameRecord,madeGameTask,orderMadeGames,readMadeGame,validMadeGameId,type MadeGame} from '../../../../context/store/index.ts';
+import {contextReader,contextWriter,GAME_FACTORY_APPLET,MADE_GAME_LIMITS,betterBest,checkMadeGameSource,gameFactoryModel,madeGameDocument,madeGameId,madeGameRecord,madeGameTask,orderMadeGames,readMadeGame,validMadeGameId,type MadeGame} from '../../../../context/store/index.ts';
 import {WorldletError} from '../../files.ts';
 import {FOX,type FoxService} from '../../services.ts';
 import type {Host,Row} from '../../types.ts';
@@ -19,7 +19,7 @@ export function installGames(host:Host){
  const fox=()=>host.use<FoxService>(FOX);
  const jobs=new Map<string,Job>();
  const personal=()=>{if(!store.writable||store.sampleEnabled())throw new WorldletError('The Game Factory makes games in your own world. The practice world has none.');};
- const games=()=>{try{return store.ledger().madeGameRecords().map(readMadeGame).filter((game):game is MadeGame=>!!game&&validMadeGameId(game.id));}catch{return [];}};
+ const games=()=>{try{return contextReader(store.context()).bodies('made-games').map(readMadeGame).filter((game):game is MadeGame=>!!game&&validMadeGameId(game.id));}catch{return [];}};
  const read=(id:string):MadeGame|null=>games().find(game=>game.id===id)??null;
  function list():MadeGame[] {
   if(store.sampleEnabled())return [];
@@ -36,11 +36,11 @@ export function installGames(host:Host){
  const player=new GamePlayer(new Surface(host),(id,score)=>{
   const game=read(id);if(!game)return;
   const best=betterBest(game.best,score);if(best===game.best)return;
-  try{store.ledger().saveMadeGame(id,{...game,best});changed(id);}catch(error){host.diagnostics.record(error,'madeGameBest');}
+  try{contextWriter(store.context(),'person').write('made-games',{save:[{...game,best}],with:{id}});changed(id);}catch(error){host.diagnostics.record(error,'madeGameBest');}
  });
 
  // A changed game keeps its last few versions beside it.
- const save=(id:string,html:string,record:MadeGame)=>store.ledger().saveMadeGame(id,record as unknown as Row,html,MADE_GAME_LIMITS.versions);
+ const save=(id:string,html:string,record:MadeGame)=>contextWriter(store.context(),'fox').write('made-games',{save:[record as unknown as Row],with:{id,html,versions:MADE_GAME_LIMITS.versions}});
 
  host.register({
   madeGames:()=>({games:list().map(({ideas:_ideas,...game})=>game)}),
@@ -98,7 +98,7 @@ export function installGames(host:Host){
    const answer=(parent?await dialog.showMessageBox(parent,options):await dialog.showMessageBox(options)).response;
    if(answer!==0)return {cancelled:true};
    if(player.current===id)player.stop();
-   store.ledger().deleteMadeGame(id);
+   contextWriter(store.context(),'person').remove('made-games',[id]);
    changed(id);
    return {ok:true};
   }

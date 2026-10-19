@@ -33,6 +33,23 @@ const exceptions=new Map([
  ['context/connectors/services/presets.ts -> agent/gate/index.ts','A board preset of the agents source reads Agent reports with the reports\' own reader (#681).'],
  ['context/connectors/service-sync.ts -> agent/tasks/index.ts','Service sync keeps Synced Context fresh on the shared source-check schedule, which Tasks owns (#681).'],
 ]);
+// The one way in to Context (#676, context/store/context.ts). UI only reads Context: to change anything it hands the work
+// to Agent, so it never imports a writer. Only Connectors write the Synced kind, so only context/connectors (and the Store
+// that defines it) imports the Synced writer.
+const CONTEXT_WRITERS=['contextWriter','syncedWriter','connectorWriter'];
+const SYNCED_WRITERS=['syncedWriter'];
+export function checkContextNames(file:string,target:string,names:readonly string[]|'*'){
+ if(!target.startsWith('context/'))return;
+ if(layer(file)==='ui'){
+  assert(names!=='*',`${file}: UI imports Context by name, so what it reads stays visible: ${target}`);
+  const writes=names.filter(name=>CONTEXT_WRITERS.includes(name));
+  assert(!writes.length,`${file}: UI only reads Context; writes go through agent/ (${writes.join(', ')})`);
+ }
+ if(names!=='*'&&!file.startsWith('context/connectors/')&&!file.startsWith('context/store/')){
+  const synced=names.filter(name=>SYNCED_WRITERS.includes(name));
+  assert(!synced.length,`${file}: only context/connectors writes Synced Context (${synced.join(', ')})`);
+ }
+}
 const used=new Set<string>();
 function layer(file:string){return layers.find(x=>file.startsWith(x+'/'))??file.split('/')[0];}
 export function checkEdge(file:string,target:string){
@@ -49,11 +66,11 @@ export function checkSource(file:string,source:string){
   assert(!/platform\s*[!=]==?\s*['"](?:windows|macos)['"]/.test(source),`${file}: UI must use capabilities, not OS branches`);
  }
  const ast=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true);
- function dependency(specifier:string){
+ function dependency(specifier:string,names?:readonly string[]|'*'){
   const resolved=ts.resolveModuleName(specifier,path.resolve(root,file),options,ts.sys).resolvedModule;
   if(resolved&&!resolved.isExternalLibraryImport&&!resolved.resolvedFileName.includes('/node_modules/')){
    const target=path.relative(root,fs.realpathSync(resolved.resolvedFileName)).split(path.sep).join('/');
-   checkEdge(file,target);return;
+   checkEdge(file,target);if(names)checkContextNames(file,target,names);return;
   }
   assert(!specifier.startsWith('.')&&!specifier.startsWith('/')&&!layers.some(x=>specifier.startsWith(x+'/')),`${file}: unresolved local dependency ${specifier}`);
   assert(!PURE.includes(layer(file)),`${file}: pure layer cannot import external module ${specifier}`);
@@ -61,7 +78,7 @@ export function checkSource(file:string,source:string){
  if(file!=='api/types.d.ts')assert.equal(ast.referencedFiles.length,0,`${file}: use explicit module imports instead of reference paths`);
  function visit(node:ts.Node){
   if(PURE.includes(layer(file))&&ts.isIdentifier(node)&&['window','document','navigator','process','require'].includes(node.text))assert.fail(`${file}: pure layer cannot use host global ${node.text}`);
-  if((ts.isImportDeclaration(node)||ts.isExportDeclaration(node))&&node.moduleSpecifier&&ts.isStringLiteral(node.moduleSpecifier))dependency(node.moduleSpecifier.text);
+  if((ts.isImportDeclaration(node)||ts.isExportDeclaration(node))&&node.moduleSpecifier&&ts.isStringLiteral(node.moduleSpecifier))dependency(node.moduleSpecifier.text,importedNames(node));
   if(ts.isImportEqualsDeclaration(node))assert.fail(`${file}: import-equals is not allowed; use ESM`);
   if(ts.isIdentifier(node)&&node.text==='require')assert.fail(`${file}: require is not allowed; use ESM`);
   if(ts.isCallExpression(node)&&node.expression.kind===ts.SyntaxKind.ImportKeyword){
@@ -72,6 +89,20 @@ export function checkSource(file:string,source:string){
   ts.forEachChild(node,visit);
  }
  visit(ast);
+}
+/** The names an import or export declaration takes from its module (the original names, before `as`), or '*' for all. */
+function importedNames(node:ts.ImportDeclaration|ts.ExportDeclaration):readonly string[]|'*' {
+ if(ts.isExportDeclaration(node)){
+  if(!node.exportClause)return '*';
+  return ts.isNamedExports(node.exportClause)?node.exportClause.elements.map(item=>(item.propertyName??item.name).text):'*';
+ }
+ const clause=node.importClause;
+ if(!clause)return [];
+ const names=clause.name?['default']:[];
+ const bindings=clause.namedBindings;
+ if(bindings&&ts.isNamespaceImport(bindings))return '*';
+ if(bindings&&ts.isNamedImports(bindings))names.push(...bindings.elements.map(item=>(item.propertyName??item.name).text));
+ return names;
 }
 function scan(dir:string){
  for(const entry of fs.readdirSync(dir,{withFileTypes:true})){

@@ -7,6 +7,7 @@ import type {Preferences} from '../preferences.ts';
 import {removeOldLeftovers} from './leftovers.ts';
 import {moveFilesIn} from './moved-in.ts';
 import {WorldLedger} from './ledger.ts';
+import {ledgerContext} from './context-storage.ts';
 import {ActivityRecorder} from '../modules/applets/activity.ts';
 import {EMPTY_OVERLAY} from '../../../context/connectors/index.ts';
 import eventPolicy from '../../../contracts/world-event-policy.json';
@@ -95,6 +96,8 @@ export class WorldStore {
   this.worldLedger=value;return value;
  }
  closeLedger(){this.worldLedger?.close();this.worldLedger=null;}
+ /** The World's Context, for its one way in (#676): `contextReader` and `contextWriter` take this. */
+ context(){return ledgerContext(this.ledger());}
  runtimeSpec(owner:string){return this.runtimeRows().find(row=>row.provider===owner&&(row.mode==='scheduled'||row.mode==='observation'))??null;}
  private loadLibrary(){
   if(!fs.existsSync(path.join(this.root,'world.sqlite'))&&(this.state.libraryStorageVersion!=null||this.hadDatabase()))throw new WorldletError('The World library database is missing. Restore its backup before continuing.');

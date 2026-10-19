@@ -28,7 +28,7 @@ Inside the app there are four layers ([#677](https://github.com/clockless-org/wo
 | --- | --- | --- | --- |
 | 1 | **UI** (See) | Every screen and its interaction logic, one codebase that every window shows. World (`ui/world/`: places, HUD), Applets (`ui/applets/`: each Applet's screen beside its real website, games, practice), Companion (`ui/companion/`: face, conversation, voice), Attention (`ui/attention/`: what needs the person now, the artifact card and the Journal), Frame (`ui/frame/`: start, setup, settings, navigation), Style (`ui/style/`: shared controls, tokens and themes) | `ui/` |
 | 2 | **Agent** (Do) | Who does the work. Companion (`agent/companion/`: turns through the person's own Agent, memory, setup), Tasks (`agent/tasks/`: routines, checks, drafts), Applets (`agent/applets/`: running Applets, driving the browser), Attention (`agent/attention/`: deciding and ranking what needs the person), Gate (`agent/gate/`: every Agent, its Grants, World tools, approvals and audit, local and remote MCP), App rules (`agent/app/`: what the app reports, update channels). Everyone, the companion included, passes the Gate | `agent/` |
-| 3 | **Context** (Know) | Everything the World knows, in one hub on the person's own machine. Store (`context/store/`: the hub; every record, history, artifacts and made games; one way in and out and one search are #676), Applets (`context/applets/`: the catalog, each Applet's records and the World log), Connectors (`context/connectors/`: Services in and out, what they sync, Service presets and the board). Four kinds of record live in the Store: Synced, Recorded, Made, Known ([#676](https://github.com/clockless-org/worldlet/issues/676)) | `context/` |
+| 3 | **Context** (Know) | Everything the World knows, in one hub on the person's own machine. Store (`context/store/`: the hub; every record, history, artifacts and made games; one way in and out and one search, `context/store/context.ts`, #676), Applets (`context/applets/`: the catalog, each Applet's records and the World log), Connectors (`context/connectors/`: Services in and out, what they sync, Service presets and the board). Four kinds of record live in the Store: Synced, Recorded, Made, Known ([#676](https://github.com/clockless-org/worldlet/issues/676)) | `context/` |
 | 4 | **Platform** (Host) | Where the World runs and every window that reaches it. Host (`platform/host/`: the shared host Desktop and Server both run: router, host modules, storage, vault, the relay link), Desktop (`platform/desktop/`: Electron around the Host, the window, OS permissions, updates, installers), Server (`platform/server/`: Node around the Host, no screen), Web (`platform/web/`: how a page talks to its host, the page a browser opens, pairing), Phone (`platform/ios/`, `platform/android/`). It runs things and makes no product decisions | `platform/` |
 
 Someone asks in UI (or an Agent asks directly) → Agent runs it through the Gate, reading
@@ -49,9 +49,10 @@ Rules:
 - Nothing reads storage except through Context's single entry.
 - Nothing is deleted automatically; only a retention period the person sets removes data.
 
-The common record envelope, the single read/write entry with Grants and audit, one search
-across all four kinds, and draft and pin state for Made records are next steps
-([context/store/STORAGE.md](../context/store/STORAGE.md#four-kinds)).
+The record envelope, the single read/write entry (`contextReader`, `contextWriter`, and `connectorWriter` for Synced) and
+one search across all four kinds are in `context/store/context.ts` ([one way in](../context/store/STORAGE.md#one-way-in));
+`npm run check:arch` enforces that UI only reads and only Connectors write Synced. Routing the remaining domains with
+Grants and audit, one database with content-addressed files, and draft and pin state for Made records are next steps.
 
 <a id="folders-by-layer"></a>
 ### Folders by layer

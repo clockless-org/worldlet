@@ -35,3 +35,6 @@ export {GAME_MAKING_OPEN,GAME_FACTORY_APPLET,MADE_GAME_LIMITS,SANDBOX_POLICY,MAD
 export type {MadeGame,ModelSourceName} from './factory.ts';
 export {BATTLE_REVIEW,GAME_REVIEW_APPLET,battleWatch,battleUserId,battleSite,observeBattleMessage,finishedBattles,battleReviewDue,battlesReviewed,battleSummaryDue,battlesSummarized,battleReviewTask,battleNow} from './battle-review.ts';
 export type {BattleWatch,WatchedBattle,FinishedBattle,BattleResult} from './battle-review.ts';
+// The one way in to Context (#676): the envelope, the read and write entries and one search across the four kinds.
+export {CONTEXT_KINDS,CONTEXT_DOMAINS,CONTEXT_SEARCH_LIMITS,contextDomain,contextEnvelope,contextTime,contextTerms,contextReader,contextWriter,syncedWriter} from './context.ts';
+export type {ContextKind,ContextOrigin,ContextEnvelope,ContextRecord,ContextDomain,ContextDomainId,ContextChange,ContextDomainStore,ContextStorage,ContextHit,ContextQuery,ContextReader,ContextWriter} from './context.ts';
