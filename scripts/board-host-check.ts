@@ -9,7 +9,7 @@ import {BOARD_READ_REUSE_MS,createWorldBoard} from '../platform/electron/src/mod
 import {openStandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
 import {STANDING_OUTSIDE_TURN} from '../core/agent/grants.ts';
 import {BOARD_REASONS} from '../context/board/index.ts';
-import {PRESET_REASONS,saveServicePreset} from '../core/accounts/index.ts';
+import {PRESET_REASONS,saveServicePreset} from '../context/accounts/index.ts';
 import type {ServiceRead} from '../contracts/services.ts';
 
 // The board on the host (context/board/README.md, core/agent/GRANTS.md#the-board), the same modules the Electron and Node

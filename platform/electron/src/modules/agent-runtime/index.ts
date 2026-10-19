@@ -24,7 +24,7 @@ import {createWorldAddressHost,type WorldAddressHost} from './world-address.ts';
 import {createAgentArtifacts,type AgentArtifacts} from './agent-artifacts.ts';
 import {createServiceDrafts,type ServiceDrafts} from './service-drafts.ts';
 import type {AskDrafts} from './agent-asks.ts';
-import {GITHUB_APP,type PosthogSettings} from '../../../../../core/accounts/index.ts';
+import {GITHUB_APP,type PosthogSettings} from '../../../../../context/accounts/index.ts';
 import {moveFoxProfile} from './fox-move.ts';
 import {HERMES_WINDOW_DONE,endHermesInstall,hermesInstallWindow,hermesSessionModels,hermesStarts,installHermes,workingHermesAgent,installedHermes,ownHermesAgent,signInHermes,type HermesInstallProgress} from './hermes-official.ts';
 import {UPDATED,backgroundSignIn,claudeCodeSignedIn,openSignIn} from './provider-sign-in.ts';

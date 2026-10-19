@@ -9,7 +9,7 @@ import {assertOAuthCallback} from './oauth-callback-fixture.ts';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import {CONNECTORS,connector,connectorScopes} from '../core/accounts/index.ts';
+import {CONNECTORS,connector,connectorScopes} from '../context/accounts/index.ts';
 import {McpAccounts} from '../platform/electron/src/modules/sources/mcp-account.ts';
 import {McpUnauthorized} from '../platform/electron/src/modules/sources/mcp-client.ts';
 import {withTempDir} from './test-temp.ts';

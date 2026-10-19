@@ -4,7 +4,7 @@ import {GOOGLE_SIGN_IN_EVENT,googleSignInStage} from '../../contracts/platform.t
 import {googleConsentActions,googleConsentUrl} from './google-consent.ts';
 import {connectionGuide} from '../applets/index.ts';
 import {WORLD_PRESETS} from '../world/index.ts';
-import {connectorTiles} from '../../core/accounts/index.ts';
+import {connectorTiles} from '../../context/accounts/index.ts';
 import {copyAndOpen,listenForSignInCode} from '../companion/index.ts';
 const el=(tag: string,text?: string,cls?: string): any=>Object.assign(document.createElement(tag),{...(text==null?{}:{textContent:text}),className:cls||''});
 const providerTitle=p=>getApp(p)?.title||{google:'Google','google-drive':'Google Drive',folder:'Local folder'}[p];

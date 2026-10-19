@@ -1,5 +1,5 @@
 import {BOARD_PROVIDERS,BOARD_REASONS,boardPresetIds,defineBoard,readBoardReadArgs,readStoredBoard,resolveBoard,type BoardRead} from '../../../../../context/board/index.ts';
-import {servicePresetRead} from '../../../../../core/accounts/index.ts';
+import {servicePresetRead} from '../../../../../context/accounts/index.ts';
 import {agentBoardRecords} from '../../../../../core/agent/index.ts';
 import type {AgentListEntry} from '../../../../../contracts/agent-reports.ts';
 import type {BoardRecord} from '../../../../../contracts/board.ts';

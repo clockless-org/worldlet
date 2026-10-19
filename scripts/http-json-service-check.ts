@@ -1,4 +1,4 @@
-// HTTP JSON as a Worldlet Service, read only (contracts/services.ts, core/accounts/services/http-json.ts,
+// HTTP JSON as a Worldlet Service, read only (contracts/services.ts, context/accounts/services/http-json.ts,
 // service-source.ts, `read_service`): against a stub HTTP server, an endpoint's name and HTTPS base address are checked
 // before anything is sent, its optional token is checked with one GET before it is kept and a refused one replaces
 // nothing; several named endpoints live in one connection; `list` names them and `read` sends one GET to a path under
@@ -14,7 +14,7 @@ import path from 'node:path';
 import type {AddressInfo} from 'node:net';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
 import type {ServiceRecords} from '../contracts/services.ts';
-import {HTTP_JSON_LIMITS,httpJsonBaseUrl,httpJsonRequest,privateAddress,readServicePresetRead,saveServicePreset,servicePresetRead} from '../core/accounts/index.ts';
+import {HTTP_JSON_LIMITS,httpJsonBaseUrl,httpJsonRequest,privateAddress,readServicePresetRead,saveServicePreset,servicePresetRead} from '../context/accounts/index.ts';
 import {readBoardDefinition,resolveBoard} from '../context/board/index.ts';
 import {channelDefaultGrants,serviceReadTargets,standingActions,standingCallDecision} from '../core/agent/grants.ts';
 import {turnTrustObserve} from '../core/agent/turn-trust.ts';

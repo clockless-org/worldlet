@@ -1,4 +1,4 @@
-import {notionPageId} from '../../core/accounts/index.ts';
+import {notionPageId} from '../../context/accounts/index.ts';
 import {agentEl as el,agentButton} from './agent-change.ts';
 
 /** Owner settings for saved Notion context. OAuth remains in the existing connection flow; the host validates every

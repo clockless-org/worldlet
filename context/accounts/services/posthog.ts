@@ -23,7 +23,7 @@ export const POSTHOG_GATE:ServiceGate=Object.freeze({name:'posthog',title:'PostH
  busy:'PostHog is limiting reads right now. Try again in a minute.',
  signedOut:'PostHog signed you out. Sign in to PostHog again in Settings › Connectors.'});
 
-/** PostHog's own sign-in (core/accounts/connectors.ts, `mcp-oauth`): its remote MCP server's address names its
+/** PostHog's own sign-in (context/accounts/connectors.ts, `mcp-oauth`): its remote MCP server's address names its
  * authorization server, where Worldlet registers itself and signs in with PKCE on this computer. The access token it
  * gives is then sent as a Bearer to PostHog Cloud's API (the same endpoints a personal API key reads), never to the MCP
  * server's tools. */

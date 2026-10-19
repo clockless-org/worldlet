@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import dns from 'node:dns/promises';
 import net from 'node:net';
 import {WorldletError} from '../../files.ts';
-import {CLOUDFLARE_API,CLOUDFLARE_EXECUTE,CLOUDFLARE_GATE,CLOUDFLARE_SIGN_IN,CLOUDFLARE_SIGN_IN_READS,cloudflareAccounts,cloudflareExecute,cloudflareExecuteAnswer,type CloudflareSettings,GOOGLE_TOKEN_URL,HTTP_JSON_GATE,HTTP_JSON_LIMITS,POSTHOG_GATE,POSTHOG_SIGN_IN,POSTHOG_SIGN_IN_HOSTS,connector,posthogProjects,type PosthogSettings,SEARCH_CONSOLE_API,SEARCH_CONSOLE_GATE,checkCloudflare,checkHttpJson,checkPosthog,checkSearchConsole,cloudflareSettings,httpJsonEndpoints,httpJsonSettings,posthogSettings,privateAddress,readCloudflare,readHttpJson,readPosthog,readSearchConsole,searchConsoleAccessToken,searchConsoleAssertion,searchConsoleKey,searchConsoleSettings,type HttpJsonSettings,type ServiceGate,type ServiceHttp} from '../../../../../core/accounts/index.ts';
+import {CLOUDFLARE_API,CLOUDFLARE_EXECUTE,CLOUDFLARE_GATE,CLOUDFLARE_SIGN_IN,CLOUDFLARE_SIGN_IN_READS,cloudflareAccounts,cloudflareExecute,cloudflareExecuteAnswer,type CloudflareSettings,GOOGLE_TOKEN_URL,HTTP_JSON_GATE,HTTP_JSON_LIMITS,POSTHOG_GATE,POSTHOG_SIGN_IN,POSTHOG_SIGN_IN_HOSTS,connector,posthogProjects,type PosthogSettings,SEARCH_CONSOLE_API,SEARCH_CONSOLE_GATE,checkCloudflare,checkHttpJson,checkPosthog,checkSearchConsole,cloudflareSettings,httpJsonEndpoints,httpJsonSettings,posthogSettings,privateAddress,readCloudflare,readHttpJson,readPosthog,readSearchConsole,searchConsoleAccessToken,searchConsoleAssertion,searchConsoleKey,searchConsoleSettings,type HttpJsonSettings,type ServiceGate,type ServiceHttp} from '../../../../../context/accounts/index.ts';
 import {SERVICE_ACTIONS} from '../../../../../contracts/services.ts';
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections,VaultService} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
@@ -12,7 +12,7 @@ import {McpAccounts} from './mcp-account.ts';
 import {McpHttpClient,McpUnauthorized} from './mcp-client.ts';
 
 /** Worldlet Services read over the service's own HTTPS API with a key the person pasted (contracts/services.ts,
- * core/accounts/services): PostHog, whose remote MCP server serves only PostHog Cloud and chooses its own project,
+ * context/accounts/services): PostHog, whose remote MCP server serves only PostHog Cloud and chooses its own project,
  * Cloudflare's analytics, whose own MCP servers sign in with OAuth and offer far more than reads, and HTTP JSON
  * endpoints the person names. The connection is the World's own, in the vault as `service:<name>`: the settings the
  * person gave (PostHog's address and project, Cloudflare's account) and their key; for HTTP JSON, each named

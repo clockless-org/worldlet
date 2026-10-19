@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import {hermesConfigValues} from '../../../../../core/agent/index.ts';
-import {connectorScopes,githubDevicePollForm,githubDeviceStartForm,readGithubDevicePoll,readGithubDeviceStart,GITHUB_APP} from '../../../../../core/accounts/index.ts';
+import {connectorScopes,githubDevicePollForm,githubDeviceStartForm,readGithubDevicePoll,readGithubDeviceStart,GITHUB_APP} from '../../../../../context/accounts/index.ts';
 import {WorldletError,writeAtomic} from '../../files.ts';
 import type {VaultService} from '../../host/services.ts';
 import {McpHttpClient,McpUnauthorized} from './mcp-client.ts';
@@ -48,7 +48,7 @@ export class McpAccounts {
   this.vault=options.vault;this.agentHomes=options.agentHomes;this.fetch=options.fetch??fetch;this.now=options.now??Date.now;
   this.sleep=options.sleep??(ms=>new Promise(resolve=>setTimeout(resolve,ms)));
  }
- /** Signs in to GitHub with the official Worldlet GitHub App's device flow (core/accounts/github-device.ts): GitHub
+ /** Signs in to GitHub with the official Worldlet GitHub App's device flow (context/accounts/github-device.ts): GitHub
   * gives a short code, `show` puts it in front of the person, and this polls GitHub from this computer until they
   * choose Authorize on github.com, cancel, or the code runs out. The user token and its refresh token are kept in the
   * vault as the connection `name` to `url` (GitHub's MCP server); they are renewed with the public client ID alone.
@@ -216,7 +216,7 @@ export class McpAccounts {
  /** MCP authorization (2025-06-18): the server's protected-resource metadata names its authorization server, whose
   * metadata gives the endpoints; the World registers itself there (RFC 7591) for this loopback address and signs
   * in with PKCE, the resource indicator naming the server (RFC 8707). It asks only for the connector's own short
-  * scope list (core/accounts/connectors.ts), never every scope the server offers. */
+  * scope list (context/accounts/connectors.ts), never every scope the server offers. */
  private async consent(name:string,url:string,open:(url:string)=>Promise<void>,cancelled:()=>boolean,registeredClient?:McpPublicClient,write=false):Promise<WorldGrant> {
   const resource=await this.resourceMetadata(url);
   const issuer=typeof resource?.authorization_servers?.[0]==='string'?resource.authorization_servers[0]:new URL(url).origin;

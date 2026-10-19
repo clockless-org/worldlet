@@ -3,9 +3,9 @@ import {AGENT_AUDIT_KEEP,SERVICE_DRAFT_MESSAGES,SERVICE_DRAFT_REASONS,makeServic
  serviceDraftChange,serviceDraftItemId,serviceDraftPending,settleServiceDraft,writeServiceDraft,type ServiceDraftIO} from '../../../../../core/agent/index.ts';
 import {SERVICE_DRAFT_PROVIDERS,serviceDraftTarget,type ServiceDraft,type ServiceDraftProvider} from '../../../../../contracts/service-drafts.ts';
 import type {AgentAuditEntry} from '../../../../../contracts/agent-identity.ts';
-import type {McpSession} from '../../../../../core/accounts/index.ts';
+import type {McpSession} from '../../../../../context/accounts/index.ts';
 import type {PosthogRequest} from '../../../../../core/agent/index.ts';
-import type {PosthogSettings} from '../../../../../core/accounts/index.ts';
+import type {PosthogSettings} from '../../../../../context/accounts/index.ts';
 import type {Row} from './types.ts';
 
 // PostHog and Notion drafts (core/agent/GRANTS.md#posthog-and-notion-drafts), as GitHub drafts are kept

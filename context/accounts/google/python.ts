@@ -1,5 +1,5 @@
 // The Python semantics the Google reads were written with (dict.get, truthiness, int(), str(), code-point lengths
-// and order), so the TypeScript ports answer exactly what the Hermes originals did. Private to core/accounts.
+// and order), so the TypeScript ports answer exactly what the Hermes originals did. Private to context/accounts.
 
 /** `o.get(k, d)`: a key that is present keeps its value, null included. */
 export const got=(o:any,k:string,d:any=undefined)=>o!==null&&typeof o==='object'&&Object.hasOwn(o,k)?o[k]:d;
