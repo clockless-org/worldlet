@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import {tmpdir} from 'node:os';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
-// The World's tasks beside Fox (owner request 2026-10-11, ui/hud/task-panel.ts, core/tasks/task-panel.ts): the
+// The World's tasks beside Fox (owner request 2026-10-11, ui/hud/task-panel.ts, agent/tasks/task-panel.ts): the
 // scheduled Routines on Fox's left and what the Agent is doing now on its right, on the message bar's line, each one small
 // card in the same style (a picture, a name, one line), Fox and its message bar between them. Two cards a side in a wide
 // World, then "+N", which opens the whole list. A running card opens its window above it (the step, when it started, who

@@ -35,7 +35,7 @@ import {backgroundLaunch,showInBackground} from '../background-launch.ts';
 // Codex is not asked, so this journey never waits for it; startup-setup-check.ts drives a late description arriving.
 // The things it names the person handles most show on a Things tile while setup waits ("Asking … what you do most"),
 // and become their own Applets: a conversation's, or one of their own once the Agent's conversations are brought
-// (core/tasks ongoingFromAgent, checked in scripts/ongoing-check.ts); a catalog Applet that fits joins the World even
+// (agent/tasks ongoingFromAgent, checked in scripts/ongoing-check.ts); a catalog Applet that fits joins the World even
 // when the description arrives after setup (agent-runtime placeThings).
 
 const COMPANION_BLOCKING=false;

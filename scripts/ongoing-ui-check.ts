@@ -1,4 +1,4 @@
-// Ongoing things on the World page (core/tasks/README.md): the brought conversations about one subject stand in Worth
+// Ongoing things on the World page (agent/tasks/README.md): the brought conversations about one subject stand in Worth
 // Doing as one theme; opening it lays out why with Show me, Not now and Don't ask again; Show me puts the theme off and
 // asks Fox, who shows one artifact (Kelvin 2026-10-07: an artifact, not an Applet). A conversation kept as an Applet
 // earlier is still a device of its own, which opens on its kind's page and latest messages.
@@ -33,7 +33,7 @@ try{
  await page.goto(worldUrl());await waitForWorld(page);
  // A thing kept earlier is a device of its own.
  await page.waitForFunction(()=>(document.querySelector('#notionWorld') as any)?.appletLayout?.has('app-job-fooddiary001'));
- // Fox's sessions (core/tasks/fox-sessions.ts): pointing at Fox shows them left of its card, the main one first.
+ // Fox's sessions (agent/tasks/fox-sessions.ts): pointing at Fox shows them left of its card, the main one first.
  const avatar=page.locator('.companion-avatar'),input=page.locator('#notionInput'),column=page.locator('.companion-dialogue>.fox-sessions');
  await avatar.hover();await column.waitFor();
  assert.equal(await column.locator('.fox-session strong').first().textContent(),'Fox','the main session leads, under the Agent\'s name');

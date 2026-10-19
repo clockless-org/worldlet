@@ -228,7 +228,7 @@ private struct JournalSheet: View {
 }
 
 /// What the person's Agent is doing now and what it runs next (owner request 2026-10-11): the cards either side of Fox
-/// on the computer (core/tasks task-panel.ts), as lists. A running task's row opens its Applet when the phone has it,
+/// on the computer (agent/tasks task-panel.ts), as lists. A running task's row opens its Applet when the phone has it,
 /// otherwise it unfolds what the task has said.
 private struct TasksPage: View {
     @Environment(AppModel.self) private var model

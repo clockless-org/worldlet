@@ -1,4 +1,4 @@
-// When each of the person's scheduled jobs runs next, for the World's Task panel (core/tasks/task-panel.ts).
+// When each of the person's scheduled jobs runs next, for the World's Task panel (agent/tasks/task-panel.ts).
 // The jobs keep running on their own Agent's scheduler (contracts/harness-services.ts `HarnessJob`); this only reads
 // their schedule. A cron expression is the standard five fields (minute hour day-of-month month day-of-week) with
 // `*`, lists, ranges and steps, read in the computer's local time like the schedulers that run them.

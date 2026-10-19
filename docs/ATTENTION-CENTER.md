@@ -133,7 +133,7 @@ the same result reaches the paired phone while it is fresh (twelve hours):
 These items have no source fact behind them, so they stay current until the person settles them (Got it, Done,
 Later), and opening one keeps no second copy in the Journal when the result already is a Journal card. The Task
 panel lists the next brief and summary among its Routines; finished runs are not listed there
-([core/tasks/README.md](../core/tasks/README.md#task-panel)).
+([agent/tasks/README.md](../agent/tasks/README.md#task-panel)).
 
 ## Acceptance
 

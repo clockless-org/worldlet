@@ -365,7 +365,7 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
    assert.equal(fs.readdirSync(spareHome).filter(name=>name.endsWith('.token')).length,0,'shutdown stops the spare and its bridge');
    script(path.join(bin,'claude'),`if [ "$1" = "--version" ]; then echo "2.1.0 (Claude Code)"; exit 0; fi\ncat > "$PWD/stdin.txt"\nprintf '%s\\n' "$@" > "$PWD/args.txt"\nenv > "$PWD/env.txt"\ncat "${fixture}"\n`);
   }
-  // A brought conversation Fox continues (core/tasks/fox-sessions.ts): its turns go on in the person's own Claude Code
+  // A brought conversation Fox continues (agent/tasks/fox-sessions.ts): its turns go on in the person's own Claude Code
   // session, in the folder it ran in; the kept one's Applet does too. A session Claude Code answers under a new ID is
   // continued there next time. Never one Worldlet keeps out of the history sync.
   {

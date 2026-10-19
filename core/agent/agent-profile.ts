@@ -30,11 +30,11 @@ export interface AgentProfile {
  /** Applets it suggests: a catalog key when one fits, else a title of its own. */
  applets:{key?:string;title:string;why?:string}[];
  /** What the person handles most day to day, read from their conversations (owner request 2026-10-12): each becomes
-  * an Applet, the catalog's when `key` fits, else the conversation it happens in (core/tasks ongoingFromAgent). */
+  * an Applet, the catalog's when `key` fits, else the conversation it happens in (agent/tasks ongoingFromAgent). */
  things:{title:string;why?:string;threads:string[];key?:string}[];
  /** What the person should see in the Attention Center right after setup, read from their conversations (owner request
   * 2026-10-12, Kelvin: "onboard了以后 Attention Center里面要有东西"): something dated coming up, something they said they
-  * would do, something worth knowing. Each names the conversation it comes from (core/tasks attentionFromAgent). */
+  * would do, something worth knowing. Each names the conversation it comes from (agent/tasks attentionFromAgent). */
  attention:AgentAttention[];
 }
 export const AGENT_ATTENTION_GROUPS=['coming','doing','knowing'] as const;
@@ -52,7 +52,7 @@ export const AGENT_PROFILE_DIGEST=Object.freeze({conversations:40,lines:3,line:1
 /** The message sent to the Agent. `catalog`: the Applet keys it may suggest from. `conversations`: its conversations as
  * Worldlet already read them from its files (owner request 2026-10-12, Kelvin: "先读文件可以"). With them, the Agent
  * answers from the list and what it already knows, without tools: going through its history itself took a Hermes Agent
- * minutes and sometimes never ended. The things it names point at these titles (core/tasks ongoingFromAgent). */
+ * minutes and sometimes never ended. The things it names point at these titles (agent/tasks ongoingFromAgent). */
 export function agentProfilePrompt(catalog:readonly string[],conversations:readonly (AgentConversationDigest|string)[]=[]):string {
  const one=(value:string,limit:number)=>[...value.replace(/\s+/g,' ').trim()].slice(0,limit).join('');
  const seen=new Set<string>(),list:AgentConversationDigest[]=[];

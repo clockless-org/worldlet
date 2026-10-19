@@ -16,7 +16,7 @@ import {installWorld} from '../world.ts';
 import {installArtifacts} from '../artifacts/index.ts';
 import {journalTarget} from '../../../../../core/agent/index.ts';
 import {ONGOING,type OngoingService} from '../../host/services.ts';
-import {conversationAttentionId} from '../../../../../core/tasks/index.ts';
+import {conversationAttentionId} from '../../../../../agent/tasks/index.ts';
 import {writeSelection} from '../agent-runtime/local-harness.ts';
 import {writeAgentProfile} from '../agent-runtime/agent-profile.ts';
 import {errorMessage} from '../../files.ts';
@@ -312,7 +312,7 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce
  }finally{await env.close();}
 }
 
-// Brought conversations (core/tasks/attention.ts): with no mail connected, a conversation active lately reaches the
+// Brought conversations (agent/tasks/attention.ts): with no mail connected, a conversation active lately reaches the
 // Center through the Ongoing module, its finding cites it and stays current, and its original opens the conversation.
 {
  const env=environment();
@@ -349,7 +349,7 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce
  }finally{await env.close();}
 }
 
-// What the chosen Agent picked out for the Center when setup asked it to describe itself (core/tasks attentionFromAgent)
+// What the chosen Agent picked out for the Center when setup asked it to describe itself (agent/tasks attentionFromAgent)
 // is there before any synthesis pass, current and citing its conversation; one the person removed is not made again.
 {
  const env=environment();

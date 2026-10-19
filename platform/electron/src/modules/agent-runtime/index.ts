@@ -42,7 +42,7 @@ import {harnessSkills} from './harness-skills.ts';
 import {harnessMemory} from './harness-memory.ts';
 import {AGENT_VERSIONS,agentRevoked,serviceGranted,askGranted,ASK_GRANT_KINDS,type AskGrantKind,boardGranted,BOARD_GRANT_KINDS,type BoardGrantKind,artifactGranted,ARTIFACT_GRANT_KINDS,type ArtifactGrantKind,githubDraftGranted,githubWriteGrants,isServiceDraftProvider,serviceDraftGranted,agentProfileApplets,agentProfileAsked,type AgentProfile,BACKGROUND_SIGN_IN,PROVIDER_SETTING,agentProviders,agentTooOldMessage,agentVersionStatus,chooseProvider,isModelProviderId,openClawModels,providerSignIn,readProviderChoices,signedInProviders,type ModelProviderId,connectArgument,harnessToolsSummary,isLocalHarnessId,isMigrationSource,localHarness,readRemoteGatewayUrl,recommendLocalHarness,type LocalHarnessId,reportGranted,REPORT_GRANT_KINDS,type ReportGrantKind,SCRIPT_HARNESS} from '../../../../../core/agent/index.ts';
 import {harnessTools} from './harness-services.ts';
-import {ongoingId} from '../../../../../core/tasks/index.ts';
+import {ongoingId} from '../../../../../agent/tasks/index.ts';
 import {SERVICE_PROVIDERS,SERVICE_TITLES} from '../../../../../contracts/services.ts';
 import {GITHUB_WRITE_LIMITS} from '../../../../../contracts/github-drafts.ts';
 import {SERVICE_DRAFT_PROVIDERS,SERVICE_DRAFT_TITLES} from '../../../../../contracts/service-drafts.ts';

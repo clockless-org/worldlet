@@ -25,6 +25,7 @@ const exceptions=new Map([
  
  ['platform/bridge/world-tool-runtime.ts -> ui/shell/index.ts','Host tool dispatcher invokes the public semantic World UI.'],
  ['platform/bridge/agent-client.ts -> ui/companion/index.ts','Presentation status copy is still exported by Companion.'],
+ ['context/context/service-sync.ts -> agent/tasks/index.ts','Service sync keeps Synced Context fresh on the shared source-check schedule, which Tasks owns (#681).'],
 ]);
 const used=new Set<string>();
 function layer(file:string){return layers.find(x=>file.startsWith(x+'/'))??file.split('/')[0];}

@@ -30,7 +30,7 @@ export function mountPhoneBridge({publish,publishLive=async()=>{},answer=()=>fal
  /** What the person said with the phone's Order button: sent as an Order from this computer (ui/companion/native-chat.ts). */
  /** The Applet world (core/phone PhoneWorld), or null where there is none. */
  world?:()=>PhoneWorld|null,
- /** The Task panel's cards (core/tasks TaskPanel), for the phone's Tasks tab; null until the panel has read them. */
+ /** The Task panel's cards (agent/tasks TaskPanel), for the phone's Tasks tab; null until the panel has read them. */
  tasks?:()=>unknown,
  /** The Journal's cards (context/artifacts Artifact); the phone gets today's (core/phone phoneJournal). */
  journal?:()=>any[]|null,

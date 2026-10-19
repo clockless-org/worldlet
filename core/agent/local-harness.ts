@@ -154,7 +154,7 @@ export function openClawToolConfig(include:string|null,server:WorldToolServer):s
 }
 
 /** A Claude Code session a turn continues: the person's own conversation Fox was switched to (owner decision
- * 2026-10-12, core/tasks/fox-sessions.ts), written into so it goes on in Claude Code too. */
+ * 2026-10-12, agent/tasks/fox-sessions.ts), written into so it goes on in Claude Code too. */
 export type LocalHarnessResume={session:string};
 /** `config`: an OpenClaw configuration for this turn (openClawToolConfig); `workspace`: the person's OpenClaw
  * workspace, so its own persona, memory and instructions come along. `agent`: one of the person's other agents

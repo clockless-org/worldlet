@@ -1,8 +1,8 @@
-// The World's tasks beside Fox (core/tasks/task-panel.ts, core/tasks/next-run.ts): which rows go under Scheduled and Doing now,
+// The World's tasks beside Fox (agent/tasks/task-panel.ts, agent/tasks/next-run.ts): which rows go under Scheduled and Doing now,
 // their order, every row kept (a side lists them all), only what the person set going (no Applet checks, no finished
 // work), and the time text. Fixed clock, fictional jobs; no browser.
 import assert from 'node:assert/strict';
-import {nextCronRun,taskPanel,taskHowOften,routineEvery,routineDay,turnTaskName,TURN_TASK_SOURCE} from '../core/tasks/index.ts';
+import {nextCronRun,taskPanel,taskHowOften,routineEvery,routineDay,turnTaskName,TURN_TASK_SOURCE} from '../agent/tasks/index.ts';
 
 const at=(text:string)=>new Date(text).getTime();
 const now=at('2026-10-10T07:30:00');

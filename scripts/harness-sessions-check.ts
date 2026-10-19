@@ -308,7 +308,7 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
   assert.ok(!replayed.some(e=>e.type==='delta'&&/replayed/.test(e.text)),'replayed history is not shown as Fox\'s words');
   assert.ok(fs.existsSync(path.join(turnHome,'harness-sessions.json')),'Worldlet keeps the thread-to-session map in its own folder');
   await adapter.shutdown();
-  // A brought conversation Fox was switched to (core/tasks/fox-sessions.ts) goes on in the person's own session, its
+  // A brought conversation Fox was switched to (agent/tasks/fox-sessions.ts) goes on in the person's own session, its
   // newest one (owner decision 2026-10-12): loaded, not one of Fox's own, so its turns keep coming back through the
   // history sync. One of another profile's, or with no session to continue, is a session of Fox's own as before.
   {

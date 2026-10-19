@@ -2,7 +2,7 @@
 // really one job carried on over days (an OpenClaw channel, a long Claude Code session) can become its own Applet.
 // Fox proposes it as something worth doing; only the person's yes makes it one. Kept, it is listed in the Ongoing
 // Applet on the computer and has its own tile in the phone's Applet world. These are the rules every host applies
-// (core/tasks/README.md).
+// (agent/tasks/README.md).
 import {MIGRATION_SOURCE_TITLES,isMigrationSource} from '../../contracts/agent.ts';
 import {ONGOING_KINDS,isOngoingKind,ongoingKind,ongoingOffered,type OngoingKindOrGeneral} from './kinds.ts';
 
@@ -41,7 +41,7 @@ export interface OngoingThing {
  /** Set on things kept since the World's areas were regrouped (2026-10-08): `library` is Social and `travel` is
   * Entertainment. An earlier kept thing's `library` meant Create (now Work) and its `travel` a trip (now Life). */
  regrouped?:true;
- /** What it is about (core/tasks/kinds.ts): fitness, food, study, money, travel, a project, or general. Told
+ /** What it is about (agent/tasks/kinds.ts): fitness, food, study, money, travel, a project, or general. Told
   * from its name and the person's own messages when it is proposed. */
  kind?:OngoingKindOrGeneral;
  /** The name the person's own Agent gave the thing when it described what they handle most (core/agent/agent-profile.ts
@@ -122,7 +122,7 @@ export function ongoingRefresh(things:OngoingThing[],conversations:BroughtConver
   if(c.turns!==thing.turns||c.last!==thing.last||c.userTurns!==thing.userTurns||c.first!==thing.first||kind.kind)save.push({...thing,turns:c.turns,userTurns:c.userTurns,first:c.first,last:c.last,...kind});
  }
  const known=new Set(things.map(t=>t.id));
- // Only a conversation of a kind Fox offers is proposed (core/tasks/themes.ts): one of no kind, or a project, neither
+ // Only a conversation of a kind Fox offers is proposed (agent/tasks/themes.ts): one of no kind, or a project, neither
  // waits nor takes a place from one that is offered.
  const waiting=things.filter(t=>t.state==='proposed'&&!forget.includes(t.id)&&ongoingOffered(ongoingKindOf(t))).length;
  const room=Math.max(0,ONGOING_LIMITS.proposals-waiting);

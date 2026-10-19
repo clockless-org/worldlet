@@ -5,7 +5,7 @@
  * A long answer folds to a few lines with Show more. */
 import {mountFoxSessions} from './fox-sessions.ts';
 import {showQuestion,type ThreadEntry} from './fox-thread.ts';
-import type {FoxSession} from '../../core/tasks/index.ts';
+import type {FoxSession} from '../../agent/tasks/index.ts';
 
 /** One message pair of the window: an entry of the thread, or Fox's line that is not a turn (`user` empty). `working`
  * is the step Fox is on while the turn runs. */

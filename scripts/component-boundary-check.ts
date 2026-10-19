@@ -35,7 +35,7 @@ async function scan(dir:string):Promise<void>{
 }
 assert.throws(()=>assertComponentImport('ui/hud/example.ts','../../core/tasks/runtime-tasks.ts'),/bypasses/);
 assert.throws(()=>assertComponentImport('agent/attention/example.ts','../tasks/runtime-tasks.ts'),/bypasses/);
-assertComponentImport('core/tasks/example.ts','./runtime-tasks.ts');
+assertComponentImport('agent/tasks/example.ts','./runtime-tasks.ts');
 assertComponentImport('ui/hud/example.ts','../../core/tasks/index.ts');
 assert.throws(()=>assertComponentImport('ui/companion/example.ts','../browser/browser-device.ts'),/bypasses/);
 assert.throws(()=>assertComponentImport('website/main.ts','../ui/shell/notion-world.ts'),/bypasses/);

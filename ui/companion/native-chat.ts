@@ -15,7 +15,7 @@ import {foxVisibleText,guidedVisibleText} from './fox-visible-text.ts';
 import {modelFailure} from './model-failure.ts';
 import {FOX_WORKING} from './fox-doing.ts';
 import {mountFoxNameTag,FOX_STATUS_EVENT} from './fox-name-tag.ts';
-import {TURN_TASK_SOURCE,turnTaskName,foxSessionCards,foxSessionDetail,foxSessionLine,foxSessionOf,foxSessionPlace,type FoxSession} from '../../core/tasks/index.ts';
+import {TURN_TASK_SOURCE,turnTaskName,foxSessionCards,foxSessionDetail,foxSessionLine,foxSessionOf,foxSessionPlace,type FoxSession} from '../../agent/tasks/index.ts';
 import {mountFoxSessions} from './fox-sessions.ts';
 import {mountFoxChatWindow,type FoxChatMessage} from './fox-chat-window.ts';
 import type {FoxActivitySignal} from '../../contracts/companion-activity.ts';
@@ -251,7 +251,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  }
  window.addEventListener('worldlet:harness-agents',()=>{answeredBy.clear();scheduleRender();});
  threadStack.append(threadList,threadFoot);panel.append(threadStack);
- // Fox's sessions (core/tasks/fox-sessions.ts): the main one, then each conversation brought from the person's other
+ // Fox's sessions (agent/tasks/fox-sessions.ts): the main one, then each conversation brought from the person's other
  // Agents. A Thing's row opens its Applet; any other row makes that conversation the place Fox talks in, in the World,
  // until the main session is picked again or the person goes somewhere else (owner request 2026-10-12).
  let sessionList:FoxSession[]=[],sessionHere:FoxSession|null=null,sessionTurns:((id:string)=>Promise<any>)|null=null;

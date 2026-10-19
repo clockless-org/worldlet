@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
 import {validateAppletRuntimes,appletReadPlan,finishAppletPage,type AppletRuntimeSpec} from '../context/applets/runtime.ts';
-import {dueSourceCheck} from '../core/tasks/source-checks.ts';
+import {dueSourceCheck} from '../agent/tasks/source-checks.ts';
 const rows=validateAppletRuntimes(APP_DEFINITIONS.map(a=>JSON.parse(readFileSync(`ui/applets/${a.key}/runtime.json`,'utf8'))));
 for(const app of APP_DEFINITIONS)assert.match(readFileSync(`ui/applets/${app.key}/applet.md`,'utf8'),/## Status/);
 const mail=rows.find(r=>r.provider==='gmail')!;

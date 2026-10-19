@@ -1,9 +1,9 @@
-// core/tasks/next-run.ts `nextCronRun` jumps over hours that can't match instead of stepping minute by minute. This
+// agent/tasks/next-run.ts `nextCronRun` jumps over hours that can't match instead of stepping minute by minute. This
 // keeps a verbatim copy of the minute-by-minute version and checks both give the same answer for thousands of seeded
 // cron expressions and start times: every field form the parser reads (and some it refuses), month ends, Feb 29,
 // the new year, and both daylight-saving changes in America/Los_Angeles as well as UTC. No browser.
 import assert from 'node:assert/strict';
-import {nextCronRun} from '../core/tasks/next-run.ts';
+import {nextCronRun} from '../agent/tasks/next-run.ts';
 
 // The minute-by-minute version, as it was before the jump.
 function oldField(text:string,min:number,max:number):Set<number>|null {

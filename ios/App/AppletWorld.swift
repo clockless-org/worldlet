@@ -3,7 +3,7 @@ import WorldletKit
 
 /// The Applets tab (owner request 2026-10-11): the Applets that work on the phone, as a list in the computer's own
 /// order, grouped by section. The person's things come first: each OpenClaw channel or long conversation that is one job
-/// carried on is a thing of its own, found by the computer (core/tasks ongoingCandidates), and the first line said in
+/// carried on is a thing of its own, found by the computer (agent/tasks ongoingCandidates), and the first line said in
 /// one makes it an Applet there with its own thread. Then the Applets working now, the connected accounts and the rest.
 /// Applets that work only on the computer are not sent. A row's lamp breathes while its Applet works, shows a red dot
 /// when it failed and fades when it is off; its badge counts the Now items it holds. A row with a website opens it in

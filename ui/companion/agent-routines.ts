@@ -8,7 +8,7 @@
  * Above them, Worldlet's own two default Routines (context/artifacts/daily.ts): Today's prep and Wrap up today, which
  * Worldlet runs by asking the Agent at that time. Pause and Resume change only Worldlet's setting (host
  * `foxPreferenceChange` `daily_routines`), never the Agent. */
-import {nextCronRun,routineClock,taskHowOften,taskPlannedWhen} from '../../core/tasks/index.ts';
+import {nextCronRun,routineClock,taskHowOften,taskPlannedWhen} from '../../agent/tasks/index.ts';
 import type {HarnessJob,RoutineSchedule} from '../../contracts/harness-services.ts';
 import {DAILY_PLAN_HOUR,DAILY_SUMMARY_HOUR,DAILY_ROUTINE_NAMES,readDailyRoutines} from '../../context/artifacts/index.ts';
 import {agentButton,agentDay,agentEl as el,confirmAgentChange,type AgentCall} from './agent-change.ts';

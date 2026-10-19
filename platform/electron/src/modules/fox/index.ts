@@ -185,7 +185,7 @@ export function installFox(host:Host){
   subscribed=true;
   runtime.onChanged(reason=>reason==='agent-changed'?agentChanged():reason==='model-changed'?modelChanged():page.event('worldlet:model-changed'));
  }
- // The World's Task panel (core/tasks/task-panel.ts): one read of what it draws from. The person's scheduled jobs on
+ // The World's Task panel (agent/tasks/task-panel.ts): one read of what it draws from. The person's scheduled jobs on
  // their own Agent's scheduler (its `schedule` service; names and schedules only, never prompts) and the Applet tasks
  // Fox handed over that are working now. Applets' own checks are not the person's tasks, and finished work lives in the
  // Journal: neither is read. Core decides the rows. The page's panel and, without the page, the host's (modules/phone).
@@ -1149,7 +1149,7 @@ export function installFox(host:Host){
    // Bringing again starts over, older conversations included (older-history.ts).
    older.reset(request.id);
    const brought=request.id!=='hermes'?await bringAgent(request.id,{companion,world:store.ledger(),ownFolders:[path.join(host.profile.root,'agent')],own:ownHarnessSession(request.id,store.ledger().ownHarnessSessions(request.id)),hermesHome:null,importRoutines:null}):null;
-   // A brought conversation that looks like one job carried on is proposed as an Applet (core/tasks), and the
+   // A brought conversation that looks like one job carried on is proposed as an Applet (agent/tasks), and the
    // recent ones are read for the Attention Center; a large history's older part follows in the background.
    if(brought)host.optional<OngoingService>(ONGOING)?.refresh();
    older.start(request.id,brought?.older);

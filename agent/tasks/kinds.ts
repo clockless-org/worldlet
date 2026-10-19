@@ -2,7 +2,7 @@
 // 学习 财务"). A kept conversation that is about one of a few fixed kinds of life (fitness, food, study, money, travel,
 // a project) opens on a ready-made page for that kind, filled from the conversation itself: the workouts, meals,
 // questions, amounts, trip plans or to-dos the person wrote. Anything else keeps the plain page. Pure rules; the
-// host reads the turns and the page draws them (core/tasks/README.md#kinds).
+// host reads the turns and the page draws them (agent/tasks/README.md#kinds).
 
 export type OngoingKind='food'|'fitness'|'study'|'finance'|'travel'|'project';
 export type OngoingKindOrGeneral=OngoingKind|'general';
@@ -61,7 +61,7 @@ export const ONGOING_KINDS:Readonly<Record<OngoingKind,OngoingKindSpec>>=Object.
   ask:'list what is done, what is still open, and the next step'},
 });
 export const ONGOING_KIND_IDS=Object.keys(ONGOING_KINDS) as OngoingKind[];
-/** The kinds Fox offers to pull onto one page (core/tasks/themes.ts): the parts of life where the conversations are the
+/** The kinds Fox offers to pull onto one page (agent/tasks/themes.ts): the parts of life where the conversations are the
  * person's own record (what they ate, lifted, learned, spent, planned). A project is not one (owner Order 2026-10-10:
  * a page joining three unrelated work threads into their "status" had no subject and told old news as current): each
  * work thread is its own matter and where it stands lives in the work itself, not in what was said about it weeks ago. */

@@ -21,7 +21,7 @@ export type PhoneItemFox={say:string,option:string,turns:{user:string,text:strin
 export type PhoneAccount={provider:string,title:string,action:'reconnect'|'permissions'};
 /** One Applet in the phone's Applet world (owner decision 2026-10-03: swipe down from Now). `section` is where the
  * grid shows it: `live` (working now, holding Now items, or a widget for now), `accounts` (a connected source) or
- * `jobs` (an ongoing thing the person made into an Applet, core/tasks; its key is `job-…`) or `places` (every other
+ * `jobs` (an ongoing thing the person made into an Applet, agent/tasks; its key is `job-…`) or `places` (every other
  * Applet in the World). `state` is its lamp: busy (working), ready, failed or off. `line` says what
  * it is doing or its status, `recent` its latest world log lines (newest last), `widget` the widget a moment Applet opens,
  * `fox` its own thread of Fox's conversation (what was said inside it), and `mine` where one of the person's own Applets
@@ -30,7 +30,7 @@ export type PhoneAccount={provider:string,title:string,action:'reconnect'|'permi
  * moment Applets and ongoing things, which work on the phone in their own page, come without one. */
 export type PhoneApplet={key:string,title:string,section:'live'|'accounts'|'jobs'|'places',state:'busy'|'ready'|'failed'|'off',
  line?:string,recent?:{text:string,at:string}[],widget?:string,fox?:PhoneItemFox,mine?:'site'|'page'|'conversation',url?:string};
-/** One card of the computer's Task panel, the cards either side of Fox (core/tasks task-panel.ts), as the phone's Tasks
+/** One card of the computer's Task panel, the cards either side of Fox (agent/tasks task-panel.ts), as the phone's Tasks
  * tab lists it (owner request 2026-10-11): `name` and `status` are the card's words, `when` its time text ("In progress",
  * "Tomorrow 6:00 AM"), `icon` its picture (`fox`, `clock` or an Applet's catalog key), `progress` how far a page Fox drives
  * is (0 to 1), `applet` the phone's Applet key the card opens, `every` and `by` how often a routine runs and who runs it,
@@ -129,7 +129,7 @@ export function phoneAttention({now,later,accounts=[],world,tasks,journal}:{now:
  return value;
 }
 
-/** The computer's Task panel (core/tasks TaskPanel) as the phone's Tasks tab shows it. */
+/** The computer's Task panel (agent/tasks TaskPanel) as the phone's Tasks tab shows it. */
 export function phoneTasks(panel:any):PhoneTasks{
  const row=(r:any):PhoneTask|null=>{
   const id=clip(r?.id,200),name=clip(r?.name||r?.title,60);if(!id||!name)return null;
@@ -157,7 +157,7 @@ export function phoneJournal(artifacts:any[],at:number):PhoneJournalEntry[]{
  * (key, title, provider, lamp `state`, status `label`, `source` true for one that reads an account, `url` the website
  * the phone opens, phoneWebAddress; a place without one stays on the computer); `now` what each is
  * doing this moment ("Reading Mail…", context/activity worldLogNow); `log` the world log (context/activity WorldLogLine);
- * `widgets` the widgets for now; `jobs` the ongoing things kept (core/tasks: id, title, line and the conversation's latest
+ * `widgets` the widgets for now; `jobs` the ongoing things kept (agent/tasks: id, title, line and the conversation's latest
  * lines); `thread` an Applet's own turns of Fox's conversation (native-chat threadOf). */
 export type PhoneWorld={places:any[],now?:{applet:string,text:string}[],log?:{at:number,text:string,applet?:string}[],
  widgets?:{id:string,title:string}[],jobs?:{id:string,title:string,line:string,recent:{text:string,at:string}[]}[],thread?:(key:string)=>any[]};
