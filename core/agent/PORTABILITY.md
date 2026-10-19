@@ -68,9 +68,9 @@ Use one open-source repository and one official composition. Separate repositori
 
 ### Built-in personality and user overrides
 
-`core/companion/default-persona.json` is the single built-in personality definition:
+`agent/companion/default-persona.json` is the single built-in personality definition:
 warm, witty and on the person's side, a friend who speaks up when it helps. Whatever
-the personality, `core/companion/fox-voice.ts` adds how Fox talks (a friend texting,
+the personality, `agent/companion/fox-voice.ts` adds how Fox talks (a friend texting,
 not a help desk: no filler, length matched to the person, emoji only after theirs;
 owner request 2026-10-06). Shared Core resolves a blank/whitespace
 archive personality to this default; nonempty saved personality replaces it. The

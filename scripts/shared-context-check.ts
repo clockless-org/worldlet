@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {contextLayout} from '../context/context/context-layout.ts';
-import {validateConversationHistory} from '../core/companion/conversation-history.ts';
+import {validateConversationHistory} from '../agent/companion/conversation-history.ts';
 const original=contextLayout({themes:[{theme:'library'},{theme:'studio'}]});
 assert.deepEqual(original.places.map(p=>p.position),[[0,0,2],[0,0,17],[0,0,-13]]);
 const next=contextLayout({themes:[{theme:'library'},{theme:'studio'},{theme:'health'}],previous:JSON.stringify(original)});

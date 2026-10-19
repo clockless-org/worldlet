@@ -5,7 +5,7 @@ import {readItemHostRequest} from '../contracts/item-actions.ts';
 import {readBrowserOutcomeRequest} from '../contracts/browser-receipt.ts';
 import {beginBrowserReceipt,observeBrowserReceipt,resolveBrowserReceipt} from '../context/browser/index.ts';
 import {attentionCompletion,attentionPlanCurrent} from "../agent/attention/index.ts";
-import {readFoxHostRequest} from './companion/index.ts';
+import {readFoxHostRequest} from '../agent/companion/index.ts';
 import {readBrowserSurfaceRequest} from '../contracts/browser-surface.ts';
 import {browserDriverStart,browserDriverNext} from '../context/browser/index.ts';
 import {harnessHandshake,harnessReceive,harnessAuthHandoff,turnTrustObserve,turnTrustInherit,turnWriteAdmission,turnWriteNotice,worldItemSnapshot,worldItemRestore} from './agent/index.ts';
@@ -21,14 +21,14 @@ import {setRuntimeTaskEnabled,configureRuntimeSource,claimRuntimeTask,finishRunt
 import {validateAppletRuntimes,appletReadPlan,finishAppletPage} from '../context/applets/index.ts';
 import {agentWorkPriority,nextAgentWork,admitBackgroundWork,userIdle,preemptAgentWork,foregroundAgentWork} from './tasks/index.ts';
 import {agentRequestDeadline,agentDeadlineRemaining} from './tasks/index.ts';
-import {conversationGuidance,onScreenText,placeContext,recentBrowsing} from './companion/index.ts';
-import {modelStatusFresh} from './companion/index.ts';
+import {conversationGuidance,onScreenText,placeContext,recentBrowsing} from '../agent/companion/index.ts';
+import {modelStatusFresh} from '../agent/companion/index.ts';
 import {diagnosticReport,diagnosticError,exceptionReport,nativeCrashReport} from './diagnostics/index.ts';
 import {interruptsBackground,readSourceChecksNow} from './tasks/index.ts';
 import {foxTiming} from './diagnostics/index.ts';
 import {attentionFailure} from '../agent/attention/index.ts';
 import {attentionExecution,attentionFollowupReads,attentionReads} from '../agent/attention/index.ts';
-import {applyMemoryEdits} from './companion/index.ts';
+import {applyMemoryEdits} from '../agent/companion/index.ts';
 import {processedAttentionContent,attentionOwnerAllowed} from '../agent/attention/index.ts';
 import {sourceReadAction} from '../context/applets/index.ts';
 import {recordAttentionProgress,discardedAttentionRemovals,matchingAttentionID,suppressedAttention,observeAttention,projectAttention,planAttention,startAttentionBudget,finishAttentionBudget,attentionDependencies,attentionCurrent,validateAttentionRegistrations,weatherObservationText} from '../agent/attention/index.ts';
@@ -40,16 +40,16 @@ import {validateAgentCapabilities,validateAgentEvent} from '../contracts/agent.t
 import {journalEntry,executionEvent,taskExecutionEvents,worldActionEvent,worldEvent,recentWorldHistory} from '../context/items/index.ts';
 import {defaultSourceChecks,dueSourceCheck,startSourceCheck,reconcileSourceCheck,finishSourceCheck,configureSourceCheck} from './tasks/index.ts';
 import {contextLayout} from '../context/context/index.ts';
-import {validateConversationHistory} from './companion/index.ts';
+import {validateConversationHistory} from '../agent/companion/index.ts';
 import {visibleWorldItems,queryWorldItems,calendarItemTimes} from '../context/items/index.ts';
 import {needsTaskContinuityReview,matchingWorldItemOwnerSource,resolveWorldItemID} from '../context/items/index.ts';
 import {migrateWorldItems} from '../context/items/index.ts';
 import {validateWorldItem} from '../context/items/index.ts';
 import {localDeletionRequest,localDeletionSources,localDeletionRecord,localDeletionTrail,worldItemMutation,updateWorldItem,reviewWorldItem,prepareWorldItem,needsAttentionReview} from '../context/items/index.ts';
-import {validateCompanionArchive,validCompanionID,validCompanionTimestamp,shouldRotateCompanion} from './companion/index.ts';
-import {companionPrompt} from './companion/index.ts';
-import {companionPersonaPrompt} from './companion/index.ts';
-import {recallCompanion} from './companion/index.ts';
+import {validateCompanionArchive,validCompanionID,validCompanionTimestamp,shouldRotateCompanion} from '../agent/companion/index.ts';
+import {companionPrompt} from '../agent/companion/index.ts';
+import {companionPersonaPrompt} from '../agent/companion/index.ts';
+import {recallCompanion} from '../agent/companion/index.ts';
 /** Narrow JSON entry for native JS engines. No system capabilities are exposed. */
 export function invoke(operation:string,input:string):string {
  try {

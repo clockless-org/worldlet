@@ -1,19 +1,2 @@
-/** Public component API. Cross-component consumers import this entry point. */
-export * from './companion-activity.ts';
-export * from './companion-archive.ts';
-export * from './companion-prompt.ts';
-export * from './companion-persona.ts';
-export * from './companion-recall.ts';
-export {characters,utf8Length} from '../../context/items/index.ts';
-export * from './conversation-guidance.ts';
-export * from './conversation-history.ts';
-export * from './conversation-place.ts';
-export * from './memory-edits.ts';
-export * from './model-status.ts';
-export * from './host-request.ts';
-export * from './fox-voice.ts';
-export * from './fox-proactive.ts';
-export * from './fox-talk.ts';
-export * from './conversation-topics.ts';
-export * from './speech-vocabulary.ts';
-export * from './fox-turn-recovery.ts';
+// Moved to agent/companion/index.ts (#681). This re-export stays until nothing imports the old path.
+export * from '../../agent/companion/index.ts';
