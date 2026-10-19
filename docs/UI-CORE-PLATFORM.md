@@ -61,7 +61,7 @@ The shared dispatcher the Platform calls is `agent/index.ts`, since it calls bot
 
 | Layer | Folders |
 | --- | --- |
-| UI | `ui/applets/` `ui/artifacts/` `ui/attention/` `ui/browser/` `ui/companion/` `ui/components/` `ui/distribution/` `ui/games/` `ui/hud/` `ui/onboarding/` `ui/practice/` `ui/shell/` `ui/theme-packages/` `ui/themes/` `ui/web/` `ui/world/` |
+| UI | `ui/applets/` `ui/artifacts/` `ui/attention/` `ui/browser/` `ui/companion/` `ui/components/` `ui/distribution/` `ui/games/` `ui/hud/` `ui/onboarding/` `ui/practice/` `ui/settings/` `ui/shell/` `ui/theme-packages/` `ui/themes/` `ui/web/` `ui/world/` |
 | Agent (`agent/`) | `agent/agents/` `agent/tasks/` `agent/companion/` `agent/tools/` `agent/attention/` `agent/onboarding/` `agent/windows/` `agent/diagnostics/` `agent/distribution/` |
 | Context (`context/`) | `context/sources/` `context/items/` `context/artifacts/` `context/activity/` `context/accounts/` `context/applets/` `context/board/` `context/browser/` `context/games/` |
 | Platform | `platform/bridge/` `platform/browser/` `platform/distribution/` `platform/electron/` `platform/install/` `platform/local-tools/` `platform/node/` `platform/web-engine/` |
@@ -86,7 +86,7 @@ component is missing or listed twice. Which layer each folder is in: [folders by
 | Context | Everything the World knows, kept on the person's computer: World items and history, conversation and execution journals, source context, and each connected Service's synced snapshots with the one search over them (`world_context`). Storage and kinds: [context/items/STORAGE.md](../context/items/STORAGE.md#four-kinds) | (no folder of its own: every feature reads it; Settings › Context beside Fox) | `context/sources/` `context/items/` | (no host module of its own: `platform/electron/src/store/` persists it) |
 | Connectors | Context's intake: sign-in to Services (Google, Notion, GitHub, Linear, PostHog, Cloudflare and the rest) and this computer's own sources, their reads, and writes the person approved | (no folder of its own: Settings › Connectors beside Fox) | `context/accounts/` | `platform/electron/src/modules/sources/` |
 | Windows | The same World in another window: a web browser at the World's address and the phone, paired by QR code through the end-to-end encrypted relay | `ui/web/` (the page a web browser opens, [web](../agent/windows/README.md#web)) | `agent/windows/` | `platform/electron/src/modules/phone/` |
-| Base | Setup, the app shell, distribution and diagnostics | `ui/shell/` `ui/components/` `ui/onboarding/` `ui/distribution/` | `agent/onboarding/` `agent/diagnostics/` `agent/distribution/` | `platform/electron/src/modules/shell/` `platform/electron/src/modules/media/` (the media surface the World's sound, Fox's voice and Voice Memos share), `contracts/` |
+| Base | Setup, the app shell, Settings, distribution and diagnostics | `ui/shell/` `ui/components/` `ui/onboarding/` `ui/settings/` `ui/distribution/` | `agent/onboarding/` `agent/diagnostics/` `agent/distribution/` | `platform/electron/src/modules/shell/` `platform/electron/src/modules/media/` (the media surface the World's sound, Fox's voice and Voice Memos share), `contracts/` |
 
 Work flows Companion or Applets → Task → Artifact → Attention → Journal: Fox and
 Applets start tasks, each task's result is an artifact, an artifact that needs the

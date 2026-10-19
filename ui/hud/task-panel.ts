@@ -20,7 +20,8 @@
 // `worldlet:applet-task`, `worldlet:fox-status`). Hidden while there is nothing to show; the stylesheet hides it in a
 // short window and beside an open Applet or reader, and keeps only Routines during
 // onboarding and the tour (ui/components/layout.css).
-import {FOX_STATUS_EVENT,routineTimePicker,routineWhenLine,scheduleWhen} from '../companion/index.ts';
+import {FOX_STATUS_EVENT} from '../companion/index.ts';
+import {routineTimePicker,routineWhenLine,scheduleWhen} from '../settings/index.ts';
 import {companionStill,themeAppletIcon} from '../themes/index.ts';
 import {taskPanel,routineClock,type TaskPanel,type TaskRow,type TaskPanelInput} from '../../agent/tasks/index.ts';
 import {callHost} from '../../platform/bridge/host.ts';

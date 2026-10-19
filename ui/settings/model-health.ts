@@ -1,4 +1,4 @@
-import {modelFailure} from './model-failure.ts';
+import {modelFailure} from '../companion/index.ts';
 import type {HarnessLocation} from '../../contracts/harness-services.ts';
 
 // What Settings › Agents says about Fox's model (owner request 2026-10-06: connect models fully in Settings and

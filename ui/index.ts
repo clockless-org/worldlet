@@ -16,7 +16,7 @@ import {mountLocalMusic,mountWorldAudio} from './shell/index.ts';
 import {mountChannelReply,mountHarnessApproval,mountHarnessCall,mountWriteNotice} from './companion/index.ts';
 import {mountNotionReview} from './companion/index.ts';
 import {mountEmailReview} from './companion/index.ts';
-import {createFoxPreferences} from './companion/index.ts';
+import {createFoxPreferences} from './settings/index.ts';
 import {applyTextScale} from './components/index.ts';
 import {prepareUIFonts} from './components/index.ts';
 import {SAMPLE_DATASET_ID} from './world/index.ts';

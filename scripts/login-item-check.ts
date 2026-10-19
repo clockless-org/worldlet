@@ -129,7 +129,7 @@ try{
  }
 
  // The `login` guide shows the system's status and turns it on and off.
- const {createFoxPreferences}=await import('../ui/companion/fox-preferences.ts');
+ const {createFoxPreferences}=await import('../ui/settings/fox-preferences.ts');
  for(const [status,platform,pattern,label] of [
   ['requires-approval','darwin',/allow Worldlet in System Settings → General → Login Items/,'Don\'t open at login'],
   ['enabled','win32',/opens quietly in the background/,'Don\'t open at login'],

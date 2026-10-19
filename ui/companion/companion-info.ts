@@ -8,7 +8,7 @@ import {createActivityRecords} from './activity-records.ts';
 import {createCompanionArtifacts,mountJournalBook} from '../artifacts/index.ts';
 import {createCompanionPhone} from './companion-phone.ts';
 import {companionStill} from '../themes/index.ts';
-import {createCompanionSettings} from './companion-settings.ts';
+import {createCompanionSettings} from '../settings/index.ts';
 import {readFoxSkills,skillOffers,type FoxSkills} from './companion-skills.ts';
 
 /** Companion controls; dismiss from the close button or outside the panel. */

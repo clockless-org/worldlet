@@ -1,4 +1,4 @@
-import {replyMarkdown} from './reply-markdown.ts';
+import {replyMarkdown} from '../companion/index.ts';
 
 /** A Fox guide ({text, body, actions}) drawn inside the companion panel instead of Fox's bubble, so
  * a setting finishes on the page where it started. `view` stands in for the
