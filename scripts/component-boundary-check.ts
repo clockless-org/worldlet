@@ -45,7 +45,7 @@ console.log('PASS Core/UI public component entry points, including type and dyna
 
 // The Electron window coordinators dispatch domain operations; the World store owns persistence.
 const ledgerAccess=/\bWorldLedger\b|\.ledger\s*\(|node:sqlite/;
-for(const file of ['platform/electron/src/main.ts','platform/electron/src/world/window.ts']){
+for(const file of ['platform/desktop/src/main.ts','platform/desktop/src/world/window.ts']){
  const source=await readFile(file,'utf8');
  assert(!ledgerAccess.test(source),`${file} must use Store domain operations, not open the ledger`);
  assert(!/store\.state(?:\.\w+)*\s*=(?!=)|store\.state\.\w+\.(?:push|splice|pop|shift|unshift)\s*\(|store\.(?:persist|changed)\s*\(/.test(source),`${file} must mutate domain state through Store operations`);
@@ -53,7 +53,7 @@ for(const file of ['platform/electron/src/main.ts','platform/electron/src/world/
 console.log('PASS Electron window coordinators use Store operations and never replace, mutate or persist Store state directly.');
 
 // Website pages report activity through the recorder; observation cannot mutate storage directly.
-for(const file of ['platform/electron/src/modules/applets/page.ts','platform/electron/src/modules/applets/youtube.ts']){
+for(const file of ['platform/host/modules/applets/page.ts','platform/host/modules/applets/youtube.ts']){
  const source=await readFile(file,'utf8');
  assert(!ledgerAccess.test(source),`${file} must delegate activity persistence`);
 }

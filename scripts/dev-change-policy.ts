@@ -7,7 +7,7 @@ export function devChange(paths:string[]):'none'|'web'|'native' {
   if(/^scripts\/[^/]+-check\.(ts|py)$/.test(file))continue;
   if(file==='resources/styles/builtin/assets/brand/mark.json')return 'native';
   if(/^(ui\/|agent\/|context\/|contracts\/|resources\/|platform\/bridge\/)/.test(file)){web=true;continue;}
-  // The Electron host (platform/electron/**) and resident Python workers must load their new
+  // The Electron host (platform/desktop/**) and resident Python workers must load their new
   // implementation. Unknown build/dependency changes conservatively rebuild the host too.
   return 'native';
  }

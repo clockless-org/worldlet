@@ -1,6 +1,6 @@
 // npm run test:ios: the iPhone app on the Mac release gate (owner decision 2026-10-03: pull requests only
 // compile it; the RC runs its tests for every PR merged since the last RC at once). WorldletKit's tests
-// (`swift test`), then the XCUITest UI tests (ios/UITests) on an iPhone Simulator: an XcodeGen project,
+// (`swift test`), then the XCUITest UI tests (platform/ios/UITests) on an iPhone Simulator: an XcodeGen project,
 // one build, `xcodebuild test`. They tap through pairing, Attention, an item's card, Later, Fox and Settings
 // on -demo data, so no network, account or signing is needed.
 // A Mac without Xcode reports SKIP and passes, as test:agent:local does without Codex; a missing XcodeGen
@@ -12,7 +12,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
-const ios=path.join(root,'ios'),out=path.join(root,'.local/ios-build');
+const ios=path.join(root,'platform/ios'),out=path.join(root,'.local/ios-build');
 const fail=text=>{console.error('FAIL iOS: '+text);process.exit(1);};
 // With `log`, the output goes straight into that file as it comes, so a run the release gate's time budget kills
 // still leaves the log of how far it got (Alpha 4244 left none, #321).

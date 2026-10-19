@@ -6,7 +6,7 @@ import vm from 'node:vm';
 import {build} from 'esbuild';
 import {chromium} from 'playwright';
 // Execute the exact embedded JXA the Electron host runs, with a fake Notes dictionary, never a personal library.
-const source=await readFile('platform/electron/src/modules/sources/apple.ts','utf8').then(text=>text.replace(/\r\n/g,'\n')); // Windows checkouts may use CRLF.
+const source=await readFile('platform/host/modules/sources/apple.ts','utf8').then(text=>text.replace(/\r\n/g,'\n')); // Windows checkouts may use CRLF.
 const script=source.match(/const NOTES_WRITE=String\.raw`\n([\s\S]*?)\n`;/)![1];
 assert(!script.includes('${'),'the Notes script has no template substitutions');
 let writes=0,body='<div>Original</div>';

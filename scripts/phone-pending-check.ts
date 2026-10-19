@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {boxPlace,pairKeys,readPairLink,sealBox} from '../platform/web/index.ts';
-import {createLocalRelay} from '../platform/electron/src/modules/shell/local-relay.ts';
-import {createPhoneRelay} from '../platform/electron/src/modules/shell/relay.ts';
+import {createLocalRelay} from '../platform/host/modules/shell/local-relay.ts';
+import {createPhoneRelay} from '../platform/host/modules/shell/relay.ts';
 
 // A phone's message the computer cannot take yet (the World page not there, say) is kept on the computer and offered
 // again, while the relay's cursor moves on: a message left on the relay came back at once on every long poll, about four

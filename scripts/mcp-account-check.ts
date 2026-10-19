@@ -1,4 +1,4 @@
-// The World's MCP account connections (platform/electron/src/modules/sources/mcp-account.ts, mcp-client.ts) against a
+// The World's MCP account connections (platform/host/modules/sources/mcp-account.ts, mcp-client.ts) against a
 // fake service: an Agent's own connection in its Hermes profile is used as it is (OAuth tokens or a `.env` token) and
 // a refreshed token is written back the way Hermes writes it; a connection made through Worldlet discovers the
 // server's authorization server, registers on a loopback address and signs in with PKCE and a resource indicator,
@@ -10,8 +10,8 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {CONNECTORS,connector,connectorScopes} from '../context/connectors/index.ts';
-import {McpAccounts} from '../platform/electron/src/modules/sources/mcp-account.ts';
-import {McpUnauthorized} from '../platform/electron/src/modules/sources/mcp-client.ts';
+import {McpAccounts} from '../platform/host/modules/sources/mcp-account.ts';
+import {McpUnauthorized} from '../platform/host/modules/sources/mcp-client.ts';
 import {withTempDir} from './test-temp.ts';
 
 await withTempDir('worldlet-mcp-account-',async temp=>{

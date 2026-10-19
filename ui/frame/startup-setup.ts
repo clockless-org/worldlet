@@ -6,7 +6,7 @@ import {setupText,setInterfaceLanguage} from './setup-language.ts';
 import {hostFeatures,googleSignInStart} from '../../platform/bridge/features.ts';
 import {GOOGLE_SIGN_IN_EVENT,googleSignInStage} from '../../contracts/platform.ts';
 import {LOCAL_HARNESSES,agentProfileApplets,agentProfileAsked,connectRequestPlan} from '../../agent/gate/index.ts';
-import {agentBringDimensions,agentProfileDimensions,agentsDetectedDimensions,diagnosticError,hermesSetupDimensions,timingBucket} from '../../agent/base/index.ts';
+import {agentBringDimensions,agentProfileDimensions,agentsDetectedDimensions,diagnosticError,hermesSetupDimensions,timingBucket} from '../../agent/app/index.ts';
 import {googleConsentActions,googleConsentUrl} from './google-consent.ts';
 
 // Local Agent marks: Claude Code and Codex reuse their Applet logos; the rest ship in resources/brands.
@@ -150,7 +150,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // Back on this page after a relaunch: what the chosen Agent said about itself meanwhile.
  if(typeof draft.agent==='string'&&!draft.profile)void call('agentHarness',{operation:'profile',id:draft.agent}).then(result=>{if(!disposed&&!draft.profile)takeProfile(result?.profile);},()=>{});
  const agentText=(text:string,agent:string)=>t(text).replace('{agent}',agent);
- // Setup's product events (agent/base/ANALYTICS.md#bringing-an-agent): allowlisted dimensions, a duration bucket.
+ // Setup's product events (agent/app/ANALYTICS.md#bringing-an-agent): allowlisted dimensions, a duration bucket.
  const productEvent=(event:string,dimensions:Record<string,string>={},duration='')=>window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event,dimensions,duration}}));
  const failureCode=(error:any)=>{try{return String(diagnosticError({message:typeof error?.message==='string'?error.message:''}).code);}catch{return 'operationFailed';}};
  // The code and, when Core has one, its fixed rule (did not start, too old, gone): select failures were a bare

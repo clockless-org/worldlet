@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {harnessService,skillDraftProblem,skillFrontmatter,skillInvocation,skillLastRanLabel,skillLastRuns,skillMarkdown,skillRepeats,worldSkills,SKILL_REPEAT,type SkillTurn} from '../agent/gate/index.ts';
-import {harnessSkills} from '../platform/electron/src/modules/agents/harness-skills.ts';
-import {createFoxSkills} from '../platform/electron/src/modules/companion/skills.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {harnessSkills} from '../platform/host/modules/agents/harness-skills.ts';
+import {createFoxSkills} from '../platform/host/modules/companion/skills.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
 import {withTempDir} from './test-temp.ts';
 
 // The `skills` Harness service (contracts/HARNESS.md#harness-services-v2, agent/gate/PORTABILITY.md#the-agents-skills-in-the-world):

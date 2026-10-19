@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
-import {openAgentDatabase} from '../platform/electron/src/modules/agents/agent-database.ts';
+import {openAgentDatabase} from '../platform/host/modules/agents/agent-database.ts';
 import {withTempDir} from './test-temp.ts';
 
-// An Agent's own database is read in a reader process (platform/electron/src/modules/agents/agent-database.ts):
+// An Agent's own database is read in a reader process (platform/host/modules/agents/agent-database.ts):
 // the same rows and errors as an in-process read, and a `-shm` truncated under the reader by a program that ignores
 // this computer's locks ends only the reader, not this process; the next read starts a new one.
 

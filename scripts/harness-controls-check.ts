@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {hermesDisabledAfter,hermesDisabledSkills,hermesHubSkills,hermesJobCommand,hermesJobCreateCommand,hermesSkillCommand,isControlArgument,jobChangeDone,jobChangeOffered,openClawJobCommand,openClawJobCreateCommand,openClawSkillCommand,openClawSkillEnabled,openClawSkillKey,readJobChange,readJobCreate,readSkillChange,scheduleMatches} from '../agent/gate/index.ts';
-import {harnessScheduleControls} from '../platform/electron/src/modules/agents/harness-schedule-controls.ts';
-import {harnessSkills} from '../platform/electron/src/modules/agents/harness-skills.ts';
-import {createHarnessControls} from '../platform/electron/src/modules/companion/harness-controls.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {harnessScheduleControls} from '../platform/host/modules/agents/harness-schedule-controls.ts';
+import {harnessSkills} from '../platform/host/modules/agents/harness-skills.ts';
+import {createHarnessControls} from '../platform/host/modules/companion/harness-controls.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Settings › Agents's controls for the Agent's own skills and scheduled tasks (owner plan 2026-10-11, PR 2;

@@ -14,7 +14,7 @@ assert.deepEqual(selectChecks(['README.md','docs/RELEASE-GUIDELINES.md']),[]);
 assert.deepEqual(selectChecks(['ui/companion/motion.ts']),trustChecks);
 for(const file of ['scripts/machine-capacity.mjs','scripts/dev-workspace.ts',
  '.github/workflows/architecture.yml','package-lock.json','package.json','release.json','new-root/config',
- 'platform/electron/distribution/mac/publish-release.py','scripts/release-label-check.ts','scripts/machine-health-check.ts']){
+ 'platform/desktop/distribution/mac/publish-release.py','scripts/release-label-check.ts','scripts/machine-health-check.ts']){
  assert.deepEqual(selectChecks([file]),all,file);
 }
 for(const file of ['agent/gate/turn-trust.ts','harness/example/agent.py','contracts/agent.ts'])assert.deepEqual(selectChecks([file]),trustChecks,file);
@@ -53,10 +53,10 @@ for(const file of readdirSync(new URL('../.github/workflows/',import.meta.url)).
 }
 // A host popup-rule change (#781 shape) selects only the trust checks, not all operational checks.
 const popupPaths=['contracts/README.md','contracts/fixtures/parity/browser-popup.json',
- 'platform/electron/README.md','platform/electron/src/modules/applets/rules.ts','platform/electron/src/modules/applets/page.ts',
+ 'platform/desktop/README.md','platform/host/modules/applets/rules.ts','platform/host/modules/applets/page.ts',
  'scripts/electron-bridge-check.ts','scripts/parity-vectors.ts','scripts/parity-core-usage.ts'];
 assert.deepEqual(selectChecks(popupPaths),trustChecks);
-for(const file of ['scripts/attention-events-check.ts','platform/bridge/world-tool-runtime.ts','platform/electron/src/modules/companion/index.ts'])assert.deepEqual(selectChecks([file]),trustChecks,file);
+for(const file of ['scripts/attention-events-check.ts','platform/bridge/world-tool-runtime.ts','platform/host/modules/companion/index.ts'])assert.deepEqual(selectChecks([file]),trustChecks,file);
 assert.deepEqual(selectChecks([...popupPaths,'scripts/machine-wakeup.mjs']),all,'mixed changes retain operational checks');
 assert.deepEqual(selectChecks(['scripts/unknown-new-helper.ts']),all,'unclassified scripts remain conservative');
 assert(!workflow.includes('paths-ignore:')&&!workflow.includes('paths:'),'required check must always report');

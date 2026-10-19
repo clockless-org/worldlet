@@ -56,10 +56,10 @@ try{
  lines.push(...[...directories].reverse().map(dir=>`RMDir "$Stage\\${escape(dir)}"`),'RMDir "$Stage"','!macroend');
  lines.push('!macro DeletePayload',...files.map(file=>`Delete "$INSTDIR\\app\\${escape(file)}"`),...[...directories].reverse().map(dir=>`RMDir "$INSTDIR\\app\\${escape(dir)}"`),'RMDir "$INSTDIR\\app"','!macroend');
  writeFileSync(generated,'\uFEFF'+lines.join('\n')+'\n');
- run(compiler,['/NOCONFIG','/V2',`/DGENERATED=${generated}`,path.join(root,'platform/electron/distribution/windows/installer.nsi')]);
+ run(compiler,['/NOCONFIG','/V2',`/DGENERATED=${generated}`,path.join(root,'platform/desktop/distribution/windows/installer.nsi')]);
  const launcher=path.join(outputDir,`launcher-${testId||'unsigned'}.nsh`);
  writeFileSync(launcher,'\uFEFF'+[...defines(output),`!define INNER ${quoted(inner)}`].join('\n')+'\n');
- try{run(compiler,['/NOCONFIG','/V2',`/DGENERATED=${launcher}`,path.join(root,'platform/electron/distribution/windows/launcher.nsi')]);}
+ try{run(compiler,['/NOCONFIG','/V2',`/DGENERATED=${launcher}`,path.join(root,'platform/desktop/distribution/windows/launcher.nsi')]);}
  finally{rmSync(inner,{force:true});}
  const sha256=createHash('sha256').update(readFileSync(output)).digest('hex');
  writeFileSync(output+'.sha256',`${sha256}  ${path.basename(output)}\n`);

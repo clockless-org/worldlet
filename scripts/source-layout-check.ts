@@ -24,7 +24,7 @@ assert.equal(packageScripts.test,'node scripts/run-steps.mjs test:core && npm ru
 if(website)assert.match(await readFile('scripts/build-app.ts','utf8'),/WORKERS_CI==='1'/,'Cloudflare Git builds must compile the website, not the desktop app');
 const hostWatcher=await readFile('scripts/dev-electron.ts','utf8');
 if(website)assert((await readFile('scripts/dev-website.ts','utf8')).includes("['website','ui','agent','context','contracts','resources']"));
-assert(hostWatcher.includes("['ui','agent','context','contracts','resources','platform/bridge','platform/electron','platform/local-tools','platform/browser','platform/web-engine','scripts']"));
+assert(hostWatcher.includes("['ui','agent','context','contracts','resources','platform/bridge','platform/host','platform/web','platform/desktop','platform/local-tools','platform/browser','platform/web-engine','scripts']"));
 // Ignore old local caches, but never retain executable sources in retired roots.
 const {execFileSync}=await import('node:child_process');
 const tracked=execFileSync('git',['ls-files','--cached','--others','--exclude-standard','-z'],{encoding:'utf8'}).split('\0');
@@ -70,12 +70,12 @@ console.log('PASS direct layer roots, independent Applet catalog and non-executa
 const packaging=await readFile('scripts/package-electron.ts','utf8');
 assert(packaging.includes("run(process.execPath,['scripts/build-native-ui.ts']"),'Distribution must use the shared UI builder');
 assert(packaging.includes("run(process.execPath,['scripts/build-electron.ts']"),'Distribution must bundle the Electron host');
-await access('platform/electron/tsconfig.json');await access('platform/electron/src/main.ts');
+await access('platform/desktop/tsconfig.json');await access('platform/desktop/src/main.ts');
 
 // One World renderer: the trusted page is an isolated, sandboxed WebContentsView without Node.
-const worldWindow=await readFile('platform/electron/src/world/window.ts','utf8');
+const worldWindow=await readFile('platform/desktop/src/world/window.ts','utf8');
 assert(/contextIsolation:true,sandbox:true,nodeIntegration:false,webSecurity:true/.test(worldWindow),'the World page must stay isolated and sandboxed');
-for(const file of await sources('platform/electron/src')){
+for(const file of [...await sources('platform/host'),...await sources('platform/desktop/src')]){
  const source=await readFile(file,'utf8');
  assert(!/nodeIntegration\s*:\s*true|webviewTag\s*:\s*true|enableRemoteModule/.test(source),`${file} must not give a page Node, <webview> or remote access`);
  assert(!/getFileIcon\([^)]*size\s*:\s*['"]large['"]/.test(source),`${file} asks for a large file icon, which stops the app on macOS (Chromium's IconLoader): use 'normal' there`);

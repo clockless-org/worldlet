@@ -4,12 +4,12 @@ import http from 'node:http';
 import path from 'node:path';
 import {acpModels,acpPromptUsage,acpUsageUpdate,addHarnessUsage,appletModelFor,chooseAppletModel,harnessService,harnessTurnTimings,harnessUsageLabel,isHarnessModelId,openClawModels,
  readAppletModels,readHarnessUsage,readResponsesChunk,responsesStream,responsesUsage,usageSince} from '../agent/gate/index.ts';
-import {foxTiming,foxTimingEvent} from '../agent/base/index.ts';
+import {foxTiming,foxTimingEvent} from '../agent/app/index.ts';
 import {restoreThread,threadFinish,threadRow,threadStart,threadUsage} from '../ui/companion/fox-thread.ts';
-import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/src/modules/agents/local-harness.ts';
-import {createHarnessModels} from '../platform/electron/src/modules/companion/harness-models.ts';
-import {AGENT} from '../platform/electron/src/host/services.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/host/modules/agents/local-harness.ts';
+import {createHarnessModels} from '../platform/host/modules/companion/harness-models.ts';
+import {AGENT} from '../platform/host/services.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Model and speed of a Fox thread on the person's own Agent (agent/gate/PORTABILITY.md#model-usage-and-speed-in-a-fox-thread):

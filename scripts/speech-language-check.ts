@@ -37,7 +37,7 @@ assert.equal(speechLanguage(),'multi');
 store.set('worldlet-speech-language','zh;rm -rf');
 assert.equal(speechLanguage(),'multi','a malformed saved value is ignored');
 
-const host=readFileSync(new URL('../platform/electron/src/modules/companion/speech.ts',import.meta.url),'utf8');
+const host=readFileSync(new URL('../platform/host/modules/companion/speech.ts',import.meta.url),'utf8');
 assert.match(host,/\^\(multi\|\[a-z\]\{2,3\}\)\$/,'the host accepts every language code the app sends');
 const mac=readFileSync(new URL('../platform/local-tools/whisper_local.py',import.meta.url),'utf8');
 assert.match(mac,/MODEL = 'mlx-community\/whisper-large-v3-turbo'/,'Mac uses Large v3 Turbo');
@@ -63,9 +63,9 @@ print(json.dumps([spoken_text(heard(c)) for c in [
  [('请不吝点赞 订阅 转发 打赏支持明镜与点点栏目', .2, -.4)], [('字幕由Amara.org社区提供', .1, -.3), (' Thanks for watching!', .1, -.3)],
  [('Open the mail applet.', .95, -1.4)], [('把邮件打开，谢谢观看', .1, -.3), ('Open mail.', .7, -.5), ('Hi', None, None)]]]))`],{encoding:'utf8'}));
 assert.deepEqual(kept,['','','','把邮件打开，谢谢观看 Open mail. Hi'],'silence phrases and segments Whisper judges silent are dropped; speech around them stays');
-const ios=readFileSync(new URL('../ios/App/VoiceInput.swift',import.meta.url),'utf8');
+const ios=readFileSync(new URL('../platform/ios/App/VoiceInput.swift',import.meta.url),'utf8');
 assert.doesNotMatch(ios,/Locale\.current/,'the iPhone app\'s own (English) locale must not pick the speech language');
 assert.match(ios,/SpeechLanguage\.locale\(/);
-const android=readFileSync(new URL('../android/app/src/main/kotlin/app/worldlet/android/VoiceInput.kt',import.meta.url),'utf8');
+const android=readFileSync(new URL('../platform/android/app/src/main/kotlin/app/worldlet/android/VoiceInput.kt',import.meta.url),'utf8');
 assert.match(android,/EXTRA_LANGUAGE, SpeechLanguage\.tag\(/,'Android names the language it listens for');
 console.log('PASS speech language: local Whisper Large v3 Turbo with a language hint; phones listen in the person\'s language');

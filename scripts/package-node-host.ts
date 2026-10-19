@@ -1,4 +1,4 @@
-// Packages the Node host (platform/node) for Linux: `worldlet-server-<label>-linux-<arch>.tar.gz` for x64 and arm64,
+// Packages the Node host (platform/server) for Linux: `worldlet-server-<label>-linux-<arch>.tar.gz` for x64 and arm64,
 // each holding the program (worldlet.cjs), the interface build it serves (WorldletWeb), Worldlet's Google Desktop OAuth
 // registration (GoogleOAuthClient.json, app identity only: scripts/google-oauth-windows.ts), a pinned Node for that
 // architecture, the `bin/worldlet` command and SHA256SUMS of every file. Beside them: each tarball's `.sha256`, the
@@ -34,7 +34,7 @@ export const serverName=(label:string,arch:string)=>`worldlet-server-${label}-li
 export const recordName=(label:string)=>`worldlet-server-${label}-linux.json`;
 /** The `worldlet` command in the package: the command line with the Node beside it, wherever it was linked from. */
 export const WRAPPER=`#!/bin/sh
-# The worldlet command: the Node host's command line (platform/node/README.md), run with the Node this package carries.
+# The worldlet command: the Node host's command line (platform/server/README.md), run with the Node this package carries.
 here="$(dirname "$(readlink -f "$0")")/.."
 exec "$here/node/bin/node" "$here/worldlet.cjs" "$@"
 `;
@@ -62,7 +62,7 @@ try{
   fs.mkdirSync(path.join(stage,'bin'),{recursive:true});
   fs.copyFileSync(path.join(program,'worldlet.cjs'),path.join(stage,'worldlet.cjs'));
   fs.cpSync(web,path.join(stage,'WorldletWeb'),{recursive:true,filter:source=>path.basename(source)!=='.dev-reload'});
-  // Beside worldlet.cjs, where the host looks for it (platform/node main.ts sets resourcesPath to the program's folder).
+  // Beside worldlet.cjs, where the host looks for it (platform/server main.ts sets resourcesPath to the program's folder).
   if(!stageGoogleRegistration(root,stage)){
    if(process.env.WORLDLET_RELEASE_MANIFEST)throw Error('A release of the Linux service needs Worldlet\'s Google registration: set WORLDLET_GOOGLE_CLIENT_FILE, or place it at .local/google-oauth-client.json.');
    console.log('No Google registration: this package\'s Google sign-in will say it is not configured.');

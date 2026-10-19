@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Native crash frames (`Electron Framework+0x90b413c`, PostHog error_code nativeCrash) → function and source line,
-// from the Breakpad symbols Electron publishes with each release (agent/base/ANALYTICS.md#native-crashes).
+// from the Breakpad symbols Electron publishes with each release (agent/app/ANALYTICS.md#native-crashes).
 // Usage: node scripts/crash-symbols.ts --electron 44.5.1 [--platform darwin-arm64|darwin-x64|win32-x64]
 //          [--module "Electron Framework"] [--id <crash_module_id>] 0x90b413c 0x45e540 …
 // The symbols (about 130 MB zipped) are cached in ~/.cache/worldlet/electron-symbols.

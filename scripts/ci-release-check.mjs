@@ -17,7 +17,7 @@ assert.deepEqual(releaseManifest(id,'a'.repeat(40)).platformBuilds,{mac:4012,win
 // The builds this repository publishes stay above every build the release hosts published before it.
 assert(BUILD_OFFSET>=3400);
 // One Build everywhere: Android's versionCode and the Dev app add the same offset to the same count.
-assert(readFileSync(new URL('../android/app/build.gradle.kts',import.meta.url),'utf8').includes(BUILD_OFFSET+' + ProcessBuilder("git", "rev-list", "--count", "HEAD")'),'Android versionCode is BUILD_OFFSET + the commit count');
+assert(readFileSync(new URL('../platform/android/app/build.gradle.kts',import.meta.url),'utf8').includes(BUILD_OFFSET+' + ProcessBuilder("git", "rev-list", "--count", "HEAD")'),'Android versionCode is BUILD_OFFSET + the commit count');
 assert(readFileSync(new URL('./build-info.ts',import.meta.url),'utf8').includes("releaseIdentity(Number(git('rev-list','--count','HEAD'))"),'the Dev app takes its Build from releaseIdentity');
 
 // Channels: live ones use the feeds installed apps read; others go to staging releases nothing reads.
@@ -28,7 +28,7 @@ assert.deepEqual(channelKeys('alpha',true),{feedTag:'channel-alpha',prefix:'alph
 assert.deepEqual(channelKeys('beta',true),{feedTag:'channel-beta',prefix:'',mac:['appcast.xml','appcast-intel.xml'],windows:'windows-preview.json',linux:'linux.json',history:true});
 assert.equal(channelKeys('beta',false).feedTag,'staging-beta');
 assert.equal(labelOf('2026.105.4001'),'2026.0105.4001');
-const committed=JSON.parse(readFileSync(new URL('../platform/electron/distribution/Channels.json',import.meta.url),'utf8'));
+const committed=JSON.parse(readFileSync(new URL('../platform/desktop/distribution/Channels.json',import.meta.url),'utf8'));
 assert(committed.live.every(c=>['dev','alpha','beta'].includes(c)));
 
 // A Sparkle item keeps its signature and points at the build's release; history keeps other builds.

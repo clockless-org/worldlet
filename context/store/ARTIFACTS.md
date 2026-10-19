@@ -176,7 +176,7 @@ Rules (`context/store/replies.ts`, executed in `ui/frame/notion-world.ts` at the
 
 ## Storage
 
-Local first. The `artifacts` table in `world.sqlite` holds each artifact's record (JSON) and when it was last shown ([World storage](./STORAGE.md)), so a World restored on another computer has them all. The host module is `platform/electron/src/modules/attention`; the page reaches it through the `artifacts` request (`list`, `get`, `save`, `delete`) and hears `worldlet:artifacts` when one changes.
+Local first. The `artifacts` table in `world.sqlite` holds each artifact's record (JSON) and when it was last shown ([World storage](./STORAGE.md)), so a World restored on another computer has them all. The host module is `platform/host/modules/attention`; the page reaches it through the `artifacts` request (`list`, `get`, `save`, `delete`) and hears `worldlet:artifacts` when one changes.
 
 ## Checks
 

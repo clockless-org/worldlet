@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {withTempDir} from './test-temp.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {createAgentAccess} from '../platform/electron/src/modules/agents/agent-access.ts';
-import {createAgentReports} from '../platform/electron/src/modules/agents/agent-reports.ts';
-import {openStandingWorldTools} from '../platform/electron/src/modules/agents/world-tool-bridge.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
+import {createAgentAccess} from '../platform/host/modules/agents/agent-access.ts';
+import {createAgentReports} from '../platform/host/modules/agents/agent-reports.ts';
+import {openStandingWorldTools} from '../platform/host/modules/agents/world-tool-bridge.ts';
 import {STANDING_OUTSIDE_TURN} from '../agent/gate/grants.ts';
 import {REPORT_REASONS} from '../agent/gate/reports.ts';
 

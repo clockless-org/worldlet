@@ -27,9 +27,9 @@ Inside the app there are four layers ([#677](https://github.com/clockless-org/wo
 | # | Layer | What it is | Code |
 | --- | --- | --- | --- |
 | 1 | **UI** (See) | Every screen and its interaction logic, one codebase that every window shows. World (`ui/world/`: places, HUD), Applets (`ui/applets/`: each Applet's screen beside its real website, games, practice), Companion (`ui/companion/`: face, conversation, voice), Attention (`ui/attention/`: what needs the person now, the artifact card and the Journal), Frame (`ui/frame/`: start, setup, settings, navigation), Style (`ui/style/`: shared controls, tokens and themes) | `ui/` |
-| 2 | **Agent** (Do) | Who does the work. Companion (`agent/companion/`: turns through the person's own Agent, memory, setup), Tasks (`agent/tasks/`: routines, checks, drafts), Applets (`agent/applets/`: running Applets, driving the browser), Attention (`agent/attention/`: deciding and ranking what needs the person), Gate (`agent/gate/`: every Agent, its Grants, World tools, approvals and audit, local and remote MCP), Base (`agent/base/`: diagnostics and delivery rules). Everyone, the companion included, passes the Gate | `agent/` |
+| 2 | **Agent** (Do) | Who does the work. Companion (`agent/companion/`: turns through the person's own Agent, memory, setup), Tasks (`agent/tasks/`: routines, checks, drafts), Applets (`agent/applets/`: running Applets, driving the browser), Attention (`agent/attention/`: deciding and ranking what needs the person), Gate (`agent/gate/`: every Agent, its Grants, World tools, approvals and audit, local and remote MCP), App rules (`agent/app/`: what the app reports, update channels). Everyone, the companion included, passes the Gate | `agent/` |
 | 3 | **Context** (Know) | Everything the World knows, in one hub on the person's own machine. Store (`context/store/`: the hub; every record, history, artifacts and made games; one way in and out and one search are #676), Applets (`context/applets/`: the catalog, each Applet's records and the World log), Connectors (`context/connectors/`: Services in and out, what they sync, Service presets and the board). Four kinds of record live in the Store: Synced, Recorded, Made, Known ([#676](https://github.com/clockless-org/worldlet/issues/676)) | `context/` |
-| 4 | **Platform** (Host) | Where the World runs and every window that reaches it. Desktop (`platform/electron/`: the window, OS permissions, storage, updates, the browser engine), Server (`platform/node/`: the same World with no screen), Web (`platform/web/`: the window protocol and the page any browser opens, reaching its World through the relay), Phone (`ios/`, `android/`: native apps paired the same way). It runs things and makes no product decisions | `platform/`, `ios/`, `android/` |
+| 4 | **Platform** (Host) | Where the World runs and every window that reaches it. Host (`platform/host/`: the shared host Desktop and Server both run: router, host modules, storage, vault, the relay link), Desktop (`platform/desktop/`: Electron around the Host, the window, OS permissions, updates, installers), Server (`platform/server/`: Node around the Host, no screen), Web (`platform/web/`: how a page talks to its host, the page a browser opens, pairing), Phone (`platform/ios/`, `platform/android/`). It runs things and makes no product decisions | `platform/` |
 
 Someone asks in UI (or an Agent asks directly) → Agent runs it through the Gate, reading
 and writing Context → the result is a Made record (an Artifact) → shown in Attention and kept in the Journal (UI).
@@ -64,31 +64,31 @@ The shared dispatcher the Platform calls is `agent/index.ts`, since it calls bot
 | Layer | Folders |
 | --- | --- |
 | UI | `ui/world/` `ui/applets/` `ui/companion/` `ui/attention/` `ui/frame/` `ui/style/` |
-| Agent (`agent/`) | `agent/companion/` `agent/applets/` `agent/attention/` `agent/tasks/` `agent/gate/` `agent/base/` |
+| Agent (`agent/`) | `agent/companion/` `agent/applets/` `agent/attention/` `agent/tasks/` `agent/gate/` `agent/app/` |
 | Context (`context/`) | `context/store/` `context/applets/` `context/connectors/` |
-| Platform | `platform/bridge/` `platform/browser/` `platform/distribution/` `platform/electron/` `platform/install/` `platform/local-tools/` `platform/node/` `platform/web/` `platform/web-engine/` |
+| Platform | `platform/host/` `platform/desktop/` `platform/server/` `platform/web/` `platform/ios/` `platform/android/` `platform/bridge/` `platform/browser/` `platform/distribution/` `platform/install/` `platform/local-tools/` `platform/web-engine/` |
 
 <a id="features"></a>
 ## Features and the base
 
 Layers cut the product across; features cut it down. Each feature is a vertical
 slice with its own UI, Agent or Context, and (when it needs one) Platform part. Every `ui/`, `agent/` and
-`context/` component and every Electron host module (`platform/electron/src/modules/`) belongs to exactly one row below; `npm run check:docs` fails when a
+`context/` component and every Electron host module (`platform/host/modules/`) belongs to exactly one row below; `npm run check:docs` fails when a
 component is missing or listed twice. Which layer each folder is in: [folders by layer](#folders-by-layer). The Node host runs the same Agent and Context and the same host modules without a window.
 
 | Feature | What it is | UI | Agent and Context | Platform |
 | --- | --- | --- | --- | --- |
-| World | The place everything sits in: areas, HUD, themes | `ui/world/` | (none of its own: the World log is part of Context's applets) | `platform/electron/src/modules/world/` |
-| Applets | Where the person's data and actions live, with the real website beside them | `ui/applets/` | `context/applets/` `agent/applets/` | `platform/electron/src/modules/applets/` |
-| Companion | Fox: the one conversation, voice, memory and what Fox is doing | `ui/companion/` | `agent/companion/` | `platform/electron/src/modules/companion/` |
-| Attention | What needs the person now: ranked, at most nine, each waiting for Done, Send or Later | `ui/attention/` | `agent/attention/` | `platform/electron/src/modules/attention/` |
-| Tasks | Work that runs without the person: routines, cron jobs, source checks, background drafts and Applet tasks. Fox starts some, Applets start others; the person's Agent does them |  (no folder of its own: its status shows in Fox, on Applets and in the Ongoing Applet) | `agent/tasks/` | `platform/electron/src/modules/tasks/` |
-| Artifacts & Journal | What work produces: one artifact for every card, draft, page and brief, shown wherever it is needed (Attention, Fox, Applets), and the Journal that keeps them by day | (none of its own: the artifact card and the Journal are in Attention's UI) | (none of its own: artifacts are records in Context's store) | (in Attention's host module, `platform/electron/src/modules/attention/artifacts.ts`) |
-| Agents & Gate | The Agents connected to the World and the one door they pass: the connection to the person's Agent (adapters), World tools over the `worldlet` MCP server (local and remote), per-Agent Grants, approvals and the audit |  (no folder of its own: Allow cards show in Attention, Settings › Agents beside Fox) | `agent/gate/` | `platform/electron/src/modules/agents/` |
-| Context | Everything the World knows, kept on the person's computer: World items and history, conversation and execution journals, source context, and each connected Service's synced snapshots with the one search over them (`world_context`). Storage and kinds: [context/store/STORAGE.md](../context/store/STORAGE.md#four-kinds) |  (no folder of its own: every feature reads it; Settings › Context beside Fox) | `context/store/` | `platform/electron/src/store/` (no host module of its own:  persists it) |
-| Connectors | Context's intake: sign-in to Services (Google, Notion, GitHub, Linear, PostHog, Cloudflare and the rest) and this computer's own sources, their reads, and writes the person approved |  (no folder of its own: Settings › Connectors beside Fox) | `context/connectors/` | `platform/electron/src/modules/sources/` |
-| Windows | The same World in another window: a web browser at the World's address and the phone, paired by QR code through the end-to-end encrypted relay |  (none: every window shows the same UI; the browser page that hosts it is in Platform) | (none) | `platform/web/` (pairing, sealing, what each window is sent, the browser page; [web](../platform/web/README.md#web)), the host side in `platform/electron/src/modules/shell/phone.ts`, and the phone apps in `ios/` and `android/` |
-| Base | Setup, the app shell, Settings, distribution and diagnostics | `ui/frame/` `ui/style/` (shared controls, tokens and the themes) | `agent/base/` | `platform/electron/src/modules/shell/` (with the media surface the World's sound, Fox's voice and Voice Memos share), `contracts/` |
+| World | The place everything sits in: areas, HUD, themes | `ui/world/` | (none of its own: the World log is part of Context's applets) | `platform/host/modules/world/` |
+| Applets | Where the person's data and actions live, with the real website beside them | `ui/applets/` | `context/applets/` `agent/applets/` | `platform/host/modules/applets/` |
+| Companion | Fox: the one conversation, voice, memory and what Fox is doing | `ui/companion/` | `agent/companion/` | `platform/host/modules/companion/` |
+| Attention | What needs the person now: ranked, at most nine, each waiting for Done, Send or Later | `ui/attention/` | `agent/attention/` | `platform/host/modules/attention/` |
+| Tasks | Work that runs without the person: routines, cron jobs, source checks, background drafts and Applet tasks. Fox starts some, Applets start others; the person's Agent does them |  (no folder of its own: its status shows in Fox, on Applets and in the Ongoing Applet) | `agent/tasks/` | `platform/host/modules/tasks/` |
+| Artifacts & Journal | What work produces: one artifact for every card, draft, page and brief, shown wherever it is needed (Attention, Fox, Applets), and the Journal that keeps them by day | (none of its own: the artifact card and the Journal are in Attention's UI) | (none of its own: artifacts are records in Context's store) | (in Attention's host module, `platform/host/modules/attention/artifacts.ts`) |
+| Agents & Gate | The Agents connected to the World and the one door they pass: the connection to the person's Agent (adapters), World tools over the `worldlet` MCP server (local and remote), per-Agent Grants, approvals and the audit |  (no folder of its own: Allow cards show in Attention, Settings › Agents beside Fox) | `agent/gate/` | `platform/host/modules/agents/` |
+| Context | Everything the World knows, kept on the person's computer: World items and history, conversation and execution journals, source context, and each connected Service's synced snapshots with the one search over them (`world_context`). Storage and kinds: [context/store/STORAGE.md](../context/store/STORAGE.md#four-kinds) |  (no folder of its own: every feature reads it; Settings › Context beside Fox) | `context/store/` | `platform/host/store/` (no host module of its own:  persists it) |
+| Connectors | Context's intake: sign-in to Services (Google, Notion, GitHub, Linear, PostHog, Cloudflare and the rest) and this computer's own sources, their reads, and writes the person approved |  (no folder of its own: Settings › Connectors beside Fox) | `context/connectors/` | `platform/host/modules/sources/` |
+| Windows | The same World in another window: a web browser at the World's address and the phone, paired by QR code through the end-to-end encrypted relay |  (none: every window shows the same UI; the browser page that hosts it is in Platform) | (none) | `platform/web/` (pairing, sealing, what each window is sent, the browser page; [web](../platform/web/README.md#web)), the host side in `platform/host/modules/shell/phone.ts`, and the phone apps in `ios/` and `android/` |
+| Base | Setup, the app shell, Settings, distribution and diagnostics | `ui/frame/` `ui/style/` (shared controls, tokens and the themes) | `agent/app/` | `platform/host/modules/shell/` (with the media surface the World's sound, Fox's voice and Voice Memos share), `contracts/` |
 
 Work flows Companion or Applets → Task → Artifact → Attention → Journal: Fox and
 Applets start tasks, each task's result is an artifact, an artifact that needs the
@@ -113,8 +113,8 @@ Worldlet owns schedule settings and claim authority; Harness executes admitted j
 
 ## Chromium and trust boundaries
 
-One [Electron host](../platform/electron/README.md) serves Mac, Windows and Linux; it
-replaced the Swift/CEF and C#/WebView2 hosts (#996). The [Node host](../platform/node/README.md) runs
+One [Electron host](../platform/desktop/README.md) serves Mac, Windows and Linux; it
+replaced the Swift/CEF and C#/WebView2 hosts (#996). The [Node host](../platform/server/README.md) runs
 its modules that need no window for Linux and computers without a display, and shows the same World page in a web
 browser on that computer (below); it reuses those modules through a small `electron` stand-in rather than holding
 product rules of its own. The shared World UI is a separate
@@ -126,12 +126,12 @@ host privileges and run in their own session partition.
 <a id="the-world-in-a-web-browser"></a>
 **The World in a web browser.** There is one UI: the host serves the same World page to a browser on the same
 computer ([contracts/web-world.ts](../contracts/web-world.ts)), the Node host as its only page and the app beside its
-own window while it runs ([host/world-web.ts](../platform/electron/src/host/world-web.ts)). The page is the interface build, served
-read-only at `http://127.0.0.1:<port>/world/` by [local-relay.ts](../platform/electron/src/modules/shell/local-relay.ts)
+own window while it runs ([host/world-web.ts](../platform/host/world-web.ts)). The page is the interface build, served
+read-only at `http://127.0.0.1:<port>/world/` by [local-relay.ts](../platform/host/modules/shell/local-relay.ts)
 (files inside the build after resolving links, `resolveWorldFile`, and only the types the page loads). Its
 `worldletHost` is [web-host.ts](../platform/bridge/web-host.ts), which `resolveHost` picks only when the app gave the
 page none; it talks to the host over one WebSocket at `/world/socket`, and the host answers through the same router
-([host/web-page.ts](../platform/electron/src/host/web-page.ts)). The trust it gets:
+([host/web-page.ts](../platform/host/web-page.ts)). The trust it gets:
 
 - **Same computer only.** The server listens on 127.0.0.1 and answers only requests addressed to `127.0.0.1` or
   `localhost` on its port by name (the `Host` header), so a website cannot reach it through a name it points at
@@ -223,7 +223,7 @@ re-exports, type imports and dynamic imports), checks layer dependencies and pub
 Core/UI component entry points, and rejects computed imports/CommonJS bypasses.
 The policy lives in `scripts/architecture-boundaries.ts`; legacy edges are exact
 file pairs with reasons, and unused exceptions fail the check. New components follow
-the same rules without registration. The Electron host (`platform/electron`) is in this graph; Python helper internals
+the same rules without registration. The Electron host (`platform/desktop`) is in this graph; Python helper internals
 are not, and their own checks remain in the gate.
 
 The **Architecture** GitHub check runs this gate and shared type checking on every PR.

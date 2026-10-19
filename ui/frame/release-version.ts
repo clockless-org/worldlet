@@ -1,1 +1,1 @@
-export {displayReleaseVersion} from '../../agent/base/index.ts';
+export {displayReleaseVersion} from '../../agent/app/index.ts';

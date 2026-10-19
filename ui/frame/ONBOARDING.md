@@ -33,11 +33,11 @@ Unfinished setup resumes from actual Google connection state or the host's saved
 
 Verification: `node scripts/startup-setup-check.ts` covers the greyed Google, the development mock sign-in with retry, persisted choices, background-check dispatch and completed-user bypass with mocked accounts. Real Google authorization still requires native acceptance.
 
-A packaged app prepares its bundled Hermes runtime on first use (`platform/electron/src/modules/agents/installation.ts`). Google and Notion connection requests wait for that preparation and continue authorization without requiring model setup or reopening the app; retrying a connection retries failed preparation. On a fresh installation the browser may still wait for runtime dependencies to finish installing; instant OAuth independent of that runtime is not yet implemented. The retired Windows host's `--google-source-check` covered delayed preparation, duplicate requests and cancellation; no Electron check covers that path yet, and none authorizes a real account.
+A packaged app prepares its bundled Hermes runtime on first use (`platform/host/modules/agents/installation.ts`). Google and Notion connection requests wait for that preparation and continue authorization without requiring model setup or reopening the app; retrying a connection retries failed preparation. On a fresh installation the browser may still wait for runtime dependencies to finish installing; instant OAuth independent of that runtime is not yet implemented. The retired Windows host's `--google-source-check` covered delayed preparation, duplicate requests and cancellation; no Electron check covers that path yet, and none authorizes a real account.
 
 ### Google sign-in stages
 
-Google consent opens in the browser only when the saved grant cannot be reused; Reconnect on a healthy connection opens none. Hosts that declare `googleSignInStages` dispatch `worldlet:google-sign-in` to the World page (`contracts/platform.ts`): `browser` only after they asked the system browser to open consent, then `verifying`. The desktop host reports `browser` when Hermes hands over the consent address (`platform/electron/src/modules/agents/hermes.ts`); the contract also allows a `preparing` stage, which the current host does not send. Setup and Fox's connect guide (Google, Mail, Calendar and Drive) start with a neutral Connecting line and show the browser steps only during `browser`. The desktop host's `browser` stage also carries the consent address it opened (`{stage:'browser',url}`); when it is Google's own authorization page (`googleAuthorizationUrl` in `agent/gate/auth-handoff.ts`), both surfaces add Open again, which asks the host to open the same address in the default browser (`openSystemBrowser`), and Copy link, for a browser that never came up (owner meetings 2026-10-02/03). Cancel stays available throughout, and a stage never replaces a guide Fox has said since. Hosts without the capability keep the browser steps from the start. `node scripts/google-connection-check.ts` covers both surfaces with fixtures, including both fallback actions; the agent-runtime Electron module check covers the host opening consent and passing the same address with `browser`; the retired native hosts' reuse/consent and stage-order checks have not been ported to Electron. None authorizes a real account.
+Google consent opens in the browser only when the saved grant cannot be reused; Reconnect on a healthy connection opens none. Hosts that declare `googleSignInStages` dispatch `worldlet:google-sign-in` to the World page (`contracts/platform.ts`): `browser` only after they asked the system browser to open consent, then `verifying`. The desktop host reports `browser` when Hermes hands over the consent address (`platform/host/modules/agents/hermes.ts`); the contract also allows a `preparing` stage, which the current host does not send. Setup and Fox's connect guide (Google, Mail, Calendar and Drive) start with a neutral Connecting line and show the browser steps only during `browser`. The desktop host's `browser` stage also carries the consent address it opened (`{stage:'browser',url}`); when it is Google's own authorization page (`googleAuthorizationUrl` in `agent/gate/auth-handoff.ts`), both surfaces add Open again, which asks the host to open the same address in the default browser (`openSystemBrowser`), and Copy link, for a browser that never came up (owner meetings 2026-10-02/03). Cancel stays available throughout, and a stage never replaces a guide Fox has said since. Hosts without the capability keep the browser steps from the start. `node scripts/google-connection-check.ts` covers both surfaces with fixtures, including both fallback actions; the agent-runtime Electron module check covers the host opening consent and passing the same address with `browser`; the retired native hosts' reuse/consent and stage-order checks have not been ported to Electron. None authorizes a real account.
 
 ## Retired Mail-first tour
 
@@ -113,7 +113,7 @@ any Today's prep, so step 6 boxes it (“I made your first card from what you've
 “Does it look right?”: **Looks good** settles it as the first win, with no Google needed. It runs once per World, never in
 the practice world or an automated browser, not with Today's prep paused, and not with Mail connected (the mail brings
 the first thing to do, and a card made beside it competed with Fox's help on it); a failure adds no Worth Doing item (step 6
-would pick it), and Fox goes on as before. Its steps are [product events](../../agent/base/ANALYTICS.md#the-first-card).
+would pick it), and Fox goes on as before. Its steps are [product events](../../agent/app/ANALYTICS.md#the-first-card).
 
 Steps 1–5 persist as `journeyStage=world-tour` and resume at the same step; a place opened another
 way lifts the spotlight until the person is back in the overview. The last choice on step 5 hands over to
@@ -193,7 +193,7 @@ the bottom-right corner during the first run and gone after it.
 
 Closing the window before onboarding is over (setup, then this tour) quits Worldlet instead of
 leaving Fox on the desktop, and minimizing only minimizes (owner request 2026-10-04,
-`platform/electron/src/modules/shell/companion.ts`); the next launch resumes at the same step.
+`platform/host/modules/shell/companion.ts`); the next launch resumes at the same step.
 `onboarding-first-value-check.ts` verifies selection, retry, the still-open choice and the first win after a Go ahead, which waits for Fox's reply.
 `onboarding-first-value-world-check.ts` exercises late Attention publication and the
 actual bundled world/preview. Both use fictional records, not real-account acceptance.
@@ -217,6 +217,6 @@ It happens once (`loginItem` `offered`, stored per computer); afterwards only th
 it: Fox's `login` guide ("Open Worldlet at login") or the app menu's **Open at Login**. Fox repeats
 the system's status truthfully, including when macOS still needs approval in System Settings →
 General → Login Items. Worldlet itself shows no further prompt.
-[Distribution](../../platform/electron/DISTRIBUTION.md#open-at-login) describes the host and the
+[Distribution](../../platform/desktop/DISTRIBUTION.md#open-at-login) describes the host and the
 quiet start. `node scripts/login-item-check.ts` covers the status mapping, the offer's timing and
 finality, the guide and the quiet-start wiring with a fake clock and DOM.

@@ -116,7 +116,7 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
  const value=name=>{const i=args.indexOf(name);return i>=0?args[i+1]:undefined;};
  const file=value('--package')||latestCandidate(root);
  if(!file)throw Error('Build a Store MSIX first: node scripts/windows-msix.ts');
- const store=JSON.parse(readFileSync(path.join(root,'platform/electron/distribution/windows/store-identity.json'),'utf8'));
+ const store=JSON.parse(readFileSync(path.join(root,'platform/desktop/distribution/windows/store-identity.json'),'utf8'));
  const out=value('--record')||path.join(root,'.local/windows-store-delivery.json');
  const record=await deliverStore({file:path.resolve(file),store,env:process.env,dryRun:args.includes('--dry-run'),log:console.log});
  mkdirSync(path.dirname(out),{recursive:true});writeFileSync(out,JSON.stringify(record,null,2)+'\n');

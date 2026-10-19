@@ -36,7 +36,7 @@ Connector scripts live in the trusted Harness and host adapters. Packages refere
 
 ## Current execution
 
-The Electron host runs this pipeline on every OS (`platform/electron/src/modules/attention/`, with scheduling rules in shared Core). Measurements and device acceptance recorded in this document came from the retired native Mac host unless stated otherwise; Electron device acceptance is pending.
+The Electron host runs this pipeline on every OS (`platform/host/modules/attention/`, with scheduling rules in shared Core). Measurements and device acceptance recorded in this document came from the retired native Mac host unless stated otherwise; Electron device acceptance is pending.
 
 | Applet | Collection | Analysis/output |
 | --- | --- | --- |
@@ -294,7 +294,7 @@ This snapshot distinguishes implementation from acceptance; historical progress 
 
 ### Current implementation gap and rollout
 
-Baseline inspected for this design: `f7686e54`. Source of truth was `context/applets/runtime.ts`, `agent/tasks/`, `agent/attention/attention-center.ts`, the native Mac host's runtime, Attention Center, World interaction and Hermes worker, and [Attention jobs](../../contracts/HARNESS.md#bundled-attention-extension) for the Harness path. Their Electron owners are `platform/electron/src/modules/attention/center.ts`, `modules/attention/tools.ts` and `modules/agents/hermes-worker.ts`.
+Baseline inspected for this design: `f7686e54`. Source of truth was `context/applets/runtime.ts`, `agent/tasks/`, `agent/attention/attention-center.ts`, the native Mac host's runtime, Attention Center, World interaction and Hermes worker, and [Attention jobs](../../contracts/HARNESS.md#bundled-attention-extension) for the Harness path. Their Electron owners are `platform/host/modules/attention/center.ts`, `modules/attention/tools.ts` and `modules/agents/hermes-worker.ts`.
 
 | Phase | Existing foundation | Required implementation and exit evidence |
 | --- | --- | --- |

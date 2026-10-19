@@ -311,7 +311,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='select').map(c=>c.id)),['claude-code','openclaw']);
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>['localAgent','agentIntegrations'].includes(c.action)).map(c=>c.action+':'+c.operation+':'+c.id)),['localAgent:adopt:openclaw','agentIntegrations:port:openclaw']);
   assert.ok(!await page.evaluate(()=>(window as any).calls.some(c=>c.action==='connect')),'No Google sign-in');
-  // Which Agent, who answers for Fox, and what came along: IDs, buckets and outcomes only (agent/base/ANALYTICS.md#bringing-an-agent).
+  // Which Agent, who answers for Fox, and what came along: IDs, buckets and outcomes only (agent/app/ANALYTICS.md#bringing-an-agent).
   await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='usageEvent'&&c.event==='agent_bring_completed'));
   const usage=await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='usageEvent'));
   const chosen=usage.find(c=>c.event==='local_agent_selected'&&c.local_agent==='openclaw');

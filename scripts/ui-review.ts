@@ -1,6 +1,6 @@
 // npm run test:ui:review: Codex looks at the RC run's UI (owner request 2026-10-02: RC UI should be visible as a recording,
 // Codex studies it and raises problems). The real-app gates (test:onboarding, test:agent:local)
-// keep pictures of the World view and their PASS lines (WORLDLET_CHECK_FRAMES, platform/electron/src/checks/index.ts)
+// keep pictures of the World view and their PASS lines (WORLDLET_CHECK_FRAMES, platform/desktop/src/checks/index.ts)
 // under .local/electron-checks/<check>-frames. This script picks up to MAX_IMAGES of them per run and asks this
 // computer's Codex CLI, read-only, for visible UI problems as JSON. Findings are printed and saved to
 // .local/electron-checks/ui-review.json. Only a "blocker" (unmistakable breakage a person would see at once) fails

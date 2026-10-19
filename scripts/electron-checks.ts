@@ -50,12 +50,12 @@ if(wanted('host-contract')){
  }
 }
 
-// 2. Module checks: platform/electron/src/**/check.ts, bundled and run under Electron's Node.
+// 2. Module checks: platform/host/**/check.ts and platform/desktop/src/**/check.ts, bundled and run under Electron's Node.
 function checks(dir:string):string[]{
  return readdirSync(dir,{withFileTypes:true}).flatMap(entry=>{const file=path.join(dir,entry.name);return entry.isDirectory()?checks(file):entry.name==='check.ts'?[file]:[];});
 }
-for(const file of checks(path.join(root,'platform/electron/src')).sort()){
- const name='module:'+path.relative(path.join(root,'platform/electron/src'),path.dirname(file));
+for(const [base,file] of ['platform/host','platform/desktop/src'].flatMap(dir=>checks(path.join(root,dir)).sort().map(file=>[path.join(root,dir),file] as const))){
+ const name='module:'+path.relative(base,path.dirname(file));
  if(!wanted(name))continue;
  const outfile=path.join(scratch,name.replace(/[^a-z0-9-]+/gi,'_')+'.mjs');
  // ESM: checks use top-level await; bundled CommonJS dependencies still get a require.

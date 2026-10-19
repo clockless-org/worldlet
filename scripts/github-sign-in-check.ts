@@ -1,12 +1,12 @@
 // GitHub sign-in with the official Worldlet GitHub App's device code (context/connectors/github-device.ts and
-// McpAccounts.connectDevice in platform/electron/src/modules/sources/mcp-account.ts) against a fake GitHub: only the
+// McpAccounts.connectDevice in platform/host/modules/sources/mcp-account.ts) against a fake GitHub: only the
 // public client ID is sent, never a secret; the code is shown; polling waits, slows down when asked, stops on cancel,
 // refusal or expiry in plain words; the user token is checked before it is kept, kept in the vault, and renewed with
 // the client ID alone; a refresh GitHub refuses signs the person out.
 import assert from 'node:assert/strict';
 import {GITHUB_APP,GITHUB_DEVICE_REASONS,GITHUB_INSTALL_URL,readGithubDevicePoll,readGithubDeviceStart,connectorTiles} from '../context/connectors/index.ts';
 import {signInCode} from '../contracts/platform.ts';
-import {McpAccounts} from '../platform/electron/src/modules/sources/mcp-account.ts';
+import {McpAccounts} from '../platform/host/modules/sources/mcp-account.ts';
 
 // Core rules.
 assert.equal(GITHUB_APP.clientId,'Iv23liCU8TGiC1MCnBI6');

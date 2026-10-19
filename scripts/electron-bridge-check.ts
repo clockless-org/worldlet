@@ -15,7 +15,7 @@ const stub=(contents:string):Plugin=>({name:'electron-stub',setup(b){
 }});
 
 // 1. The preload exposes the bridge only in the trusted top-level World document.
-const preload=(await build({entryPoints:['platform/electron/src/world/preload.ts'],bundle:true,write:false,format:'iife',platform:'browser',logLevel:'error',
+const preload=(await build({entryPoints:['platform/desktop/src/world/preload.ts'],bundle:true,write:false,format:'iife',platform:'browser',logLevel:'error',
  plugins:[stub('export const contextBridge=globalThis.__electron.contextBridge,ipcRenderer=globalThis.__electron.ipcRenderer;')]})).outputFiles[0].text;
 function load(href:string,top=true){
  const exposed:Record<string,any>={},invoked:any[]=[];let reply:any={ok:true,value:{workspaceId:'test'}};
@@ -48,7 +48,7 @@ console.log('PASS preload exposes worldletHost v1 only to the top-level worldlet
 // 2. The main process trusts the same document only.
 await withTempDir('worldlet-bridge-check-',async scratch=>{
  const out=path.join(scratch,'protocol.mjs');
- await build({entryPoints:['platform/electron/src/world/protocol.ts'],outfile:out,bundle:true,format:'esm',platform:'node',logLevel:'error',plugins:[stub('export const protocol={},net={};')]});
+ await build({entryPoints:['platform/host/protocol.ts'],outfile:out,bundle:true,format:'esm',platform:'node',logLevel:'error',plugins:[stub('export const protocol={},net={};')]});
  const {trustedWorldURL,WORLD_URL}=await import(pathToFileURL(out).href);
  assert.equal(WORLD_URL,'worldlet://app/index.html');
  assert.equal(trustedWorldURL(WORLD_URL),true);
@@ -57,7 +57,7 @@ await withTempDir('worldlet-bridge-check-',async scratch=>{
 });
 
 // 3. Every request is re-checked against the sending frame before the router runs.
-const main=readFileSync('platform/electron/src/main.ts','utf8');
+const main=readFileSync('platform/desktop/src/main.ts','utf8');
 const handler=main.slice(main.indexOf("ipcMain.handle('worldlet:request'"));
 assert(handler.length<main.length,'main.ts handles worldlet:request');
 const guard=handler.indexOf('const frame=event.senderFrame;'),dispatch=handler.indexOf('router.dispatch(');
@@ -67,15 +67,15 @@ for(const condition of ['event.sender!==world.view.webContents','!frame','frame.
  assert(check.includes(condition),'request guard rejects: '+condition);
 assert.match(check,/return \{ok:false,error:/,'untrusted senders get an error, not a dispatch');
 // The preload is attached to the World view only; website views never get one.
-assert.match(readFileSync('platform/electron/src/world/window.ts','utf8'),/new WebContentsView\(\{webPreferences:\{preload,/);
+assert.match(readFileSync('platform/desktop/src/world/window.ts','utf8'),/new WebContentsView\(\{webPreferences:\{preload,/);
 const files=(dir:string):string[]=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?files(path.join(dir,e.name)):e.name.endsWith('.ts')?[path.join(dir,e.name)]:[]);
 // The one module view with a preload is the CEF page surface (#1170): it draws engine frames, never loads a website,
 // and its preload is its own (web-surface), not the World's.
-const SURFACE=path.join('platform/electron/src/modules/applets/engine/surface.ts');
-for(const file of files('platform/electron/src/modules'))for(const [prefs] of readFileSync(file,'utf8').matchAll(/webPreferences\s*:\s*\{[^}]*\}/g))
+const SURFACE=path.join('platform/host/modules/applets/engine/surface.ts');
+for(const file of files('platform/host/modules'))for(const [prefs] of readFileSync(file,'utf8').matchAll(/webPreferences\s*:\s*\{[^}]*\}/g))
  assert(!/\bpreload\b/.test(prefs)||file===SURFACE,`${file} must not give a website view a preload`);
 const surface=readFileSync(SURFACE,'utf8');
 for(const rule of ["setWindowOpenHandler(()=>({action:'deny'}))","on('will-navigate',event=>event.preventDefault())","loadURL('data:text/html;charset=utf-8,'"])
  assert(surface.includes(rule),'the website surface never leaves its own document: '+rule);
-assert.match(readFileSync('platform/electron/src/modules/applets/engine/process.ts','utf8'),/export function surfacePreload\([^)]*\)\{return [^\n]*'web-surface-preload\.cjs'\)/,'the surface gets its own preload');
+assert.match(readFileSync('platform/host/modules/applets/engine/process.ts','utf8'),/export function surfacePreload\([^)]*\)\{return [^\n]*'web-surface-preload\.cjs'\)/,'the surface gets its own preload');
 console.log('PASS main process rejects other senders, subframes and untrusted documents; only the World view has the preload (the CEF surface has its own and never loads a website)');

@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import {AGENT_NOTE_LIMIT,agentAnswerReason,agentBindingInstructions,agentBindingPlace,answeringAgent,bindAgent,noteAgentPlace,readAgentBindings} from '../agent/gate/index.ts';
 import {conversationAttentionId,ongoingId} from '../agent/tasks/index.ts';
-import {createHarnessAgents} from '../platform/electron/src/modules/companion/harness-agents.ts';
-import {AGENT} from '../platform/electron/src/host/services.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {createHarnessAgents} from '../platform/host/modules/companion/harness-agents.ts';
+import {AGENT} from '../platform/host/services.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Several agents routed by channel and instructions per place (agent/gate/PORTABILITY.md#which-agent-answers-where):

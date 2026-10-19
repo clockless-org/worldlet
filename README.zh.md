@@ -124,7 +124,7 @@ Fox 是你用文字或语音对话的伙伴。它通过你的 Agent 干活，把
 
 **还有：**
 
-- **[手机伴侣](ios/README.md)**：iPhone 和 [Android](android/README.md) 上的 Attention Center 和 Fox，扫码配对，经端到端加密中继连到电脑。
+- **[手机伴侣](platform/ios/README.md)**：iPhone 和 [Android](platform/android/README.md) 上的 Attention Center 和 Fox，扫码配对，经端到端加密中继连到电脑。
 - **[Journal](ui/attention/CARD-SYSTEM.md)**：Fox 做的卡片按天留存。
 - **[Scheduled（定时任务）](agent/gate/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**：说一次（“每天早上 8 点告诉我天气和第一个会”），Fox 就一直做；你的 Agent 原有的定时任务也一起带过来。安装后默认有两个，可以关掉：[早上 7 点的“今日准备”和傍晚 6 点的“今日收尾”](context/store/ARTIFACTS.md#the-days-plan-and-summary)，各是一张 Attention 卡片。
 - **[Connectors（连接器）](context/applets/INTEGRATIONS.md#settings--connectors)**：在 设置 › Connectors 里，用各服务自己的登录连接 Google、Notion、Linear、PostHog、Cloudflare 等，Search Console 用你的 Google 登录连接，GitHub 则在 GitHub 自己的页面上粘贴一个短码连接（不需要密钥，也没有 secret）。已连接服务的最新内容每小时同步到你的 World（可以在它的卡片上关掉），你允许的 Agent 可以在一个地方搜索全部内容。Fox 和它用的 Agent 能读取已连接的服务，其他 Agent 只有你选了才能读，任何改动都会先问你：Agent 起草的 GitHub Issue 或评论要你批准后才以你的身份发出，并带一行“Drafted by”说明。
@@ -145,7 +145,7 @@ Fox 是你用文字或语音对话的伙伴。它通过你的 Agent 干活，把
 
 ## 隐私
 
-没有 Worldlet 账号，你的记录都在你自己的电脑上。官方构建会上报基础使用统计（设置、连接和核心操作的结果，绝不包括消息内容、连接的内容或浏览记录），可以在 设置 › General › Usage counts 里关掉，详见[统计说明](agent/base/ANALYTICS.md)。你自己构建的版本不上报任何东西，除非你配置了自己的 PostHog 项目。
+没有 Worldlet 账号，你的记录都在你自己的电脑上。官方构建会上报基础使用统计（设置、连接和核心操作的结果，绝不包括消息内容、连接的内容或浏览记录），可以在 设置 › General › Usage counts 里关掉，详见[统计说明](agent/app/ANALYTICS.md)。你自己构建的版本不上报任何东西，除非你配置了自己的 PostHog 项目。
 
 ## 从源码构建
 

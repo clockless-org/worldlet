@@ -2,7 +2,7 @@
 import {WIDGET_LIMITS,widgetDocument,readWidgetState,type Widget,type WidgetState} from '../../context/store/index.ts';
 import {worldLogApplet} from '../../context/applets/index.ts';
 import {httpsAddress} from './phone-web.ts';
-// The phone renders exactly these shapes (ios/Worldlet/Models.swift); bump PAIR_PROTOCOL in pairing.ts when one
+// The phone renders exactly these shapes (platform/ios/Worldlet/Models.swift); bump PAIR_PROTOCOL in pairing.ts when one
 // changes incompatibly.
 export type PhoneGroup='event'|'needsAction'|'unseen';
 // fact, summary, source and art are optional (absent when empty), so an older phone ignores them: fact is the row's time
