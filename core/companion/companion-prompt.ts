@@ -1,6 +1,6 @@
 import type {CompanionArchive} from '../../contracts/companion.ts';
 import policy from '../../contracts/companion-policy.json' with {type:'json'};
-import {characters} from './companion-text.ts';
+import {characters} from '../../context/items/index.ts';
 import {FOX_ENVIRONMENT_RULE} from '../../contracts/companion-conversation.ts';
 import {companionPersonaPrompt} from './companion-persona.ts';
 import {FOX_VOICE} from './fox-voice.ts';

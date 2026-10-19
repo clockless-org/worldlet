@@ -1,5 +1,5 @@
 import policy from '../../contracts/world-event-policy.json' with {type:'json'};
-import {characters} from '../../core/companion/index.ts';
+import {characters} from './text.ts';
 const fields=new Set(policy.fields),plumbing=new Set(policy.plumbing);
 /** Allowlisted identifiers/states only. Never persist arbitrary chat/request bodies. */
 export function worldEvent(action:string,body:Record<string,unknown>):{body:Record<string,unknown>;applet?:string}|null {

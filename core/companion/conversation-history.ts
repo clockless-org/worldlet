@@ -1,4 +1,4 @@
-import {characters} from './companion-text.ts';
+import {characters} from '../../context/items/index.ts';
 /** Host bounds encoded bytes and owns storage/consent; core validates record shape. */
 export function validateConversationHistory(value:unknown,writing:boolean):void {
  if(!Array.isArray(value)||value.length>80||!value.every(v=>v!==null&&typeof v==='object'&&!Array.isArray(v)))

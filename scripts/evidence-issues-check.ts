@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {sourceEvidenceIssues as issues,sourceEvidenceContext} from '../core/attention/evidence-issues.ts';
+import {sourceEvidenceIssues as issues,sourceEvidenceContext} from '../context/applets/evidence-issues.ts';
 const evidence={'gmail:thread':{text:'PRIVATE: Please reply tomorrow.',url:'https://private.example'}};
 const ref={provider:'gmail',id:'thread',quote:'Please reply tomorrow.'};
 assert.deepEqual(issues([{sources:[ref]}],evidence,['gmail']),[]);

@@ -37,3 +37,5 @@ export {MESSAGES_LIMITS,messagesConversation,messagesConversationTitle,messagesL
 export {APPLE_MUSIC_BUNDLE,LOCAL_MUSIC_COMMANDS,LOCAL_MUSIC_LIMITS,MEDIA_REMOTE_COMMANDS,localMusicCommand,localMusicQuery,localPlayerName,nowPlayingLine,readNowPlaying,worldletPlayer,readPlaylists,readTracks,type LocalMusicCommand,type LocalMusicState,type LocalPlaylist,type LocalTrack,type NowPlaying} from './local-music.ts';
 
 export {LOCAL_CALENDAR_LIMITS,LOCAL_CALENDAR_NAME,LOCAL_EVENT_TITLE,validCalendarEventId,calendarEventId,readCalendarEvent,mergeCalendarEvent,orderCalendarEvents,eventStart,localDay,calendarOccurrences,upcomingCalendarEvents,occurrenceStart,alertAt,calendarAlerts,CALENDAR_REPEATS,CALENDAR_ALERT_MINUTES,type LocalCalendarEvent,type CalendarRepeat,type CalendarOccurrence} from './calendar-events.ts';
+// Repair guidance for rejected source evidence, and the evidence identity Applet analysis attaches (moved from Attention, #681).
+export {sourceEvidenceIssues,sourceEvidenceContext} from './evidence-issues.ts';

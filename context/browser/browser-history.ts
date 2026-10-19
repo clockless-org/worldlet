@@ -1,5 +1,5 @@
 import type {BrowserVisit} from '../../contracts/browser-history.ts';
-import {characters} from '../../core/companion/index.ts';
+import {characters} from '../items/index.ts';
 const clip=(value:string,count:number)=>characters(value).slice(0,count).join('');
 const normalized=(value:string)=>value.normalize('NFC').toLowerCase();
 const privateHosts=['accounts.google.com','appleid.apple.com','mail.google.com','outlook.live.com','outlook.office.com','calendar.google.com','notion.so','notion.site','notion.com','discord.com','slack.com'];

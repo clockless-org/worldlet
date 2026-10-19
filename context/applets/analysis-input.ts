@@ -1,4 +1,4 @@
-import {sourceEvidenceContext} from '../../core/attention/index.ts';
+import {sourceEvidenceContext} from './evidence-issues.ts';
 import {appletAnalysisItems} from './analysis-state.ts';
 type Row=Record<string,any>;
 /** Conservative preprocessing. Originals and their revision checkpoints stay intact. */

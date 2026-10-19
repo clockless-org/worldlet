@@ -1,4 +1,4 @@
-import {characters} from './companion-text.ts';
+import {characters} from '../../context/items/index.ts';
 /** Spatial context switching (owner decision 2026-10-04): Fox has one conversation that remembers
  * everything, and every turn is said in a place (the World, an Applet, one email, one website). Each
  * turn the model gets, beside the whole conversation, the turns said in this place, a note when the

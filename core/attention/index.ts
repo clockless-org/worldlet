@@ -8,7 +8,7 @@ export * from './attention-level.ts';
 export * from './attention-rank.ts';
 export * from './attention-preview.ts';
 export * from './attention-reads.ts';
-export * from './evidence-issues.ts';
+export {sourceEvidenceIssues,sourceEvidenceContext} from '../../context/applets/index.ts';
 export * from './attention-execution.ts';
 export * from './attention-events.ts';
 

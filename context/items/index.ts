@@ -12,3 +12,5 @@ export * from './execution-journal.ts';
 
 export {worldHistoryQuery,worldHistoryPage,worldEventAppend,worldHistoryIdentityVersion} from './world-history.ts';
 export {conversationEntries} from './conversation-journal.ts';
+export {characters,utf8Length,looksSecret,agentReplyFailed} from './text.ts';
+export {attentionArrivedAt,recordInstant,type AttentionRankItem} from './record-time.ts';

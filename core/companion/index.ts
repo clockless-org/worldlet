@@ -4,7 +4,7 @@ export * from './companion-archive.ts';
 export * from './companion-prompt.ts';
 export * from './companion-persona.ts';
 export * from './companion-recall.ts';
-export * from './companion-text.ts';
+export {characters,utf8Length} from '../../context/items/index.ts';
 export * from './conversation-guidance.ts';
 export * from './conversation-history.ts';
 export * from './conversation-place.ts';

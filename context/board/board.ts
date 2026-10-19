@@ -2,7 +2,7 @@ import {BOARD_BLOCK_KINDS,BOARD_DEFINE_PRESETS,BOARD_LIMITS,type BoardReadArgs,t
 import {WORLD_PRESET_PROVIDERS,type ServicePreset} from '../../contracts/service-presets.ts';
 import {SERVICE_PROVIDERS,type ServiceRecords} from '../../contracts/services.ts';
 import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
-import {looksSecret} from '../../core/agent/index.ts';
+import {looksSecret} from '../items/index.ts';
 import {saveServicePreset} from '../accounts/index.ts';
 
 /** What a board block may show: a Service's live read, or the World's own records (`agents`). A Notion preset is
