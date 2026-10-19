@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {homeWritePlan} from '../context/applets/index.ts';
-import {worldActions,resolveAction} from '../core/tools/index.ts';
+import {worldActions,resolveAction} from '../agent/tools/index.ts';
 const due='2026-10-01T09:30:00-07:00';
 assert.equal(homeWritePlan({provider:'apple-reminders',operation:'complete',id:'live:apple-reminders:abc'}).id,'abc');
 assert.equal(homeWritePlan({provider:'google-calendar',operation:'create',title:'Meeting',start:due,end:'2026-10-01T10:30:00-07:00'}).title,'Meeting');

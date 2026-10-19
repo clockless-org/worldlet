@@ -90,7 +90,7 @@ export function hermesWorldToolsCommand(server:HermesWorldToolsServer,state:Herm
  * is refused. `_world_authorize` names the service it authorizes. */
 export const HERMES_CHANNEL_TOOLS=['query_world_items','read_world_history','read_companion_archive','meeting_decisions','read_world_source','read_connected_google','prepare_email','_source_begin','_source_result','_email_review'];
 /** The one guarded write a Hermes channel may make with no Fox turn running: the World's browser link (`world/link`,
- * core/tools controls.ts; it only returns the room link there is or makes one, never ends or replaces one). Owner
+ * agent/tools controls.ts; it only returns the room link there is or makes one, never ends or replaces one). Owner
  * decision 2026-10-15: the Agent may get the World link at any time, from any Hermes channel, accepting that anyone who
  * can message the person's Agent can get it. Called by its own name only (not through `_world_authorize`), its channel
  * turn starts trusted (hermesChannelTrust) so Core's write rule admits it; every other write stays refused. */

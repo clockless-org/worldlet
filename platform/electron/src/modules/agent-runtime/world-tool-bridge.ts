@@ -2,7 +2,7 @@ import http from 'node:http';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import {describeActions,resolveAction,worldActions,worldGatewayTools,type WorldAction} from '../../../../../core/tools/index.ts';
+import {describeActions,resolveAction,worldActions,worldGatewayTools,type WorldAction} from '../../../../../agent/tools/index.ts';
 import {GRANT_REASONS,HERMES_WORLD_TOOLS_SHIM,agentAuditEntry,artifactGranted,standingActions,standingCallDecision,type GrantDecision,type HermesOwnCalls,type HermesWorldToolsServer,type WorldToolServer} from '../../../../../core/agent/index.ts';
 import type {AgentAccess} from '../../host/services.ts';
 import type {AgentIdentity,Grant} from '../../../../../contracts/agent-identity.ts';
@@ -92,21 +92,21 @@ module.exports=async function(pi){
 const RESULT_LIMIT=200_000;
 /** Bytes one call may send. The standing server takes an ask with all its attachments in base64 (contracts/agent-asks.ts). */
 const CALL_LIMIT=1_000_000,STANDING_CALL_LIMIT=Math.ceil(AGENT_ASK_LIMITS.attachmentBytes/3)*4+CALL_LIMIT;
-/** The World tool behind `asks/*` (core/tools/gateway.ts). */
+/** The World tool behind `asks/*` (agent/tools/gateway.ts). */
 const ASK_TOOL='agent_asks';
-/** The World tool behind `board/*` (core/tools/gateway.ts). */
+/** The World tool behind `board/*` (agent/tools/gateway.ts). */
 const BOARD_TOOL='world_board';
-/** The World tool behind `context/*` (core/tools/gateway.ts). */
+/** The World tool behind `context/*` (agent/tools/gateway.ts). */
 const CONTEXT_TOOL='world_context';
-/** The World tool behind `github-drafts/*` (core/tools/gateway.ts). */
+/** The World tool behind `github-drafts/*` (agent/tools/gateway.ts). */
 const DRAFT_TOOL='github_drafts';
-/** The World tool behind `agents/*` (core/tools/gateway.ts). */
+/** The World tool behind `agents/*` (agent/tools/gateway.ts). */
 const REPORT_TOOL='agent_reports';
-/** The World tool behind `github-writes/*` (core/tools/gateway.ts). */
+/** The World tool behind `github-writes/*` (agent/tools/gateway.ts). */
 const WRITE_TOOL='github_writes';
-/** The World tool behind `agent-artifacts/*` (core/tools/gateway.ts). */
+/** The World tool behind `agent-artifacts/*` (agent/tools/gateway.ts). */
 const ARTIFACT_TOOL='agent_artifacts';
-/** The World tool behind `posthog-drafts/*` and `notion-drafts/*` (core/tools/gateway.ts). */
+/** The World tool behind `posthog-drafts/*` and `notion-drafts/*` (agent/tools/gateway.ts). */
 const SERVICE_DRAFT_TOOL='service_drafts';
 
 /** What one Agent may reach on the standing server (core/agent/GRANTS.md): the actions it may discover and the decision

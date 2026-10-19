@@ -13,7 +13,7 @@ import {channelDefaultGrants,currentServiceGrant,serviceReadGrant,standingAction
 import {readServicePresetRead} from '../context/accounts/index.ts';
 import {hermesChannelToolAllowed} from '../core/agent/hermes-server.ts';
 import {turnTrustObserve} from '../core/agent/turn-trust.ts';
-import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
+import {resolveAction,worldActionOf,worldActions} from '../agent/tools/gateway.ts';
 import {McpAccounts} from '../platform/electron/src/modules/sources/mcp-account.ts';
 import {McpSource,McpSourceAccess,McpSourceConnections} from '../platform/electron/src/modules/sources/mcp-source.ts';
 import {GoogleAccount} from '../platform/electron/src/modules/sources/google-account.ts';
@@ -23,7 +23,7 @@ import {validateAttentionRegistrations} from '../agent/attention/attention-cente
 import {attentionFollowupReads,attentionReads} from '../agent/attention/index.ts';
 import {validateAppletRuntimes} from '../context/applets/runtime.ts';
 import {conversationGuidance} from '../core/companion/conversation-guidance.ts';
-import {listWorldTools} from '../core/tools/index.ts';
+import {listWorldTools} from '../agent/tools/index.ts';
 import {withTempDir} from './test-temp.ts';
 
 const TOKEN='fixture-token';

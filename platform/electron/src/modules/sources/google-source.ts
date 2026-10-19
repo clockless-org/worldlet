@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {Compile} from 'typebox/compile';
 import {WorldletError} from '../../files.ts';
-import {listWorldTools} from '../../../../../core/tools/index.ts';
+import {listWorldTools} from '../../../../../agent/tools/index.ts';
 import {GOOGLE_SIGN_IN,GOOGLE_SIGN_IN_SERVICES,curatedConnection,curatedSourceRead} from '../../../../../context/applets/index.ts';
 import {harnessAuthHandoff} from '../../../../../core/agent/index.ts';
 import {GoogleRestError,MOCK_GOOGLE_EMAIL,discover,mockGoogle,normalizeSource as normalize,prepareMail as prepare,readCalendar,readDrive,readDriveList,readPage,reconcileMail as reconcile,sendMail as send,sourceFailure,type GoogleRest} from '../../../../../context/accounts/index.ts';
@@ -131,7 +131,7 @@ export class GoogleSourceConnections implements AgentSourceConnections {
 }
 
 const validators=new Map<string,ReturnType<typeof Compile>>();
-/** A World service tool's arguments against its schema (core/tools). */
+/** A World service tool's arguments against its schema (agent/tools). */
 export function validateWorldTool(name:string,args:Row){
  let validator=validators.get(name);
  if(!validator){

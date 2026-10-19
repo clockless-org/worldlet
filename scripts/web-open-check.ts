@@ -18,7 +18,7 @@ import {createRtcHost,type RtcPage} from '../platform/electron/src/modules/phone
 import {RTC_PAGE_SCRIPT} from '../platform/electron/src/modules/phone/rtc-page.ts';
 import {memoryRoom} from './memory-room.ts';
 import {createWebClient,createRoomWebClient,isRoomLink,readWebPairLink,WebPairingEnded,pairKeys,fromBase64url,sha256Hex,worldLinkReply,type PhoneMessage} from '../core/phone/index.ts';
-import {resolveAction,worldActions} from '../core/tools/index.ts';
+import {resolveAction,worldActions} from '../agent/tools/index.ts';
 import {buildWebOpen} from './build-web-open.ts';
 
 // The relay this computer serves itself (local-relay.ts), on a free port, with the page built as the app ships it.
@@ -206,7 +206,7 @@ const until=async(client:{poll(wait?:number):Promise<any>},ok:(view:any)=>boolea
  // A side without the right token is refused; a frame sealed with another key is dropped.
  const stranger=createRoomWebClient({link:'#v=1&s='+'A'.repeat(43)+'&m=room',relay:'https://worldlet.ai',name:'x',version:'web',WebSocket:RoomSocket as any});
  await assert.rejects(stranger.poll(),/not reachable/,'a pairing nobody made has no computer');
- // The Agent's `world/link` (core/tools share_world_link) keeps the link a browser already opened.
+ // The Agent's `world/link` (agent/tools share_world_link) keeps the link a browser already opened.
  assert.equal((await mac.ensure()).link,made,'an existing link is kept');
  const reply=worldLinkReply(mac.status());
  assert.ok('ok' in reply&&reply.link===made&&reply.opened===true);

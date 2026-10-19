@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {homeWritePlan,todoistWriteReview,todoistWriteResult} from '../context/applets/index.ts';
-import {worldActions,resolveAction} from '../core/tools/index.ts';
+import {worldActions,resolveAction} from '../agent/tools/index.ts';
 const plan={provider:'todoist',operation:'complete',id:'t123'};
 const source={object:{id:'t123',content:'Exact task',description:'Full description',recurring:false,checked:false,projectId:'p123'},childCount:0,children:[]};
 const expected=todoistWriteReview({plan,source});

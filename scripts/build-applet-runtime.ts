@@ -1,4 +1,4 @@
-import {worldActions} from '../core/tools/gateway.ts';
+import {worldActions} from '../agent/tools/gateway.ts';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {APP_DEFINITIONS} from '../context/applets/catalog.ts';

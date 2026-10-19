@@ -10,7 +10,7 @@ import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
 import {SERVICE_ACTIONS,SERVICE_PROVIDERS,SERVICE_TITLES} from '../contracts/services.ts';
 import {MCP_SERVICE_RECORD_LIMITS,mcpServiceRecords,readServicePresetRead} from '../context/accounts/index.ts';
 import {channelDefaultGrants,serviceReadGrant,standingCallDecision} from '../core/agent/grants.ts';
-import {resolveAction,worldActions} from '../core/tools/gateway.ts';
+import {resolveAction,worldActions} from '../agent/tools/gateway.ts';
 import {McpAccounts} from '../platform/electron/src/modules/sources/mcp-account.ts';
 import {McpSource,McpSourceAccess} from '../platform/electron/src/modules/sources/mcp-source.ts';
 import {withTempDir} from './test-temp.ts';

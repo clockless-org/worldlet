@@ -1,4 +1,4 @@
-import {contentTools} from '../../core/tools/index.ts';
+import {contentTools} from '../../agent/tools/index.ts';
 
 // Content tools that change the user's world; every loop gates them the same way.
 export const contentWrites=new Set(contentTools.filter(t=>t.name!=='list_deleted').map(t=>t.name));

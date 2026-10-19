@@ -1,5 +1,5 @@
 import policy from './turn-trust.json' with {type:'json'};
-import {worldToolCatalog} from '../tools/index.ts';
+import {worldToolCatalog} from '../../agent/tools/index.ts';
 /** One model turn's trust. Once any tool returns untrusted content, writes in that turn are denied without a prompt. */
 export type TurnTrust={untrustedSource:string|null};
 const TRUSTED_WORLD_ACTIONS=policy.trustedWorldActions.map(pattern=>new RegExp('^'+pattern.split('*').map(part=>part.replace(/[.+?^${}()|[\]\\]/g,'\\$&')).join('.*')+'$'));

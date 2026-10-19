@@ -401,9 +401,9 @@ Hermes ────────┘                              ├─ UI / nati
 
 | Module | Owns |
 | --- | --- |
-| `core/tools/catalog.ts` | Internal definitions, public/setup policy and the two gateway schemas |
-| `core/tools/gateway.ts` | Target/action routing, discovery and fixed Applet routing fields |
-| `core/tools/modules.ts` | Trusted authored Applet/template extensions; no harness-specific registration |
+| `agent/tools/catalog.ts` | Internal definitions, public/setup policy and the two gateway schemas |
+| `agent/tools/gateway.ts` | Target/action routing, discovery and fixed Applet routing fields |
+| `agent/tools/modules.ts` | Trusted authored Applet/template extensions; no harness-specific registration |
 | Domain `.ts` files and `services.json` | Single-source argument schemas, including the formerly Python-only services |
 | `platform/bridge/world-tool-runtime.ts` | Validation, serial UI execution, receipts, one content write per user input, read-before-share and native dispatch |
 | `harness/hermes/world_gateway.py` | Consumes the generated target/action manifest; exposes exactly the same World entry points |

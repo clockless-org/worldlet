@@ -59,7 +59,7 @@ re-export at its old `index.ts` (and at any other file used from outside this re
 | Layer | Folders |
 | --- | --- |
 | UI | `ui/applets/` `ui/artifacts/` `ui/attention/` `ui/browser/` `ui/companion/` `ui/components/` `ui/distribution/` `ui/games/` `ui/hud/` `ui/onboarding/` `ui/practice/` `ui/shell/` `ui/theme-packages/` `ui/themes/` `ui/web/` `ui/world/` |
-| Agent (to `agent/`) | `core/agent/` `core/tasks/` `core/companion/` `core/tools/` `agent/attention/` `agent/onboarding/` |
+| Agent (to `agent/`) | `core/agent/` `core/tasks/` `core/companion/` `agent/tools/` `agent/attention/` `agent/onboarding/` |
 | Context (to `context/`) | `context/context/` `context/items/` `context/artifacts/` `context/activity/` `context/accounts/` `context/applets/` `context/board/` `context/browser/` `context/games/` |
 | Agent and Context, split per file | `core/phone/` `core/diagnostics/` `core/distribution/` |
 | Platform | `platform/bridge/` `platform/browser/` `platform/distribution/` `platform/electron/` `platform/install/` `platform/local-tools/` `platform/node/` `platform/web-engine/` |
@@ -80,7 +80,7 @@ component is missing or listed twice. Which layer each folder is in: [folders by
 | Attention | What needs the person now: ranked, at most nine, each waiting for Done, Send or Later | `ui/attention/` | `agent/attention/` | `platform/electron/src/modules/attention/` |
 | Tasks | Work that runs without the person: routines, cron jobs, source checks, background drafts and Applet tasks. Fox starts some, Applets start others; the person's Agent does them | (no folder of its own: its status shows in Fox, on Applets and in the Ongoing Applet) | `core/tasks/` | `platform/electron/src/modules/tasks/` |
 | Artifacts & Journal | What work produces: one artifact for every card, draft, page and brief, shown wherever it is needed (Attention, Fox, Applets), and the Journal that keeps them by day | `ui/artifacts/` | `context/artifacts/` | `platform/electron/src/modules/artifacts/` |
-| Agents & Gate | The Agents connected to the World and the one door they pass: the connection to the person's Agent (adapters), World tools over the `worldlet` MCP server (local and remote), per-Agent Grants, approvals and the audit | (no folder of its own: Allow cards show in Attention, Settings › Agents beside Fox) | `core/agent/` `core/tools/` | `platform/electron/src/modules/agent-runtime/` |
+| Agents & Gate | The Agents connected to the World and the one door they pass: the connection to the person's Agent (adapters), World tools over the `worldlet` MCP server (local and remote), per-Agent Grants, approvals and the audit | (no folder of its own: Allow cards show in Attention, Settings › Agents beside Fox) | `core/agent/` `agent/tools/` | `platform/electron/src/modules/agent-runtime/` |
 | Context | Everything the World knows, kept on the person's computer: World items and history, conversation and execution journals, source context, and each connected Service's synced snapshots with the one search over them (`world_context`). Storage and kinds: [context/items/STORAGE.md](../context/items/STORAGE.md#four-kinds) | (no folder of its own: every feature reads it; Settings › Context beside Fox) | `context/context/` `context/items/` | (no host module of its own: `platform/electron/src/store/` persists it) |
 | Connectors | Context's intake: sign-in to Services (Google, Notion, GitHub, Linear, PostHog, Cloudflare and the rest) and this computer's own sources, their reads, and writes the person approved | (no folder of its own: Settings › Connectors beside Fox) | `context/accounts/` | `platform/electron/src/modules/sources/` |
 | Windows | The same World in another window: a web browser at the World's address and the phone, paired by QR code through the end-to-end encrypted relay | `ui/web/` (the page a web browser opens, [web](../core/phone/README.md#web)) | `core/phone/` | `platform/electron/src/modules/phone/` |
@@ -167,7 +167,7 @@ leaves them out, unlike the host services, which fail closed: every app window h
   players, the microphone (speaking to Fox, Talk, dictation and spoken replies), the desktop Companion window, and the
   corner room the Mac keeps for its window buttons.
 - **Fox's tools** that need one of these (the built-in browser, YouTube, the World's sound, music players) answer
-  that it is not available in a browser window ([page-features.ts](../core/tools/page-features.ts)) instead of failing
+  that it is not available in a browser window ([page-features.ts](../agent/tools/page-features.ts)) instead of failing
   on their own.
 - **The host refuses them too.** Before the router, a browser's page is refused the actions behind each of these
   features (`WEB_PAGE_ACTIONS`: the native website views and what drives them, YouTube, the World's sound, music
