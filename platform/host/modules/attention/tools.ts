@@ -1,4 +1,5 @@
 import {AGENT_ASK_PROVIDER} from '../../../../contracts/agent-asks.ts';
+import {contextReader,contextWriter} from '../../../../context/store/index.ts';
 import {core} from '../../core.ts';
 import {attentionImageURL} from '../../../../agent/attention/index.ts';
 import {WorldletError} from '../../files.ts';
@@ -69,16 +70,19 @@ export async function worldTool(center:AttentionCenter,name:string,args:Row,turn
  const store=center.store;
  if(!store.writable||!store.state.cloudConsent||store.sampleEnabled())throw new WorldletError('Allow private context in your personal world first.');
  const db=store.ledger();
+ // Attention items through the one way in to Context (#676): an Agent on the standing server, or Fox.
+ const items=()=>contextReader(store.context()).bodies('attention-items'),item=(id:string)=>contextReader(store.context()).get('attention-items',id)?.body;
+ const writes=contextWriter(store.context(),turn.startsWith('channel-')?'agent':'fox');
  if(monitorProvider!==undefined&&!center.enabledCheck(monitorProvider))throw new WorldletError('This source check is paused.');
  if(name==='query_world_items'){
   const provider=monitorProvider??(typeof args.provider==='string'?args.provider:undefined);
   // A call outside any Fox turn (an Agent on the standing server) reads its own asks with asks/read only, never other
   // Agents' asks through their Attention items (provider `agents`, agent/gate/GRANTS.md#agent-asks).
-  const items=db.records('items').filter(item=>!(turn.startsWith('channel-')&&item.provider===AGENT_ASK_PROVIDER));
-  const result=core('worldItemsQuery',{items,checks:db.records('checks'),provider});
+  const visible=items().filter(item=>!(turn.startsWith('channel-')&&item.provider===AGENT_ASK_PROVIDER));
+  const result=core('worldItemsQuery',{items:visible,checks:db.records('checks'),provider});
   if(!isRow(result))throw new WorldletError('Invalid item query result.');
   result.operations=core('runtimeOperationReport',{rows:db.records('runtime-operations'),owner:provider});
-  result.workflows=core('browserWorkflowReport',{receipts:db.records('browser-actions'),items:db.records('items'),owner:provider});
+  result.workflows=core('browserWorkflowReport',{receipts:db.records('browser-actions'),items:items(),owner:provider});
   const runtime=center.runtimeTaskReport();
   if(provider!==undefined)runtime.rows=rows(runtime.rows).filter(row=>row.owner===provider);
   result.runtimeTasks=runtime;
@@ -147,7 +151,7 @@ export async function worldTool(center:AttentionCenter,name:string,args:Row,turn
  if(name==='upsert_world_items')return upsertWorldItems(center,args,turn,monitorProvider);
  if(name==='review_world_item'){
   const id=args.id,assessment=args.assessment,reason=args.reason,refs=args.sources;
-  const previous=typeof id==='string'?db.records('items').find(item=>item.id===id):undefined;
+  const previous=typeof id==='string'?items().find(item=>item.id===id):undefined;
   if(typeof id!=='string'||typeof assessment!=='string'||typeof reason!=='string'||!previous||monitorProvider!==undefined&&previous.provider!==monitorProvider||!Array.isArray(refs)||!refs.length||refs.length>8)throw new WorldletError('Invalid item review.');
   const evidence:Row[]=[];
   for(const ref of refs){
@@ -161,10 +165,10 @@ export async function worldTool(center:AttentionCenter,name:string,args:Row,turn
   if(snapshot)center.attentionManaged({sources:evidence},snapshot,'synthesis');
   if(snapshot&&assessment==='actionable')managed=center.attentionManaged(previous,snapshot,'synthesis');
   const saveReview=()=>{
-   db.review(id,assessment,reason,evidence,turn);
-   if(managed){const reviewed=db.find('items',id);if(reviewed){reviewed.attentionDependencies=managed.attentionDependencies;db.put('items',id,reviewed);}}
-   const reviewed=db.find('items',id);
-   if(reviewed)db.put('items',id,center.calendarTimes(reviewed,store.worldEvidence[turn]??{}));
+   writes.write('attention-items',{operation:'review',with:{id,assessment,reason,sources:evidence,run:turn}});
+   if(managed){const reviewed=item(id);if(reviewed){reviewed.attentionDependencies=managed.attentionDependencies;writes.write('attention-items',{operation:'put',save:[reviewed]});}}
+   const reviewed=item(id);
+   if(reviewed)writes.write('attention-items',{operation:'put',save:[center.calendarTimes(reviewed,store.worldEvidence[turn]??{})]});
   };
   if(snapshot)db.withRuntimeOutput('attention:center',turn,()=>{center.requireAttentionWritable();saveReview();});
   else db.transaction(saveReview);
@@ -174,11 +178,11 @@ export async function worldTool(center:AttentionCenter,name:string,args:Row,turn
  if(monitorProvider!==undefined)throw new WorldletError('Scheduled checks cannot change user status or schedules.');
  if(name==='update_world_item'){
   if(typeof args.id!=='string'||typeof args.status!=='string')throw new WorldletError('Missing item status.');
-  db.update(args.id,args.status);center.worldChanged();return {ok:true};
+  writes.write('attention-items',{operation:'status',with:{id:args.id,status:args.status}});center.worldChanged();return {ok:true};
  }
  if(name==='archive_world_items'){
   if(!Array.isArray(args.ids)||!args.ids.every(id=>typeof id==='string'))throw new WorldletError('Missing item IDs.');
-  const count=db.archive(args.ids);center.worldChanged();
+  const count=writes.write<number>('attention-items',{operation:'archive',with:{ids:args.ids}});center.worldChanged();
   return {ok:true,archived:count,restorable:true};
  }
  if(name==='read_companion_archive')return center.readCompanionArchive(args);
@@ -190,6 +194,7 @@ export async function worldTool(center:AttentionCenter,name:string,args:Row,turn
 const RACES=[CONTEXT_CHANGED,SOURCE_PAUSED];
 async function upsertWorldItems(center:AttentionCenter,args:Row,turn:string,monitorProvider?:string):Promise<Row> {
  const store=center.store,db=store.ledger();
+ const writes=contextWriter(store.context(),turn.startsWith('channel-')?'agent':'fox');
  const items=args.items;
  if(!Array.isArray(items)||!store.worldEvidence[turn])throw new WorldletError('Read sources in this turn before saving findings.');
  const evidence=store.worldEvidence[turn];
@@ -205,7 +210,7 @@ async function upsertWorldItems(center:AttentionCenter,args:Row,turn:string,moni
  // Nothing in this loop writes the Applet registry or the attention context.
  const providers=center.checkProviders(),facts=db.attentionFacts();
  const current={facts,paused:snapshot?center.pausedProviders():[]};
- let saved:Row[]|undefined;const savedItems=()=>saved??=db.records('items');
+ let saved:Row[]|undefined;const savedItems=()=>saved??=contextReader(store.context()).bodies('attention-items');
  const canonicalItems=core('canonicalSourceQuotes',{items,evidence});
  if(!Array.isArray(canonicalItems))throw new WorldletError('Invalid source quotes.');
  for(const [index,original] of canonicalItems.entries()){
@@ -269,7 +274,7 @@ async function upsertWorldItems(center:AttentionCenter,args:Row,turn:string,moni
    // changed during the run stays pending for the next pass.
    const ids:unknown[]=[],reviews:unknown[]=[];
    for(const item of validated){
-    try{const saved=db.transaction(()=>db.saveTaskProposals([item],turn));ids.push(...(saved.ids??[]));reviews.push(...(saved.taskReviews??[]));}
+    try{const saved=writes.transaction(()=>writes.write<Row>('attention-items',{operation:'propose',save:[item],with:{run:turn}}));ids.push(...(saved.ids??[]));reviews.push(...(saved.taskReviews??[]));}
     catch(error){if(!isValidation(error))throw error;reject(-1,item,error);}
    }
    const withheld=strings(core('withheldContextIds',{context:snapshot,rejected}));
@@ -281,7 +286,7 @@ async function upsertWorldItems(center:AttentionCenter,args:Row,turn:string,moni
    return {ok:true,ids,persisted:true,taskReviews:reviews,requiresReview:reviews.length>0,withheldContextIds:withheld,
     guidance:reviews.length?"Changed tasks await the user's choice in Fox. Do not claim they were updated or create a duplicate to bypass review.":'Findings saved.'};
   });
- }else result=db.saveTaskProposals(validated,turn);
+ }else result=writes.write<Row>('attention-items',{operation:'propose',save:validated,with:{run:turn}});
  if(rejected.length)result.rejected=rejected;
  center.acknowledged.add(turn);center.worldChanged();
  return result;

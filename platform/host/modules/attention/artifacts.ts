@@ -25,7 +25,7 @@ export function installArtifacts(host:Host){
  function keep(result:ScheduleResult|null){
   try{
    if(!result)return;
-   const id=store.ledger().upsert([result.item as Row],'worldlet-schedule')[0]??'';
+   const id=contextWriter(store.context(),'fox').write<string[]>('attention-items',{save:[result.item as Row],with:{run:'worldlet-schedule'}})[0]??'';
    store.worldChanged();
    if(result.push&&id)void host.optional<PhoneService>(PHONE)?.notify({...result.push,open:{item:id},act:{attention:id}}).catch(()=>{});
   }catch(error){host.diagnostics.record(error,'artifacts');}

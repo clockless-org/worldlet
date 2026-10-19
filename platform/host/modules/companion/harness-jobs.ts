@@ -1,4 +1,6 @@
 import {AGENT,ANALYTICS,PHONE,type AgentService,type AnalyticsService,type PhoneService} from '../../services.ts';
+import {contextWriter} from '../../../../context/store/index.ts';
+import {ledgerContext} from '../../store/context-storage.ts';
 import type {Host,Row} from '../../types.ts';
 import {harnessService,scheduleElsewhere,scheduleStep,type ScheduleState} from '../../../../agent/gate/index.ts';
 import type {HarnessJobRun} from '../../../../contracts/harness-services.ts';
@@ -39,7 +41,7 @@ export function createHarnessJobs(host:Host,{allowed,every=60}:{allowed:()=>bool
   let changed=false;
   for(const result of [...step.results,...step.stopped?[step.stopped]:[]]){
    let id='';
-   try{id=ledger.upsert([result.item as Row],'harness-schedule')[0]??'';changed=true;}catch(error){host.diagnostics.record(error,'harnessJobs');continue;}
+   try{id=contextWriter(ledgerContext(ledger),'agent').write<string[]>('attention-items',{save:[result.item as Row],with:{run:'harness-schedule'}})[0]??'';changed=true;}catch(error){host.diagnostics.record(error,'harnessJobs');continue;}
    if(result.push&&id)void host.optional<PhoneService>(PHONE)?.notify({...result.push,open:{item:id},act:{attention:id}}).catch(()=>{});
    // A run of one of the Agent's own jobs (a failed one is a Worth Doing task); the scheduler-stopped note is not a run.
    if(result!==step.stopped){

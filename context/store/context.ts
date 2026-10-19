@@ -51,11 +51,15 @@ export type ContextDomainId=typeof CONTEXT_DOMAINS[number]['id'];
 export type ContextDomain=typeof CONTEXT_DOMAINS[number];
 
 /** A change to one domain, in its stored shape: records to save, ids to forget, and what goes with them (a page, its
- * state, the Attention item of a draft). */
-export type ContextChange={save?:Row[];forget?:string[];with?:Row};
+ * state, the Attention item of a draft). `operation` names a domain's own change when it is more than a save (an
+ * Attention item's status, a review, an archive), with its arguments in `with`. */
+export type ContextChange={save?:Row[];forget?:string[];with?:Row;operation?:string};
 /** How Platform keeps one domain. `rows` lists its records as stored; `search` is a domain's own index (conversations,
- * website recordings) when listing every row would be too much; `write` applies a change as one save. */
-export type ContextDomainStore={rows?():Row[];get?(id:string):Row|null;search?(terms:string[],limit:number):Row[];write?(change:ContextChange):void};
+ * website recordings) when listing every row would be too much; `query` answers a domain's own named reads (a thread's
+ * turns, a visit's records); `write` applies a change as one save, told who writes it, and answers what the domain's
+ * change answers. */
+export type ContextDomainStore={rows?():Row[];get?(id:string):Row|null;search?(terms:string[],limit:number):Row[];
+ query?(name:string,args:Row):unknown;write?(change:ContextChange,author:ContextOrigin):unknown};
 /** What Platform gives the entry: the domains it keeps, and a transaction when several writes must land together. */
 export type ContextStorage={domains:Partial<Record<ContextDomainId,ContextDomainStore>>;transaction?<T>(work:()=>T):T};
 
@@ -150,6 +154,12 @@ export function contextReader(storage:ContextStorage) {
  return {
   domains:()=>CONTEXT_DOMAINS.filter(domain=>storage.domains[domain.id]),
   has:(domain:ContextDomainId)=>!!storage.domains[domain],
+  /** One of a domain's own named reads, as the domain answers it. */
+  query:<T=unknown>(domain:ContextDomainId,name:string,args:Row={}):T=>{
+   const kept=store(storage,domain);
+   if(!kept.query)throw Error(`${contextDomain(domain).label} has no ${name} here.`);
+   return kept.query(name,args) as T;
+  },
   /** Every record of a domain, as stored, in the order the domain keeps them. */
   read:<T extends Row=Row>(domain:ContextDomainId):ContextRecord<T>[]=>rows(domain).map(row=>record(domain,row as T)),
   /** The stored records alone, for callers that only need what they always read. */
@@ -181,17 +191,25 @@ export function contextReader(storage:ContextStorage) {
 }
 export type ContextReader=ReturnType<typeof contextReader>;
 
-function writer(storage:ContextStorage,allowed:(kind:ContextKind)=>boolean,refusal:string) {
- const change=(domain:ContextDomainId,work:ContextChange)=>{
+/** Who writes, as the entry hands it to the domain: an author named by kind alone becomes `{by}`. */
+export function contextAuthor(author:ContextOrigin['by']|ContextOrigin):ContextOrigin {
+ const value=typeof author==='string'?{by:author}:author;
+ if(!value||!['service','agent','person','fox','world'].includes(value.by))throw Error('Say who writes this Context.');
+ return value.id?{by:value.by,id:String(value.id)}:{by:value.by};
+}
+function writer(storage:ContextStorage,author:ContextOrigin,allowed:(kind:ContextKind)=>boolean,refusal:string) {
+ const change=(domain:ContextDomainId,work:ContextChange):unknown=>{
   const {kind,label}=contextDomain(domain);
   if(!allowed(kind))throw Error(refusal.replace('{label}',label));
   const kept=store(storage,domain);
   if(!kept.write)throw Error(`${label} cannot be changed here.`);
-  kept.write(work);
+  return kept.write(work,author);
  };
  return {
-  /** Saves records of a domain in their stored shape, and forgets the ids given, as one save. */
-  write:(domain:ContextDomainId,work:ContextChange)=>change(domain,work),
+  author,
+  /** Saves records of a domain in their stored shape, and forgets the ids given, as one save; or the domain's own
+   * `operation`. Answers what the domain answers. */
+  write:<T=unknown>(domain:ContextDomainId,work:ContextChange):T=>change(domain,work) as T,
   remove:(domain:ContextDomainId,ids:string[])=>{if(ids.length)change(domain,{forget:ids});},
   /** Several writes that land together, or none of them. */
   transaction:<T>(work:()=>T):T=>storage.transaction?storage.transaction(work):work(),
@@ -199,11 +217,13 @@ function writer(storage:ContextStorage,allowed:(kind:ContextKind)=>boolean,refus
 }
 /** Writing Recorded, Made and Known Context. Agents, the person, Fox and the World write here; Synced is refused, since
  * only Connectors write it (`syncedWriter`). UI never writes: it asks Agent. */
-export function contextWriter(storage:ContextStorage,_author:Exclude<ContextOrigin['by'],'service'>|ContextOrigin) {
- return writer(storage,kind=>kind!=='synced','{label} is kept up to date by its Connector; nothing else writes it.');
+export function contextWriter(storage:ContextStorage,author:Exclude<ContextOrigin['by'],'service'>|ContextOrigin) {
+ const who=contextAuthor(author);
+ if(who.by==='service')throw Error('A Service\'s records are written by its Connector.');
+ return writer(storage,who,kind=>kind!=='synced','{label} is kept up to date by its Connector; nothing else writes it.');
 }
 /** Writing Synced Context: the bounded copies of Services. Only Connectors (context/connectors) use this. */
-export function syncedWriter(storage:ContextStorage,_service:string) {
- return writer(storage,kind=>kind==='synced','Only Recorded, Made and Known Context is written there; {label} is not Synced.');
+export function syncedWriter(storage:ContextStorage,service:string) {
+ return writer(storage,service?{by:'service',id:service}:{by:'service'},kind=>kind==='synced','Only Recorded, Made and Known Context is written there; {label} is not Synced.');
 }
 export type ContextWriter=ReturnType<typeof contextWriter>;

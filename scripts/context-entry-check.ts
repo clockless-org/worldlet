@@ -62,6 +62,25 @@ connectorWriter(storage,'github').write('service-sync',{save:[{id:'sync-1',provi
 assert.equal(reader.get('service-sync','sync-1')?.updatedAt,40_000);
 const writesBefore=writes.length;fox.remove('artifacts',[]);assert.equal(writes.length,writesBefore,'nothing to forget writes nothing');
 
+// Who writes travels with the write: the host marks an ask's or a draft's Attention item as the person's or an Agent's
+// from it, as each module passed by hand before; a domain's own reads and changes go through the entry too.
+{
+ const saved:string[]=[];
+ const fake={agentAsks:()=>[],saveAgentAsk:(_ask:any,item:any,origin:string)=>{saved.push(item.id+':'+origin);},
+  agentAskAttachment:(askId:string,id:string,offset:number,length:number)=>new Uint8Array([askId.length,id.length,offset,length]),
+  update:(id:string,status:string,snoozedUntil:any,readOnly:boolean,by:any)=>{saved.push([id,status,snoozedUntil,readOnly,by].join(','));},value:()=>null} as any;
+ const context=ledgerContext(fake);
+ contextWriter(context,'person').write('agent-asks',{save:[{id:'a1'}],with:{item:{id:'ask-a1'}}});
+ contextWriter(context,{by:'agent',id:'agent-alex'}).write('agent-asks',{save:[{id:'a1'}],with:{item:{id:'ask-a1'}}});
+ contextWriter(context,'person').write('attention-items',{operation:'status',with:{id:'i1',status:'read',snoozedUntil:null,readOnly:true}});
+ assert.deepEqual(saved,['ask-a1:user','ask-a1:agent','i1,read,,true,']);
+ assert.deepEqual([...contextReader(context).query<Uint8Array>('agent-asks','attachment',{askId:'a1',id:'f',offset:2,length:9})],[2,1,2,9]);
+ assert.throws(()=>contextReader(context).query('agent-asks','pages'),/no pages/);
+ assert.throws(()=>contextWriter(context,'person').write('attention-items',{operation:'erase'}),/no erase/);
+ assert.throws(()=>contextWriter(context,{by:'service',id:'github'} as any),/Connector/);
+ assert.equal(connectorWriter(context,'github').author.id,'github');
+}
+
 // The host's storage: the same tables and shapes as before, and a transaction that keeps several writes together.
 await withTempDir('worldlet-context-entry-',async dir=>{
  const ledger=new WorldLedger(path.join(dir,'world'));

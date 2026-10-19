@@ -5,6 +5,8 @@ import {GITHUB_DRAFT_TARGET,type GithubAppCredentials,type GithubDraft,type Gith
 import type {AgentAuditEntry,Grant} from '../../../../contracts/agent-identity.ts';
 import type {VaultService} from '../../services.ts';
 import {GITHUB_APP} from '../../../../context/connectors/index.ts';
+import {contextReader,contextWriter} from '../../../../context/store/index.ts';
+import {ledgerContext} from '../../store/context-storage.ts';
 import type {Row} from './types.ts';
 
 // GitHub drafts (agent/gate/GRANTS.md#github-drafts). Core decides; this keeps the records and talks to GitHub: each
@@ -79,8 +81,10 @@ const own=(value:unknown)=>value instanceof Error&&value.message?value.message:'
 export function createGithubDrafts({ledger,vault,name,changed,userToken=async()=>null,signedIn=()=>false,fetch=globalThis.fetch as unknown as GithubFetch,api=GITHUB_API,userAgent='Worldlet',
  now=()=>new Date().toISOString(),clock=()=>Date.now(),newId=()=>crypto.randomUUID()}:
  {ledger:()=>DraftLedger|null;vault:VaultService;name:(agentId:string)=>string;changed:()=>void;userToken?:(force?:boolean)=>Promise<string|null>;signedIn?:()=>boolean;fetch?:GithubFetch;api?:string;userAgent?:string;now?:()=>string;clock?:()=>number;newId?:()=>string}):GithubDrafts {
- const load=(db:DraftLedger)=>db.githubDrafts().flatMap(row=>{const draft=readStoredGithubDraft(row);return draft?[draft]:[];});
- const save=(db:DraftLedger,draft:GithubDraft,origin:'user'|'agent')=>db.saveGithubDraft(draft as unknown as Row,githubDraftAttentionItem(draft,name(draft.agentId)) as Row,origin);
+ const load=(db:DraftLedger)=>contextReader(ledgerContext(db)).bodies('github-drafts').flatMap(row=>{const draft=readStoredGithubDraft(row);return draft?[draft]:[];});
+ // Through the one way in to Context (#676): who writes decides whether the item's status is the person's or the Agent's.
+ const save=(db:DraftLedger,draft:GithubDraft,origin:'user'|'agent')=>contextWriter(ledgerContext(db),origin==='user'?{by:'person'}:{by:'agent',id:draft.agentId})
+  .write('github-drafts',{save:[draft as unknown as Row],with:{item:githubDraftAttentionItem(draft,name(draft.agentId)) as Row}});
  const audit=(db:DraftLedger,draft:GithubDraft,action:string,decision:AgentAuditEntry['decision'],reason:string,at:string)=>{
   try{db.recordAgentAudit({at,agentId:draft.agentId,target:GITHUB_DRAFT_TARGET,action,decision,reason:[...reason].slice(0,300).join('')},AGENT_AUDIT_KEEP);}catch{}
  };
@@ -88,7 +92,7 @@ export function createGithubDrafts({ledger,vault,name,changed,userToken=async()=
  // device): the draft is dismissed. Approving needs this computer (`githubDraft`), so neither writes anything.
  const settle=(db:DraftLedger,drafts:GithubDraft[],at:string)=>drafts.map(draft=>{
   if(!githubDraftPending(draft))return draft;
-  const item=db.value('items',githubDraftItemId(draft.id));
+  const item=contextReader(ledgerContext(db)).get('attention-items',githubDraftItemId(draft.id))?.body;
   if(item?.statusOrigin!=='user'||item.status!=='done'&&item.status!=='dismissed')return draft;
   // A create already begun may have been made: never said to have written nothing.
   const next=draft.writeStartedAt?settleGithubDraft(draft,'unknown',at,{reason:GITHUB_DRAFT_REASONS.unknown}):settleGithubDraft(draft,'dismissed',at);

@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import {WorldletError} from '../../files.ts';
 import {canBuild} from '../../store/world-store.ts';
 import type {SourcesContext} from './context.ts';
+import {contextWriter} from '../../../../context/store/index.ts';
 import type {Row} from '../../types.ts';
 // Setup progress (Mac Onboarding.swift host action) and the one-time headline fallback
 // (OnboardingNews.swift): a bounded first-party RSS read, never a subscription.
@@ -50,7 +51,7 @@ export function createOnboarding(ctx:SourcesContext){
     if(saved){if(saved.status==='open')return saved;continue;}
     const item={provider:'browser',kind:'update',title:row.title,context:`${publisher} · A headline from the past 24 hours. Open the article to read the full story.`,priority:'normal',sources:[{provider:'browser',id:row.link,url:row.link,quote:row.title}]};
     try{
-     const ids=store.ledger().upsert([item],'onboarding-news-'+crypto.randomUUID().toUpperCase());store.worldChanged();
+     const ids=contextWriter(store.context(),'world').write<string[]>('attention-items',{save:[item],with:{run:'onboarding-news-'+crypto.randomUUID().toUpperCase()}});store.worldChanged();
      const created=store.worldItems().find(value=>value.id===ids[0]);
      if(created)return created;
     }catch{continue;}
