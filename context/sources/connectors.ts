@@ -6,7 +6,7 @@
  *   public client (no secret) and waits on a loopback address (platform/electron/src/modules/sources/mcp-account.ts).
  * - `google`: Worldlet's own Google sign-in (Mail, Calendar, Drive; Search Console adds its own read permission).
  * - `key`: a pasted key or file (`TOKEN_PROVIDERS` in context/applets/sources.ts), until the service gets a sign-in.
- * - `github-device`: the official Worldlet GitHub App's device code (context/accounts/github-device.ts): the person types a
+ * - `github-device`: the official Worldlet GitHub App's device code (context/sources/github-device.ts): the person types a
  *   short code on github.com; only the App's public client ID is used, with no secret and no loopback address.
  * - `local` is reserved for this computer's own apps. */
 export type ConnectorMechanism='mcp-oauth'|'github-device'|'google'|'key'|'local';
@@ -48,7 +48,7 @@ const entry=(value:Connector):Connector=>Object.freeze({...value,providers:Objec
  * (RFC 9728 `scopes_supported`) on 2026-10-17 and cut to what the World's readers use. */
 export const CONNECTORS:readonly Connector[]=Object.freeze([
  entry({id:'google',name:'Google',purpose:'See your mail, calendar and files in Google.',mechanism:'google',providers:['gmail','google-calendar','google-drive'],shown:'always',region:'home',
-  // Google's sign-in asks per service, in context/accounts/google and the host's Google account; not from this list.
+  // Google's sign-in asks per service, in context/sources/google and the host's Google account; not from this list.
   scopes:scopes([]),fallback:[],headless:false}),
  // Notion's server offers one scope, `default`.
  entry({id:'notion',name:'Notion',purpose:'See your pages and databases in Notion.',mechanism:'mcp-oauth',providers:['notion'],shown:'always',region:'work',scopes:scopes(['default']),fallback:['agent'],headless:false}),

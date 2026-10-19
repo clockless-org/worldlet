@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import {withTempDir} from './test-temp.ts';
 import {SERVICE_PRESET_LIMITS} from '../contracts/service-presets.ts';
-import {PRESET_REASONS,readServicePresetRead,readStoredServicePreset,removeServicePreset,saveServicePreset,servicePresetRead} from '../context/accounts/index.ts';
+import {PRESET_REASONS,readServicePresetRead,readStoredServicePreset,removeServicePreset,saveServicePreset,servicePresetRead} from '../context/sources/index.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {createServicePresets,loadServicePresets} from '../platform/electron/src/modules/sources/service-presets.ts';
 
-// Service presets (contracts/service-presets.ts, context/accounts/services/presets.ts): named, saved reads of a Worldlet
+// Service presets (contracts/service-presets.ts, context/sources/services/presets.ts): named, saved reads of a Worldlet
 // Service, checked as the Service's own reader checks them, holding no key, kept in world.sqlite.
 const now='2026-10-15T12:00:00.000Z',later='2026-10-15T13:00:00.000Z';
 const refused=(work:()=>unknown,reason:string|RegExp)=>assert.throws(work,(error:Error)=>typeof reason==='string'?error.message===reason:reason.test(error.message));

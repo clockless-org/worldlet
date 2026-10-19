@@ -1,7 +1,7 @@
 // The Game Factory (owner request 2026-10-03): the person tells Fox what game they want, Fox's model
 // writes it as one self-contained HTML file, and Worldlet checks it, tries it offline and keeps it in
 // this World. These are the rules every host applies; the host stores files, runs the hidden trial
-// and shows the game in its own sandboxed view (context/games/README.md).
+// and shows the game in its own sandboxed view (context/artifacts/GAMES.md).
 
 /** Making games is not open yet (owner decision 2026-10-03: "先coming soon"): the Games area panel shows
  * Make a game as coming soon and Fox is not offered the tools. The rules and host engine below are ready. */

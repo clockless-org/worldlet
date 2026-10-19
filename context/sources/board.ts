@@ -3,13 +3,13 @@ import {WORLD_PRESET_PROVIDERS,type ServicePreset} from '../../contracts/service
 import {SERVICE_PROVIDERS,type ServiceRecords} from '../../contracts/services.ts';
 import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
 import {looksSecret} from '../items/index.ts';
-import {saveServicePreset} from '../accounts/index.ts';
+import {saveServicePreset} from './services/presets.ts';
 
 /** What a board block may show: a Service's live read, or the World's own records (`agents`). A Notion preset is
  * collected for the person, not read live, so the board refuses it. */
 export const BOARD_PROVIDERS:readonly string[]=Object.freeze([...SERVICE_PROVIDERS,...WORLD_PRESET_PROVIDERS]);
 
-/** The board (contracts/board.ts, context/board/README.md). Pure: the host supplies the definition, the saved presets and
+/** The board (contracts/board.ts, context/sources/BOARD.md). Pure: the host supplies the definition, the saved presets and
  * each preset's Service read (or why it could not be read), and shows what comes back. No model is involved: every
  * value is a field the read returned, and every block that cannot be shown says why in plain words. */
 

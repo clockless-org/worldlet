@@ -12,7 +12,7 @@ import {ASK_REASONS,askItemId} from '../agent/agents/asks.ts';
 import {roomDenied} from '../contracts/web-world.ts';
 import {STANDING_OUTSIDE_TURN} from '../agent/agents/grants.ts';
 import {GITHUB_DRAFT_REASONS,GITHUB_DRAFT_STALE,GITHUB_WRITE_REASONS,GITHUB_WRITE_STALE,githubDraftCreatedUrl,githubDraftItemId,githubDraftSignature} from '../agent/agents/github-drafts.ts';
-import {GITHUB_APP} from '../context/accounts/index.ts';
+import {GITHUB_APP} from '../context/sources/index.ts';
 
 // GitHub drafts on the host (agent/agents/GRANTS.md#github-drafts), the same modules the Electron and Node hosts run,
 // against a stubbed GitHub: an Agent drafts only under its own "Can draft GitHub changes" Grant; the draft keeps the

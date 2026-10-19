@@ -5,7 +5,7 @@
 // from the page at once and never shows in the guide, while the address and project stay for another try; a connected
 // PostHog promises no background reads.
 import assert from 'node:assert/strict';
-import {CONNECTOR_TECHNICAL_WORDS} from '../context/accounts/index.ts';
+import {CONNECTOR_TECHNICAL_WORDS} from '../context/sources/index.ts';
 import {bundleScript,withBrowser,pageErrors} from './browser-test.ts';
 
 declare global {var TokenSetup:any;var tokenState:any;var tokenCalls:any[];var tokenRefuse:boolean;var tokenGuide:any;}

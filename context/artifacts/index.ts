@@ -12,3 +12,8 @@ export {WIDGET_APPLET,WIDGET_LIMITS,WIDGET_POLICY,WIDGET_REPORT,widgetId,validWi
 export type {Widget,WidgetData,WidgetState,WidgetStateEntry,WidgetSeed} from './widgets.ts';
 export {ARTIFACT_PAGE_MAKER,ARTIFACT_PAGE_LIMITS,ARTIFACT_PAGE_ROOM,ARTIFACT_PAGE_CONTROLS,ARTIFACT_PAGE_REPORT,artifactRenderMode,artifactPageActions,readArtifactPageSpec,artifactPageTask,artifactPageBrief,artifactPageDocument,readArtifactPageReport,readArtifactPageConsole,readArtifactPageState,artifactPageZoom,artifactPageProblems,placeArtifactMaterials,artifactPageTrialProblems,readArtifactPage,artifactPageBudget} from './artifact-render.ts';
 export type {ArtifactRenderMode,ArtifactPageSpec,ArtifactPageSeed,ArtifactPage} from './artifact-render.ts';
+// What was the games folder (#714).
+export {GAME_MAKING_OPEN,GAME_FACTORY_APPLET,MADE_GAME_LIMITS,SANDBOX_POLICY,MADE_GAME_POLICY,MADE_GAME_REPORT,sandboxDocument,gameFactoryModel,madeGameId,validMadeGameId,madeGameRecord,readMadeGame,orderMadeGames,offlinePageProblems,checkMadeGameSource,madeGameTrialProblems,madeGameDocument,readMadeGameReport,betterBest,madeGameTask} from './factory.ts';
+export type {MadeGame,ModelSourceName} from './factory.ts';
+export {BATTLE_REVIEW,GAME_REVIEW_APPLET,battleWatch,battleUserId,battleSite,observeBattleMessage,finishedBattles,battleReviewDue,battlesReviewed,battleSummaryDue,battlesSummarized,battleReviewTask,battleNow} from './battle-review.ts';
+export type {BattleWatch,WatchedBattle,FinishedBattle,BattleResult} from './battle-review.ts';

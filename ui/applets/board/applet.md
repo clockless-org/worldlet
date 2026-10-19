@@ -1,6 +1,6 @@
 # Board
 
-The numbers the person tracks, on one board: tabs of blocks, each a saved read of GitHub, PostHog or Cloudflare shown as a number, a funnel, a list or a trend. The board is general: anyone's board renders here, and what it shows is data in that person's own World ([context/board](../../../context/board/README.md)).
+The numbers the person tracks, on one board: tabs of blocks, each a saved read of GitHub, PostHog or Cloudflare shown as a number, a funnel, a list or a trend. The board is general: anyone's board renders here, and what it shows is data in that person's own World ([context/board](../../../context/sources/BOARD.md)).
 
 - **Peek.** A cork board with pinned cards in the Work area. The first tab's first `number` block is drawn on its main card as the north-star number, tinted only when that block has a good or bad tone. With no board, or when that block cannot be read, the card stays plain. No Attention marker is invented.
 - **Focus.** Peek → Focus, as for website Applets: there is no Open. The panel ([panel.ts](panel.ts)) shows the board's title, its tabs, Refresh and when it was read. Each block is a card; a card that cannot be shown says why in its own words, offers **Connect** when its Service is not connected (never for the World's own `agents` source, which has nothing to connect), and the other cards keep showing. Lists open their links through the World's usual link path, never inside the panel; a row with no link (an Agent, a run reported without one) is its title alone.

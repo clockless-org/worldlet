@@ -1,5 +1,5 @@
 import {answerServiceRequest,readServiceRequest,serviceRequestDue,serviceRequestItem,serviceRequestRefusal,type ServiceRequest} from '../../../../../agent/agents/index.ts';
-import {connector} from '../../../../../context/accounts/index.ts';
+import {connector} from '../../../../../context/sources/index.ts';
 import type {AgentAccess} from '../../host/services.ts';
 import type {Row} from './types.ts';
 

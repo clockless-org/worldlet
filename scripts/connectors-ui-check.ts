@@ -5,7 +5,7 @@
 // (CONNECTOR_TECHNICAL_WORDS). `--screenshot <file.png>` saves the page, and `-narrow.png` beside it at phone width.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {CONNECTOR_TECHNICAL_WORDS} from '../context/accounts/index.ts';
+import {CONNECTOR_TECHNICAL_WORDS} from '../context/sources/index.ts';
 import {withBrowser,bundleScript,pageErrors} from './browser-test.ts';
 
 await withBrowser(async browser=>{

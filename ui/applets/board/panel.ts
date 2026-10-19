@@ -1,5 +1,5 @@
 import {node,textButton as button} from '../../components/index.ts';
-import {BOARD_TONE_WORDS,formatBoardNumber,formatBoardRate} from '../../../context/board/index.ts';
+import {BOARD_TONE_WORDS,formatBoardNumber,formatBoardRate} from '../../../context/sources/index.ts';
 import type {BoardBlockView,BoardTabView,BoardView,BoardDefinition} from '../../../contracts/board.ts';
 
 const el:(tag:string,cls?:string,text?:unknown)=>any=node;
@@ -19,7 +19,7 @@ export const BOARD_ASKS=Object.freeze({
  changed:'What changed on this board tab? Read each block\'s saved preset again with read_service and compare it with the values shown. Use only what the reads return.',
 });
 
-// The board (context/board/README.md), read-only: the host action `board` (`read`, optionally a `tab`) and nothing else.
+// The board (context/sources/BOARD.md), read-only: the host action `board` (`read`, optionally a `tab`) and nothing else.
 // An Agent the person allows sets it up; no block is edited here. Each card shows its block's value or its own error.
 export function createBoardApplet({native,ask=(_text:string,_options?:any)=>{},settings=(_part:string)=>{},connect=(_provider:string)=>{},connected=(_provider:string)=>true as boolean|undefined,openLink=(_url:string)=>{},onContext=()=>{}}:{native:any;ask?:(text:string,options?:any)=>unknown;settings?:(part:string)=>unknown;connect?:(provider:string)=>unknown;connected?:(provider:string)=>boolean|undefined;openLink?:(url:string)=>unknown;onContext?:()=>void}){
  const root=el('section','board-applet');root.setAttribute('aria-label','Board');

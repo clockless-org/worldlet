@@ -1,4 +1,4 @@
-// Linear, Todoist and Supabase as Worldlet Services (contracts/services.ts, context/accounts/mcp/service-records.ts,
+// Linear, Todoist and Supabase as Worldlet Services (contracts/services.ts, context/sources/mcp/service-records.ts,
 // `read_service`): against fixtures of their official MCP servers, list and read come back as bounded Service records
 // with the turn's admission asked first; Linear and Todoist page with a cursor; the Applets' own reads are unchanged; the
 // Grant targets linear/list, linear/read and the rest are each a "Can read" Grant's and never a default; presets take
@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
 import {SERVICE_ACTIONS,SERVICE_PROVIDERS,SERVICE_TITLES} from '../contracts/services.ts';
-import {MCP_SERVICE_RECORD_LIMITS,mcpServiceRecords,readServicePresetRead} from '../context/accounts/index.ts';
+import {MCP_SERVICE_RECORD_LIMITS,mcpServiceRecords,readServicePresetRead} from '../context/sources/index.ts';
 import {channelDefaultGrants,serviceReadGrant,standingCallDecision} from '../agent/agents/grants.ts';
 import {resolveAction,worldActions} from '../agent/tools/gateway.ts';
 import {McpAccounts} from '../platform/electron/src/modules/sources/mcp-account.ts';

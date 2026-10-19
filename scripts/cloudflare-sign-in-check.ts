@@ -1,4 +1,4 @@
-// Cloudflare's own sign-in (context/accounts/connectors.ts `mcp-oauth`, service-source.ts signIn.mcp, mcp-account.ts):
+// Cloudflare's own sign-in (context/sources/connectors.ts `mcp-oauth`, service-source.ts signIn.mcp, mcp-account.ts):
 // against fixtures of Cloudflare's MCP server (its metadata names only two scopes; its authorization server offers the
 // rest), Connect with no key registers Worldlet and signs in on a loopback address asking only the connector's read
 // list, finds the accounts the sign-in reads and keeps the first, checks it with one read and keeps no key. Each read
@@ -7,7 +7,7 @@
 // sign-in Cloudflare no longer accepts says to sign in again; another account is chosen without signing in again; a key
 // under Advanced replaces the sign-in, and Disconnect forgets both.
 import assert from 'node:assert/strict';
-import {cloudflareExecute,cloudflareExecuteAnswer,connectorScopes,plainConnectorText,CLOUDFLARE_GATE} from '../context/accounts/index.ts';
+import {cloudflareExecute,cloudflareExecuteAnswer,connectorScopes,plainConnectorText,CLOUDFLARE_GATE} from '../context/sources/index.ts';
 import {ServiceSource} from '../platform/electron/src/modules/sources/service-source.ts';
 
 const MCP='https://mcp.cloudflare.com/mcp',ISSUER='https://mcp.cloudflare.com';

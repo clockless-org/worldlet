@@ -13,7 +13,7 @@ export interface AgentReports {
  /** One `agent_reports` call (`agents/report`, `agents/list`) by `agentId`, already admitted by its Grants. */
  call(agentId:string,args:Row):Row;
  /** Every Agent the person has not revoked with its report, as `agents/list` answers, for the board's `agents` source
-  * (context/board/README.md#the-agents-source): null outside the person's own World. */
+  * (context/sources/BOARD.md#the-agents-source): null outside the person's own World. */
  list():AgentListEntry[]|null;
  /** One Agent's report and how it reads now, for Settings › Agents: none outside the person's own World. */
  state(agentId:string):{liveness:AgentLiveness;report?:AgentReport};

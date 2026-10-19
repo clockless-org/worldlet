@@ -1,5 +1,5 @@
 import {WorldletError} from '../../files.ts';
-import type {McpSession,McpTool,McpToolResult} from '../../../../../context/accounts/index.ts';
+import type {McpSession,McpTool,McpToolResult} from '../../../../../context/sources/index.ts';
 
 /** The MCP protocol revision the World asks for; a server answers with the one it speaks. */
 export const MCP_PROTOCOL='2025-06-18';

@@ -35,7 +35,7 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | Where Applet code lives | [Worldlet Applets](../ui/applets/README.md) |
 | How an Applet should look and behave | [Applet design guide](../ui/applets/DESIGN-GUIDE.md) · [motion](../ui/applets/MOTION.md) |
 | How to build one | [Applet implementation guide](../ui/applets/IMPLEMENTATION-GUIDE.md) · [integrations](../context/applets/INTEGRATIONS.md) |
-| A board of Service numbers: tabs, funnels, trends | [The board](../context/board/README.md) |
+| A board of Service numbers: tabs, funnels, trends | [The board](../context/sources/BOARD.md) |
 | Cards Fox makes | [Card system](../ui/artifacts/CARD-SYSTEM.md) |
 | Worlds, styles and artwork | [Resources](../resources/README.md) · [Village world](../resources/worlds/village/README.md) |
 
@@ -357,10 +357,10 @@ Indexed: **286 Markdown documents** and **749 supporting documentation files**.
 - [context/applets/INTEGRATIONS.md](../context/applets/INTEGRATIONS.md)
 - [context/applets/MY-APPLETS.md](../context/applets/MY-APPLETS.md)
 - [context/applets/RUNTIME.md](../context/applets/RUNTIME.md)
+- [context/artifacts/GAMES.md](../context/artifacts/GAMES.md)
 - [context/artifacts/README.md](../context/artifacts/README.md)
-- [context/board/README.md](../context/board/README.md)
-- [context/games/README.md](../context/games/README.md)
 - [context/items/STORAGE.md](../context/items/STORAGE.md)
+- [context/sources/BOARD.md](../context/sources/BOARD.md)
 - [contracts/COMPONENTS.md](../contracts/COMPONENTS.md)
 - [contracts/HARNESS.md](../contracts/HARNESS.md)
 - [contracts/README.md](../contracts/README.md)

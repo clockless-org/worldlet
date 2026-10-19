@@ -8,7 +8,7 @@ import {practiceTools} from './practice.ts';
 import {gameTools} from './games.ts';
 import {widgetTools} from './widgets.ts';
 import {calendarTools} from './calendar.ts';
-import {GAME_MAKING_OPEN} from '../../context/games/index.ts';
+import {GAME_MAKING_OPEN} from '../../context/artifacts/index.ts';
 import services from './services.json' with {type:'json'};
 import {WORLD_APPS} from '../../context/applets/index.ts';
 import {worldModules} from './modules.ts';
