@@ -8,9 +8,9 @@ import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {CONVERSATION_ATTENTION,conversationAttentionId,conversationObservation,conversationOriginal,conversationsForAttention,validConversationAttentionId} from '../agent/tasks/index.ts';
 import {worldLogLines} from '../context/activity/index.ts';
-import {HERMES_OLDER,HERMES_RECENT,readOlderHermes,readOwnHermes} from '../platform/electron/src/modules/agent-runtime/agent-files.ts';
-import {createOlderHistory} from '../platform/electron/src/modules/fox/older-history.ts';
-import {broughtConversations} from '../platform/electron/src/modules/fox/migration.ts';
+import {HERMES_OLDER,HERMES_RECENT,readOlderHermes,readOwnHermes} from '../platform/electron/src/modules/agents/agent-files.ts';
+import {createOlderHistory} from '../platform/electron/src/modules/companion/older-history.ts';
+import {broughtConversations} from '../platform/electron/src/modules/companion/migration.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 
 const DAY=86_400,now=Date.parse('2026-10-06T20:00:00Z')/1000;

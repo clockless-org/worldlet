@@ -11,7 +11,7 @@ const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try{
  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'}),errors=pageErrors(page);
  await page.addInitScript(()=>{const w=window as any;w.calls=[];w.source={source:'own',ready:true,name:'claude-sonnet',provider:'anthropic'};
-  // Settings › Agents (agent/agents/GRANTS.md): one Agent with its default Grants and newest decisions.
+  // Settings › Agents (agent/gate/GRANTS.md): one Agent with its default Grants and newest decisions.
   w.access=[{id:'hermes',name:'Hermes Agent',harness:'hermes',kind:'local',createdAt:'2026-10-01T09:00:00.000Z',lastSeenAt:'2026-10-14T18:30:00.000Z',
    grants:[{id:'hermes-channel-read',agentId:'hermes',targets:['items/query','history/query','companion/recall','meetings/decisions','gmail/draft','gmail/read','google-calendar/read','apple-notes/read','todoist/read','applet:mail/read'],access:'read',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'},
     {id:'hermes-channel-link',agentId:'hermes',targets:['world/link'],access:'write',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'},
@@ -78,13 +78,13 @@ try{
    const file='/Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json';
    w.access=[...w.access,{id:'nightly-build',name:b.name,harness:'script',kind:'local',createdAt:'2026-10-15T09:00:00.000Z',grants:[],audit:[],services:[],asks:{ask:false,work:false},board:{read:false,define:false},reports:{report:false,list:false},liveness:'offline',endpointFile:file}];
    return {ok:true,id:'nightly-build',name:b.name,endpointFile:file};}
-  // Orders (agent/agents/GRANTS.md#orders-and-waking-an-agent): the page sends the Agent, and a wake command as a list of
+  // Orders (agent/gate/GRANTS.md#orders-and-waking-an-agent): the page sends the Agent, and a wake command as a list of
   // words; the host checks it (here, as the host does, the program's full path).
   if(b.action==='agentAccess'&&b.operation==='setOrderTarget'){w.orders=b.id?{defaultFor:b.id}:{};return {ok:true};}
   if(b.action==='agentAccess'&&b.operation==='setWake'){if(!Array.isArray(b.command))throw new Error('A wake command is a list of words: the program, then each of its arguments.');
    if(b.command.length&&!b.command[0].startsWith('/'))throw new Error('A wake command starts with the full path of a program, like /usr/local/bin/wake-agent.');
    w.access=w.access.map(a=>a.id===b.id?{...a,wake:[...b.command],audit:[{at:'2026-10-15T08:30:00.000Z',agentId:a.id,target:'asks',action:b.command.length?'set-wake':'clear-wake',decision:'allowed'},...a.audit]}:a);return {ok:true};}
-  // Your World's address (agent/agents/WORLD-ADDRESS.md): the page sends a name, a share choice or an ID, nothing else.
+  // Your World's address (agent/gate/WORLD-ADDRESS.md): the page sends a name, a share choice or an ID, nothing else.
   if(b.action==='worldAddress'){
    const a=w.address??={name:null,reachable:false,remote:true,devices:[],visitors:[],shares:[]};
    const out=()=>({...a,...a.name?{address:'https://'+a.name+'.worldlet.ai'}:{},shares:a.shares.map(s=>({...s,...a.name?{link:'https://'+a.name+'.worldlet.ai/s/'+s.id}:{}}))});
@@ -113,7 +113,7 @@ try{
   if(b.action==='agentHarness'&&b.operation==='forget-gateway'){w.gateway=null;return {ok:true};}
   if(b.action==='agentHarness'&&b.operation==='pair'){w.remote='Mac mini';return {ok:true,remote:{computer:'Mac mini'}};}
   if(b.action==='agentHarness'&&b.operation==='select'){w.agentInUse=b.id;return {ok:true,id:b.id};}
-  // The provider the Agent in use answers with (agent/agents/model-providers.ts): every one it supports, signed in or not.
+  // The provider the Agent in use answers with (agent/gate/model-providers.ts): every one it supports, signed in or not.
   if(b.action==='agentHarness'&&b.operation==='providers')return w.agentInUse?{agent:'hermes',title:'Hermes Agent',chosen:w.provider??null,providers:[
    {id:'chatgpt',name:'ChatGPT',account:'Your ChatGPT plan',signedIn:true,signIn:true},{id:'anthropic',name:'Anthropic',account:'Your Claude plan or Anthropic API key',signedIn:false,signIn:true},
    {id:'opencode-go',name:'OpenCode Go',account:'Your OpenCode Go subscription',signedIn:true,signIn:true}]}:{agent:null,providers:[],chosen:null};
@@ -387,7 +387,7 @@ try{
  assert.deepEqual([await seeing.isChecked(),await defining.isChecked()],[false,true]);
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Board$/.test(c.operation))),
   [{action:'agentAccess',operation:'grantBoard',id:'hermes',kind:'define'},{action:'agentAccess',operation:'ungrantBoard',id:'hermes',kind:'read'}],'only the Agent and which, never targets');
- // "Can save to your Journal" and "Can read Agents' Journal artifacts" (agent/agents/GRANTS.md#agent-artifacts): the same way.
+ // "Can save to your Journal" and "Can read Agents' Journal artifacts" (agent/gate/GRANTS.md#agent-artifacts): the same way.
  const savingJournal=hermesAccess.getByRole('checkbox',{name:'Can save to your Journal',exact:true}),readingJournal=hermesAccess.getByRole('checkbox',{name:'Can read Agents\' Journal artifacts',exact:true});
  assert.deepEqual([await savingJournal.isChecked(),await readingJournal.isChecked()],[false,true]);
  await savingJournal.click();
@@ -397,14 +397,14 @@ try{
  assert.deepEqual([await savingJournal.isChecked(),await readingJournal.isChecked()],[true,false]);
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Artifacts$/.test(c.operation))),
   [{action:'agentAccess',operation:'grantArtifacts',id:'hermes',kind:'save'},{action:'agentAccess',operation:'ungrantArtifacts',id:'hermes',kind:'read'}],'only the Agent and which, never targets');
- // "Can draft GitHub changes" (agent/agents/GRANTS.md#github-drafts): the same way, naming only the Agent.
+ // "Can draft GitHub changes" (agent/gate/GRANTS.md#github-drafts): the same way, naming only the Agent.
  const drafting=hermesAccess.getByRole('checkbox',{name:'Can draft GitHub changes',exact:true});
  assert.equal(await drafting.isChecked(),false);
  await drafting.click();
  await accessPart.getByText('Hermes Agent can now draft GitHub changes for you to approve.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/GithubDrafts$/.test(c.operation))),
   [{action:'agentAccess',operation:'grantGithubDrafts',id:'hermes'}],'only the Agent, never targets');
- // "Can update Issues in <repo> without asking" (agent/agents/GRANTS.md#standing-github-writes): each one with its
+ // "Can update Issues in <repo> without asking" (agent/gate/GRANTS.md#standing-github-writes): each one with its
  // repository and Remove, listed once (not again among the Grants), and Allow for another, the page sending the Agent,
  // the repository and a choice with its label prefix, never targets.
  const writesPart=hermesAccess.locator('[data-github-writes=hermes]');
@@ -426,7 +426,7 @@ try{
   [{action:'agentAccess',operation:'grantGithubWrites',id:'hermes',repo:'example/tools',choice:'labels',labelPrefix:'state:'},
    {action:'agentAccess',operation:'grantGithubWrites',id:'hermes',repo:'not a repo',choice:'comment-labels',labelPrefix:'state:'},
    {action:'agentAccess',operation:'ungrantGithubWrites',id:'hermes',repo:'example/app'}],'the Agent, the repository and a choice, never targets');
- // What it last reported (agent/agents/GRANTS.md#agent-reports), and "Can report its work" and "Can see other Agents".
+ // What it last reported (agent/gate/GRANTS.md#agent-reports), and "Can report its work" and "Can see other Agents".
  await hermesAccess.getByText(/^Quiet: Building the installer · Fix the build · reported \d+ min ago\.$/).waitFor();
  const reporting=hermesAccess.getByRole('checkbox',{name:'Can report its work',exact:true}),listing=hermesAccess.getByRole('checkbox',{name:'Can see other Agents',exact:true});
  assert.deepEqual([await reporting.isChecked(),await listing.isChecked()],[true,false]);
@@ -434,7 +434,7 @@ try{
  await accessPart.getByText('Hermes Agent can now see what your other Agents are doing.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Reports$/.test(c.operation))),
   [{action:'agentAccess',operation:'grantReports',id:'hermes',kind:'list'}],'only the Agent and which, never targets');
- // "Add an Agent for a script" (agent/agents/GRANTS.md#agents-for-scripts), folded: only the name goes to the host.
+ // "Add an Agent for a script" (agent/gate/GRANTS.md#agents-for-scripts), folded: only the name goes to the host.
  await accessPart.locator('[data-script-agents] > summary').click();
  await accessPart.getByRole('button',{name:'Add',exact:true}).click();
  await accessPart.getByText(/^Could not add it: Give it a name/).waitFor();
@@ -445,7 +445,7 @@ try{
  await accessPart.locator('[data-access-agent=nightly-build]').getByText('For a script. Its key is in /Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='addScript')),
   [{action:'agentAccess',operation:'addScript',name:''},{action:'agentAccess',operation:'addScript',name:'Nightly build'}],'only the name');
- // Your World's address (agent/agents/WORLD-ADDRESS.md): a name, the browsers allowed, the board shared and the people
+ // Your World's address (agent/gate/WORLD-ADDRESS.md): a name, the browsers allowed, the board shared and the people
  // who see it, each with its own way to end it; only names, share choices and IDs go to the host.
  const addressRoot=local.locator('[data-part=world-address]'),addressPart=addressRoot.locator('[data-world-address]');
  await addressPart.getByText(/^Give your World its own web address, like alex\.worldlet\.ai/).waitFor();
@@ -468,7 +468,7 @@ try{
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='worldAddress'&&c.operation!=='status')),
   [{action:'worldAddress',operation:'check',name:'taken'},{action:'worldAddress',operation:'check',name:'Alex'},{action:'worldAddress',operation:'claim',name:'Alex'},
    {action:'worldAddress',operation:'share',open:true},{action:'worldAddress',operation:'remove',id:'v1'},{action:'worldAddress',operation:'remove',id:'pk1'}],'only names, choices and IDs');
- // "Give new work to" and each Agent's wake command (agent/agents/GRANTS.md#orders-and-waking-an-agent): the page sends
+ // "Give new work to" and each Agent's wake command (agent/gate/GRANTS.md#orders-and-waking-an-agent): the page sends
  // the Agent, and the command as a list of words, one per line as typed; the host's refusal shows in plain words.
  const target=accessPart.getByRole('combobox',{name:'Give new work to',exact:true});
  assert.equal(await target.inputValue(),'');
@@ -496,7 +496,7 @@ try{
    {action:'agentAccess',operation:'setWake',id:'hermes',command:['/Users/alex/bin/wake-agent','--work','{askId}']},{action:'agentAccess',operation:'setWake',id:'hermes',command:[]},
    {action:'agentAccess',operation:'setOrderTarget',id:''}],'the Agent and a list of words, never a shell line');
  assert.doesNotMatch(await hermesAccess.innerText(),/\bMCP\b|token|endpoint|shell/i,'plain words only');
- // "Can draft PostHog changes" (agent/agents/GRANTS.md#posthog-and-notion-drafts): only for a connected Service, naming
+ // "Can draft PostHog changes" (agent/gate/GRANTS.md#posthog-and-notion-drafts): only for a connected Service, naming
  // only the Agent and the Service. Notion is not connected here, so it has no checkbox.
  assert.equal(await hermesAccess.getByRole('checkbox',{name:'Can draft Notion changes',exact:true}).count(),0);
  const posthogDrafting=hermesAccess.getByRole('checkbox',{name:'Can draft PostHog changes',exact:true});
@@ -540,7 +540,7 @@ try{
  await broken.waitFor({state:'detached'});
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&['install-hermes','select'].includes(c.operation)).slice(-2).map(c=>c.operation+(c.id?':'+c.id:''))),['install-hermes','select:hermes']);
  await page.evaluate(()=>{(window as any).agentInUse=null;});
- // An Agent on another computer (agent/windows/README.md#another-computers-agent): its code pairs, Settings says where Fox
+ // An Agent on another computer (platform/web/README.md#another-computers-agent): its code pairs, Settings says where Fox
  // runs, and Stop using ends the pairing.
  // Both are folded under Other ways to connect, few people need them (owner request 2026-10-10).
  await local.getByText('Other ways to connect',{exact:true}).click();
@@ -553,7 +553,7 @@ try{
  await remote.getByRole('button',{name:'Stop using',exact:true}).click();
  await remote.getByRole('button',{name:'Pair',exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&['pair','clear'].includes(c.operation)).map(c=>c.operation)),['clear','pair','clear']);
- // An OpenClaw Gateway on another computer, reached directly (agent/windows/README.md#an-agent-gateway-on-another-computer):
+ // An OpenClaw Gateway on another computer, reached directly (platform/web/README.md#an-agent-gateway-on-another-computer):
  // its address and token connect, Settings says it is reached directly, Stop using keeps it to Use again without the
  // token, and Forget removes it.
  const gateway=local.locator('[data-agent=gateway]');

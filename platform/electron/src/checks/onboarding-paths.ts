@@ -1,8 +1,8 @@
 import path from 'node:path';
 import {dialog,Menu,shell,type BaseWindow,type MenuItem,type WebContents,type WebContentsView} from 'electron';
 import {AGENT,ANALYTICS,DESKTOP_COMPANION,type AgentService,type AnalyticsService,type DesktopCompanionService} from '../host/services.ts';
-import {readSelection} from '../modules/agent-runtime/local-harness.ts';
-import {readAdopted} from '../modules/agent-runtime/local-memory.ts';
+import {readSelection} from '../modules/agents/local-harness.ts';
+import {readAdopted} from '../modules/agents/local-memory.ts';
 import type {CheckContext} from './index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 

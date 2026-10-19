@@ -6,7 +6,7 @@ import {fitAttentionPanel} from './fit-attention-panel.ts';
 import {mountWorldLog} from './world-log.ts';
 import {mountTaskPanel} from './task-panel.ts';
 import {agentVersionLine} from './agent-version.ts';
-import {summarizeRequest} from '../../agent/agents/index.ts';
+import {summarizeRequest} from '../../agent/gate/index.ts';
 import {callHost} from '../../platform/bridge/host.ts';
 import {isDesktopCompanion,requireWorldSurface} from '../companion/index.ts';
 import {displayReleaseVersion} from '../distribution/index.ts';

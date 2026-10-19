@@ -1,6 +1,6 @@
 import {PAGE_FEATURES,type HostFeatures} from '../../contracts/platform.ts';
 import type {BrowserBudget} from '../../contracts/browser-surface.ts';
-import {readBrowserBudget} from '../../agent/browser/index.ts';
+import {readBrowserBudget} from '../../agent/applets/index.ts';
 // Compatibility for snapshots from older hosts. New hosts may explicitly
 // advertise capabilities; UI depends on features rather than OS names.
 // Picture in picture needs a host that knows browserPip, so older hosts never offer it.

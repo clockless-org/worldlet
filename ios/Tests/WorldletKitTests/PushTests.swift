@@ -13,7 +13,7 @@ import FoundationNetworking
 final class PushTests: XCTestCase {
     let secret = Data(0..<32)
 
-    /// Seals like the computer's WebCrypto (agent/windows/pairing.ts sealBox): the shared vector's key from HKDF, additional
+    /// Seals like the computer's WebCrypto (platform/web/pairing.ts sealBox): the shared vector's key from HKDF, additional
     /// data `<id>|push`, base64url(nonce | ciphertext | tag). Built here so the test does not lean on PairKeys.seal.
     private func sealPush(_ json: String) throws -> String {
         let key = HKDF<SHA256>.deriveKey(inputKeyMaterial: SymmetricKey(data: secret), salt: Data("worldlet-pair-v1".utf8),
@@ -33,7 +33,7 @@ final class PushTests: XCTestCase {
         XCTAssertThrowsError(try PairKeys(secret: Data(repeating: 9, count: 32)).openPush(box: box))
     }
 
-    /// A box the desktop sealed with WebCrypto (agent/windows/pairing.ts sealBox(keys, 'push', …), the shared test vector).
+    /// A box the desktop sealed with WebCrypto (platform/web/pairing.ts sealBox(keys, 'push', …), the shared test vector).
     func testOpensDesktopPushBox() throws {
         let box = "NXbWmeDoP9KSc1t5IfsA6v8H3oKMTIaFarv2JFBzi5kcP8-ArxwPFaZXsi5NeiEBQFPq4qTreDA4A3lT4qpNTPN1rF3t5y_AJfCU4qL4julqls0JVaGzZIMUxXnhFOU4WW8cxLsndfk9IomPAdR4ZqPHoZoEw4UWzE59d8G6QBx2iiJprNUOLz6sfXFdW6Fi1gpZa_sTdvE_zCxoNWUcP7Fg-oAAuOs"
         let push = try PairKeys(secret: secret).openPush(box: box)
@@ -66,7 +66,7 @@ final class PushTests: XCTestCase {
         XCTAssertNil(PushTarget(userInfo: ["p": "x"]))
     }
 
-    /// The notification's buttons (agent/windows/README.md, Push › Actions) send the app's own messages.
+    /// The notification's buttons (platform/web/README.md, Push › Actions) send the app's own messages.
     func testButtonsSendTheAppsOwnMessages() throws {
         let keys = PairKeys(secret: secret)
         func read(_ json: String) throws -> PhonePush { try keys.openPush(box: sealPush(json)) }

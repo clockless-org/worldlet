@@ -1,7 +1,7 @@
 import path from 'node:path';
 import {AGENT,FOX,type AgentService,type FoxService} from '../host/services.ts';
-import {LocalHarnessRuntime,readSelection} from '../modules/agent-runtime/local-harness.ts';
-import type {AgentEventHandler,Row} from '../modules/agent-runtime/types.ts';
+import {LocalHarnessRuntime,readSelection} from '../modules/agents/local-harness.ts';
+import type {AgentEventHandler,Row} from '../modules/agents/types.ts';
 import type {CheckContext} from './index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 import {errorMessage as message} from '../files.ts';

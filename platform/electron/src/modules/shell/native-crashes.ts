@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import type {Row} from '../../host/types.ts';
 
-/** Native crash reports written since the last look (agent/diagnostics/ANALYTICS.md#native-crashes): on macOS the
+/** Native crash reports written since the last look (agent/base/ANALYTICS.md#native-crashes): on macOS the
  * system's own reports of Worldlet's processes, already unwound; on Windows the Crashpad minidumps in the library's
  * logs (main.ts), of which only the crash address is read. At most `limit`, oldest first. */
 export function nativeCrashes({since,dumps,system=process.platform,reports=path.join(os.homedir(),'Library','Logs','DiagnosticReports'),limit=5}:

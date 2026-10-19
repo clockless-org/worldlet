@@ -59,7 +59,7 @@ final class FakeRoom: RoomConnector, @unchecked Sendable {
 final class RoomTests: XCTestCase {
     let secret = Data(0..<32)
 
-    /// The same vector as agent/windows room.ts roomEntry, from the phone's side.
+    /// The same vector as agent/base room.ts roomEntry, from the phone's side.
     func testEntryMatchesDesktop() {
         let entry = roomEntry(keys: PairKeys(secret: secret), relay: PairLink.defaultRelay)
         XCTAssertEqual(entry.url.absoluteString, "wss://worldlet.ai/api/room/6ffad7c07348adf279da3f73518e9dbb0035c89a312fd6c43de409549a2fb7a4")

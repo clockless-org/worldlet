@@ -1,4 +1,4 @@
-import {loginItemOfferDue,loginItemOn,loginItemText} from '../../agent/distribution/index.ts';
+import {loginItemOfferDue,loginItemOn,loginItemText} from '../../agent/base/index.ts';
 
 /** Worldlet turns on Open at Login once (#1229) and Fox says so, with a way to turn it off: after
  * onboarding and its celebrations, never during setup, the tour or the first task. It does not ask

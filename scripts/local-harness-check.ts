@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,claudeCodeSignInExpired,codexProblem,codexWorldToolsFailed,modelAtCapacity,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
- type LocalHarnessId} from '../agent/agents/index.ts';
+ type LocalHarnessId} from '../agent/gate/index.ts';
 import {spawn} from 'node:child_process';
-import {openWorldToolBridge} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
-import {AgentNotStarting,BUSY_RETRIES,forgetNotStarting,LocalHarnessAdapter,LocalHarnessRuntime,harnessEnvironment,harnessVersion,locateLocalHarnesses,readSelection,searchDirectories,selectedInstall,writeSelection,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
+import {openWorldToolBridge} from '../platform/electron/src/modules/agents/world-tool-bridge.ts';
+import {AgentNotStarting,BUSY_RETRIES,forgetNotStarting,LocalHarnessAdapter,LocalHarnessRuntime,harnessEnvironment,harnessVersion,locateLocalHarnesses,readSelection,searchDirectories,selectedInstall,writeSelection,type HarnessEnvironment} from '../platform/electron/src/modules/agents/local-harness.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Local Agent Harnesses at setup: the shared catalog, recommendation, per-command turns and output

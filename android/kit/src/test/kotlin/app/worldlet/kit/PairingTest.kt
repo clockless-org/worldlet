@@ -41,7 +41,7 @@ class PairingTest {
         assertEquals(link, WorldletJson.decodeFromString(PairLink.serializer(), WorldletJson.encodeToString(PairLink.serializer(), link)))
     }
 
-    /** A box the desktop sealed (WebCrypto, agent/windows/pairing.ts) opens here, and only in its own place. */
+    /** A box the desktop sealed (WebCrypto, platform/web/pairing.ts) opens here, and only in its own place. */
     @Test
     fun opensDesktopBox() {
         val keys = PairKeys(secret)

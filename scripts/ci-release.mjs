@@ -9,7 +9,7 @@
 //                    so a feed's address never changes: releases/download/channel-<name>/<feed>.
 //  staging-<name>    the same for a channel that is not live yet (platform/electron/distribution/Channels.json): CI
 //                    publishes there while the release machines still run the channel, and nothing reads it.
-// Channels are the in-app update channels (agent/distribution/update-channel.ts):
+// Channels are the in-app update channels (agent/base/update-channel.ts):
 //  dev    every push to main; alpha  a Dev build promoted by a maintainer; beta  an Alpha build promoted, the public
 //  download, whose feeds keep history. Promotion never rebuilds: it only names the same installer in another feed.
 // The website's old /downloads/ addresses forward to these (installed apps that read them keep updating).

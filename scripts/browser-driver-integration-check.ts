@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {createInterface} from 'node:readline';
 import {chromium} from 'playwright';
-import {browserDriverStart,browserDriverNext} from '../agent/browser/index.ts';
+import {browserDriverStart,browserDriverNext} from '../agent/applets/index.ts';
 const python=process.env.WORLDLET_TOOLS_PYTHON,binary=process.env.WORLDLET_AGENT_BROWSER;
 if(!python||!binary)throw Error('Set WORLDLET_TOOLS_PYTHON and WORLDLET_AGENT_BROWSER to installed runtimes.');
 const browser=await chromium.launch();

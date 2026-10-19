@@ -2,15 +2,15 @@ import type {ServiceRead} from '../../../../contracts/services.ts';
 import type {NativeImage} from 'electron';
 import type {Row} from './types.ts';
 import type {HarnessApprovals,HarnessCalls,HarnessEvents,HarnessSend,HarnessSkills,HarnessTools,HarnessVoice} from '../../../../contracts/harness-services.ts';
-import type {PhonePushRequest} from '../../../../agent/windows/index.ts';
+import type {PhonePushRequest} from '../../../web/index.ts';
 import type {AgentAuditEntry,AgentIdentity,Grant} from '../../../../contracts/agent-identity.ts';
 import type {McpSession,PosthogSettings} from '../../../../context/sources/index.ts';
-import type {PosthogRequest} from '../../../../agent/agents/index.ts';
+import type {PosthogRequest} from '../../../../agent/gate/index.ts';
 // Cross-module service contracts inside the Electron host. A module provides one with
 // `host.provide(NAME, impl)` and others reach it with `host.use(NAME)` / `host.optional(NAME)`.
 // Modules never import each other's implementation files.
 
-// Agent runtime (modules/agent-runtime) ---------------------------------------------------
+// Agent runtime (modules/agents) ---------------------------------------------------
 /** One Harness conversation lane. `onEvent` receives adapter events; returning a value
  * answers a `tool` event (the value becomes the tool result). */
 export type AgentEventHandler=(event:Row)=>Promise<Row|null|undefined>|Row|null|undefined;
@@ -98,9 +98,9 @@ export interface AgentService {
  channelSend?(source:string):HarnessSend|null;
  /** Where a World tool call that reaches Worldlet outside any Fox turn goes (World tools on Hermes: another Hermes channel,
   * owner decision 2026-10-08 19:15Z); Fox's module answers it as a turn of its own. `agent` is the Agent whose token made
-  * the call (agent/agents/GRANTS.md). */
+  * the call (agent/gate/GRANTS.md). */
  onChannelTool?(handler:(name:string,args:Row,agent?:string)=>Promise<Row>):void;
- /** Each Agent's identity, Grants and audit (agent/agents/GRANTS.md); null where the host keeps none. */
+ /** Each Agent's identity, Grants and audit (agent/gate/GRANTS.md); null where the host keeps none. */
  agentAccess?():AgentAccess|null;
  /** Fox's Harness's own text-to-speech (`voice`), null when it declares none or is not installed here: spoken replies
   * then use a system voice. */
@@ -215,7 +215,7 @@ export interface CompanionService {
 }
 export const COMPANION='companion';
 
-// Fox foreground conversation (modules/fox) --------------------------------------------------
+// Fox foreground conversation (modules/companion) --------------------------------------------------
 export interface FoxService {
  /** Mac `foxScope()`: chat, status, warm-up and privacy gates address the same Agent home. */
  scope():{sample:boolean,setup:boolean};
@@ -248,38 +248,38 @@ export interface FoxService {
  /** Answers the Agent's permission prompt (as the `harnessApproval` action does), for a phone or browser without the page. */
  answerApproval?(id:string,choice:string):Promise<void>;
  /** What the Task panel draws from (agent/tasks TaskPanelInput: the Agent's scheduled jobs, the Applet tasks working now),
-  * for the host's own Center while the World page is not there (modules/phone). */
+  * for the host's own Center while the World page is not there (modules/shell). */
  taskPanel?():Promise<Row>;
 }
 export const FOX='fox';
 
-// Phone pairing (modules/phone) and widgets (modules/artifacts) ------------------------------------
+// Phone pairing (modules/shell) and widgets (modules/attention) ------------------------------------
 export interface PhoneService {
  /** Sends a desktop slot to the paired phone when it changed (kept for a phone that pairs later). */
  publish(slot:'widgets',value:unknown):Promise<boolean>;
  /** Seconds since the paired phone was last open or sent something; null when it never was. */
  idleSeconds():number|null;
- /** Notifies the paired phone (agent/windows PhonePush), only while it is paired and not open and never in setup or the
+ /** Notifies the paired phone (agent/base PhonePush), only while it is paired and not open and never in setup or the
   * sample world; resolves whether the relay sent it. Routines and background task reports call it directly. */
  notify(push:PhonePushRequest):Promise<boolean>;
- /** The turn Fox is streaming (agent/windows phoneLive) for an open phone or browser, from a turn the host runs without the
+ /** The turn Fox is streaming (agent/base phoneLive) for an open phone or browser, from a turn the host runs without the
   * World page (FoxService.converse); the done update also pushes the reply to a phone that is put away. */
  live?(value:Row):Promise<boolean>;
- /** The browser link to this World for another device (agent/windows/README.md#web, `kind: 'web'`): the one there is, or a
+ /** The browser link to this World for another device (platform/web/README.md#web, `kind: 'web'`): the one there is, or a
   * new one when there is none. The Agent's `world/link` hands it to the person; it needs no World page. */
  worldLink?():Promise<Row>;
- /** The full World's link for another device (`kind: 'world'`, agent/windows/world-room.ts): the one there is, or a new one. */
+ /** The full World's link for another device (`kind: 'world'`, platform/web/world-room.ts): the one there is, or a new one. */
  worldRoomLink?():Promise<Row>;
  /** A new full World link in place of the old one, whose pages close (a browser signed out of the World's address). */
  worldRoomRenew?():Promise<Row>;
- /** This computer's own server on 127.0.0.1 (modules/phone/local-relay.ts), started on first use on the port it used
+ /** This computer's own server on 127.0.0.1 (modules/shell/local-relay.ts), started on first use on the port it used
   * last: a browser link on this computer, and the World page a host without a window serves there (platform/node). */
- localServer?():Promise<import('../modules/phone/local-relay.ts').LocalServer>;
+ localServer?():Promise<import('../modules/shell/local-relay.ts').LocalServer>;
 }
 export const PHONE='phone';
-/** Opens the page that runs browsers' direct lines (modules/phone/rtc-host.ts): a hidden window in the Electron host
+/** Opens the page that runs browsers' direct lines (modules/shell/rtc-host.ts): a hidden window in the Electron host
  * (rtc-window.ts), provided before the modules install. A host without it runs a browser link through the room only. */
-export type RtcPageFactory=()=>import('../modules/phone/rtc-host.ts').RtcPage;
+export type RtcPageFactory=()=>import('../modules/shell/rtc-host.ts').RtcPage;
 export const RTC_PAGE='rtcPage';
 /** The person's activity fact for background admission (Core `userIdle`, #1650): seconds since their last input on
  * this computer or on an open paired phone. Owned by modules/shell. */
@@ -300,10 +300,10 @@ export interface OngoingService {
 }
 export const ONGOING='ongoing';
 
-// Browser (modules/browser) -----------------------------------------------------------------
+// Browser (modules/applets) -----------------------------------------------------------------
 export interface BrowserService {
  /** The website page the panel shows, on either engine, for the release-gate checks. */
- visiblePage():import('../modules/browser/web-page.ts').WebPage|null;
+ visiblePage():import('../modules/applets/web-page.ts').WebPage|null;
  /** A link from the World page or a website: opens in the in-app browser or the system browser. */
  openExternalRequest(url:string):void;
  stop():void;
@@ -315,7 +315,7 @@ export interface BrowserService {
  resetHistory():void;
  /** What a website page's recorder saved: kept in the World and followed for game reviews (the release-gate
   * game review check records Showdown battles through it). */
- recorded(visits:import('../modules/browser/recorder.ts').RecordedVisit[],records:(import('../../../../agent/browser/index.ts').WebRecord&{visit:string})[]):void;
+ recorded(visits:import('../modules/applets/recorder.ts').RecordedVisit[],records:(import('../../../../agent/applets/index.ts').WebRecord&{visit:string})[]):void;
  /** Starts a proactive game review if one is due (context/artifacts battleReviewDue); the games handed to Fox, if any. */
  reviewGamesNow():import('../../../../context/artifacts/index.ts').FinishedBattle[]|null;
  /** The game on the page on screen, when it is one Worldlet can follow (a Showdown battle): what is being played now and
@@ -324,12 +324,12 @@ export interface BrowserService {
 }
 export const BROWSER='browser';
 
-// The media surface (modules/media) ------------------------------------------------------------
+// The media surface (modules/shell) ------------------------------------------------------------
 /** The host-owned playback and capture surface the World's sound, Fox's voice and Voice Memos share. */
-export interface MediaService {readonly surface:import('../modules/media/surface.ts').MediaSurface}
+export interface MediaService {readonly surface:import('../modules/shell/surface.ts').MediaSurface}
 export const MEDIA='media';
 
-// World sound (modules/world-audio) and Fox's voice (modules/voice) -----------------------------
+// World sound (modules/world) and Fox's voice (modules/companion) -----------------------------
 export interface AudioService {setDucked(active:boolean,reason:'live'|'recording'|'spoken-reply'):void;snapshot():Row;stop():void}
 export const AUDIO='audio';
 export interface SpeechService {
@@ -372,7 +372,7 @@ export interface DesktopCompanionService {
  backdropImage?():NativeImage|null;
 }
 export const DESKTOP_COMPANION='desktopCompanion';
-/** Run in background (agent/windows/README.md#web): a preference set from the browser link's section (modules/phone) and
+/** Run in background (platform/web/README.md#web): a preference set from the browser link's section (modules/shell) and
  * cleared when that link ends. Closing the World then leaves no window, not even Fox, and a login launch opens none. */
 export const RUN_IN_BACKGROUND='worldlet.runInBackground';
 export interface AppUpdatesService {snapshot():Row;activate():Promise<Row>}
@@ -395,7 +395,7 @@ export interface AnalyticsService {
 export const ANALYTICS='analytics';
 
 // Credentials (src/vault.ts, always present) -----------------------------------------------------
-/** Per-Agent identity, Grants and audit (agent/agents/GRANTS.md), kept by the Agent runtime: identities and Grants with
+/** Per-Agent identity, Grants and audit (agent/gate/GRANTS.md), kept by the Agent runtime: identities and Grants with
  * Fox's setup choices (`agent_settings`), token hashes in the vault, audit entries in the World's ledger. */
 export interface AgentAccess {
  /** The Agent's identity, made on first use; its default Grants are written again each run. A revoked one stays revoked. */
@@ -463,10 +463,10 @@ export interface WorldWebService {
  link():Promise<string>;
 }
 export const WORLD_WEB='worldWeb';
-/** The World page on another device, met through the pairing room (modules/phone/world-room-link.ts): the host takes
+/** The World page on another device, met through the pairing room (modules/shell/world-room-link.ts): the host takes
  * each page that joined as it takes a browser's World page here (host/web-page.ts), with only what ROOM_ALLOWED lets
  * through (contracts/web-world.ts). */
 export interface WorldRoomPageService {
- accept(socket:import('../modules/phone/web-socket.ts').TextSocket):void;
+ accept(socket:import('../modules/shell/web-socket.ts').TextSocket):void;
 }
 export const WORLD_ROOM_PAGE='worldRoomPage';

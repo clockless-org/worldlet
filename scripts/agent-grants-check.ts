@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {serviceDraftGrant,serviceDraftGrantAuditEntry,serviceDraftGranted,artifactGrant,artifactGrantAuditEntry,artifactGrantTargets,artifactGranted,githubWriteGrant,githubWriteGrantAuditEntry,githubWriteGrantFor,githubWriteGrants,githubWriteScopeWords,OWN_GRANT_TARGETS,githubDraftGrant,githubDraftGrantAuditEntry,githubDraftGranted,boardGrant,boardGrantAuditEntry,boardGrantTargets,boardGranted,askGrant,askGrantAuditEntry,askGrantTargets,askGranted,AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites,reportGrant,reportGrantAuditEntry,reportGrantTargets,reportGranted} from '../agent/agents/grants.ts';
-import {HERMES_CHANNEL_READ_ONLY,hermesChannelToolAllowed} from '../agent/agents/hermes-server.ts';
-import {resolveAction,worldActionOf,worldActions} from '../agent/tools/gateway.ts';
-import {turnWriteAdmission,writeDecision} from '../agent/agents/turn-trust.ts';
-import {GITHUB_DRAFT_REASONS,GITHUB_WRITE_REASONS,readGithubWriteRun,readGithubWriteScope} from '../agent/agents/github-drafts.ts';
+import {serviceDraftGrant,serviceDraftGrantAuditEntry,serviceDraftGranted,artifactGrant,artifactGrantAuditEntry,artifactGrantTargets,artifactGranted,githubWriteGrant,githubWriteGrantAuditEntry,githubWriteGrantFor,githubWriteGrants,githubWriteScopeWords,OWN_GRANT_TARGETS,githubDraftGrant,githubDraftGrantAuditEntry,githubDraftGranted,boardGrant,boardGrantAuditEntry,boardGrantTargets,boardGranted,askGrant,askGrantAuditEntry,askGrantTargets,askGranted,AGENT_AUDIT_KEEP,GRANT_REASONS,agentAuditEntry,channelDefaultGrants,serviceGrantAuditEntry,serviceGranted,serviceReadGrant,serviceReadTargets,grantCoversTarget,grantDecision,grantPatternMatches,keepAgentAudit,readAgentIdentity,readGrant,standingActions,standingCallDecision,STANDING_OUTSIDE_TURN,worldCallWrites,reportGrant,reportGrantAuditEntry,reportGrantTargets,reportGranted} from '../agent/gate/grants.ts';
+import {HERMES_CHANNEL_READ_ONLY,hermesChannelToolAllowed} from '../agent/gate/hermes-server.ts';
+import {resolveAction,worldActionOf,worldActions} from '../agent/gate/gateway.ts';
+import {turnWriteAdmission,writeDecision} from '../agent/gate/turn-trust.ts';
+import {GITHUB_DRAFT_REASONS,GITHUB_WRITE_REASONS,readGithubWriteRun,readGithubWriteScope} from '../agent/gate/github-drafts.ts';
 import {prepareWorldItem} from '../context/items/world-item-state.ts';
 import {mergeArtifact,readArtifact} from '../context/artifacts/artifacts.ts';
 

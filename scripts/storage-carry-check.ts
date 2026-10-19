@@ -1,7 +1,7 @@
-// A page moving between the website engines takes its site's localStorage along (agent/browser/storage-carry.ts).
+// A page moving between the website engines takes its site's localStorage along (agent/applets/storage-carry.ts).
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
-import {STORAGE_CARRY,carriedStorage,storageCarryScript} from '../agent/browser/index.ts';
+import {STORAGE_CARRY,carriedStorage,storageCarryScript} from '../agent/applets/index.ts';
 
 const store=(entries:Record<string,string>={})=>{const map=new Map(Object.entries(entries));return {map,getItem:(k:string)=>map.has(k)?map.get(k)!:null,setItem:(k:string,v:string)=>{map.set(k,String(v));},clear:()=>map.clear()};};
 const run=(script:string,origin:string,local=store(),session=store())=>{vm.runInNewContext(script,{location:{origin},localStorage:local,sessionStorage:session,Date,JSON});return {local,session};};

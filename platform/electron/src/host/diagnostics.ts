@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {StringDecoder} from 'node:string_decoder';
 import {core} from '../core.ts';
-import {redactDiagnosticText,diagnosticLineCapture} from '../../../../agent/diagnostics/index.ts';
+import {redactDiagnosticText,diagnosticLineCapture} from '../../../../agent/base/index.ts';
 import {ensureDirectory,errorMessage} from '../files.ts';
 /** Appends text to a log file, renamed to `<name>.previous<ext>` once past 1 MB. Never throws. */
 export function appendRotated(file:string,text:string){
@@ -32,7 +32,7 @@ export interface DiagnosticNote {at:string;operation:string;requestId:string;mes
 /** How many recent failures `recent` keeps. */
 const RECENT_NOTES=100;
 /** Appends Core-projected error records to `logs/diagnostics.jsonl`, rotated past 1 MB. The file keeps only Core's
- * code and operation, never the error text (agent/diagnostics/report.ts); `recent` holds the last few failures with
+ * code and operation, never the error text (agent/base/report.ts); `recent` holds the last few failures with
  * their text in this process's memory, so a development check that finds a failure can say what it was. */
 export function createDiagnostics(root:string){
  const file=path.join(root,'logs','diagnostics.jsonl');

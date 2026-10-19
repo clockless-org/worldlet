@@ -4,8 +4,8 @@ import {ONGOING,WORLD_TOOLS,type OngoingService,type WorldToolsService} from '..
 import type {Host} from '../../host/types.ts';
 import {installExternalEvents} from './external-events.ts';
 import {installHarnessCalls} from './harness-calls.ts';
-import {readAgentProfile} from '../agent-runtime/agent-profile.ts';
-import {readSelection} from '../agent-runtime/local-harness.ts';
+import {readAgentProfile} from '../agents/agent-profile.ts';
+import {readSelection} from '../agents/local-harness.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 
 const HOUR=3_600_000;
@@ -36,7 +36,7 @@ export function installOngoing(host:Host){
    const ledger=store.ledger();
    const {save,forget}=ongoingRefresh(things(),ledger.broughtConversations(),now(),c=>ledger.ownText(c.source,c.session,60));
    if(save.length||forget.length){store.ledger().saveOngoing(save as any[],forget);changed();}
-   // The things the chosen Agent said the person handles most (agent/agents/agent-profile.ts) become their own Applets once
+   // The things the chosen Agent said the person handles most (agent/gate/agent-profile.ts) become their own Applets once
    // their conversations are here; a removed one stays removed (agent/tasks ongoingFromAgent).
    const chosen=readSelection(host.profile.root),said=chosen?readAgentProfile(host.profile.root,chosen)?.things??[]:[];
    const keep=said.length?ongoingFromAgent(said,things(),ledger.broughtConversations(),now(),c=>ledger.ownText(c.source,c.session,60),chosen??undefined):[];
@@ -60,7 +60,7 @@ export function installOngoing(host:Host){
    seed(center,conversationsForAttention(ledger.broughtConversations(),now()));
   }catch(error){host.diagnostics.record(error,'ongoingAttention');}
  }
- // What the chosen Agent picked out for the Center when setup asked it to describe itself (agent/agents/agent-profile.ts
+ // What the chosen Agent picked out for the Center when setup asked it to describe itself (agent/gate/agent-profile.ts
  // `attention`) is there when the World opens, before any synthesis pass, each from a conversation the Center reads.
  function seed(center:WorldToolsService,recent:ReturnType<typeof conversationsForAttention>){
   const chosen=readSelection(host.profile.root),said=chosen?readAgentProfile(host.profile.root,chosen)?.attention??[]:[];
@@ -120,7 +120,7 @@ export function installOngoing(host:Host){
    throw new WorldletError('Unknown request.');
   },
  });
- // Bringing an Agent calls refresh() (modules/fox); the clock catches conversations that age into or out of view.
+ // Bringing an Agent calls refresh() (modules/companion); the clock catches conversations that age into or out of view.
  const clock=setInterval(refresh,HOUR);
  host.onPageLoaded(refresh);
  host.onQuit(()=>clearInterval(clock));

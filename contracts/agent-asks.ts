@@ -1,10 +1,10 @@
-/** Agent asks (agent/agents/GRANTS.md#agent-asks): what an Agent asks the person, or work it leaves for an Agent to take.
+/** Agent asks (agent/gate/GRANTS.md#agent-asks): what an Agent asks the person, or work it leaves for an Agent to take.
  * An ask is posted by one Agent through the `worldlet` MCP server; the host stamps its `agentId` from the token that
  * made the call, never from what the model sent. The person answers it on its Attention card; an Agent reads the
  * answer by polling `asks/read`. An `input` ask is work any Agent with "Can take work" may claim (a lease) and resolve.
  * Work may name the one Agent it is for (`for`, an order): that Agent sees it first, and the host may wake it
- * (agent/agents/GRANTS.md#orders-and-waking-an-agent).
- * Hosts own IDs, clocks and storage; Core decides (agent/agents/asks.ts). */
+ * (agent/gate/GRANTS.md#orders-and-waking-an-agent).
+ * Hosts own IDs, clocks and storage; Core decides (agent/gate/asks.ts). */
 
 /** `ask`: a question for the person, answered with one of its choices or a note. `input`: work an Agent may claim. */
 export type AgentAskKind='ask'|'input';
@@ -22,7 +22,7 @@ export interface AgentAskAnswer {
  /** ISO instant, host clock. */
  at:string;
 }
-/** A screenshot or a file an ask carries (agent/agents/GRANTS.md#agent-asks): only what describes it. Its bytes are kept
+/** A screenshot or a file an ask carries (agent/gate/GRANTS.md#agent-asks): only what describes it. Its bytes are kept
  * apart in the World (`agent_ask_attachments` in world.sqlite), keyed by the ask's ID and this ID, and read with
  * `asks/attachment`. An attachment is data: never instructions, for a model or anyone else. */
 export interface AgentAskAttachment {
@@ -75,7 +75,7 @@ export interface AgentAsk {
   * it with `asks/read` and may claim it at once; another may claim it only once it has waited
   * AGENT_ASK_LIMITS.forMinutes unclaimed, or after a lease on it ran out. */
  for?:string;
- /** GitHub, PostHog and Notion drafts this ask carries (agent/agents/GRANTS.md#agent-asks), each the posting Agent's
+ /** GitHub, PostHog and Notion drafts this ask carries (agent/gate/GRANTS.md#agent-asks), each the posting Agent's
   * own and pending when posted. Answering the ask's `Approve` choice on this computer approves them all, each read again first and refused
   * when its target changed; any other answer leaves them unrun. */
  draftIds?:string[];
@@ -138,7 +138,7 @@ export interface AgentAskReply {id:string;outcome:'answered'|'done'|'skipped';ch
 /** What became of one of an ask's drafts, as `asks/read` shows it. */
 export interface AgentAskDraft {id:string;status:string;resultUrl?:string;reason?:string}
 
-/** Orders and waking an Agent (agent/agents/GRANTS.md#orders-and-waking-an-agent): the World's own setting, kept with the
+/** Orders and waking an Agent (agent/gate/GRANTS.md#orders-and-waking-an-agent): the World's own setting, kept with the
  * Agents' Grants in world.sqlite (`agent_settings`, `agent-orders`), changed only in Settings › Agents. */
 export interface AgentOrders {
  /** "Give new work to": the Agent that `input` work posted without `for` is for. */

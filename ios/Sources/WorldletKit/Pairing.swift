@@ -5,7 +5,7 @@ import CryptoKit
 import Crypto
 #endif
 
-// Phone pairing protocol v1, the iPhone half of agent/windows/pairing.ts (see agent/windows/README.md). The QR code carries a
+// Phone pairing protocol v1, the iPhone half of platform/web/pairing.ts (see platform/web/README.md). The QR code carries a
 // 32-byte secret; HKDF-SHA256 turns it into the relay pairing id, one bearer token per side and the AES-256-GCM key
 // that seals every payload. scripts/phone-pairing-check.ts and PairingTests.swift pin the same test vector.
 public enum PairingError: LocalizedError, Equatable {
@@ -43,7 +43,7 @@ public struct PairLink: Equatable, Codable, Sendable {
     public let secret: Data
     public let relay: URL
     public let name: String
-    /// The pairing meets in the pairing room (agent/windows/README.md#room): the code said `m=room`, or the computer moved a
+    /// The pairing meets in the pairing room (platform/web/README.md#room): the code said `m=room`, or the computer moved a
     /// relay pairing there. Absent from links kept before.
     public let room: Bool?
 

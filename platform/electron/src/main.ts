@@ -1,6 +1,6 @@
-import {sharedEnginePid,stopSharedEngine,websiteEngine} from './modules/browser/engine/process.ts';
-import {readMemory,refreshMemory} from './modules/browser/memory.ts';
-import {browserBudget} from '../../../agent/browser/index.ts';
+import {sharedEnginePid,stopSharedEngine,websiteEngine} from './modules/applets/engine/process.ts';
+import {readMemory,refreshMemory} from './modules/applets/memory.ts';
+import {browserBudget} from '../../../agent/applets/index.ts';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -22,8 +22,8 @@ import {installCapture} from './world/capture.ts';
 import {captureRequest,refuseBesideRunningCopy,runCapture,type CaptureRequest} from './world/window-capture.ts';
 import {probeRequest,refuseProbeBesideRunningCopy,runProbe,type ProbeRequest} from './world/permission-probe.ts';
 import {loginItemCheckRequest,refuseLoginItemCheckBesideRunningCopy,runLoginItemCheck,type LoginItemCheckRequest} from './world/login-item-check.ts';
-import {openedAtLogin} from '../../../agent/distribution/index.ts';
-import {onboardingUnfinished} from '../../../agent/onboarding/index.ts';
+import {openedAtLogin} from '../../../agent/base/index.ts';
+import {onboardingUnfinished} from '../../../agent/companion/index.ts';
 import {updateAcceptance} from './modules/shell/update-acceptance.ts';
 import {modules} from './modules/index.ts';
 import {runCheck} from './checks/index.ts';
@@ -31,7 +31,7 @@ import {ensureDirectory,errorMessage} from './files.ts';
 import {createVault} from './vault.ts';
 import {ANALYTICS,DESKTOP_COMPANION,PHONE,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,WORLD_ROOM_PAGE,WORLD_WEB,type AnalyticsService,type DesktopCompanionService,type PhoneService,type RtcPageFactory,type VaultService,type WorldRoomPageService,type WorldWebService} from './host/services.ts';
 import {roomDenied} from '../../../contracts/web-world.ts';
-import {openRtcWindow} from './modules/phone/rtc-window.ts';
+import {openRtcWindow} from './modules/shell/rtc-window.ts';
 import type {Host} from './host/types.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
 import {backgroundLaunchWanted,startBackgroundLaunch} from './background-launch.ts';
@@ -72,7 +72,7 @@ startGraphics(profile.root);
 app.setPath('userData',path.join(profile.root,'Browser','Electron'));
 // Native crashes of the installed app leave a Crashpad report in the library's logs, never uploaded whole; the next
 // launch reports that one exists (`native_crash` on app_unclean_exit, modules/shell) and, on Windows, its crash address
-// (agent/diagnostics/ANALYTICS.md#native-crashes); an Order can name it.
+// (agent/base/ANALYTICS.md#native-crashes); an Order can name it.
 if(app.isPackaged&&profile.channel==='release'){
  try{app.setPath('crashDumps',path.join(profile.root,'logs','crashes'));crashReporter.start({uploadToServer:false});}catch{}
 }
@@ -142,7 +142,7 @@ async function start(){
   gone:()=>{},
   failed,
  });
- // The World on another device, met through the pairing room (modules/phone/world-room-link.ts): a page beside the
+ // The World on another device, met through the pairing room (modules/shell/world-room-link.ts): a page beside the
  // others, with only what ROOM_ALLOWED lets through (contracts/web-world.ts roomDenied).
  const remote=createWebPage({
   platform:platformName(),

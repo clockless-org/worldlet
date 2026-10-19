@@ -1,7 +1,7 @@
 import {app,shell} from 'electron';
 import {execFile,spawn} from 'node:child_process';
 import path from 'node:path';
-import {defaultBrowserSupported,incomingLink,linksInArguments,type DefaultBrowserStatus} from '../../../../../agent/distribution/index.ts';
+import {defaultBrowserSupported,incomingLink,linksInArguments,type DefaultBrowserStatus} from '../../../../../agent/base/index.ts';
 import {WorldletError} from '../../files.ts';
 import {handOffLinks,receiveLinks} from '../../system-browser.ts';
 import type {Host} from '../../host/types.ts';

@@ -60,7 +60,7 @@ await copyFile(path.join(root,BUILTIN_STYLE.companion.portrait),path.join(output
 await copyFile(path.join(root,'resources/common/ASTRONOMY-LICENSE.txt'),path.join(output,'ASTRONOMY-LICENSE.txt'));
 await copyFile(path.join(root,'node_modules/typebox/license'),path.join(output,'TYPEBOX-LICENSE.txt'));
 await buildWorldAssets(root,output,JSON.parse(defines.__WORLDLET_CHANNEL__));
-// Worldlet in a browser on this computer (agent/windows/README.md#web): the app serves this page itself on 127.0.0.1.
+// Worldlet in a browser on this computer (platform/web/README.md#web): the app serves this page itself on 127.0.0.1.
 await buildWebOpen(root,path.join(output,'open'),JSON.parse(defines.__WORLDLET_BUILD__).version);
 await Promise.all(bundles);
 await writeFile(path.join(output,'index.html'),`<!doctype html><html lang="en-US" data-bundle-version="${resourceVersion}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="${WORLD_PAGE_CSP}"><title>Worldlet</title><link rel="icon" href="brand/worldlet-app-icon.svg" type="image/svg+xml"><link rel="stylesheet" href="brand/brand.css"><link rel="stylesheet" href="world-startup.css"><link rel="preload" href="worldlet.js" as="script"><link rel="stylesheet" href="worldlet-ui.css"><link rel="stylesheet" href="native.css"><link rel="stylesheet" href="pixi-world.css"><link rel="stylesheet" href="applet-scene.css"><link rel="stylesheet" href="mail-focus.css"></head><body>${startup}<main id="app" hidden></main><main id="contextSpace" hidden></main><p id="nativeNotice" role="status"></p><script src="environment-assets.js?v=${resourceVersion}"></script><script src="world-startup.js?v=${resourceVersion}"></script></body></html>`);
@@ -80,18 +80,18 @@ await copyFile(path.join(root,'platform/browser/agent_browser.py'),path.join(out
 await cp(path.join(root,'platform/browser/demo'),path.join(output,'demo'),{recursive:true});
 await writeFile(path.join(output,'browser/activity-observer.js'),'('+installActivityCollector.toString()+')().read()');
 await writeFile(path.join(output,'browser/media-hold.js'),'('+holdMedia.toString()+')()');
-// What the built-in browser records of a page (agent/browser/web-record.ts), installed in its isolated world.
+// What the built-in browser records of a page (agent/applets/web-record.ts), installed in its isolated world.
 await writeFile(path.join(output,'browser/web-record.js'),'('+installWebRecorder.toString()+')()');
-// Saved sign-ins (agent/browser/saved-logins.ts): every website page's isolated world, the built-in browser's own.
+// Saved sign-ins (agent/applets/saved-logins.ts): every website page's isolated world, the built-in browser's own.
 await writeFile(path.join(output,'browser/login-watch.js'),'('+installLoginWatch.toString()+')()');
 await writeFile(path.join(output,'browser/passkey-watch.js'),'('+installPasskeyWatch.toString()+')()');
 // Meetings pages' call-audio hooks, a function of the binding's name (engine/page.ts calls it with one).
 await writeFile(path.join(output,'browser/meeting-audio.js'),'('+installMeetingAudio.toString()+')');
 // A function of its mode ('probe', 'enter', 'leave'); the host calls it with one.
 await writeFile(path.join(output,'browser/picture-in-picture.js'),'('+pictureInPicture.toString()+')');
-// Every CEF website page's video-format counts (agent/browser/video-formats.ts), a function of the formats' pattern.
+// Every CEF website page's video-format counts (agent/applets/video-formats.ts), a function of the formats' pattern.
 await writeFile(path.join(output,'browser/video-formats.js'),'('+installVideoFormatWatch.toString()+')');
-// Focus on website pages (agent/browser/page-focus.ts): its rules with Readability, run in the page's isolated world.
+// Focus on website pages (agent/applets/page-focus.ts): its rules with Readability, run in the page's isolated world.
 await build({entryPoints:[path.join(root,'platform/bridge/page-focus.ts')],outfile:path.join(output,'browser/page-focus.js'),bundle:true,format:'iife',minify:true,target:'es2022'});
 await copyFile(path.join(root,'node_modules/@mozilla/readability/LICENSE.md'),path.join(output,'READABILITY-LICENSE.txt'));
 // The development app polls this marker. Writing it here means any rebuild reloads it,

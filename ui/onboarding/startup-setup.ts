@@ -5,8 +5,8 @@ import {themeAppletIcon} from '../themes/index.ts';
 import {setupText,setInterfaceLanguage} from './setup-language.ts';
 import {hostFeatures,googleSignInStart} from '../../platform/bridge/features.ts';
 import {GOOGLE_SIGN_IN_EVENT,googleSignInStage} from '../../contracts/platform.ts';
-import {LOCAL_HARNESSES,agentProfileApplets,agentProfileAsked,connectRequestPlan} from '../../agent/agents/index.ts';
-import {agentBringDimensions,agentProfileDimensions,agentsDetectedDimensions,diagnosticError,hermesSetupDimensions,timingBucket} from '../../agent/diagnostics/index.ts';
+import {LOCAL_HARNESSES,agentProfileApplets,agentProfileAsked,connectRequestPlan} from '../../agent/gate/index.ts';
+import {agentBringDimensions,agentProfileDimensions,agentsDetectedDimensions,diagnosticError,hermesSetupDimensions,timingBucket} from '../../agent/base/index.ts';
 import {googleConsentActions,googleConsentUrl} from './google-consent.ts';
 
 // Local Agent marks: Claude Code and Codex reuse their Applet logos; the rest ship in resources/brands.
@@ -33,7 +33,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // More options (owner request 2026-10-09): the Agents not on this computer, Google and ChatGPT (coming soon), an Agent
  // on another computer and an API key, folded under the cards.
  let more=false;
- // "My Agent is on another computer" (agent/windows/README.md#another-computers-agent): the code Worldlet there shows,
+ // "My Agent is on another computer" (platform/web/README.md#another-computers-agent): the code Worldlet there shows,
  // pasted here, pairs this Worldlet with it and Fox's conversation runs on its Agent.
  let remoteForm=false,remoteCode='',pairingRemote=false;
  // No Agent here (Codex alone included): Worldlet installs stock Hermes Agent the official way (`install-hermes`), then
@@ -72,7 +72,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  let googleStage:string='connecting',googleUrl:string|undefined;
  const onGoogleStage=(event:Event)=>{const detail=(event as CustomEvent).detail,stage=googleSignInStage(detail);if(disposed||!signingIn||!stage)return;googleStage=stage;googleUrl=googleConsentUrl(detail);render();};
  window.addEventListener(GOOGLE_SIGN_IN_EVENT,onGoogleStage);
- // An install script launched Worldlet with `--connect=<id>` (agent/agents/PORTABILITY.md#local-harnesses-chosen-at-setup):
+ // An install script launched Worldlet with `--connect=<id>` (agent/gate/PORTABILITY.md#local-harnesses-chosen-at-setup):
  // that Agent is picked and brought in as the big button would. Launched again while setup is open, the host says so
  // and setup looks again.
  const onConnectRequest=()=>{if(!disposed)void detectAgents();};
@@ -102,7 +102,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  window.addEventListener('worldlet:app-update',onAppUpdate);
  const appUpdateButton=node('button','','setup-link setup-app-update') as HTMLButtonElement;appUpdateButton.type='button';
  appUpdateButton.onclick=()=>{if(updatingApp)return;updatingApp=true;render();void call('appUpdate').then(value=>{appUpdate=value;},()=>{}).finally(()=>{updatingApp=false;if(!disposed)render();});};
- /** What the chosen Agent said about itself (agent/agents/agent-profile.ts), arriving after its proving turn while setup
+ /** What the chosen Agent said about itself (agent/gate/agent-profile.ts), arriving after its proving turn while setup
   * goes on: the connections and channels its files do not show join the Connections tile, the skills it named count
   * when its files held fewer, and the Applets it points to join the World's selection (owner request 2026-10-11). */
  function takeProfile(profile:any){
@@ -150,7 +150,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // Back on this page after a relaunch: what the chosen Agent said about itself meanwhile.
  if(typeof draft.agent==='string'&&!draft.profile)void call('agentHarness',{operation:'profile',id:draft.agent}).then(result=>{if(!disposed&&!draft.profile)takeProfile(result?.profile);},()=>{});
  const agentText=(text:string,agent:string)=>t(text).replace('{agent}',agent);
- // Setup's product events (agent/diagnostics/ANALYTICS.md#bringing-an-agent): allowlisted dimensions, a duration bucket.
+ // Setup's product events (agent/base/ANALYTICS.md#bringing-an-agent): allowlisted dimensions, a duration bucket.
  const productEvent=(event:string,dimensions:Record<string,string>={},duration='')=>window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event,dimensions,duration}}));
  const failureCode=(error:any)=>{try{return String(diagnosticError({message:typeof error?.message==='string'?error.message:''}).code);}catch{return 'operationFailed';}};
  // The code and, when Core has one, its fixed rule (did not start, too old, gone): select failures were a bare
@@ -161,7 +161,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // The Agent's own name where it has one (OpenClaw's Nova), else its product name.
  const agentName=(agent:{title:string,memory?:{name:string|null}})=>agent.memory?.name||agent.title;
  const giveName=(id:string|null)=>{const found=agents.find(a=>a.id===id);return found?.memory?.name||AGENT_SHORT[id||'']||found?.title||id||'';};
- /** The picked Agent when its version is older than Worldlet works with (agent/agents/agent-versions.ts). */
+ /** The picked Agent when its version is older than Worldlet works with (agent/gate/agent-versions.ts). */
  const outdated=(id:string|null)=>agents.find(a=>a.id===id&&a.version?.outdated===true)||null;
  async function updateAgent(agent:{id:string,title:string}){
   await call('agentHarness',{operation:'update',id:agent.id});
@@ -246,7 +246,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   if(importingAgent()){
    if(!draft.brought)return list;
    list.push('profile','conversations','notes','skills','routines');
-   // What the Agent says the person does most (agent/agents/agent-profile.ts things): asked while the rest arrives.
+   // What the Agent says the person does most (agent/gate/agent-profile.ts things): asked while the rest arrives.
    if(agentProfileAsked(draft.agent))list.push('things');
    if(!porting)list.push('connections','apps');
    return list;
@@ -615,7 +615,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    card.append(image(AGENT_ICONS[found.id]||'','setup-agent-icon'),node('strong',agentName(found),'setup-agent-name'));
    // Where it comes from when it has its own name, else what it runs on.
    const sub=found.memory?.name?title:found.id==='codex'?t(found.model===false?'Sign in to Codex first':'Your ChatGPT plan'):t(found.memory?'Its memory comes along':'On this computer');
-   // Older than Worldlet works with (agent/agents/agent-versions.ts): the card says which version it needs.
+   // Older than Worldlet works with (agent/gate/agent-versions.ts): the card says which version it needs.
    const old=found.version?.outdated===true;card.classList.toggle('is-outdated',old);
    card.append(node('small',connecting?agentText('Connecting to {agent}…',title):old?t('Needs version {version} or newer').replace('{version}',found.version!.minimum):sub,'setup-agent-sub'));
    const history=found.memory?.history,chips=node('span','','setup-agent-chips');

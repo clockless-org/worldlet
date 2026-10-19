@@ -1,9 +1,9 @@
-// Shared "resume where I left off" rule for website Applets (agent/browser/page-resume.ts).
+// Shared "resume where I left off" rule for website Applets (agent/applets/page-resume.ts).
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {APP_DEFINITIONS} from '../context/applets/index.ts';
-import {BROWSER_HOME,appletHomeLanding,atAppletHome,browserHomePage,browserStartsHome,createBrowserHome} from '../agent/browser/browser-home.ts';
-import {BROWSER_BUDGET,PAGE_MEMORY,PAGE_RESUME,appletSite,browserBudget,memoryPressure,createPageMemory,livePagePlan,readBrowserBudget,resumablePage,sitePage} from '../agent/browser/index.ts';
+import {BROWSER_HOME,appletHomeLanding,atAppletHome,browserHomePage,browserStartsHome,createBrowserHome} from '../agent/applets/browser-home.ts';
+import {BROWSER_BUDGET,PAGE_MEMORY,PAGE_RESUME,appletSite,browserBudget,memoryPressure,createPageMemory,livePagePlan,readBrowserBudget,resumablePage,sitePage} from '../agent/applets/index.ts';
 
 // Site-locked platforms: the Electron website panel decides these through the same core sitePage.
 const vectors=JSON.parse(readFileSync('contracts/fixtures/parity/browser-applet-site.json','utf8')) as Record<string,{allowed:string[];refused:string[]}>;
@@ -92,7 +92,7 @@ assert.deepEqual(four.live,['bilibili','youtube','x','netflix'],'a budget of fou
 assert.deepEqual(livePagePlan(new Map([['x',now-minute]]),now,'youtube',1).live,['youtube'],'a budget of one: the window only');
 console.log(`PASS browser budget by memory (live pages and Fox tasks) and its bounds`);
 console.log(`PASS page resume: ${count} site vectors, Applet sites, remembered-page rules, per-Applet persistence, practice isolation, memory pressure and live-page bounds (${PAGE_RESUME.livePages} pages, ${PAGE_RESUME.liveMs/minute} min).`);
-// The Browser's home page (agent/browser/browser-home.ts, owner request 2026-10-06).
+// The Browser's home page (agent/applets/browser-home.ts, owner request 2026-10-06).
 {
  const kept=new Map<string,string>(),store={getItem:(k:string)=>kept.get(k)??null,setItem:(k:string,v:string)=>{kept.set(k,v);}};
  const settings=createBrowserHome(store),panel=createBrowserHome(store);

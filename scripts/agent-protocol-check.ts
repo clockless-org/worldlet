@@ -63,7 +63,7 @@ for(const value of [null,1,'true',{},[]])assert.throws(()=>validateAgentCapabili
 console.log('PASS optional Harness capabilities are absent-by-default and strictly boolean');
 
 // Shared untrusted-turn rule.
-const {readsUntrusted,observeTool,writeDecision,persists}=await import('../agent/agents/index.ts');
+const {readsUntrusted,observeTool,writeDecision,persists}=await import('../agent/gate/index.ts');
 for(const [name,args,expected] of [['memory',{},false],['web_search',{},true],['mcp_any_tool',{},true],['call_world_tool',{target:'settings',action:'open'},false],['call_world_tool',{target:'content',action:'read'},true]] as const)assert.equal(readsUntrusted(name,args),expected,name);
 const trusted={untrustedSource:null},tainted=observeTool(trusted,'web_extract');
 assert.deepEqual(writeDecision(observeTool(trusted,'memory'),true),{allowed:true});

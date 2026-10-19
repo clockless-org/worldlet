@@ -1,4 +1,4 @@
-// What the built-in browser records (agent/browser/web-record.ts): a real Chromium page on a local
+// What the built-in browser records (agent/applets/web-record.ts): a real Chromium page on a local
 // site with a JSON API, a form and a WebSocket, recorded through DevTools by the host recorder into a
 // World database, then searched and read back as Fox would. Secrets never reach the database.
 import assert from 'node:assert/strict';
@@ -9,9 +9,9 @@ import http from 'node:http';
 import {WebSocketServer} from 'ws';
 import {launchTestBrowser} from './browser-test.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {WebRecorder,manageRecordings} from '../platform/electron/src/modules/browser/recorder.ts';
+import {WebRecorder,manageRecordings} from '../platform/electron/src/modules/applets/recorder.ts';
 import {installWebRecorder} from '../platform/bridge/web-record.js';
-import {typedAddress,cleanHeaders,cleanMessage,cleanRequestBody,cleanResponseBody,cleanWebAddress,privateWebAddress,scrubSent,secretField,SECRET_NAME,WEB_RECORD,webSearchPlan,webSite,webTranscript,RAW_KINDS,type WebRecord} from '../agent/browser/index.ts';
+import {typedAddress,cleanHeaders,cleanMessage,cleanRequestBody,cleanResponseBody,cleanWebAddress,privateWebAddress,scrubSent,secretField,SECRET_NAME,WEB_RECORD,webSearchPlan,webSite,webTranscript,RAW_KINDS,type WebRecord} from '../agent/applets/index.ts';
 import {CARRY,carriesConversation,placeContext,recentBrowsing} from '../agent/companion/index.ts';
 
 // Rules ------------------------------------------------------------------------------------------
@@ -61,7 +61,7 @@ for(const hint of ['pin','code','security_code','sms_code','pwd','Enter your PIN
 for(const hint of ['trainer','q','Search','author'])assert.ok(!secretField('text',hint),hint+' is an ordinary field');
 assert.ok(installWebRecorder.toString().includes(SECRET_NAME.toString()),'the observer carries core SECRET_NAME');
 // Recordings expire without a page being opened: on start and every hour.
-const deviceSource=fs.readFileSync(new URL('../platform/electron/src/modules/browser/device.ts',import.meta.url),'utf8');
+const deviceSource=fs.readFileSync(new URL('../platform/electron/src/modules/applets/device.ts',import.meta.url),'utf8');
 assert.match(deviceSource,/setTimeout\(\(\)=>this\.pruneRecordings\(true\)/,'recordings are pruned on start');
 assert.match(deviceSource,/setInterval\(\(\)=>this\.pruneRecordings\(true\),3_600_000\)/,'recordings are pruned hourly');
 // The recorder: a page reported private keeps nothing until it navigates; socket addresses are checked;

@@ -21,7 +21,7 @@ export function worldWebToken(vault:TokenVault):string {
  return token;
 }
 
-/** Serves the World at /world/ on this computer's own server (modules/phone/local-relay.ts) and writes its link to the
+/** Serves the World at /world/ on this computer's own server (modules/shell/local-relay.ts) and writes its link to the
  * library's owner-only `world-link.txt`. The link carries the token: it goes only into that file, never to a log. */
 export function serveWorldWeb({root,webRoot,vault,server,accept}:{root:string;webRoot:string;vault:TokenVault;
  server:{origin:string;serveWorld(route:{webRoot:string;token:string;accept(socket:PageSocket):void}):void};accept(socket:PageSocket):void}){

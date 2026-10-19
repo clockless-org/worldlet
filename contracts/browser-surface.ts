@@ -23,14 +23,14 @@ export function readBrowserPaperEdge(input:unknown):BrowserPaperEdge {
  return {asset:value.asset,image,profile:readBrowserPaperProfile(value.profile),...frame?{frame}:{}};
 }
 /** How many website pages stay live at once and how many Fox browser tasks may drive pages at the
- * same time (agent/browser/budget.ts). Hosts send it with their capabilities (`browserBudget`). */
+ * same time (agent/applets/budget.ts). Hosts send it with their capabilities (`browserBudget`). */
 export interface BrowserBudget {livePages:number;foxTasks:number}
 /** A page's own layout size, in CSS pixels, when it shows scaled into a smaller `rect`. */
 export interface SurfacePageSize {width:number;height:number}
 /** While Fox drives the page, the host glows the frame `colors` inward over the page edge, equally
  * deep all round, and draws Fox's pointer and the page's one status over the page: a small card grown from the top edge headed by `label`, with its `colors` as an accent, listing
  * Fox's latest `steps` (ticked when done; `earlier` counts older ones not listed) and, once
- * `finished`, the `result` in the same place without the glow (agent/browser/fox-steps.ts, #1619).
+ * `finished`, the `result` in the same place without the glow (agent/applets/fox-steps.ts, #1619).
  * Absent means none of it.
  * The page keeps its rect; the overlay never takes input. `turnSeconds` 0 is static;
  * `phaseSeconds` is how far the frame's turn already is, so the glow starts in step. */
@@ -45,7 +45,7 @@ export interface BrowserFoxGlow {label:string;colors:string[];turnSeconds:number
  * its previous behavior.
  *
  * `browserPip` makes `applet`'s page the World's picture-in-picture window (rule in
- * agent/browser/picture-in-picture.ts). With `rect` the page shows there, still playing, only
+ * agent/applets/picture-in-picture.ts). With `rect` the page shows there, still playing, only
  * its video visible: it enters from the visible page of that Applet, or moves; a zero-size
  * `rect` keeps it playing without drawing it. Without `rect` the window ends and the page is
  * kept or released as `live` says, like a page left with browserHide. browserShow of the same
@@ -58,7 +58,7 @@ export interface BrowserFoxGlow {label:string;colors:string[];turnSeconds:number
  * there, and a press on it is reported (`{phase:'task-pip',event:'press'}`). Without `page` the page
  * takes `rect`'s size, as before.
  *
- * Fox's copy (same hosts, agent/browser/picture-in-picture.ts `foxCopyPlacement`): browserLayout with
+ * Fox's copy (same hosts, agent/applets/picture-in-picture.ts `foxCopyPlacement`): browserLayout with
  * `copy` gives Fox a copy of the visible page, made at its address in the same engine the first time,
  * shown scaled into `copy.rect` at `copy.page` as its own size and taking no input. Fox's steps and
  * the `fox` glow then go to the copy, while `rect` stays the person's page. The host reports a press

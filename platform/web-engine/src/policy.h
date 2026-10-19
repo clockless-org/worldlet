@@ -1,5 +1,5 @@
 #pragma once
-// Native URL facts of the website panel, identical to platform/electron/src/modules/browser/rules.ts
+// Native URL facts of the website panel, identical to platform/electron/src/modules/applets/rules.ts
 // (publicPage, signInPage, httpsUpgrade, popupAllowed, opensAsTab). Chromium decides navigations and popups synchronously, so
 // the engine answers them itself; the host replays contracts/fixtures/parity/browser-public-page.json
 // (with its `upgraded` addresses) browser-popup.json and browser-tab.json against these functions (the `policy` message, ../README.md#checks).

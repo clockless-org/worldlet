@@ -9,11 +9,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
 import {GITHUB_LIMITS,GITHUB_TOOLS,readGithub} from '../context/sources/index.ts';
-import {channelDefaultGrants,currentServiceGrant,serviceReadGrant,standingActions,standingCallDecision} from '../agent/agents/grants.ts';
+import {channelDefaultGrants,currentServiceGrant,serviceReadGrant,standingActions,standingCallDecision} from '../agent/gate/grants.ts';
 import {readServicePresetRead} from '../context/sources/index.ts';
-import {hermesChannelToolAllowed} from '../agent/agents/hermes-server.ts';
-import {turnTrustObserve} from '../agent/agents/turn-trust.ts';
-import {resolveAction,worldActionOf,worldActions} from '../agent/tools/gateway.ts';
+import {hermesChannelToolAllowed} from '../agent/gate/hermes-server.ts';
+import {turnTrustObserve} from '../agent/gate/turn-trust.ts';
+import {resolveAction,worldActionOf,worldActions} from '../agent/gate/gateway.ts';
 import {McpAccounts} from '../platform/electron/src/modules/sources/mcp-account.ts';
 import {McpSource,McpSourceAccess,McpSourceConnections} from '../platform/electron/src/modules/sources/mcp-source.ts';
 import {GoogleAccount} from '../platform/electron/src/modules/sources/google-account.ts';
@@ -23,7 +23,7 @@ import {validateAttentionRegistrations} from '../agent/attention/attention-cente
 import {attentionFollowupReads,attentionReads} from '../agent/attention/index.ts';
 import {validateAppletRuntimes} from '../context/applets/runtime.ts';
 import {conversationGuidance} from '../agent/companion/conversation-guidance.ts';
-import {listWorldTools} from '../agent/tools/index.ts';
+import {listWorldTools} from '../agent/gate/index.ts';
 import {withTempDir} from './test-temp.ts';
 
 const TOKEN='fixture-token';

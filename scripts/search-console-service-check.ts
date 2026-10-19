@@ -12,13 +12,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
 import {GOOGLE_TOKEN_URL,SEARCH_CONSOLE_LIMITS,SEARCH_CONSOLE_SCOPE,readServicePresetRead,saveServicePreset,searchConsoleSpec} from '../context/sources/index.ts';
-import {channelDefaultGrants,serviceReadTargets,standingActions,standingCallDecision} from '../agent/agents/grants.ts';
-import {turnTrustObserve} from '../agent/agents/turn-trust.ts';
-import {worldActionOf,worldActions} from '../agent/tools/gateway.ts';
+import {channelDefaultGrants,serviceReadTargets,standingActions,standingCallDecision} from '../agent/gate/grants.ts';
+import {turnTrustObserve} from '../agent/gate/turn-trust.ts';
+import {worldActionOf,worldActions} from '../agent/gate/gateway.ts';
 import {SOURCE_PROVIDERS,TOKEN_PROVIDERS,connectSettings,connectToken} from '../context/applets/index.ts';
 import {resolveBoard,readBoardDefinition} from '../context/sources/index.ts';
 import {SERVICE_TITLES,type ServiceRecords} from '../contracts/services.ts';
-import {ExecutionJournal} from '../platform/electron/src/modules/agent-runtime/journal.ts';
+import {ExecutionJournal} from '../platform/electron/src/modules/agents/journal.ts';
 import {ServiceSource,ServiceSourceAccess,ServiceSourceConnections} from '../platform/electron/src/modules/sources/service-source.ts';
 import {withTempDir} from './test-temp.ts';
 

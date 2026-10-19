@@ -1,5 +1,5 @@
 import type {FoxChatBody} from '../../contracts/fox.ts';
-import {reduceAgentResponse,turnTrustInherit} from '../../agent/agents/index.ts';
+import {reduceAgentResponse,turnTrustInherit} from '../../agent/gate/index.ts';
 import {validateAgentEvent} from '../../contracts/agent.ts';
 import {createWorldToolRuntime} from './world-tool-runtime.ts';
 import {foxDoing,FOX_WORKING} from '../../ui/companion/index.ts';

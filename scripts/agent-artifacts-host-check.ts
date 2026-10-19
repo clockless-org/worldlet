@@ -3,15 +3,15 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {withTempDir} from './test-temp.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/agent-access.ts';
-import {agentArtifactId,createAgentArtifacts} from '../platform/electron/src/modules/agent-runtime/agent-artifacts.ts';
-import {openStandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
-import {STANDING_OUTSIDE_TURN} from '../agent/agents/grants.ts';
+import {createAgentAccess} from '../platform/electron/src/modules/agents/agent-access.ts';
+import {agentArtifactId,createAgentArtifacts} from '../platform/electron/src/modules/agents/agent-artifacts.ts';
+import {openStandingWorldTools} from '../platform/electron/src/modules/agents/world-tool-bridge.ts';
+import {STANDING_OUTSIDE_TURN} from '../agent/gate/grants.ts';
 import {ARTIFACT_LIMITS,journalDays,readArtifact} from '../context/artifacts/index.ts';
-import {AGENT_ARTIFACT_REASONS} from '../agent/agents/index.ts';
+import {AGENT_ARTIFACT_REASONS} from '../agent/gate/index.ts';
 import {AGENT_ARTIFACT_LIMITS} from '../contracts/agent-artifacts.ts';
 
-// Agents' Journal artifacts on the host (agent/agents/GRANTS.md#agent-artifacts), the same modules the Electron and Node hosts run:
+// Agents' Journal artifacts on the host (agent/gate/GRANTS.md#agent-artifacts), the same modules the Electron and Node hosts run:
 // kept in world.sqlite's `artifacts` table beside Fox's own, so the Journal lists them; reached only through the standing
 // `worldlet` MCP server with each Agent's own token and Grants (none by default, never a Fox turn's); stamped with the
 // Agent from its token; a key replaces the same artifact; each Agent keeps its newest 48; a read returns only artifacts

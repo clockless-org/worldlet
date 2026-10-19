@@ -1,5 +1,5 @@
 import type {UICommand,UISnapshot,WorldUI} from '../../contracts/ui.ts';
-import {validateUICommand} from '../../agent/tools/index.ts';
+import {validateUICommand} from '../../agent/gate/index.ts';
 /** CDP can inspect this semantic interface even when the world is a Pixi canvas.
  * Navigation uses the exact handlers used by mouse/keyboard. Privileged actions
  * remain in the existing authorized tool gateway, not this navigation API. */

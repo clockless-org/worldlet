@@ -63,10 +63,10 @@ The shared dispatcher the Platform calls is `agent/index.ts`, since it calls bot
 
 | Layer | Folders |
 | --- | --- |
-| UI | `ui/applets/` `ui/artifacts/` `ui/attention/` `ui/browser/` `ui/companion/` `ui/components/` `ui/distribution/` `ui/games/` `ui/hud/` `ui/onboarding/` `ui/practice/` `ui/settings/` `ui/shell/` `ui/theme-packages/` `ui/themes/` `ui/web/` `ui/world/` |
-| Agent (`agent/`) | `agent/agents/` `agent/tasks/` `agent/companion/` `agent/tools/` `agent/browser/` `agent/attention/` `agent/onboarding/` `agent/windows/` `agent/diagnostics/` `agent/distribution/` |
+| UI | `ui/applets/` `ui/artifacts/` `ui/attention/` `ui/browser/` `ui/companion/` `ui/components/` `ui/distribution/` `ui/games/` `ui/hud/` `ui/onboarding/` `ui/practice/` `ui/settings/` `ui/shell/` `ui/theme-packages/` `ui/themes/` `ui/world/` |
+| Agent (`agent/`) | `agent/companion/` `agent/applets/` `agent/attention/` `agent/tasks/` `agent/gate/` `agent/base/` |
 | Context (`context/`) | `context/items/` `context/activity/` `context/sources/` `context/applets/` `context/artifacts/` |
-| Platform | `platform/bridge/` `platform/browser/` `platform/distribution/` `platform/electron/` `platform/install/` `platform/local-tools/` `platform/node/` `platform/web-engine/` |
+| Platform | `platform/bridge/` `platform/browser/` `platform/distribution/` `platform/electron/` `platform/install/` `platform/local-tools/` `platform/node/` `platform/web/` `platform/web-engine/` |
 
 <a id="features"></a>
 ## Features and the base
@@ -78,17 +78,17 @@ component is missing or listed twice. Which layer each folder is in: [folders by
 
 | Feature | What it is | UI | Agent and Context | Platform |
 | --- | --- | --- | --- | --- |
-| World | The place everything sits in: areas, HUD, themes | `ui/world/` `ui/hud/` `ui/themes/` `ui/theme-packages/` | `context/activity/` | `platform/electron/src/modules/world.ts` `platform/electron/src/modules/world-audio/` |
-| Applets | Where the person's data and actions live, with the real website beside them | `ui/applets/` `ui/browser/` `ui/games/` `ui/practice/` | `context/applets/` `agent/browser/` | `platform/electron/src/modules/applet-art/` `platform/electron/src/modules/applet-tools/` `platform/electron/src/modules/browser/` `platform/electron/src/modules/calendar/` `platform/electron/src/modules/games/` |
-| Companion | Fox: the one conversation, voice, memory and what Fox is doing | `ui/companion/` | `agent/companion/` | `platform/electron/src/modules/fox/` `platform/electron/src/modules/voice/` |
+| World | The place everything sits in: areas, HUD, themes | `ui/world/` `ui/hud/` `ui/themes/` `ui/theme-packages/` | `context/activity/` | `platform/electron/src/modules/world/` |
+| Applets | Where the person's data and actions live, with the real website beside them | `ui/applets/` `ui/browser/` `ui/games/` `ui/practice/` | `context/applets/` `agent/applets/` | `platform/electron/src/modules/applets/` |
+| Companion | Fox: the one conversation, voice, memory and what Fox is doing | `ui/companion/` | `agent/companion/` | `platform/electron/src/modules/companion/` |
 | Attention | What needs the person now: ranked, at most nine, each waiting for Done, Send or Later | `ui/attention/` | `agent/attention/` | `platform/electron/src/modules/attention/` |
 | Tasks | Work that runs without the person: routines, cron jobs, source checks, background drafts and Applet tasks. Fox starts some, Applets start others; the person's Agent does them | (no folder of its own: its status shows in Fox, on Applets and in the Ongoing Applet) | `agent/tasks/` | `platform/electron/src/modules/tasks/` |
-| Artifacts & Journal | What work produces: one artifact for every card, draft, page and brief, shown wherever it is needed (Attention, Fox, Applets), and the Journal that keeps them by day | `ui/artifacts/` | `context/artifacts/` | `platform/electron/src/modules/artifacts/` |
-| Agents & Gate | The Agents connected to the World and the one door they pass: the connection to the person's Agent (adapters), World tools over the `worldlet` MCP server (local and remote), per-Agent Grants, approvals and the audit | (no folder of its own: Allow cards show in Attention, Settings › Agents beside Fox) | `agent/agents/` `agent/tools/` | `platform/electron/src/modules/agent-runtime/` |
-| Context | Everything the World knows, kept on the person's computer: World items and history, conversation and execution journals, source context, and each connected Service's synced snapshots with the one search over them (`world_context`). Storage and kinds: [context/items/STORAGE.md](../context/items/STORAGE.md#four-kinds) | (no folder of its own: every feature reads it; Settings › Context beside Fox) | `context/sources/` `context/items/` | (no host module of its own: `platform/electron/src/store/` persists it) |
+| Artifacts & Journal | What work produces: one artifact for every card, draft, page and brief, shown wherever it is needed (Attention, Fox, Applets), and the Journal that keeps them by day | `ui/artifacts/` | `context/artifacts/` | (in Attention's host module, `platform/electron/src/modules/attention/artifacts.ts`) |
+| Agents & Gate | The Agents connected to the World and the one door they pass: the connection to the person's Agent (adapters), World tools over the `worldlet` MCP server (local and remote), per-Agent Grants, approvals and the audit | (no folder of its own: Allow cards show in Attention, Settings › Agents beside Fox) | `agent/gate/` | `platform/electron/src/modules/agents/` |
+| Context | Everything the World knows, kept on the person's computer: World items and history, conversation and execution journals, source context, and each connected Service's synced snapshots with the one search over them (`world_context`). Storage and kinds: [context/items/STORAGE.md](../context/items/STORAGE.md#four-kinds) | (no folder of its own: every feature reads it; Settings › Context beside Fox) | `context/sources/` `context/items/` | `platform/electron/src/store/` (no host module of its own:  persists it) |
 | Connectors | Context's intake: sign-in to Services (Google, Notion, GitHub, Linear, PostHog, Cloudflare and the rest) and this computer's own sources, their reads, and writes the person approved | (no folder of its own: Settings › Connectors beside Fox) | (none of its own: Connectors, what they sync and the board over Service presets are Context's sources) | `platform/electron/src/modules/sources/` |
-| Windows | The same World in another window: a web browser at the World's address and the phone, paired by QR code through the end-to-end encrypted relay | `ui/web/` (the page a web browser opens, [web](../agent/windows/README.md#web)) | `agent/windows/` | `platform/electron/src/modules/phone/` |
-| Base | Setup, the app shell, Settings, distribution and diagnostics | `ui/shell/` `ui/components/` `ui/onboarding/` `ui/settings/` `ui/distribution/` | `agent/onboarding/` `agent/diagnostics/` `agent/distribution/` | `platform/electron/src/modules/shell/` `platform/electron/src/modules/media/` (the media surface the World's sound, Fox's voice and Voice Memos share), `contracts/` |
+| Windows | The same World in another window: a web browser at the World's address and the phone, paired by QR code through the end-to-end encrypted relay | (none: every window shows the same UI; the browser page that hosts it is in Platform) | (none) | `platform/web/` (pairing, sealing, what each window is sent, the browser page; [web](../platform/web/README.md#web)), the host side in `platform/electron/src/modules/shell/phone.ts`, and the phone apps in `ios/` and `android/` |
+| Base | Setup, the app shell, Settings, distribution and diagnostics | `ui/shell/` `ui/components/` `ui/onboarding/` `ui/settings/` `ui/distribution/` | `agent/base/` | `platform/electron/src/modules/shell/` (with the media surface the World's sound, Fox's voice and Voice Memos share), `contracts/` |
 
 Work flows Companion or Applets → Task → Artifact → Attention → Journal: Fox and
 Applets start tasks, each task's result is an artifact, an artifact that needs the
@@ -127,7 +127,7 @@ host privileges and run in their own session partition.
 **The World in a web browser.** There is one UI: the host serves the same World page to a browser on the same
 computer ([contracts/web-world.ts](../contracts/web-world.ts)), the Node host as its only page and the app beside its
 own window while it runs ([host/world-web.ts](../platform/electron/src/host/world-web.ts)). The page is the interface build, served
-read-only at `http://127.0.0.1:<port>/world/` by [local-relay.ts](../platform/electron/src/modules/phone/local-relay.ts)
+read-only at `http://127.0.0.1:<port>/world/` by [local-relay.ts](../platform/electron/src/modules/shell/local-relay.ts)
 (files inside the build after resolving links, `resolveWorldFile`, and only the types the page loads). Its
 `worldletHost` is [web-host.ts](../platform/bridge/web-host.ts), which `resolveHost` picks only when the app gave the
 page none; it talks to the host over one WebSocket at `/world/socket`, and the host answers through the same router
@@ -171,14 +171,14 @@ leaves them out, unlike the host services, which fail closed: every app window h
   players, the microphone (speaking to Fox, Talk, dictation and spoken replies), the desktop Companion window, and the
   corner room the Mac keeps for its window buttons.
 - **Fox's tools** that need one of these (the built-in browser, YouTube, the World's sound, music players) answer
-  that it is not available in a browser window ([page-features.ts](../agent/tools/page-features.ts)) instead of failing
+  that it is not available in a browser window ([page-features.ts](../agent/gate/page-features.ts)) instead of failing
   on their own.
 - **The host refuses them too.** Before the router, a browser's page is refused the actions behind each of these
   features (`WEB_PAGE_ACTIONS`: the native website views and what drives them, YouTube, the World's sound, music
   players, speech and the desktop Companion), with the same reason Fox's tools give, so a page that asks anyway
   reaches nothing on this computer's screen. The list of sites the built-in browser visited stays readable.
 
-The World on another device meets the computer through the pairing room, as a third page with less trust (`ROOM_ALLOWED`): [the World on another device](../agent/windows/README.md#the-world-on-another-device).
+The World on another device meets the computer through the pairing room, as a third page with less trust (`ROOM_ALLOWED`): [the World on another device](../platform/web/README.md#the-world-on-another-device).
 
 CDP controls a selected target; it is not a renderer, authorization bypass or general
 component API. Agent-operated World navigation uses versioned semantic actions through

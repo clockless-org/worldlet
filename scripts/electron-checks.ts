@@ -65,13 +65,13 @@ for(const file of checks(path.join(root,'platform/electron/src')).sort()){
  // Checks that import Electron APIs run in a real main process (no window); others under Electron's Node.
  const wrapper=outfile.replace(/\.mjs$/,'.main.mjs');
  // No top-level await here: Electron emits ready only after an ESM entry's top level settles.
- // Windowed checks read pixels back (modules/browser/engine): as in a capture run (#1057, #1060), Windows occlusion
+ // Windowed checks read pixels back (modules/applets/engine): as in a capture run (#1057, #1060), Windows occlusion
  // tracking must not evict the window's surface and the display stays on, or capturePage rejects (RC b10523a0, #1218).
 // On the Mac a check window other windows cover whole is not occluded either: a release host keeps its own windows in
 // front, and a covered page drew nothing (Mac Alpha 4378, "each page shows its own pixels ([null,null])", #500).
  // Each run keeps its own Electron storage (cookies, persist: partitions) in its scratch home, never the user-wide
  // default: a check that left cookies there (or another run beside it) changed what the next run read (Mac RC 3252,
- // modules/browser/engine's shared sign-in step).
+ // modules/applets/engine's shared sign-in step).
  writeFileSync(wrapper,`import {app,powerSaveBlocker} from 'electron';app.dock?.hide();app.setPath('userData',${JSON.stringify(path.join(home,'Electron'))});
 if(process.platform==='win32')app.commandLine.appendSwitch('disable-features','CalculateNativeWinOcclusion');
 if(process.platform==='darwin')app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');

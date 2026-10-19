@@ -10,13 +10,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
 import {POSTHOG_LIMITS,hogqlSelect,posthogHost} from '../context/sources/index.ts';
-import {channelDefaultGrants,standingActions,standingCallDecision} from '../agent/agents/grants.ts';
-import {hermesChannelToolAllowed} from '../agent/agents/hermes-server.ts';
-import {turnTrustObserve} from '../agent/agents/turn-trust.ts';
-import {resolveAction,worldActionOf,worldActions} from '../agent/tools/gateway.ts';
+import {channelDefaultGrants,standingActions,standingCallDecision} from '../agent/gate/grants.ts';
+import {hermesChannelToolAllowed} from '../agent/gate/hermes-server.ts';
+import {turnTrustObserve} from '../agent/gate/turn-trust.ts';
+import {resolveAction,worldActionOf,worldActions} from '../agent/gate/gateway.ts';
 import {APP_DEFINITIONS,SOURCE_PROVIDERS,connectSettings,connectToken} from '../context/applets/index.ts';
 import {validateAppletRuntimes} from '../context/applets/runtime.ts';
-import {ExecutionJournal} from '../platform/electron/src/modules/agent-runtime/journal.ts';
+import {ExecutionJournal} from '../platform/electron/src/modules/agents/journal.ts';
 import {ServiceSource,ServiceSourceAccess,ServiceSourceConnections} from '../platform/electron/src/modules/sources/service-source.ts';
 import {withTempDir} from './test-temp.ts';
 

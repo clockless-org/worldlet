@@ -6,11 +6,11 @@ import {execFileSync} from 'node:child_process';
 import {BrowserWindow,type BaseWindow} from 'electron';
 import {WorldLedger} from '../store/ledger.ts';
 import {createDiagnostics,type DiagnosticNote} from '../host/diagnostics.ts';
-import {ExecutionJournal} from '../modules/agent-runtime/journal.ts';
-import {DEMO_HOST} from '../modules/browser/page.ts';
+import {ExecutionJournal} from '../modules/agents/journal.ts';
+import {DEMO_HOST} from '../modules/applets/page.ts';
 import {AGENT,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,USER_ACTIVITY,type AgentService,type BrowserService,type CompanionService,type DesktopCompanionService,type FoxService,type UserActivityService} from '../host/services.ts';
 import {desktopCompanion} from './onboarding-paths.ts';
-import type {WebPage} from '../modules/browser/web-page.ts';
+import type {WebPage} from '../modules/applets/web-page.ts';
 import type {Row} from '../host/types.ts';
 import type {CheckContext} from './index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
@@ -30,7 +30,7 @@ import {backgroundLaunch,showInBackground} from '../background-launch.ts';
 // and says why in one line; scripts/startup-setup-check.ts drives that on the setup page (owner decision 2026-10-11).
 // Claude Code whose sign-in ran out opens its own sign-in page in the browser by itself, once per launch
 // (agent-runtime/provider-sign-in.ts signInOnce, scripts/model-providers-check.ts); this journey runs on Codex.
-// An OpenClaw or Hermes Agent also describes itself after that check (agent/agents/agent-profile.ts), in the background,
+// An OpenClaw or Hermes Agent also describes itself after that check (agent/gate/agent-profile.ts), in the background,
 // from its conversations Worldlet already read from its files (titles, counts, openings), without running tools:
 // Codex is not asked, so this journey never waits for it; startup-setup-check.ts drives a late description arriving.
 // The things it names the person handles most show on a Things tile while setup waits ("Asking … what you do most"),
@@ -147,7 +147,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  const doing=Date.now()/1000;
  await press('Do it for me');
  await wait('browser open under Fox’s glow',"!!document.querySelector('.browser-viewport.is-fox-control')",8);
- // The glow is a separate transparent window above the page (modules/browser/glow.ts): FoxGlow
+ // The glow is a separate transparent window above the page (modules/applets/glow.ts): FoxGlow
  // shows it with the style applied (isShowing) and hides it when Fox stops driving the page.
  const glowing=()=>foxGlowShowing(window);
  for(let i=0;i<80&&!await glowing();i++)await sleep(100);
@@ -336,7 +336,7 @@ async function foxGlowShowing(window:BaseWindow){
  }
  return false;
 }
-/** Website views on the rehearsal site, as attached to the World window (modules/browser/page.ts PageView). */
+/** Website views on the rehearsal site, as attached to the World window (modules/applets/page.ts PageView). */
 /** Check evidence: the World window's screen area, the glow window above it included. A background launch keeps the
  * World behind other windows (background-launch.ts), so there it saves the World window alone. */
 function capture(window:BaseWindow,file:string){
@@ -422,7 +422,7 @@ async function detectorCheck(){
  const db=new WorldLedger(root);
  try{
   if(recordedFailures(root,db).failures.length)throw Error('The failure detector reports failures in an empty library.');
-  // The Agent runtime's journal writer (modules/agent-runtime/index.ts) into this scratch ledger.
+  // The Agent runtime's journal writer (modules/agents/index.ts) into this scratch ledger.
   const record=(entry:Row)=>db.recordExecution(entry);
   const home=(scope:string)=>ExecutionJournal.register(path.join(root,'agent',scope,'hermes'),true,record);
   const diagnostics=createDiagnostics(root);
@@ -446,7 +446,7 @@ async function detectorCheck(){
   await saves({action:'chat',mode:'chat',monitor:true,sourceAnalysis:true,analysisLane:'google-calendar',session:unrepaired},'applet-analysis',['save-1'],unrepaired);
   // A source tool call refused within a turn (attention/tools.ts _source_begin) is that call's result, not failed work.
   try{await ExecutionJournal.run({action:'sourceTool',name:'read_world_source',args:{}},home('source'),undefined,async()=>{throw Error('Source is unavailable or this turn reached its read limit.');});}catch{}
-  // A kept page released under memory pressure (modules/browser/device.ts) is the host relieving
+  // A kept page released under memory pressure (modules/applets/device.ts) is the host relieving
   // memory as designed, not failed background work.
   diagnostics.record(Error('Kept page released under memory pressure (lowMemory).'),'keptPageRelease');
   diagnostics.record(Error('Kept page released under memory pressure (appFootprint).'),'keptPageRelease');
@@ -585,7 +585,7 @@ export function recordedFailures(root:string,db:WorldLedger,notes:DiagnosticNote
   return found;
  };
  // 4. Persisted diagnostics (logs/diagnostics.jsonl): any failure code except a cancellation and
- // a kept page released under memory pressure (agent/browser/page-resume.ts PAGE_MEMORY), which is
+ // a kept page released under memory pressure (agent/applets/page-resume.ts PAGE_MEMORY), which is
  // the host relieving memory as designed, not failed work. A tool-level rejection (the tool reply told the model to correct and resubmit) is a normal
  // self-correction only when a later call of that tool in the same run was accepted and the run
  // succeeded; otherwise the work was never saved and it fails.

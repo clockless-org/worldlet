@@ -4,17 +4,17 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {withTempDir} from './test-temp.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/agent-access.ts';
-import {GITHUB_APP_VAULT_KEY,GITHUB_DRAFT_MESSAGES,createGithubDrafts,type GithubFetch} from '../platform/electron/src/modules/agent-runtime/github-drafts.ts';
-import {openStandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
-import {createAgentAsks} from '../platform/electron/src/modules/agent-runtime/agent-asks.ts';
-import {ASK_REASONS,askItemId} from '../agent/agents/asks.ts';
+import {createAgentAccess} from '../platform/electron/src/modules/agents/agent-access.ts';
+import {GITHUB_APP_VAULT_KEY,GITHUB_DRAFT_MESSAGES,createGithubDrafts,type GithubFetch} from '../platform/electron/src/modules/agents/github-drafts.ts';
+import {openStandingWorldTools} from '../platform/electron/src/modules/agents/world-tool-bridge.ts';
+import {createAgentAsks} from '../platform/electron/src/modules/agents/agent-asks.ts';
+import {ASK_REASONS,askItemId} from '../agent/gate/asks.ts';
 import {roomDenied} from '../contracts/web-world.ts';
-import {STANDING_OUTSIDE_TURN} from '../agent/agents/grants.ts';
-import {GITHUB_DRAFT_REASONS,GITHUB_DRAFT_STALE,GITHUB_WRITE_REASONS,GITHUB_WRITE_STALE,githubDraftCreatedUrl,githubDraftItemId,githubDraftSignature} from '../agent/agents/github-drafts.ts';
+import {STANDING_OUTSIDE_TURN} from '../agent/gate/grants.ts';
+import {GITHUB_DRAFT_REASONS,GITHUB_DRAFT_STALE,GITHUB_WRITE_REASONS,GITHUB_WRITE_STALE,githubDraftCreatedUrl,githubDraftItemId,githubDraftSignature} from '../agent/gate/github-drafts.ts';
 import {GITHUB_APP} from '../context/sources/index.ts';
 
-// GitHub drafts on the host (agent/agents/GRANTS.md#github-drafts), the same modules the Electron and Node hosts run,
+// GitHub drafts on the host (agent/gate/GRANTS.md#github-drafts), the same modules the Electron and Node hosts run,
 // against a stubbed GitHub: an Agent drafts only under its own "Can draft GitHub changes" Grant; the draft keeps the
 // target as read; Approve reads it again and refuses when its state or updatedAt changed or it is gone, and otherwise
 // writes once as the GitHub App (a JWT it signs, exchanged for an installation token) and keeps the result's link;
@@ -22,7 +22,7 @@ import {GITHUB_APP} from '../context/sources/index.ts';
 // appear in no answer, item, audit entry, stored row or log line. Through the person's GitHub sign-in (no own App),
 // approved drafts are written as the person with the sign-in's user token, renewed once when GitHub refuses it, each new
 // Issue or comment ending with "Drafted by <Agent> in Worldlet", and standing writes are refused. A label transition (`labels.set`) is drafted and
-// approved against the labels the Agent read. Standing GitHub writes (agent/agents/GRANTS.md#standing-github-writes) run
+// approved against the labels the Agent read. Standing GitHub writes (agent/gate/GRANTS.md#standing-github-writes) run
 // at once, without a card, only within the reach of the Agent's own Grant for that repository, each read again and
 // refused when not as the Agent read it, each audited.
 await withTempDir('worldlet-github-drafts-',async dir=>{

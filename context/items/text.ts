@@ -1,5 +1,5 @@
 // Text helpers every part of the World shares: grapheme and UTF-8 lengths, whether a string may be a credential, and
-// whether an Agent's reply is a provider failure. They moved here from agent/companion and agent/agents so Context needs
+// whether an Agent's reply is a provider failure. They moved here from agent/companion and agent/gate so Context needs
 // nothing from Agent (#681).
 const segmenter=new Intl.Segmenter('en',{granularity:'grapheme'});
 export const characters=(text:string)=>Array.from(segmenter.segment(text),part=>part.segment);

@@ -1,9 +1,9 @@
-// Saved sign-ins (agent/browser/saved-logins.ts, owner request 2026-10-07): the rules for what is offered, and the
+// Saved sign-ins (agent/applets/saved-logins.ts, owner request 2026-10-07): the rules for what is offered, and the
 // page watch (platform/bridge/login-watch.js) in a real Chromium page: a sign-in without a form (Pokémon Showdown's
 // dialog), a form sent with Enter, an account typed on its own step, a one-time code that is no password, a sign-in
 // dialog that appears later, and filling a saved account in as typing would.
 import assert from 'node:assert/strict';
-import {SAVED_LOGINS,loginFillText,loginOffer,loginSavedText,loginSite,loginUsername,loginsFor,loginsOverLimit,readLoginSignal,type SavedLogin} from '../agent/browser/index.ts';
+import {SAVED_LOGINS,loginFillText,loginOffer,loginSavedText,loginSite,loginUsername,loginsFor,loginsOverLimit,readLoginSignal,type SavedLogin} from '../agent/applets/index.ts';
 import {installLoginWatch} from '../platform/bridge/login-watch.js';
 import {launchTestBrowser} from './browser-test.ts';
 

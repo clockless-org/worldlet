@@ -87,7 +87,7 @@ assert.match(world,/replies=markReplyPrepared\(replies,next\.id,now,\{thread:nex
 assert.match(fs.readFileSync('ui/index.ts','utf8'),/emailReviews:sample\?undefined:/,'No drafts are read in the practice world');
 assert.match(fs.readFileSync('ui/components/layout.css','utf8'),/\.notion-world:is\(\[data-onboarding=true\],\[data-onboarding-locked=true\],\[data-tour-step\]\) \.task-panel \.task-group\[data-group=now\]\{display:none\}/,'Doing now in the Task panel stays out of onboarding and the tour');
 // The host still refuses background work outside the person's own World and beside other background work.
-const host=fs.readFileSync('platform/electron/src/modules/fox/index.ts','utf8');
+const host=fs.readFileSync('platform/electron/src/modules/companion/index.ts','utf8');
 assert.match(host,/if\(scope\.sample\|\|scope\.setup\|\|store\.sampleEnabled\(\)\|\|store\.state\.cloudConsent!==true\|\|!runtime\|\|!make\)throw new WorldletError\('Background work runs in your own world\.'\);/);
 assert.match(host,/if\(backgroundRun\|\|appletTasks\.size\)throw new WorldletError\('Fox is busy with other background work\.'\);/);
 console.log('PASS prepared replies: open mail tasks from the last two days, each once, a few a day, after the first run settled, for someone who used Worldlet lately, never in the practice world, onboarding, the tour or an automated browser; Fox reads the thread and prepares a draft it never sends; the Task panel says what it is doing and what is ready');

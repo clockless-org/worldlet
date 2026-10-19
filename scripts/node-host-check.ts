@@ -211,7 +211,7 @@ await withTempDir('wl-',async temp=>{
    assert.equal(new URL(localLink).hostname,'127.0.0.1');
    assert.equal(cli('link','--loacl').status,2,'a mistyped local option must not return the remote link');
    assert.equal(cli('status','--local').status,2,'local selection is for link only');
-   // Remote access (agent/agents/REMOTE-MCP.md) is off until asked for; a wrong word is a usage error.
+   // Remote access (agent/gate/REMOTE-MCP.md) is off until asked for; a wrong word is a usage error.
    const remote=cli('remote');
    assert.equal(remote.status,0,remote.stderr);
    assert.match(remote.stdout,/Remote access is off/);

@@ -9,7 +9,7 @@ import type {AgentEventHandler,AgentRuntime,AgentSourceConnections} from '../../
 import type {Row} from '../../host/types.ts';
 import type {McpAccounts,McpConnection} from './mcp-account.ts';
 import {McpUnauthorized} from './mcp-client.ts';
-import {ExecutionJournal} from '../agent-runtime/journal.ts';
+import {ExecutionJournal} from '../agents/journal.ts';
 import {SERVICE_PROVIDERS} from '../../../../../contracts/services.ts';
 import {admitServiceRead} from './service-source.ts';
 
@@ -51,7 +51,7 @@ export class McpSource {
   try{return await collectNotionPage(session,id);}finally{void session.close();}
  }
  /** The Notion connection Notion's reviewed writes use (the official address, NOTION_GATE), for a Notion draft the
-  * person approved (agent/agents/service-drafts.ts); null when Notion is not connected there. The caller closes it. */
+  * person approved (agent/gate/service-drafts.ts); null when Notion is not connected there. The caller closes it. */
  notionSession():(McpSession&{close():Promise<void>})|null {
   const connection=this.accounts.connection('notion');
   return connection&&NOTION_GATE.urls.includes(connection.url)?this.accounts.session(connection,'Notion'):null;

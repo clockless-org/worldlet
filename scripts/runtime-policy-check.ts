@@ -14,7 +14,7 @@ assert.ok(!JSON.stringify(runtimeFailure({now,failures:0,message:'private@exampl
 // 15 minutes on one Mac, 2026-10-11): the model is unavailable, so wait an hour, and the batch's records are not at fault.
 {
  const {appletAnalysisUnsubmitted,APPLET_ANALYSIS_MODEL_UNAVAILABLE}=await import('../context/applets/index.ts');
- const {diagnosticError}=await import('../agent/diagnostics/index.ts');
+ const {diagnosticError}=await import('../agent/base/index.ts');
  const rejected='ChatGPT or Codex Subscription rejected the request and retrying won\'t help. Pick another model with /model, or check the details in `~/.hermes/logs/agent.log`.\n\nProvider said: HTTP 400: {"detail":"The \'gpt-6-astra\' model is not supported when using Codex with a ChatGPT account."}';
  assert.equal(appletAnalysisUnsubmitted(rejected),APPLET_ANALYSIS_MODEL_UNAVAILABLE);
  for(const reply of ['Done.','',undefined,{message:1}])assert.equal(appletAnalysisUnsubmitted(reply),'Applet analysis ended without a verified result.',String(reply));

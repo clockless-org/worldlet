@@ -1,6 +1,6 @@
-import {firstValueCandidate} from '../../agent/onboarding/index.ts';
+import {firstValueCandidate} from '../../agent/companion/index.ts';
 import {connectionLive,sourcesReading} from '../../context/applets/index.ts';
-import {journalTarget} from '../../agent/agents/index.ts';
+import {journalTarget} from '../../agent/gate/index.ts';
 import {createCoachMark,createTourSpotlight,elementBox} from './tour-spotlight.ts';
 
 /**
@@ -37,7 +37,7 @@ import {createCoachMark,createTourSpotlight,elementBox} from './tour-spotlight.t
  * an interrupted operation is never replayed.
  */
 const WAIT=60000,BROUGHT_WAIT=15000,READING_WAIT=300000,FIRST_CARD_WAIT=180000;
-/** The first Today’s prep, or any day's card Fox kept in the Journal, as its Attention item (agent/agents harness-schedule). */
+/** The first Today’s prep, or any day's card Fox kept in the Journal, as its Attention item (agent/gate harness-schedule). */
 const journalCard=(item:any)=>!!item&&item.kind==='update'&&!!journalTarget(item.sources);
 
 export function mountFirstValue({root,view,call,state:initial,arriving=false}){
@@ -49,7 +49,7 @@ export function mountFirstValue({root,view,call,state:initial,arriving=false}){
  // starts the wait for a first item; `ending` is set once the tour ends without one.
  let focus='',waitingSince=0,ending=false,keeping=false;
  const mountedAt=Date.now();
- // The first card's steps, each reported once (agent/diagnostics/ANALYTICS.md#the-first-card).
+ // The first card's steps, each reported once (agent/base/ANALYTICS.md#the-first-card).
  const reported=new Set<string>();
  const firstCardStep=(event:string)=>{if(reported.has(event))return;reported.add(event);window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event,dimensions:{}}}));};
  // The step's main action is filled, a second choice quiet (owner request 2026-10-06; world-tour.ts).

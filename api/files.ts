@@ -13,9 +13,9 @@ export const FILES=Object.freeze({
  immersiveComposition:'resources/styles/builtin/references/immersive/composition.json',
  install:'platform/install/',
  macReleasePage:'ui/distribution/mac-release.ts',
- webOpenScript:'ui/web/open.ts',
- webOpenPage:'ui/web/open.html',
- webOpenStyle:'ui/web/open.css',
+ webOpenScript:'platform/web/page/open.ts',
+ webOpenPage:'platform/web/page/open.html',
+ webOpenStyle:'platform/web/page/open.css',
  modelSources:'contracts/model-sources.json',
  // The release hosts.
  channels:'platform/electron/distribution/Channels.json',

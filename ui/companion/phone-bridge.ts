@@ -1,24 +1,24 @@
-import {phoneAttention,phoneActionStatus,phoneLive,type PhoneMessage,type PhoneWorld} from '../../agent/windows/index.ts';
+import {phoneAttention,phoneActionStatus,phoneLive,type PhoneMessage,type PhoneWorld} from '../../platform/web/index.ts';
 import {attentionLaterUntil} from '../../agent/attention/index.ts';
 import {attentionSceneArt} from '../attention/index.ts';
 
-// The World page's half of phone pairing (agent/windows/README.md). It sends the Attention Center's Now and Later to the
+// The World page's half of phone pairing (platform/web/README.md). It sends the Attention Center's Now and Later to the
 // host when they change, and carries out what the paired phone asks: a chat line goes to Fox's main conversation as the
 // person's own message (queued behind a running turn, like a typed one), and Done, Later or Remove settles the item the
 // way the desktop card does, and Connect opens that account's sign-in here, where the person finishes it (the phone never
 // signs in to anything). An Order said on the phone goes to Claude like the computer's own Order button (never to Fox as a
 // chat line), and Fox says here how it went. The host calls window.worldletPhoneMessage and acknowledges the message
 // when it returns true.
-// The Applet world rides with the Center: the World's Applets, what each is doing and its own thread (agent/windows
+// The Applet world rides with the Center: the World's Applets, what each is doing and its own thread (agent/base
 // phoneApplets), so the phone's swipe down from Now shows them and each item links to its Applet.
 const LIVE_GAP=250;
 type Settle=(item:{worldItemId:string},status:string,snoozedUntil:string|null)=>Promise<unknown>;
 type Account={provider:string,title:string,action:string,run:()=>unknown};
 export function mountPhoneBridge({publish,publishLive=async()=>{},answer=()=>false,ask,askItem=(_id,text)=>ask(text),askApplet=(_key,text)=>ask(text),openApplet=()=>false,world=()=>null,tasks=()=>null,journal=()=>null,choose=()=>false,itemFox=()=>null,settle,kindOf,ready=()=>true}:{
  publish:(value:unknown)=>Promise<unknown>,
- /** Sends the turn Fox is streaming (agent/windows phoneLive). */
+ /** Sends the turn Fox is streaming (agent/base phoneLive). */
  publishLive?:(value:unknown)=>Promise<unknown>,
- /** The phone's answer to the Agent's permission prompt that rides with the live turn (agent/windows PhoneLive `approval`). */
+ /** The phone's answer to the Agent's permission prompt that rides with the live turn (agent/base PhoneLive `approval`). */
  answer?:(id:string,choice:'once'|'always'|'deny')=>unknown,
  ask:(text:string)=>unknown,
  /** A line the person said on the phone with an item's card open: it joins that item's conversation, as on the computer. */
@@ -28,15 +28,15 @@ export function mountPhoneBridge({publish,publishLive=async()=>{},answer=()=>fal
  /** Open on the computer, asked from an Applet's page on the phone. */
  openApplet?:(key:string)=>unknown,
  /** What the person said with the phone's Order button: sent as an Order from this computer (ui/companion/native-chat.ts). */
- /** The Applet world (agent/windows PhoneWorld), or null where there is none. */
+ /** The Applet world (agent/base PhoneWorld), or null where there is none. */
  world?:()=>PhoneWorld|null,
  /** The Task panel's cards (agent/tasks TaskPanel), for the phone's Tasks tab; null until the panel has read them. */
  tasks?:()=>unknown,
- /** The Journal's cards (context/artifacts Artifact); the phone gets today's (agent/windows phoneJournal). */
+ /** The Journal's cards (context/artifacts Artifact); the phone gets today's (agent/base phoneJournal). */
  journal?:()=>any[]|null,
  /** The option Fox offers on an item's card (its primary help), chosen on the phone. */
  choose?:(id:string)=>unknown,
- /** What Fox says on an item's card and that item's latest turns (agent/windows/payloads.ts PhoneItemFox). */
+ /** What Fox says on an item's card and that item's latest turns (platform/web/payloads.ts PhoneItemFox). */
  itemFox?:(id:string)=>unknown,
  settle:Settle,
  kindOf:(id:string)=>string|undefined,
@@ -55,7 +55,7 @@ export function mountPhoneBridge({publish,publishLive=async()=>{},answer=()=>fal
  const handled=new Set<string>();
  (globalThis as any).worldletPhoneMessage=async(message:PhoneMessage,key?:string)=>{
   // Retried deliveries (the host could not record the acknowledgement) are taken once. The host names each delivery
-  // (agent/windows phoneMessageKey): an Attention message's id is its item's, so "Later" then "Done" on one item are two.
+  // (agent/base phoneMessageKey): an Attention message's id is its item's, so "Later" then "Done" on one item are two.
   const delivery=typeof key==='string'&&key?key:message?.type==='attention'?'':message?.id;
   if(delivery&&handled.has(delivery))return true;
   if(!ready())return false;

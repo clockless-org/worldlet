@@ -3,7 +3,7 @@ import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
 import path from 'node:path';
 import {tmpdir} from 'node:os';
 const platform=process.platform==='win32'?'windows':'macos';
-import {updateOnboarding} from '../agent/onboarding/onboarding.ts';
+import {updateOnboarding} from '../agent/companion/onboarding.ts';
 import {WORLD_APPS,seedAppletSelection} from '../context/applets/index.ts';
 // Every app setup can offer says what it is for in one line (demo feedback 2026-10-03); a website Applet never claims account sync.
 for(const app of WORLD_APPS){
@@ -292,7 +292,7 @@ await withBrowser(fileAccess,async browser=>{
   // Only what came over gets a tile (owner request 2026-10-09), in the order it arrives.
   assert.deepEqual(await page.locator('.setup-tile').evaluateAll(list=>list.map(e=>e.className.split(' ')[1])),['setup-tile-avatar','setup-tile-profile','setup-tile-conversations','setup-tile-notes','setup-tile-skills','setup-tile-routines','setup-tile-things','setup-tile-connections','setup-tile-apps']);
   assert.equal(await page.locator('.setup-tile-profile .setup-tile-note').textContent(),'Knows: Runs a small design studio in Kyoto');
-  // Meanwhile Worldlet asks the Agent what the person does most (agent/agents/agent-profile.ts things), and says so.
+  // Meanwhile Worldlet asks the Agent what the person does most (agent/gate/agent-profile.ts things), and says so.
   assert.equal(await page.locator('.setup-tile-things.is-waiting .setup-tile-note').textContent(),'Asking Nova what you do most…');
   assert.equal(await page.locator('.setup-tile-conversations .setup-tile-count').textContent(),'3');
   assert.deepEqual(await page.locator('.setup-tile-conversations li').allTextContents(),['Trip plan for Kyoto','Weekly investor update','Fix the flaky login test']);
@@ -311,7 +311,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='select').map(c=>c.id)),['claude-code','openclaw']);
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>['localAgent','agentIntegrations'].includes(c.action)).map(c=>c.action+':'+c.operation+':'+c.id)),['localAgent:adopt:openclaw','agentIntegrations:port:openclaw']);
   assert.ok(!await page.evaluate(()=>(window as any).calls.some(c=>c.action==='connect')),'No Google sign-in');
-  // Which Agent, who answers for Fox, and what came along: IDs, buckets and outcomes only (agent/diagnostics/ANALYTICS.md#bringing-an-agent).
+  // Which Agent, who answers for Fox, and what came along: IDs, buckets and outcomes only (agent/base/ANALYTICS.md#bringing-an-agent).
   await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='usageEvent'&&c.event==='agent_bring_completed'));
   const usage=await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='usageEvent'));
   const chosen=usage.find(c=>c.event==='local_agent_selected'&&c.local_agent==='openclaw');
@@ -320,7 +320,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.ok(brought&&brought.local_agent==='openclaw'&&brought.integrations_came_over==='1_9'&&brought.integrations_reconnect==='1_9'&&/^(0|1_9|10_99|100_999|1000_plus)$/.test(brought.bring_conversations),JSON.stringify(brought));
   assert.ok(!JSON.stringify(usage).match(/GitHub|Nova|#|\//),'No titles, names or paths in setup events');
   assert.equal(await page.evaluate(()=>(window as any).fixture.cloudConsent),true,'Choosing an Agent allows Fox to use the world’s context');
-  // OpenClaw then describes itself in the background (agent/agents/agent-profile.ts): what its files did not show joins
+  // OpenClaw then describes itself in the background (agent/gate/agent-profile.ts): what its files did not show joins
   // the tiles and the World's selection, and only the outcome and a count leave the device.
   await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:agent-check',{detail:{id:'openclaw',result:'ok',ms:40000,profile:{agent:{name:'Nova'},workspaces:[],aboutUser:[],skills:[{name:'a'},{name:'b'},{name:'c'},{name:'d'},{name:'e'}],connections:[{name:'1Password vault',kind:'password_vault',service:'1password'}],channels:[{provider:'discord',place:'#groceries'}],routines:[],threads:[],applets:[{key:'amazon',title:'Amazon',why:'Restocks the kitchen'}],things:[{title:'Kitchen restock',threads:['#groceries'],key:'amazon'},{title:'Studio invoices',threads:[]}]}}})));
   await page.waitForFunction(()=>document.querySelectorAll('.setup-tile-connections .setup-tile-logos>*').length===4);
@@ -437,7 +437,7 @@ await withBrowser(fileAccess,async browser=>{
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-fit-2-1440-'+host+'.png')});
   assert.deepEqual(errors,[]);await page.close();
  }
-// One-click install (`--connect=<id>`, agent/agents/PORTABILITY.md#local-harnesses-chosen-at-setup): the Agent the
+// One-click install (`--connect=<id>`, agent/gate/PORTABILITY.md#local-harnesses-chosen-at-setup): the Agent the
  // host hands over is connected with the same select as the big button and brought in by itself; one not
  // found here, or a select that fails, leaves the first half with it picked and the error shown; so does a select that
  // moved on before its answer check (`checkLater`) and hears that check failed; a second launch while setup is open
@@ -508,7 +508,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='requested').length>=1),true);
   assert.deepEqual(errors,[]);await page.close();
  }
- // An Agent older than Worldlet works with (agent/agents/agent-versions.ts): its card says which version it needs, the big
+ // An Agent older than Worldlet works with (agent/gate/agent-versions.ts): its card says which version it needs, the big
  // button opens its own update in Terminal instead of connecting it, and Check again reads its version afresh.
  {
   const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'});const errors=pageErrors(page);
@@ -648,7 +648,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='onboarding'&&c.operation==='setup')),false,'onboarding setup is not redone');
   assert.deepEqual(errors,[]);await page.close();
  }
- // My Agent is on another computer (agent/windows/README.md#another-computers-agent): the code from Worldlet there pairs
+ // My Agent is on another computer (platform/web/README.md#another-computers-agent): the code from Worldlet there pairs
  // this one with it, and setup goes on to the second half; a refused code says why and the code box stays.
  {
   const page=await browser.newPage({viewport:{width:1024,height:700},reducedMotion:'reduce'});const errors=pageErrors(page);

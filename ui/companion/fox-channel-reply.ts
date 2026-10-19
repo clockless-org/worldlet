@@ -1,4 +1,4 @@
-/** A reply Fox offers in a channel a brought conversation came from (`reply_in_channel`; agent/agents/PORTABILITY.md
+/** A reply Fox offers in a channel a brought conversation came from (`reply_in_channel`; agent/gate/PORTABILITY.md
  * #replying-in-a-channel): a guide in Fox's card with where it goes, the exact text and Send, Edit and Skip. Only Send
  * sends, through the host (`channelReply`) and the person's own Agent; Edit turns the text into a field and Send then
  * sends what the field holds. A settled offer (sent or skipped, here or elsewhere) leaves a short line. */

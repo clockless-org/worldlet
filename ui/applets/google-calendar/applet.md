@@ -13,7 +13,7 @@ Read your connected calendars, and keep your own events on this computer. Access
 
 Owner request 2026-10-06: Calendar matches Apple Calendar, and the person can add, change and delete events. Worldlet
 has no write access to a connected calendar, so these events live in this World only: the `calendar_events` table of
-world.sqlite (rules in `context/applets/calendar-events.ts`, host in `platform/electron/src/modules/calendar/`). The
+world.sqlite (rules in `context/applets/calendar-events.ts`, host in `platform/electron/src/modules/applets/`). The
 practice world keeps its events in memory for the session.
 
 - Day and Week are a time grid (`grid.ts`): an hour gutter, an all-day strip, overlapping events side by side, a
@@ -34,7 +34,7 @@ practice world keeps its events in memory for the session.
   alert is a Mac or Windows notification, and clicking it shows that day in Calendar.
 - Attention: what is on in the next day stands in Coming Up (at most five, in time order with the synced events),
   here and on the phone; an event whose alert has come leads it. Opening one shows its day.
-- Fox works with them through `manage_calendar` (`agent/tools/calendar.ts`, gateway `calendar/list|add|change|delete`):
+- Fox works with them through `manage_calendar` (`agent/gate/calendar.ts`, gateway `calendar/list|add|change|delete`):
   it lists, adds and changes events, and deletes one only when the person asked in their own words this turn.
   `google-calendar/draft` stays for the Mac's Calendar app only.
 

@@ -23,7 +23,7 @@ import {SAMPLE_DATASET_ID} from './world/index.ts';
 import {makeSampleWorld} from './world/index.ts';
 import {createNativeCompanion} from './companion/index.ts';
 import {mountWorldOnboarding} from './onboarding/index.ts';
-import {onboardingUnfinished} from '../agent/onboarding/index.ts';
+import {onboardingUnfinished} from '../agent/companion/index.ts';
 import {mountNotionWorld} from './shell/index.ts';
 import {setMailAvatarLookup} from './applets/index.ts';
 import {setAttentionImageLookup} from './attention/index.ts';
@@ -38,7 +38,7 @@ window.addEventListener('unhandledrejection',event=>reportException(event.reason
 // PostHog's standard web capture (autocapture, sessions, masked replay): only in a release app with sharing on.
 startWebAnalytics(callHost);
 // Only allowlisted dimensions pass (the host allowlists them again): an Applet key, `trigger` user|background,
-// setup's `dimensions` (agent/diagnostics/setup-events.ts) with a `duration` bucket and, for user_engaged, its kind. user_engaged is reported in the practice world too: a person exploring it is using the app.
+// setup's `dimensions` (agent/base/setup-events.ts) with a `duration` bucket and, for user_engaged, its kind. user_engaged is reported in the practice world too: a person exploring it is using the app.
 window.addEventListener('worldlet:product-event',(e:Event)=>{const detail=(e as CustomEvent).detail;if(typeof detail==='string')track(detail);else if(detail?.event==='user_engaged')void Promise.resolve(callHost('usageEvent',{event:'user_engaged',engagement_kind:detail.engagement_kind})).catch(()=>{});else if(detail)track(detail.event,typeof detail.duration==='string'?detail.duration:'',{...(detail.dimensions&&typeof detail.dimensions==='object'?detail.dimensions:{}),...(detail.applet?{applet:detail.applet}:{}),...(detail.trigger?{trigger:detail.trigger}:{})});});
 installDesktopCompanion();
 window.worldletAudio=value=>window.dispatchEvent(new CustomEvent('worldlet:audio',{detail:value}));

@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 import {widgetDocument,WIDGET_POLICY} from '../context/artifacts/index.ts';
 import {checkMadeGameSource,madeGameDocument,readMadeGameReport,madeGameRecord,readMadeGame,orderMadeGames,madeGameTrialProblems,gameFactoryModel,madeGameId,validMadeGameId,madeGameTask,betterBest,GAME_MAKING_OPEN,MADE_GAME_POLICY,SANDBOX_POLICY,MADE_GAME_REPORT,GAME_FACTORY_APPLET} from '../context/artifacts/index.ts';
 import {createWorldToolRuntime} from '../platform/bridge/world-tool-runtime.ts';
-import {worldActions,listWorldTools} from '../agent/tools/index.ts';
+import {worldActions,listWorldTools} from '../agent/gate/index.ts';
 import {APP_DEFINITIONS} from '../context/applets/index.ts';
 
 // A plain canvas game passes; SVG namespaces, `rect.top`, `node.parent` and location.reload are not network use.
@@ -68,9 +68,9 @@ assert.equal(APP_DEFINITIONS.some(app=>app.id===GAME_FACTORY_APPLET),false,'the 
 // locked the same way, including WebRTC, whose UDP never passes the session's request filter.
 {
  const read=(file:string)=>readFileSync(new URL('../platform/electron/src/modules/'+file,import.meta.url),'utf8');
- const trial=read('games/trial.ts'),lock=trial.slice(trial.indexOf('export function lockGameContents'),trial.indexOf('export function placeGameView'));
+ const trial=read('applets/trial.ts'),lock=trial.slice(trial.indexOf('export function lockGameContents'),trial.indexOf('export function placeGameView'));
  assert.match(lock,/setWebRTCIPHandlingPolicy\('disable_non_proxied_udp'\)/);assert.match(lock,/action:'deny'/);assert.match(lock,/will-navigate/);assert.match(lock,/will-redirect/);
  assert.match(trial.slice(trial.indexOf('export async function tryMadeGame')),/lockGameContents\(contents\)/,'the trial');
- for(const player of ['games/player.ts','artifacts/widget-player.ts'])assert.match(read(player),/lockGameContents\(contents\)/,player);
+ for(const player of ['applets/player.ts','attention/widget-player.ts'])assert.match(read(player),/lockGameContents\(contents\)/,player);
 }
 console.log('PASS Game Factory: offline-only pages, sandbox prelude and reports, records, own-model rule; making is coming soon and Fox is offered no game tools.');

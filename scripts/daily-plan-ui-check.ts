@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
-import {dailyScheduleResult} from '../agent/agents/index.ts';
+import {dailyScheduleResult} from '../agent/gate/index.ts';
 // The morning brief (Today’s prep) on the World page (context/artifacts/README.md#the-days-plan-and-summary): made at 7 AM by itself,
 // quietly, in a background session beside the conversation (owner Orders 2026-10-07). For someone who used Worldlet
 // lately, Fox is asked once in the morning, with the window hidden and before the person touches anything; the

@@ -12,7 +12,7 @@ for(const source of [
  "const x=import(name)",
  '/// <reference path="../../agent/tasks/index.ts" />',
 ])assert.throws(()=>checkSource('ui/hud/example.ts',source),undefined,source);
-assert.throws(()=>checkEdge('agent/agents/example.ts','platform/bridge/index.ts'),/Forbidden/);
+assert.throws(()=>checkEdge('agent/gate/example.ts','platform/bridge/index.ts'),/Forbidden/);
 // Context imports only itself and contracts; Agent imports Context and contracts (#681).
 assert.throws(()=>checkEdge('context/items/example.ts','agent/tasks/index.ts'),/Forbidden/);
 assert.throws(()=>checkEdge('context/items/example.ts','agent/index.ts'),/Forbidden/);
@@ -20,9 +20,9 @@ checkEdge('agent/tasks/example.ts','context/items/index.ts');
 checkEdge('platform/electron/src/example.ts','agent/index.ts');
 assert.throws(()=>checkEdge('ui/hud/example.ts','harness/example/agent.ts'),/Forbidden/);
 assert.throws(()=>checkSource('contracts/example.ts',"import fs from 'node:fs'"),/pure layer/);
-assert.throws(()=>checkSource('agent/agents/example.ts','process.env.TOKEN'),/host global/);
+assert.throws(()=>checkSource('agent/gate/example.ts','process.env.TOKEN'),/host global/);
 assert.throws(()=>checkSource('ui/hud/example.ts','window.chrome.webview.postMessage({})'),/Host bridge/);
-assert.throws(()=>checkSource('harness/example/tools.ts',"export {practiceTools} from '../../agent/tools/practice.ts'"),/Forbidden/);
+assert.throws(()=>checkSource('harness/example/tools.ts',"export {practiceTools} from '../../agent/gate/practice.ts'"),/Forbidden/);
 for(const branch of ["state.platform!=='windows'","platform != \"macos\"","platform==='windows'"])assert.throws(()=>checkSource('ui/hud/example.ts',branch),/capabilities/,branch);
 // api/ reaches into any component for the operations repository; nothing here imports it.
 checkEdge('api/build.ts','ui/world/world-layout.ts');

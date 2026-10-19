@@ -7,7 +7,7 @@ import {SERVICE_ACTIONS} from '../../../../../contracts/services.ts';
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections,VaultService} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
 import {validateWorldTool} from './google-source.ts';
-import {ExecutionJournal} from '../agent-runtime/journal.ts';
+import {ExecutionJournal} from '../agents/journal.ts';
 import {McpAccounts} from './mcp-account.ts';
 import {McpHttpClient,McpUnauthorized} from './mcp-client.ts';
 
@@ -299,7 +299,7 @@ export class ServiceSource {
   }finally{clearTimeout(timer);}
  }
  /** A connected Service's settings and a request function over its key, for a write the person approved (PostHog
-  * drafts, agent/agents/service-drafts.ts): each request answers its status and JSON instead of throwing for a refusal,
+  * drafts, agent/gate/service-drafts.ts): each request answers its status and JSON instead of throwing for a refusal,
   * so Core can say why. It still goes only to the connection's one origin, follows no redirect and stops at the gate's
   * time and size; the key stays here. Null when the Service is not connected. */
  writer(provider:string):{settings:unknown;request(method:'GET'|'POST'|'PATCH',path:string,body?:Record<string,unknown>):Promise<{status:number;json:unknown}>}|null {
@@ -442,7 +442,7 @@ async function bounded(response:Response,gate:ServiceGate,controller:AbortContro
 
 /** `read_service`'s own gate, for every Service whichever transport reads it: the call is checked against the tool's
  * schema, must name one of `providers` and an operation that Service has (SERVICE_ACTIONS), and is admitted by the
- * turn (whose Grants name `<provider>/<operation>`, agent/agents/GRANTS.md; the read makes the turn untrusted). Returns
+ * turn (whose Grants name `<provider>/<operation>`, agent/gate/GRANTS.md; the read makes the turn untrusted). Returns
  * the one read to make. */
 export async function admitServiceRead(args:Row,providers:readonly string[],onEvent:AgentEventHandler|undefined):Promise<{provider:string;body:Row}> {
  validateWorldTool('read_service',args);

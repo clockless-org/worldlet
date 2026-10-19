@@ -53,7 +53,7 @@ for(const file of ['platform/electron/src/main.ts','platform/electron/src/world/
 console.log('PASS Electron window coordinators use Store operations and never replace, mutate or persist Store state directly.');
 
 // Website pages report activity through the recorder; observation cannot mutate storage directly.
-for(const file of ['platform/electron/src/modules/browser/page.ts','platform/electron/src/modules/browser/youtube.ts']){
+for(const file of ['platform/electron/src/modules/applets/page.ts','platform/electron/src/modules/applets/youtube.ts']){
  const source=await readFile(file,'utf8');
  assert(!ledgerAccess.test(source),`${file} must delegate activity persistence`);
 }

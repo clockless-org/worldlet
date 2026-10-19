@@ -1,20 +1,20 @@
 // Worldlet's fixed MCP home (platform/node/README.md#one-fixed-mcp-home): `~/.worldlet/mcp` (`WORLDLET_HOME` names
 // another place than `~/.worldlet`) holds the standing server's stdio shim, its tool list and one owner-only endpoint
 // file per Agent. Their names never change, so an Agent registers the server once: each run the host writes the
-// endpoint and that Agent's new token (agent/agents/GRANTS.md) into the same file, and removes it when it stops, so a call
-// then answers that Worldlet is not open. `register` runs the Agent's own command (agent/agents/harness-connections.ts
+// endpoint and that Agent's new token (agent/gate/GRANTS.md) into the same file, and removes it when it stops, so a call
+// then answers that Worldlet is not open. `register` runs the Agent's own command (agent/gate/harness-connections.ts
 // worldToolsCommands) and copies the Worldlet skill into the Agent's skills folder.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {standingWorldTools} from '../../electron/src/modules/agent-runtime/index.ts';
-import {mcpHome,worldletHome} from '../../electron/src/modules/agent-runtime/script-agents.ts';
-import {currentEnvironment,locateLocalHarnesses} from '../../electron/src/modules/agent-runtime/local-harness.ts';
-import {runHarnessCommand} from '../../electron/src/modules/agent-runtime/harness-approvals.ts';
-import {codexHome} from '../../electron/src/modules/agent-runtime/agent-files.ts';
-import type {StandingAgent} from '../../electron/src/modules/agent-runtime/world-tool-bridge.ts';
+import {standingWorldTools} from '../../electron/src/modules/agents/index.ts';
+import {mcpHome,worldletHome} from '../../electron/src/modules/agents/script-agents.ts';
+import {currentEnvironment,locateLocalHarnesses} from '../../electron/src/modules/agents/local-harness.ts';
+import {runHarnessCommand} from '../../electron/src/modules/agents/harness-approvals.ts';
+import {codexHome} from '../../electron/src/modules/agents/agent-files.ts';
+import type {StandingAgent} from '../../electron/src/modules/agents/world-tool-bridge.ts';
 import {ensureDirectory,writeAtomic} from '../../electron/src/files.ts';
-import {LOCAL_HARNESSES,commandReason,isWorldToolsRegistrar,worldToolsCommands,type WorldToolsRegistrar} from '../../../agent/agents/index.ts';
+import {LOCAL_HARNESSES,commandReason,isWorldToolsRegistrar,worldToolsCommands,type WorldToolsRegistrar} from '../../../agent/gate/index.ts';
 
 /** The Worldlet skill (harness/skills/worldlet/SKILL.md), put in by scripts/build-node-host.ts. */
 declare const __WORLDLET_SKILL__:string|undefined;

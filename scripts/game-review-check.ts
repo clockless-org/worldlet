@@ -12,12 +12,12 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {WebRecorder,readRecordings} from '../platform/electron/src/modules/browser/recorder.ts';
-import {WEB_RECORD,webTranscript,type WebRecord} from '../agent/browser/index.ts';
+import {WebRecorder,readRecordings} from '../platform/electron/src/modules/applets/recorder.ts';
+import {WEB_RECORD,webTranscript,type WebRecord} from '../agent/applets/index.ts';
 import {conversationGuidance} from '../agent/companion/conversation-guidance.ts';
-import {listWorldTools} from '../agent/tools/index.ts';
+import {listWorldTools} from '../agent/gate/index.ts';
 import {BATTLE_REVIEW,battleNow,battleReviewDue,battleReviewTask,battleSummaryDue,battleWatch,battlesReviewed,battlesSummarized,finishedBattles,observeBattleMessage} from '../context/artifacts/index.ts';
-import {BattleReviews} from '../platform/electron/src/modules/browser/battle-review.ts';
+import {BattleReviews} from '../platform/electron/src/modules/applets/battle-review.ts';
 
 type Frame={in?:string;out?:string};
 const fixture=JSON.parse(fs.readFileSync(new URL('./fixtures/showdown-battles.json',import.meta.url),'utf8')) as {games:{room:string;frames:Frame[]}[]};

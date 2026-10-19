@@ -3,7 +3,7 @@ import {WorldletError} from '../../files.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {RUN_IN_BACKGROUND,type DesktopCompanionService} from '../../host/services.ts';
 import {companionEntry,companionMenu,type CompanionTray} from './companion-tray.ts';
-import {onboardingUnfinished} from '../../../../../agent/onboarding/index.ts';
+import {onboardingUnfinished} from '../../../../../agent/companion/index.ts';
 import {backgroundLaunch,showInBackground} from '../../background-launch.ts';
 
 const WORLD_BACKGROUND='#20251d';
@@ -286,7 +286,7 @@ export class DesktopCompanion implements DesktopCompanionService {
   panel.hide();this.entry?.show();
   this.hideApp();
  }
- /** Every Worldlet window steps aside while the app keeps running, so a browser link (ui/web) keeps working. The Dock
+ /** Every Worldlet window steps aside while the app keeps running, so a browser link (platform/web/page) keeps working. The Dock
   * (Mac) or the tray (Windows) brings the World back; until onboarding is over there is nothing to run. */
  background(){
   if(this.unfinished())return false;

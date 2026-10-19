@@ -14,7 +14,7 @@ import {Preferences} from '../../preferences.ts';
 import {WorldStore} from '../../store/world-store.ts';
 import {UsageAnalytics,INSTALLATION_KEYS,INSTALL_CLAIM_URL,ingestPath,personInput,safeDimensions} from './analytics.ts';
 import {minidumpCrash,nativeCrashes} from './native-crashes.ts';
-import {nativeCrashFromIps} from '../../../../../agent/diagnostics/index.ts';
+import {nativeCrashFromIps} from '../../../../../agent/base/index.ts';
 import {capture,decode,dispose,encode,restore,validate,PREFERENCE_KEYS,type Archive} from './backup.ts';
 import {worldMenu,worldMenuState} from './world-menu.ts';
 import {DesktopCompanion} from './companion.ts';
@@ -252,7 +252,7 @@ try{
   await new Promise(resolve=>setTimeout(resolve,30));
   assert.equal(claims.length,1,'never asked again');
   assert.equal(events.at(-1).properties.invite_token,'0123456789abcdef0123456789abcdef','later events carry it too');
-  // Speed, update and Fox speak-first events carry only their allowlisted buckets (agent/diagnostics/ANALYTICS.md).
+  // Speed, update and Fox speak-first events carry only their allowlisted buckets (agent/base/ANALYTICS.md).
   analytics.recordProductEvent('fox_proactive_asked','',{proactive_moment:'settled',proactive_status:'spoke',line:'private line'});
   analytics.recordProductEvent('page_load_timing','15_60s',{timing_outcome:'complete',page_engine:'cef',url:'https://private.example/'});
   analytics.recordProductEvent('update_applied','',{update_wait:'1_7d'});
@@ -312,7 +312,7 @@ try{
   console.log('PASS web capture: the World page gets PostHog settings only with sharing on; the host forwards only this project\'s ingestion paths');
  }
 
- // Native crashes (agent/diagnostics/ANALYTICS.md#native-crashes): the next launch finds the system's report of a Mac
+ // Native crashes (agent/base/ANALYTICS.md#native-crashes): the next launch finds the system's report of a Mac
  // crash, or the Crashpad minidump of a Windows one, and sends PostHog the crashed thread as module + offset frames and
  // the exception only: no path, user name, registers or the OS's misleading export names for the app's own modules.
  {
@@ -456,7 +456,7 @@ try{
   desktop.stop();
   console.log('PASS another app in front puts Fox on the desktop; the World coming back brings it home');
  }
- // Run in background (agent/windows/README.md#web): no window stays, not even Fox, while the app keeps running for a browser link.
+ // Run in background (platform/web/README.md#web): no window stays, not even Fox, while the app keeps running for a browser link.
  {
   const world=new BaseWindow({width:400,height:300,show:false}),view=new WebContentsView();
   world.contentView.addChildView(view);view.setBounds({x:0,y:0,width:400,height:300});

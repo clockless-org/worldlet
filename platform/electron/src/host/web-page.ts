@@ -2,10 +2,10 @@ import {errorMessage} from '../files.ts';
 import {WEB_PAGE_FEATURES,WORLD_ELSEWHERE_CODE,webDenied,webEventDetail,webReply,type WorldHostFrame} from '../../../../contracts/web-world.ts';
 import type {PageBridge} from './types.ts';
 // The World page in a web browser on this computer (contracts/web-world.ts), as a PageBridge: the host reaches it over
-// the page's socket (modules/phone/local-relay.ts) as the app reaches its own World page over IPC, and its requests go
+// the page's socket (modules/shell/local-relay.ts) as the app reaches its own World page over IPC, and its requests go
 // to the same router. One page at a time: a newer one takes over and the older one is told the World is open elsewhere.
 
-/** A page's open socket (modules/phone/web-socket.ts TextSocket). */
+/** A page's open socket (modules/shell/web-socket.ts TextSocket). */
 export interface PageSocket {
  send(text:string):void;
  close(code?:number,reason?:string):void;

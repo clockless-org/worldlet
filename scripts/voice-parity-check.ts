@@ -2,7 +2,7 @@
 // into any text field of the World, not only Fox's bar (ui/companion/field-dictation.ts); local Whisper hears the
 // World's own names as its initial prompt (agent/companion/speech-vocabulary.ts, platform/local-tools/whisper_*.py);
 // Fox's spoken replies use the Agent's own text-to-speech through the Harness `voice` service where the Harness has one
-// (agent/agents/harness-voice.ts, agent-runtime/harness-voice.ts), and a system voice otherwise.
+// (agent/gate/harness-voice.ts, agent-runtime/harness-voice.ts), and a system voice otherwise.
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import fs from 'node:fs';
@@ -12,9 +12,9 @@ import {SPEECH_VOCABULARY,speechPrompt,speechTerm,speechTerms,worldSpeechTerms} 
 import {makeSampleWorld} from '../ui/world/sample-data.ts';
 import {dictationTarget,dictationWords} from '../ui/companion/field-dictation.ts';
 import {validateHarnessServices} from '../contracts/harness-services.ts';
-import {HARNESS_SERVICES,HARNESS_VOICE,harnessService,harnessVoiceArgs,harnessVoiceResult,harnessVoiceText} from '../agent/agents/index.ts';
-import {harnessVoice} from '../platform/electron/src/modules/agent-runtime/harness-voice.ts';
-import type {SendCommand} from '../platform/electron/src/modules/agent-runtime/harness-send.ts';
+import {HARNESS_SERVICES,HARNESS_VOICE,harnessService,harnessVoiceArgs,harnessVoiceResult,harnessVoiceText} from '../agent/gate/index.ts';
+import {harnessVoice} from '../platform/electron/src/modules/agents/harness-voice.ts';
+import type {SendCommand} from '../platform/electron/src/modules/agents/harness-send.ts';
 
 // The World's names: people first, then Applets and places, each once; no sentences, links or common words.
 assert.equal(speechTerm('Yiwen Su'),'Yiwen Su');
@@ -31,7 +31,7 @@ assert.ok(prompt.startsWith('Fox, Kelvin Ren, ')&&prompt.endsWith('.')&&prompt.l
 assert.equal(speechPrompt([]),'');
 assert.equal(speechPrompt(Array.from({length:60},(_,i)=>'Someone Longname'+i)).length<=SPEECH_VOCABULARY.characters,true);
 // The hint reaches Whisper as its initial prompt from a file, on both computers, and an echo of it is not speech.
-const host=fs.readFileSync(new URL('../platform/electron/src/modules/voice/speech.ts',import.meta.url),'utf8');
+const host=fs.readFileSync(new URL('../platform/electron/src/modules/companion/speech.ts',import.meta.url),'utf8');
 assert.match(host,/this\.local\.transcribe\(pcm,this\.language,controller\.signal,this\.prompt\)/,'Fox and field dictation pass the World\'s names');
 assert.match(host,/fs\.writeFileSync\(hint,prompt,\{mode:0o600\}\)/,'the names go in a private file, never on the command line');
 const mac=fs.readFileSync(new URL('../platform/local-tools/whisper_local.py',import.meta.url),'utf8');
@@ -102,6 +102,6 @@ print(json.dumps([hint, names_hint(None)] + [echoes_hint(t, hint) for t in ['Fox
 const speech=host.slice(host.indexOf('export class SpeechOutput'));
 assert.match(speech,/if\(agent&&!voiceId\)/,'a system voice the person chose wins');
 assert.match(speech,/agent\.speak\(plain\)\.catch\(\(\)=>null\)/,'a failed clip falls back to the system voice');
-const surface=fs.readFileSync(new URL('../platform/electron/src/modules/media/surface.ts',import.meta.url),'utf8');
+const surface=fs.readFileSync(new URL('../platform/electron/src/modules/shell/surface.ts',import.meta.url),'utf8');
 assert.match(surface,/speakClip\(token,url\)/);assert.match(surface,/stopSpeaking\(\)\{speechSynthesis\.cancel\(\);if\(clip\)/,'Stop silences the Agent\'s clip too');
 console.log('PASS voice parity: dictation into any World text field, World names as Whisper\'s hint, the Agent\'s own voice through the Harness voice service with a system-voice fallback');

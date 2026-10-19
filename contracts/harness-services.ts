@@ -13,7 +13,7 @@ export type HarnessServices={version:2;harness:string;services:Partial<Record<Ha
 /** conversation: a resident session per Fox thread. The Harness keeps the context (compaction included); Worldlet sends
  * only the new line, its instructions and World tools. `model`: one the `models` service listed, for this turn and
  * the ones after it (absent: the Agent's own). `world`: a short bounded note of what happened in the World since this
- * session last replied (agent/agents/world-since.ts), which leads the turn's input after the instructions, so the session
+ * session last replied (agent/gate/world-since.ts), which leads the turn's input after the instructions, so the session
  * keeps it like any line (core harnessTurnText); absent when nothing happened. */
 export type HarnessSessionKey={world:string;thread:string;agent?:string};
 export type HarnessTurnInput={text:string;instructions:string;tools:boolean;attachments?:string[];model?:string;world?:string};
@@ -76,7 +76,7 @@ export interface HarnessSchedule {
  previewCreate?(job:HarnessJobCreate):Promise<string>;
  create?(job:HarnessJobCreate):Promise<void>;
 }
-/** One change to one job, each the Agent's own command (agent/agents/harness-controls.ts): pause or resume it, run it
+/** One change to one job, each the Agent's own command (agent/gate/harness-controls.ts): pause or resume it, run it
  * once now, remove it, move it to another time (owner request 2026-10-11: more control in Settings), or edit its name,
  * what it does and its time at once (owner request 2026-10-12, from the Routines beside Fox). */
 export type HarnessJobAction='pause'|'resume'|'run'|'remove'|'reschedule'|'edit';
@@ -204,7 +204,7 @@ export type HarnessSkill={name:string;description:string;where:string;lastUsedAt
  /** The Agent has its own command that removes this one (Hermes Agent: only a skill it installed from its hub). */
  removable?:boolean};
 export type HarnessSkillDraft={name:string;description:string;body:string};
-/** Turn one skill off or on again, or remove it, each with the Agent's own command (agent/agents/harness-controls.ts). */
+/** Turn one skill off or on again, or remove it, each with the Agent's own command (agent/gate/harness-controls.ts). */
 export type HarnessSkillChange={skill:string;action:'disable'|'enable'|'remove'};
 export interface HarnessSkills {list():Promise<HarnessSkill[]>;save?(draft:HarnessSkillDraft):Promise<{name:string;where:string}>;
  /** The Agent's own command a change runs, as the person sees it before confirming; absent with `change`: read-only. */
@@ -217,7 +217,7 @@ export interface HarnessSkills {list():Promise<HarnessSkill[]>;save?(draft:Harne
  * `memory` everything else it keeps (MEMORY.md; Claude Code's CLAUDE.md; Codex's and pi's AGENTS.md). One entry per
  * item where the Agent separates them (Hermes Agent's `§`), else per paragraph; `where` is the file. No Agent here has
  * a command that forgets one entry, so forgetting is a request to the Agent in Fox's conversation, where its own
- * memory tool does it (agent/agents/harness-memory.ts memoryForgetRequest). */
+ * memory tool does it (agent/gate/harness-memory.ts memoryForgetRequest). */
 export type HarnessMemoryEntry={id:string;kind:'user'|'memory';text:string;where:string};
 export interface HarnessMemory {list():Promise<HarnessMemoryEntry[]>;}
 

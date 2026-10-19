@@ -3,13 +3,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {Compile} from 'typebox/compile';
 import {WorldletError} from '../../files.ts';
-import {listWorldTools} from '../../../../../agent/tools/index.ts';
+import {listWorldTools} from '../../../../../agent/gate/index.ts';
 import {GOOGLE_SIGN_IN,GOOGLE_SIGN_IN_SERVICES,curatedConnection,curatedSourceRead} from '../../../../../context/applets/index.ts';
-import {harnessAuthHandoff} from '../../../../../agent/agents/index.ts';
+import {harnessAuthHandoff} from '../../../../../agent/gate/index.ts';
 import {GoogleRestError,MOCK_GOOGLE_EMAIL,discover,mockGoogle,normalizeSource as normalize,prepareMail as prepare,readCalendar,readDrive,readDriveList,readPage,reconcileMail as reconcile,sendMail as send,sourceFailure,type GoogleRest} from '../../../../../context/sources/index.ts';
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
-import {ExecutionJournal} from '../agent-runtime/journal.ts';
+import {ExecutionJournal} from '../agents/journal.ts';
 import {SERVICE_PROVIDERS} from '../../../../../contracts/services.ts';
 import type {GoogleAccount,GoogleService} from './google-account.ts';
 
@@ -131,7 +131,7 @@ export class GoogleSourceConnections implements AgentSourceConnections {
 }
 
 const validators=new Map<string,ReturnType<typeof Compile>>();
-/** A World service tool's arguments against its schema (agent/tools). */
+/** A World service tool's arguments against its schema (agent/gate). */
 export function validateWorldTool(name:string,args:Row){
  let validator=validators.get(name);
  if(!validator){

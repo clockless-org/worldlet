@@ -44,7 +44,7 @@ export interface OngoingThing {
  /** What it is about (agent/tasks/kinds.ts): fitness, food, study, money, travel, a project, or general. Told
   * from its name and the person's own messages when it is proposed. */
  kind?:OngoingKindOrGeneral;
- /** The name the person's own Agent gave the thing when it described what they handle most (agent/agents/agent-profile.ts
+ /** The name the person's own Agent gave the thing when it described what they handle most (agent/gate/agent-profile.ts
   * `things`), shown instead of the conversation's own name. */
  named?:string;
 }

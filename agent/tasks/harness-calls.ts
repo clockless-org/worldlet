@@ -97,7 +97,7 @@ export const callReportDue=(call:HarnessCall,now:number)=>ended(call)&&now-(call
 /** The original an item opens back to. */
 export const callOriginal=(record:{title?:unknown;text?:unknown})=>({title:typeof record.title==='string'&&record.title?record.title:'Phone call',text:typeof record.text==='string'?record.text:''});
 
-// Calling from an Applet (agent/agents/PORTABILITY.md#calling-from-an-applet) -------------------------------------------
+// Calling from an Applet (agent/gate/PORTABILITY.md#calling-from-an-applet) -------------------------------------------
 // An Applet item with a phone number offers Call; its data fills in who, why and what to ask; the person reads and
 // edits that in Fox's card and only their Call dials, through the Harness's `calls.place`; the call then shows live.
 

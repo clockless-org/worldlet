@@ -3,16 +3,16 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import {acpModels,acpPromptUsage,acpUsageUpdate,addHarnessUsage,appletModelFor,chooseAppletModel,harnessService,harnessTurnTimings,harnessUsageLabel,isHarnessModelId,openClawModels,
- readAppletModels,readHarnessUsage,readResponsesChunk,responsesStream,responsesUsage,usageSince} from '../agent/agents/index.ts';
-import {foxTiming,foxTimingEvent} from '../agent/diagnostics/index.ts';
+ readAppletModels,readHarnessUsage,readResponsesChunk,responsesStream,responsesUsage,usageSince} from '../agent/gate/index.ts';
+import {foxTiming,foxTimingEvent} from '../agent/base/index.ts';
 import {restoreThread,threadFinish,threadRow,threadStart,threadUsage} from '../ui/companion/fox-thread.ts';
-import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
-import {createHarnessModels} from '../platform/electron/src/modules/fox/harness-models.ts';
+import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/src/modules/agents/local-harness.ts';
+import {createHarnessModels} from '../platform/electron/src/modules/companion/harness-models.ts';
 import {AGENT} from '../platform/electron/src/host/services.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {withTempDir} from './test-temp.ts';
 
-// Model and speed of a Fox thread on the person's own Agent (agent/agents/PORTABILITY.md#model-usage-and-speed-in-a-fox-thread):
+// Model and speed of a Fox thread on the person's own Agent (agent/gate/PORTABILITY.md#model-usage-and-speed-in-a-fox-thread):
 // the usage each Agent reports read one way, the `models` service and the per-Applet model choice, and, with a fake
 // Hermes Agent over ACP and a fake OpenClaw Gateway, the warm-up (a thread's session opened before Send, once, also when
 // the turn arrives while it is opening), the model switch they really offer (ACP `session/set_model`, the Gateway's

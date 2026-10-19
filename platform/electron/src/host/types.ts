@@ -47,7 +47,7 @@ export interface Host {
   * what the window gets on load. */
  onPageConnected(listener:()=>void):void;
  /** Called once per run when the host starts its own work: the World page's first load, or at once when the app runs in
-  * background with no page (agent/windows/README.md#web). What runs without the World (Attention reading, routines, the
+  * background with no page (platform/web/README.md#web). What runs without the World (Attention reading, routines, the
   * phone and browser links) starts here, not on the page. */
  onStarted(listener:()=>void):void;
  /** `recent`: the last failures this process recorded, with their error text, from memory only (host/diagnostics.ts). */

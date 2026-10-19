@@ -71,11 +71,11 @@ assert.match(readFileSync('platform/electron/src/world/window.ts','utf8'),/new W
 const files=(dir:string):string[]=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?files(path.join(dir,e.name)):e.name.endsWith('.ts')?[path.join(dir,e.name)]:[]);
 // The one module view with a preload is the CEF page surface (#1170): it draws engine frames, never loads a website,
 // and its preload is its own (web-surface), not the World's.
-const SURFACE=path.join('platform/electron/src/modules/browser/engine/surface.ts');
+const SURFACE=path.join('platform/electron/src/modules/applets/engine/surface.ts');
 for(const file of files('platform/electron/src/modules'))for(const [prefs] of readFileSync(file,'utf8').matchAll(/webPreferences\s*:\s*\{[^}]*\}/g))
  assert(!/\bpreload\b/.test(prefs)||file===SURFACE,`${file} must not give a website view a preload`);
 const surface=readFileSync(SURFACE,'utf8');
 for(const rule of ["setWindowOpenHandler(()=>({action:'deny'}))","on('will-navigate',event=>event.preventDefault())","loadURL('data:text/html;charset=utf-8,'"])
  assert(surface.includes(rule),'the website surface never leaves its own document: '+rule);
-assert.match(readFileSync('platform/electron/src/modules/browser/engine/process.ts','utf8'),/export function surfacePreload\([^)]*\)\{return [^\n]*'web-surface-preload\.cjs'\)/,'the surface gets its own preload');
+assert.match(readFileSync('platform/electron/src/modules/applets/engine/process.ts','utf8'),/export function surfacePreload\([^)]*\)\{return [^\n]*'web-surface-preload\.cjs'\)/,'the surface gets its own preload');
 console.log('PASS main process rejects other senders, subframes and untrusted documents; only the World view has the preload (the CEF surface has its own and never loads a website)');

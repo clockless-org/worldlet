@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {browserDriverStart,browserDriverNext} from '../agent/browser/index.ts';
+import {browserDriverStart,browserDriverNext} from '../agent/applets/index.ts';
 const refs={e1:{role:'combobox',name:'Search'}};
 const base={documentId:'d1',revision:'d2',refs,url:'https://example.com'};
 assert.ok(browserDriverStart({...base,args:{operation:'click',documentId:'stale',ref:'e1'}}).result.error);
