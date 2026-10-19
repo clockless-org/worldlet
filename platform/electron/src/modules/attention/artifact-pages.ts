@@ -3,8 +3,8 @@ import {ARTIFACT_PAGE_LIMITS,ARTIFACT_PAGE_MAKER,ARTIFACT_PAGE_ROOM,artifactPage
 import {WorldletError} from '../../files.ts';
 import {FOX,type FoxService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
-import {Surface} from '../browser/surface.ts';
-import {closeGameView,gameURL,gameWebPreferences,lockGameContents,placeGameView,tryMadeGame} from '../games/trial.ts';
+import {Surface} from '../applets/surface.ts';
+import {closeGameView,gameURL,gameWebPreferences,lockGameContents,placeGameView,tryMadeGame} from '../applets/trial.ts';
 
 /** One page being written: the artifact, the size it is for, the theme's look and its materials as data addresses. */
 interface Job {id:string;size:'medium'|'large';spec:ArtifactPageSpec;materials:Record<string,string>}

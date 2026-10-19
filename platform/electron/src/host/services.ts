@@ -274,12 +274,12 @@ export interface PhoneService {
  worldRoomRenew?():Promise<Row>;
  /** This computer's own server on 127.0.0.1 (modules/phone/local-relay.ts), started on first use on the port it used
   * last: a browser link on this computer, and the World page a host without a window serves there (platform/node). */
- localServer?():Promise<import('../modules/phone/local-relay.ts').LocalServer>;
+ localServer?():Promise<import('../modules/shell/local-relay.ts').LocalServer>;
 }
 export const PHONE='phone';
 /** Opens the page that runs browsers' direct lines (modules/phone/rtc-host.ts): a hidden window in the Electron host
  * (rtc-window.ts), provided before the modules install. A host without it runs a browser link through the room only. */
-export type RtcPageFactory=()=>import('../modules/phone/rtc-host.ts').RtcPage;
+export type RtcPageFactory=()=>import('../modules/shell/rtc-host.ts').RtcPage;
 export const RTC_PAGE='rtcPage';
 /** The person's activity fact for background admission (Core `userIdle`, #1650): seconds since their last input on
  * this computer or on an open paired phone. Owned by modules/shell. */
@@ -303,7 +303,7 @@ export const ONGOING='ongoing';
 // Browser (modules/browser) -----------------------------------------------------------------
 export interface BrowserService {
  /** The website page the panel shows, on either engine, for the release-gate checks. */
- visiblePage():import('../modules/browser/web-page.ts').WebPage|null;
+ visiblePage():import('../modules/applets/web-page.ts').WebPage|null;
  /** A link from the World page or a website: opens in the in-app browser or the system browser. */
  openExternalRequest(url:string):void;
  stop():void;
@@ -315,7 +315,7 @@ export interface BrowserService {
  resetHistory():void;
  /** What a website page's recorder saved: kept in the World and followed for game reviews (the release-gate
   * game review check records Showdown battles through it). */
- recorded(visits:import('../modules/browser/recorder.ts').RecordedVisit[],records:(import('../../../../agent/applets/index.ts').WebRecord&{visit:string})[]):void;
+ recorded(visits:import('../modules/applets/recorder.ts').RecordedVisit[],records:(import('../../../../agent/applets/index.ts').WebRecord&{visit:string})[]):void;
  /** Starts a proactive game review if one is due (context/artifacts battleReviewDue); the games handed to Fox, if any. */
  reviewGamesNow():import('../../../../context/artifacts/index.ts').FinishedBattle[]|null;
  /** The game on the page on screen, when it is one Worldlet can follow (a Showdown battle): what is being played now and
@@ -326,7 +326,7 @@ export const BROWSER='browser';
 
 // The media surface (modules/media) ------------------------------------------------------------
 /** The host-owned playback and capture surface the World's sound, Fox's voice and Voice Memos share. */
-export interface MediaService {readonly surface:import('../modules/media/surface.ts').MediaSurface}
+export interface MediaService {readonly surface:import('../modules/shell/surface.ts').MediaSurface}
 export const MEDIA='media';
 
 // World sound (modules/world-audio) and Fox's voice (modules/voice) -----------------------------
@@ -467,6 +467,6 @@ export const WORLD_WEB='worldWeb';
  * each page that joined as it takes a browser's World page here (host/web-page.ts), with only what ROOM_ALLOWED lets
  * through (contracts/web-world.ts). */
 export interface WorldRoomPageService {
- accept(socket:import('../modules/phone/web-socket.ts').TextSocket):void;
+ accept(socket:import('../modules/shell/web-socket.ts').TextSocket):void;
 }
 export const WORLD_ROOM_PAGE='worldRoomPage';

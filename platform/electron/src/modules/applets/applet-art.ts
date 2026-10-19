@@ -6,8 +6,8 @@ import {nativeImage} from 'electron';
 import {APPLET_ART_LIMITS,artToPaint,codexArtTask,readAppletArt,readArtSubject,validArtApplet,type AppletArt,type AppletArtAttempt,type AppletArtSubject} from '../../../../../context/applets/index.ts';
 import {WorldletError} from '../../files.ts';
 import type {Host} from '../../host/types.ts';
-import {currentEnvironment,harnessEnvironment,locateLocalHarnesses,type LocalHarnessInstall} from '../agent-runtime/local-harness.ts';
-import {stopChild} from '../agent-runtime/protocol.ts';
+import {currentEnvironment,harnessEnvironment,locateLocalHarnesses,type LocalHarnessInstall} from '../agents/local-harness.ts';
+import {stopChild} from '../agents/protocol.ts';
 
 const ATTEMPTS='applet-art-attempts';
 const DAY=86_400_000;

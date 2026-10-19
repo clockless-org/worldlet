@@ -7,7 +7,7 @@ import {SERVICE_ACTIONS} from '../../../../../contracts/services.ts';
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections,VaultService} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
 import {validateWorldTool} from './google-source.ts';
-import {ExecutionJournal} from '../agent-runtime/journal.ts';
+import {ExecutionJournal} from '../agents/journal.ts';
 import {McpAccounts} from './mcp-account.ts';
 import {McpHttpClient,McpUnauthorized} from './mcp-client.ts';
 

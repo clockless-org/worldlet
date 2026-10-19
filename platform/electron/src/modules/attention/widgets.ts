@@ -5,8 +5,8 @@ import {readArtifact,validArtifactId} from '../../../../../context/artifacts/ind
 import {WorldletError} from '../../files.ts';
 import {FOX,PHONE,WIDGETS,type FoxService,type PhoneService,type WidgetsService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
-import {Surface} from '../browser/surface.ts';
-import {tryMadeGame} from '../games/trial.ts';
+import {Surface} from '../applets/surface.ts';
+import {tryMadeGame} from '../applets/trial.ts';
 import {WidgetPlayer} from './widget-player.ts';
 
 /** One widget request in flight: the Applet task that works on it and what it may replace. */

@@ -285,7 +285,7 @@ It writes `login-item.json` (the verdict), `login-item-app.json` and `login-item
 
 ### Release Fox setup check (Mac)
 
-`node scripts/release-fox-setup-mac.mjs --bootstrap <HermesBootstrap> --out <dir>` runs the first Fox setup that a brand-new Mac does. The RC package step runs it on 02 after the login item check, against `Worldlet.app/Contents/Resources/HermesBootstrap` inside the mounted DMG. It bundles the app's own `platform/electron/src/modules/agent-runtime/installation.ts`, with Electron stubbed, and calls `HermesInstallation.prepare()`. The installer starts exactly as the app starts it, including its working directory. The run uses a temporary HOME whose path has spaces, like `Application Support`, and only the system PATH. No user, Homebrew or uv-managed Python is visible, so setup downloads and verifies the source, installs the app-owned Python and packages, and validates them.
+`node scripts/release-fox-setup-mac.mjs --bootstrap <HermesBootstrap> --out <dir>` runs the first Fox setup that a brand-new Mac does. The RC package step runs it on 02 after the login item check, against `Worldlet.app/Contents/Resources/HermesBootstrap` inside the mounted DMG. It bundles the app's own `platform/electron/src/modules/agents/installation.ts`, with Electron stubbed, and calls `HermesInstallation.prepare()`. The installer starts exactly as the app starts it, including its working directory. The run uses a temporary HOME whose path has spaces, like `Application Support`, and only the system PATH. No user, Homebrew or uv-managed Python is visible, so setup downloads and verifies the source, installs the app-owned Python and packages, and validates them.
 
 It passes when:
 

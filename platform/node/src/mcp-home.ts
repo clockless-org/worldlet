@@ -7,12 +7,12 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {standingWorldTools} from '../../electron/src/modules/agent-runtime/index.ts';
-import {mcpHome,worldletHome} from '../../electron/src/modules/agent-runtime/script-agents.ts';
-import {currentEnvironment,locateLocalHarnesses} from '../../electron/src/modules/agent-runtime/local-harness.ts';
-import {runHarnessCommand} from '../../electron/src/modules/agent-runtime/harness-approvals.ts';
-import {codexHome} from '../../electron/src/modules/agent-runtime/agent-files.ts';
-import type {StandingAgent} from '../../electron/src/modules/agent-runtime/world-tool-bridge.ts';
+import {standingWorldTools} from '../../electron/src/modules/agents/index.ts';
+import {mcpHome,worldletHome} from '../../electron/src/modules/agents/script-agents.ts';
+import {currentEnvironment,locateLocalHarnesses} from '../../electron/src/modules/agents/local-harness.ts';
+import {runHarnessCommand} from '../../electron/src/modules/agents/harness-approvals.ts';
+import {codexHome} from '../../electron/src/modules/agents/agent-files.ts';
+import type {StandingAgent} from '../../electron/src/modules/agents/world-tool-bridge.ts';
 import {ensureDirectory,writeAtomic} from '../../electron/src/files.ts';
 import {LOCAL_HARNESSES,commandReason,isWorldToolsRegistrar,worldToolsCommands,type WorldToolsRegistrar} from '../../../agent/gate/index.ts';
 

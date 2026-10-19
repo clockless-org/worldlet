@@ -3,7 +3,7 @@ import {bundledResource} from '../../resources.ts';
 import {BROWSER,DESKTOP_COMPANION,type BrowserService,type DesktopCompanionService} from '../../host/services.ts';
 import {BrowserDevice} from './device.ts';
 import {agentScript} from './agent.ts';
-import {toolsPython} from '../media/local-tools.ts';
+import {toolsPython} from '../shell/local-tools.ts';
 import {discoverBookmarks} from './bookmarks.ts';
 import {websiteSession} from './surface.ts';
 import {YouTubePlayer,YouTubeService} from './youtube.ts';

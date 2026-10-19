@@ -5,7 +5,7 @@ import {spawn,type ChildProcess} from 'node:child_process';
 import {core} from '../../core.ts';
 import {WorldletError} from '../../files.ts';
 import {ExecutionJournal} from './journal.ts';
-import {windowsSandboxEnv} from '../media/io.ts';
+import {windowsSandboxEnv} from '../shell/io.ts';
 import {AgentCancelled,AgentEventWait,LineReader,UnsupportedRuntime,executable,stopChild,uptime} from './protocol.ts';
 import {encodeArchive} from './hermes-files.ts';
 import type {Adapter,AgentEventHandler,AgentRoutines,AgentRuntime,AgentSourceConnections,Row,RuntimeContext} from './types.ts';

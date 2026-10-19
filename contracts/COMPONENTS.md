@@ -334,7 +334,7 @@ record concrete exceptions and required device checks in its issue/PR.
 ### Activity boundary and coverage
 
 `context/activity/index.ts` exposes `activityEvent`, `activityObserve` and
-`activityURL`. `ActivityRecorder` (`platform/electron/src/modules/browser/activity.ts`)
+`activityURL`. `ActivityRecorder` (`platform/electron/src/modules/applets/activity.ts`)
 is the only browser activity persistence adapter; the website panel (`device.ts`)
 supplies page/focus/clock facts, and website page views (`page.ts`) never open the
 ledger. Trusted World clicks/semantic commands use `platform/bridge/activity.ts` and

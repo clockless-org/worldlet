@@ -5,7 +5,7 @@
 // with `tool-result`), forwards its Agent's permission prompts as `approval` (answered with `approval-answer`; none in
 // time is Deny) and ends it with `done`; `cancel` stops it there. A message too long for one box goes as `part`s.
 // Shared rules only: the message shapes and bounds, the turn body the host runs and the parts. The relay calls belong
-// to the hosts (platform/electron/src/modules/phone/remote.ts and remote-host.ts).
+// to the hosts (platform/electron/src/modules/shell/remote.ts and remote-host.ts).
 import {base64url,fromBase64url} from './pairing.ts';
 import {harnessSessionThread,harnessThreadPlace,isHarnessAgentId,isHarnessApprovalChoice,readHarnessApprovalRequest,readWorldSince} from '../gate/index.ts';
 import type {HarnessApprovalChoice,HarnessApprovalRequest} from '../../contracts/harness-services.ts';

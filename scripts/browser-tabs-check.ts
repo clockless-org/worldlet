@@ -80,7 +80,7 @@ console.log(`PASS Browser tabs: keys the surface accepts, add up to ${BROWSER_TA
 
 // Website downloads go straight into Downloads with no save dialog; a taken name gets a number.
 {
- const {downloadPath}=await import('../platform/electron/src/modules/browser/download-path.ts');
+ const {downloadPath}=await import('../platform/electron/src/modules/applets/download-path.ts');
  // The folder's own separator: \ on Windows (Windows RC 2026.1007.3135).
  const {join}=await import('node:path'),d=(name:string)=>join('/d',name);
  const taken=new Set([d('report.pdf'),d('report (1).pdf'),d('download')]);

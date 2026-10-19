@@ -6,7 +6,7 @@ import {acpModels,acpPromptUsage,acpUsageUpdate,addHarnessUsage,appletModelFor,c
  readAppletModels,readHarnessUsage,readResponsesChunk,responsesStream,responsesUsage,usageSince} from '../agent/gate/index.ts';
 import {foxTiming,foxTimingEvent} from '../agent/base/index.ts';
 import {restoreThread,threadFinish,threadRow,threadStart,threadUsage} from '../ui/companion/fox-thread.ts';
-import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
+import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/src/modules/agents/local-harness.ts';
 import {createHarnessModels} from '../platform/electron/src/modules/fox/harness-models.ts';
 import {AGENT} from '../platform/electron/src/host/services.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';

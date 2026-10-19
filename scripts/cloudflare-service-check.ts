@@ -14,7 +14,7 @@ import {turnTrustObserve} from '../agent/gate/turn-trust.ts';
 import {worldActionOf,worldActions} from '../agent/gate/gateway.ts';
 import {APP_DEFINITIONS,SOURCE_PROVIDERS,TOKEN_PROVIDERS,connectSettings,connectToken} from '../context/applets/index.ts';
 import {validateAppletRuntimes} from '../context/applets/runtime.ts';
-import {ExecutionJournal} from '../platform/electron/src/modules/agent-runtime/journal.ts';
+import {ExecutionJournal} from '../platform/electron/src/modules/agents/journal.ts';
 import {ServiceSource,ServiceSourceAccess,ServiceSourceConnections} from '../platform/electron/src/modules/sources/service-source.ts';
 import {withTempDir} from './test-temp.ts';
 

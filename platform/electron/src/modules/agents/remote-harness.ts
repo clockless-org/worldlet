@@ -2,7 +2,7 @@ import path from 'node:path';
 import {WorldletError} from '../../files.ts';
 import {ExecutionJournal} from './journal.ts';
 import {AgentCancelled,UnsupportedRuntime,agentEvent} from './protocol.ts';
-import type {RemoteAgentLink} from '../phone/remote.ts';
+import type {RemoteAgentLink} from '../shell/remote.ts';
 import type {HarnessApprovalChoice} from '../../../../../contracts/harness-services.ts';
 import {NO_ROUTINES,PortableAdapter} from './external.ts';
 import type {Adapter,AgentEventHandler,AgentRoutines,AgentRuntime,Row,RuntimeContext} from './types.ts';

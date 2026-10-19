@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {PUSH_BOX_PLACE,channelJoiner,channelPieces,boxPlace,openBox,pairKeys,readPairLink,readRoomFrame,roomEntry,sealBox,type PairKeys,type PhoneMessage} from '../agent/base/index.ts';
-import {createLocalRelay} from '../platform/electron/src/modules/phone/local-relay.ts';
-import {createPhoneRelay} from '../platform/electron/src/modules/phone/relay.ts';
+import {createLocalRelay} from '../platform/electron/src/modules/shell/local-relay.ts';
+import {createPhoneRelay} from '../platform/electron/src/modules/shell/relay.ts';
 import {memoryRoom} from './memory-room.ts';
 
 // The phone's pairing in the pairing room (agent/base/README.md#room): the computer's code says `m=room` and the computer

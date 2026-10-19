@@ -6,9 +6,9 @@ import zlib from 'node:zlib';
 import {DatabaseSync} from 'node:sqlite';
 import {claudeCodeConversationTitle,claudeCodeTurn,hermesConversationIncluded,hermesConversationTitle,hermesRoutine,hermesTurn,migrationMemoryNote,migrationRoutineKey,migrationSkillMarkdown,migrationSkillPath,migrationSkillsSafe,
  openClawAgentSkill,openClawChannelPrompts,openClawConversationIncluded,openClawConversationSkill,openClawConversationTitle,openClawPromptFor,openClawRoutine,openClawSkillName,openClawTurn,piTurn} from '../agent/gate/index.ts';
-import {openClawAgents,parseJSON5,readOpenClaw,reportOpenClawWorkspaces,scanOpenClawWorkspaces,surveyOpenClaw} from '../platform/electron/src/modules/agent-runtime/openclaw-files.ts';
-import {surveyAgentHistory} from '../platform/electron/src/modules/agent-runtime/agent-files.ts';
-import {firstSentence,localAgentModel,openClawWorkspace,readLocalAgentMemory,summarizeLocalAgent} from '../platform/electron/src/modules/agent-runtime/local-memory.ts';
+import {openClawAgents,parseJSON5,readOpenClaw,reportOpenClawWorkspaces,scanOpenClawWorkspaces,surveyOpenClaw} from '../platform/electron/src/modules/agents/openclaw-files.ts';
+import {surveyAgentHistory} from '../platform/electron/src/modules/agents/agent-files.ts';
+import {firstSentence,localAgentModel,openClawWorkspace,readLocalAgentMemory,summarizeLocalAgent} from '../platform/electron/src/modules/agents/local-memory.ts';
 import {bringAgent,broughtFile,placeBrought,readBrought,restoreBrought} from '../platform/electron/src/modules/fox/migration.ts';
 import {allowed as inBackup,validate as validateBackup} from '../platform/electron/src/modules/shell/backup.ts';
 import {digest} from '../platform/electron/src/files.ts';

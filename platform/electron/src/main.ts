@@ -1,5 +1,5 @@
-import {sharedEnginePid,stopSharedEngine,websiteEngine} from './modules/browser/engine/process.ts';
-import {readMemory,refreshMemory} from './modules/browser/memory.ts';
+import {sharedEnginePid,stopSharedEngine,websiteEngine} from './modules/applets/engine/process.ts';
+import {readMemory,refreshMemory} from './modules/applets/memory.ts';
 import {browserBudget} from '../../../agent/applets/index.ts';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -31,7 +31,7 @@ import {ensureDirectory,errorMessage} from './files.ts';
 import {createVault} from './vault.ts';
 import {ANALYTICS,DESKTOP_COMPANION,PHONE,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,WORLD_ROOM_PAGE,WORLD_WEB,type AnalyticsService,type DesktopCompanionService,type PhoneService,type RtcPageFactory,type VaultService,type WorldRoomPageService,type WorldWebService} from './host/services.ts';
 import {roomDenied} from '../../../contracts/web-world.ts';
-import {openRtcWindow} from './modules/phone/rtc-window.ts';
+import {openRtcWindow} from './modules/shell/rtc-window.ts';
 import type {Host} from './host/types.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
 import {backgroundLaunchWanted,startBackgroundLaunch} from './background-launch.ts';

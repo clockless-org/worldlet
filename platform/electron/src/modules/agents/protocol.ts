@@ -1,9 +1,9 @@
 import {core} from '../../core.ts';
 import {readHarnessApprovalRequest,readHarnessApprovalResult} from '../../../../../agent/gate/index.ts';
 import {WorldletError} from '../../files.ts';
-import {end} from '../media/io.ts';
+import {end} from '../shell/io.ts';
 // One executable test for every host module (on Windows X_OK is only existence, so a file is enough).
-export {executable} from '../media/io.ts';
+export {executable} from '../shell/io.ts';
 import type {ChildProcess} from 'node:child_process';
 import type {AgentEventHandler,AgentRuntime,Row} from './types.ts';
 

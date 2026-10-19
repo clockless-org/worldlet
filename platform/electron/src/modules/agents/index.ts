@@ -56,7 +56,7 @@ import {surveyAgentHistory} from './agent-files.ts';
 import {readLocalAgentMemory,writeAdopted} from './local-memory.ts';
 import {RemoteHarnessAdapter} from './remote-harness.ts';
 import {RemoteGatewayAdapter,checkRemoteGateway,readRemoteGateway,remoteGatewayView,writeRemoteGateway} from './remote-gateway.ts';
-import {createRemoteAgentLink,type RemoteAgentLink} from '../phone/remote.ts';
+import {createRemoteAgentLink,type RemoteAgentLink} from '../shell/remote.ts';
 import type {Adapter,Row,RuntimeContext} from './types.ts';
 import type {HarnessVoice} from '../../../../../contracts/harness-services.ts';
 import {bundledResource} from '../../resources.ts';

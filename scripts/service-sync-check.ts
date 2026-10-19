@@ -110,7 +110,7 @@ console.log('PASS Service sync: explicit scheduling, real SQLite, restart/cursor
 // Real bounded Service adapter with a synthetic vault + mock HTTP, even when an execution home is registered.
 const {ServiceSource}=await import('../platform/electron/src/modules/sources/service-source.ts');
 const {collectServicePage}=await import('../platform/electron/src/modules/sources/service-collection.ts');
-const {ExecutionJournal}=await import('../platform/electron/src/modules/agent-runtime/journal.ts');
+const {ExecutionJournal}=await import('../platform/electron/src/modules/agents/journal.ts');
 await withTempDir('worldlet-service-collector-',async dir=>{
  const entries:unknown[]=[],values=new Map<string,string>();let fail=false,calls=0;
  const vault={get:(id:string)=>values.get(id)??null,set:(id:string,value:string)=>{values.set(id,value);},delete:(id:string)=>{values.delete(id);},deleteAll:()=>values.clear()};

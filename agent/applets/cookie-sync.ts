@@ -1,7 +1,7 @@
 // One sign-in across both website engines (owner report 2026-10-08: "有的browser用electron，有的用CEF以后，登录状态不能
 // share了"). Website pages run on the CEF engine, and on Electron's own views for the Applets whose video needs H.264
 // (X, Douyin, Twitch) or a site seen needing it; each engine keeps its own cookie storage, so signing in on one did
-// not reach the other. The host keeps the two alike (platform/electron/src/modules/browser/cookie-bridge.ts):
+// not reach the other. The host keeps the two alike (platform/electron/src/modules/applets/cookie-bridge.ts):
 //
 // - A cookie Electron's storage sets or deletes is set or deleted in the engine's at once (or when the engine next runs).
 // - The engine has no cookie events, so the host compares its cookies with the last look after each page loads,

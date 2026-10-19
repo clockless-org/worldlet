@@ -110,7 +110,7 @@ Games (owner request 2026-10-03) replaced Tools in the same court: its AI assist
 <a id="sky-and-weather"></a>
 ## Local sky and weather
 
-The desktop app and website preview share `ui/world/environment/world-environment.ts` and `ui/world/environment/celestial.ts`; the HUD binding is `ui/world/world-environment.ts`. The desktop host's location and forecast transport is `platform/electron/src/modules/applet-tools/weather.ts`: fixed Open-Meteo requests, Mac location through Chromium geolocation in the host media surface (the macOS location permission), Windows location through the system location service; on other systems location fails explicitly and the person searches for a city. No model generates astronomical positions or weather.
+The desktop app and website preview share `ui/world/environment/world-environment.ts` and `ui/world/environment/celestial.ts`; the HUD binding is `ui/world/world-environment.ts`. The desktop host's location and forecast transport is `platform/electron/src/modules/applets/weather.ts`: fixed Open-Meteo requests, Mac location through Chromium geolocation in the host media surface (the macOS location permission), Windows location through the system location service; on other systems location fails explicitly and the person searches for a city. No model generates astronomical positions or weather.
 
 ### Location and time
 
@@ -181,7 +181,7 @@ The selected Agent forwards playback through the cancellable host audio bridge, 
 
 ### Host playback and honest state
 
-Playback runs in audio elements of the host's media surface, a hidden Chromium view that outlives World reloads and the desktop Companion (`platform/electron/src/modules/media/surface.ts`, `audio.ts`).
+Playback runs in audio elements of the host's media surface, a hidden Chromium view that outlives World reloads and the desktop Companion (`platform/electron/src/modules/shell/surface.ts`, `audio.ts`).
 
 - `RadioMusic` with `RadioDirectory` (`audio.ts`, `directory.ts`; Radio Browser directory): uses the directory's dynamic DNS entry with mirror discovery and an identifiable User-Agent; searches by tag, filters unavailable stations and unsupported streams, and only selects HTTPS URLs. After playback really starts it reports one station click as the directory requires; no chat content is reported. Up to three candidates are tried in bounded fashion. States are loading / playing / buffering / paused / stopped / error; the start receipt waits until the player is actually playing and the media is ready.
 - `BackgroundMusic`: plays the bundled CC0 ambience and the original offline tracks.

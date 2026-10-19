@@ -7,10 +7,10 @@ import {isoSeconds} from '../../files.ts';
 import {AGENT,ONGOING,type AgentService,type OngoingService} from '../../host/services.ts';
 import type {Host} from '../../host/types.ts';
 import {busyWith} from '../../host/busy.ts';
-import {TEXT_BUDGET} from '../agent-runtime/agent-files.ts';
-import {filesHistory,type HistoryOptions} from '../agent-runtime/agent-history.ts';
-import {readSelection} from '../agent-runtime/local-harness.ts';
-import {readAdopted} from '../agent-runtime/local-memory.ts';
+import {TEXT_BUDGET} from '../agents/agent-files.ts';
+import {filesHistory,type HistoryOptions} from '../agents/agent-history.ts';
+import {readSelection} from '../agents/local-harness.ts';
+import {readAdopted} from '../agents/local-memory.ts';
 import {boundBytes,broughtTurnId} from './migration.ts';
 
 // The person's Agent keeps talking after setup (a Discord channel, a Telegram DM, a terminal session), so the World

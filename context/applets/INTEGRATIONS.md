@@ -365,7 +365,7 @@ flowchart LR
 | Completed / Stopped / Failed | Completion, interruption or failure events received on this connection |
 | Needs attention | Connection dropped or a request failed; refresh to reconnect |
 
-Worldlet runs its own `codex app-server` stdio child through `platform/local-tools/codex_sessions.py`, started by the host (`platform/electron/src/modules/applet-tools/coding.ts`); it reuses the local Codex login and history; it copies no credentials and does not control the desktop Codex app. Do not continue the same session from two clients at once. After a restart every session is Saved until Worldlet runs it and receives new events.
+Worldlet runs its own `codex app-server` stdio child through `platform/local-tools/codex_sessions.py`, started by the host (`platform/electron/src/modules/applets/coding.ts`); it reuses the local Codex login and history; it copies no credentials and does not control the desktop Codex app. Do not continue the same session from two clients at once. After a restart every session is Saved until Worldlet runs it and receives new events.
 
 Scope is **reading and continuing existing sessions**. Creating, archiving, deleting, live takeover from other clients and the full set of experimental server requests are not covered, so the Applet stays Building. Unsupported server requests return an explicit error and are never auto-approved. The installed CLI must support `thread/turns/list`; which Codex version provides it depends on the user's installation and is not pinned by Worldlet. Sample Mode and read-only storage refuse the local session interface.
 
@@ -377,7 +377,7 @@ npm run build:native-ui
 
 UI tests use fictional sessions to cover selection, continuation, streamed replies, approvals, file preview, cancel and back. `python3 scripts/codex-sessions-portable-check.py` (in `npm run test:harness`) drives the helper against a local app-server fixture, and `npm run test:codex:stream` checks that large RPC lines reach the Electron host whole. The native protocol tests that also covered paged history, resume only on explicit send and unchanged session configuration retired with #996; coverage of those cases in the portable check is not re-audited here. No test sends to a real user session or writes real session content into the repository.
 
-Interface: [OpenAI Codex App Server](https://developers.openai.com/codex/app-server/). Code: `platform/electron/src/modules/applet-tools/coding.ts`, `platform/local-tools/codex_sessions.py`, `ui/applets/codex/codex-applet.ts`.
+Interface: [OpenAI Codex App Server](https://developers.openai.com/codex/app-server/). Code: `platform/electron/src/modules/applets/coding.ts`, `platform/local-tools/codex_sessions.py`, `ui/applets/codex/codex-applet.ts`.
 
 <a id="health-travel-money-applets"></a>
 ## Worldlet Services read over their own API
@@ -535,7 +535,7 @@ Totals over 1,000 records are reported as unavailable rather than truncated. Eve
 
 #### Verification and local runs
 
-- The native `--stripe-check` (CLI argument allowlist and both authorization response shapes) is not yet ported to Electron; the host implementation is `platform/electron/src/modules/browser/stripe.ts`.
+- The native `--stripe-check` (CLI argument allowlist and both authorization response shapes) is not yet ported to Electron; the host implementation is `platform/electron/src/modules/applets/stripe.ts`.
 - Mac packaging (`scripts/package-electron.ts`) calls `scripts/bundle-stripe.ts`, which takes the official binary from the `@stripe/cli-darwin-<arch>` npm package (arm64 or x64), and ships it as `<resources>/stripe`. Development runs use the binary from `node_modules`. The version is pinned by `package.json` (`@stripe/cli` 1.50.11), not by the script. `bundle-stripe.ts` also stages the upstream license, but whether the Electron package ships `STRIPE-CLI-LICENSE.txt` still needs checking.
 - Test data lives only in fixtures. Real browser authorization and account reads wait for the user to connect.
 
@@ -623,7 +623,7 @@ flowchart LR
 | --- | --- |
 | Device | `resources/styles/builtin/assets/world/devices/youtube.png`: a television with wooden feet, antenna and knobs, drawn at its authored Explore slot in `ui/world/applet-sprites.ts`. The brand mark stays in `ui/applets/youtube/logo.ts` and is used for the HUD icon, not painted on the device |
 | UI | `ui/applets/youtube/panel.ts` and `panel.css`: a link field, the player and queue cards with loading, empty and error states |
-| Data | `YouTubeService` (`platform/electron/src/modules/browser/youtube.ts`): link parsing, the local queue and Open on YouTube. No Google API call and no network request of its own |
+| Data | `YouTubeService` (`platform/electron/src/modules/applets/youtube.ts`): link parsing, the local queue and Open on YouTube. No Google API call and no network request of its own |
 | Credentials | None. The service holds no token, and `forgetAccount()` deletes anything an earlier build stored |
 | Player | `YouTubePlayer` (same file) loads `ui/applets/youtube/player.html` (copied to `youtube-player.html` by `scripts/build-native-ui.ts`) in a sandboxed `WebContentsView` with a synthetic HTTPS origin derived from the Mac bundle ID; official controls kept |
 | Fox | `use_youtube` in `worker/companion-tools.ts` drives the same panel operations; the host bridge re-checks private-content consent |

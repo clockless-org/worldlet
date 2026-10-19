@@ -1,6 +1,6 @@
 import {BrowserWindow,session,type Session,type WebContents,type WebContentsView} from 'electron';
 import {madeGameTrialProblems,readMadeGameReport} from '../../../../../context/artifacts/index.ts';
-import type {Surface} from '../browser/surface.ts';
+import type {Surface} from './surface.ts';
 import type {Row} from '../../host/types.ts';
 
 const sleep=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms));

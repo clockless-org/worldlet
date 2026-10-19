@@ -18,9 +18,9 @@ import {WorldLedger} from './ledger.ts';
 import {EMPTY_OVERLAY} from '../../../../context/sources/index.ts';
 import {removeOldLeftovers} from './leftovers.ts';
 import {readAgentSetting,writeAgentSetting} from './agent-settings.ts';
-import {BrowserHistory} from '../modules/browser/history.ts';
-import {ActivityRecorder} from '../modules/browser/activity.ts';
-import {installWorld} from '../modules/world.ts';
+import {BrowserHistory} from '../modules/applets/history.ts';
+import {ActivityRecorder} from '../modules/applets/activity.ts';
+import {installWorld} from '../modules/world/world.ts';
 
 type Row=Record<string,any>;
 const scratch=fs.mkdtempSync(path.join(process.env.WORLDLET_CHECK_ROOT??os.tmpdir(),'worldlet-library-'));

@@ -14,7 +14,7 @@ const common={bundle:true,platform:'node' as const,format:'cjs' as const,target:
 await Promise.all([
  build({...common,entryPoints:[path.join(root,'platform/electron/src/main.ts')],outfile:path.join(out,'main.cjs')}),
  build({...common,entryPoints:[path.join(root,'platform/electron/src/world/preload.ts')],outfile:path.join(out,'world-preload.cjs')}),
- build({...common,entryPoints:[path.join(root,'platform/electron/src/modules/browser/engine/surface-preload.ts')],outfile:path.join(out,'web-surface-preload.cjs')})
+ build({...common,entryPoints:[path.join(root,'platform/electron/src/modules/applets/engine/surface-preload.ts')],outfile:path.join(out,'web-surface-preload.cjs')})
 ]);
 await writeFile(path.join(out,'package.json'),JSON.stringify({name:'worldlet',productName:'Worldlet',main:'main.cjs',private:true},null,1));
 // Development hosts find the browser driver in .local/browser-driver (platform/electron/src/resources.ts).

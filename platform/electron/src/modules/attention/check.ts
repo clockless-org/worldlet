@@ -12,13 +12,13 @@ import type {WorldToolsService} from '../../host/services.ts';
 import type {ActionHandler,Host,Row} from '../../host/types.ts';
 import {installAttention} from './index.ts';
 import {installOngoing} from '../tasks/index.ts';
-import {installWorld} from '../world.ts';
-import {installArtifacts} from '../artifacts/index.ts';
+import {installWorld} from '../world/world.ts';
+import {installArtifacts} from './artifacts.ts';
 import {journalTarget} from '../../../../../agent/gate/index.ts';
 import {ONGOING,type OngoingService} from '../../host/services.ts';
 import {conversationAttentionId} from '../../../../../agent/tasks/index.ts';
-import {writeSelection} from '../agent-runtime/local-harness.ts';
-import {writeAgentProfile} from '../agent-runtime/agent-profile.ts';
+import {writeSelection} from '../agents/local-harness.ts';
+import {writeAgentProfile} from '../agents/agent-profile.ts';
 import {errorMessage} from '../../files.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 

@@ -133,41 +133,25 @@
 <text x="36" y="744" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#57606A">platform/electron/src/modules/</text>
 <text x="36" y="766" font-size="12" fill="#57606A">the host: Electron or Node</text>
 <rect x="254" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="323.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">world.ts</text>
-<rect x="254" y="730" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="323.0" y="745" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">world-audio/</text>
+<text x="323.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">world/</text>
 <rect x="406" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="475.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">applet-art/</text>
-<rect x="406" y="730" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="475.0" y="745" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">applet-tools/</text>
-<rect x="406" y="756" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="475.0" y="771" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">browser/</text>
-<rect x="406" y="782" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="475.0" y="797" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">calendar/</text>
-<rect x="406" y="808" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="475.0" y="823" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">games/</text>
+<text x="475.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">applets/</text>
 <rect x="558" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
 <text x="627.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">fox/</text>
-<rect x="558" y="730" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="627.0" y="745" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">voice/</text>
 <rect x="710" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
 <text x="779.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">attention/</text>
 <rect x="862" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
 <text x="931.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">tasks/</text>
-<rect x="1014" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="1083.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">artifacts/</text>
+<text x="1083.0" y="720" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">in attention/</text>
 <rect x="1166" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="1235.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent-runtime/</text>
+<text x="1235.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agents/</text>
 <rect x="1318" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
 <text x="1387.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">../store/</text>
 <rect x="1470" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
 <text x="1539.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">sources/</text>
-<rect x="1622" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="1691.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">phone/</text>
+<text x="1691.0" y="720" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">in shell/</text>
 <rect x="1774" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
 <text x="1843.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">shell/</text>
-<rect x="1774" y="730" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="1843.0" y="745" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">media/</text>
 <text x="1996" y="136" font-size="13" font-weight="700" fill="#57606A">OUTSIDE THE WORLD, AND HOW EACH CONNECTS</text>
 <rect x="1996" y="150" width="440" height="170" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
 <text x="2012" y="178" font-size="16" font-weight="700" fill="#1F2328">People and their windows</text>

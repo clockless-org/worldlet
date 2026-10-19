@@ -28,15 +28,15 @@ import {isWorldToolsRegistrar} from '../../../agent/gate/index.ts';
 import {onboardingUnfinished} from '../../../agent/fox/index.ts';
 import {ALREADY_RUNNING,controlSocketPath,serveControl,type ControlReply,type ControlRequest} from './control.ts';
 import {mcpHome,openMcpHome,registerAgent,registeredAgents} from './mcp-home.ts';
-import {installWorld} from '../../electron/src/modules/world.ts';
+import {installWorld} from '../../electron/src/modules/world/world.ts';
 import {installFox} from '../../electron/src/modules/fox/index.ts';
 import {installAttention} from '../../electron/src/modules/attention/index.ts';
-import {installAgentRuntime,scriptAgentService} from '../../electron/src/modules/agent-runtime/index.ts';
+import {installAgentRuntime,scriptAgentService} from '../../electron/src/modules/agents/index.ts';
 import {installSources} from '../../electron/src/modules/sources/index.ts';
-import {installPhone} from '../../electron/src/modules/phone/index.ts';
+import {installPhone} from '../../electron/src/modules/shell/phone.ts';
 import {installOngoing} from '../../electron/src/modules/tasks/index.ts';
-import {installArtifacts} from '../../electron/src/modules/artifacts/index.ts';
-import {installCalendar} from '../../electron/src/modules/calendar/index.ts';
+import {installArtifacts} from '../../electron/src/modules/attention/artifacts.ts';
+import {installCalendar} from '../../electron/src/modules/applets/calendar.ts';
 
 /** The host modules that work with no window, in the Electron host's order (platform/electron/src/modules/index.ts).
  * The shell, browser, media, sound, voice, Applet tools, games, widgets, artifact pages, site Applets and Applet art

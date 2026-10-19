@@ -22,11 +22,11 @@ flowchart TD
 | Protocol acceptance | `agent/gate/index.ts`: `harnessHandshake`, `harnessReceive` | Shared validation for every adapter; correlation, declared streaming/tools, duplicate tool IDs, terminal state |
 | Sign-in handoffs | `agent/gate/index.ts`: `harnessAuthHandoff` | Hermes `google_auth`/`model_auth` events: one per run, matching request only, fixed Google OAuth path/OpenAI device URL, bounded device code; hosts open or display only accepted values |
 | Serialization facade | `agent/index.ts`: `harnessHandshake`, `harnessReceive`, `harnessAuthHandoff` | JSON envelopes for the host's in-process Core (`platform/electron/src/core.ts`) |
-| Executable adapter | `platform/electron/src/modules/agent-runtime/external.ts` | Spawn, bounded JSONL IO, deadline, cancellation, execute accepted tool callbacks |
+| Executable adapter | `platform/electron/src/modules/agents/external.ts` | Spawn, bounded JSONL IO, deadline, cancellation, execute accepted tool callbacks |
 | Reference Harness | `harness/example/agent.py` | Independent executable example; no Hermes dependency |
 | Browser policy and flow | `agent/applets/index.ts` | Observation projection, element policy, command sequencing and snapshot consumption |
 | Browser transport | `platform/browser/agent_browser.py` | Private provider endpoint and pinned upstream driver process; no model or planner |
-| Host browser endpoints | `platform/electron/src/modules/browser/agent.ts` (driver process), `page.ts` (CDP through `webContents.debugger`) | Selected page, navigation generation, cancellation, CDP IO |
+| Host browser endpoints | `platform/electron/src/modules/applets/agent.ts` (driver process), `page.ts` (CDP through `webContents.debugger`) | Selected page, navigation generation, cancellation, CDP IO |
 
 Consumers enter through these interfaces. Harnesses cannot call host storage
 internals, Core internals or the page CDP endpoint directly. Tools travel back

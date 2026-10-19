@@ -2,9 +2,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type {Host} from '../../host/types.ts';
 import type {LocalDataFacts} from '../../../../../agent/base/index.ts';
-import {discoverHermes} from '../agent-runtime/hermes-files.ts';
-import {openClawState} from '../agent-runtime/openclaw-config.ts';
-import {openClawAgents} from '../agent-runtime/openclaw-files.ts';
+import {discoverHermes} from '../agents/hermes-files.ts';
+import {openClawState} from '../agents/openclaw-config.ts';
+import {openClawAgents} from '../agents/openclaw-files.ts';
 
 // What `local_data_size` reports (agent/base/data-size.ts): file sizes and two cheap counts, never a name or a
 // path. The recordings' size is the one the browser's tidy counted a minute after start (WorldLedger.webRecordBytes).

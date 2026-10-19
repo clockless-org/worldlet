@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {PUSH_BOX_PLACE,boxPlace,openBox,pairKeys,phoneDesktop,readPairLink,readPhoneMessage,sealBox} from '../agent/base/index.ts';
-import {createLocalRelay} from '../platform/electron/src/modules/phone/local-relay.ts';
-import {createPhoneRelay} from '../platform/electron/src/modules/phone/relay.ts';
+import {createLocalRelay} from '../platform/electron/src/modules/shell/local-relay.ts';
+import {createPhoneRelay} from '../platform/electron/src/modules/shell/relay.ts';
 
 // The phone's notification token kept on the computer (agent/base/README.md#push): the phone hands it over with a sealed
 // `push` message, the computer keeps it in its vault and never delivers it, and a notification goes to the relay's

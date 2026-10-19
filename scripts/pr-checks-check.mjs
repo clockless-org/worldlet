@@ -53,7 +53,7 @@ for(const file of readdirSync(new URL('../.github/workflows/',import.meta.url)).
 }
 // A host popup-rule change (#781 shape) selects only the trust checks, not all operational checks.
 const popupPaths=['contracts/README.md','contracts/fixtures/parity/browser-popup.json',
- 'platform/electron/README.md','platform/electron/src/modules/browser/rules.ts','platform/electron/src/modules/browser/page.ts',
+ 'platform/electron/README.md','platform/electron/src/modules/applets/rules.ts','platform/electron/src/modules/applets/page.ts',
  'scripts/electron-bridge-check.ts','scripts/parity-vectors.ts','scripts/parity-core-usage.ts'];
 assert.deepEqual(selectChecks(popupPaths),trustChecks);
 for(const file of ['scripts/attention-events-check.ts','platform/bridge/world-tool-runtime.ts','platform/electron/src/modules/fox/index.ts'])assert.deepEqual(selectChecks([file]),trustChecks,file);

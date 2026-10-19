@@ -3,7 +3,7 @@ import {GAME_FACTORY_APPLET,MADE_GAME_LIMITS,betterBest,checkMadeGameSource,game
 import {WorldletError} from '../../files.ts';
 import {FOX,type FoxService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
-import {Surface} from '../browser/surface.ts';
+import {Surface} from './surface.ts';
 import {GamePlayer} from './player.ts';
 import {tryMadeGame} from './trial.ts';
 

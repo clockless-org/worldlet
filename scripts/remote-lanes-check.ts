@@ -4,7 +4,7 @@
 // (up to two at once), and a host that does not say it runs lanes is sent none.
 import assert from 'node:assert/strict';
 import {readRemoteHostInfo,readRemoteToHost,remoteHostInfo,remoteTurnBody,remoteTurnRequest} from '../agent/base/index.ts';
-import {createRemoteAgentHost} from '../platform/electron/src/modules/phone/remote-host.ts';
+import {createRemoteAgentHost} from '../platform/electron/src/modules/shell/remote-host.ts';
 
 type Row=Record<string,unknown>;
 const thread=JSON.stringify(['overview','']);

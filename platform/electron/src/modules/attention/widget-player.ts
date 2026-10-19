@@ -1,7 +1,7 @@
 import {WebContentsView} from 'electron';
 import {readWidgetConsole,widgetDocument,type WidgetSeed} from '../../../../../context/artifacts/index.ts';
-import {Surface} from '../browser/surface.ts';
-import {closeGameView,gameURL,gameWebPreferences,lockGameContents,placeGameView} from '../games/trial.ts';
+import {Surface} from '../applets/surface.ts';
+import {closeGameView,gameURL,gameWebPreferences,lockGameContents,placeGameView} from '../applets/trial.ts';
 import type {Row} from '../../host/types.ts';
 
 /** The widget the Widgets panel shows: a sibling view over the World at the rect the panel reserves, never an

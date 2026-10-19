@@ -12,8 +12,8 @@ import {AGENT,ANALYTICS,AUDIO,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,SOURCES,SP
  ONGOING,PHONE,WORLD_WEB,type PhoneService,type WorldWebService,type OngoingService,type CompanionService,type DesktopCompanionService,type FoxService,type SourcesService,type SpeechService,type WorldToolsService} from '../../host/services.ts';
 import {createCompanion,decode,type Scope} from './companion.ts';
 import {resetToFirstLaunch} from './reset.ts';
-import {readLocalAgentMemory,summarizeLocalAgent} from '../agent-runtime/local-memory.ts';
-import {hermesThreads} from '../agent-runtime/agent-files.ts';
+import {readLocalAgentMemory,summarizeLocalAgent} from '../agents/local-memory.ts';
+import {hermesThreads} from '../agents/agent-files.ts';
 import {readModelSource} from './model-source.ts';
 import {bringAgent} from './migration.ts';
 import {createOlderHistory} from './older-history.ts';

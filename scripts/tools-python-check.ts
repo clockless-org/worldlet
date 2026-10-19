@@ -1,4 +1,4 @@
-// Worldlet's own tools Python (platform/electron/src/modules/media/tools-python.ts): whichever Agent Fox uses, local
+// Worldlet's own tools Python (platform/electron/src/modules/shell/tools-python.ts): whichever Agent Fox uses, local
 // speech, coding sessions and the browser driver's relay run on a Python Worldlet sets up with its bundled uv, never an
 // Agent's. One setup on first use (a pinned CPython, a venv with pip, the hash-pinned requirements, then a start
 // check), shared by concurrent callers, kept until its requirements change; a failed step says so and is retried next
@@ -6,7 +6,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {ToolsPython,TOOLS_PYTHON_VERSION} from '../platform/electron/src/modules/media/tools-python.ts';
+import {ToolsPython,TOOLS_PYTHON_VERSION} from '../platform/electron/src/modules/shell/tools-python.ts';
 import {withTempDir} from './test-temp.ts';
 
 delete process.env.WORLDLET_TOOLS_PYTHON;

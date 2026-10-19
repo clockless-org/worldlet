@@ -9,7 +9,7 @@ import {harnessAuthHandoff} from '../../../../../agent/gate/index.ts';
 import {GoogleRestError,MOCK_GOOGLE_EMAIL,discover,mockGoogle,normalizeSource as normalize,prepareMail as prepare,readCalendar,readDrive,readDriveList,readPage,reconcileMail as reconcile,sendMail as send,sourceFailure,type GoogleRest} from '../../../../../context/sources/index.ts';
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
-import {ExecutionJournal} from '../agent-runtime/journal.ts';
+import {ExecutionJournal} from '../agents/journal.ts';
 import {SERVICE_PROVIDERS} from '../../../../../contracts/services.ts';
 import type {GoogleAccount,GoogleService} from './google-account.ts';
 

@@ -9,7 +9,7 @@ import type {AgentEventHandler,AgentRuntime,AgentSourceConnections} from '../../
 import type {Row} from '../../host/types.ts';
 import type {McpAccounts,McpConnection} from './mcp-account.ts';
 import {McpUnauthorized} from './mcp-client.ts';
-import {ExecutionJournal} from '../agent-runtime/journal.ts';
+import {ExecutionJournal} from '../agents/journal.ts';
 import {SERVICE_PROVIDERS} from '../../../../../contracts/services.ts';
 import {admitServiceRead} from './service-source.ts';
 

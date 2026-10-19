@@ -14,7 +14,7 @@ be bypassed by enabling an unrestricted shell/browser toolset. No new Agent loop
 
 - `agent/applets/agent-browser.ts`: pure snapshot projection and action policy.
 - `agent/applets/driver-flow.ts`: the shared command sequence (see [Shared driver boundary](#shared-driver-boundary)).
-- `platform/electron/src/modules/browser/agent.ts`: driver process, document-generation
+- `platform/electron/src/modules/applets/agent.ts`: driver process, document-generation
   checks, ordered driver commands and cancellation. `page.ts` relays CDP to the selected
   page through `webContents.debugger`.
 - `agent_browser.py`: stdio/WebSocket transport and upstream provider handshake.

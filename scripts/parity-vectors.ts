@@ -7,7 +7,7 @@ import path from 'node:path';
 // Time-zone rules are part of the contract; every runner pins the same zone.
 process.env.TZ='America/Los_Angeles';
 const {coreEnvelope}=await import('../platform/electron/src/core.ts');
-const {publicPage,httpsUpgrade,popupAllowed,opensAsTab,MAX_POPUPS}=await import('../platform/electron/src/modules/browser/rules.ts');
+const {publicPage,httpsUpgrade,popupAllowed,opensAsTab,MAX_POPUPS}=await import('../platform/electron/src/modules/applets/rules.ts');
 const dir='contracts/fixtures/parity';
 // Not Core vectors: the host-usage baseline, the native URL contracts below, and the
 // site-locked Applet list that scripts/page-resume-check.ts replays through agent/applets.

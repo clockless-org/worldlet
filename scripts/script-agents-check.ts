@@ -3,10 +3,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {withTempDir} from './test-temp.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/agent-access.ts';
-import {createAgentReports} from '../platform/electron/src/modules/agent-runtime/agent-reports.ts';
-import {createScriptAgents} from '../platform/electron/src/modules/agent-runtime/script-agents.ts';
-import {openStandingWorldTools,type StandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
+import {createAgentAccess} from '../platform/electron/src/modules/agents/agent-access.ts';
+import {createAgentReports} from '../platform/electron/src/modules/agents/agent-reports.ts';
+import {createScriptAgents} from '../platform/electron/src/modules/agents/script-agents.ts';
+import {openStandingWorldTools,type StandingWorldTools} from '../platform/electron/src/modules/agents/world-tool-bridge.ts';
 import {SCRIPT_AGENT_REASONS,scriptAgentId,scriptAgentName} from '../agent/gate/script-agents.ts';
 import {STANDING_OUTSIDE_TURN} from '../agent/gate/grants.ts';
 

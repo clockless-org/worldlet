@@ -148,7 +148,7 @@ Everything Worldlet keeps on the computer is in that one folder; the installed a
 | `preferences.json` | This computer's preferences: practice mode, volumes, update channel, Open at Login and analytics (`platform/electron/src/preferences.ts`); the World's own preferences are in `world.sqlite`. The Mac host's `worldlet.*` UserDefaults and analytics identity are imported once, the first time the file is created. |
 | `vault.json` | Small credentials (CLI grants, client secrets) encrypted with Electron `safeStorage` (Keychain-backed key on Mac, DPAPI on Windows, libsecret on Linux); owner-only, deleted by reset (`platform/electron/src/vault.ts`). |
 | `Browser/Electron/` | Chromium data. Website sessions live in `Browser/Electron/Partitions`: `persist:website` (personal) and `persist:website-practice` (practice). |
-| `Browser/CEF/` | The CEF website engine's cache and website sign-ins (`platform/electron/src/modules/browser/engine/process.ts`). |
+| `Browser/CEF/` | The CEF website engine's cache and website sign-ins (`platform/electron/src/modules/applets/engine/process.ts`). |
 | `logs/` | Owner-only diagnostics and Fox timing logs, each rotated once past 1 MB. |
 | `updates/` | Mac update downloads and the staged app. |
 | `runtime/` | Fox's Hermes program: Python, its packages and the uv cache (`agent-runtime/installation.ts`). Windows `runtime/hermes-<digest>/`, Mac and Linux `runtime/<revision>-<digest>/`. |
