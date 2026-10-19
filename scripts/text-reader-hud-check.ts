@@ -23,7 +23,7 @@ await withBrowser(fileAccess,async browser=>{
   const surface=key==='gmail'?host.locator('.mail-focus.ui-applet-surface'):host.locator(':scope[data-reader-hud=true]');
   await surface.waitFor();
   const outer=await surface.boundingBox();
-  // The Applet shelf (ui/hud/applet-shelf.ts) stands above an open Applet; the reader starts under it.
+  // The Applet shelf (ui/world/applet-shelf.ts) stands above an open Applet; the reader starts under it.
   const top=await page.locator('#notionWorld').evaluate(e=>e.hasAttribute('data-applet-shelf'))?150:64;
   // Mail reads on its theme scene's painted paper (ui/applets/scene); the other readers keep the shared gutters.
   if(key==='gmail'){const paper=await page.locator('.applet-scene[data-applet=gmail] .applet-scene-region[data-role=primary]').boundingBox();assert(['x','y','width','height'].every(k=>Math.abs(outer[k]-paper[k])<2),key+' reads on the scene paper: '+JSON.stringify({outer,paper}));}

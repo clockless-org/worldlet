@@ -1,4 +1,4 @@
-// Setup's Work step on the Connectors tiles (ui/onboarding/world-onboarding.ts, core connectorTiles): each service that
+// Setup's Work step on the Connectors tiles (ui/shell/world-onboarding.ts, core connectorTiles): each service that
 // signs in is a tile whose Connect signs in with no key (PostHog, Cloudflare), with no technical word and nothing to type
 // outside Advanced. Under Advanced, PostHog with a key (TOKEN_PROVIDERS) asks for its address (US Cloud by default), the
 // project ID and the key in a password field; the key goes to the host's `connect` once with the settings, is cleared
@@ -12,7 +12,7 @@ declare global {var TokenSetup:any;var tokenState:any;var tokenCalls:any[];var t
 const PASTED='phx_'+'Ab1'.repeat(15);
 await withBrowser(async browser=>{
  const page=await browser.newPage(),errors=pageErrors(page);
- const bundle=await bundleScript({entryPoints:['ui/onboarding/world-onboarding.ts'],globalName:'TokenSetup'});
+ const bundle=await bundleScript({entryPoints:['ui/shell/world-onboarding.ts'],globalName:'TokenSetup'});
  await page.setContent('<main><div id="guide"></div></main>');await page.addScriptTag({content:bundle});
  await page.evaluate(()=>{
   tokenCalls=[];tokenRefuse=true;tokenState={platform:'mac',onboarding:{completed:true},sources:[],knowledge:[],connections:[],cloudConsent:true};

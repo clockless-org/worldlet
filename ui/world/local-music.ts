@@ -5,8 +5,8 @@
 // (world-audio.ts). Worldlet's own radio never shows here (context/applets/local-music.ts). The host looks
 // only while the World is in front; the practice world never shows the person's music.
 import {nowPlayingLine,type LocalMusicState} from '../../context/applets/index.ts';
-import {uiIcon} from '../components/index.ts';
-import {windowActive} from './index.ts';
+import {uiIcon} from '../style/index.ts';
+import {windowActive} from './frame-budget.ts';
 
 const el=(tag:string,className='',text?:string)=>{const e=document.createElement(tag);if(className)e.className=className;if(text!==undefined)e.textContent=text;return e;};
 

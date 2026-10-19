@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import sharp from 'sharp';
 import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
-import {BUILTIN_STYLE} from '../ui/components/style.ts';
+import {BUILTIN_STYLE} from '../ui/style/style.ts';
 import {LANDMARK_KEYS} from '../ui/world/village/region-landmarks.ts';
 import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
 

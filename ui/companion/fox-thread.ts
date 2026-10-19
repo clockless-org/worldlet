@@ -7,7 +7,7 @@ import {addHarnessUsage,harnessUsageLabel,legacyActionDisplayText,readHarnessUsa
 import type {HarnessUsage} from '../../contracts/harness-services.ts';
 import {conversationTopics} from '../../agent/companion/index.ts';
 import {contextThread} from '../attention/index.ts';
-import {uiIcon} from '../components/index.ts';
+import {uiIcon} from '../style/index.ts';
 
 export type ThreadStatus='working'|'done'|'error';
 /** `userIcon` marks a question the person asked with an action or a choice: its icon shows before

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {bundleScript} from './browser-test.ts';
-const bundle=await bundleScript({entryPoints:['ui/onboarding/world-onboarding.ts'],globalName:'Setup'});
+const bundle=await bundleScript({entryPoints:['ui/shell/world-onboarding.ts'],globalName:'Setup'});
 const browser=await chromium.launch({headless:true});
 try{
  const page=await browser.newPage();await page.setContent('<main id="world"></main>');await page.addScriptTag({content:bundle});

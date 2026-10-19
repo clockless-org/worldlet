@@ -110,7 +110,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.match(await page.locator('.world-context').innerText(),new RegExp(app.title));
   // Pointer release schedules HUD context separately from the reduced-motion camera.
   await page.waitForFunction(title=>document.querySelector('.companion-context .companion-name')?.textContent===title,app.title);
-  // On a wide window the Applet shelf names the open Applet in the title's place (ui/hud/applet-shelf.ts); the title,
+  // On a wide window the Applet shelf names the open Applet in the title's place (ui/world/applet-shelf.ts); the title,
   // with its brand icon, names it where the shelf does not stand.
   if(await page.locator('.applet-shelf').isVisible())assert.equal(await page.locator('.applet-shelf-tab[data-current] .applet-shelf-name').innerText(),app.title,app.key+' stands in the middle of the shelf');
   else{

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {bundleScript,withBrowser,pageErrors} from './browser-test.ts';
-const script=await bundleScript({entryPoints:['ui/browser/paper-edge.ts']});
+const script=await bundleScript({entryPoints:['ui/applets/paper-edge.ts']});
 await withBrowser(async browser=>{
  const page=await browser.newPage({viewport:{width:800,height:600}}),errors=pageErrors(page);
  await page.setContent('<style>body{margin:0}canvas{pointer-events:none}</style><canvas></canvas>');

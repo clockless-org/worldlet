@@ -93,7 +93,7 @@ const FILE_ID=/^[A-Za-z0-9_-]{8,64}$/,BASE64=/^[A-Za-z0-9+/]*={0,2}$/;
 const clip=(value:unknown,max:number=PHONE_LIMITS.field)=>typeof value==='string'?value.trim().slice(0,max):'';
 const iso=(value:unknown)=>{const t=typeof value==='number'?value:Date.parse(String(value??''));return Number.isFinite(t)?new Date(t).toISOString():null;};
 
-// A Center row (ui/hud/native-hud.ts matter) as the phone lists it. Grouped rows keep every member id, so an action on
+// A Center row (ui/world/native-hud.ts matter) as the phone lists it. Grouped rows keep every member id, so an action on
 // the phone settles the whole group, as the desktop card does.
 function phoneItem(m:any,snoozed:boolean):PhoneAttentionItem|null{
  const id=clip(m?.worldItemId||m?.id,200);

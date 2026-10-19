@@ -11,7 +11,7 @@ if os.environ.get('WORLDLET_LIVE_MODEL_CHECK') != '1':
     raise SystemExit('Set WORLDLET_LIVE_MODEL_CHECK=1 to use the configured development model with fictional mail.')
 access = json.loads((ROOT / '.local/model-access-dev.json').read_text())
 messages = json.loads((ROOT / 'scripts/fixtures/onboarding/mail.json').read_text())['messages']
-policy = (ROOT / 'ui/onboarding/first-win.ts').read_text().split('export const firstWinDiscovery = `', 1)[1].split('`;', 1)[0]
+policy = (ROOT / 'ui/shell/first-win.ts').read_text().split('export const firstWinDiscovery = `', 1)[1].split('`;', 1)[0]
 promotion = {'id': 'thread:generic-sale', 'subject': 'Buy more this weekend', 'body': 'Our regular weekly advertisement: buy three decorative mugs and save 5%. No existing order, account change, deadline or personal benefit is involved.'}
 cases = [('invitation', messages[:2], True, True), ('resolved', messages, False, True), ('information', messages[1:2], False, True), ('irrelevant', [promotion], False, False), ('empty', [], False, False)]
 for name, records, needs_task, needs_update in cases:

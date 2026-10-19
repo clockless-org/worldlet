@@ -1,5 +1,5 @@
-import {uiIcon} from '../components/index.ts';
-import {companionStill,themeAppletIcon} from '../themes/index.ts';
+import {uiIcon} from '../style/index.ts';
+import {companionStill,themeAppletIcon} from '../style/index.ts';
 import {WORLD_APPS} from '../../context/applets/index.ts';
 import {journalPayload} from '../../context/items/index.ts';
 /** Every event Worldlet recorded on this computer, newest first, for the Worldlet team (Settings › Help, folded under

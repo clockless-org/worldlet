@@ -6,7 +6,7 @@ tool from `../../drafts/hud-v1/review-board.png`; exact prompt is in `paper.prom
 The tool does not expose an exact model version. The PNG is retained unmodified.
 
 Separating opaque painted material from runtime silhouettes avoids the draft
-atlas's stray alpha fringes. `ui/components/hud.css` owns the shared presentation:
+atlas's stray alpha fringes. `ui/style/hud.css` owns the shared presentation:
 paper pills, honey primary state, clean circular controls, input and panel skins.
 The original button atlas is registered without duplication. Panel and close
 controls display tight circular windows **inside** its painted discs; the dirty

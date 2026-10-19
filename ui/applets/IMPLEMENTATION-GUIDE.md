@@ -102,7 +102,7 @@ behavioral parity. No native policy or device behavior changes are made here.
 ## Integration map
 
 For a generated native Applet, default to `appletSurface`, `actionButton`,
-`emptyState` and `notice` from `ui/components/primitives/components.ts`.
+`emptyState` and `notice` from `ui/style/primitives/components.ts`.
 Use the [built-in HUD contract](../../resources/styles/builtin/UI.md) rather
 than introducing a local palette or image-based controls. The live component
 gallery includes an interactive Notes example; Weather is a production route
@@ -117,8 +117,8 @@ using the same shell, with live data and explicit unavailable/error states.
 | Asset packaging | `scripts/build-world-assets.ts`; inspect the active asset paths before registering files |
 | Connections | `ui/applets/connection-guide.ts`, host adapters in `platform/electron/src/modules/sources/` (`connections.ts`, `apple.ts`, `local.ts`) and `harness/hermes/` |
 | Routing and selected originals | `ui/shell/notion-world.ts` |
-| Browser Focus | `ui/browser/browser-device.ts`, host browser module `platform/electron/src/modules/applets/` ([website views](../../platform/browser/INTEGRATION.md#native-browser)); dismiss must unload page/media unless the [resume rule](../../platform/browser/INTEGRATION.md#resuming-a-website-applet) keeps it |
-| Fox dialogue and actions | `ui/companion/native-chat.ts`, `ui/hud/native-hud.ts` |
+| Browser Focus | `ui/applets/browser-device.ts`, host browser module `platform/electron/src/modules/applets/` ([website views](../../platform/browser/INTEGRATION.md#native-browser)); dismiss must unload page/media unless the [resume rule](../../platform/browser/INTEGRATION.md#resuming-a-website-applet) keeps it |
+| Fox dialogue and actions | `ui/companion/native-chat.ts`, `ui/world/native-hud.ts` |
 | Focused checks | Existing relevant scripts under `scripts/`; use fictional data for routine UI validation |
 
 ## Definition versus user instance

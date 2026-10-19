@@ -2,7 +2,7 @@
 
 A theme is **static**: pictures, sounds, fonts and JSON. It holds no code and no stylesheet, and nothing in it runs. The main repository draws the World and every Applet page itself and reads from the theme only what this contract declares (owner decision 2026-10-10: "Theme 都是静态资源，不要让它去靠什么 render 什么东西了").
 
-Worldlet bundles one theme, the Village, in `ui/theme-packages/village/`; there is no theme picker. The main repository owns the executable [TypeScript contract](../../ui/themes/build-theme-contract.ts), the [import validator](../../scripts/build-theme-source.ts) and the [registry](../../ui/themes/build-theme.ts). Packages are bundled into the app; nothing is downloaded at runtime.
+Worldlet bundles one theme, the Village, in `ui/style/theme-packages/village/`; there is no theme picker. The main repository owns the executable [TypeScript contract](../../ui/style/themes/build-theme-contract.ts), the [import validator](../../scripts/build-theme-source.ts) and the [registry](../../ui/style/themes/build-theme.ts). Packages are bundled into the app; nothing is downloaded at runtime.
 
 ```mermaid
 flowchart LR
@@ -27,7 +27,7 @@ package/
 
 Themes do not have release version numbers. Optional `updatedAt` records the last source modification as a UTC timestamp (for example, `2026-10-10T07:10:00Z`); it is informational. `contractVersion` alone controls compatibility; source hashes identify the copied contents.
 
-The importer accepts only static files (`json`, `png`, `webp`, `jpg`, `svg`, fonts, `mp3`, `m4a`, `wav`, `ogg`, `webm`, `txt`, `md`) and rejects code, stylesheets, symlinks, unresolved LFS pointers and any `assets/...` path a JSON file names that the package does not ship. Validated bytes replace `ui/theme-packages/<id>` atomically. The import writes the package's `index.ts`, which imports its JSON for the host (the manifest, the presentation and every other JSON file by package path, which the host reads through `themeData`), records hashes in `source-lock.json` and regenerates `ui/theme-packages/index.ts`. A failed import keeps the previous copy, and builds remove stale output assets.
+The importer accepts only static files (`json`, `png`, `webp`, `jpg`, `svg`, fonts, `mp3`, `m4a`, `wav`, `ogg`, `webm`, `txt`, `md`) and rejects code, stylesheets, symlinks, unresolved LFS pointers and any `assets/...` path a JSON file names that the package does not ship. Validated bytes replace `ui/style/theme-packages/<id>` atomically. The import writes the package's `index.ts`, which imports its JSON for the host (the manifest, the presentation and every other JSON file by package path, which the host reads through `themeData`), records hashes in `source-lock.json` and regenerates `ui/style/theme-packages/index.ts`. A failed import keeps the previous copy, and builds remove stale output assets.
 
 ## What the theme declares
 
@@ -47,7 +47,7 @@ Anything left out keeps the shared look, sounds and pictures.
 
 ### Custom Applet art presets
 
-The host reads `themeAppletPresets()` from `ui/themes/index.ts`. It returns the active theme's entries with `icon` and `background` resolved to published URLs; a theme without presets returns an empty list. IDs are stable within the theme. Presets are art choices, not Applet keys: they neither register providers nor create Applets, authorize actions or connect user data. The host owns selection, responsive layout and live HTML content.
+The host reads `themeAppletPresets()` from `ui/style/themes/index.ts`. It returns the active theme's entries with `icon` and `background` resolved to published URLs; a theme without presets returns an empty list. IDs are stable within the theme. Presets are art choices, not Applet keys: they neither register providers nor create Applets, authorize actions or connect user data. The host owns selection, responsive layout and live HTML content.
 
 The Village bundles 16 pairs under `assets/applet-presets/`, declared in `presentation.json`. The [source catalog](../styles/builtin/presets/personal-scenes/README.md) contains the full visual gallery and research. An Applet creation picker is not connected yet. For example, host code can read `themeAppletPresets().find(p => p.id === 'meal-planner')` and use its image URLs.
 
@@ -113,7 +113,7 @@ An Artifact is a card Fox puts in front of the person ([context/artifacts](../..
 | `materials` (optional) | Up to 12 pictures a generated Artifact may place, each with an `id` and its `usage` |
 | `colors` (optional) | `#rrggbb` per colour role: `paper`, `ink`, `brass` and one accent per tone (`moss`, `teal`, `honey`, `sage`, `clay`, `plum`) |
 
-The host reads it with `themeArtifact()` (`ui/themes/build-theme.ts`). The same look serves both ways the host makes an Artifact: filling its own card with the words Fox wrote, and having the Agent write a whole page, which the host shows isolated. A theme without the section keeps the host's card. Brand logos (the HUD title bar, picture-in-picture) stay the host's.
+The host reads it with `themeArtifact()` (`ui/style/themes/build-theme.ts`). The same look serves both ways the host makes an Artifact: filling its own card with the words Fox wrote, and having the Agent write a whole page, which the host shows isolated. A theme without the section keeps the host's card. Brand logos (the HUD title bar, picture-in-picture) stay the host's.
 
 Assets at `assets/...` are published to `theme-assets/<id>/...`; the host resolves them with `themeAssetURL`.
 
@@ -121,7 +121,7 @@ Not part of a theme: how the World and Applet pages are drawn (the host's code),
 
 ## The Village
 
-The Village package is the one description of the Village: its art in `assets/` (`art.json` indexes it; `scripts/village-art.ts` encodes it from the painted sources), `lamps.json` (where each device's lamp sits), Applet `icons` for every catalog Applet, and the host's pack of it: `pack.json` (space, layout, motion, companion and surfaces; `ui/themes/theme-pack.ts`), `style.json` and `tokens.json` (its Style Pack; `ui/components/style.ts`) and `world.json` (areas, slots and plates; `ui/world/world-pack.ts`). The painted sources these name stay in `resources/styles/builtin` and `resources/worlds/village`. The animated Pixi World that draws it is the host's code in `ui/world/village/` (`village-world.ts` behind the host's World mount, `ui/world/world-renderer.ts`). Its Applets open in the host's own Applet pages, and the host draws the pins, lamp labels, lamps on device pictures and the zoom between World and Applet. Its Artifact look is in `assets/artifact/` ([the style pack](../../ui/theme-packages/village/assets/artifact/README.md)), declared in `presentation.json`. One folder in the package is reference material the host does not read and the app does not ship (only `assets/` is published): `areas/` (painted day and night close views of the six places, not used yet).
+The Village package is the one description of the Village: its art in `assets/` (`art.json` indexes it; `scripts/village-art.ts` encodes it from the painted sources), `lamps.json` (where each device's lamp sits), Applet `icons` for every catalog Applet, and the host's pack of it: `pack.json` (space, layout, motion, companion and surfaces; `ui/style/themes/theme-pack.ts`), `style.json` and `tokens.json` (its Style Pack; `ui/style/style.ts`) and `world.json` (areas, slots and plates; `ui/world/world-pack.ts`). The painted sources these name stay in `resources/styles/builtin` and `resources/worlds/village`. The animated Pixi World that draws it is the host's code in `ui/world/village/` (`village-world.ts` behind the host's World mount, `ui/world/world-renderer.ts`). Its Applets open in the host's own Applet pages, and the host draws the pins, lamp labels, lamps on device pictures and the zoom between World and Applet. Its Artifact look is in `assets/artifact/` ([the style pack](../../ui/style/theme-packages/village/assets/artifact/README.md)), declared in `presentation.json`. One folder in the package is reference material the host does not read and the app does not ship (only `assets/` is published): `areas/` (painted day and night close views of the six places, not used yet).
 
 ## Checking a package
 
@@ -135,10 +135,10 @@ npm run test:theme-source
 
 ## Compatibility
 
-Contract v3 is frozen. `ui/themes/frozen/contract-v3.d.ts` holds its declarations and `scripts/fixtures/theme-contract-v3/` is a package that uses every part of it. `node scripts/theme-contract-check.ts` runs in PR CI (`npm run check:contracts`) and fails when a change would break a package written against v3: the frozen manifest and presentation must still be accepted, no frozen field may be removed, and the frozen package must still validate.
+Contract v3 is frozen. `ui/style/themes/frozen/contract-v3.d.ts` holds its declarations and `scripts/fixtures/theme-contract-v3/` is a package that uses every part of it. `node scripts/theme-contract-check.ts` runs in PR CI (`npm run check:contracts`) and fails when a change would break a package written against v3: the frozen manifest and presentation must still be accepted, no frozen field may be removed, and the frozen package must still validate.
 
 An additive, optional change passes; refresh the snapshot in the same PR with `node scripts/theme-contract-check.ts --freeze`. Anything else needs contract v4 with its own snapshot and frozen package. Incompatible versions fail at import before copying.
 
 Contract v2 let a package ship code (`renderWorld`, `renderApplet`) and a stylesheet. It was retired on 2026-10-10 when themes became static; no package uses it.
 
-The old data-only `ThemePack` (`ui/themes/theme-pack.ts`) only describes the Village's source art and companion; it is not a theme API.
+The old data-only `ThemePack` (`ui/style/themes/theme-pack.ts`) only describes the Village's source art and companion; it is not a theme API.

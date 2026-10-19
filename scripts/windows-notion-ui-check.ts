@@ -4,7 +4,7 @@ import {bundleScript,withBrowser,pageErrors} from './browser-test.ts';
 declare global {var NotionSetup:any;var notionGuide:any;var notionState:any;var notionCalls:any[];var notionPending:any;var notionHang:boolean;}
 await withBrowser(async browser=>{
  const page=await browser.newPage(),errors=pageErrors(page);
- const bundle=await bundleScript({entryPoints:['ui/onboarding/world-onboarding.ts'],globalName:'NotionSetup'});
+ const bundle=await bundleScript({entryPoints:['ui/shell/world-onboarding.ts'],globalName:'NotionSetup'});
  await page.setContent('<main><div id="guide"></div></main>');await page.addScriptTag({content:bundle});
  await page.evaluate(()=>{
   notionCalls=[];notionHang=false;notionState={platform:'windows',onboarding:{completed:true},sources:[],knowledge:[],connections:[],cloudConsent:false};

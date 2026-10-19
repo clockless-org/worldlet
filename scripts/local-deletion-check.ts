@@ -46,7 +46,7 @@ assert.equal(localDeletionTrail({provider:'gmail',bucket:'browser-actions',recor
 assert.equal(localDeletionTrail({source:'s1',gone:[],bucket:'task-reviews',record:{proposal:{id:'p',sources:[{local:true,id:'s1'}]}}}),true,'a forgotten local source takes reviews that carry it');
 assert.equal(localDeletionTrail({source:'s1',gone:[],bucket:'task-reviews',record:review('p','notion')}),false);
 
-const bundle=await bundleScript({entryPoints:['ui/onboarding/world-onboarding.ts'],globalName:'DeletionOnboarding'});
+const bundle=await bundleScript({entryPoints:['ui/shell/world-onboarding.ts'],globalName:'DeletionOnboarding'});
 const browser=await chromium.launch();
 try {
  const page=await browser.newPage();

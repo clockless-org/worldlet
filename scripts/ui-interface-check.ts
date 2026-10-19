@@ -19,7 +19,7 @@ console.log('PASS versioned UI actions, stale target rejection, closed command s
 // Public UI imports must not mount controls, register global handlers or require
 // a live document. Startup belongs to explicit mount functions and entry files.
 assert.equal(typeof globalThis.document,'undefined');
-for(const component of ['components','attention','world','shell','browser','onboarding','companion','distribution','applets','practice','hud']){
+for(const component of ['style','attention','world','shell','companion','applets','settings']){
  const api=await import(`../ui/${component}/index.ts`);
  assert(Object.keys(api).length>0,`${component} has no public API`);
 }

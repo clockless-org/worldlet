@@ -1,7 +1,7 @@
 import {callHost} from '../../platform/bridge/host.ts';
 import {pageFeatures} from '../../platform/bridge/features.ts';
 import {isDesktopCompanion} from './world-surface.ts';
-import {companionStill} from '../themes/index.ts';
+import {companionStill} from '../style/index.ts';
 /** World frames drawn so far (pixi-world.ts metrics), or null when no World with a frame count is shown. */
 const worldFrames=():number|null=>{const n=(document.querySelector('#notionWorld') as any)?.sceneMetrics?.performance?.frames;return typeof n==='number'?n:null;};
 /** Settles once the World has drawn two more frames, at most WORLD_DRAWN_MS later (a hidden page draws none). */

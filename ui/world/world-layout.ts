@@ -1,9 +1,9 @@
 import {APP_DEFINITIONS} from '../../context/applets/index.ts';
 import {WORLD_WIDTH,WORLD_HEIGHT} from './world-design.ts';
-import {BUILTIN_STYLE,BUILTIN_STYLE_REF} from '../components/index.ts';
-import {ACTIVE_THEME} from '../themes/index.ts';
+import {BUILTIN_STYLE,BUILTIN_STYLE_REF} from '../style/index.ts';
+import {ACTIVE_THEME} from '../style/index.ts';
 import {parseWorldPack} from './world-pack.ts';
-// The active theme's space (ui/themes): its areas, slots, camera frame and HUD-safe areas.
+// The active theme's space (ui/style/themes): its areas, slots, camera frame and HUD-safe areas.
 export const THEME_WORLD=parseWorldPack(ACTIVE_THEME.world);
 // One order for rendering, pin indices, drag targets and the resident shelf:
 // rear row left-to-right, then front row left-to-right. Never mutate the pack.

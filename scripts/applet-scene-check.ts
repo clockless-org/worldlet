@@ -4,10 +4,10 @@
 import assert from 'node:assert/strict';
 import {build} from 'esbuild';
 import {readFile} from 'node:fs/promises';
-import {parseThemePresentation} from '../ui/themes/build-theme-contract.ts';
+import {parseThemePresentation} from '../ui/style/themes/build-theme-contract.ts';
 import {launchTestBrowser} from './browser-test.ts';
 
-const village=JSON.parse(await readFile('ui/theme-packages/village/presentation.json','utf8'));
+const village=JSON.parse(await readFile('ui/style/theme-packages/village/presentation.json','utf8'));
 assert.ok(parseThemePresentation(village).sceneMaterials?.paper,'Village gives its paper a material');
 for(const [bad,why] of [[{paper:{ink:'red'}},'colour'],[{glass:{ink:'#000000'}},'material'],[{paper:{shadow:'#000000'}},'role'],[{paper:{bodyFont:'url(x)'}},'font']] as const)
  assert.throws(()=>parseThemePresentation({...village,sceneMaterials:bad}),/scene materials/,'rejects a bad '+why);
@@ -18,7 +18,7 @@ try{
  const page=await browser.newPage({viewport:{width:1440,height:900},reducedMotion:'reduce'}),errors:string[]=[];page.on('pageerror',e=>errors.push(String(e)));
  // The fixture serves the package's own picture, as the preview does; the World resolves it through themeAppletScene.
  await page.route('http://scene.test/**',route=>{const path=new URL(route.request().url()).pathname;
-  return path==='/'?route.fulfill({contentType:'text/html',body:'<!doctype html>'}):route.fulfill({path:'ui/theme-packages/village'+path});});
+  return path==='/'?route.fulfill({contentType:'text/html',body:'<!doctype html>'}):route.fulfill({path:'ui/style/theme-packages/village'+path});});
  await page.goto('http://scene.test/');
  await page.setContent('<main id="shell" style="position:fixed;inset:0"><section id="host" style="position:absolute;inset:0"></section></main>');
  await page.addStyleTag({content:await readFile('ui/applets/scene/applet-scene.css','utf8')+await readFile('ui/applets/gmail/focus.css','utf8')+await readFile('ui/applets/gmail/open.css','utf8')});
@@ -54,7 +54,7 @@ try{
  near(got.region,fit.regions[0],'another scene moves Mail to its own region');
  assert.equal(got.ink,village.sceneMaterials.screen.ink,'and dresses it in that region\'s material');assert.equal(got.letters,1);
  // A framed web scene places the actual shell and Fox on the theme's registered coordinates.
- await page.addStyleTag({content:await readFile('ui/components/layout.css','utf8')+await readFile('ui/companion/companion-dialogue.css','utf8')});
+ await page.addStyleTag({content:await readFile('ui/style/layout.css','utf8')+await readFile('ui/companion/companion-dialogue.css','utf8')});
  await page.evaluate(()=>{const shell=document.getElementById('shell')!;shell.id='notionWorld';shell.className='native-console fox-first-console';shell.dataset.depth='object';shell.dataset.panelScene='pokemon-showdown';shell.dataset.appletShelf='true';
   shell.insertAdjacentHTML('beforeend','<div class="notion-content" data-template="browser"><div class="browser-viewport"></div></div><div class="notion-hud"><div class="companion-dialogue">A reply beside the game</div></div>');});
  const framedScenes=[...Object.entries(village.appletScenes),...village.appletPresets.map(p=>[p.id,p])] as [string,any][];

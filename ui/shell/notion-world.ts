@@ -1,5 +1,5 @@
 import {createMailArrival} from '../world/index.ts';
-import {themeAppletIcon,ACTIVE_THEME,themeAmbientTrack,createMailArrivalObserver} from '../themes/index.ts';
+import {themeAppletIcon,ACTIVE_THEME,themeAmbientTrack,createMailArrivalObserver} from '../style/index.ts';
 import {renderHomeFocus,createPanelScene,appletSceneKey} from '../applets/index.ts';
 import {mailMetadata} from '../applets/index.ts';
 import {safeAttentionURL as safeAttentionSourceURL} from '../../agent/attention/index.ts';
@@ -12,8 +12,8 @@ import {carriesConversation,worldSpeechTerms} from '../../agent/companion/index.
 import {helpNarration,narrateHelp} from '../companion/index.ts';
 import {createWorldUI} from './public-interface.ts';
 import {eventTrigger,reportAppletOpened,reportEngagement,reportProductEvent} from './product-analytics.ts';
-import {mountFoxArtifact,flyIntoJournal,artifactPageSpec,turnIntoDock} from '../artifacts/index.ts';
-import {node,textButton,worldletMark,uiIcon} from '../components/index.ts';
+import {mountFoxArtifact,flyIntoJournal,artifactPageSpec,turnIntoDock} from '../attention/index.ts';
+import {node,textButton,worldletMark,uiIcon} from '../style/index.ts';
 import {readRetryDelay,sourceReadAction} from '../../context/applets/index.ts';
 import {attentionRequest,journalTarget} from '../../agent/gate/index.ts';
 import {FOCUS_RULES_REQUEST,browserEffectDecision,browserFinalStep,browserFollowThrough,typedAddress,webSite} from '../../agent/applets/index.ts';
@@ -32,15 +32,15 @@ import {renderMailFocus} from '../applets/index.ts';
 import {renderTranscript,transcriptBar} from '../applets/index.ts';
 import {createVoiceMemoReader} from '../applets/index.ts';
 import {createMessagesReader} from './messages.ts';
-import {installTextReaderHUD} from '../components/index.ts';
-import {createPracticeWalkthrough} from '../practice/index.ts';
-import {createPracticeJob,practiceJobSession,practiceJobDetail,PRACTICE_BUILD_MS} from '../practice/index.ts';
-import {mountPracticeTimer,practiceTimerHTML} from '../practice/index.ts';
+import {installTextReaderHUD} from '../style/index.ts';
+import {createPracticeWalkthrough} from '../applets/index.ts';
+import {createPracticeJob,practiceJobSession,practiceJobDetail,PRACTICE_BUILD_MS} from '../applets/index.ts';
+import {mountPracticeTimer,practiceTimerHTML} from '../applets/index.ts';
 import {MEETING_BRIEF_REQUEST,meetingSummaryRequest,calendarMeetings,dueMeeting,meetingContextDetail,meetingsStage} from '../../context/applets/index.ts';
-import {inspectBrowserOutcome} from '../browser/index.ts';
+import {inspectBrowserOutcome} from '../applets/index.ts';
 import {presentEmailReview} from '../companion/index.ts';
-import {tennisDemo} from '../practice/index.ts';
-import {tennisCard} from '../practice/index.ts';
+import {tennisDemo} from '../applets/index.ts';
+import {tennisCard} from '../applets/index.ts';
 import {createClaudeSession} from '../applets/index.ts';
 import {forecastStage,weatherGlyph} from '../world/index.ts';
 import {createWeatherPanel} from '../applets/index.ts';
@@ -68,9 +68,9 @@ import {phoneWebAddress} from '../../platform/web/index.ts';
 import {applyModuleWorld,moduleStatus} from '../world/index.ts';
 import {createModuleScene} from '../world/index.ts';
 import {settleItemPage} from '../../context/items/index.ts';
-import {createBrowserPanel} from '../browser/index.ts';
-import {restoreTextScale} from '../components/index.ts';
-import {detailTemplate} from '../components/index.ts';
+import {createBrowserPanel} from '../applets/index.ts';
+import {restoreTextScale} from '../style/index.ts';
+import {detailTemplate} from '../style/index.ts';
 import {searchNotes} from '../applets/index.ts';
 import {mountTravelExperiment} from '../world/index.ts';
 import {mountWorldEnvironment} from '../world/index.ts';
@@ -81,7 +81,7 @@ import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import {roomObjects} from '../world/index.ts';
 import { createWorldTools } from './live-world-tools.ts';
-import {mountNativeHUD,mountAppletShelf} from '../hud/index.ts';
+import {mountNativeHUD,mountAppletShelf} from '../world/index.ts';
 
 const element:(tag:string,cls?:string,text?:unknown)=>any=node;
 const button=textButton;
@@ -448,7 +448,7 @@ export function mountNotionWorld(data: World, native: any) {
     root.dispatchEvent(new CustomEvent('worldlet:applet-layout'));
   }
   root.appletLayout={area:id=>sections.find(r=>r.moduleId===id&&r.entity==='app')?.buildingId,areaTitle:id=>buildings.find(b=>b.id===id)?.title,has:id=>!data.hiddenApplets?.includes(id)&&(data.unlockedApplets?data.unlockedApplets.includes(id):sections.find(r=>r.moduleId===id)?.installByDefault!==false),available:id=>sections.some(r=>r.moduleId===id&&r.entity==='app'),add:id=>editApplet('unlock',id),open:id=>visitObject(id)};
-  // Saved with every theme's pinned places (ui/themes/theme-placements.ts).
+  // Saved with every theme's pinned places (ui/style/themes/theme-placements.ts).
   const storedRegions=()=>JSON.stringify(storedRegionLayout(regionLayout));
   let savedRegions=regionsInWorld&&data.regionLayout?storedRegions():'',regionSave=false;
   function saveRegions(){
@@ -1629,7 +1629,7 @@ export function mountNotionWorld(data: World, native: any) {
    void Promise.resolve(native?.artifacts?.({operation:'save',artifact,scheduled:due.kind,day:due.day})).catch(()=>{}).then(()=>{window.dispatchEvent(new Event('worldlet:artifacts'));void requestArtifactPage(artifact,false);});
    return {ok:true,id:artifact.id,size:artifact.size,shown:'journal'};
   }
-  // When the next brief and today's summary will be made, for the Task panel's Planned timeline (ui/hud/task-panel.ts);
+  // When the next brief and today's summary will be made, for the Task panel's Planned timeline (ui/world/task-panel.ts);
   // nothing in the practice world or before the first run is over, which makes neither.
   const announceDaily=()=>{const none=!!data.sample||!!native?.firstRun?.();window.dispatchEvent(new CustomEvent('worldlet:daily-planned',{detail:{planned:none?[]:dailyPlanned(daily,new Date(),routinesOn),paused:none?[]:(['plan','summary'] as const).filter(kind=>!routinesOn[kind])}}));};
   setTimeout(announceDaily,0);
@@ -1646,7 +1646,7 @@ export function mountNotionWorld(data: World, native: any) {
     void askDaily(due);
   },30000);
   // What Fox is doing, for its name tag and the World's Task panel (worldlet:fox-status): the step while it works, then
-  // empty with what was done, which closes its window in the panel (ui/hud/task-panel.ts). Reply drafts made meanwhile
+  // empty with what was done, which closes its window in the panel (ui/world/task-panel.ts). Reply drafts made meanwhile
   // are counted from the host's worldlet:email-drafted.
   function backgroundWork(source:string,kind:FoxWorkKind,text:string,name?:string){
     let drafted=0;const count=()=>{drafted++;};
@@ -1680,7 +1680,7 @@ export function mountNotionWorld(data: World, native: any) {
   }
   // The first card (owner decision 2026-10-13): a new person's first Today's prep starts the moment their World first
   // opens, whatever the hour, in a background session beside the first-run tour, so the tour's pick step
-  // (ui/onboarding/first-value.ts) finds a card Fox already made and approving it is the first win, with no Google
+  // (ui/shell/first-value.ts) finds a card Fox already made and approving it is the first win, with no Google
   // needed. It is the one background turn the first run allows; never in the practice world or an automated browser,
   // once per World (a busy background session asks again at the next poll), not with Today's prep paused, and not
   // with Mail connected.
@@ -2267,7 +2267,7 @@ export function mountNotionWorld(data: World, native: any) {
    if(address&&openWorldURL(address)){input.value='';input.dispatchEvent(new Event('input'));return;}
    if(artifactFollowUpSent(followUpDraft,input.value,foxArtifact.visible&&shownArtifact?String(shownArtifact.id):null)&&followUp(input.value))return;
    voice.submit()};
-  // The first-run tour's first value can be a conversation the person brought (ui/onboarding/first-value.ts).
+  // The first-run tour's first value can be a conversation the person brought (ui/shell/first-value.ts).
   let firstValueOngoing:{list:()=>{id:string,title:string,say:string}[],make:(id:string)=>Promise<boolean>}|null=null;
   if(native){
     // The paired iPhone mirrors the Center and talks to Fox through this page (platform/web/README.md).
@@ -2378,12 +2378,12 @@ export function mountNotionWorld(data: World, native: any) {
      setInterval(loadJournal,5*60_000);loadJournal();
     }
     nativeHUD=mountNativeHUD({root,onAttention:view=>{phone?.attention(view);if(!data.sample&&view?.now?.length)reportProductEvent('attention_shown',{attention_count:String(Math.min(9,view.now.length))});},calendar:calendarSoon,openCalendar:openCalendarEvent,widgets:()=>widgetsNow,openWidget:id=>visitObject(momentAppletId(id)),ongoing:()=>themesNow().map(({id,title,context})=>({id,title,context})),openOngoing:offerOngoing,updates:native.updates,connectApplet:moduleId=>{const r=sections.find(s=>s.moduleId===moduleId);if(r?.key==='voice-memos'){visitObject(r.moduleId,{enter:false});showVoiceMemos(r,'connect');}else if(r?.key==='messages'){visitObject(r.moduleId,{enter:false});showMessages(r);}else if(r?.key==='obsidian'){visitObject(r.moduleId);showObsidian(r,'choose');}else if(r&&native?.setup)native.setup('connection',r.region,r.key);},snapshot:()=>({data,pages,sections,areas,buildings,composites,arrivals,read,current,currentSpace,depth,attentionItemId:attentionPage?.worldItemId}),previewAttention,open,visitArea,visitSpace,visitBuilding,visitObject,focusContent,showSearch,connect:()=>{if(data.personal)templateLibrary();else sourceInfo();},original:async id=>{const item=pages.get(id);if(data.sample&&item?.noteId&&pages.has(item.noteId)){open(item.noteId);return;}const result=await native.original(pages.get(id).sourceId);const body=dialog(result.title);body.append(element('pre','private-original',result.text));},chat:()=>voice,back,home,leaveApplet:()=>{libraryWebReturn=null;back();},dialog,itemActions,onDecision:(d,choice)=>{const p=pages.get(d.pageId);if(!p)return {error:'Note not found'};const r=contentStore.mutate('patch_content',{id:p.id,revision:p.revision,field:'body',old_text:'',new_text:'\n## Selected option\n'+choice+'\nPlan only. No booking, payment or message was sent.'},{operationId:crypto.randomUUID()});if(r.ok)contentChanged(r);return r;},storage:native.storage,sample:()=>!!data.sample,toggleSample:native.toggleSample,contextual:()=>attentionPage?moduleContext():travelExperiment?.context()||moduleContext(),tasks:()=>travelExperiment?.tasks()||[]});
-    // The Thing shelf above an open Thing (ui/hud/applet-shelf.ts): the recently used Things, the open one in the middle.
+    // The Thing shelf above an open Thing (ui/world/applet-shelf.ts): the recently used Things, the open one in the middle.
     const shelfApp=(id:string)=>{const r=sections.find(s=>s.moduleId===id&&s.entity==='app');if(!r||!root.appletLayout?.has(id))return null;return {title:r.title,image:themeAppletIcon(r.key)||appLogoSource(r)||''};};
     appletShelf=mountAppletShelf({root,applet:shelfApp,lastUsed:id=>regionLayout.lastUsedAt[id]||0,
      recent:()=>sections.filter(r=>r.entity==='app'&&(regionLayout.lastUsedAt[r.moduleId]||0)>0).sort((a,b)=>(regionLayout.lastUsedAt[b.moduleId]||0)-(regionLayout.lastUsedAt[a.moduleId]||0)).map(r=>r.moduleId),
      open:id=>visitObject(id),
-     // + enters the Browser with its address ready to type, or opens a new tab when the Browser is already open (ui/browser/browser-device.ts).
+     // + enters the Browser with its address ready to type, or opens a new tab when the Browser is already open (ui/applets/browser-device.ts).
      newPage:()=>{const inside=current==='app-browser';if(!inside)visitObject('app-browser');requestAnimationFrame(()=>window.dispatchEvent(new CustomEvent('worldlet:browser-navigate',{detail:inside?'new-tab':'address',cancelable:true})));}});
     appletShelf.sync(depth==='object'?current:null);
     if(data.sample&&buildings.length){travelExperiment=mountTravelExperiment({root,room:sections.find(s=>s.trip),pages,visit:visitObject,refresh:()=>{scene?.refreshContent();nativeHUD?.sync();},open:dialog,state:worldState,storage:native.storage,onContext:()=>nativeHUD?.sync()});scene?.refreshContent();}saveRegions();

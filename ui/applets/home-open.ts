@@ -1,7 +1,7 @@
 import {renderRemindersOpen} from './apple-reminders/open.ts';
 import {renderNotesOpen} from './apple-notes/open.ts';
 import {attentionIcon} from '../attention/index.ts';
-import {node} from '../components/index.ts';
+import {node} from '../style/index.ts';
 import {renderCalendar,type CalendarState} from './google-calendar/grid.ts';
 export {localCalendarItems} from './google-calendar/grid.ts';
 export type HomeOpenState=CalendarState;

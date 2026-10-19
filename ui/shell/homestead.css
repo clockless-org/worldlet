@@ -1,4 +1,4 @@
-/* Legacy compatibility only. Current product UI belongs in ui/components/*.css. */
+/* Legacy compatibility only. Current product UI belongs in ui/style/*.css. */
 /* Native world's minimal HUD. Connector badges are anchored to projected land positions. */
 .notion-pin[data-kind="connector"]{display:flex;flex-direction:column;align-items:center;gap:5px;background:transparent;border:0;box-shadow:none;min-width:94px;padding:8px 12px;transform:translate(-50%,-70%);color:#354d3f;transition:filter .2s}
 .notion-pin[data-kind="connector"] strong{font-size:13px;font-weight:600;letter-spacing:.02em}

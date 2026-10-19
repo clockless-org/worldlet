@@ -45,7 +45,7 @@ export function installBrowser(host:Host){
   browserPip:request=>{hookDetach();if(!desktop()?.isDesktop)device.pip(String(request.applet??''),request.rect,request.live);return {ok:true};},
   browserCommand:request=>device.command(typeof request.operation==='string'?request.operation:'',object(request.args),request.agent===true),
   browserBookmarks:()=>discoverBookmarks(),
-  // The World's Task panel shows the page Fox is driving in a small window (ui/hud/task-panel.ts): a small picture of
+  // The World's Task panel shows the page Fox is driving in a small window (ui/world/task-panel.ts): a small picture of
   // it as it stands, its address and the steps Fox's status lists. Nothing while Fox drives no page.
   taskPanelPage:async()=>{
    const working=device.foxWorking,contents=working?.page.pictureContents;

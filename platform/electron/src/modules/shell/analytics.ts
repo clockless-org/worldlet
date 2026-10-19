@@ -94,7 +94,7 @@ const ALLOWED:Record<string,string[]>={
  proactive_card:['yes','no'],
  // How the chosen Agent's description of itself ended (agent/gate/agent-profile.ts).
  profile_result:['ok','timeout','invalid','failed'],
- // tour_skipped: the step of the first run's eight-step tour it was skipped on (ui/onboarding/README.md).
+ // tour_skipped: the step of the first run's eight-step tour it was skipped on (ui/shell/ONBOARDING.md).
  tour_step:['1','2','3','4','5','6','7','8'],
  // first_card_ready: how a new person's first Today's prep ended (ui/shell/notion-world.ts startFirstCard).
  first_card_result:['ok','no_card','failed'],

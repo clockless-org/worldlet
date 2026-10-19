@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {fitThemeScene} from '../ui/themes/scene-registration.ts';
-import type {ThemeSceneRegistration} from '../ui/themes/build-theme-contract.ts';
+import {fitThemeScene} from '../ui/style/themes/scene-registration.ts';
+import type {ThemeSceneRegistration} from '../ui/style/themes/build-theme-contract.ts';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import {parseBuildThemeManifest,parseThemePresentation} from '../ui/themes/build-theme-contract.ts';
+import {parseBuildThemeManifest,parseThemePresentation} from '../ui/style/themes/build-theme-contract.ts';
 import {validateBuildTheme,importBuildTheme,buildThemeSource} from './build-theme-source.ts';
 import {checkSceneFrameCoverage} from './scene-frame-coverage.ts';
 import ts from 'typescript';
@@ -100,19 +100,19 @@ try{
  assert.throws(()=>parseThemePresentation({...presentation,artifact:{...artifact,colors:{gold:'#aa7b35'}}}),/artifact colors/);
  assert.throws(()=>parseThemePresentation({...presentation,artifact:{...artifact,colors:{ink:'green'}}}),/artifact colors/);
  await write('first');await fs.writeFile(path.join(source,'assets','test.txt'),'fixture');
- await importBuildTheme(source,consumer);const lock=path.join(consumer,'ui/theme-packages/first/source-lock.json'),initial=await fs.readFile(lock,'utf8');
+ await importBuildTheme(source,consumer);const lock=path.join(consumer,'ui/style/theme-packages/first/source-lock.json'),initial=await fs.readFile(lock,'utf8');
  assert.equal(JSON.parse(initial).updatedAt,manifest.updatedAt);assert.equal(JSON.parse(initial).contractVersion,3);assert.equal('version' in JSON.parse(initial),false);
  // The generated index imports only the package's JSON.
- assert.doesNotMatch(await fs.readFile(path.join(consumer,'ui/theme-packages/first/index.ts'),'utf8'),/\.ts'|\.css/);
+ assert.doesNotMatch(await fs.readFile(path.join(consumer,'ui/style/theme-packages/first/index.ts'),'utf8'),/\.ts'|\.css/);
  await importBuildTheme(source,consumer);assert.equal(await fs.readFile(lock,'utf8'),initial);
  await fs.writeFile(path.join(source,'theme.json'),JSON.stringify({...manifest,contractVersion:99}));await assert.rejects(importBuildTheme(source,consumer),/Invalid build theme/);assert.equal(await fs.readFile(lock,'utf8'),initial);
- await write('second');await importBuildTheme(source,consumer);assert.equal(JSON.parse(await fs.readFile(path.join(consumer,'ui/theme-packages/second/theme.json'),'utf8')).id,'second');
+ await write('second');await importBuildTheme(source,consumer);assert.equal(JSON.parse(await fs.readFile(path.join(consumer,'ui/style/theme-packages/second/theme.json'),'utf8')).id,'second');
  assert.equal(await fs.readFile(lock,'utf8'),initial,'importing another theme leaves the first untouched');
- assert.match(await fs.readFile(path.join(consumer,'ui/theme-packages/index.ts'),'utf8'),/THEME_PACKAGES=\[theme_first,theme_second\]/);
+ assert.match(await fs.readFile(path.join(consumer,'ui/style/theme-packages/index.ts'),'utf8'),/THEME_PACKAGES=\[theme_first,theme_second\]/);
  const output=path.join(tmp,'output');await fs.mkdir(path.join(output,'theme-assets'),{recursive:true});await fs.writeFile(path.join(output,'theme-assets','stale.txt'),'old');assert.deepEqual((await buildThemeSource(consumer,output)).map(t=>t.id),['first','second']);await assert.rejects(fs.stat(path.join(output,'theme-assets/stale.txt')));assert.equal(await fs.readFile(path.join(output,'theme-assets/second/test.txt'),'utf8'),'fixture');
  assert.equal(await fs.readFile(path.join(output,'theme-assets/first/plate.svg'),'utf8'),await fs.readFile(path.join(source,'assets/plate.svg'),'utf8'),'preset art survives import and publication');
- assert.deepEqual(JSON.parse(await fs.readFile(path.join(consumer,'ui/theme-packages/first/presentation.json'),'utf8')).appletPresets,[preset]);
- assert.deepEqual(JSON.parse(await fs.readFile(path.join(consumer,'ui/theme-packages/first/presentation.json'),'utf8')).appletScenes,presentation.appletScenes);
+ assert.deepEqual(JSON.parse(await fs.readFile(path.join(consumer,'ui/style/theme-packages/first/presentation.json'),'utf8')).appletPresets,[preset]);
+ assert.deepEqual(JSON.parse(await fs.readFile(path.join(consumer,'ui/style/theme-packages/first/presentation.json'),'utf8')).appletScenes,presentation.appletScenes);
  // Code and stylesheets are refused, wherever they sit in the package.
  for(const file of ['entry.ts','theme.css','assets/draw.js']){await fs.writeFile(path.join(source,file),'export default 1');await assert.rejects(validateBuildTheme(source),/A theme is static/);await fs.rm(path.join(source,file));}
  await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify({...presentation,icons:{gmail:'assets/missing.png'}}));await assert.rejects(validateBuildTheme(source),/Missing declared asset/);

@@ -2,7 +2,7 @@
 // Compare chromatic material bands to the pack's current baseline, never an unaccepted draft.
 import assert from 'node:assert/strict';
 import sharp from 'sharp';
-import {BUILTIN_STYLE} from '../ui/components/style.ts';
+import {BUILTIN_STYLE} from '../ui/style/style.ts';
 // Five percentage points is a coarse art-review budget, not an exact match.
 // Normalize sampling size so higher-resolution outputs do not get more votes.
 const reference=BUILTIN_STYLE.references.palette;

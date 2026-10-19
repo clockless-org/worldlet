@@ -52,7 +52,7 @@ These events exist only in builds that have them: `update_prepared`, `update_app
 
 ## Bringing an Agent
 
-Owner goal 2026-10-06: the target customer already runs an Agent (OpenClaw, Claude Code, Hermes Agent, Codex, pi), so setup reports where such a person gets stuck ([plan](../../ui/onboarding/README.md#a-local-agent-instead-of-google)). Every dimension is allowlisted twice (the World page's `worldlet:product-event` and the host's `safeDimensions`); amounts are buckets (`countBucket` in `agent/base/setup-events.ts`: `0`, `1_9`, `10_99`, `100_999`, `1000_plus`) and the Agent is its public product ID (`local_agent`: `claude-code`, `codex`, `hermes`, `openclaw`, `pi`). No Agent name, conversation title, path, model name or integration name is sent.
+Owner goal 2026-10-06: the target customer already runs an Agent (OpenClaw, Claude Code, Hermes Agent, Codex, pi), so setup reports where such a person gets stuck ([plan](../../ui/shell/ONBOARDING.md#a-local-agent-instead-of-google)). Every dimension is allowlisted twice (the World page's `worldlet:product-event` and the host's `safeDimensions`); amounts are buckets (`countBucket` in `agent/base/setup-events.ts`: `0`, `1_9`, `10_99`, `100_999`, `1000_plus`) and the Agent is its public product ID (`local_agent`: `claude-code`, `codex`, `hermes`, `openclaw`, `pi`). No Agent name, conversation title, path, model name or integration name is sent.
 
 | Event | When | Dimensions |
 | --- | --- | --- |
@@ -63,12 +63,12 @@ Owner goal 2026-10-06: the target customer already runs an Agent (OpenClaw, Clau
 | `agent_bring_failed` | Bringing it in failed | `local_agent`, `error_code`, `duration_bucket` |
 | `agent_profile_result` | The chosen Agent answered or not when asked to describe itself as JSON ([plan](../gate/agent-profile.ts)); setup never waits for it | `local_agent`, `profile_result` (`ok`, `timeout`, `invalid`, `failed`), `bring_connections` (connections it reported, bucketed), `duration_bucket` |
 | `hermes_setup_started` / `hermes_setup_completed` / `hermes_setup_failed` | No Agent here: Worldlet installs Hermes Agent (`install`), then ChatGPT signs in inside it (`sign_in`) | `hermes_setup` (`install`, `sign_in`; `terminal` when the person opens the official installer in a Terminal or PowerShell window after a failed install), `install_step` (the installer's step it reached, `0`–`9`, `10_plus`), on failure `hermes_failure` (`command_line_tools`, `download`, `manifest`, `stage`, `not_found`, `timeout`, `cancelled`, `not_started`, `no_model`, `other`) and, when the installer ran, `hermes_stage` (the stage by name: `prerequisites`, `repository`, `venv`, `python_deps`, `config`, `products`, `desktop`, `complete`, `other`) and `hermes_reason` (why it stopped, mostly the installer's own failure classes recognized by their fixed messages: `python_install_failed`, `deps_install_failed`, `download_failed`, `access_denied`, `missing_file`, `path_too_long`, `git_failed`, …, `other`; `HERMES_REASONS` in `agent/base/setup-events.ts`), `duration_bucket` |
-| `tour_skipped` | The Tutorial switch turned off in the first run | `tour_step` (`1`–`8`, the [tour's steps](../../ui/onboarding/README.md#after-arrival-guided-tour-then-a-first-useful-task)) |
+| `tour_skipped` | The Tutorial switch turned off in the first run | `tour_step` (`1`–`8`, the [tour's steps](../../ui/shell/ONBOARDING.md#after-arrival-guided-tour-then-a-first-useful-task)) |
 | `first_win` | The first-value task was settled and celebrated | none |
 
 ### The first card
 
-Owner decision 2026-10-13: a new person's first Today's prep starts as their World first opens, beside the first-run tour, so the tour's pick step finds a card Fox already made and approving it is the first win, with no Google needed; with Mail connected it does not run (`startFirstCard` in `ui/shell/notion-world.ts`, `ui/onboarding/first-value.ts`). Each step is sent once per World:
+Owner decision 2026-10-13: a new person's first Today's prep starts as their World first opens, beside the first-run tour, so the tour's pick step finds a card Fox already made and approving it is the first win, with no Google needed; with Mail connected it does not run (`startFirstCard` in `ui/shell/notion-world.ts`, `ui/shell/first-value.ts`). Each step is sent once per World:
 
 | Event | When | Dimensions |
 | --- | --- | --- |
@@ -107,10 +107,10 @@ Events that can be started either by the person or by the app carry `trigger`: `
 | `user_engaged` | user | `recordUserEngaged`, `watchInput`, `personInput` (`platform/electron/src/modules/shell/analytics.ts`); `reportEngagement` (`ui/shell/product-analytics.ts`) |
 | `app_active` | neither: the app ran | `recordActiveDay` (`analytics.ts`); also sent on Google connection events |
 | `fox_turn_*` | user: a visible conversation turn the person sent or a Worldlet button they pressed; greetings excluded | `withFoxTurnAnalytics` (`ui/shell/product-analytics.ts`), `submit` (`ui/companion/native-chat.ts`) |
-| `onboarding_started`, `onboarding_apps_viewed`, `local_agents_detected`, `local_agent_select_failed`, `agent_bring_completed`, `agent_bring_failed` | background: shown by the setup surface | `ui/onboarding/startup-setup.ts` |
-| `tour_skipped`, `first_win` | background: the first-run tour's outcome | `ui/onboarding/world-tour.ts`, `ui/onboarding/first-value.ts` |
-| `first_card_started`, `first_card_ready`, `first_card_shown`, `first_card_opened`, `first_card_approved` | background: the first card's steps, approving included (`first_win` follows it) | `startFirstCard` (`ui/shell/notion-world.ts`), `ui/onboarding/first-value.ts` |
-| `onboarding_completed`, `local_agent_selected` | user: the person finished setup or chose an Agent | `recordOnboardingCompleted` (`analytics.ts`); `ui/onboarding/startup-setup.ts` |
+| `onboarding_started`, `onboarding_apps_viewed`, `local_agents_detected`, `local_agent_select_failed`, `agent_bring_completed`, `agent_bring_failed` | background: shown by the setup surface | `ui/shell/startup-setup.ts` |
+| `tour_skipped`, `first_win` | background: the first-run tour's outcome | `ui/shell/world-tour.ts`, `ui/shell/first-value.ts` |
+| `first_card_started`, `first_card_ready`, `first_card_shown`, `first_card_opened`, `first_card_approved` | background: the first card's steps, approving included (`first_win` follows it) | `startFirstCard` (`ui/shell/notion-world.ts`), `ui/shell/first-value.ts` |
+| `onboarding_completed`, `local_agent_selected` | user: the person finished setup or chose an Agent | `recordOnboardingCompleted` (`analytics.ts`); `ui/shell/startup-setup.ts` |
 | `world_entered` | background: the World loaded | `ui/index.ts` |
 | `google_connect_*`, `source_connect_*`, `source_disconnect_*`, `item_update_*` | user, with `trigger` (Fox's tool steps and calls after the gesture expired are `background`) | `withProductAnalytics` (`ui/shell/product-analytics.ts`) |
 | `content_read_*` | background: includes list refreshes and cache reads; never counted as use | `withProductAnalytics` |

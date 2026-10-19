@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import sharp from 'sharp';
-import type {ThemeSceneRegistration} from '../ui/themes/build-theme-contract.ts';
+import type {ThemeSceneRegistration} from '../ui/style/themes/build-theme-contract.ts';
 
 /** Measure the transparent opening, not a prompt's approximate rectangle. The extraction's alpha is
  * intentionally antialiased: 240 is an opaque-enough rim, while faint residual alpha is still opening. */

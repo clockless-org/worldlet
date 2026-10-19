@@ -3,7 +3,7 @@ import {POPULAR_APPS,POPULAR_APP_ENTRIES} from '../context/applets/popular-apps.
 import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
 import {appLogoSource} from '../ui/applets/visuals.ts';
 import {placementPages,resolvePlacements} from '../ui/world/slot-placement.ts';
-import {appletStyle} from '../ui/components/style.ts';
+import {appletStyle} from '../ui/style/style.ts';
 import {existsSync} from 'node:fs';
 import {SERVICE_PROVIDERS} from '../contracts/services.ts';
 assert.equal(POPULAR_APPS.length,56);

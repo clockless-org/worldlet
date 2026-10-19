@@ -1,8 +1,8 @@
-import {ACTIVE_THEME} from '../themes/index.ts';
-import {firstWinCandidate} from '../onboarding/index.ts';
+import {ACTIVE_THEME} from '../style/index.ts';
+import {firstWinCandidate} from '../shell/index.ts';
 import {mountCompanionLife} from './companion-life.ts';
 import {companionPosition} from './companion-position.ts';
-import {uiIcon} from '../components/index.ts';
+import {uiIcon} from '../style/index.ts';
 import {mountCompanionInfo} from './companion-info.ts';
 import {watchModelNeeded} from './model-needed.ts';
 import {mountAppletTaskResults} from './applet-task-results.ts';
@@ -33,7 +33,7 @@ export function parseSuggestedReplies(value){
 }
 import {replyMarkdown} from './reply-markdown.ts';
 import {replyActionIdentity} from './reply-actions.ts';
-import {viewMode} from '../components/index.ts';
+import {viewMode} from '../style/index.ts';
 import {rememberSpeechLanguage} from './speech-language.ts';
 import {mountMicrophonePicker} from './microphone-picker.ts';
 import {createFoxTalk} from './fox-talk.ts';
@@ -913,7 +913,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   if(typed){input.value='';clearTimeout(collapseTimer);editing=true;renderEntry();input.focus({preventScroll:true});}
   if(!invitation&&!quiet){rememberSpeechLanguage(shown);animateInput(shown);}turnReply=sameContext(reply)&&reply?.text?reply:frontReply();turnEntry='';if(!quiet&&!windowOpen)expanded=false;turnStatus='Getting ready…';active=true;quietTurn=quiet;const guided=root.dataset.onboardingLocked==='true',turn=++generation,requestContext=context.key,requestView=contentIdentity(),requestThread=activeThread(),requestLocation=context.title,directSession=!invitation&&origin==='user'&&!!chatRoute?.();let turnPartial='';streamingReply=false;if(!quiet)preview=!!reply?.text;render();
   const entryId=invitation||quiet?'':'turn:'+Date.now()+':'+turn;
-  // A turn in which Fox does something (a tool runs) is a task beside Fox while it lasts (ui/hud/task-panel.ts).
+  // A turn in which Fox does something (a tool runs) is a task beside Fox while it lasts (ui/world/task-panel.ts).
   let taskShown=false;const turnTask=(step:string)=>{taskShown=true;window.dispatchEvent(new CustomEvent(FOX_STATUS_EVENT,{detail:{source:TURN_TASK_SOURCE,text:step,name:turnTaskName(shown)}}));};
   // The paired phone shows the turn as it streams (agent/base phoneLive): its steps and the reply so far.
   const live=(text:string,done=false)=>{if(!entryId)return;root.dispatchEvent(new CustomEvent('worldlet:fox-live',{detail:{id:entryId,key:requestContext,user:thread.find(e=>e.id===entryId)?.user||shown,steps:thread.find(e=>e.id===entryId)?.steps||[],text,done}}));};

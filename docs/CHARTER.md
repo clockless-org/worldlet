@@ -13,7 +13,7 @@ something out.
 | --- | --- | --- |
 | This charter | Why the system is shaped this way, and which properties are not traded away | Intent |
 | [README.md](../README.md) | What exists today, with status and evidence | Facts |
-| [DESIGN.md](../ui/components/INTERACTION.md) | The rules the code follows: interaction, typography, color, components, scenes | Implementation rules |
+| [DESIGN.md](../ui/style/INTERACTION.md) | The rules the code follows: interaction, typography, color, components, scenes | Implementation rules |
 
 ## Overview
 

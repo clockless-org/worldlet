@@ -50,7 +50,7 @@ established by the engine change.
 Opening a website Applet again (YouTube, X, TikTok, Netflix, Browser, the Web view of a
 scene Applet and every other Applet with a website) shows the page the person left, not
 its start page. The rule is shared: `agent/applets/page-resume.ts` decides, the Browser
-panel (`ui/browser/browser-device.ts`) applies it, and the host only keeps, shows and
+panel (`ui/applets/browser-device.ts`) applies it, and the host only keeps, shows and
 releases pages as the `browserShow`/`browserHide` requests say (`contracts/browser-surface.ts`;
 `platform/electron/src/modules/applets/device.ts`).
 
@@ -111,7 +111,7 @@ Every website page opens in Focus (owner request 2026-10-05). The rule is shared
 decides what Focus does on a page (`pageFocusPlan`), the host applies it on each page load
 (`platform/electron/src/modules/applets/device.ts`) by evaluating `browser/page-focus.js`
 (`platform/bridge/page-focus.ts`, bundled with Readability by the native UI build) in the page's isolated world, and
-the Browser panel shows the switch after Back (`ui/browser/browser-device.ts`).
+the Browser panel shows the switch after Back (`ui/applets/browser-device.ts`).
 
 - **Articles.** Off app-style sites and sites people work in, a page that Readability finds readable and whose article
   has at least 900 characters shows only that article: a reader page over the site's page, in a closed shadow root,
@@ -144,13 +144,13 @@ the Browser panel shows the switch after Back (`ui/browser/browser-device.ts`).
 ## Picture in picture
 
 While a website Applet's page plays a video, **Picture in picture** (#919) appears in
-the Applet's [top bar](../../ui/components/INTERACTION.md#top-bar), right of the title, as the
+the Applet's [top bar](../../ui/style/INTERACTION.md#top-bar), right of the title, as the
 same kind of control as Back (#951). Choosing it goes back as Back does, but the page is not
 hidden: it keeps playing, with its sound, as a window in the World's right third that shows
 only the video (#950). Leaving any other way (Back, World, another Applet) works as before.
 The rule is shared: `agent/applets/picture-in-picture.ts` decides which Applets offer it, where the window shows,
-its size and where it may go; the Browser panel (`ui/browser/browser-device.ts`, with the offer
-and the window's frame in `ui/browser/picture-in-picture.ts`) applies it; the host only places,
+its size and where it may go; the Browser panel (`ui/applets/browser-device.ts`, with the offer
+and the window's frame in `ui/applets/picture-in-picture.ts`) applies it; the host only places,
 shows and hides the page as `browserPip` says (`contracts/browser-surface.ts`;
 `platform/electron/src/modules/applets/device.ts`) and runs the shared page script.
 
@@ -221,7 +221,7 @@ input on its own, and Fox's agent-browser relay is per page.
 - **One sound at a time.** Pages share audio focus (the engine enables Chromium's `AudioFocusEnforcement`):
   a page that starts playing pauses the one that was playing.
 - **Tabs in the Browser** (owner request 2026-10-07: booking flights and hotels needs several pages;
-  `agent/applets/browser-tabs.ts`, `ui/browser/browser-device.ts`). Only the generic Browser has them; website
+  `agent/applets/browser-tabs.ts`, `ui/applets/browser-device.ts`). Only the generic Browser has them; website
   Applets keep one page. Each tab is its own kept page under an Applet-like key (`browser`, `browser--2`…), sent
   as `applet` in `browserShow` and listed in `live`, so the budget above decides which tabs stay alive: picking a
   live tab shows its page as it was, a released one opens again at its last address (`hold`). Up to eight tabs;
@@ -258,7 +258,7 @@ Checks:
 Fox's pages stay in their Applet (owner feedback 2026-10-02, replacing the window of #1175). Picture in
 picture at the World's bottom-right is for videos only. Hosts that declare `browserTaskPictureInPicture` (the CEF website engine, which draws
 a page as a texture at any size) keep Fox's page working when the person leaves; elsewhere leaving
-hides the page as before. The Browser panel (`ui/browser/browser-device.ts`) applies it.
+hides the page as before. The Browser panel (`ui/applets/browser-device.ts`) applies it.
 
 - **Fox's copy (owner request 2026-10-09).** When Fox starts working on the page in view, it gets a copy
   of that page in the panel's top-right corner, and the person keeps their own page and goes on using
@@ -278,7 +278,7 @@ hides the page as before. The Browser panel (`ui/browser/browser-device.ts`) app
 
 - **Still Fox's, over its device.** If the person leaves the Applet while Fox works, Fox's page (its
   copy, which takes the person's page's place) is never hidden. A small live screen sits over that Applet's device in the World, with a tail pointing
-  down at it (owner decision 2026-10-02, `ui/browser/applet-task-screen.ts`), and the panel sends
+  down at it (owner decision 2026-10-02, `ui/applets/applet-task-screen.ts`), and the panel sends
   `browserLayout` with the screen's slot as `rect`, the panel's size as `page` and `press`. The page
   keeps its layout size, so Fox's references stay valid, and its next steps reach it; the engine
   draws it smaller at about 15 frames a second (`pageFrameRate`, [web engine](../web-engine/README.md)).
@@ -350,7 +350,7 @@ Two browser tools are defined in `worker/companion-tools.ts`, emitted into the H
 
 | Tool | Scope | Operations |
 | --- | --- | --- |
-| `browse_web` | The X reading terminal (`ui/browser/browser-device.ts`) | `read`, `open` (an X post or profile URL), `scroll`, `back`, `forward`, `home`, `bookmarks`, `save`, `saved` (query local captures) |
+| `browse_web` | The X reading terminal (`ui/applets/browser-device.ts`) | `read`, `open` (an X post or profile URL), `scroll`, `back`, `forward`, `home`, `bookmarks`, `save`, `saved` (query local captures) |
 | `automate_browser` | Any public HTTPS page in the embedded panel (agent-browser via `agent/applets/driver-flow.ts`) | `open`, `snapshot`, `do` (steps in words, each control picked by the small model tier), `click`, `fill`, `submit`, `scroll`, `back`, `forward`; actions run directly except the last step, which asks once, and consequential ones leave a receipt |
 
 Neither tool offers arbitrary JavaScript, posting, direct messages, likes, account settings or credential access. Real account content is never treated as sample data: any agent read requires private-context consent, even while the sample world is open. `automate_browser` limits are described in Search, browser and routines.

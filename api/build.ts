@@ -1,9 +1,9 @@
 // What the website build uses (api/README.md). Runs in Node.
-export {BRAND,brandAssets} from '../ui/components/primitives/brand.ts';
-export {BUILTIN_STYLE} from '../ui/components/style.ts';
-export {uiTokenCSS} from '../ui/components/tokens.ts';
-export {ACTIVE_THEME,theme,themeAppletArt} from '../ui/themes/index.ts';
-export type {RegisteredTheme} from '../ui/themes/index.ts';
+export {BRAND,brandAssets} from '../ui/style/primitives/brand.ts';
+export {BUILTIN_STYLE} from '../ui/style/style.ts';
+export {uiTokenCSS} from '../ui/style/tokens.ts';
+export {ACTIVE_THEME,theme,themeAppletArt} from '../ui/style/index.ts';
+export type {RegisteredTheme} from '../ui/style/index.ts';
 export {LANDMARK_KEYS} from '../ui/world/village/region-landmarks.ts';
 export {WORLD_LAYOUT} from '../ui/world/world-layout.ts';
 export type {WorldPack} from '../ui/world/world-pack.ts';

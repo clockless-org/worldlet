@@ -4,7 +4,7 @@ Plant vegetables that ripen on the real clock, from half an hour to a day, and c
 
 **Not released** (owner decision 2026-10-03: "这个游戏先不上线"): the Garden is not in the catalog, so no world shows it. The board, artwork and this contract stay for when it ships; adding it back to `GAME_APPLETS` in `context/applets/definitions/games.ts` brings it in.
 
-The Games area's slow game (owner request 2026-10-03: a farm game where a crop takes a day to ripen, so people come back twelve or twenty-four hours later). The other games are over in a few minutes; the garden gives a reason to return. The board is our own code ([ui/games/garden.ts](../../games/garden.ts)): it runs offline, needs no account and reads nothing.
+The Games area's slow game (owner request 2026-10-03: a farm game where a crop takes a day to ripen, so people come back twelve or twenty-four hours later). The other games are over in a few minutes; the garden gives a reason to return. The board is our own code ([ui/applets/garden.ts](../garden.ts)): it runs offline, needs no account and reads nothing.
 
 - Six plots to start, up to twelve bought with coins. Pick a seed, then an empty plot to plant it.
 - Radish 30 minutes, Lettuce 4 hours, Carrot 8 hours, Tomato 12 hours, Pumpkin 22 hours, Strawberry 24 hours. Longer crops cost more and sell for more, so the best value is planted at night and harvested the next day.

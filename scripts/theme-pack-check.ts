@@ -1,16 +1,16 @@
-// The host's Theme Pack (ui/themes/theme-registry.ts): the Village look the host draws with, a broken pack is
+// The host's Theme Pack (ui/style/themes/theme-registry.ts): the Village look the host draws with, a broken pack is
 // rejected, business events play each cue once and never success on failure, and slot pins are kept per theme.
 // Themes a person picks are packages (resources/themes/CONTRACT.md; scripts/build-theme-source-check.ts).
 import assert from 'node:assert/strict';
 import {access} from 'node:fs/promises';
-import {ACTIVE_THEME,DEFAULT_THEME_ID,companionPerformance,createThemeEvents,parseThemePack,selectThemePins,storedThemePins,switchThemePins,themeAppletArt,type ThemePlacementLayout} from '../ui/themes/index.ts';
-import {BUILTIN_STYLE,STYLE_TOKENS} from '../ui/components/style.ts';
+import {ACTIVE_THEME,DEFAULT_THEME_ID,companionPerformance,createThemeEvents,parseThemePack,selectThemePins,storedThemePins,switchThemePins,themeAppletArt,type ThemePlacementLayout} from '../ui/style/index.ts';
+import {BUILTIN_STYLE,STYLE_TOKENS} from '../ui/style/style.ts';
 import {WORLD_LAYOUT,THEME_WORLD} from '../ui/world/world-layout.ts';
 import {villageCamera} from '../ui/world/village/village-camera.ts';
 import {FOX_STATES} from '../ui/companion/animation/fox-state-catalog.ts';
 import {WORLD_APPS} from '../context/applets/catalog.ts';
 import {MOMENT_ART} from '../context/applets/moment.ts';
-import village from '../ui/theme-packages/village/pack.json' with {type:'json'};
+import village from '../ui/style/theme-packages/village/pack.json' with {type:'json'};
 
 const store=new Map<string,string>();
 (globalThis as any).localStorage={getItem:(k:string)=>store.has(k)?store.get(k):null,setItem:(k:string,v:string)=>{store.set(k,String(v));},removeItem:(k:string)=>{store.delete(k);}};
@@ -141,7 +141,7 @@ const castlePack=parseThemePack({...structuredClone(village),id:'castle',space:{
 // Surfaces reach the shared UI as --theme-* properties and data attributes; a shared surface sets nothing,
 // and switching away clears the previous theme's.
 {
- const {applyThemeSurfaces}=await import('../ui/themes/theme-surfaces.ts');
+ const {applyThemeSurfaces}=await import('../ui/style/themes/theme-surfaces.ts');
  const props=new Map<string,string>(),dataset:Record<string,string>={};
  (globalThis as any).document={documentElement:{dataset,style:{setProperty:(k:string,v:string)=>props.set(k,v),removeProperty:(k:string)=>props.delete(k)}},fonts:{add(){}}};
  applyThemeSurfaces({tokens:{'--theme-ink':'#2b1d0e'},fonts:{},skin:{bubble:{image:'assets/world/a b.png',slice:[40,30,40,30],width:20}},sounds:{events:{},ambient:{}},attention:[],transitions:{area:'zoom',room:'door',ms:400}});
@@ -154,7 +154,7 @@ const castlePack=parseThemePack({...structuredClone(village),id:'castle',space:{
 }
 // Short event sounds obey the native channel volume and visibility; no renderer ambience competes with it.
 {
- const {syncThemeSounds,playThemeSound,attentionPicture}=await import('../ui/themes/theme-surfaces.ts');
+ const {syncThemeSounds,playThemeSound,attentionPicture}=await import('../ui/style/themes/theme-surfaces.ts');
  const w=globalThis as any,played:string[]=[],paused:string[]=[];
  w.document={hidden:false,documentElement:{dataset:{worldSounds:'off',worldSoundVolume:'0.18'}}};
  w.Audio=class {src:string;loop=false;volume=0;constructor(src:string){this.src=src;}play(){played.push(this.src);return Promise.resolve();}pause(){paused.push(this.src);}removeAttribute(){}};
@@ -172,7 +172,7 @@ console.log('PASS Theme Pack: the host draws with the Village pack, broken packs
 
 // Theme sound projection and the platform-independent selection policy.
 {
- const {themeAmbientTrack}=await import('../ui/themes/index.ts');
+ const {themeAmbientTrack}=await import('../ui/style/index.ts');
  const {createAmbientSelection}=await import('../agent/gate/index.ts');
  const pack=castlePack;
  assert.equal(themeAmbientTrack(pack),'theme:castle:water-glints');

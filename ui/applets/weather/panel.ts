@@ -1,4 +1,4 @@
-import {node,appletSurface,actionButton,facts,notice,emptyState} from '../../components/index.ts';
+import {node,appletSurface,actionButton,facts,notice,emptyState} from '../../style/index.ts';
 import {weatherGlyph,weatherKind} from '../../world/index.ts';
 
 const value=(v:any,suffix='')=>Number.isFinite(v)?Math.round(v)+suffix:'—';

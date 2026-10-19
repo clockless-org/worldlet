@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {inspectBrowserOutcome} from '../ui/browser/action-outcome.ts';
+import {inspectBrowserOutcome} from '../ui/applets/action-outcome.ts';
 const calls:any[]=[];let attempts=0;
 const value=await inspectBrowserOutcome(async args=>{calls.push(args);return ++attempts<3?{error:'Loading'}:{receipt:{id:'r'},observation:{text:'Your request was received.'}};},'r',undefined,async()=>{});
 assert.equal(value.observation.text,'Your request was received.');

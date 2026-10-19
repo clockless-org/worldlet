@@ -1,5 +1,5 @@
 import {attentionIcon} from '../../attention/index.ts';
-import {node} from '../../components/index.ts';
+import {node} from '../../style/index.ts';
 /** Read-only native reminders, arranged on the theme's task board. Mutations are prepared with Fox. */
 const boards=new WeakMap<object,{filter:string;list:string;query:string}>();
 export function renderRemindersOpen(panel:HTMLElement,items:any[],value:any,owner:object,pick:(item:any)=>void){

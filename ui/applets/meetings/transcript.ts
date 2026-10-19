@@ -1,4 +1,4 @@
-import {node} from '../../components/index.ts';
+import {node} from '../../style/index.ts';
 /** The bar over a call while it is transcribed: always visible, with Stop and a reminder to tell the
  * others. `update` takes the host's state (`phase:'transcript'` events from the website panel). */
 export function transcriptBar(onStop:()=>void){

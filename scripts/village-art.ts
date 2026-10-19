@@ -4,15 +4,15 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import sharp from 'sharp';
 import {cachedEncode} from './build-cache.ts';
-import {theme,themeAppletArt} from '../ui/themes/index.ts';
-import {themeAssetPath} from '../ui/themes/build-theme-contract.ts';
+import {theme,themeAppletArt} from '../ui/style/index.ts';
+import {themeAssetPath} from '../ui/style/themes/build-theme-contract.ts';
 import {checkVillageSceneLibrary} from './village-scene-library.ts';
 import {checkVillageRegisteredScenes} from './village-registered-scenes.ts';
 import {checkVillageAppletPresets} from './village-applet-presets.ts';
 import {paintedBox} from './painted-box.ts';
 
 /**
- * The Village's runtime art, encoded once and committed under ui/theme-packages/village/assets: World plates and
+ * The Village's runtime art, encoded once and committed under ui/style/theme-packages/village/assets: World plates and
  * landmarks, every Applet's device (its icon), open pictures, motion, logos, Mail parts and Focus rooms. The
  * build reads these files as they are; they are the Village theme package's `assets/`. The painted
  * originals stay where they are as authoring sources; `art.lock.json` ties each output to its source bytes.
@@ -20,7 +20,7 @@ import {paintedBox} from './painted-box.ts';
  *   node scripts/village-art.ts           re-encode everything (after changing a source)
  *   node scripts/village-art.ts --check   every output exists and matches its source; no encoding
  */
-export const VILLAGE_ART='ui/theme-packages/village/assets';
+export const VILLAGE_ART='ui/style/theme-packages/village/assets';
 export interface VillageArtIndex {
  world:{day:string;night:string};
  landmarks:Record<string,{day:string;night:string}>;

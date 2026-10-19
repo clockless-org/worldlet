@@ -6,7 +6,7 @@ Default controls and materials follow the [built-in UI standard](../../resources
 
 This is the design handbook for making Worldlet Applets. It records the product decisions, not a claim that every animation or integration already exists. Start here before designing a device or implementing its interaction. This ordinary repository document is the authoring entry point; no Create Applet skill is used. Implementation steps live in [Implementation guide](IMPLEMENTATION-GUIDE.md). The Factory workflow remains future work.
 
-Implementation fields, compatibility and route details live in [Applet presentation](../components/INTERACTION.md#applet-presentation). Current acceptance lives in [Applet review](../components/INTERACTION.md#applet-presentation-acceptance-contract). If older studies disagree with this handbook, follow this handbook for Applet design; keep serialized IDs compatible.
+Implementation fields, compatibility and route details live in [Applet presentation](../style/INTERACTION.md#applet-presentation). Current acceptance lives in [Applet review](../style/INTERACTION.md#applet-presentation-acceptance-contract). If older studies disagree with this handbook, follow this handbook for Applet design; keep serialized IDs compatible.
 
 ## 1. What an Applet is
 
@@ -212,7 +212,7 @@ The coding battery is part of the Peek device assembly, sharing its position, sc
 
 ## Native / Web presentation switch
 
-Hybrid Applets expose a Native / Web switch in the Applet's [top bar](../components/INTERACTION.md#top-bar), right of the title, in Open and Focus: a capsule of two icon buttons, the chosen view lit. Native is the simplified reader; Web replaces the left content with the original website inside the same Applet. Preserve the selected native item on return. Never navigate to Browser merely to open the original, and do not duplicate the toggle with a globe or “View original” action. Switching away unloads the browser content and media but retains sign-in. Local-only Applets such as Obsidian do not offer their marketing website as an equivalent Web mode. Keep editing actions with Fox.
+Hybrid Applets expose a Native / Web switch in the Applet's [top bar](../style/INTERACTION.md#top-bar), right of the title, in Open and Focus: a capsule of two icon buttons, the chosen view lit. Native is the simplified reader; Web replaces the left content with the original website inside the same Applet. Preserve the selected native item on return. Never navigate to Browser merely to open the original, and do not duplicate the toggle with a globe or “View original” action. Switching away unloads the browser content and media but retains sign-in. Local-only Applets such as Obsidian do not offer their marketing website as an equivalent Web mode. Keep editing actions with Fox.
 
 ## Health, Travel and Money
 

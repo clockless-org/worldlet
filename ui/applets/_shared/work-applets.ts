@@ -1,6 +1,6 @@
 import {localPathName} from '../../../context/sources/index.ts';
 import {CODING_SESSIONS} from '../../../context/applets/index.ts';
-import {practiceJobSession,practiceJobDetail} from '../../practice/index.ts';
+import {practiceJobSession,practiceJobDetail} from '../practice-coding.ts';
 // CLI records remain local UI data. Listing or reading never resumes an agent.
 export const WORK_APPLETS=['github',...CODING_SESSIONS];
 const provider=(key,result)=>result.providers?.find(p=>p.provider===(key==='codex'?'codex':'claude'));

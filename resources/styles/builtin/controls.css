@@ -247,7 +247,7 @@ body.ui-gallery:has([data-theme=night]){background:#233c34}
 .native-console:is(.is-typing,.compact-viewport,[data-onboarding=true],[data-onboarding-locked=true],[data-tour-lock=true],[data-tour-spotlight=true],[data-tour-fox],[data-fox-away]) .fox-name-tag{display:none}
 #notionWorld.native-console:is(.is-typing,.compact-viewport,[data-onboarding=true],[data-onboarding-locked=true],[data-tour-lock=true],[data-tour-spotlight=true],[data-tour-fox],[data-fox-away]){--fox-tag-room:0px}
 :is(#notionWorld.native-console,body) .fox-side-button[hidden]{display:none}
-/* The Tutorial switch while a tour runs (owner Order 2026-10-07, ui/onboarding/tour-lock.ts): a bulb, the word and a
+/* The Tutorial switch while a tour runs (owner Order 2026-10-07, ui/shell/tour-lock.ts): a bulb, the word and a
    small switch, on, in the window's bottom-right on the body, above the spotlight and the lock. Once the tour is over
    it goes; Settings › Help shows the tour again (owner request 2026-10-11). */
 :is(#notionWorld .world-environment,body) .tutorial-switch{order:10;justify-self:end;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:flex-end;gap:8px;height:28px;min-height:28px;margin:0;padding:0;border:0;border-radius:8px;appearance:none;background:none;box-shadow:none;color:inherit;font:500 var(--ui-text-label,13px)/1.5 var(--ui-font-ui,system-ui);text-shadow:inherit;white-space:nowrap;cursor:pointer;pointer-events:auto}
@@ -289,7 +289,7 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 /* A website page's Back at its first page, or Forward with nothing ahead, rests. */
 #notionWorld.native-console .scene-control:is(.browser-back,.browser-forward):disabled{opacity:.45;cursor:default;background:var(--system-glass-fill)}
 /* Make Applet at the top of the Browser says what it does: icon and words on one pill. */
-/* A website page's toolbar (ui/browser/browser-device.ts): each control a frosted black button (owner request 2026-10-15),
+/* A website page's toolbar (ui/applets/browser-device.ts): each control a frosted black button (owner request 2026-10-15),
    its glass from layout.css's --browser-glass-*. */
 #notionWorld.native-console .browser-toolbar .scene-control{width:34px;height:34px;min-width:34px;min-height:34px;border:1px solid var(--browser-glass-line);border-radius:17px;background:var(--browser-glass-fill);box-shadow:var(--browser-glass-shadow);color:#fff;text-shadow:none;-webkit-backdrop-filter:var(--browser-glass-blur);backdrop-filter:var(--browser-glass-blur)}
 #notionWorld.native-console .browser-toolbar .scene-control svg{width:18px;height:18px;filter:none}
@@ -334,7 +334,7 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 @media(min-width:801px){
  /* An Applet drawn in its theme scene puts its reader on the scene's painted region instead (ui/applets/scene). */
  #notionWorld.native-console:not([data-applet-scene]) #notionContent:not([data-template=browser]){top:64px!important;left:64px!important;bottom:64px!important}
- /* Inside an Applet the Applet shelf stands above the panel (ui/hud/applet-shelf.ts). */
+ /* Inside an Applet the Applet shelf stands above the panel (ui/world/applet-shelf.ts). */
  #notionWorld.native-console[data-applet-shelf]:not([data-applet-scene]) #notionContent{top:150px!important}
  #notionWorld.native-console #notionContent:not([data-template=browser]):is([data-template=weather],[data-applet=gmail]){--weather-shell-padding:0px;padding:0!important}
  #notionWorld.native-console #notionContent[data-template=weather]>.notion-reader-head{display:none}

@@ -6,9 +6,9 @@ import {fileURLToPath} from 'node:url';
 import sharp from 'sharp';
 import {checkSceneFrameCoverage} from './scene-frame-coverage.ts';
 import {importBuildTheme} from './build-theme-source.ts';
-import type {ThemeAppletScene,ThemeSceneRegistration} from '../ui/themes/build-theme-contract.ts';
+import type {ThemeAppletScene,ThemeSceneRegistration} from '../ui/style/themes/build-theme-contract.ts';
 
-const SOURCE='resources/styles/builtin/references/registered-scenes',PACKAGE='ui/theme-packages/village';
+const SOURCE='resources/styles/builtin/references/registered-scenes',PACKAGE='ui/style/theme-packages/village';
 type Source={frameSource?:string;webFrame?:ThemeSceneRegistration['webFrame'];webEdge?:ThemeSceneRegistration['webEdge'];id:string;title:string;source:string;iconSource?:string;regions:ThemeSceneRegistration['regions'];companion:ThemeSceneRegistration['companion'];prompt:string};
 type Lock=Record<string,{source:string;sourceSha256:string;sha256:string;imageSize:[number,number];settings:string}>;
 const sha=(bytes:Buffer)=>createHash('sha256').update(bytes).digest('hex');

@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import {access,readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
-import {BUILTIN_STYLE,BUILTIN_STYLE_REF,STYLE_TOKENS,appletStyle,assertBuiltinStyle} from '../ui/components/style.ts';
+import {BUILTIN_STYLE,BUILTIN_STYLE_REF,STYLE_TOKENS,appletStyle,assertBuiltinStyle} from '../ui/style/style.ts';
 import {WORLD_LAYOUT} from '../ui/world/world-layout.ts';
 import {WORLD_APPS} from '../context/applets/catalog.ts';
-import {UI_TOKENS,UI_NIGHT_TOKENS,WORLD_UI} from '../ui/components/tokens.ts';
+import {UI_TOKENS,UI_NIGHT_TOKENS,WORLD_UI} from '../ui/style/tokens.ts';
 import {deviceSource} from './build-world-assets.ts';
 import {worldPackPath,parseWorldPack} from '../ui/world/world-pack.ts';
 
@@ -41,7 +41,7 @@ for(const a of WORLD_APPS){
 }
 // Intentional visual changes must explicitly update this reviewed extraction baseline.
 assert.equal(createHash('sha256').update(JSON.stringify(STYLE_TOKENS)).digest('hex'),'f934fb6e28867e4fc8c97b4a21b719a44748a8043386b353c7cdb194896df8b7','Visual tokens changed; review before updating snapshot');
-const village=JSON.parse(await readFile('ui/theme-packages/village/world.json','utf8'));
+const village=JSON.parse(await readFile('ui/style/theme-packages/village/world.json','utf8'));
 assert.equal(parseWorldPack(village).artStatus,'approved','Live Village is reviewed for integration');
 for(const change of [x=>delete x.style,x=>x.style.id='other',x=>x.style.version='99.0.0',x=>delete x.artStatus]){
  const broken=structuredClone(village);change(broken);assert.throws(()=>parseWorldPack(broken));

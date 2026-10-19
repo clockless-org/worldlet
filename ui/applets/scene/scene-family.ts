@@ -1,4 +1,4 @@
-import {themeAppletScene} from '../../themes/index.ts';
+import {themeAppletScene} from '../../style/index.ts';
 /**
  * Which painted scene an Applet borrows when the theme has none of its own. A theme paints scenes keyed by Applet
  * (gmail, google-calendar) and a few kept for a kind of Applet (music, files, maps). The host, not the theme, says which

@@ -1,7 +1,7 @@
 /// Where model-written Markdown is bold. Briefs and replies often put `**` right against Chinese text or punctuation
 /// ("**时间：**10月5日", "请在**周五（10月9日）**前回复"), where CommonMark's flanking rules, and so
 /// `AttributedString(markdown:)`, leave the asterisks as literal text (owner report 2026-10-04). Any closed pair on one
-/// line whose text starts with a non-space is bold here, as on the computer (ui/components/markdown.ts); asterisks
+/// line whose text starts with a non-space is bold here, as on the computer (ui/style/markdown.ts); asterisks
 /// inside backticks or escaped with a backslash stay as they are. The app renders each segment's other inline syntax.
 public func strongSegments(_ text: String) -> [(text: String, strong: Bool)] {
     let chars = Array(text)

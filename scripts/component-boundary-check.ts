@@ -31,14 +31,14 @@ async function scan(dir:string):Promise<void>{
   visit(ast);
  }
 }
-assert.throws(()=>assertComponentImport('ui/hud/example.ts','../../agent/tasks/runtime-tasks.ts'),/bypasses/);
+assert.throws(()=>assertComponentImport('ui/world/example.ts','../../agent/tasks/runtime-tasks.ts'),/bypasses/);
 assert.throws(()=>assertComponentImport('agent/attention/example.ts','../tasks/runtime-tasks.ts'),/bypasses/);
 assertComponentImport('agent/tasks/example.ts','./runtime-tasks.ts');
-assertComponentImport('ui/hud/example.ts','../../agent/tasks/index.ts');
+assertComponentImport('ui/world/example.ts','../../agent/tasks/index.ts');
 assert.throws(()=>assertComponentImport('ui/companion/example.ts','../browser/browser-device.ts'),/bypasses/);
 assert.throws(()=>assertComponentImport('website/main.ts','../ui/shell/notion-world.ts'),/bypasses/);
 assertComponentImport('ui/companion/example.ts','../browser/index.ts');
-assertComponentImport('ui/browser/example.ts','./browser-device.ts');
+assertComponentImport('ui/applets/example.ts','./browser-device.ts');
 // The open-source export leaves out the hosted services (website, models, worker).
 for(const root of ['ui','agent','context','platform/bridge','website','models','worker'])if(existsSync(root))await scan(root);
 console.log('PASS Core/UI public component entry points, including type and dynamic imports; internal access stays within its owner.');

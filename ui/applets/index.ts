@@ -32,3 +32,13 @@ export {searchNotes} from './apple-notes/note-search.ts';
 export {createClaudeSession} from './claude-code/claude-session.ts';
 export {createCodexApplet} from './codex/codex-applet.ts';
 export {createVoiceMemoReader} from './voice-memos/voice-memos.ts';
+// What was the browser folder (#714).
+export {inspectBrowserOutcome} from './action-outcome.ts';
+export {createBrowserPanel} from './browser-device.ts';
+// What was the practice folder (#714).
+export {PRACTICE_BUILD_MS,createPracticeJob,practiceJobDetail,practiceJobSession} from './practice-coding.ts';
+export {mountPracticeTimer,practiceTimerHTML} from './practice-timer.ts';
+export {createPracticeWalkthrough} from './practice-walkthrough.ts';
+export {tennisCard} from './tennis-card.ts';
+export {tennisDemo} from './tennis-demo.ts';
+export * from './game-boards.ts';

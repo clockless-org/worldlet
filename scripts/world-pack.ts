@@ -6,7 +6,7 @@ import sharp from 'sharp';
 import {parseWorldPack,worldPackPath} from '../ui/world/world-pack.ts';
 
 // The Village theme package holds the world's description (world.json); its painted plates stay in resources/worlds/village.
-const manifest=await realpath(path.resolve(process.argv[2]||'ui/theme-packages/village/world.json'));
+const manifest=await realpath(path.resolve(process.argv[2]||'ui/style/theme-packages/village/world.json'));
 const root=await realpath(path.resolve(process.argv[3]||'resources/worlds/village'));
 const pack=parseWorldPack(JSON.parse(await readFile(manifest,'utf8')));
 if(pack.artStatus!=='approved')console.warn('DRAFT artwork: retained for review, not approved for runtime. Style: '+pack.style.id+'@'+pack.style.version);

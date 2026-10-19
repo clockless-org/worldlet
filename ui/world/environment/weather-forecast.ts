@@ -1,5 +1,5 @@
 import {weatherKind} from './world-environment.ts';
-import {weatherArtwork} from '../../components/index.ts';
+import {weatherArtwork} from '../../style/index.ts';
 export function forecastDays(raw){
  const d=raw?.daily||{},value=(key,i)=>Number.isFinite(d[key]?.[i])?d[key][i]:null;
  return (Array.isArray(d.time)?d.time:[]).slice(0,7).map((time,i)=>({time:time*1000,code:value('weather_code',i),high:value('temperature_2m_max',i),low:value('temperature_2m_min',i),rain:value('precipitation_probability_max',i),wind:value('wind_speed_10m_max',i),sunrise:value('sunrise',i),sunset:value('sunset',i)})).filter(d=>Number.isFinite(d.time)&&d.time>0);

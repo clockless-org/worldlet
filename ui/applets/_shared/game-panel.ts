@@ -1,5 +1,5 @@
-import {node,actionButton} from '../../components/index.ts';
-import {bestScore,type Game,type GameHost} from '../../games/index.ts';
+import {node,actionButton} from '../../style/index.ts';
+import {bestScore,type Game,type GameHost} from '../core.ts';
 
 /** Native games float over the Village: a small heading, the board and separate actions. */
 export function createGamePanel({key,title,create}:{key:string;title:string;create:(host:GameHost)=>Game}){

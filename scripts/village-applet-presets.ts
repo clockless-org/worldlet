@@ -6,10 +6,10 @@ import {fileURLToPath} from 'node:url';
 import sharp from 'sharp';
 import {checkSceneFrameCoverage} from './scene-frame-coverage.ts';
 import {importBuildTheme} from './build-theme-source.ts';
-import type {ThemeAppletPreset,ThemeSceneRegistration} from '../ui/themes/build-theme-contract.ts';
+import type {ThemeAppletPreset,ThemeSceneRegistration} from '../ui/style/themes/build-theme-contract.ts';
 
 const SOURCE='resources/styles/builtin/presets/personal-scenes';
-const PACKAGE='ui/theme-packages/village';
+const PACKAGE='ui/style/theme-packages/village';
 const SETTINGS={icon:'768px-webp-q92-alpha100',background:'original-size-webp-q90',frame:'original-alpha'} as const;
 type Catalog={presets:{id:string;name:string;use:string;category:string;icon:string;background:string;frameSource?:string;composition?:Omit<ThemeSceneRegistration,'sha256'>}[]};
 type Lock=Record<string,{source:string;sourceSha256:string;sha256:string;settings:string}>;

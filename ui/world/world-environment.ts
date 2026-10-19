@@ -1,5 +1,5 @@
-import {environmentAt,normalizeWeather,forecastParams,validPlace,WEATHER_TTL} from './index.ts';
-import {weatherGlyph} from './index.ts';
+import {environmentAt,normalizeWeather,forecastParams,validPlace,WEATHER_TTL} from './environment/world-environment.ts';
+import {weatherGlyph} from './environment/weather-forecast.ts';
 const el=(tag: string,text?: string): any=>Object.assign(document.createElement(tag),text===undefined?{}:{textContent:text});
 const key='worldlet-environment-v1';
 const browserAdapter={

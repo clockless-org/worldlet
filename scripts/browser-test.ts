@@ -39,7 +39,7 @@ function worldPage(page:Page){
 }
 // The checks measure the default look, frosted glass included, so every page asks for full transparency whatever the
 // host says: a Mac with no graphics acceleration (CI's hosted runners) reports Reduce Transparency, which turns the
-// glass off (ui/components/hud.css) and failed every material check there.
+// glass off (ui/style/hud.css) and failed every material check there.
 export async function fullTransparency(page:Page){
  try{await (await page.context().newCDPSession(page)).send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-transparency',value:'no-preference'}]});}
  catch{/* a browser without the Chrome DevTools Protocol keeps the host's setting */}

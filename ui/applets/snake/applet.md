@@ -2,7 +2,7 @@
 
 Steer the snake through the garden and eat the apples without biting your tail.
 
-A game in the Games area. The board is our own code ([ui/games/snake.ts](../../games/snake.ts)): it runs offline, needs no account and reads nothing. It is built when the Applet opens and dropped when it closes, so nothing renders or ticks while it is closed. The best score stays in this window's local storage.
+A game in the Games area. The board is our own code ([ui/applets/snake.ts](../snake.ts)): it runs offline, needs no account and reads nothing. It is built when the Applet opens and dropped when it closes, so nothing renders or ticks while it is closed. The best score stays in this window's local storage.
 
 ## Runtime
 

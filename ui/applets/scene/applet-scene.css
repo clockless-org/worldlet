@@ -52,7 +52,7 @@
 .applet-scene .applet-scene-region[data-role=secondary] .scene-title{font-size:clamp(14px,50cqh,48px);line-height:1}
 .applet-scene .applet-scene-region[data-role=secondary] .scene-meta{font-size:clamp(8px,14cqh,13px)}
 
-/* A web Applet's page (ui/browser/browser-device.ts) sits in the Browser scene's screen region: the painting is its
+/* A web Applet's page (ui/applets/browser-device.ts) sits in the Browser scene's screen region: the painting is its
    frame, so the panel's own wooden rim steps aside and the native page follows the panel. */
 #notionWorld>.panel-scene{position:absolute;inset:0;z-index:4;pointer-events:none}
 #notionWorld[data-applet-scene][data-panel-scene]>.notion-content:is([data-template=browser],[data-template=game]){left:var(--applet-scene-primary-left);top:var(--applet-scene-primary-top);width:var(--applet-scene-primary-width);height:var(--applet-scene-primary-height);right:auto;bottom:auto;max-width:none;max-height:none;margin:0;
@@ -81,7 +81,7 @@
   left:calc(var(--applet-scene-companion-left) + var(--applet-scene-companion-width) / 2);
   width:calc(var(--applet-scene-companion-width) - 8px);transform:translateX(-50%);
  }
- /* The Applet shelf (ui/hud/applet-shelf.ts) spans Fox's column, centered over Fox. */
+ /* The Applet shelf (ui/world/applet-shelf.ts) spans Fox's column, centered over Fox. */
  #notionWorld.native-console[data-applet-frame][data-applet-scene]>.applet-shelf{left:var(--applet-scene-companion-left);width:var(--applet-scene-companion-width)}
  #notionWorld.native-console.fox-first-console[data-applet-frame][data-applet-scene] .companion-dialogue{
   width:min(460px,calc(var(--applet-scene-companion-width) - 24px));
@@ -95,7 +95,7 @@
  #notionWorld.native-console.radial-pet-console[data-applet-frame] .world-actions .world-capsule>span{flex-shrink:0}
 }
 
-/* A framed page's toolbar (ui/browser/browser-device.ts) stands on the painted frame's top rail, just above the page
+/* A framed page's toolbar (ui/applets/browser-device.ts) stands on the painted frame's top rail, just above the page
    (owner request 2026-10-13: "网址条放边框上"): the panel rises over the frame's foreground canvas, which hid it; the page's
    slot is clear, so the rim drawn over the page still shows through it. */
 #notionWorld[data-applet-frame][data-applet-scene][data-panel-scene]>.notion-content[data-template=browser]:has(>.browser-toolbar:not([hidden])){z-index:36}
