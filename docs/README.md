@@ -56,7 +56,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **285 Markdown documents** and **749 supporting documentation files**.
+Indexed: **286 Markdown documents** and **749 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -65,7 +65,7 @@ Indexed: **285 Markdown documents** and **749 supporting documentation files**.
 | Applet runtime descriptions | 120 |
 | UI and Applet authoring references | 30 |
 | Resource and artwork records | 74 |
-| Module and service documentation | 39 |
+| Module and service documentation | 40 |
 | Website documentation and articles | 0 |
 | Documentation diagrams, previews and evidence | 749 |
 
@@ -340,7 +340,7 @@ Indexed: **285 Markdown documents** and **749 supporting documentation files**.
 
 </details>
 
-<details><summary>Module and service documentation (39)</summary>
+<details><summary>Module and service documentation (40)</summary>
 
 - [agent/README.md](../agent/README.md)
 - [agent/agents/GRANTS.md](../agent/agents/GRANTS.md)
@@ -352,6 +352,7 @@ Indexed: **285 Markdown documents** and **749 supporting documentation files**.
 - [agent/tasks/README.md](../agent/tasks/README.md)
 - [agent/windows/README.md](../agent/windows/README.md)
 - [android/README.md](../android/README.md)
+- [api/README.md](../api/README.md)
 - [context/README.md](../context/README.md)
 - [context/applets/INTEGRATIONS.md](../context/applets/INTEGRATIONS.md)
 - [context/applets/MY-APPLETS.md](../context/applets/MY-APPLETS.md)

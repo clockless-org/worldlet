@@ -25,6 +25,7 @@ Use placeholders instead: `alex@example.com`, `example.com`, `192.0.2.10` (or `1
 - Preserve five runtime layers: UI → Agent and Context → Platform → Harness → Models/Services. `contracts/` is a cross-layer interface package, not a sixth layer.
 - Worldlet's scope is the upper three layers. Put most product behavior in shared `ui/` and pure `agent/` and `context/`; keep native Platform adapters thin (few independent product decisions). Harness and model concerns belong to the Harness.
 - Before adding native branching, state transitions, schedules, retry or cache policy, validation, prompts or status copy, look for a shared owner. Native code supplies OS facts and permission results, executes shared decisions and performs browser, process and file IO.
+- The operations repository uses this repository only through [`api/`](api/README.md). When you move or rename something listed there, update `api/` in the same change; never make the operations repository follow a folder.
 - For audits and cross-platform changes, use [the architecture audit checklist](docs/UI-CORE-PLATFORM.md#architecture-audit) and report concrete file evidence. Passing import checks is not proof of behavioral parity.
 
 ## Changes and pull requests

@@ -27,6 +27,7 @@
     "verbatimModuleSyntax": true
   },
   "include": [
+    "api",
     "ui",
     "agent",
     "context",
