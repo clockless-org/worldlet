@@ -4,7 +4,7 @@
 </defs>
 <rect width="1200" height="780" rx="18" fill="#FFFFFF"/><rect x="0.5" y="0.5" width="1199" height="779" rx="18" fill="none" stroke="#D8DDE4"/>
 <text x="40" y="54" font-size="26" font-weight="700" fill="#1F2328">Worldlet 四层架构</text>
-<text x="40" y="80" font-size="15" fill="#57606A">UI · Agent · Context · 平台。Core 拆成 Agent 和 Context 两层。</text>
+<text x="40" y="80" font-size="15" fill="#57606A">UI · Agent · Context · 平台。Agent 和 Context 原来是 Core。</text>
 
 <!-- See -->
 <rect x="40" y="100" width="820" height="150" rx="14" fill="#EEF4FF" stroke="#B6CCFE"/>
@@ -31,7 +31,7 @@
 <rect x="444" y="340" width="180" height="40" rx="8" fill="#FFFFFF" stroke="#A9D8B8"/><text x="534" y="365">派活 · 提问</text>
 <rect x="636" y="340" width="204" height="40" rx="8" fill="#FFFFFF" stroke="#A9D8B8"/><text x="738" y="365">Agents · 身份 · 撤销</text>
 </g>
-<text x="840" y="322" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A" text-anchor="end">core/ · agent</text>
+<text x="840" y="322" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A" text-anchor="end">agent/</text>
 <rect x="60" y="396" width="780" height="56" rx="10" fill="#1F2328"/>
 <text x="80" y="420" font-size="15" font-weight="800" fill="#FFFFFF">门禁</text>
 <text x="80" y="441" font-size="13" fill="#D0D7DE">进出 World 的唯一入口：World tools · 权限 · 草稿等你批准 · 每次调用都有记录</text>
@@ -40,7 +40,7 @@
 <rect x="40" y="510" width="820" height="180" rx="14" fill="#FFF8EC" stroke="#F0CF8E"/>
 <text x="60" y="542" font-size="20" font-weight="800" fill="#9A6700">3 · Context</text>
 <text x="190" y="542" font-size="14" fill="#57606A">World 知道的一切，存在一个地方</text>
-<text x="840" y="542" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A" text-anchor="end">core/ · context</text>
+<text x="840" y="542" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A" text-anchor="end">context/</text>
 <rect x="60" y="558" width="560" height="116" rx="10" fill="#FFFFFF" stroke="#F0CF8E"/>
 <text x="76" y="582" font-size="14" font-weight="700" fill="#1F2328">Context</text>
 <text x="146" y="582" font-size="12" fill="#57606A">每条记录：从哪来 · 时间 · 版本 · 由什么生成 · 谁能读</text>
