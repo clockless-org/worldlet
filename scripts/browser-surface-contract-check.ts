@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readBrowserSurfaceRequest} from '../contracts/browser-surface.ts';
 import type {BrowserSurfaceCall} from '../contracts/browser-surface.ts';
-import {invoke} from '../core/index.ts';
+import {invoke} from '../agent/index.ts';
 import {callHost} from '../platform/bridge/host.ts';
 const rect={x:-5,y:10.5,width:640,height:480};
 const fox={label:'🦊 Fox is working on this page',colors:['#ff8a3d','#ffd166','#ff8a3d'],turnSeconds:2.4,phaseSeconds:0.5};

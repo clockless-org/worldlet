@@ -36,8 +36,7 @@ Rules:
 
 - Calls go downward only.
 - Imports follow the layers: `context/` imports only itself and `contracts/`; `agent/` imports `context/` and `contracts/`;
-  `ui/` imports the public `index.ts` of both. Nothing but the Platform imports what is left of `core/` (its shared
-  dispatcher and old-path re-exports). `npm run check:arch` enforces this; the few exact exceptions are named in
+  `ui/` imports the public `index.ts` of both. Nothing imports what is left of `core/` (old-path re-exports). `npm run check:arch` enforces this; the few exact exceptions are named in
   [scripts/architecture-boundaries.ts](../scripts/architecture-boundaries.ts).
 - UI only reads Context; to change anything it hands the work to Agent.
 - Everyone in Agent passes the Gate, Fox included. Agents reach Context only through World tools and their Grants.
@@ -57,8 +56,8 @@ Every folder of `ui/`, `agent/`, `context/` and `platform/` belongs to exactly o
 `npm run check:docs` fails when a folder is missing or listed twice.
 
 `core/` holds no component any more: its folders moved to `agent/` and `context/` ([#681](https://github.com/clockless-org/worldlet/issues/681)).
-What is left is `core/index.ts`, the shared dispatcher the Platform calls, and re-exports at old paths (each folder's
-`index.ts`, and files used from outside this repository). A re-export goes once nothing imports it.
+The shared dispatcher the Platform calls is `agent/index.ts`, since it calls both layers. What is left in `core/` is
+re-exports at old paths (each folder's `index.ts`, and files used from outside this repository) until nothing imports them.
 
 | Layer | Folders |
 | --- | --- |

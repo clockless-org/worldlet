@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {executionEvent,taskExecutionEvents,worldActionEvent} from '../context/items/index.ts';
 import {claimRuntimeTask,finishRuntimeTask} from '../agent/tasks/index.ts';
-import {invoke} from '../core/index.ts';
+import {invoke} from '../agent/index.ts';
 const claim=claimRuntimeTask({taskId:'mail:read',ownerId:'gmail',pool:'source-io',generation:1,runId:'run-1',now:100,leaseSeconds:30})!;
 const first=taskExecutionEvents(claim)[0];
 assert.equal(first.kind,'task.running');assert.equal(first.taskId,claim.task.id);assert.equal(first.runId,claim.run.id);

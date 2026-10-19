@@ -1,4 +1,4 @@
-import {invoke} from '../../../core/index.ts';
+import {invoke} from '../../../agent/index.ts';
 // The shared rules run in-process. The host still exchanges JSON with them, exactly as the
 // earlier JavaScriptCore/Jint hosts did, so no native caller can hand Core a live object.
 export class CoreError extends Error {}

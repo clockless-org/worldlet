@@ -17,7 +17,7 @@ runtime stack remains **UI → Core → Platform → Harness → Models/Services
 | Layer | Components / directories | Public interface | Must not own |
 | --- | --- | --- | --- |
 | UI | `ui/world`, `ui/applets`, `ui/companion`, `ui/attention`, `ui/shell` | Versioned semantic World actions in `contracts/ui.ts`; component functions; host transport | OS branches, provider protocols, independent scheduling policy |
-| Core | `agent/agent`, `context/applets`, `agent/attention`, `agent/tasks`, `agent/companion`, `context/context`, `context/items`, `context/browser`, `agent/tools`, `agent/diagnostics`, `agent/onboarding` | Each component's `index.ts`; serialized native entry in `core/index.ts` | DOM, filesystem, clocks, sockets, Electron/Node types, platform conditions |
+| Core | `agent/agent`, `context/applets`, `agent/attention`, `agent/tasks`, `agent/companion`, `context/context`, `context/items`, `context/browser`, `agent/tools`, `agent/diagnostics`, `agent/onboarding` | Each component's `index.ts`; serialized native entry in `agent/index.ts` | DOM, filesystem, clocks, sockets, Electron/Node types, platform conditions |
 | Platform | `platform/bridge`, `platform/electron`, `platform/browser`, `platform/local-tools` | `contracts/platform.ts`; shared Core requests/results; negotiated Harness contract | A second copy of onboarding, source processing, retry/priority or model-selection rules |
 | Harness | `harness/hermes` or an external adapter | `contracts/harness.ts`, capability discovery, tasks/events/cancellation | World UI implementation or ownership of portable user records |
 | Models/Services | `models` and provider APIs | Harness/provider protocols | UI navigation and OS permissions |
@@ -229,7 +229,7 @@ project, not separately packaged libraries. Paths are under `platform/electron/s
 | Element interaction | Bundled upstream `agent-browser`; `platform/browser/agent_browser.py` transport | `modules/browser/agent.ts` (driver process), `page.ts` (agent CDP transport) |
 | Selected-target CDP | Private commands/events; no browser-wide access | `page.ts` through `webContents.debugger`; `Target.*`/`Browser.*` refused |
 | World semantic actions | `contracts/ui.ts`, `window.worldletUI.snapshot/dispatch` | Trusted World view (`world/window.ts`) |
-| Headless Core execution | Serialized operations in `core/index.ts` | `core.ts`, in-process |
+| Headless Core execution | Serialized operations in `agent/index.ts` | `core.ts`, in-process |
 | Durable execution | `contracts/execution.ts`, `context/items/index.ts` | `store/ledger.ts`, `modules/agent-runtime/journal.ts` |
 
 Chromium paints pages; Electron embeds it. CDP controls the selected page;
@@ -250,7 +250,7 @@ and SQLite effects belong to Platform.
 
 TypeScript production callers outside a Core component import its `index.ts`.
 Implementation modules are private to that component. The serialized composition
-root remains `core/index.ts`; the host's `core.ts` consumes its named operations
+root is `agent/index.ts`; the host's `core.ts` consumes its named operations
 through `invoke`, not Core implementation files. `contracts/`
 remains dependency-free. White-box fixtures may directly test implementation files.
 

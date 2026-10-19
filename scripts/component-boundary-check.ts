@@ -4,7 +4,7 @@ import {existsSync} from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
 
-// Native/Python bridges consume core/index.ts. Production TypeScript consumers
+// Native/Python bridges consume agent/index.ts. Production TypeScript consumers
 // enter other Core/UI components through their explicit public APIs.
 export function assertComponentImport(file:string,specifier:string) {
  if(!specifier.startsWith('.'))return;

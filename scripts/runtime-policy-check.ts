@@ -98,7 +98,7 @@ assert.equal(analysisPlan({candidates,tasks:[{id:'applet:gmail:analyze',lastStar
 console.log('PASS repeated yielded slices rotate fairly without pretending successful completion');
 
 const {runtimeTaskLease,runtimeRunPrune}=await import('../agent/tasks/index.ts');
-const {invoke}=await import('../core/index.ts');
+const {invoke}=await import('../agent/index.ts');
 assert.equal(runtimeTaskLease({taskId:'applet:mail:check'}),300);
 assert.equal(runtimeTaskLease({taskId:'applet:mail:analyze'}),660);
 assert.equal(runtimeTaskLease({taskId:'attention'}),660);

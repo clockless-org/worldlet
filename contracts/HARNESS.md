@@ -21,7 +21,7 @@ flowchart TD
 | Wire shapes | `contracts/harness.ts`, `contracts/agent.ts` | Version, handshake, request, event, tool result, terminal result/error, declared capabilities |
 | Protocol acceptance | `agent/agent/index.ts`: `harnessHandshake`, `harnessReceive` | Shared validation for every adapter; correlation, declared streaming/tools, duplicate tool IDs, terminal state |
 | Sign-in handoffs | `agent/agent/index.ts`: `harnessAuthHandoff` | Hermes `google_auth`/`model_auth` events: one per run, matching request only, fixed Google OAuth path/OpenAI device URL, bounded device code; hosts open or display only accepted values |
-| Serialization facade | `core/index.ts`: `harnessHandshake`, `harnessReceive`, `harnessAuthHandoff` | JSON envelopes for the host's in-process Core (`platform/electron/src/core.ts`) |
+| Serialization facade | `agent/index.ts`: `harnessHandshake`, `harnessReceive`, `harnessAuthHandoff` | JSON envelopes for the host's in-process Core (`platform/electron/src/core.ts`) |
 | Executable adapter | `platform/electron/src/modules/agent-runtime/external.ts` | Spawn, bounded JSONL IO, deadline, cancellation, execute accepted tool callbacks |
 | Reference Harness | `harness/example/agent.py` | Independent executable example; no Hermes dependency |
 | Browser policy and flow | `context/browser/index.ts` | Observation projection, element policy, command sequencing and snapshot consumption |

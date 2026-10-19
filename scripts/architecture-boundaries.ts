@@ -6,8 +6,8 @@ import ts from 'typescript';
 const root=process.cwd();
 const config=ts.readConfigFile('tsconfig.json',ts.sys.readFile);
 const options=ts.parseJsonConfigFileContent(config.config,ts.sys,root).options;
-// core/ moved into agent/ and context/ (#681). What is left there is the shared dispatcher (core/index.ts), which
-// the Platform calls, and re-exports of old paths. Nothing else may import it, so no new code lands in core/.
+// core/ moved into agent/ and context/ (#681); the shared dispatcher the Platform calls is agent/index.ts. What is left
+// in core/ is re-exports of old paths, for the operations repository. Nothing here may import it.
 const layers=['platform/bridge','ui','agent','context','core','contracts','models','harness','platform','website','worker'];
 const PURE=['agent','context','core','contracts'];
 const allowed:Record<string,string[]>={
@@ -16,7 +16,7 @@ const allowed:Record<string,string[]>={
  core:['core','agent','context','contracts'], contracts:['contracts'],
  'platform/bridge':['platform/bridge','agent','context','contracts'],
  'models':['models','contracts','agent','context'],
- harness:['harness','contracts'], platform:['platform','platform/bridge','agent','context','core','contracts'],
+ harness:['harness','contracts'], platform:['platform','platform/bridge','agent','context','contracts'],
  website:['website','ui','agent','context','contracts','resources','platform/bridge'],
  worker:['worker','agent','context','contracts'],
 };
