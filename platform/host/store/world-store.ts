@@ -10,7 +10,7 @@ import {WorldLedger} from './ledger.ts';
 import {ledgerContext} from './context-storage.ts';
 import {ActivityRecorder} from '../modules/applets/activity.ts';
 import {EMPTY_OVERLAY} from '../../../context/connectors/index.ts';
-import {contextReader,contextWriter} from '../../../context/store/index.ts';
+import {contextReader,contextWriter,type ContextStorage} from '../../../context/store/index.ts';
 import eventPolicy from '../../../contracts/world-event-policy.json';
 
 type Row=Record<string,any>;
@@ -97,8 +97,22 @@ export class WorldStore {
   this.worldLedger=value;return value;
  }
  closeLedger(){this.worldLedger?.close();this.worldLedger=null;}
- /** The World's Context, for its one way in (#676): `contextReader` and `contextWriter` take this. */
- context(){return ledgerContext(this.ledger());}
+ /** The World's Context, for its one way in (#676): `contextReader` and `contextWriter` take this. The library (sources
+  * and Knowledge) is part of it, kept in the configuration and `sources/` files as before. */
+ context():ContextStorage{const storage=ledgerContext(this.ledger());return {...storage,domains:{...storage.domains,...this.libraryContext().domains}};}
+ /** The library alone, without opening the database: its sources (the original of each through `original`; a new one
+  * through `ingest`, written by its Connector) and Knowledge (one merged record per source, replacing the one before). */
+ libraryContext():ContextStorage{
+  return {domains:{
+   sources:{rows:()=>this.state.sources,get:id=>this.state.sources.find(source=>source.id===id)??null,
+    query:(name,args)=>{if(name!=='original')throw new WorldletError('Sources have no '+name+' here.');return this.original(String(args.id));},
+    write:change=>{if(change.operation!=='ingest')throw new WorldletError('Sources change only by ingest here.');return this.ingest(change.with as any);}},
+   knowledge:{rows:()=>this.state.knowledge,write:change=>{
+    const save=change.save??[],replaced=new Set(save.map(row=>row.sourceId));
+    this.state.knowledge=[...this.state.knowledge.filter(row=>!replaced.has(row.sourceId)),...save];this.changed();
+   }},
+  }};
+ }
  runtimeSpec(owner:string){return this.runtimeRows().find(row=>row.provider===owner&&(row.mode==='scheduled'||row.mode==='observation'))??null;}
  private loadLibrary(){
   if(!fs.existsSync(path.join(this.root,'world.sqlite'))&&(this.state.libraryStorageVersion!=null||this.hadDatabase()))throw new WorldletError('The World library database is missing. Restore its backup before continuing.');

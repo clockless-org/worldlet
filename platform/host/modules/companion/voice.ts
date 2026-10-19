@@ -1,3 +1,4 @@
+import {contextReader} from '../../../../context/store/index.ts';
 import {app,BaseWindow} from 'electron';
 import {SPEECH_VOCABULARY,TALK,speechPrompt,speechTerms} from '../../../../agent/companion/index.ts';
 import {WorldletError} from '../../files.ts';
@@ -44,7 +45,7 @@ export function installVoice(host:Host){
    if(!barge)spoken.stop();
    const microphone=request.microphone&&typeof request.microphone==='object'&&typeof (request.microphone as Row).id==='string'?{id:String((request.microphone as Row).id).slice(0,512),label:String((request.microphone as Row).label??'').slice(0,512)}:null;
    // Whisper hears the World's names (core speechPrompt): Fox's, those the page shows, then the World's topics.
-   const topics=sample()||!Array.isArray(store.state.knowledge)?[]:store.state.knowledge.map((k:Row)=>k?.topic);
+   const knowledge=contextReader(store.libraryContext()).bodies('knowledge'),topics=sample()||!Array.isArray(knowledge)?[]:knowledge.map((k:Row)=>k?.topic);
    const prompt=speechPrompt(speechTerms([preferences.string('worldlet.companionName')||'Fox'],Array.isArray(request.vocabulary)?request.vocabulary.slice(0,SPEECH_VOCABULARY.terms):[],topics));
    const started=await speech.start(typeof request.language==='string'?request.language:'multi',microphone,undefined,barge?TALK.bargePrerollMs/1000+0.4:0,prompt);
    return {ok:true,...started};

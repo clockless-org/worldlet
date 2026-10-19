@@ -1,3 +1,4 @@
+import {contextChanges,contextReads,ledgerContext} from '../../store/context-storage.ts';
 import fs from 'node:fs';
 import path from 'node:path';
 import {core} from '../../core.ts';
@@ -79,12 +80,12 @@ export function createCompanion(host:Host){
   if(legacy()){
    const values=(Object.keys(LEGACY) as Stored[]).map(kind=>[kind,readLegacy(path.join(folder,LEGACY[kind]))] as const);
    const turns=(values.find(([kind])=>kind==='profile')?.[1]?.conversations??[]) as Row[];
-   ledger.transaction(()=>{for(const [kind,value] of values)ledger.saveCompanionStored(name,kind,kind==='profile'&&value?{...value,conversations:[]}:value);});
+   ledger.transaction(()=>{for(const [kind,value] of values)contextChanges(ledgerContext(ledger),'fox','companion').saveCompanionStored(name,kind,kind==='profile'&&value?{...value,conversations:[]}:value);});
    // Turns the profile still held (before conversations moved to the database) join Fox's own.
-   if(turns.length)conversationLedger(scope).addCompanionTurns(WorldLedger.OWN,turns as any);
+   if(turns.length)contextChanges(ledgerContext(conversationLedger(scope)),'fox','conversations').addCompanionTurns(WorldLedger.OWN,turns as any);
    for(const kind of Object.keys(LEGACY) as Stored[]){const file=path.join(folder,LEGACY[kind]);if(fs.existsSync(file)&&!isLink(file))fs.renameSync(file,file+'.before-database');}
   }
-  return {get:(kind:Stored)=>ledger.companionStored(name,kind),set:(kind:Stored,value:Row|null)=>ledger.saveCompanionStored(name,kind,value),transaction:<T>(work:()=>T)=>ledger.transaction(work)};
+  return {get:(kind:Stored)=>contextReads(ledgerContext(ledger),'companion').companionStored(name,kind),set:(kind:Stored,value:Row|null)=>contextChanges(ledgerContext(ledger),'fox','companion').saveCompanionStored(name,kind,value),transaction:<T>(work:()=>T)=>ledger.transaction(work)};
  }
  function saveArchive(archive:Row,scope:Scope){
   records(scope).set('profile',JSON.parse(encode({...archive,conversations:[]})));
@@ -128,7 +129,7 @@ export function createCompanion(host:Host){
    // Reads happen several times per exchange; only a new or changed profile is written.
    if(!stored||moved||stableJSON({...value,conversations:[]})!==loaded)saveArchive(value,scope);
    // The recent conversation rides along for prompts, the phone and stateless adapters.
-   return {...value,conversations:conversationLedger(scope).companionTurns(WorldLedger.OWN,policy.rotateAfterTurns)};
+   return {...value,conversations:contextReads(ledgerContext(conversationLedger(scope)),'conversations').companionTurns(WorldLedger.OWN,policy.rotateAfterTurns)};
   }
   return value;
  }
@@ -148,13 +149,13 @@ export function createCompanion(host:Host){
      const segment=decode(fs.readFileSync(file));
      if(segment.identity.id===value.identity.id)turns.push(...segment.conversations);
     }
-    ledger.addCompanionTurns(WorldLedger.OWN,turns);
+    contextChanges(ledgerContext(ledger),'fox','conversations').addCompanionTurns(WorldLedger.OWN,turns);
     fs.renameSync(folder,path.join(base,'companion','history.before-database'));
     return true;
    }catch(error){legacyChecked.add(base);host.diagnostics.record(error,'moveLegacyTurns');}
   }
   if(!turns.length)return false;
-  ledger.addCompanionTurns(WorldLedger.OWN,turns);
+  contextChanges(ledgerContext(ledger),'fox','conversations').addCompanionTurns(WorldLedger.OWN,turns);
   return true;
  }
  function reference(value:Row,forRecall=false){
@@ -181,7 +182,7 @@ export function createCompanion(host:Host){
   if(!store.writable)throw new WorldletError('Companion history is read-only.');
   archive(scope);
   const messageId=uuid();
-  conversationLedger(scope).addCompanionTurns(WorldLedger.OWN,[{id:messageId,session:sessionID,role,text,createdAt:isoSeconds(),thread}]);
+  contextChanges(ledgerContext(conversationLedger(scope)),'fox','conversations').addCompanionTurns(WorldLedger.OWN,[{id:messageId,session:sessionID,role,text,createdAt:isoSeconds(),thread}]);
   if(!scope.sample&&!scope.setup){
    // A short local preview, with a stable reference to the full archive.
    store.recordHistory({id:messageId,kind:'conversation.message',at:Date.now()/1000,actor:role==='user'?'user':'fox',messageId,preview:characterPrefix(text,240)},sessionID);
@@ -191,7 +192,7 @@ export function createCompanion(host:Host){
  // Transfer -----------------------------------------------------------------------------
  /** The portable archive: the profile with every one of Fox's own turns (brought ones stay out). */
  function capture(profileArchive:Row):Row {
-  const result={...profileArchive,conversations:store.writable?conversationLedger(PRIVATE).companionTurns(WorldLedger.OWN):[...profileArchive.conversations]};
+  const result={...profileArchive,conversations:store.writable?contextReads(ledgerContext(conversationLedger(PRIVATE)),'conversations').companionTurns(WorldLedger.OWN):[...profileArchive.conversations]};
   encode(result);return result;
  }
  function exportArchive(){
@@ -214,7 +215,7 @@ export function createCompanion(host:Host){
    return kept;
   });
   // The imported conversation replaces Fox's own; the previous one stays in the recovery copy.
-  store.ledger().replaceCompanionHistory(WorldLedger.OWN,{turns:portable.conversations,notes:[]});
+  contextChanges(ledgerContext(store.ledger()),'fox','conversations').replaceCompanionHistory(WorldLedger.OWN,{turns:portable.conversations,notes:[]});
   preferences.set('worldlet.companionName',portable.identity.name);style.set(portable.personality);
   return rollback;
  }
@@ -248,7 +249,7 @@ export function createCompanion(host:Host){
       notes.push({id:turn.id,session:turn.session,date,text:date?turn.text.slice(`Notes for ${date}\n\n`.length):turn.text,createdAt:turn.createdAt});
      }else conversation.push(turn);
     }
-    store.ledger().replaceCompanionHistory(source,{turns:conversation as any,notes});
+    contextChanges(ledgerContext(store.ledger()),'fox','conversations').replaceCompanionHistory(source,{turns:conversation as any,notes});
     fs.renameSync(folder,path.join(root,'companion',source+'.before-database'));
    }catch(error){legacyFailed.add(source);host.diagnostics.record(error,'moveLegacyBrought');}
   }
@@ -258,13 +259,13 @@ export function createCompanion(host:Host){
   if(!isMigrationSource(source))throw new WorldletError('Unknown Agent to bring history from.');
   if(!store.writable||store.sampleEnabled())throw new WorldletError('Return to your own world before bringing another Agent’s history.');
   moveLegacyBrought();
-  return store.ledger().replaceCompanionHistory(source,{turns:broughtTurns(history),notes:history.notes});
+  return contextChanges(ledgerContext(store.ledger()),'fox','conversations').replaceCompanionHistory(source,{turns:broughtTurns(history),notes:history.notes});
  }
  /** Adds older conversations to what `source` brought (fox/older-history.ts); turns already here stay. */
  function addImportedHistory(source:MigrationSource,history:Pick<BroughtHistory,'conversations'>):number {
   if(!isMigrationSource(source))throw new WorldletError('Unknown Agent to bring history from.');
   if(!store.writable||store.sampleEnabled())throw new WorldletError('Return to your own world before bringing another Agent’s history.');
-  return store.ledger().addCompanionTurns(source,broughtTurns({...history,notes:[]}));
+  return contextChanges(ledgerContext(store.ledger()),'fox','conversations').addCompanionTurns(source,broughtTurns({...history,notes:[]}));
  }
  /** Memory first, then Fox's own conversation newest first, then what other Agents brought. */
  const recall=(args:Row)=>{
@@ -274,7 +275,7 @@ export function createCompanion(host:Host){
   const ledger=store.ledger();
   if(typeof args.id==='string'&&args.id){
    try{return memories(args);}catch(error){
-    const row=ledger.companionRecord(args.id);
+    const row=contextReads(ledgerContext(ledger),'conversations').companionRecord(args.id);
     if(!row)throw error;
     // Same paging and record shape as the companion archive's own recall.
     const result=core<Row>('companionRecall',{archive:{...profile,memoryAuthority:'hermes',conversations:[{id:row.id,session:row.session,role:row.role,text:row.text,createdAt:row.createdAt}]},args});
@@ -285,12 +286,12 @@ export function createCompanion(host:Host){
   if(typeof offset!=='number'||!Number.isInteger(offset)||offset<0)return memories(args);
   const query=typeof args.query==='string'?args.query:'';
   const first=memories({...args,offset:0}),memoryTotal=Number(first.total??0);
-  const total=memoryTotal+ledger.searchCompanion(query,0,0).total;
+  const total=memoryTotal+contextReads(ledgerContext(ledger),'conversations').searchCompanion(query,0,0).total;
   if(offset>total)throw new Error('Companion result offset is out of range.');
   const records:Row[]=offset<memoryTotal?[...memories(args).records]:[];
   if(records.length<5){
    const trim=(row:Row)=>{const chars=Array.from(String(row.text));return {...row,text:chars.slice(0,600).join(''),truncated:chars.length>600};};
-   records.push(...ledger.searchCompanion(query,Math.max(0,offset-memoryTotal),5-records.length).rows.map(trim));
+   records.push(...contextReads(ledgerContext(ledger),'conversations').searchCompanion(query,Math.max(0,offset-memoryTotal),5-records.length).rows.map(trim));
   }
   const shown=offset+records.length;
   return {records,total,referenceOnly:true,memoryAuthority:first.memoryAuthority,...(shown<total?{nextOffset:shown}:{})};
@@ -390,28 +391,28 @@ export function createCompanion(host:Host){
    if(!store.writable||!Array.isArray(rows))throw new WorldletError('Invalid conversation history.');
    if(Buffer.byteLength(JSON.stringify(rows),'utf8')>5_000_000)throw new WorldletError('Conversation history is too large.');
    core('conversationHistoryValidate',{rows,writing:true});
-   store.ledger().replaceCompanionViews(rows);
+   contextChanges(ledgerContext(store.ledger()),'fox','chat-by-place').replaceCompanionViews(rows);
    if(legacy)try{fs.renameSync(file,file+'.before-database');}catch{}
    return rows;
   }
-  if(!legacy)return store.ledger().companionViews();
+  if(!legacy)return contextReads(ledgerContext(store.ledger()),'chat-by-place').companionViews();
   const saved=readFile();
   if(!store.writable)return saved;
   const ledger=store.ledger();
   // A World restored from an older backup brings the file back; it is the newer copy then.
-  ledger.replaceCompanionViews(saved);
+  contextChanges(ledgerContext(ledger),'fox','chat-by-place').replaceCompanionViews(saved);
   fs.renameSync(file,file+'.before-database');
-  return ledger.companionViews();
+  return contextReads(ledgerContext(ledger),'chat-by-place').companionViews();
  }
  function closeLedgers(){for(const db of ledgers.values())db.close();ledgers.clear();}
 
  /** This place's earlier turns and where the previous turn was said (spatial context switching). */
  /** When the resident session of `thread` last replied (epoch seconds), or null (agent/gate/world-since.ts). */
- function lastReply(scope:Scope,thread:string):number|null {return worldSinceCutoff(conversationLedger(scope).recentTurnPlaces(400),thread);}
+ function lastReply(scope:Scope,thread:string):number|null {return worldSinceCutoff(contextReads(ledgerContext(conversationLedger(scope)),'conversations').recentTurnPlaces(400),thread);}
  function place(scope:Scope,thread:string){
   if(!thread)return null;
   const ledger=conversationLedger(scope);
-  return core<Row|null>('conversationPlace',{thread,turns:ledger.threadTurns(thread,8),previous:ledger.previousThread('')});
+  return core<Row|null>('conversationPlace',{thread,turns:contextReads(ledgerContext(ledger),'conversations').threadTurns(thread,8),previous:contextReads(ledgerContext(ledger),'conversations').previousThread('')});
  }
  return {style,archive,reference,prompt,update,session,place,lastReply,recordTurn,capture,exportArchive,importArchive,recall,replaceImportedHistory,addImportedHistory,memoryManager,adoptMemory,recordEvent,conversationRecall,closeLedgers,decode};
 }

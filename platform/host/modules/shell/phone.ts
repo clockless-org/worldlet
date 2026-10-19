@@ -1,3 +1,4 @@
+import {contextReads,ledgerContext} from '../../store/context-storage.ts';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -165,7 +166,7 @@ export function installPhone(host:Host){
   let world:any;
   try{const ledger=host.store.writable?host.store.ledger():null;
    world={places:hostAppletPlaces({onboarding:host.store.state.onboarding,connections:host.store.state.connections}),
-    thread:(key:string)=>ledger?threadPairs(ledger.threadTurns(JSON.stringify(['object:app-'+key,'']),8)):[]};}
+    thread:(key:string)=>ledger?threadPairs(contextReads(ledgerContext(ledger),'conversations').threadTurns(JSON.stringify(['object:app-'+key,'']),8)):[]};}
   catch(error){host.diagnostics.record(error,'phoneApplets');}
   const value=phoneAttention({now:center.now,later:center.later,world,tasks,journal},Date.now()),text=JSON.stringify({...value,at:''});
   if(text===hostSent)return;

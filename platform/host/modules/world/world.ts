@@ -1,3 +1,5 @@
+import {contextReader} from '../../../../context/store/index.ts';
+import {contextReads,ledgerContext} from '../../store/context-storage.ts';
 import {WorldletError} from '../../files.ts';
 import type {Host} from '../../types.ts';
 import {SOURCES,WORLD_TOOLS} from '../../services.ts';
@@ -57,12 +59,12 @@ export function installWorld(host:Host){
      if(!record)throw new WorldletError('That call is no longer in this world.');
      return callOriginal(record);
     }
-    const c=validConversationAttentionId(id)?ledger.broughtConversations().find(row=>conversationAttentionId(row.source,row.session)===id):undefined;
+    const c=validConversationAttentionId(id)?contextReads(ledgerContext(ledger),'conversations').broughtConversations().find(row=>conversationAttentionId(row.source,row.session)===id):undefined;
     if(!c)throw new WorldletError('That conversation is no longer in this world.');
-    return conversationOriginal(c,ledger.conversationTurns(c.source,c.session,CONVERSATION_ATTENTION.originalTurns));
+    return conversationOriginal(c,contextReads(ledgerContext(ledger),'conversations').conversationTurns(c.source,c.session,CONVERSATION_ATTENTION.originalTurns));
    }
-   const original=store.original(request.id);
-   return {title:original.title,text:original.text,sourceURL:store.state.sources.find(s=>s.id===request.id)?.sourceURL,mail:{}};
+   const library=contextReader(store.libraryContext()),original=library.query<Record<string,any>>('sources','original',{id:request.id});
+   return {title:original.title,text:original.text,sourceURL:library.get('sources',request.id)?.body.sourceURL,mail:{}};
   }
  });
 }

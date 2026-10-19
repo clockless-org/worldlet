@@ -1,3 +1,4 @@
+import {contextReads,ledgerContext} from '../../store/context-storage.ts';
 import {dialog} from 'electron';
 import {artifactPage,readWidgetData,readyApplet,widgetWithData,WIDGET_APPLET,WIDGET_LIMITS,checkWidgetSource,mergeWidgetState,orderWidgets,readWidget,readWidgetConsole,readWidgetState,validWidgetId,widgetActive,widgetDocument,widgetHousekeeping,widgetId,widgetRecord,widgetStateChanges,widgetTask,widgetTrialProblems,widgetValues,type Widget,type WidgetState} from '../../../../context/store/index.ts';
 import {phoneWidgets} from '../../../web/index.ts';
@@ -25,14 +26,14 @@ export function installWidgets(host:Host){
  const personal=()=>{if(!store.writable||store.sampleEnabled())throw new WorldletError('New Applets are made in your own world. The practice world has none.');};
  const rows=():{widget:Widget,state:WidgetState}[]=>{
   if(store.sampleEnabled())return [];
-  try{return store.ledger().widgetRows().flatMap(row=>{const widget=readWidget(row.record);return widget?[{widget,state:readWidgetState(row.state)}]:[];});}
+  try{return contextReads(ledgerContext(store.ledger()),'widgets').widgetRows().flatMap(row=>{const widget=readWidget(row.record);return widget?[{widget,state:readWidgetState(row.state)}]:[];});}
   catch(error){host.diagnostics.record(error,'widgets');return [];}
  };
  // Writes go through the one way in to Context (#676); the page and its state ride along with the record.
  const saveWidget=(id:string,record:Row,extra:{html?:string;state?:Row}={},author:'fox'|'person'|'world'='fox')=>contextWriter(store.context(),author).write('widgets',{save:[record],with:{id,...extra}});
  const forgetWidget=(id:string,author:'person'|'world'='person')=>contextWriter(store.context(),author).remove('widgets',[id]);
  const find=(id:string)=>validWidgetId(id)?rows().find(row=>row.widget.id===id)??null:null;
- const rawPage=(id:string)=>{const value=store.ledger().widgetPage(id);if(value===null)throw new WorldletError('That Applet is not in this world.');return value;};
+ const rawPage=(id:string)=>{const value=contextReads(ledgerContext(store.ledger()),'widgets').widgetPage(id);if(value===null)throw new WorldletError('That Applet is not in this world.');return value;};
  // The page as it is shown, here and on the phone: with its data ahead of its own code (context/applets/MY-APPLETS.md#data-and-page).
  const html=(id:string)=>widgetWithData(rawPage(id),find(id)?.widget.data);
  const list=()=>orderWidgets(rows().map(row=>row.widget));
@@ -157,7 +158,7 @@ export function installWidgets(host:Host){
     if(checkWidgetSource(ready.html).length)throw new WorldletError('That ready-made Applet could not be added.');
     if(existing){
      // A copy added before its page was redrawn takes the new page and keeps what was ticked.
-     if(store.ledger().widgetPage(existing.id)!==ready.html){
+     if(contextReads(ledgerContext(store.ledger()),'widgets').widgetPage(existing.id)!==ready.html){
       const record=widgetRecord({title:existing.title,blurb:ready.blurb,color:ready.color},{id:existing.id,idea,now:t,previous:existing});
       saveWidget(existing.id,record,{html:ready.html});
       if(player.current===existing.id)player.refresh(existing.id,ready.html,widgetValues(find(existing.id)?.state??{}),{page:true});

@@ -1,3 +1,4 @@
+import {contextReads,ledgerContext} from '../../store/context-storage.ts';
 import {randomUUID} from 'node:crypto';
 import {AGENT,type AgentService} from '../../services.ts';
 import type {Host,Row} from '../../types.ts';
@@ -99,7 +100,7 @@ export function createHarnessControls(host:Host){
    const current=agent()?.harness?.id;
    if(!own())return {current:inUse(),harnesses:[]};
    let runs=new Map<string,number>();
-   try{runs=skillLastRuns((store.ledger() as unknown as {skillTurns():{role:string;text:string;at:number}[]}).skillTurns());}catch(error){host.diagnostics.record(error,'harnessSkills');}
+   try{runs=skillLastRuns(contextReads(ledgerContext(store.ledger()),'conversations').skillTurns());}catch(error){host.diagnostics.record(error,'harnessSkills');}
    return {current:inUse(),harnesses:await Promise.all(skillSets().map(async({harness,title,skills})=>{
     let listed:Row[]=[],error='';
     try{listed=(await skills.list()).slice(0,300).map(s=>{const at=Math.max(s.lastUsedAt??0,runs.get(s.name.toLowerCase())??0);

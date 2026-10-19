@@ -1,3 +1,4 @@
+import {contextReads,ledgerContext} from '../../store/context-storage.ts';
 import {CONVERSATION_ATTENTION,attentionFromAgent,conversationObservation,conversationsForAttention,ONGOING_LIMITS,ongoingDecide,ongoingKindOf,ongoingTemplate,ongoingRecent,ongoingRefresh,ongoingFromAgent,ongoingCandidates,ongoingTurnText,orderOngoing,readOngoing,validOngoingId,type OngoingThing} from '../../../../agent/tasks/index.ts';
 import {contextReader,contextWriter} from '../../../../context/store/index.ts';
 import {WorldletError} from '../../files.ts';
@@ -28,19 +29,19 @@ export function installOngoing(host:Host){
  const changed=(id='')=>page.event('worldlet:ongoing',{id});
  const unrecorded=(known:OngoingThing[]):OngoingThing[]=>{
   if(!own())return [];
-  try{const ledger=store.ledger();return ongoingCandidates(known,ledger.broughtConversations(),now(),c=>ledger.ownText(c.source,c.session,60));}
+  try{const ledger=store.ledger();return ongoingCandidates(known,contextReads(ledgerContext(ledger),'conversations').broughtConversations(),now(),c=>contextReads(ledgerContext(ledger),'conversations').ownText(c.source,c.session,60));}
   catch(error){host.diagnostics.record(error,'ongoing');return [];}
  };
  function refresh(){
   if(!own())return;
   try{
    const ledger=store.ledger();
-   const {save,forget}=ongoingRefresh(things(),ledger.broughtConversations(),now(),c=>ledger.ownText(c.source,c.session,60));
+   const {save,forget}=ongoingRefresh(things(),contextReads(ledgerContext(ledger),'conversations').broughtConversations(),now(),c=>contextReads(ledgerContext(ledger),'conversations').ownText(c.source,c.session,60));
    if(save.length||forget.length){contextWriter(store.context(),'world').write('ongoing',{save:save as any[],forget});changed();}
    // The things the chosen Agent said the person handles most (agent/gate/agent-profile.ts) become their own Applets once
    // their conversations are here; a removed one stays removed (agent/tasks ongoingFromAgent).
    const chosen=readSelection(host.profile.root),said=chosen?readAgentProfile(host.profile.root,chosen)?.things??[]:[];
-   const keep=said.length?ongoingFromAgent(said,things(),ledger.broughtConversations(),now(),c=>ledger.ownText(c.source,c.session,60),chosen??undefined):[];
+   const keep=said.length?ongoingFromAgent(said,things(),contextReads(ledgerContext(ledger),'conversations').broughtConversations(),now(),c=>contextReads(ledgerContext(ledger),'conversations').ownText(c.source,c.session,60),chosen??undefined):[];
    if(keep.length){contextWriter(store.context(),'agent').write('ongoing',{save:keep as any[]});changed();store.changed();}
   }catch(error){host.diagnostics.record(error,'ongoing');}
   observe();
@@ -53,12 +54,12 @@ export function installOngoing(host:Host){
   if(!center)return;
   try{
    const ledger=store.ledger();
-   const records=conversationsForAttention(ledger.broughtConversations(),now()).flatMap(c=>{
-    const value=conversationObservation(c,ledger.conversationTurns(c.source,c.session,CONVERSATION_ATTENTION.turns));
+   const records=conversationsForAttention(contextReads(ledgerContext(ledger),'conversations').broughtConversations(),now()).flatMap(c=>{
+    const value=conversationObservation(c,contextReads(ledgerContext(ledger),'conversations').conversationTurns(c.source,c.session,CONVERSATION_ATTENTION.turns));
     return value?[value]:[];
    });
    if(records.length)center.observeConversations(records);
-   seed(center,conversationsForAttention(ledger.broughtConversations(),now()));
+   seed(center,conversationsForAttention(contextReads(ledgerContext(ledger),'conversations').broughtConversations(),now()));
   }catch(error){host.diagnostics.record(error,'ongoingAttention');}
  }
  // What the chosen Agent picked out for the Center when setup asked it to describe itself (agent/gate/agent-profile.ts
@@ -100,12 +101,12 @@ export function installOngoing(host:Host){
     const limit=Math.min(40,Math.max(1,Math.round(Number(request.limit)||12)));
     // What the person and their Agent wrote, without the gateway's reply pointers and thread context (agent/tasks).
     const said=<T extends {text:string}>(rows:T[])=>rows.flatMap(row=>{const text=ongoingTurnText(row.text);return text?[{...row,text}]:[];});
-    const turns=said(store.ledger().conversationTurns(thing.source,thing.session,limit));
+    const turns=said(contextReads(ledgerContext(store.ledger()),'conversations').conversationTurns(thing.source,thing.session,limit));
     // The phone's tile: the latest lines, each with its time.
     const recent=turns.slice(-ONGOING_LIMITS.recent).flatMap(turn=>{const text=ongoingRecent(thing,[turn])[0];return text?[{text,at:turn.createdAt}]:[];});
     // Its panel asks for its page too: a thing of a kind opens on that kind's page, filled from the person's own messages (agent/tasks kinds).
     const kind=ongoingKindOf(thing);
-    const template=kind==='general'||request.template!==true?null:ongoingTemplate(kind,said(store.ledger().conversationTurns(thing.source,thing.session,400)),now());
+    const template=kind==='general'||request.template!==true?null:ongoingTemplate(kind,said(contextReads(ledgerContext(store.ledger()),'conversations').conversationTurns(thing.source,thing.session,400)),now());
     return {turns,recent,template};
    }
    if(['keep','later','decline'].includes(operation)){

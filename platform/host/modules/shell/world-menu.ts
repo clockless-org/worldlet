@@ -1,3 +1,4 @@
+import {contextReader} from '../../../../context/store/index.ts';
 import type {MenuItemConstructorOptions} from 'electron';
 import {core} from '../../core.ts';
 import {canBuild,type WorldStore} from '../../store/world-store.ts';
@@ -10,7 +11,7 @@ export function worldMenuState(store:WorldStore):WorldMenuState {
  return core<WorldMenuState>('worldMenuState',{
   writable:store.writable,sample:store.sampleEnabled(),busy:store.busy,organizing:store.organizing,
   cloudConsent:store.state.cloudConsent===true,
-  sources:store.state.sources.filter(s=>s.enabled!==false).length,connections:store.state.connections.filter(canBuild).length
+  sources:contextReader(store.libraryContext()).bodies('sources').filter(s=>s.enabled!==false).length,connections:store.state.connections.filter(canBuild).length
  });
 }
 

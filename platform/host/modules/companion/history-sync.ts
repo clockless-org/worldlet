@@ -1,3 +1,4 @@
+import {contextChanges,contextReads,ledgerContext} from '../../store/context-storage.ts';
 import path from 'node:path';
 import {setTimeout as sleep} from 'node:timers/promises';
 import type {HarnessExternalEvent,HarnessHistory} from '../../../../contracts/harness-services.ts';
@@ -54,7 +55,7 @@ export function createHistorySync(host:Host,{history=filesHistory,every=HISTORY_
  /** The chosen Harness, the Agent brought at setup and every Agent the World keeps conversations from or reads. */
  function sources():MigrationSource[] {
   const ledger=store.ledger(),root=host.profile.root;
-  const named=[readSelection(root),readAdopted(root),...Object.keys(ledger.companionCounts()),...ledger.historySources()];
+  const named=[readSelection(root),readAdopted(root),...Object.keys(contextReads(ledgerContext(ledger),'conversations').companionCounts()),...ledger.historySources()];
   return [...new Set(named)].filter((source):source is MigrationSource=>isMigrationSource(source)&&harnessService(source,'history')!==null);
  }
  /** One check of one source; returns how many turns it added. */
@@ -68,7 +69,7 @@ export function createHistorySync(host:Host,{history=filesHistory,every=HISTORY_
   const threads=(await busyWith('historySync',()=>reader.threads(checked===null?0:checked-HISTORY_SYNC.overlap))).sort((a,b)=>b.updatedAt-a.updatedAt);
   if(!threads.length){ledger.saveHistoryCursor(source,'',null,'',started);return 0;}
   // The same limit as any brought history (TEXT_BUDGET); a check that stops at its own limit carries on next time.
-  const total=TEXT_BUDGET-ledger.companionBytes(source);
+  const total=TEXT_BUDGET-contextReads(ledgerContext(ledger),'conversations').companionBytes(source);
   let left=Math.min(HISTORY_SYNC.bytes,total),added=0,busy=false,read=false;
   // Only what arrived since the last check can need the person now; a first read is history.
   const fresh=checked===null?Infinity:checked-HISTORY_SYNC.overlap;
@@ -83,7 +84,7 @@ export function createHistorySync(host:Host,{history=filesHistory,every=HISTORY_
    let session=saved?.session||ledger.companionSession(broughtTurnId(source,thread.id,'0'))||'';
    let cursor=saved?.cursor??undefined,through=false;read=true;
    // The lines just before a new message, for its context: the conversation's latest kept turns, then this read's.
-   const before:string[]=thread.shared&&session?ledger.conversationTurns(source,session,3).map(turn=>turn.text):[];
+   const before:string[]=thread.shared&&session?contextReads(ledgerContext(ledger),'conversations').conversationTurns(source,session,3).map(turn=>turn.text):[];
    for(;;){
     const page=await busyWith('historySync',()=>reader.turns(thread.id,cursor,HISTORY_SYNC.turns));
     session||=migrationSession(source,thread.title||page.title||'');
@@ -96,7 +97,7 @@ export function createHistorySync(host:Host,{history=filesHistory,every=HISTORY_
      if(thread.shared&&turn.role==='user'&&turn.at>=fresh){const event=channelMessageEvent({source,thread:thread.id,title:session,turn:{id:turn.id,text,at:turn.at},before});if(event)asks.push(event);}
      before.push(text);if(before.length>3)before.shift();
     }
-    if(rows.length)added+=ledger.addCompanionTurns(source,rows);
+    if(rows.length)added+=contextChanges(ledgerContext(ledger),'agent','conversations').addCompanionTurns(source,rows);
     if(left<=0||stopped)break;
     if(page.turns.length<HISTORY_SYNC.turns){through=true;break;}
     await sleep(0);
