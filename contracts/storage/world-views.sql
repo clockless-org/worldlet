@@ -1,4 +1,4 @@
--- History identity (context/items/world-history.ts worldEventAppend). Not unique:
+-- History identity (context/store/world-history.ts worldEventAppend). Not unique:
 -- legacy rows may already repeat an id; new appends skip an existing identity.
 CREATE INDEX IF NOT EXISTS entries_event_identity ON entries(kind,key,json_extract(body,'$.id'));
 -- Additive, read-only business views over the single durable ledger.
