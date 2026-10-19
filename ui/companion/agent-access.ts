@@ -3,7 +3,7 @@
  * more in the page, then removes that Agent's key so it can no longer reach the World; and, for each connected
  * Service, "Can read <Service>", which gives or takes back that Service's read Grant at once; "Can ask you" and "Can
  * take work" (Agent asks, core/agent/GRANTS.md#agent-asks), "Can see your board" and "Can set up your board"
- * (core/board/README.md), and "Can report its work" and "Can see other Agents"
+ * (context/board/README.md), and "Can report its work" and "Can see other Agents"
  * (core/agent/GRANTS.md#agent-reports), and "Can save to your Journal" and "Can read Agents' Journal artifacts"
  * (core/agent/GRANTS.md#agent-artifacts), and "Can draft <Service> changes" for PostHog and Notion while connected
  * (core/agent/GRANTS.md#posthog-and-notion-drafts), the same way; once a GitHub App is connected, "Can update Issues in <repo>
@@ -30,7 +30,7 @@ type Agent={id:string;name:string;harness:string;kind:'local'|'remote';createdAt
 type Report={status:'working'|'idle'|'blocked'|'offline';summary:string;work:{title:string;state?:string}[];runs:{title:string;status:string}[];reportedAt:string};
 /** "Can ask you" and "Can take work" (core askGrant): the page names only which, never targets. */
 const ASK_TOGGLES=[['ask','Can ask you','can now ask you things in Attention','can no longer ask you things'],['work','Can take work','can now take work left for Agents','can no longer take work']] as const;
-/** "Can see your board" and "Can set up your board" (core boardGrant, core/board/README.md), the same way. */
+/** "Can see your board" and "Can set up your board" (core boardGrant, context/board/README.md), the same way. */
 const BOARD_TOGGLES=[['read','Can see your board','can now see your board','can no longer see your board'],['define','Can set up your board','can now set up your board','can no longer set up your board']] as const;
 /** "Can save to your Journal" and "Can read Agents' Journal artifacts" (core artifactGrant,
  * core/agent/GRANTS.md#agent-artifacts), the same way. */

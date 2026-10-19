@@ -35,7 +35,7 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | Where Applet code lives | [Worldlet Applets](../ui/applets/README.md) |
 | How an Applet should look and behave | [Applet design guide](../ui/applets/DESIGN-GUIDE.md) · [motion](../ui/applets/MOTION.md) |
 | How to build one | [Applet implementation guide](../ui/applets/IMPLEMENTATION-GUIDE.md) · [integrations](../core/applets/INTEGRATIONS.md) |
-| A board of Service numbers: tabs, funnels, trends | [The board](../core/board/README.md) |
+| A board of Service numbers: tabs, funnels, trends | [The board](../context/board/README.md) |
 | Cards Fox makes | [Card system](../ui/artifacts/CARD-SYSTEM.md) |
 | Worlds, styles and artwork | [Resources](../resources/README.md) · [Village world](../resources/worlds/village/README.md) |
 
@@ -344,6 +344,7 @@ Indexed: **284 Markdown documents** and **747 supporting documentation files**.
 
 - [android/README.md](../android/README.md)
 - [context/artifacts/README.md](../context/artifacts/README.md)
+- [context/board/README.md](../context/board/README.md)
 - [context/games/README.md](../context/games/README.md)
 - [context/items/STORAGE.md](../context/items/STORAGE.md)
 - [contracts/COMPONENTS.md](../contracts/COMPONENTS.md)
@@ -358,7 +359,6 @@ Indexed: **284 Markdown documents** and **747 supporting documentation files**.
 - [core/applets/MY-APPLETS.md](../core/applets/MY-APPLETS.md)
 - [core/applets/RUNTIME.md](../core/applets/RUNTIME.md)
 - [core/attention/README.md](../core/attention/README.md)
-- [core/board/README.md](../core/board/README.md)
 - [core/diagnostics/ANALYTICS.md](../core/diagnostics/ANALYTICS.md)
 - [core/phone/README.md](../core/phone/README.md)
 - [core/tasks/README.md](../core/tasks/README.md)

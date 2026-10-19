@@ -221,7 +221,7 @@ export function askGrantAuditEntry(agentId:string,kind:string,granted:boolean,at
 }
 
 /** "Can see your board" (`read`: board/read) and "Can set up your board" (`define`: board/define) in Settings › Agents ›
- * Access (core/board/README.md). Never part of the default Grants, and never given by a Fox turn. */
+ * Access (context/board/README.md). Never part of the default Grants, and never given by a Fox turn. */
 export type BoardGrantKind='read'|'define';
 export const BOARD_GRANT_KINDS:readonly BoardGrantKind[]=Object.freeze(['read','define']);
 export function boardGrantTargets(kind:string):string[] {

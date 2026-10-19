@@ -16,7 +16,7 @@ import {channelDefaultGrants,serviceReadTargets,standingActions,standingCallDeci
 import {turnTrustObserve} from '../core/agent/turn-trust.ts';
 import {worldActionOf,worldActions} from '../core/tools/gateway.ts';
 import {SOURCE_PROVIDERS,TOKEN_PROVIDERS,connectSettings,connectToken} from '../core/applets/index.ts';
-import {resolveBoard,readBoardDefinition} from '../core/board/index.ts';
+import {resolveBoard,readBoardDefinition} from '../context/board/index.ts';
 import {SERVICE_TITLES,type ServiceRecords} from '../contracts/services.ts';
 import {ExecutionJournal} from '../platform/electron/src/modules/agent-runtime/journal.ts';
 import {ServiceSource,ServiceSourceAccess,ServiceSourceConnections} from '../platform/electron/src/modules/sources/service-source.ts';
