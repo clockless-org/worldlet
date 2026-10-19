@@ -17,4 +17,3 @@ export {locateLocalHarnesses} from '../platform/electron/src/modules/agent-runti
 export {readLocalAgentMemory} from '../platform/electron/src/modules/agent-runtime/local-memory.ts';
 export {bringAgent} from '../platform/electron/src/modules/fox/migration.ts';
 export {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-export {SETUP_OPTIONS} from '../platform/electron/src/checks/setup-option-names.ts';

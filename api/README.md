@@ -13,7 +13,7 @@ and rename its folders without a change there ([#714](https://github.com/clockle
 | [build.ts](build.ts) | Brand, tokens, themes, the World's layout, the Applet catalog and release versions for the website build | Node |
 | [worker.ts](worker.ts) | The World page's Content Security Policy, for the website's Worker | Worker bundle |
 | [checks.ts](checks.ts) | Phone pairing, remote Agents, Agent reports, boards, update channels and setup, for the checks that test the website Worker against the app | Node |
-| [release.ts](release.ts) | The release check, update acceptance and the Windows release manifest, for the release hosts | Node |
+| [release.ts](release.ts) | The release check, update acceptance, the Windows release manifest and the setup options, for the release hosts and their checks; it loads no Electron module | Node |
 | [files.ts](files.ts) | The paths of the files the website and the release hosts read or bundle | Node |
 | [types.d.ts](types.d.ts) | The app's ambient types, for type-checking code that imports this folder | `tsc` |
 
