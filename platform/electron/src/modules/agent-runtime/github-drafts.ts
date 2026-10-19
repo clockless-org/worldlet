@@ -1,13 +1,13 @@
 import crypto from 'node:crypto';
 import {AGENT_AUDIT_KEEP,GITHUB_DRAFT_REASONS,GITHUB_WRITE_REASONS,githubAppJwtClaims,githubDraftAttentionItem,githubDraftChange,githubDraftCreatedPath,githubDraftCreatedUrl,githubDraftHeadline,githubDraftItemId,githubDraftOutcome,githubDraftPending,githubDraftReadPath,githubDraftRequests,githubDraftSignature,
- githubDraftResultUrl,githubDraftTarget,githubDraftTargetParts,githubWriteAuditEntry,githubWriteChange,githubWriteDraft,githubWriteGrantFor,makeGithubDraft,readGithubApp,readGithubDraftCreate,readGithubDrafts,readGithubWriteRun,readStoredGithubApp,readStoredGithubDraft,settleGithubDraft,startGithubDraftWrite,type GithubWriteRequest,type GithubWriter} from '../../../../../core/agent/index.ts';
+ githubDraftResultUrl,githubDraftTarget,githubDraftTargetParts,githubWriteAuditEntry,githubWriteChange,githubWriteDraft,githubWriteGrantFor,makeGithubDraft,readGithubApp,readGithubDraftCreate,readGithubDrafts,readGithubWriteRun,readStoredGithubApp,readStoredGithubDraft,settleGithubDraft,startGithubDraftWrite,type GithubWriteRequest,type GithubWriter} from '../../../../../agent/agent/index.ts';
 import {GITHUB_DRAFT_TARGET,type GithubAppCredentials,type GithubDraft,type GithubWrite} from '../../../../../contracts/github-drafts.ts';
 import type {AgentAuditEntry,Grant} from '../../../../../contracts/agent-identity.ts';
 import type {VaultService} from '../../host/services.ts';
 import {GITHUB_APP} from '../../../../../context/accounts/index.ts';
 import type {Row} from './types.ts';
 
-// GitHub drafts (core/agent/GRANTS.md#github-drafts). Core decides; this keeps the records and talks to GitHub: each
+// GitHub drafts (agent/agent/GRANTS.md#github-drafts). Core decides; this keeps the records and talks to GitHub: each
 // draft in the World's ledger (`state.github-drafts` in world.sqlite) beside its Attention item (provider `agents`), and
 // each GitHub request over GitHub's REST API as the person, through their GitHub sign-in with the Worldlet GitHub App
 // (context/applets/INTEGRATIONS.md#github-sign-in; `userToken`), or, when they connected one under Settings › Connectors ›
@@ -15,7 +15,7 @@ import type {Row} from './types.ts';
 // (`github-app`); they, the token the App signs, the installation token GitHub gives for it and the sign-in's user token
 // never leave this module: not to a page, an Agent, an audit entry, a log or an event. Every error here is one of this
 // module's own sentences, never a message that could carry a request. A new Issue or comment ends with a line naming the
-// Agent that drafted it (core githubDraftSignature). A standing GitHub write (core/agent/GRANTS.md#standing-github-writes)
+// Agent that drafted it (core githubDraftSignature). A standing GitHub write (agent/agent/GRANTS.md#standing-github-writes)
 // runs the same way, at once, with no draft kept, and only as the person's own GitHub App: through the sign-in every
 // write is a draft the person approves first.
 

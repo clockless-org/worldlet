@@ -49,7 +49,7 @@ export const publicReview=(review:Record<string,any>)=>Object.fromEntries(PUBLIC
 
 /** The first of `candidates` (as given, or wrapped in `data`) that the server's own schema for tool `name` accepts, so a
  * write is never sent in a shape the server would read differently. Also used by Notion drafts
- * (core/agent/service-drafts.ts). */
+ * (agent/agent/service-drafts.ts). */
 export async function notionWriteArgs(session:McpSession,name:string,candidates:unknown[]){
  const listed=await session.listTools();
  const tool=(listed?.tools??[]).find(tool=>tool?.name===name);

@@ -5,7 +5,7 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 import {DatabaseSync} from 'node:sqlite';
 import {claudeCodeConversationTitle,claudeCodeTurn,hermesConversationIncluded,hermesConversationTitle,hermesRoutine,hermesTurn,migrationMemoryNote,migrationRoutineKey,migrationSkillMarkdown,migrationSkillPath,migrationSkillsSafe,
- openClawAgentSkill,openClawChannelPrompts,openClawConversationIncluded,openClawConversationSkill,openClawConversationTitle,openClawPromptFor,openClawRoutine,openClawSkillName,openClawTurn,piTurn} from '../core/agent/index.ts';
+ openClawAgentSkill,openClawChannelPrompts,openClawConversationIncluded,openClawConversationSkill,openClawConversationTitle,openClawPromptFor,openClawRoutine,openClawSkillName,openClawTurn,piTurn} from '../agent/agent/index.ts';
 import {openClawAgents,parseJSON5,readOpenClaw,reportOpenClawWorkspaces,scanOpenClawWorkspaces,surveyOpenClaw} from '../platform/electron/src/modules/agent-runtime/openclaw-files.ts';
 import {surveyAgentHistory} from '../platform/electron/src/modules/agent-runtime/agent-files.ts';
 import {firstSentence,localAgentModel,openClawWorkspace,readLocalAgentMemory,summarizeLocalAgent} from '../platform/electron/src/modules/agent-runtime/local-memory.ts';
@@ -432,7 +432,7 @@ try{
  assert.deepEqual(data.notes.map(n=>[n.agentId,n.date]),[['main','2026-10-01']]);
  assert.equal(readLocalAgentMemory('openclaw',outside,env)?.user,'Lives in LA.');
  assert.equal(openClawAgents(outside,{} as NodeJS.ProcessEnv).find(a=>a.id==='helper')?.workspace,null,'a missing variable leaves only that path unread');
- // Where its configuration leads nowhere, the folder the Agent itself reported (core/agent/agent-profile.ts workspaces)
+ // Where its configuration leads nowhere, the folder the Agent itself reported (agent/agent/agent-profile.ts workspaces)
  // is read, when it is a workspace inside the home folder; one outside it never is.
  write(path.join(outside,'elsewhere','helper','SOUL.md'),'Name: Helper\nHelps.');
  const away=fs.mkdtempSync(path.join(os.tmpdir(),'worldlet-openclaw-away-'));write(path.join(away,'SOUL.md'),'Name: Away');

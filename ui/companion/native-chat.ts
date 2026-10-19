@@ -39,7 +39,7 @@ import {mountMicrophonePicker} from './microphone-picker.ts';
 import {createFoxTalk} from './fox-talk.ts';
 import {mountCompanionPortrait} from './companion-portrait.ts';
 import {foxTrace} from './fox-performance.ts';
-import {harnessUsageLabel} from '../../core/agent/index.ts';
+import {harnessUsageLabel} from '../../agent/agent/index.ts';
 
 /** A line Fox said on its own (fox-proactive.ts), as opposed to a reply, question or notice. */
 const spokeFirstLine=(value:any)=>String(value?.source||'').startsWith('proactive:');

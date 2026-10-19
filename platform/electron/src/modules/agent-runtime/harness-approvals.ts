@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
-import {claudeCodeStandingRules,codexStandingRules,harnessApprovalFeatures,hermesAllowlistWithout,hermesConfigValues,hermesStandingRules,openClawApprovalsWithout,openClawGrantRules,openClawStandingRules,standingRuleId,type LocalHarnessId} from '../../../../../core/agent/index.ts';
+import {claudeCodeStandingRules,codexStandingRules,harnessApprovalFeatures,hermesAllowlistWithout,hermesConfigValues,hermesStandingRules,openClawApprovalsWithout,openClawGrantRules,openClawStandingRules,standingRuleId,type LocalHarnessId} from '../../../../../agent/agent/index.ts';
 import type {HarnessStandingRule,HarnessStandingRules} from '../../../../../contracts/harness-services.ts';
 import {WorldletError} from '../../files.ts';
 import {claudeCodeHome,codexHome,json,readFile} from './agent-files.ts';
@@ -9,11 +9,11 @@ import {hermesHomes} from './harness-agents.ts';
 import {harnessEnvironment,type HarnessEnvironment,type LocalHarnessInstall} from './local-harness.ts';
 
 // The standing rules an Always left in the person's Harness (contracts/harness-services.ts HarnessStandingRules, the
-// `approvalFeatures.rules` a Harness declares in core/agent/harness-services.ts), read where that Harness keeps them and
+// `approvalFeatures.rules` a Harness declares in agent/agent/harness-services.ts), read where that Harness keeps them and
 // revoked only the way its own documentation gives: Hermes Agent's `command_allowlist` in each profile's config.yaml,
 // changed with its own `hermes config set`; OpenClaw's approvals document and automation grants through its own
 // `openclaw approvals` commands. Worldlet never edits either file itself. What the entries mean is Core's
-// (core/agent/harness-approvals.ts); fox `harnessApprovalRules` never asks which Harness it is.
+// (agent/agent/harness-approvals.ts); fox `harnessApprovalRules` never asks which Harness it is.
 
 const OUTPUT=4_000_000;
 type Run={code:number|null;stdout:string;stderr:string};
@@ -119,7 +119,7 @@ const codexRules=readOnlyRules(({home,env})=>{
  let names:string[]=[];try{names=fs.readdirSync(folder).filter(name=>name.endsWith('.rules')).sort().slice(0,50);}catch{}
  return codexStandingRules(names.map(name=>readFile(root,path.join(folder,name),OUTPUT)).join('\n'));
 });
-/** The Harnesses whose standing rules Worldlet reads (`approvalFeatures.rules` in core/agent/harness-services.ts). */
+/** The Harnesses whose standing rules Worldlet reads (`approvalFeatures.rules` in agent/agent/harness-services.ts). */
 export const HARNESS_STANDING_RULES:Partial<Record<LocalHarnessId,(install:LocalHarnessInstall,environment:HarnessEnvironment)=>HarnessStandingRules>>={hermes:hermesStandingRulesService,openclaw:openClawStandingRulesService,'claude-code':claudeCodeRules,codex:codexRules};
 export function standingRules(install:LocalHarnessInstall,environment:HarnessEnvironment):HarnessStandingRules|null {
  return harnessApprovalFeatures(install.id).rules?HARNESS_STANDING_RULES[install.id]?.(install,environment)??null:null;

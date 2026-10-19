@@ -5,7 +5,7 @@ import {themeAppletIcon} from '../themes/index.ts';
 import {setupText,setInterfaceLanguage} from './setup-language.ts';
 import {hostFeatures,googleSignInStart} from '../../platform/bridge/features.ts';
 import {GOOGLE_SIGN_IN_EVENT,googleSignInStage} from '../../contracts/platform.ts';
-import {LOCAL_HARNESSES,agentProfileApplets,agentProfileAsked,connectRequestPlan} from '../../core/agent/index.ts';
+import {LOCAL_HARNESSES,agentProfileApplets,agentProfileAsked,connectRequestPlan} from '../../agent/agent/index.ts';
 import {agentBringDimensions,agentProfileDimensions,agentsDetectedDimensions,diagnosticError,hermesSetupDimensions,timingBucket} from '../../core/diagnostics/index.ts';
 import {googleConsentActions,googleConsentUrl} from './google-consent.ts';
 
@@ -72,7 +72,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  let googleStage:string='connecting',googleUrl:string|undefined;
  const onGoogleStage=(event:Event)=>{const detail=(event as CustomEvent).detail,stage=googleSignInStage(detail);if(disposed||!signingIn||!stage)return;googleStage=stage;googleUrl=googleConsentUrl(detail);render();};
  window.addEventListener(GOOGLE_SIGN_IN_EVENT,onGoogleStage);
- // An install script launched Worldlet with `--connect=<id>` (core/agent/PORTABILITY.md#local-harnesses-chosen-at-setup):
+ // An install script launched Worldlet with `--connect=<id>` (agent/agent/PORTABILITY.md#local-harnesses-chosen-at-setup):
  // that Agent is picked and brought in as the big button would. Launched again while setup is open, the host says so
  // and setup looks again.
  const onConnectRequest=()=>{if(!disposed)void detectAgents();};
@@ -102,7 +102,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  window.addEventListener('worldlet:app-update',onAppUpdate);
  const appUpdateButton=node('button','','setup-link setup-app-update') as HTMLButtonElement;appUpdateButton.type='button';
  appUpdateButton.onclick=()=>{if(updatingApp)return;updatingApp=true;render();void call('appUpdate').then(value=>{appUpdate=value;},()=>{}).finally(()=>{updatingApp=false;if(!disposed)render();});};
- /** What the chosen Agent said about itself (core/agent/agent-profile.ts), arriving after its proving turn while setup
+ /** What the chosen Agent said about itself (agent/agent/agent-profile.ts), arriving after its proving turn while setup
   * goes on: the connections and channels its files do not show join the Connections tile, the skills it named count
   * when its files held fewer, and the Applets it points to join the World's selection (owner request 2026-10-11). */
  function takeProfile(profile:any){
@@ -161,7 +161,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // The Agent's own name where it has one (OpenClaw's Nova), else its product name.
  const agentName=(agent:{title:string,memory?:{name:string|null}})=>agent.memory?.name||agent.title;
  const giveName=(id:string|null)=>{const found=agents.find(a=>a.id===id);return found?.memory?.name||AGENT_SHORT[id||'']||found?.title||id||'';};
- /** The picked Agent when its version is older than Worldlet works with (core/agent/agent-versions.ts). */
+ /** The picked Agent when its version is older than Worldlet works with (agent/agent/agent-versions.ts). */
  const outdated=(id:string|null)=>agents.find(a=>a.id===id&&a.version?.outdated===true)||null;
  async function updateAgent(agent:{id:string,title:string}){
   await call('agentHarness',{operation:'update',id:agent.id});
@@ -246,7 +246,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   if(importingAgent()){
    if(!draft.brought)return list;
    list.push('profile','conversations','notes','skills','routines');
-   // What the Agent says the person does most (core/agent/agent-profile.ts things): asked while the rest arrives.
+   // What the Agent says the person does most (agent/agent/agent-profile.ts things): asked while the rest arrives.
    if(agentProfileAsked(draft.agent))list.push('things');
    if(!porting)list.push('connections','apps');
    return list;
@@ -615,7 +615,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
    card.append(image(AGENT_ICONS[found.id]||'','setup-agent-icon'),node('strong',agentName(found),'setup-agent-name'));
    // Where it comes from when it has its own name, else what it runs on.
    const sub=found.memory?.name?title:found.id==='codex'?t(found.model===false?'Sign in to Codex first':'Your ChatGPT plan'):t(found.memory?'Its memory comes along':'On this computer');
-   // Older than Worldlet works with (core/agent/agent-versions.ts): the card says which version it needs.
+   // Older than Worldlet works with (agent/agent/agent-versions.ts): the card says which version it needs.
    const old=found.version?.outdated===true;card.classList.toggle('is-outdated',old);
    card.append(node('small',connecting?agentText('Connecting to {agent}…',title):old?t('Needs version {version} or newer').replace('{version}',found.version!.minimum):sub,'setup-agent-sub'));
    const history=found.memory?.history,chips=node('span','','setup-agent-chips');

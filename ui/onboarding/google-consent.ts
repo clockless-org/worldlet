@@ -1,5 +1,5 @@
 import {googleSignInStage} from '../../contracts/platform.ts';
-import {googleAuthorizationUrl} from '../../core/agent/index.ts';
+import {googleAuthorizationUrl} from '../../agent/agent/index.ts';
 
 /** The consent address a `browser` sign-in stage carries, only when it is Google's own authorization page. */
 export const googleConsentUrl=(detail:unknown)=>googleSignInStage(detail)==='browser'?googleAuthorizationUrl((detail as {url?:unknown}|null)?.url):undefined;

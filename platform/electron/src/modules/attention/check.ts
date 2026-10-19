@@ -14,7 +14,7 @@ import {installAttention} from './index.ts';
 import {installOngoing} from '../tasks/index.ts';
 import {installWorld} from '../world.ts';
 import {installArtifacts} from '../artifacts/index.ts';
-import {journalTarget} from '../../../../../core/agent/index.ts';
+import {journalTarget} from '../../../../../agent/agent/index.ts';
 import {ONGOING,type OngoingService} from '../../host/services.ts';
 import {conversationAttentionId} from '../../../../../agent/tasks/index.ts';
 import {writeSelection} from '../agent-runtime/local-harness.ts';

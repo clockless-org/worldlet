@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {openAgentDatabase,type AgentDatabase,type AgentStatement} from './agent-database.ts';
 import {claudeCodeAgentSkill,claudeCodeConversationTitle,claudeCodeTurn,codexSessionIncluded,codexTurns,hermesConversationIncluded,hermesConversationTitle,hermesSendRoute,hermesSharedChat,hermesProfileSkill,hermesRoutine,hermesScheduleJob,hermesTurn,migrationNotesSession,piConversationTitle,piTurn,promptTemplateSkill,
- type HermesSendRoute,type MigrationRoutineResult,type MigrationTurn} from '../../../../../core/agent/index.ts';
+ type HermesSendRoute,type MigrationRoutineResult,type MigrationTurn} from '../../../../../agent/agent/index.ts';
 import {realPath as real} from '../../files.ts';
 import {declaredName,discoverHermes} from './hermes-files.ts';
 

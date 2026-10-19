@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {realPath as real,writeAtomic,WorldletError} from '../../files.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
-import {isMigrationSource,type MigrationSource} from '../../../../../core/agent/index.ts';
+import {isMigrationSource,type MigrationSource} from '../../../../../agent/agent/index.ts';
 import {claudeCodeHome,codexHome,piHome} from './agent-files.ts';
 import {declaredName,discoverHermes} from './hermes-files.ts';
 import {openClawConfigPresent,openClawWorkspace,readOpenClawConfig} from './openclaw-config.ts';

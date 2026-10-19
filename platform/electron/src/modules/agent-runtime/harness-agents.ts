@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {harnessAgentInstructions,hermesProfileModel,isHarnessAgentId,openClawAgentModel,type LocalHarnessId} from '../../../../../core/agent/index.ts';
+import {harnessAgentInstructions,hermesProfileModel,isHarnessAgentId,openClawAgentModel,type LocalHarnessId} from '../../../../../agent/agent/index.ts';
 import type {HarnessAgent,HarnessAgents} from '../../../../../contracts/harness-services.ts';
 import {realPath as real} from '../../files.ts';
 import {directories,readFile} from './agent-files.ts';
@@ -56,5 +56,5 @@ export function hermesHomes(home=os.homedir(),environment=process.env,platform:N
  return homes.map(entry=>({...entry,main:entry.root===active}));
 }
 
-/** The Harnesses whose agents Worldlet reads (`agents: 'files'` in core/agent/harness-services.ts). */
+/** The Harnesses whose agents Worldlet reads (`agents: 'files'` in agent/agent/harness-services.ts). */
 export const HARNESS_AGENTS:Partial<Record<LocalHarnessId,(home?:string,environment?:NodeJS.ProcessEnv)=>HarnessAgents>>={openclaw:openClawAgentsService,hermes:hermesAgentsService};

@@ -15,7 +15,7 @@ import {eventTrigger,reportAppletOpened,reportEngagement,reportProductEvent} fro
 import {mountFoxArtifact,flyIntoJournal,artifactPageSpec,turnIntoDock} from '../artifacts/index.ts';
 import {node,textButton,worldletMark,uiIcon} from '../components/index.ts';
 import {readRetryDelay,sourceReadAction} from '../../context/applets/index.ts';
-import {attentionRequest,journalTarget} from '../../core/agent/index.ts';
+import {attentionRequest,journalTarget} from '../../agent/agent/index.ts';
 import {FOCUS_RULES_REQUEST,browserEffectDecision,browserFinalStep,browserFollowThrough,typedAddress,webSite} from '../../context/browser/index.ts';
 import {quietSourceReader} from '../applets/index.ts';
 import {mountAttentionPreview,taskReviewLine} from '../attention/index.ts';
@@ -490,7 +490,7 @@ export function mountNotionWorld(data: World, native: any) {
    if(data.sample||areaSignalsReading||Date.now()-areaSignals.at<600_000)return;areaSignalsReading=true;
    const installed=native?.installedApplets?Promise.resolve(native.installedApplets()).then(r=>new Set<string>(Array.isArray(r?.keys)?r.keys:[]),()=>areaSignals.installed):Promise.resolve(areaSignals.installed);
    const visits=native?.visitedSites?Promise.resolve(native.visitedSites()).then(r=>r?.hosts&&typeof r.hosts==='object'?r.hosts:{},()=>areaSignals.visits):Promise.resolve(areaSignals.visits);
-   // What the person's own Agent suggested when it described itself (core/agent/agent-profile.ts), kept on this computer.
+   // What the person's own Agent suggested when it described itself (agent/agent/agent-profile.ts), kept on this computer.
    const suggested=native?.agentSuggestions?Promise.resolve(native.agentSuggestions()).then(r=>new Set<string>(Array.isArray(r?.keys)?r.keys:[]),()=>areaSignals.suggested):Promise.resolve(areaSignals.suggested);
    void Promise.all([installed,visits,suggested]).then(([i,v,s])=>{areaSignals={installed:i,visits:v,suggested:s,at:Date.now()};}).finally(()=>{areaSignalsReading=false;});
   }
@@ -950,12 +950,12 @@ export function mountNotionWorld(data: World, native: any) {
     const memberIds=nativeHUD?.attentionMembers(item.worldItemId)||[item.worldItemId];
     for(const id of memberIds){
       if(data.sample){settleSampleItem(id,status);const saved=readSnoozes();if(snoozedUntil)saved[id]=snoozedUntil;else delete saved[id];native?.storage?.setItem('itemSnoozes',JSON.stringify(saved));}
-      // An Agent's ask (core/agent/GRANTS.md#agent-asks) is answered on the host, which settles its item with it.
-      // A GitHub, PostHog or Notion draft the host already approved or dismissed (core/agent/GRANTS.md#github-drafts): its
+      // An Agent's ask (agent/agent/GRANTS.md#agent-asks) is answered on the host, which settles its item with it.
+      // A GitHub, PostHog or Notion draft the host already approved or dismissed (agent/agent/GRANTS.md#github-drafts): its
       // item is settled.
       else if(hosted){}
       else if(ask){
-        // Approve on an ask that carries drafts approves them on the host first (core/agent/GRANTS.md#agent-asks).
+        // Approve on an ask that carries drafts approves them on the host first (agent/agent/GRANTS.md#agent-asks).
         const asked=itemPage(id)?.worldItemAsk,askId=asked?.id,drafts=!!asked?.drafts&&ask.outcome==='answered'&&ask.choice==='Approve';
         const result=askId&&native?.agentAsk?await native.agentAsk(askId,ask.outcome,ask.choice,ask.note,drafts):null;
         if(!result?.ok){nativeHUD?.sync();throw Error(result?.error||'Could not answer this.');}
@@ -1240,7 +1240,7 @@ export function mountNotionWorld(data: World, native: any) {
     showDraftLine(page);voice?.setAttentionActions?.([]);
     return;
    }
-   // A connector asking to reach the World (core/agent/REMOTE-MCP.md): Allow makes it an Agent of its own; Deny sends it
+   // A connector asking to reach the World (agent/agent/REMOTE-MCP.md): Allow makes it an Agent of its own; Deny sends it
    // away. Only this computer's pages can answer (not in ROOM_ALLOWED). The card names where it returns and the code
    // its waiting page shows.
    const consent=page.worldItemRemoteConsent&&page.worldItemRemoteConsent.status==='pending'&&!data.sample&&native?.remoteMcp?page.worldItemRemoteConsent:null;
@@ -1255,7 +1255,7 @@ export function mountNotionWorld(data: World, native: any) {
       const result=await native.remoteMcp(operation,consent.id);
       if(!result?.ok)throw Error(result?.error||'Could not do that.');
       await settleAttention(page,result.status==='allowed'?'done':'dismissed',null,{advance:true,hosted:true});
-      // A browser or a person at the World's own address (core/agent/WORLD-ADDRESS.md).
+      // A browser or a person at the World's own address (agent/agent/WORLD-ADDRESS.md).
       if(consent.asks){notify(result.status!=='allowed'?'Declined. Nothing was shared.':consent.asks==='owner'?`${consent.client} can now open your World. Sign it out in Settings › Agent › Access.`:`${consent.client} can now see your ${consent.share||'board'}. Remove them in Settings › Agent › Access.`);return;}
       notify(result.status!=='allowed'?'Declined. Nothing was connected.'
        :operation==='allow'&&named?`${consent.client} can now reach your World and read your ${named}. Change what it may do in Settings › Agents.`
@@ -1268,7 +1268,7 @@ export function mountNotionWorld(data: World, native: any) {
     showDraftLine(page);voice?.setAttentionActions?.([]);
     return;
    }
-   // An Agent's first need of a Service (core/agent/GRANTS.md#when-an-agent-first-needs-a-service): Allow gives it that
+   // An Agent's first need of a Service (agent/agent/GRANTS.md#when-an-agent-first-needs-a-service): Allow gives it that
    // Service's read Grant; Connect signs in to the Service first, then allows. Only this computer's pages (not in
    // ROOM_ALLOWED).
    const wanted=page.worldItemServiceRequest&&page.worldItemServiceRequest.status==='pending'&&!data.sample&&native?.serviceRequest?page.worldItemServiceRequest:null;

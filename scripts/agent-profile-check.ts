@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {AGENT_PROFILE_SCHEMA,agentProfileApplets,agentProfileAsked,agentProfilePrompt,looksSecret,parseAgentProfile} from '../core/agent/index.ts';
+import {AGENT_PROFILE_SCHEMA,agentProfileApplets,agentProfileAsked,agentProfilePrompt,looksSecret,parseAgentProfile} from '../agent/agent/index.ts';
 import {describeAgent,readAgentProfile,writeAgentProfile} from '../platform/electron/src/modules/agent-runtime/agent-profile.ts';
 import {readAgentSetting} from '../platform/electron/src/store/agent-settings.ts';
 
-// What a person's own Agent says about itself before setup brings it in (core/agent/agent-profile.ts): the prompt, the
+// What a person's own Agent says about itself before setup brings it in (agent/agent/agent-profile.ts): the prompt, the
 // bounded and secret-free parse, the Applets it points to, and the background turn's timeout and one retry.
 
 const prompt=agentProfilePrompt(['gmail','discord','amazon']);

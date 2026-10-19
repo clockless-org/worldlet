@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {hermesDisabledAfter,hermesDisabledSkills,hermesHubSkills,hermesJobCommand,hermesJobCreateCommand,hermesSkillCommand,isControlArgument,jobChangeDone,jobChangeOffered,openClawJobCommand,openClawJobCreateCommand,openClawSkillCommand,openClawSkillEnabled,openClawSkillKey,readJobChange,readJobCreate,readSkillChange,scheduleMatches} from '../core/agent/index.ts';
+import {hermesDisabledAfter,hermesDisabledSkills,hermesHubSkills,hermesJobCommand,hermesJobCreateCommand,hermesSkillCommand,isControlArgument,jobChangeDone,jobChangeOffered,openClawJobCommand,openClawJobCreateCommand,openClawSkillCommand,openClawSkillEnabled,openClawSkillKey,readJobChange,readJobCreate,readSkillChange,scheduleMatches} from '../agent/agent/index.ts';
 import {harnessScheduleControls} from '../platform/electron/src/modules/agent-runtime/harness-schedule-controls.ts';
 import {harnessSkills} from '../platform/electron/src/modules/agent-runtime/harness-skills.ts';
 import {createHarnessControls} from '../platform/electron/src/modules/fox/harness-controls.ts';
@@ -9,7 +9,7 @@ import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Settings › Agents's controls for the Agent's own skills and scheduled tasks (owner plan 2026-10-11, PR 2;
-// core/agent/harness-controls.ts): every change is one of the Agent's own commands, checked against its source at the
+// agent/agent/harness-controls.ts): every change is one of the Agent's own commands, checked against its source at the
 // oldest supported version, run only after the person confirmed the exact preview, and read back from the Agent's own
 // files. Fixture homes and fake `hermes` / `openclaw` commands that do what the real ones do to their files; no real
 // Agent runs, no real home is touched, and Worldlet itself never writes an Agent's files.

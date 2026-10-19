@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import {ONGOING_APPLET,ONGOING_LIMITS,ongoingId,validOngoingId,ongoingName,ongoingLooksLikeJob,ongoingProposal,readOngoing,ongoingOpen,ongoingRefresh,ongoingFromAgent,ongoingCandidates,ongoingDecide,ongoingLine,ongoingThemes,ongoingThemeRequest,isOngoingThemeId,ongoingRecent,ongoingTurnText,orderOngoing,ongoingRegion,ongoingApplet,ongoingKind,ongoingKindOf,ongoingTemplate,ONGOING_KINDS,type BroughtConversation} from '../agent/tasks/index.ts';
 import {attentionFromAgent,conversationAttentionId,foxSessions,foxSessionLine,foxSessionPlace,foxSessionOf,foxSessionCards,FOX_SESSION_LIMIT} from '../agent/tasks/index.ts';
-import {harnessSessionThread,harnessChatThread,harnessThreadPlace,harnessOriginId} from '../core/agent/harness-sessions.ts';
+import {harnessSessionThread,harnessChatThread,harnessThreadPlace,harnessOriginId} from '../agent/agent/harness-sessions.ts';
 import {processedAttentionContent} from '../agent/attention/attention-content.ts';
 import {validateWorldItem} from '../context/items/world-item-validation.ts';
 import {phoneAttention,phoneTasks,phoneJournal,readPhoneMessage} from '../core/phone/index.ts';
@@ -213,7 +213,7 @@ assert.equal(ongoingTurnText('[Replying to your previous message: "ok"]\n\nNext:
 assert.equal(ongoingTurnText('[Thread context — unfinished block'),'[Thread context — unfinished block','an unclosed block is kept as written');
 assert.equal(ongoingTurnText('Weigh in on Friday.'),'Weigh in on Friday.');
 
-// What the person's own Agent said they handle most (core/agent/agent-profile.ts `things`) becomes their own Applets at once,
+// What the person's own Agent said they handle most (agent/agent/agent-profile.ts `things`) becomes their own Applets at once,
 // under the Agent's name for each, from the busiest conversation whose name matches; what they removed stays removed.
 {
  const brought=[conversation('OpenClaw · Discord · #groceries',{userTurns:20}),conversation('OpenClaw · Discord · #groceries-old',{userTurns:3,last:30}),conversation('OpenClaw · Telegram · Kids school',{userTurns:9}),conversation('OpenClaw · Discord · #random')];

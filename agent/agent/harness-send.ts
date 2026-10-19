@@ -1,5 +1,5 @@
 // The `send` Harness service's rules (contracts/harness-services.ts HarnessSend): a reply the person approved, sent by
-// their own Agent into the channel thread a brought conversation came from (core/agent/PORTABILITY.md#replying-in-a-channel).
+// their own Agent into the channel thread a brought conversation came from (agent/agent/PORTABILITY.md#replying-in-a-channel).
 // OpenClaw keeps where a session's replies go on the session itself (`deliveryContext`, else `lastChannel` and `lastTo`,
 // with its account and thread) and sends with `openclaw message send` (docs.openclaw.ai/cli/message); Hermes Agent keeps
 // the platform, chat and thread on each `state.db` session and sends with `hermes send --to <platform>:<chat>[:<thread>]`,

@@ -3,7 +3,7 @@
  * record or the World's synced conversations) and an Off mark; Turn off or Turn on, and Remove where the Agent has its
  * own command for it, each run as that Agent's own command after the person confirmed it (agent-change.ts). Fox's offer
  * to save a task it keeps repeating stays on Fox's page (companion-skills.ts). */
-import {skillLastRanLabel} from '../../core/agent/index.ts';
+import {skillLastRanLabel} from '../../agent/agent/index.ts';
 import {agentButton,agentEl as el,confirmAgentChange,type AgentCall} from './agent-change.ts';
 
 type Skill={name:string;description:string;lastRanAt:number|null;enabled?:boolean;removable?:boolean};

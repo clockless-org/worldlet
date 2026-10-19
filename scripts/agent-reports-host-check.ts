@@ -6,10 +6,10 @@ import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/agent-access.ts';
 import {createAgentReports} from '../platform/electron/src/modules/agent-runtime/agent-reports.ts';
 import {openStandingWorldTools} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
-import {STANDING_OUTSIDE_TURN} from '../core/agent/grants.ts';
-import {REPORT_REASONS} from '../core/agent/reports.ts';
+import {STANDING_OUTSIDE_TURN} from '../agent/agent/grants.ts';
+import {REPORT_REASONS} from '../agent/agent/reports.ts';
 
-// Agent reports on the host (core/agent/GRANTS.md#agent-reports), the same modules the Electron and Node hosts run:
+// Agent reports on the host (agent/agent/GRANTS.md#agent-reports), the same modules the Electron and Node hosts run:
 // each Agent's one report kept in world.sqlite, reached only through the standing `worldlet` MCP server with each
 // Agent's own token and Grants (none by default, never a Fox turn's), stamped with the token's Agent, and audited.
 await withTempDir('worldlet-agent-reports-',async dir=>{

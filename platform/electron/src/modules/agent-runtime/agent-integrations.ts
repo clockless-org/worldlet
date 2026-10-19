@@ -1,14 +1,14 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {codexMcpServers,hermesMcpServers,mcpServersFrom,planIntegrations,type AgentMcpServer,type IntegrationPlan,type MigrationSource} from '../../../../../core/agent/index.ts';
+import {codexMcpServers,hermesMcpServers,mcpServersFrom,planIntegrations,type AgentMcpServer,type IntegrationPlan,type MigrationSource} from '../../../../../agent/agent/index.ts';
 import {codexHome} from './agent-files.ts';
 import {discoverHermes} from './hermes-files.ts';
 import {openClawState} from './local-memory.ts';
 import {readOpenClawConfig} from './openclaw-files.ts';
 
 // The MCP servers a person's own Agent already had, read from its own settings (owner request
-// 2026-10-04: port its integrations instead of connecting them again). Only read; core/agent
+// 2026-10-04: port its integrations instead of connecting them again). Only read; agent/agent
 // decides which ones can come along. Tokens stay in memory and go only to the matching connection.
 
 const LIMIT=20_000_000;

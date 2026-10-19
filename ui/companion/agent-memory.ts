@@ -3,7 +3,7 @@
  * first few of each with Show all. Read only: Worldlet never edits an Agent's memory. For the Agent Fox talks through,
  * Ask it to forget closes Settings and asks it in Fox's conversation, where its own memory does it; another Agent is
  * asked in its own chat. Fox's own saved memory stays on Fox's page. */
-import {memoryForgetRequest} from '../../core/agent/index.ts';
+import {memoryForgetRequest} from '../../agent/agent/index.ts';
 import {agentButton,agentEl as el,type AgentCall} from './agent-change.ts';
 
 type Entry={id:string;kind:'user'|'memory';text:string;where:string};

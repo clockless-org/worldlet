@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,claudeCodeSignInExpired,codexProblem,codexWorldToolsFailed,modelAtCapacity,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
- type LocalHarnessId} from '../core/agent/index.ts';
+ type LocalHarnessId} from '../agent/agent/index.ts';
 import {spawn} from 'node:child_process';
 import {openWorldToolBridge} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
 import {AgentNotStarting,BUSY_RETRIES,forgetNotStarting,LocalHarnessAdapter,LocalHarnessRuntime,harnessEnvironment,harnessVersion,locateLocalHarnesses,readSelection,searchDirectories,selectedInstall,writeSelection,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';

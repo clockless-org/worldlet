@@ -1,13 +1,13 @@
 import {spawn} from 'node:child_process';
 import type {HarnessSend} from '../../../../../contracts/harness-services.ts';
-import {CHANNEL_REPLY,channelTitle,harnessSendResult,harnessService,hermesSendArgs,openClawSendArgs,openClawSendRoute,type HermesSendRoute,type OpenClawSendRoute} from '../../../../../core/agent/index.ts';
+import {CHANNEL_REPLY,channelTitle,harnessSendResult,harnessService,hermesSendArgs,openClawSendArgs,openClawSendRoute,type HermesSendRoute,type OpenClawSendRoute} from '../../../../../agent/agent/index.ts';
 import {hermesSendRouteOf} from './agent-files.ts';
 import {currentEnvironment,harnessEnvironment,locateLocalHarnesses,type HarnessEnvironment,type LocalHarnessInstall} from './local-harness.ts';
 import {openClawSessionEntry} from './openclaw-files.ts';
 import {stopChild} from './protocol.ts';
 
 // The `send` Harness service (contracts/harness-services.ts HarnessSend) for the local Harnesses that declare it
-// (core/agent/harness-services.ts): a reply the person approved goes into the channel thread a `history` thread came
+// (agent/agent/harness-services.ts): a reply the person approved goes into the channel thread a `history` thread came
 // from, sent by the person's own Agent with its own channel sign-in. Where it goes is read from the Agent's own record of
 // that thread (read-only); the Agent's command line sends it (Core's harness-send.ts has the rules). The World asks
 // for the service, never for a Harness by name: one that declares no `send`, or is not installed here, gets null.

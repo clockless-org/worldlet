@@ -1,6 +1,6 @@
 // The `skills` Harness service (contracts/harness-services.ts HarnessSkills) as the World uses it, whichever Agent it is
 // (owner parity plan 2026-10-08, blueprint row Skills): the Agent's own skills listed in the World with when each last
-// ran, beside the World's own copy of every skill (core/agent/PORTABILITY.md#the-agents-skills-in-the-world), and a
+// ran, beside the World's own copy of every skill (agent/agent/PORTABILITY.md#the-agents-skills-in-the-world), and a
 // proposal to save one when Fox has done the same multi-step task again and again. Nothing here knows which Harness it
 // is; the host reads and writes the Agent's folder (agent-runtime/harness-skills.ts). Kept ES-compatible for
 // JavaScriptCore and Jint.

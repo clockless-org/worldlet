@@ -1,9 +1,9 @@
 import crypto from 'node:crypto';
-import {AGENT_AUDIT_KEEP,ASK_REASONS,askApprovesDrafts,answerAsk,askAttachment,askAttentionItem,askItemId,askOpen,claimAsks,postAsk,readAskAttachment,readAsks,readStoredAsk,resolveAsk} from '../../../../../core/agent/index.ts';
+import {AGENT_AUDIT_KEEP,ASK_REASONS,askApprovesDrafts,answerAsk,askAttachment,askAttentionItem,askItemId,askOpen,claimAsks,postAsk,readAskAttachment,readAsks,readStoredAsk,resolveAsk} from '../../../../../agent/agent/index.ts';
 import {AGENT_ASK_TARGET,type AgentAsk} from '../../../../../contracts/agent-asks.ts';
 import type {Row} from './types.ts';
 
-// Agent asks (core/agent/GRANTS.md#agent-asks). Core decides; this keeps the records: each ask in the World's ledger
+// Agent asks (agent/agent/GRANTS.md#agent-asks). Core decides; this keeps the records: each ask in the World's ledger
 // (`state.agent-asks` in world.sqlite) beside its Attention item (provider `agents`), written together with no model.
 // The calling Agent is always the one whose token made the call (world-tool-bridge.ts), never one the model names.
 // An ask's attachments keep only what describes them in the ask; their bytes are saved in the same transaction in

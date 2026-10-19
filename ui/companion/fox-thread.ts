@@ -3,7 +3,7 @@
  * about another. Each entry here is one turn tagged with the place (segment) it was asked
  * in; each context shows only its own segment (one visible thread per context). A turn is one card:
  * it shows Fox's steps while it works and becomes the answer when it finishes. */
-import {addHarnessUsage,harnessUsageLabel,legacyActionDisplayText,readHarnessUsage} from '../../core/agent/index.ts';
+import {addHarnessUsage,harnessUsageLabel,legacyActionDisplayText,readHarnessUsage} from '../../agent/agent/index.ts';
 import type {HarnessUsage} from '../../contracts/harness-services.ts';
 import {conversationTopics} from '../../agent/companion/index.ts';
 import {contextThread} from '../attention/index.ts';

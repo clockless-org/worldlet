@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {validateHarnessServices} from '../contracts/harness-services.ts';
-import {agentServerConnections,claudeCodeStandingRules,codexStandingRules,harnessApprovalFeatures,harnessReadOnlyNote,harnessService,isMemoryEntryId,memoryEntries,memoryForgetRequest} from '../core/agent/index.ts';
+import {agentServerConnections,claudeCodeStandingRules,codexStandingRules,harnessApprovalFeatures,harnessReadOnlyNote,harnessService,isMemoryEntryId,memoryEntries,memoryForgetRequest} from '../agent/agent/index.ts';
 import {standingRules} from '../platform/electron/src/modules/agent-runtime/harness-approvals.ts';
 import {harnessConnections} from '../platform/electron/src/modules/agent-runtime/harness-connections.ts';
 import {harnessMemory} from '../platform/electron/src/modules/agent-runtime/harness-memory.ts';
@@ -12,7 +12,7 @@ import {createHarnessConnections} from '../platform/electron/src/modules/fox/har
 import {withTempDir} from './test-temp.ts';
 
 // Settings › Context and the read-only parts for Claude Code, Codex and pi (owner plan 2026-10-11, PR 3;
-// core/agent/harness-memory.ts): what each Agent remembers, read where it keeps it and never written; forgetting is a
+// agent/agent/harness-memory.ts): what each Agent remembers, read where it keeps it and never written; forgetting is a
 // plain request in Fox's conversation. Claude Code's and Codex's skills, MCP servers and standing rules, and pi's
 // skills, are listed with where to change them, never changed. Fixture homes only; no real Agent or home is touched.
 

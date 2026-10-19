@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {openAgentDatabase,type AgentDatabase} from './agent-database.ts';
-import {commandLine,commandReason,harnessService,hermesJobCommand,hermesJobCreateCommand,hermesScheduleRun,jobChangeDone,jobChangeOffered,openClawJobCommand,openClawJobCreateCommand,openClawScheduleRun,type LocalHarnessId} from '../../../../../core/agent/index.ts';
+import {commandLine,commandReason,harnessService,hermesJobCommand,hermesJobCreateCommand,hermesScheduleRun,jobChangeDone,jobChangeOffered,openClawJobCommand,openClawJobCreateCommand,openClawScheduleRun,type LocalHarnessId} from '../../../../../agent/agent/index.ts';
 import type {HarnessJobChange,HarnessJobCreate,HarnessJobRun,HarnessSchedule} from '../../../../../contracts/harness-services.ts';
 import {WorldletError} from '../../files.ts';
 import {directories,inside,json,readFile} from './agent-files.ts';
@@ -15,7 +15,7 @@ import type {HarnessEnvironment,LocalHarnessInstall} from './local-harness.ts';
 // scheduler keeps them (the read-only `files` readers of harness-schedule.ts), each with its newest result, and Pause,
 // Resume, Run now or Remove, each run as the Agent's own command after the person confirmed it (fox/harness-controls.ts):
 // Hermes Agent's `hermes cron pause|resume|run|remove` in its home, OpenClaw's `openclaw cron disable|enable|run|rm`
-// (core/agent/harness-controls.ts says where each was checked). Worldlet never writes either Agent's job files itself;
+// (agent/agent/harness-controls.ts says where each was checked). Worldlet never writes either Agent's job files itself;
 // after a command the jobs are read again, so what the page says is what the Agent now has.
 
 type Run=typeof runHarnessCommand;

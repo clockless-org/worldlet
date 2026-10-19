@@ -69,7 +69,7 @@ export async function showAgentConnections(target:HTMLElement,call:(action:strin
     if(harness.changes&&c.removable)row.append(button('Remove','remove-connection',()=>confirmChange(row,harness,{remove:c.id},'Remove',`remove ${c.name}`,`${c.name} was removed from ${harness.title}.`)));
     rows.append(row);
    }
-   // What the Agent itself said it uses when it described itself (core/agent/agent-profile.ts): vaults, mailboxes,
+   // What the Agent itself said it uses when it described itself (agent/agent/agent-profile.ts): vaults, mailboxes,
    // chat channels that are not tools Worldlet can read. Listed only; they stay in the Agent.
    const told=await call('agentHarness',{operation:'profile',id:harness.harness}).then(r=>r?.profile,()=>null);
    if(!current())return;

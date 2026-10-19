@@ -73,7 +73,7 @@ export async function worldTool(center:AttentionCenter,name:string,args:Row,turn
  if(name==='query_world_items'){
   const provider=monitorProvider??(typeof args.provider==='string'?args.provider:undefined);
   // A call outside any Fox turn (an Agent on the standing server) reads its own asks with asks/read only, never other
-  // Agents' asks through their Attention items (provider `agents`, core/agent/GRANTS.md#agent-asks).
+  // Agents' asks through their Attention items (provider `agents`, agent/agent/GRANTS.md#agent-asks).
   const items=db.records('items').filter(item=>!(turn.startsWith('channel-')&&item.provider===AGENT_ASK_PROVIDER));
   const result=core('worldItemsQuery',{items,checks:db.records('checks'),provider});
   if(!isRow(result))throw new WorldletError('Invalid item query result.');

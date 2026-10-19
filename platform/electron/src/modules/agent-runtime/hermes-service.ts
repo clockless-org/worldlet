@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import {hermesBorrowsCodex,hermesServerEnvLines,hermesServerSettings,hermesWorldTools,hermesWorldToolsCommand,hermesWorldToolsRegistered,type HermesWorldToolsServer} from '../../../../../core/agent/index.ts';
+import {hermesBorrowsCodex,hermesServerEnvLines,hermesServerSettings,hermesWorldTools,hermesWorldToolsCommand,hermesWorldToolsRegistered,type HermesWorldToolsServer} from '../../../../../agent/agent/index.ts';
 import {WorldletError,realPath} from '../../files.ts';
 import type {GatewaySettings} from './harness-sessions.ts';
 
@@ -12,7 +12,7 @@ import type {GatewaySettings} from './harness-sessions.ts';
 // login service with Hermes' own `hermes gateway install` and starts it, with its API server on this computer only:
 // a strong random API_SERVER_KEY (and API_SERVER_HOST=127.0.0.1) is appended to that profile's `.env` only when it has no
 // usable key; the person's own key, port and host are read and used, never replaced. Worldlet never stops the service.
-// The rules are Core's (core/agent/hermes-server.ts); Fox's turns reach the server through HermesServerConversation
+// The rules are Core's (agent/agent/hermes-server.ts); Fox's turns reach the server through HermesServerConversation
 // (harness-sessions.ts). Done once per profile and app run, in the background; a failure is recorded in diagnostics and
 // Fox keeps its current path. The key is never logged or shown.
 

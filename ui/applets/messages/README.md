@@ -6,7 +6,7 @@ Read iMessage conversations and send iMessages from Worldlet on a Mac (owner req
 | --- | --- |
 | Peek | The painted speech-bubble intercom with the Messages icon. It claims no unread count. |
 | Open | Four conversation cards per page from the 50 most recent conversations: the group name, the person's Contacts name or the people in it, the last line said and when. Fox offers New message and Refresh. |
-| Focus | The conversation's 60 most recent messages as bubbles (yours on the right, others' with their Contacts names) over a box to write in and **Send**. Files in a message show by name; clicking one shows it in Finder (never opens it). New messages appear while the conversation is open. A new message adds a To field for a phone number or an email address. A conversation with one person at a phone number also offers **Call** beside Fox: the person's own Agent calls them, after the person checks and edits whom, why and what to ask in Fox's card ([calling from an Applet](../../../core/agent/PORTABILITY.md#calling-from-an-applet)). |
+| Focus | The conversation's 60 most recent messages as bubbles (yours on the right, others' with their Contacts names) over a box to write in and **Send**. Files in a message show by name; clicking one shows it in Finder (never opens it). New messages appear while the conversation is open. A new message adds a To field for a phone number or an email address. A conversation with one person at a phone number also offers **Call** beside Fox: the person's own Agent calls them, after the person checks and edits whom, why and what to ask in Fox's card ([calling from an Applet](../../../agent/agent/PORTABILITY.md#calling-from-an-applet)). |
 
 ## Permissions
 

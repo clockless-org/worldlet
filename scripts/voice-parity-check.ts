@@ -2,7 +2,7 @@
 // into any text field of the World, not only Fox's bar (ui/companion/field-dictation.ts); local Whisper hears the
 // World's own names as its initial prompt (agent/companion/speech-vocabulary.ts, platform/local-tools/whisper_*.py);
 // Fox's spoken replies use the Agent's own text-to-speech through the Harness `voice` service where the Harness has one
-// (core/agent/harness-voice.ts, agent-runtime/harness-voice.ts), and a system voice otherwise.
+// (agent/agent/harness-voice.ts, agent-runtime/harness-voice.ts), and a system voice otherwise.
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import fs from 'node:fs';
@@ -12,7 +12,7 @@ import {SPEECH_VOCABULARY,speechPrompt,speechTerm,speechTerms,worldSpeechTerms} 
 import {makeSampleWorld} from '../ui/world/sample-data.ts';
 import {dictationTarget,dictationWords} from '../ui/companion/field-dictation.ts';
 import {validateHarnessServices} from '../contracts/harness-services.ts';
-import {HARNESS_SERVICES,HARNESS_VOICE,harnessService,harnessVoiceArgs,harnessVoiceResult,harnessVoiceText} from '../core/agent/index.ts';
+import {HARNESS_SERVICES,HARNESS_VOICE,harnessService,harnessVoiceArgs,harnessVoiceResult,harnessVoiceText} from '../agent/agent/index.ts';
 import {harnessVoice} from '../platform/electron/src/modules/agent-runtime/harness-voice.ts';
 import type {SendCommand} from '../platform/electron/src/modules/agent-runtime/harness-send.ts';
 

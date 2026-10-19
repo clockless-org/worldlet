@@ -19,7 +19,7 @@ function posixShell(){
 const shell=posixShell();
 if(shell){const parsed=spawnSync(shell,['-n','platform/install/install.sh'],{encoding:'utf8'});assert.equal(parsed.status,0,'install.sh parses: '+(parsed.error?.message||parsed.stderr));}
 const ids=['openclaw','hermes','pi','claude-code','codex'];
-const local=readFileSync('core/agent/local-harness.ts','utf8');
+const local=readFileSync('agent/agent/local-harness.ts','utf8');
 for(const id of ids)assert.match(local,new RegExp(`['"]${id}['"]`),`${id} is a setup Agent id`);
 assert.ok(sh.includes(`""|${ids.join('|')})`),'install.sh accepts exactly the setup Agent ids');
 assert.ok(ps.includes(`ValidateSet('', ${ids.map(id=>`'${id}'`).join(', ')})`),'install.ps1 accepts exactly the setup Agent ids');

@@ -1,7 +1,7 @@
 // Settings › Agents's controls for the Agent's own scheduled jobs and skills (owner plan 2026-10-11, PR 2): each
 // change is one of the Agent's own commands, shown to the person before it runs, never an edit Worldlet makes to the
 // Agent's files. Every command here was checked against the Agent's own source and documentation at the oldest version
-// Worldlet supports (core/agent/agent-versions.ts) and at its current release:
+// Worldlet supports (agent/agent/agent-versions.ts) and at its current release:
 // - Hermes Agent (hermes_cli/subcommands/cron.py, skills.py, config.py; website/docs/reference/cli-commands.md):
 //   `hermes cron pause|resume|run|remove <job_id>`; a skill turned off or on with `hermes config set skills.disabled
 //   <list>` (the documented `skills.disabled` list its interactive `hermes skills config` writes, read back with

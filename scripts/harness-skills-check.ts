@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {harnessService,skillDraftProblem,skillFrontmatter,skillInvocation,skillLastRanLabel,skillLastRuns,skillMarkdown,skillRepeats,worldSkills,SKILL_REPEAT,type SkillTurn} from '../core/agent/index.ts';
+import {harnessService,skillDraftProblem,skillFrontmatter,skillInvocation,skillLastRanLabel,skillLastRuns,skillMarkdown,skillRepeats,worldSkills,SKILL_REPEAT,type SkillTurn} from '../agent/agent/index.ts';
 import {harnessSkills} from '../platform/electron/src/modules/agent-runtime/harness-skills.ts';
 import {createFoxSkills} from '../platform/electron/src/modules/fox/skills.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {withTempDir} from './test-temp.ts';
 
-// The `skills` Harness service (contracts/HARNESS.md#harness-services-v2, core/agent/PORTABILITY.md#the-agents-skills-in-the-world):
+// The `skills` Harness service (contracts/HARNESS.md#harness-services-v2, agent/agent/PORTABILITY.md#the-agents-skills-in-the-world):
 // Core's rules (a skill file, when one last ran, the conservative repeat detector), the host's reading and saving
 // against fixture Hermes Agent and OpenClaw homes with a fake `openclaw` command, and the Harness-neutral World module
 // on a real world.sqlite with a fake Agent. No real Agent runs and no real home is touched.
