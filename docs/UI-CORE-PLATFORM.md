@@ -6,7 +6,7 @@ Platform host thin; the Harness and model service are replaceable through explic
 | Layer | Repository owner | Responsibility |
 | --- | --- | --- |
 | UI | `ui/` | Shared Web presentation, navigation, Fox and Applet interactions |
-| Core | `core/` | Pure product rules, records, scheduling decisions and validation |
+| Agent and Context | `agent/`, `context/` | Pure product rules, records, scheduling decisions and validation |
 | Platform | `platform/` | Electron desktop shell (and the Node host for computers without a display), permissions, persistence, processes and browser IO |
 | Harness | The person's own Agent (`harness/` holds the reference adapter example and the `worldlet` skill) | Agent planning, tool loop and admitted job execution; Worldlet never customizes it |
 | Models/services | The person's provider, reached through their Agent | Inference access, quotas and usage; Worldlet provides no model |
@@ -20,7 +20,7 @@ The product in four layers with their components: UI (`ui/`), Agent (`agent/`: w
 <a id="see-do-know"></a>
 ## Four layers: UI, Agent, Context, Platform
 
-Inside the app there are four layers ([#677](https://github.com/clockless-org/worldlet/issues/677)), in plain words See, Do, Know and Host. UI is `ui/`, Agent is `agent/` and Context is `context/` (both were `core/` until [#681](https://github.com/clockless-org/worldlet/issues/681)), and Platform is `platform/`.
+Inside the app there are four layers ([#677](https://github.com/clockless-org/worldlet/issues/677)), in plain words See, Do, Know and Host. UI is `ui/`, Agent is `agent/` and Context is `context/` (together they were once `core/`, [#681](https://github.com/clockless-org/worldlet/issues/681)), and Platform is `platform/`.
 
 | # | Layer | What it is | Code |
 | --- | --- | --- | --- |
@@ -36,7 +36,7 @@ Rules:
 
 - Calls go downward only.
 - Imports follow the layers: `context/` imports only itself and `contracts/`; `agent/` imports `context/` and `contracts/`;
-  `ui/` imports the public `index.ts` of both. Nothing imports what is left of `core/` (old-path re-exports). `npm run check:arch` enforces this; the few exact exceptions are named in
+  `ui/` imports the public `index.ts` of both. `npm run check:arch` enforces this; the few exact exceptions are named in
   [scripts/architecture-boundaries.ts](../scripts/architecture-boundaries.ts).
 - UI only reads Context; to change anything it hands the work to Agent.
 - Everyone in Agent passes the Gate, Fox included. Agents reach Context only through World tools and their Grants.
@@ -55,9 +55,7 @@ across all four kinds, and draft and pin state for Made records are next steps
 Every folder of `ui/`, `agent/`, `context/` and `platform/` belongs to exactly one layer.
 `npm run check:docs` fails when a folder is missing or listed twice.
 
-`core/` holds no component any more: its folders moved to `agent/` and `context/` ([#681](https://github.com/clockless-org/worldlet/issues/681)).
-The shared dispatcher the Platform calls is `agent/index.ts`, since it calls both layers. What is left in `core/` is
-re-exports at old paths (each folder's `index.ts`, and files used from outside this repository) until nothing imports them.
+The shared dispatcher the Platform calls is `agent/index.ts`, since it calls both Agent and Context.
 
 | Layer | Folders |
 | --- | --- |
@@ -70,11 +68,11 @@ re-exports at old paths (each folder's `index.ts`, and files used from outside t
 ## Features and the base
 
 Layers cut the product across; features cut it down. Each feature is a vertical
-slice with its own UI, Core and (when it needs one) Platform part. Every `ui/` and
-`core/` component and every Electron host module (`platform/electron/src/modules/`) belongs to exactly one row below; `npm run check:docs` fails when a
-component is missing or listed twice. Which layer each folder is in: [folders by layer](#folders-by-layer). The Node host runs the same Core and the same host modules without a window.
+slice with its own UI, Agent or Context, and (when it needs one) Platform part. Every `ui/`, `agent/` and
+`context/` component and every Electron host module (`platform/electron/src/modules/`) belongs to exactly one row below; `npm run check:docs` fails when a
+component is missing or listed twice. Which layer each folder is in: [folders by layer](#folders-by-layer). The Node host runs the same Agent and Context and the same host modules without a window.
 
-| Feature | What it is | UI | Core | Platform |
+| Feature | What it is | UI | Agent and Context | Platform |
 | --- | --- | --- | --- | --- |
 | World | The place everything sits in: areas, HUD, themes | `ui/world/` `ui/hud/` `ui/themes/` `ui/theme-packages/` | `context/activity/` | `platform/electron/src/modules/world.ts` `platform/electron/src/modules/world-audio/` |
 | Applets | Where the person's data and actions live, with the real website beside them | `ui/applets/` `ui/browser/` `ui/games/` `ui/practice/` | `context/applets/` `context/board/` `context/browser/` `context/games/` | `platform/electron/src/modules/applet-art/` `platform/electron/src/modules/applet-tools/` `platform/electron/src/modules/browser/` `platform/electron/src/modules/calendar/` `platform/electron/src/modules/games/` |
@@ -100,8 +98,8 @@ animation (anatomy, poses, studies and players) is in `ui/companion/animation/`.
 
 ## Dependency rules
 
-Core imports only Core and Contracts; Contracts depends only on itself. UI consumes
-public Core interfaces and the Host bridge. It cannot reach Platform implementations or
+Context imports only Context and Contracts; Agent imports Agent, Context and Contracts; Contracts depends only on itself. UI consumes
+public Agent and Context interfaces and the Host bridge. It cannot reach Platform implementations or
 Harness internals. A component exports its supported `index.ts` surface; helpers are
 private. Platform code executes shared decisions rather than copying them.
 
@@ -200,7 +198,7 @@ This is the single audit checklist; other documents link here.
 - [ ] **Ownership:** identify one owner for each changed product rule; distinguish UI behavior, pure Core decisions, Platform effects and Harness execution.
 - [ ] **Shared first:** check the Electron host modules for duplicate transitions, priorities, retry/timeout/cache policy, validation, prompts, status wording and privacy rules.
 - [ ] **Thin adapters:** each retained Platform decision has an OS/API/security reason. Shared code decides policy; the host still enforces actual permissions and validates untrusted inputs.
-- [ ] **Dependency direction:** Core imports only Core/Contracts; Contracts imports only Contracts. UI uses the bridge, not Platform implementations or Harness internals.
+- [ ] **Dependency direction:** Context imports only Context/Contracts, Agent only Agent/Context/Contracts; Contracts imports only Contracts. UI uses the bridge, not Platform implementations or Harness internals.
 - [ ] **Capabilities:** unsupported functionality follows declared host capabilities, not copied product flows or scattered platform-name checks.
 - [ ] **State and persistence:** Platform storage applies shared state transitions without losing stable IDs, account ownership or user decisions.
 - [ ] **Execution:** compare busy state, queueing, cancellation, deadlines, foreground priority and background recovery. OS-specific process mechanics may differ; product outcomes should not.

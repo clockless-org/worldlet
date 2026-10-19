@@ -30,7 +30,6 @@
     "ui",
     "agent",
     "context",
-    "core",
     "contracts",
     "platform/bridge",
     "types",

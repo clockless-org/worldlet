@@ -6,14 +6,13 @@ import ts from 'typescript';
 const root=process.cwd();
 const config=ts.readConfigFile('tsconfig.json',ts.sys.readFile);
 const options=ts.parseJsonConfigFileContent(config.config,ts.sys,root).options;
-// core/ moved into agent/ and context/ (#681); the shared dispatcher the Platform calls is agent/index.ts. What is left
-// in core/ is re-exports of old paths, for the operations repository. Nothing here may import it.
-const layers=['platform/bridge','ui','agent','context','core','contracts','models','harness','platform','website','worker'];
-const PURE=['agent','context','core','contracts'];
+// Agent and Context (#681): context/ imports only itself and contracts/, agent/ imports context/ and contracts/.
+const layers=['platform/bridge','ui','agent','context','contracts','models','harness','platform','website','worker'];
+const PURE=['agent','context','contracts'];
 const allowed:Record<string,string[]>={
  ui:['ui','agent','context','contracts','platform/bridge','resources'],
  agent:['agent','context','contracts'], context:['context','contracts'],
- core:['core','agent','context','contracts'], contracts:['contracts'],
+ contracts:['contracts'],
  'platform/bridge':['platform/bridge','agent','context','contracts'],
  'models':['models','contracts','agent','context'],
  harness:['harness','contracts'], platform:['platform','platform/bridge','agent','context','contracts'],
@@ -35,9 +34,7 @@ export function checkEdge(file:string,target:string){
  const edge=`${file} -> ${target}`;
  if(exceptions.has(edge)){used.add(edge);return;}
  assert(allowed[layer(file)]?.includes(layer(target)),`Forbidden layer dependency: ${edge}`);
- const component=/^(core|ui|agent|context)\/([^/]+)\/(.+)$/.exec(target);
- // A file left at its old core/ path re-exports the same file at its new place.
- if(file.startsWith('core/')&&/^(agent|context)\//.test(target)&&target.replace(/^(agent|context)\//,'core/')===file)return;
+ const component=/^(ui|agent|context)\/([^/]+)\/(.+)$/.exec(target);
  if(component&&!file.startsWith(`${component[1]}/${component[2]}/`))
   assert.equal(component[3],'index.ts',`${file} bypasses public component entry: ${target}`);
 }
@@ -80,6 +77,6 @@ function scan(dir:string){
 }
 export function checkRepository(){
  // The open-source export (scripts/oss-export.mjs) leaves out the hosted services, so a missing root is skipped.
- for(const dir of ['ui','agent','context','core','contracts','platform/bridge','platform/electron','platform/node','website','models','worker','harness'])if(fs.existsSync(dir))scan(dir);
+ for(const dir of ['ui','agent','context','contracts','platform/bridge','platform/electron','platform/node','website','models','worker','harness'])if(fs.existsSync(dir))scan(dir);
  for(const edge of exceptions.keys())assert(used.has(edge)||!fs.existsSync(edge.split(' -> ')[0]),`Remove stale architecture exception: ${edge}`);
 }

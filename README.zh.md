@@ -163,7 +163,8 @@ npm run package        # 为当前系统打包桌面 App（不签名）
 | 目录 | 负责 |
 | --- | --- |
 | `ui/` | 共享渲染和交互：World、Applet、Fox、Attention Center |
-| `core/` | 与平台无关的产品规则和数据 |
+| `agent/` | 谁来做事：Fox、任务、Agent 和门禁（与平台无关的规则） |
+| `context/` | World 知道的一切：记录、存储和连接器（与平台无关的规则） |
 | `platform/` | Electron 宿主和 Node 宿主（无显示器）：系统集成、浏览器引擎、受控执行 |
 | `harness/` | Agent 后端和参考 Harness 适配器 |
 | `contracts/` | 宿主和 Agent 共用的接口与数据形状 |
