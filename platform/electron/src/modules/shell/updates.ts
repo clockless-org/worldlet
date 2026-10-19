@@ -6,7 +6,7 @@ import {app} from 'electron';
 import {ensureDirectory,readJSON,writeJSON,WorldletError} from '../../files.ts';
 import {AGENT,ANALYTICS,type AgentService,type AnalyticsService,type AppUpdatesService} from '../../host/services.ts';
 import {timingBucket,updateWaitBucket} from '../../../../../agent/diagnostics/index.ts';
-import {demotedChannel,followedChannel,isUpdateChannel,pickUpdate,switchUpdateChannel,updateChannelOptions,updateChannelSwitchable,type UpdateChannel} from '../../../../../core/distribution/index.ts';
+import {demotedChannel,followedChannel,isUpdateChannel,pickUpdate,switchUpdateChannel,updateChannelOptions,updateChannelSwitchable,type UpdateChannel} from '../../../../../agent/distribution/index.ts';
 import {outliveQuit,relaunchAfterQuit} from '../../host/quit.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {ownerComputer} from './owner-computer.ts';
@@ -26,7 +26,7 @@ const PREPARED='worldlet.update.prepared';
 /** The Build the previous launch ran (`app_build_changed`). */
 const LAST_BUILD='worldlet.update.lastBuild';
 /** One update owner per platform. The page only sees `{state,label,detail,version,visible,enabled}` and, for
- * Settings, the update channel (core/distribution/update-channel.ts): `{channel,channels,channelNote?}`. */
+ * Settings, the update channel (agent/distribution/update-channel.ts): `{channel,channels,channelNote?}`. */
 export abstract class Updates implements AppUpdatesService {
  protected host:Host;
  protected state='idle';
@@ -296,7 +296,7 @@ export class MacUpdates extends Updates {
   const texts=await Promise.all(feed===this.alphaFeed?[feed,this.feed].map(f=>this.appcast(f)):[this.appcast(feed)]);
   const system=process.getSystemVersion();
   const items=texts.flatMap(text=>parseAppcast(text,this.acceptance?.origin)).filter(item=>compareVersions(item.minimumSystemVersion,system)<=0);
-  // A newer Build; after switching to a more stable channel, its newest even when lower (core/distribution/update-channel.ts).
+  // A newer Build; after switching to a more stable channel, its newest even when lower (agent/distribution/update-channel.ts).
   const pick=pickUpdate(items.map(item=>item.build),this.current,!this.acceptance&&this.allowLower);
   if(!this.acceptance)this.settle(pick.settled);
   return items.find(item=>item.build===pick.build)??null;
@@ -509,7 +509,7 @@ export class WindowsUpdates extends Updates {
    // Alpha is never behind Beta: a release whose RC never reached the Alpha manifest is still offered on Alpha.
    const beta=alpha?await fetchWindowsRelease(this.abort.signal,WINDOWS_MANIFEST_URL,this.agentVersion):null;
    const release=beta&&(!fetched||beta.build>fetched.build)?beta:fetched;
-   // A newer Build; after switching to a more stable channel, its newest even when lower (core/distribution/update-channel.ts).
+   // A newer Build; after switching to a more stable channel, its newest even when lower (agent/distribution/update-channel.ts).
    const pick=pickUpdate(release?[release.build]:[],this.current,!this.test&&this.allowLower);
    if(!this.test)this.settle(pick.settled);
    const offered=pick.build===null?null:release;

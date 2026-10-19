@@ -49,8 +49,7 @@ across all four kinds, and draft and pin state for Made records are next steps
 <a id="folders-by-layer"></a>
 ### Folders by layer
 
-Every folder of `ui/`, `core/` and `platform/` belongs to exactly one layer; each `core/` folder is in Agent or Context,
-except the three whose files are split between them as they move ([#681](https://github.com/clockless-org/worldlet/issues/681)).
+Every folder of `ui/`, `core/` and `platform/` belongs to exactly one layer; each `core/` folder is in Agent or Context.
 `npm run check:docs` fails when a folder is missing or listed twice.
 
 The `core/` folders move one at a time. A moved folder is listed at its new place, and `core/` keeps a
@@ -59,9 +58,8 @@ re-export at its old `index.ts` (and at any other file used from outside this re
 | Layer | Folders |
 | --- | --- |
 | UI | `ui/applets/` `ui/artifacts/` `ui/attention/` `ui/browser/` `ui/companion/` `ui/components/` `ui/distribution/` `ui/games/` `ui/hud/` `ui/onboarding/` `ui/practice/` `ui/shell/` `ui/theme-packages/` `ui/themes/` `ui/web/` `ui/world/` |
-| Agent (to `agent/`) | `agent/agent/` `agent/tasks/` `agent/companion/` `agent/tools/` `agent/attention/` `agent/onboarding/` `agent/phone/` `agent/diagnostics/` |
+| Agent (to `agent/`) | `agent/agent/` `agent/tasks/` `agent/companion/` `agent/tools/` `agent/attention/` `agent/onboarding/` `agent/phone/` `agent/diagnostics/` `agent/distribution/` |
 | Context (to `context/`) | `context/context/` `context/items/` `context/artifacts/` `context/activity/` `context/accounts/` `context/applets/` `context/board/` `context/browser/` `context/games/` |
-| Agent and Context, split per file | `core/distribution/` |
 | Platform | `platform/bridge/` `platform/browser/` `platform/distribution/` `platform/electron/` `platform/install/` `platform/local-tools/` `platform/node/` `platform/web-engine/` |
 
 <a id="features"></a>
@@ -84,7 +82,7 @@ component is missing or listed twice. Which layer each folder is in: [folders by
 | Context | Everything the World knows, kept on the person's computer: World items and history, conversation and execution journals, source context, and each connected Service's synced snapshots with the one search over them (`world_context`). Storage and kinds: [context/items/STORAGE.md](../context/items/STORAGE.md#four-kinds) | (no folder of its own: every feature reads it; Settings › Context beside Fox) | `context/context/` `context/items/` | (no host module of its own: `platform/electron/src/store/` persists it) |
 | Connectors | Context's intake: sign-in to Services (Google, Notion, GitHub, Linear, PostHog, Cloudflare and the rest) and this computer's own sources, their reads, and writes the person approved | (no folder of its own: Settings › Connectors beside Fox) | `context/accounts/` | `platform/electron/src/modules/sources/` |
 | Windows | The same World in another window: a web browser at the World's address and the phone, paired by QR code through the end-to-end encrypted relay | `ui/web/` (the page a web browser opens, [web](../agent/phone/README.md#web)) | `agent/phone/` | `platform/electron/src/modules/phone/` |
-| Base | Setup, the app shell, distribution and diagnostics | `ui/shell/` `ui/components/` `ui/onboarding/` `ui/distribution/` | `agent/onboarding/` `agent/diagnostics/` `core/distribution/` | `platform/electron/src/modules/shell/` `platform/electron/src/modules/media/` (the media surface the World's sound, Fox's voice and Voice Memos share), `contracts/` |
+| Base | Setup, the app shell, distribution and diagnostics | `ui/shell/` `ui/components/` `ui/onboarding/` `ui/distribution/` | `agent/onboarding/` `agent/diagnostics/` `agent/distribution/` | `platform/electron/src/modules/shell/` `platform/electron/src/modules/media/` (the media surface the World's sound, Fox's voice and Voice Memos share), `contracts/` |
 
 Work flows Companion or Applets → Task → Artifact → Attention → Journal: Fox and
 Applets start tasks, each task's result is an artifact, an artifact that needs the

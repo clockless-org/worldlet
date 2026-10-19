@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {defaultBrowserSupported,defaultBrowserText,incomingLink,linksInArguments} from '../core/distribution/index.ts';
+import {defaultBrowserSupported,defaultBrowserText,incomingLink,linksInArguments} from '../agent/distribution/index.ts';
 
 // Only the installed Mac and Windows apps register; Dev, Linux and the Store package never do.
 assert.equal(defaultBrowserSupported({channel:'release',platform:'darwin'}),true);

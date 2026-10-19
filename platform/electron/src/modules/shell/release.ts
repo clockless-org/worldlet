@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {app} from 'electron';
 import type {Host,Row} from '../../host/types.ts';
-import {releaseLaunch} from '../../../../../core/distribution/index.ts';
+import {releaseLaunch} from '../../../../../agent/distribution/index.ts';
 // Release identity and distribution settings. Development reads them from the checkout;
 // the packager copies `platform/electron/distribution` to `<resources>/distribution` and
 // the UI build's `build-info.json` beside it.

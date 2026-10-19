@@ -4,7 +4,7 @@ The desktop apps are built, signed and published to this repository's GitHub Rel
 
 ## Channels
 
-The channels are the in-app update channels ([update-channel.ts](../core/distribution/update-channel.ts)). Each one adds tests to the one before it (owner decision 2026-10-09):
+The channels are the in-app update channels ([update-channel.ts](../agent/distribution/update-channel.ts)). Each one adds tests to the one before it (owner decision 2026-10-09):
 
 | Channel | Tests | Where, how long | What ships |
 | --- | --- | --- | --- |
