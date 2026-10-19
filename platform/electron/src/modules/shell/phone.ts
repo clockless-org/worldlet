@@ -19,7 +19,7 @@ import {attentionLaterUntil,hostAttention} from '../../../../../agent/attention/
 import {onboardingUnfinished} from '../../../../../agent/companion/index.ts';
 import {taskPanel} from '../../../../../agent/tasks/index.ts';
 import {APP_DEFINITIONS} from '../../../../../context/applets/index.ts';
-import {readArtifact} from '../../../../../context/artifacts/index.ts';
+import {readArtifact} from '../../../../../context/store/index.ts';
 
 // Phone pairing (platform/web/README.md): the iPhone app mirrors the Attention Center and Fox's main conversation.
 // This module owns the pairing secret and the relay connection; the World page supplies the Attention snapshot

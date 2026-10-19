@@ -103,7 +103,7 @@ The live page should extend just under the inner rim, with no additional matte, 
 
 ### Artifacts
 
-An Artifact is a card Fox puts in front of the person ([context/artifacts](../../context/artifacts/README.md)). The theme says how it looks; the host makes it. The section holds no template, stylesheet or script, only files a person or a model reads:
+An Artifact is a card Fox puts in front of the person ([context/artifacts](../../context/store/ARTIFACTS.md)). The theme says how it looks; the host makes it. The section holds no template, stylesheet or script, only files a person or a model reads:
 
 | Field | What it is |
 | --- | --- |

@@ -1,5 +1,5 @@
 import {validAttentionTime} from './attention-time.ts';
-import {attentionEventError} from '../../context/items/index.ts';
+import {attentionEventError} from '../../context/store/index.ts';
 import type {WorldItem} from '../../contracts/world-item.ts';
 /** Card copy limits in Unicode code points. The upsert_world_items schema mirrors them so models see the same limits. */
 export const ATTENTION_CONTENT_LIMITS={title:40,reason:56,reasonWords:8,summary:1200,actionLabel:32,locationName:80,location:240} as const;

@@ -66,7 +66,7 @@ function fixture(login:{status:string,offered:boolean,platform?:string}){
  };
  return {calls,view,call,root:new Root()};
 }
-const {mountLoginItemOffer}=await import('../ui/shell/login-item-offer.ts');
+const {mountLoginItemOffer}=await import('../ui/frame/login-item-offer.ts');
 const offered=(view:any)=>view.guideSource==='login-item';
 try{
  // During the journey nothing is asked; finishing it (the first win) waits for its moment.
@@ -129,7 +129,7 @@ try{
  }
 
  // The `login` guide shows the system's status and turns it on and off.
- const {createFoxPreferences}=await import('../ui/settings/fox-preferences.ts');
+ const {createFoxPreferences}=await import('../ui/frame/fox-preferences.ts');
  for(const [status,platform,pattern,label] of [
   ['requires-approval','darwin',/allow Worldlet in System Settings → General → Login Items/,'Don\'t open at login'],
   ['enabled','win32',/opens quietly in the background/,'Don\'t open at login'],

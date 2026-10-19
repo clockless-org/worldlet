@@ -1,7 +1,7 @@
 import {AGENT_ARTIFACT_LIMITS,type AgentArtifactRead,type AgentArtifactSave,type AgentArtifactView} from '../../contracts/agent-artifacts.ts';
 import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
 import {looksSecret} from './agent-profile.ts';
-import {ARTIFACT_LIMITS,artifactSizeFor,mergeArtifact,orderArtifacts,validArtifactId,type Artifact} from '../../context/artifacts/index.ts';
+import {ARTIFACT_LIMITS,artifactSizeFor,mergeArtifact,orderArtifacts,validArtifactId,type Artifact} from '../../context/store/index.ts';
 
 /** Agent artifacts (contracts/agent-artifacts.ts, agent/gate/GRANTS.md#agent-artifacts). Pure: hosts supply the kept
  * artifacts, the calling Agent's ID (from its token) and name, the new artifact's ID and the clock, and save what comes

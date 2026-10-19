@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {readPresentationRequest,EMPTY_OVERLAY} from '../context/sources/index.ts';
+import {readPresentationRequest,EMPTY_OVERLAY} from '../context/connectors/index.ts';
 for(const value of [1,1.25,1.5,2])assert.equal(readPresentationRequest({action:'setTextScale',value}).action,'setTextScale');
 for(const value of [1.2,'1',null,Infinity])assert.throws(()=>readPresentationRequest({action:'setTextScale',value}));
 assert.throws(()=>readPresentationRequest({action:'setTextScale',value:1,provider:'custom'}));

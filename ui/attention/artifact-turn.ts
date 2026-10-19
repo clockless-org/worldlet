@@ -1,4 +1,4 @@
-// A follow-up on an Artifact (context/artifacts/follow-up.ts): the card turns over to its back, then drops down into the
+// A follow-up on an Artifact (context/store/follow-up.ts): the card turns over to its back, then drops down into the
 // Doing now side beside Fox, on its right (ui/world/task-panel.ts), where its work goes on in the background (owner request 2026-10-11).
 // The card is put away first; what turns and flies is a sheet standing in its place, as flyIntoJournal does.
 

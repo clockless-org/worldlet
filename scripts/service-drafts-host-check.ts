@@ -14,7 +14,7 @@ import {askItemId} from '../agent/gate/asks.ts';
 import {roomDenied} from '../contracts/web-world.ts';
 import {STANDING_OUTSIDE_TURN} from '../agent/gate/grants.ts';
 import {SERVICE_DRAFT_MESSAGES,SERVICE_DRAFT_REASONS,SERVICE_DRAFT_STALE,serviceDraftItemId} from '../agent/gate/service-drafts.ts';
-import type {PosthogSettings} from '../context/sources/index.ts';
+import type {PosthogSettings} from '../context/connectors/index.ts';
 
 // PostHog and Notion drafts on the host (agent/gate/GRANTS.md#posthog-and-notion-drafts), the same modules the Electron
 // and Node hosts run, on a real world.sqlite through the standing server, against a stubbed PostHog API (the World's

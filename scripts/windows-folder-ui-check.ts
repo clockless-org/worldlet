@@ -4,7 +4,7 @@ import {APPLET_REGION_TITLES} from '../context/applets/regions.ts';
 declare global {var FolderUI:any;var folderCalls:any[];var folderState:any;var folderGuide:any;var cancelFolder:boolean;var finishOrganization:any;}
 await withBrowser(async browser=>{
  const page=await browser.newPage(),errors=pageErrors(page);
- const bundle=await bundleScript({entryPoints:['ui/shell/world-onboarding.ts'],globalName:'FolderUI'});
+ const bundle=await bundleScript({entryPoints:['ui/frame/world-onboarding.ts'],globalName:'FolderUI'});
  await page.setContent('<main><div id="guide"></div></main>');await page.addScriptTag({content:bundle});
  await page.evaluate(()=>{
   folderCalls=[];cancelFolder=false;folderState={platform:'windows',onboarding:{completed:true},sources:[{id:'original',title:'Existing original',enabled:true}],knowledge:[],connections:[],cloudConsent:false};

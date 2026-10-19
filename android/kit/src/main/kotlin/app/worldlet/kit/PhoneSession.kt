@@ -60,7 +60,7 @@ data class PhoneUpdate(
     /** The turn Fox is streaming. */
     val live: LiveTurn? = null,
     val desktop: DesktopInfo? = null,
-    /** The widgets for now (context/artifacts). */
+    /** The widgets for now (context/store). */
     val widgets: WidgetsSnapshot? = null,
     /** When the computer last reached the relay (milliseconds since 1970). */
     val computerSeenAt: Double? = null,

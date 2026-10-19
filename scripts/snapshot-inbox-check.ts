@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {snapshotInbox} from '../ui/shell/snapshot-inbox.ts';
+import {snapshotInbox} from '../ui/frame/snapshot-inbox.ts';
 
 const turns:(()=>void)[]=[],seen:number[]=[];
 let finish:()=>void;

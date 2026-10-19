@@ -20,7 +20,7 @@ console.log('PASS native Calendar flags, declined meetings, invalid end times, m
 
 // An unsolicited invite can place a valid meeting link on the calendar: a due meeting
 // is offered with an explicit Join action and never opens by itself.
-const world=await readFile(new URL('../ui/shell/notion-world.ts',import.meta.url),'utf8');
+const world=await readFile(new URL('../ui/frame/notion-world.ts',import.meta.url),'utf8');
 const poll=world.slice(world.indexOf('const meetingPoll=setInterval('),world.indexOf('function offerMeeting('));
 assert.ok(poll.includes('dueMeeting(')&&poll.includes('offerMeeting('),'The due-meeting poll offers the meeting');
 assert.ok(!/openMeeting\(|visitObject\(|browserPanel\.mount\(/.test(poll),'The poll itself never opens or navigates');
@@ -93,7 +93,7 @@ console.log('PASS due meetings are offered with an explicit Join action; nothing
  const browser=await chromium.launch();try{
   const page=await browser.newPage({viewport:{width:1440,height:900},reducedMotion:'reduce'});
   await page.setContent('<main id="notionWorld" style="position:fixed;inset:0;background:#879a82"><section class="pixi-applet-stage" data-installation="true" data-work="true"></section></main>');
-  for(const file of ['dist/WorldletWeb/worldlet-ui.css','ui/shell/pixi-world.css'])await page.addStyleTag({content:await readFile(file,'utf8')});
+  for(const file of ['dist/WorldletWeb/worldlet-ui.css','ui/frame/pixi-world.css'])await page.addStyleTag({content:await readFile(file,'utf8')});
   await page.addScriptTag({content:script});
   await page.evaluate(stage=>{const w=window as any;w.picks=[];w.links=[];const panel=document.querySelector('.pixi-applet-stage');
    w.Meetings.renderMeetingsOpen(panel,{key:'meetings',title:'Meetings'},stage.items,{...stage,openLink:(url,provider)=>w.links.push([url,provider])},item=>w.picks.push(item.id));},meetingsStage(calls,'',now));

@@ -18,6 +18,6 @@ export {mountHomeReview} from './fox-home-review.ts';
 export {helpNarration,narrateHelp} from './help-narration.ts';
 export {mountPhoneBridge} from './phone-bridge.ts';
 export {pairingQR} from './companion-phone.ts';
-// Settings (ui/settings/) draws Fox's guides and model failures the way the conversation does.
+// Settings (ui/frame/) draws Fox's guides and model failures the way the conversation does.
 export {replyMarkdown} from './reply-markdown.ts';
 export {modelFailure} from './model-failure.ts';

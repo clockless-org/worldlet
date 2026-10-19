@@ -7,7 +7,7 @@ const bundle=await bundleScript({stdin:{contents:"export {taskRow} from './ui/st
 const browser=await chromium.launch();
 try{
  const page=await browser.newPage({viewport:{width:900,height:700}});
- await page.setContent('<style>'+await readFile('ui/shell/homestead.css','utf8')+':root{--ui-text-body:14px;--ui-text-caption:11px;--ui-font-ui:Arial}'+await readFile('ui/style/components.css','utf8')+'</style><div class="native-console radial-pet-console companion-console" style="width:310px"><div class="world-task-tracker"><div class="world-task-list"></div></div></div>');
+ await page.setContent('<style>'+await readFile('ui/frame/homestead.css','utf8')+':root{--ui-text-body:14px;--ui-text-caption:11px;--ui-font-ui:Arial}'+await readFile('ui/style/components.css','utf8')+'</style><div class="native-console radial-pet-console companion-console" style="width:310px"><div class="world-task-tracker"><div class="world-task-list"></div></div></div>');
  await page.addScriptTag({content:bundle});
  await page.evaluate(()=>{
   const {taskRow,attentionIcon}=(window as any).rows,list=document.querySelector('.world-task-list');

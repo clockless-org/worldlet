@@ -128,7 +128,7 @@
  #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact[data-size=large] .fox-artifact-body{font-size:16px;line-height:1.5}
  #notionWorld.native-console:is([data-depth=object],[data-depth=note]) .fox-artifact-body{font-size:14px;line-height:1.45}
 }
-/* Page mode (context/artifacts/README.md#theme-driven-artifacts): the page the Agent laid out shows in a sandboxed view of its
+/* Page mode (context/store/ARTIFACTS.md#theme-driven-artifacts): the page the Agent laid out shows in a sandboxed view of its
    own over the card, below the row of the card's controls; the card keeps its full room and draws only that row. */
 #notionWorld .fox-artifact[data-render=page]{height:min(440px,calc(100dvh - 460px))}
 .fox-artifact[data-render=page]>:is(h2,.fox-artifact-body,.fox-artifact-more,.fox-artifact-actions,.fox-artifact-art,.fox-artifact-scrim){visibility:hidden}

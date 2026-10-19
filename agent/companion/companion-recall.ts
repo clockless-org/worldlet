@@ -1,6 +1,6 @@
 import type {CompanionArchive,CompanionRecallResult} from '../../contracts/companion.ts';
 
-import {characters,utf8Length} from '../../context/items/index.ts';
+import {characters,utf8Length} from '../../context/store/index.ts';
 
 /** Pure retrieval. Hosts load archives and authorize access before calling. */
 export function recallCompanion(archive:CompanionArchive,args:Record<string,unknown>={}):CompanionRecallResult {

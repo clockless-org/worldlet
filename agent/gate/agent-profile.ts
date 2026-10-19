@@ -4,7 +4,7 @@
 // ~/.openclaw, a password vault, a mailbox it runs, the channels it answers in) and what its person does with it. The
 // answer only adds to what the files brought: where things are, its connections and channels, and Applets worth having.
 // It runs on the person's own Agent and stays on this computer; nothing in it may be a secret.
-import {looksSecret} from '../../context/items/index.ts';
+import {looksSecret} from '../../context/store/index.ts';
 export {looksSecret};
 
 export const AGENT_PROFILE_SCHEMA='worldlet.agent-profile/v1';

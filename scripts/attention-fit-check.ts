@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {bundleScript} from './browser-test.ts';
 
 const source=await bundleScript({entryPoints:['ui/world/fit-attention-panel.ts'],globalName:'attentionFit'});
-const css=(await Promise.all(['ui/style/components.css','ui/style/layout.css','ui/shell/pixi-world.css'].map(p=>readFile(p,'utf8')))).join('\n');
+const css=(await Promise.all(['ui/style/components.css','ui/style/layout.css','ui/frame/pixi-world.css'].map(p=>readFile(p,'utf8')))).join('\n');
 const browser=await chromium.launch();
 try{
  const page=await browser.newPage();

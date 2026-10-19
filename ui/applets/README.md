@@ -58,7 +58,7 @@ Every Applet reuses the same device state and reading flow: Applets connect to t
 | Click the model | Enter Open for unfolded sprite content or Focus for a web/native panel; unconnected capabilities go through Fox |
 | Click a record | The original opens on the left (about 2/3); closing it returns to the model |
 
-Shared interfaces: `AppContent.swift` and `ui/shell/app-device.ts`; each source provides record identity, title, original read and bounded sync. Unimplemented sync is stated, never animated. Notion's index is recent pages; Google's records are what was read locally; Notion reading uses its own native web panel while other sources read through their connector.
+Shared interfaces: `AppContent.swift` and `ui/frame/app-device.ts`; each source provides record identity, title, original read and bounded sync. Unimplemented sync is stated, never animated. Notion's index is recent pages; Google's records are what was read locally; Notion reading uses its own native web panel while other sources read through their connector.
 
 ```mermaid
 flowchart TD
@@ -129,4 +129,4 @@ expansion lists are implementation history. A visible device or discovered insta
 app does not imply connected accounts, source ingestion or background execution.
 Publisher identity and generated device provenance remain separately registered.
 Region pins and finite ground slots do not limit access through the searchable shelf.
-Website/bookmark discovery is described in [setup discovery](../shell/DISCOVERY.md).
+Website/bookmark discovery is described in [setup discovery](../frame/DISCOVERY.md).

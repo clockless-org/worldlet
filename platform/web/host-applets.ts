@@ -2,7 +2,7 @@ import {APP_DEFINITIONS,appletStatus} from '../../context/applets/index.ts';
 import {phoneWebAddress} from './phone-web.ts';
 
 /** The Applets in the World for a phone or browser's Applets page while the World page is not there
- * (platform/web/README.md#web), as the page lists them (ui/shell/notion-world.ts `world().places`): the catalog Applets the
+ * (platform/web/README.md#web), as the page lists them (ui/frame/notion-world.ts `world().places`): the catalog Applets the
  * person keeps (`onboarding.unlockedApplets`, less `hiddenApplets`; with no list, those installed by default), each with
  * its lamp from its connection (context/applets appletStatus). The page's own extras (the person's own sites, its order by
  * last use, what each Applet is doing this moment) wait for it. */

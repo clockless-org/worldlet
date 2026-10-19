@@ -70,7 +70,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  // The one setup page keeps every way in but the local Agents under More options (owner request 2026-10-09).
  await js("document.querySelector('.setup-more-toggle').click();true");
  await press('Use mock Google (Dev)');
- // The two default Routines (context/artifacts/daily.ts) are on with no row on setup (owner decision 2026-10-11).
+ // The two default Routines (context/store/daily.ts) are on with no row on setup (owner decision 2026-10-11).
  await wait('no Routines row beside Enter your world',"!!document.querySelector('.setup-footer .setup-next')&&!document.querySelector('.setup-routines')",120);
  // No fog after setup (owner request 2026-10-12): the loading screen's painting fades slowly into the World instead.
  await js("window.__fog=false;new MutationObserver((_,o)=>{if(document.querySelector('.startup-mist')){window.__fog=true;o.disconnect();}}).observe(document.body,{childList:true,subtree:true});true");
@@ -88,7 +88,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  // and no Open card pointing to an Attention item (owner decision 2026-10-10), can pull the person off a tour step.
  await js("window.__foxFirst=[];window.addEventListener('worldlet:fox-proactive',e=>window.__foxFirst.push({card:!!e.detail?.card,tour:!!document.querySelector('#notionWorld')?.dataset.tourStep}));true");
  // A real mouse click at the middle of an element: the tour's spotlight catches every click and
- // acts only on one inside its box (ui/shell/tour-spotlight.ts).
+ // acts only on one inside its box (ui/frame/tour-spotlight.ts).
  const clickAt=async(what:string,selector:string)=>{
   const at=await js(`(()=>{const b=document.querySelector(${JSON.stringify(selector)})?.getBoundingClientRect();return b&&b.width&&b.height?{x:Math.round(b.x+b.width/2),y:Math.round(b.y+b.height/2)}:null;})()`);
   if(!at)throw Error(`Nothing to click for ${what}: ${selector}\n  screen: ${await seen()}`);
@@ -98,7 +98,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
   mark(`click on ${what}`);
  };
  const spotlit="document.querySelector('#notionWorld')?.dataset.tourSpotlight==='true'";
- // The tour (ui/shell/world-tour.ts), in the owner's order of 2026-10-11: Fox's hello, the Attention Center, the
+ // The tour (ui/frame/world-tour.ts), in the owner's order of 2026-10-11: Fox's hello, the Attention Center, the
  // Applets (Mail, connected by mock Google, so no Connect Mail), the tasks and Routines beside Fox, then Fox's settings
  // and the phone, each step proven by its spotlight. The phone's Not now registers nothing with the relay.
  // The World's tasks beside Fox (ui/world/task-panel.ts) keep out of each step's way: during the tour they show only
@@ -120,7 +120,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  await step('fox');
  // With phone pairing on this host it offers the app and the pairing code (Not now); without it, Continue.
  await wait('the phone’s Not now, or Continue',`(()=>{const b=${button('Not now')}||${button('Continue')};if(!b)return false;b.click();return true;})()`,30);
- // First value (ui/shell/first-value.ts). 5. Fox boxes the item it picked; a click on it opens its card.
+ // First value (ui/frame/first-value.ts). 5. Fox boxes the item it picked; a click on it opens its card.
  // The items come from this host's own model reading the mock inbox, which on a loaded release host can
  // take minutes: Fox says it is still reading and waits for the item instead of ending the tour first
  // (Mac RCs 2961, 2963, 2968, 2980 ended it with “Nothing needs you right now” and never picked; #1970).
@@ -253,7 +253,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
 }
 
 interface MailContext {host:CheckContext['host'];js:(code:string)=>Promise<any>;wait:(what:string,code:string,seconds:number)=>Promise<void>;mark:(step:string)=>void;press:(label:string,seconds?:number)=>Promise<void>;seen:()=>Promise<string>}
-/** After the journey, two real conversations about the mock Gmail inbox (context/sources/google/mock.ts:
+/** After the journey, two real conversations about the mock Gmail inbox (context/connectors/google/mock.ts:
  * only the Google API client is fictional; paging, normalization and Fox are the real ones): Fox
  * fetches the unread mail and names who needs a reply, then drafts a reply that waits for review
  * and is cancelled, never sent. Judged on the tools the turn used and their effects, not wording;
@@ -267,7 +267,7 @@ async function mailConversation({host,js,wait,mark,press,seen}:MailContext){
   for(const row of db.history({since:Math.floor(since)-1,limit:2000})){
    if(!['tool.requested','harness.event'].includes(row.kind))continue;
    let payload=db.queryWorldHistory({seq:row.seq}).events?.[0]?.payload;
-   // A payload over 4000 characters comes back as a stub (context/items/world-history.ts): `_source_result` carries the
+   // A payload over 4000 characters comes back as a stub (context/store/world-history.ts): `_source_result` carries the
    // Mail records, so a full read of four unread threads hid the receipt (4427: Fox read Mail, the check missed it).
    if(payload?.truncated===true&&payload.useContentOffset===true){
     let text='',offset:number|undefined=0;

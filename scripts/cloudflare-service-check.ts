@@ -1,4 +1,4 @@
-// Cloudflare as a Worldlet Service, read only (contracts/services.ts, context/sources/services/cloudflare.ts,
+// Cloudflare as a Worldlet Service, read only (contracts/services.ts, context/connectors/services/cloudflare.ts,
 // service-source.ts, `read_service`): against a fixture of Cloudflare's API, a pasted API token is checked with one
 // GraphQL read for the account ID given before it is kept, and a refused one replaces nothing; `read` runs only the
 // fixed reports (Workers invocations and errors, requests per zone, over the last 24 hours), bounded; requests go only
@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {CLOUDFLARE_LIMITS,readCloudflare} from '../context/sources/index.ts';
+import {CLOUDFLARE_LIMITS,readCloudflare} from '../context/connectors/index.ts';
 import {channelDefaultGrants,standingActions,standingCallDecision} from '../agent/gate/grants.ts';
 import {turnTrustObserve} from '../agent/gate/turn-trust.ts';
 import {worldActionOf,worldActions} from '../agent/gate/gateway.ts';

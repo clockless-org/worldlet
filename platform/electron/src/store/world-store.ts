@@ -8,7 +8,7 @@ import {removeOldLeftovers} from './leftovers.ts';
 import {moveFilesIn} from './moved-in.ts';
 import {WorldLedger} from './ledger.ts';
 import {ActivityRecorder} from '../modules/applets/activity.ts';
-import {EMPTY_OVERLAY} from '../../../../context/sources/index.ts';
+import {EMPTY_OVERLAY} from '../../../../context/connectors/index.ts';
 import eventPolicy from '../../../../contracts/world-event-policy.json';
 
 type Row=Record<string,any>;

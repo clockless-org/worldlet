@@ -9,7 +9,7 @@ import {REMOTE_MCP_VAULT,createRemoteMcpHost} from '../platform/electron/src/mod
 import {serviceGranted} from '../agent/gate/grants.ts';
 import {MCP_HOST_PROTOCOL,REMOTE_MCP_LIMITS,readRemoteMcpRequest,remoteConsentItemId,remoteMcpRoom,validRedirect,wellKnownAddress} from '../agent/gate/remote-mcp.ts';
 import {roomDenied} from '../contracts/web-world.ts';
-import {projectWorldItems} from '../context/items/world-items.ts';
+import {projectWorldItems} from '../context/store/world-items.ts';
 
 // Remote MCP on the host (agent/gate/REMOTE-MCP.md), the same modules the Electron and Node hosts run, with the front
 // played by a fake WebSocket: turned on, the host opens the room as its host with its token; a cloud client discovers

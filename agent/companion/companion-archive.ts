@@ -1,6 +1,6 @@
 import type {CompanionArchive} from '../../contracts/companion.ts';
 import policy from '../../contracts/companion-policy.json' with {type:'json'};
-import {characters,utf8Length} from '../../context/items/index.ts';
+import {characters,utf8Length} from '../../context/store/index.ts';
 const pattern=(text:string)=>new RegExp(text.replace(/\\z$/, '(?![\\s\\S])'));
 const timestamp=pattern(policy.timestampPattern),uuid=pattern(policy.uuidPattern),memoryAuthority=pattern(policy.memoryAuthorityPattern);
 export function validCompanionID(value:unknown):boolean {return typeof value==='string'&&uuid.test(value);}

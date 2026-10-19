@@ -4,15 +4,13 @@ See the [World and Applet sizing standard](DESIGN-STANDARDS.md): 1920 × 1080 re
 
 Shared rendering and interaction. Components, by [feature](../docs/UI-CORE-PLATFORM.md#features):
 
-- World: world, hud, themes, theme-packages
-- Applets: applets, browser, games, practice
-- Companion: companion
-- Attention: attention (the Attention Center)
-- Artifacts & Journal: artifacts (the card system and the Journal book)
-- Tasks has no UI folder: its status shows in Fox and on Applets
-- Windows: web (the page a web browser opens)
-- Agents & Gate, Context and Connectors have no UI folder: their pages are in Settings beside Fox
-- Base: shell, components, onboarding, distribution
+- World: world (the places and the HUD)
+- Applets: applets (each Applet's screen beside its real website, games, practice)
+- Companion: companion (the companion's face, conversation and voice)
+- Attention: attention (what needs the person now, the artifact card and the Journal)
+- Frame: shell, settings (start, setup, settings, navigation; becomes `frame/` in the next step of #714)
+- Style: style (shared controls, tokens and themes)
+- Tasks shows in the companion and on Applets; the browser page that hosts this UI is Platform's `platform/web/page/`
 
 This is UI, the top of the four [layers](../docs/UI-CORE-PLATFORM.md#see-do-know).
 

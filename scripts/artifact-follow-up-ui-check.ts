@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import {tmpdir} from 'node:os';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
-// A follow-up on an Artifact runs in the background (owner request 2026-10-11, context/artifacts/follow-up.ts): a next
+// A follow-up on an Artifact runs in the background (owner request 2026-10-11, context/store/follow-up.ts): a next
 // step on the card drafts its request in Fox's message bar; sent while the card is open, the card turns over and drops
 // into the Doing now side beside Fox, the request goes to a background session (never a turn of the conversation), and
 // what it makes comes back as a new card while the Doing now card goes. Typed words stay a turn; with other background

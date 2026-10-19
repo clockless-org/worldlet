@@ -11,7 +11,7 @@ const stagesHost={version:1,features:{...hostFeatures({platform:'macos'}),google
 // (owner meetings 2026-10-02/03) can be opened again or the link copied. Any other address is ignored.
 const consentUrl='https://accounts.google.com/o/oauth2/auth?client_id=fixture.apps.googleusercontent.com&scope=openid';
 const consentStage={stage:'browser',url:consentUrl},forgedStage={stage:'browser',url:'https://accounts.google.com.evil.test/o/oauth2/auth'};
-const bundle=await bundleScript({entryPoints:['ui/shell/world-onboarding.ts'],globalName:'GoogleConnectionCheck',platform:'browser'});
+const bundle=await bundleScript({entryPoints:['ui/frame/world-onboarding.ts'],globalName:'GoogleConnectionCheck',platform:'browser'});
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage();
  await page.setContent('<main id="root"></main>');

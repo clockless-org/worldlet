@@ -246,7 +246,7 @@ The Companion can answer “What is Mail doing?” from task state, not model gu
 
 ### Storage, lifecycle and task inspection
 
-World owns storage by business domain, following [World storage](../../context/items/STORAGE.md); an Applet owns a logical namespace rather than a separate physical database. Proposed task, claim, outbox and delivery tables can be added to the existing SQLite database. Credentials stay in credential storage and are referenced by connection ID. Grants are checked at execution and again at commit.
+World owns storage by business domain, following [World storage](../store/STORAGE.md); an Applet owns a logical namespace rather than a separate physical database. Proposed task, claim, outbox and delivery tables can be added to the existing SQLite database. Credentials stay in credential storage and are referenced by connection ID. Grants are checked at execution and again at commit.
 
 Installation registers capabilities. Activation and connection enable declared jobs; opening a view is unnecessary. Pause stops new claims without deleting content. Uninstall disables tasks/subscriptions and offers the existing explicit content-retention choice. Revocation and reset cancel claims, invalidate pending deliveries and clear the appropriate private scope. OS process isolation for arbitrary third-party code is outside this first version; only trusted handlers run.
 

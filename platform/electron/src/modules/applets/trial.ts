@@ -1,11 +1,11 @@
 import {BrowserWindow,session,type Session,type WebContents,type WebContentsView} from 'electron';
-import {madeGameTrialProblems,readMadeGameReport} from '../../../../../context/artifacts/index.ts';
+import {madeGameTrialProblems,readMadeGameReport} from '../../../../../context/store/index.ts';
 import type {Surface} from './surface.ts';
 import type {Row} from '../../host/types.ts';
 
 const sleep=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms));
 let configured:Session|null=null;
-/** Made games run in a session of their own (context/artifacts/GAMES.md): in memory, no permissions, and every
+/** Made games run in a session of their own (context/store/GAMES.md): in memory, no permissions, and every
  * request that is not the page itself (data:) or something it made (blob:) is cancelled, so a game can
  * reach neither the network nor anything of the World's. */
 export function gameSession():Session {
@@ -53,7 +53,7 @@ export function closeGameView(surface:Surface,view:WebContentsView){
 
 /** Plays the game for a few seconds out of sight: it must load, draw something and survive a few keys
  * and a click without a script error. Returns the problems for the model to fix (none when it passed).
- * Widgets (context/artifacts) are tried the same way at phone size, with their own report reader and verdict. */
+ * Widgets (context/store) are tried the same way at phone size, with their own report reader and verdict. */
 export async function tryMadeGame(document:string,{width=900,height=600,read=readMadeGameReport,problems=madeGameTrialProblems}:{width?:number;height?:number;read?:(line:string)=>{error?:string}|null;problems?:typeof madeGameTrialProblems}={}):Promise<string[]> {
  const window=new BrowserWindow({show:false,width,height,webPreferences:{...gameWebPreferences(),offscreen:true}});
  const contents=window.webContents,errors:string[]=[];

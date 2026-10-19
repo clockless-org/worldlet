@@ -3,8 +3,8 @@ import path from 'node:path';
 import {WorldletError,ensureDirectory,writeAtomic,digest} from '../../files.ts';
 import {curatedSourceRead} from '../../../../../context/applets/index.ts';
 import {GITHUB_GATE,LINEAR_GATE,NOTION_GATE,PAYPAL_GATE,SUPABASE_GATE,TODOIST_GATE,MCP_POLICY,enabledMcpTools,mcpConfiguration,notion,readGithub,readLinear,readPaypal,readSupabase,todoist,todoistTimeoutSeconds,
- mcpServiceRecords,type McpGate,type McpSession,type NotionReviewStore} from '../../../../../context/sources/index.ts';
-import {collectNotionPage} from '../../../../../context/sources/index.ts';
+ mcpServiceRecords,type McpGate,type McpSession,type NotionReviewStore} from '../../../../../context/connectors/index.ts';
+import {collectNotionPage} from '../../../../../context/connectors/index.ts';
 import type {AgentEventHandler,AgentRuntime,AgentSourceConnections} from '../../host/services.ts';
 import type {Row} from '../../host/types.ts';
 import type {McpAccounts,McpConnection} from './mcp-account.ts';
@@ -102,7 +102,7 @@ export class McpSource {
   mcpConfiguration(provider,endpoint);
   let tested:Row|null=null;
   // GitHub offers no sign-in Worldlet can register for: it signs in with the official Worldlet GitHub App's device code
-  // (context/sources/github-device.ts), checked with the server's tools before it is kept.
+  // (context/connectors/github-device.ts), checked with the server's tools before it is kept.
   if(provider==='github'&&!token.trim()&&endpoint===MCP_ENDPOINTS.github){
    await this.accounts.connectDevice(provider,endpoint,shown=>code?.(shown),cancelled,async connection=>{tested=await this.test(provider,connection);});
    return tested??await this.test(provider);

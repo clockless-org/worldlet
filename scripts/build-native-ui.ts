@@ -24,7 +24,7 @@ import path from 'node:path';
 import {existsSync,renameSync} from 'node:fs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const defines=buildDefines({channel:process.env.WORLDLET_BUILD_CHANNEL||(process.env.WORLDLET_RELEASE_MANIFEST?'release':'dev')});
-const startup=await readFile(path.join(root,'ui/shell/world-startup.html'),'utf8');
+const startup=await readFile(path.join(root,'ui/frame/world-startup.html'),'utf8');
 const resourceVersion=String(Date.now());
 // Keep the running app usable if a rebuild is interrupted or fails.
 // A Dev watcher may prepare an isolated candidate; the default remains the normal build output.
@@ -35,7 +35,7 @@ process.env.WORLDLET_UI_BUILD_OUTPUT=output;
 await writeFile(path.join(output,'attention-applets.json'),JSON.stringify(validateAttentionRegistrations(APP_DEFINITIONS.flatMap(app=>app.attention?[app.attention]:[]))));
 await buildAppletRuntime(root,output);
 await buildBrand(pathToFileURL(path.join(output,'brand/')));
-for(const name of ['pixi-world.css','world-startup.css'])await copyFile(path.join(root,'ui/shell',name),path.join(output,name));
+for(const name of ['pixi-world.css','world-startup.css'])await copyFile(path.join(root,'ui/frame',name),path.join(output,name));
 await copyFile(path.join(root,'ui/applets/scene/applet-scene.css'),path.join(output,'applet-scene.css'));
 await copyFile(path.join(root,'ui/applets/gmail/focus.css'),path.join(output,'mail-focus.css'));
 // Draft Fox anatomy performances ship only with the dev resource pack (build-companion-presentation.ts),
@@ -48,9 +48,9 @@ const projectionWorker=await build({entryPoints:[path.join(root,'ui/world/world-
 await writeFile(path.join(output,'world-projection-worker.js'),projectionWorker.outputFiles[0].text);
 // Plain scripts the page and the native browser load by name: written in TypeScript, emitted as the files those loaders expect.
 // The bundles are independent, so they build together; dev-electron reruns this for every candidate.
-const bundles=[build({entryPoints:[path.join(root,'ui/applets/paper-edge.ts')],outfile:path.join(output,'paper-edge.js'),bundle:true,format:'iife',minify:true}),build({entryPoints:[path.join(root,'agent/index.ts')],outfile:path.join(output,'shared-core.js'),bundle:true,format:'iife',globalName:'WorldletCore',target:'es2022'}),// PostHog's web client (ui/shell/posthog-web.ts), loaded by the page only in a release app with sharing on.
- build({entryPoints:[path.join(root,'ui/shell/posthog-web.ts')],outfile:path.join(output,'posthog-web.js'),bundle:true,format:'iife',minify:true,target:'es2022'}),
- ...['world-startup','browser-observer','pcm-worklet'].map(name=>build({entryPoints:[path.join(root,name==='browser-observer'?'platform/bridge':'ui/shell',name+'.ts')],outfile:path.join(output,name+'.js'),bundle:true,format:'iife',minify:true})),
+const bundles=[build({entryPoints:[path.join(root,'ui/applets/paper-edge.ts')],outfile:path.join(output,'paper-edge.js'),bundle:true,format:'iife',minify:true}),build({entryPoints:[path.join(root,'agent/index.ts')],outfile:path.join(output,'shared-core.js'),bundle:true,format:'iife',globalName:'WorldletCore',target:'es2022'}),// PostHog's web client (ui/frame/posthog-web.ts), loaded by the page only in a release app with sharing on.
+ build({entryPoints:[path.join(root,'ui/frame/posthog-web.ts')],outfile:path.join(output,'posthog-web.js'),bundle:true,format:'iife',minify:true,target:'es2022'}),
+ ...['world-startup','browser-observer','pcm-worklet'].map(name=>build({entryPoints:[path.join(root,name==='browser-observer'?'platform/bridge':'ui/frame',name+'.ts')],outfile:path.join(output,name+'.js'),bundle:true,format:'iife',minify:true})),
  build({entryPoints:[path.join(root,'ui/index.ts')],outfile:path.join(output,'worldlet.js'),define:{...defines,__WORLDLET_PROJECTION_WORKER__:JSON.stringify(projectionWorker.outputFiles[0].text)},bundle:true,format:'iife',minify:true,plugins:devChannel?[]:[draftAnatomy]})];
 await writeFile(path.join(output,'native-applet-launchers.json'),JSON.stringify(APP_DEFINITIONS.filter(a=>a.nativeBundleIds?.length).map(a=>({key:a.key,bundleIds:a.nativeBundleIds}))));
 await mkdir(path.join(output,'assets'),{recursive:true});

@@ -32,7 +32,7 @@ export function mountPhoneBridge({publish,publishLive=async()=>{},answer=()=>fal
  world?:()=>PhoneWorld|null,
  /** The Task panel's cards (agent/tasks TaskPanel), for the phone's Tasks tab; null until the panel has read them. */
  tasks?:()=>unknown,
- /** The Journal's cards (context/artifacts Artifact); the phone gets today's (agent/base phoneJournal). */
+ /** The Journal's cards (context/store Artifact); the phone gets today's (agent/base phoneJournal). */
  journal?:()=>any[]|null,
  /** The option Fox offers on an item's card (its primary help), chosen on the phone. */
  choose?:(id:string)=>unknown,

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,pageErrors,worldUrl,leaveApplet} from './browser-test.ts';
 import {tmpdir} from 'node:os';
-import {localPathName} from '../context/sources/local-path.ts';
+import {localPathName} from '../context/connectors/local-path.ts';
 import path from 'node:path';
 assert.equal(localPathName('C:\\Projects\\worldlet'), 'worldlet');
 assert.equal(localPathName('/Users/fixture/worldlet/'), 'worldlet');

@@ -224,7 +224,7 @@ await withBrowser(fileAccess,async browser=>{
  await page.evaluate(()=>{const w=window as any;w.panel={...w.panel,harnessId:undefined,changes:false,jobs:[{id:'a',name:'Morning news',kind:'prompt',paused:false,when:{cron:'0 6 * * *'}},...w.panel.jobs]};window.dispatchEvent(new CustomEvent('worldlet:routines',{detail:{changed:true}}));});
  await next.locator('.task-card',{hasText:'Morning news'}).waitFor();
  // A routine paused in Settings › Agents leaves the cards at once: Settings announces `worldlet:routines` after the Agent's own
- // command ran (ui/settings/agent-routines.ts), and the panel reads its jobs again; resumed, it is back.
+ // command ran (ui/frame/agent-routines.ts), and the panel reads its jobs again; resumed, it is back.
  const pause=(paused:boolean)=>page.evaluate(paused=>{const w=window as any;w.panel={...w.panel,jobs:w.panel.jobs.map((j:any)=>j.id==='b'?{...j,paused}:j)};window.dispatchEvent(new CustomEvent('worldlet:routines',{detail:{changed:true}}));},paused);
  await pause(true);
  await next.locator('.task-card',{hasText:'Water the plants'}).waitFor({state:'detached'});

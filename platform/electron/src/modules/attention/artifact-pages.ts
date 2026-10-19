@@ -1,5 +1,5 @@
 import {WebContentsView} from 'electron';
-import {ARTIFACT_PAGE_LIMITS,ARTIFACT_PAGE_MAKER,ARTIFACT_PAGE_ROOM,artifactPageActions,artifactPageBrief,artifactPageBudget,artifactPageDocument,artifactPageProblems,artifactPageTask,artifactPageTrialProblems,placeArtifactMaterials,readArtifact,readArtifactPage,readArtifactPageConsole,readArtifactPageSpec,validArtifactId,type Artifact,type ArtifactPage,type ArtifactPageSpec} from '../../../../../context/artifacts/index.ts';
+import {ARTIFACT_PAGE_LIMITS,ARTIFACT_PAGE_MAKER,ARTIFACT_PAGE_ROOM,artifactPageActions,artifactPageBrief,artifactPageBudget,artifactPageDocument,artifactPageProblems,artifactPageTask,artifactPageTrialProblems,placeArtifactMaterials,readArtifact,readArtifactPage,readArtifactPageConsole,readArtifactPageSpec,validArtifactId,type Artifact,type ArtifactPage,type ArtifactPageSpec} from '../../../../../context/store/index.ts';
 import {WorldletError} from '../../files.ts';
 import {FOX,type FoxService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';
@@ -11,7 +11,7 @@ interface Job {id:string;size:'medium'|'large';spec:ArtifactPageSpec;materials:R
 const DATA_IMAGE=/^data:image\/(?:png|webp|jpeg|svg\+xml);base64,[A-Za-z0-9+/=]+$/;
 const materialsOf=(value:unknown,spec:ArtifactPageSpec)=>Object.fromEntries(Object.entries(value&&typeof value==='object'?value as Row:{}).filter(([id,uri])=>spec.materials.some(m=>m.id===id)&&typeof uri==='string'&&uri.length<=600_000&&DATA_IMAGE.test(uri))) as Record<string,string>;
 
-/** Artifact pages (context/artifacts/README.md#theme-driven-artifacts). After the World shows an answer at medium or large
+/** Artifact pages (context/store/ARTIFACTS.md#theme-driven-artifacts). After the World shows an answer at medium or large
  * size, it asks for a page: the Agent writes the card as one HTML page in the theme's style in a quiet background task,
  * Worldlet checks it, tries it out of sight at the card's room and keeps it beside the artifact. The World then shows
  * it in a sandboxed view of its own over the card, in the Game Factory's offline session, with no bridge but its

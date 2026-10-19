@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {bundleScript,pageErrors} from './browser-test.ts';
-const bundle=await bundleScript({stdin:{contents:"export {createFoxPreferences} from './ui/settings/fox-preferences.ts'; export {mountWorldOnboarding} from './ui/shell/world-onboarding.ts'; export {mountCompanionInfo} from './ui/companion/companion-info.ts';",resolveDir:process.cwd()},globalName:'AgentUI'});
+const bundle=await bundleScript({stdin:{contents:"export {createFoxPreferences} from './ui/frame/fox-preferences.ts'; export {mountWorldOnboarding} from './ui/frame/world-onboarding.ts'; export {mountCompanionInfo} from './ui/companion/companion-info.ts';",resolveDir:process.cwd()},globalName:'AgentUI'});
 const browser=await chromium.launch();
 try{
  const page=await browser.newPage();const errors=pageErrors(page);

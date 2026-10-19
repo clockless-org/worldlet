@@ -249,7 +249,7 @@ The world is one PixiJS WebGL renderer (`ui/world/village/pixi-world.ts`) drawin
 ### Budgets
 
 UI rendering and DOM commits stay on the main thread. Complete host snapshots use
-`ui/shell/snapshot-inbox.ts`: pending snapshots are replaceable, consumption is
+`ui/frame/snapshot-inbox.ts`: pending snapshots are replaceable, consumption is
 serialized, and idle scheduling gives input/paint an opportunity before background
 refresh (250 ms timeout, timer fallback). In-flight projections check their
 generation before committing; callers of superseded snapshots await the replacement.
@@ -293,7 +293,7 @@ No whole-product GPU time, memory or energy certification is established here, a
 
 ### Startup feedback
 
-The shared boot surface and milestones are defined in [onboarding](../shell/ONBOARDING.md).
+The shared boot surface and milestones are defined in [onboarding](../frame/ONBOARDING.md).
 Do not maintain another loader design here. Startup timings are numeric diagnostic
 facts, not fabricated percentages or proof that content is ready.
 

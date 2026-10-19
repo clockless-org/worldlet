@@ -29,10 +29,10 @@ import {createHarnessControls} from './harness-controls.ts';
 import {WORLD_APPS,MOMENT_MAKER} from '../../../../../context/applets/index.ts';
 import {diagnosticError} from '../../../../../agent/base/index.ts';
 import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,hermesChannelTrust,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,reduceAgentResponse,routineScheduleResult,standingCallDecision,worldSinceNote,type MigrationSource} from '../../../../../agent/gate/index.ts';
-import {worldLogKeeps} from '../../../../../context/activity/index.ts';
+import {worldLogKeeps} from '../../../../../context/applets/index.ts';
 import {worldActionOf,worldActions} from '../../../../../agent/gate/index.ts';
 import {onboardingUnfinished} from '../../../../../agent/companion/index.ts';
-import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../context/artifacts/index.ts';
+import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../context/store/index.ts';
 import {phoneApprovalPush,phoneFoxPush,phoneLive,worldLinkReply} from '../../../../web/index.ts';
 import {placeKey,placeKind,proactiveAsked,proactiveDue,proactiveCard,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../../agent/companion/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
@@ -944,13 +944,13 @@ export function installFox(host:Host){
    }else if(setting==='companion_name'&&typeof value==='string'&&value.trim()&&characterCount(value)<=24){
     companion.update({name:value.trim()});preferences.set('worldlet.companionName',value.trim());
    }else if(setting==='morning_brief'&&typeof value==='string'){
-    // What the 6 AM brief holds, in the person's words (context/artifacts/daily.ts); empty or the default keeps the default.
+    // What the 6 AM brief holds, in the person's words (context/store/daily.ts); empty or the default keeps the default.
     const brief=readMorningBrief(value);
     if(brief===MORNING_BRIEF_DEFAULT)preferences.remove('worldlet.morningBrief');else preferences.set('worldlet.morningBrief',brief);
     page.event('worldlet:morning-brief',{brief});
     return {ok:true,morningBrief:brief};
    }else if(setting==='daily_routines'&&(typeof value==='boolean'||value&&typeof value==='object')){
-    // The two default Routines, Today's prep and Wrap up today (context/artifacts/daily.ts): on unless turned off here,
+    // The two default Routines, Today's prep and Wrap up today (context/store/daily.ts): on unless turned off here,
     // from setup's one row (a boolean, both) or Settings › Agents › Your Agent › Routines (one of them). Worldlet's own setting;
     // nothing is written into the Agent.
     const next=typeof value==='boolean'?{plan:value,summary:value}:{...dailyRoutines(),...readDailyRoutinesChange(value)};

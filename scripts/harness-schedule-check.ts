@@ -225,7 +225,7 @@ try{
  assert.deepEqual(missed.push,{kind:'routine',title:'Today’s prep · Oct 11',body:'Did not finish: Fox needs an Agent',collapse:'daily-plan'});
  assert.match(String(dailyScheduleFailure({kind:'summary',day:'2026-10-11',at,now})!.item.summary),/your Agent did not say why/);
  assert.equal(dailyScheduleFailure({kind:'plan',day:'soon',at,now}),null);
- const {DAILY_ROUTINE_NAMES}=await import('../context/artifacts/index.ts');
+ const {DAILY_ROUTINE_NAMES}=await import('../context/store/index.ts');
  assert.ok(brief.item.title.startsWith(DAILY_ROUTINE_NAMES.plan)&&summary.item.title.startsWith(DAILY_ROUTINE_NAMES.summary),'The same names as the Task panel and Settings');
  const ran=routineScheduleResult({ran:true,late:true,job:{id:'news',name:'Morning news',last_status:'ok'}},at,now)!;
  assert.equal(ran.item.kind,'update');assert.equal(ran.item.title,'Morning news');assert.match(String(ran.item.summary),/ran late/);

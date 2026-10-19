@@ -3,7 +3,7 @@
 // The Electron wiring (powerMonitor resume wakes the clock) is module `fox` in test:electron.
 import assert from 'node:assert/strict';
 import {ROUTINE_LATE_MS,routinesDueAfterGap} from '../agent/tasks/index.ts';
-import {worldLogLines} from '../context/activity/index.ts';
+import {worldLogLines} from '../context/applets/index.ts';
 
 const now=Date.parse('2026-10-04T09:30:00Z'),at=(ms:number)=>new Date(now-ms).toISOString();
 const hour=3600_000,day=24*hour;

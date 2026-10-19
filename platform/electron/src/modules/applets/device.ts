@@ -29,7 +29,7 @@ import type {Host,Row} from '../../host/types.ts';
 import {ANALYTICS,FOX,SPEECH,USER_ACTIVITY,type AnalyticsService,type FoxService,type SpeechService,type UserActivityService} from '../../host/services.ts';
 import {userIdle} from '../../../../../agent/tasks/index.ts';
 import {timingBucket} from '../../../../../agent/base/index.ts';
-import {GAME_REVIEW_APPLET} from '../../../../../context/artifacts/index.ts';
+import {GAME_REVIEW_APPLET} from '../../../../../context/store/index.ts';
 import {busyWith} from '../../host/busy.ts';
 
 type Kept={view:WebPage;platform:string;requestedURL:URL|null};
@@ -1207,7 +1207,7 @@ return {title:document.title,text:(parts.join(' ')+ ' '+images).slice(0,6000),ur
   const browser=this.browser;
   if(!browser||browser.hidden)throw new WorldletError('Open a browsing Applet first.');
   // A scenery tap while the person types in the page ends typing there instead of leaving the Applet
-  // (owner request 2026-10-06). Same field rule as ui/shell/notion-world.ts; the page keeps its text.
+  // (owner request 2026-10-06). Same field rule as ui/frame/notion-world.ts; the page keeps its text.
   if(op==='endTyping'){
    if(agent)throw new WorldletError('Unsupported browser operation.');
    const typing=await browser.evaluate(`let el=document.activeElement;while(el?.shadowRoot?.activeElement)el=el.shadowRoot.activeElement;

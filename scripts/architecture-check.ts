@@ -14,9 +14,9 @@ for(const source of [
 ])assert.throws(()=>checkSource('ui/world/example.ts',source),undefined,source);
 assert.throws(()=>checkEdge('agent/gate/example.ts','platform/bridge/index.ts'),/Forbidden/);
 // Context imports only itself and contracts; Agent imports Context and contracts (#681).
-assert.throws(()=>checkEdge('context/items/example.ts','agent/tasks/index.ts'),/Forbidden/);
-assert.throws(()=>checkEdge('context/items/example.ts','agent/index.ts'),/Forbidden/);
-checkEdge('agent/tasks/example.ts','context/items/index.ts');
+assert.throws(()=>checkEdge('context/store/example.ts','agent/tasks/index.ts'),/Forbidden/);
+assert.throws(()=>checkEdge('context/store/example.ts','agent/index.ts'),/Forbidden/);
+checkEdge('agent/tasks/example.ts','context/store/index.ts');
 checkEdge('platform/electron/src/example.ts','agent/index.ts');
 assert.throws(()=>checkEdge('ui/world/example.ts','harness/example/agent.ts'),/Forbidden/);
 assert.throws(()=>checkSource('contracts/example.ts',"import fs from 'node:fs'"),/pure layer/);

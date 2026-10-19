@@ -2,13 +2,13 @@ import {readCompanionProfile,type CompanionKnowledge,type CompanionProfile} from
 import {companionPersona} from '../../agent/companion/index.ts';
 import {node,uiIcon} from '../style/index.ts';
 import {isDesktopCompanion,requireWorldSurface} from './world-surface.ts';
-import {eventTrigger,reportProductEvent} from '../shell/index.ts';
+import {eventTrigger,reportProductEvent} from '../frame/index.ts';
 import {createCompanionFeedback} from './companion-feedback.ts';
 import {createActivityRecords} from './activity-records.ts';
 import {createCompanionArtifacts,mountJournalBook} from '../attention/index.ts';
 import {createCompanionPhone} from './companion-phone.ts';
 import {companionStill} from '../style/index.ts';
-import {createCompanionSettings} from '../settings/index.ts';
+import {createCompanionSettings} from '../frame/index.ts';
 import {readFoxSkills,skillOffers,type FoxSkills} from './companion-skills.ts';
 
 /** Companion controls; dismiss from the close button or outside the panel. */

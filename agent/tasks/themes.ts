@@ -5,7 +5,7 @@
 // gives it. A conversation of no kind, or about a project, offers nothing (kinds.ts ONGOING_THEME_KINDS). Pure rules;
 // the World page asks Fox (agent/tasks/README.md#themes).
 import {ONGOING_KINDS,type OngoingKind} from './kinds.ts';
-import {ARTIFACT_ONE_CARD_RULE} from '../../context/artifacts/index.ts';
+import {ARTIFACT_ONE_CARD_RULE} from '../../context/store/index.ts';
 import {ongoingAgo,ongoingKindOf,ongoingOpen,type OngoingThing} from './ongoing.ts';
 
 /** What each theme's artifact is about, the way Fox names it to the person ("your training"). */

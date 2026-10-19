@@ -90,11 +90,11 @@ function buildWorldActions(sample:boolean):WorldAction[]{
  // Agent asks (agent/gate/asks.ts): each its own Grant target, which only "Can ask you" and "Can take work" name.
  operations('asks','agent_asks');
  for(const action of actions.filter(a=>a.tool==='agent_asks'))action.parameters.required={post:['title'],read:[],claim:[],resolve:['id','note','expectedRevision'],attachment:['id','attachment']}[action.action]??[];
- // The board (context/sources/BOARD.md): each its own Grant target, which only "Can see your board" and "Can set up your
+ // The board (context/connectors/BOARD.md): each its own Grant target, which only "Can see your board" and "Can set up your
  // board" name.
  operations('board','world_board');
  for(const action of actions.filter(a=>a.tool==='world_board'))action.parameters.required=action.action==='define'?['definition','expectedRevision']:[];
- // The World's saved Service context (context/sources/service-context.ts): each its own Grant target, which every "Can
+ // The World's saved Service context (context/connectors/service-context.ts): each its own Grant target, which every "Can
  // read <Service>" names; an answer holds only the Services the Agent may read.
  operations('context','world_context');
  for(const action of actions.filter(a=>a.tool==='world_context'))action.parameters.required=action.action==='search'?['query']:['id'];

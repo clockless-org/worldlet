@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {createLocationWriter} from '../ui/shell/navigation-history.ts';
+import {createLocationWriter} from '../ui/frame/navigation-history.ts';
 // The writer's throttle reads Date.now; a fixed clock keeps a slow, loaded host from
 // widening the gap between writes past the interval and flushing the stale write early.
 let clock=0;Date.now=()=>clock;

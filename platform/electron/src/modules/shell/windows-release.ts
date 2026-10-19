@@ -20,7 +20,7 @@ export function windowsUpdateTest(value:unknown):string|null {
 
 // The installer carries the website engine (CEF, #1170) since Build 1077, which took it past the former
 // 300 MiB limit (#1037). Builds before this one reject larger installers, so they update by a fresh download.
-// Keep in step with ui/shell/windows-release.ts.
+// Keep in step with ui/frame/windows-release.ts.
 export const windowsInstallerLimit=1024*1024*1024;
 export function parseWindowsManifest(value:unknown):WindowsRelease {
  const row=(value&&typeof value==='object'?value:{}) as Record<string,any>;

@@ -7,7 +7,7 @@ await withBrowser(async browser=>{
  await page.setContent('<!doctype html><title>Worldlet collection settings check</title><main class="native-console" style="max-width:620px;margin:20px auto;font:14px system-ui;--control-fill:#f0f3ed;--control-ink:#203b30;--hud-paper-ink:#203b30;--hud-muted:#5b6b60;--ui-font-ui:system-ui"><h2>Connections</h2><div id="settings"></div></main>');
  await page.addStyleTag({content:fs.readFileSync('ui/companion/companion-panel.css','utf8')});
  await page.addStyleTag({content:fs.readFileSync('ui/style/hud.css','utf8')});
- await page.addScriptTag({content:await bundleScript({entryPoints:['ui/settings/service-collection.ts'],globalName:'CollectionSettings'})});
+ await page.addScriptTag({content:await bundleScript({entryPoints:['ui/frame/service-collection.ts'],globalName:'CollectionSettings'})});
  await page.evaluate(async()=>{
   const w=window as any;w.calls=[];w.presets=[];w.jobs=[];w.refused=false;w.listRefused=false;w.connectRefused=false;
   const call=async(action:string,body:any={})=>{

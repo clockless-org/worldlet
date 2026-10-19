@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {conversationEntries,recentWorldHistory} from '../context/items/index.ts';
+import {conversationEntries,recentWorldHistory} from '../context/store/index.ts';
 const text='Full user text 🦊\n'.repeat(20000);
 const base={id:'message',requestId:'request-1',at:1,scope:'private',type:'sent',text};
 const parts=conversationEntries(base);assert(parts.length>1);assert.equal(parts.map(p=>p.data.text).join(''),text);

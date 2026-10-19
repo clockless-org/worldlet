@@ -16,8 +16,8 @@ runtime stack remains **UI → Core → Platform → Harness → Models/Services
 
 | Layer | Components / directories | Public interface | Must not own |
 | --- | --- | --- | --- |
-| UI | `ui/world`, `ui/applets`, `ui/companion`, `ui/attention`, `ui/shell` | Versioned semantic World actions in `contracts/ui.ts`; component functions; host transport | OS branches, provider protocols, independent scheduling policy |
-| Agent and Context | `agent/gate`, `context/applets`, `agent/attention`, `agent/tasks`, `agent/companion`, `context/sources`, `context/items`, `agent/applets`, `agent/gate`, `agent/base`, `agent/companion` | Each component's `index.ts`; serialized native entry in `agent/index.ts` | DOM, filesystem, clocks, sockets, Electron/Node types, platform conditions |
+| UI | `ui/world`, `ui/applets`, `ui/companion`, `ui/attention`, `ui/frame` | Versioned semantic World actions in `contracts/ui.ts`; component functions; host transport | OS branches, provider protocols, independent scheduling policy |
+| Agent and Context | `agent/gate`, `context/applets`, `agent/attention`, `agent/tasks`, `agent/companion`, `context/connectors`, `context/store`, `agent/applets`, `agent/gate`, `agent/base`, `agent/companion` | Each component's `index.ts`; serialized native entry in `agent/index.ts` | DOM, filesystem, clocks, sockets, Electron/Node types, platform conditions |
 | Platform | `platform/bridge`, `platform/electron`, `platform/browser`, `platform/local-tools` | `contracts/platform.ts`; shared Core requests/results; negotiated Harness contract | A second copy of onboarding, source processing, retry/priority or model-selection rules |
 | Harness | `harness/hermes` or an external adapter | `contracts/harness.ts`, capability discovery, tasks/events/cancellation | World UI implementation or ownership of portable user records |
 | Models/Services | `models` and provider APIs | Harness/provider protocols | UI navigation and OS permissions |
@@ -200,9 +200,9 @@ Shared companion limits and timestamp/UUID policy live in
 | Core Applets | `context/applets/index.ts` | Catalog, runtime definitions, read plans, capabilities and device state |
 | Core Scheduling | `agent/tasks/index.ts` | Claims, leases, fencing, retries, pools, deliveries and operation outcomes |
 | Core Attention | `agent/attention/index.ts` | Visibility, relevance inputs, suppression, synthesis budgets |
-| Core Activity | `context/activity/index.ts`, `contracts/activity.ts` | Local observation schemas, visit correlation, sampled foreground dwell, snapshot changes and redaction; no IO |
-| Core Items | `context/items/index.ts` | Identity, validation, state transitions, evidence projections; `worldHistoryQuery` and `worldHistoryPage` own shared history filtering and bounded retrieval |
-| Core Context | `context/sources/index.ts` | Source context, validation, schema and layout; Service sync snapshots, the saved Service context search (`world_context`) and selected Notion pages |
+| Core Activity | `context/applets/activity.ts`, `contracts/activity.ts` | Local observation schemas, visit correlation, sampled foreground dwell, snapshot changes and redaction; no IO |
+| Core Items | `context/store/index.ts` | Identity, validation, state transitions, evidence projections; `worldHistoryQuery` and `worldHistoryPage` own shared history filtering and bounded retrieval |
+| Core Context | `context/connectors/index.ts` | Source context, validation, schema and layout; Service sync snapshots, the saved Service context search (`world_context`) and selected Notion pages |
 | Core Companion / Agent | `agent/companion/index.ts`, `agent/gate/index.ts` | Portable memory/history, guidance, model freshness and response classification |
 | Core Browser / Tools | `agent/applets/index.ts`, `agent/gate/index.ts` | Browser action policy and declared tools; no browser IO |
 | Core Onboarding / Diagnostics | `agent/companion/index.ts`, `agent/base/index.ts` | Setup transitions and allowlisted diagnostic projection |
@@ -230,7 +230,7 @@ project, not separately packaged libraries. Paths are under `platform/electron/s
 | Selected-target CDP | Private commands/events; no browser-wide access | `page.ts` through `webContents.debugger`; `Target.*`/`Browser.*` refused |
 | World semantic actions | `contracts/ui.ts`, `window.worldletUI.snapshot/dispatch` | Trusted World view (`world/window.ts`) |
 | Headless Core execution | Serialized operations in `agent/index.ts` | `core.ts`, in-process |
-| Durable execution | `contracts/execution.ts`, `context/items/index.ts` | `store/ledger.ts`, `modules/agents/journal.ts` |
+| Durable execution | `contracts/execution.ts`, `context/store/index.ts` | `store/ledger.ts`, `modules/agents/journal.ts` |
 
 Chromium paints pages; Electron embeds it. CDP controls the selected page;
 agent-browser interprets website elements and executes interactions through that
@@ -284,12 +284,12 @@ entry is an explicit supported surface, not permission to bypass host grants.
 | `ui/companion/index.ts` | Fox conversation, history, review and companion presentation |
 | `ui/attention/index.ts` | Attention presentation, markers, copy and preview |
 | `ui/applets/index.ts` | Embedded page panel and outcome inspection UI |
-| `ui/shell/index.ts` | Setup, arrival and introductory presentation |
+| `ui/frame/shell.ts` | Setup, arrival and introductory presentation |
 | `ui/style/index.ts` | Visual primitives, styles, typography and reader controls |
 | `ui/world/index.ts` | Desktop-app HUD composition |
-| `ui/shell/index.ts` | World UI assembly, audio integration and shared UI analytics hooks |
+| `ui/frame/shell.ts` | World UI assembly, audio integration and shared UI analytics hooks |
 | `ui/applets/index.ts` | Fictional demo presentation |
-| `ui/shell/index.ts` | Download metadata and version presentation |
+| `ui/frame/shell.ts` | Download metadata and version presentation |
 
 Keep exported contracts close to their owner. Host requests still use the
 Platform bridge; domain rules still use Core public entry points. Do not import
@@ -333,7 +333,7 @@ record concrete exceptions and required device checks in its issue/PR.
 
 ### Activity boundary and coverage
 
-`context/activity/index.ts` exposes `activityEvent`, `activityObserve` and
+`context/applets/activity.ts` exposes `activityEvent`, `activityObserve` and
 `activityURL`. `ActivityRecorder` (`platform/electron/src/modules/applets/activity.ts`)
 is the only browser activity persistence adapter; the website panel (`device.ts`)
 supplies page/focus/clock facts, and website page views (`page.ts`) never open the
@@ -386,7 +386,7 @@ they do not certify the shipped website view, real SQLite under load, real accou
 or abrupt process termination. Recording is not lossless: DOM changes immediately
 before a close can miss the three-second poll.
 
-Conversation evidence uses `context/items.conversationEntries` and the host's
+Conversation evidence uses `context/store.conversationEntries` and the host's
 conversation journal (`platform/electron/src/modules/companion/companion.ts`). It is written at the World/Harness boundary
 before request delivery and before streamed text reaches UI. The selected Harness
 cannot disable this journal. The portable Companion archive remains a view of

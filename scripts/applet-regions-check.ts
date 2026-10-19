@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
-import {setupText} from '../ui/shell/setup-language.ts';
+import {setupText} from '../ui/frame/setup-language.ts';
 import {APPLET_REGION_TITLES,AREA_LAYOUT_VERSION,AREA_STARTER_COUNT,AREA_STARTERS,GAME_STARTERS,SETUP_SUGGESTIONS,migrateAreaLayout,seedAppletSelection,setupOffers} from '../context/applets/regions.ts';
 const keys=APP_DEFINITIONS.map(a=>a.key);
 assert.equal(new Set(keys).size,keys.length,'Each app has one definition');
@@ -36,7 +36,7 @@ const offered=APP_DEFINITIONS.filter(a=>setupOffers(a,offer.has(a.id),new Set())
 assert.ok(offered.length<=45,'Setup offers a short list: '+offered.length);
 assert.ok(!offered.some(a=>a.region==='health'),'Seeded games stay off the setup page');
 assert.ok(APP_DEFINITIONS.filter(a=>a.key==='cloudflare'||a.key==='wordle').every(a=>setupOffers(a,false,new Set([a.id]))),'Found, matched or touched apps stay in view');
-// Every app setup can show says what it is for in each setup language (ui/shell/setup-purposes.ts).
+// Every app setup can show says what it is for in each setup language (ui/frame/setup-purposes.ts).
 for(const app of APP_DEFINITIONS)for(const language of ['zh','ja','es']){
  const purpose=setupText(app.purpose||'',language);
  assert.ok(purpose!==app.purpose&&purpose.trim()&&purpose.length<=90&&!purpose.includes('\n'),language+' purpose for '+app.key);

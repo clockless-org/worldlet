@@ -254,7 +254,7 @@ Issue #1229. The setting is the app menu's **Open at Login** checkbox (the World
 - **disabled:** not registered.
 - **unsupported:** a Dev build, Linux or a Microsoft Store package. These never touch the system's login items.
 
-The Mac registers the app itself through SMAppService (`type: 'mainAppService'`). Windows writes a Run entry for the installed executable with `--opened-at-login`. The status is read again whenever the World window gains focus, so a change made in System Settings shows up. macOS may show its own "Background item added" notification; Worldlet adds no prompt of its own. Fox offers the setting once after onboarding ([onboarding](../../ui/shell/ONBOARDING.md#after-onboarding-open-worldlet-at-login-1229)).
+The Mac registers the app itself through SMAppService (`type: 'mainAppService'`). Windows writes a Run entry for the installed executable with `--opened-at-login`. The status is read again whenever the World window gains focus, so a change made in System Settings shows up. macOS may show its own "Background item added" notification; Worldlet adds no prompt of its own. Fox offers the setting once after onboarding ([onboarding](../../ui/frame/ONBOARDING.md#after-onboarding-open-worldlet-at-login-1229)).
 
 **Quiet start.** A launch by the login item (Mac `wasOpenedAtLogin`, Windows `--opened-at-login`) opens the World minimized with `showInactive()`, so nothing takes focus. Opening Worldlet again restores it.
 
@@ -471,7 +471,7 @@ checks the version, Build, painted window and kept profile data. See the
 RC Package row. The check is skipped until a published
 Build contains the hook.
 
-The website's [`windows-release.ts`](../../ui/shell/windows-release.ts) validates
+The website's [`windows-release.ts`](../../ui/frame/windows-release.ts) validates
 the same manifest and shows the direct link only for an available, valid artifact;
 `node scripts/windows-release-check.ts` covers routes, manifest refusal, unavailable
 artifacts and mobile layout. The manifest is always uploaded last.

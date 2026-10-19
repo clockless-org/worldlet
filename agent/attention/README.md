@@ -92,7 +92,7 @@ A tennis opportunity can combine a friend's message, a Calendar commitment and, 
 
 ## Verification record (2026-09-24)
 
-Recorded on the retired native Mac host; it is not Electron evidence. TypeScript checks, the native UI build, Mac compilation, shared attention/item fixtures, both native `--attention-center-check` and `--world-interaction-check`, import-specifier checks and Markdown links passed. The shipped Python World service passed its no-model/no-account fixture using an existing dependency runtime and disposable profile. The broader source-layout check reaches an existing, unchanged `ui/shell/mail-onboarding.ts` OS-branch violation; that unrelated failure is not claimed as passing. No real account, model-quality, background-after-quit or Windows acceptance is implied.
+Recorded on the retired native Mac host; it is not Electron evidence. TypeScript checks, the native UI build, Mac compilation, shared attention/item fixtures, both native `--attention-center-check` and `--world-interaction-check`, import-specifier checks and Markdown links passed. The shipped Python World service passed its no-model/no-account fixture using an existing dependency runtime and disposable profile. The broader source-layout check reaches an existing, unchanged `ui/frame/mail-onboarding.ts` OS-branch violation; that unrelated failure is not claimed as passing. No real account, model-quality, background-after-quit or Windows acceptance is implied.
 
 ## Model-authored content contract
 
@@ -357,7 +357,7 @@ The HUD preview keeps facts in the card and proactive help beside Fox. The card 
 
 ### A reply Fox prepared
 
-A new Worth Doing item whose evidence is a Gmail thread (`sources` entry `thread:<id>`) can get a reply Fox prepares by itself (owner decision 2026-10-09, [replies Fox prepares](../../context/artifacts/README.md#replies-fox-prepares)). The item is matched to its draft by that thread: the stored draft keeps the `threadId` it replies in (`emailAction` `list`), and while one waits the item's card shows "Fox drafted a reply · Review", which opens the Journal on it. Preparing never settles the item; the person still marks it Done.
+A new Worth Doing item whose evidence is a Gmail thread (`sources` entry `thread:<id>`) can get a reply Fox prepares by itself (owner decision 2026-10-09, [replies Fox prepares](../../context/store/ARTIFACTS.md#replies-fox-prepares)). The item is matched to its draft by that thread: the stored draft keeps the `threadId` it replies in (`emailAction` `list`), and while one waits the item's card shows "Fox drafted a reply · Review", which opens the Journal on it. Preparing never settles the item; the person still marks it Done.
 
 ### Which account is connected
 

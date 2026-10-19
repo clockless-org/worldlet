@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-import {worldHistoryPage} from '../context/items/index.ts';
-import {worldEvent,recentWorldHistory} from '../context/items/world-events.ts';
+import {worldHistoryPage} from '../context/store/index.ts';
+import {worldEvent,recentWorldHistory} from '../context/store/world-events.ts';
 import {pageErrors,worldUrl,openCompanionPanel,waitForWorld} from './browser-test.ts';
 assert.equal(worldEvent('worldHistory',{}),null,'History reads must not journal themselves');
 assert.deepEqual(recentWorldHistory([{kind:'conversation.message',at:'now',body:{preview:'private'}},{kind:'applet.check',key:'gmail',at:'now',body:{status:'complete'}}],8),[{kind:'applet.check',applet:'gmail',at:'now',status:'complete'}]);

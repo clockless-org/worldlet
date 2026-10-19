@@ -152,7 +152,7 @@ export class WorldLedger {
  /** One request and its Attention item, saved together, as a draft is: the item is the host's own (provider `agents`),
   * its status the request's, set by the person's answer (`user`) or by the refused call that asked (`agent`). */
  saveServiceRequest(request:Row,item:Row,origin:'user'|'agent'){this.saveDraft('service-requests',request,item,origin);}
- // Service presets (context/sources/services/presets.ts, context/applets/INTEGRATIONS.md#service-presets) ---------------
+ // Service presets (context/connectors/services/presets.ts, context/applets/INTEGRATIONS.md#service-presets) ---------------
  /** Every saved Service preset (`state.service-presets`), by ID. */
  servicePresets():Row[]{return this.records('service-presets');}
  saveServicePreset(preset:Row){this.put('service-presets',preset.id,preset);}
@@ -168,7 +168,7 @@ export class WorldLedger {
  /** Each Agent's one report (`state.agent-reports`, keyed by the Agent). */
  agentReports():Row[]{return this.records('agent-reports');}
  saveAgentReport(report:Row){this.put('agent-reports',report.agentId,report);}
- // The board (context/sources/BOARD.md) -------------------------------------------------------------------------------
+ // The board (context/connectors/BOARD.md) -------------------------------------------------------------------------------
  /** The board's current definition and revision (`state.board`), or null with none. */
  board():Row|null{return this.value('board','board');}
  saveBoard(board:Row){this.put('board','board',board);}
@@ -997,7 +997,7 @@ export class WorldLedger {
  companionSession(id:string):string|null {this.ensureCompanion();const row=this.all('SELECT session FROM companion_turns WHERE id=?',id)[0];return row?String(row.session):null;}
  /** The text `source` keeps, in bytes. */
  companionBytes(source:string):number {this.ensureCompanion();return Number(this.all('SELECT coalesce(sum(length(CAST(text AS BLOB))),0) AS n FROM companion_turns WHERE source=?',source)[0]?.n??0);}
- /** How much each kind of context this World keeps holds, for Settings › Context (context/sources/world-context.ts): the
+ /** How much each kind of context this World keeps holds, for Settings › Context (context/connectors/world-context.ts): the
   * past conversations (how many, and their text), each Service's synced context, the Journal's cards and what Agents
   * saved there (with their pages), and the board's definition. Bytes of what is kept now, not of older revisions. */
  contextSizes():{conversations:{count:number;bytes:number};services:{provider:string;bytes:number}[];journal:{bytes:number};agentOutputs:{bytes:number};board:{bytes:number}} {
@@ -1272,7 +1272,7 @@ export class WorldLedger {
   catch{throw new WorldletError('Could not keep the pictures.');}
  }
 
- // Pages Fox made (context/artifacts): `page` rows of the person's own Applets.
+ // Pages Fox made (context/store): `page` rows of the person's own Applets.
  widgetRows():{record:Row;state:Row}[] {return this.myApplets('page').map(({record,state})=>({record,state}));}
  widgetPage(id:string):string|null {return this.myAppletPage(id);}
  /** Saves a page's record, and its page and state when given; a new page needs both. */
@@ -1283,7 +1283,7 @@ export class WorldLedger {
  deleteWidget(id:string){this.deleteMyApplets([id]);}
 
  // Artifacts ---------------------------------------------------------------------------------------
- // Every card Fox showed (context/artifacts): one row each, newest shown last in `at`.
+ // Every card Fox showed (context/store): one row each, newest shown last in `at`.
  private artifactsReady=false;
  private ensureArtifacts(){
   if(this.artifactsReady)return;
@@ -1305,7 +1305,7 @@ export class WorldLedger {
   }catch{throw new WorldletError('Could not save the artifact.');}
  }
 
- // A page the Agent wrote for an artifact (context/artifacts/artifact-render.ts), kept apart from the record so listing
+ // A page the Agent wrote for an artifact (context/store/artifact-render.ts), kept apart from the record so listing
  // artifacts never reads the documents.
  private artifactPagesReady=false;
  private ensureArtifactPages(){

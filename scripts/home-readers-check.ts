@@ -15,7 +15,7 @@ const result=await bundleScript({entryPoints:['ui/applets/home-open.ts'],globalN
 const browser=await chromium.launch();try{
  const page=await browser.newPage({viewport:{width:1440,height:940},reducedMotion:'reduce'});
  await page.setContent('<main id="notionWorld" class="native-console" style="position:fixed;inset:0;background:#879a82"><section class="pixi-applet-stage"></section></main>');
- for(const file of ['dist/WorldletWeb/worldlet-ui.css','ui/shell/pixi-world.css'])await page.addStyleTag({content:await readFile(file,'utf8')});await page.addScriptTag({content:result});
+ for(const file of ['dist/WorldletWeb/worldlet-ui.css','ui/frame/pixi-world.css'])await page.addStyleTag({content:await readFile(file,'utf8')});await page.addScriptTag({content:result});
  await page.evaluate(()=>{const w=window as any;w.picks=[];w.now=new Date(2026,8,28,12).getTime();w.state={mode:'week',offset:0};w.records=Array.from({length:11},(_,i)=>({id:String(i),title:'Design review '+i,start:new Date(2026,8,28,9+i%8).toISOString(),when:'Today',context:'Project plans',record:{list:'Work',folder:'Project notes'}}));w.render=(key='google-calendar')=>{const panel=document.querySelector('section');panel.replaceChildren();w.Home.renderHomeOpen(panel,{key,title:key==='google-calendar'?'Calendar':key==='apple-notes'?'Notes':'Reminders'},w.records,{now:w.now,connected:true},w.state,i=>w.picks.push(i.id),()=>w.render(key));};w.render();});
  assert.equal(await page.locator('.home-calendar-day').count(),7);
  await page.getByRole('button',{name:'Month',exact:true}).click();assert.equal(await page.locator('.home-calendar-day').count(),30);

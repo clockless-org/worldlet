@@ -36,7 +36,7 @@ assert.throws(()=>assertComponentImport('agent/attention/example.ts','../tasks/r
 assertComponentImport('agent/tasks/example.ts','./runtime-tasks.ts');
 assertComponentImport('ui/world/example.ts','../../agent/tasks/index.ts');
 assert.throws(()=>assertComponentImport('ui/companion/example.ts','../browser/browser-device.ts'),/bypasses/);
-assert.throws(()=>assertComponentImport('website/main.ts','../ui/shell/notion-world.ts'),/bypasses/);
+assert.throws(()=>assertComponentImport('website/main.ts','../ui/frame/notion-world.ts'),/bypasses/);
 assertComponentImport('ui/companion/example.ts','../browser/index.ts');
 assertComponentImport('ui/applets/example.ts','./browser-device.ts');
 // The open-source export leaves out the hosted services (website, models, worker).

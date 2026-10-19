@@ -5,7 +5,7 @@ import {FOX_CHOOSE_AGENT_ACTION,FOX_RETRY_ACTION,FOX_RETRY_FAST_MS,foxTurnFailur
 import {diagnosticError} from '../agent/base/index.ts';
 import {replyAction} from '../ui/companion/reply-actions.ts';
 
-// The rule the UI passes, as analytics classifies it (ui/shell errorFields).
+// The rule the UI passes, as analytics classifies it (ui/frame errorFields).
 const kind=(message:string)=>{const rule=diagnosticError({message}).rule;return typeof rule==='string'&&rule!=='other'?rule:undefined;};
 
 const quick={known:null,elapsedMs:300,streamed:false,toolsRan:false,attempt:0};

@@ -15,7 +15,7 @@ import {Preferences} from '../preferences.ts';
 import {digest} from '../files.ts';
 import {WorldStore} from './world-store.ts';
 import {WorldLedger} from './ledger.ts';
-import {EMPTY_OVERLAY} from '../../../../context/sources/index.ts';
+import {EMPTY_OVERLAY} from '../../../../context/connectors/index.ts';
 import {removeOldLeftovers} from './leftovers.ts';
 import {readAgentSetting,writeAgentSetting} from './agent-settings.ts';
 import {BrowserHistory} from '../modules/applets/history.ts';

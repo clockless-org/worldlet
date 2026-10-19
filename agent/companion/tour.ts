@@ -1,6 +1,6 @@
 type Journey={completed?:boolean,journeyStage?:string}|undefined|null;
 
-/** The journey stages of the first-run tour: its first half, then first value (ui/shell/ONBOARDING.md). */
+/** The journey stages of the first-run tour: its first half, then first value (ui/frame/ONBOARDING.md). */
 export const TOUR_STAGES=['world-tour','first-value','first-value-review','first-value-running','first-value-outcome'] as const;
 
 /** The first-run tour is on: setup is done and the journey has not finished or been skipped. */

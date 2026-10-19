@@ -2,7 +2,7 @@ import SwiftUI
 import WebKit
 import WorldletKit
 
-/// Widgets on the phone (context/artifacts/README.md): a page made for the moment, at the top of Now until its end. Tapping
+/// Widgets on the phone (context/store/ARTIFACTS.md): a page made for the moment, at the top of Now until its end. Tapping
 /// one opens it over everything in a sandboxed web view: no network, no stored website data, no navigation, the page
 /// loaded from a string. Its local storage is Worldlet's: the page starts from the stored values and reports them as
 /// they change, and the app merges them with the computer's, newest edit wins.
@@ -297,7 +297,7 @@ extension PhoneWidget {
         return Color(hex: value)
     }
 
-    /// How its end reads beside its name, as on the computer (context/artifacts widgetUntil): "Pinned", "Until 6:00 PM",
+    /// How its end reads beside its name, as on the computer (context/store widgetUntil): "Pinned", "Until 6:00 PM",
     /// "Until tomorrow 9:00 AM", "Until Oct 9".
     func until(now: Date = Date()) -> String {
         if pinned { return "Pinned" }

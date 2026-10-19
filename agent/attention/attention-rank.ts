@@ -1,4 +1,4 @@
-import {attentionArrivedAt,recordInstant as instant,type AttentionRankItem} from '../../context/items/index.ts';
+import {attentionArrivedAt,recordInstant as instant,type AttentionRankItem} from '../../context/store/index.ts';
 export {attentionArrivedAt};
 import type {AttentionWorkflow} from '../../contracts/attention.ts';
 /** Attention ranking signals (#1152, owner decision 2026-10-01). Importance first, then fit with

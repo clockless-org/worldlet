@@ -1,9 +1,9 @@
-// The Game Factory's rules (context/artifacts/GAMES.md) without a host: what a made game may contain, the page
+// The Game Factory's rules (context/store/GAMES.md) without a host: what a made game may contain, the page
 // it runs as, what the host reads back, the model it needs, and that making stays closed for now.
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {widgetDocument,WIDGET_POLICY} from '../context/artifacts/index.ts';
-import {checkMadeGameSource,madeGameDocument,readMadeGameReport,madeGameRecord,readMadeGame,orderMadeGames,madeGameTrialProblems,gameFactoryModel,madeGameId,validMadeGameId,madeGameTask,betterBest,GAME_MAKING_OPEN,MADE_GAME_POLICY,SANDBOX_POLICY,MADE_GAME_REPORT,GAME_FACTORY_APPLET} from '../context/artifacts/index.ts';
+import {widgetDocument,WIDGET_POLICY} from '../context/store/index.ts';
+import {checkMadeGameSource,madeGameDocument,readMadeGameReport,madeGameRecord,readMadeGame,orderMadeGames,madeGameTrialProblems,gameFactoryModel,madeGameId,validMadeGameId,madeGameTask,betterBest,GAME_MAKING_OPEN,MADE_GAME_POLICY,SANDBOX_POLICY,MADE_GAME_REPORT,GAME_FACTORY_APPLET} from '../context/store/index.ts';
 import {createWorldToolRuntime} from '../platform/bridge/world-tool-runtime.ts';
 import {worldActions,listWorldTools} from '../agent/gate/index.ts';
 import {APP_DEFINITIONS} from '../context/applets/index.ts';

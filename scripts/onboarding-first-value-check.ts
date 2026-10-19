@@ -42,7 +42,7 @@ assert.equal(firstValueCandidate([{...item,id:'lease',priority:'high'},bookable]
 assert.equal(firstValueCandidate([bookable],Date.now(),['other'])?.id,'book','with no eligible row shown, the best item is still offered');
 assert.ok(firstValueRequest('book',firstValueLinks(bookable)).includes('https://demo.worldlet.test/brightsmile'));
 assert.ok(!/request the normal approval/.test(firstValueRequest('book')),'Fox acts directly on website steps');
-const bundle=await bundleScript({entryPoints:['ui/shell/first-value.ts'],globalName:'FirstValue'});
+const bundle=await bundleScript({entryPoints:['ui/frame/first-value.ts'],globalName:'FirstValue'});
 const browser=await chromium.launch();
 try{
  const page=await browser.newPage();await page.setContent('<main id="world"></main>');await page.addScriptTag({content:bundle});

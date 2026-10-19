@@ -346,7 +346,7 @@ Asking Fox to save captures the open post, or the post whose text is selected, l
 
 ## Fox tools
 
-Two browser tools are defined in `worker/companion-tools.ts`, emitted into the Hermes `tools.json` by `scripts/build-hermes.ts`, and executed in `ui/shell/notion-world.ts`:
+Two browser tools are defined in `worker/companion-tools.ts`, emitted into the Hermes `tools.json` by `scripts/build-hermes.ts`, and executed in `ui/frame/notion-world.ts`:
 
 | Tool | Scope | Operations |
 | --- | --- | --- |
