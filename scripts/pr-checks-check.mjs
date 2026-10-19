@@ -56,7 +56,7 @@ const popupPaths=['contracts/README.md','contracts/fixtures/parity/browser-popup
  'platform/electron/README.md','platform/electron/src/modules/applets/rules.ts','platform/electron/src/modules/applets/page.ts',
  'scripts/electron-bridge-check.ts','scripts/parity-vectors.ts','scripts/parity-core-usage.ts'];
 assert.deepEqual(selectChecks(popupPaths),trustChecks);
-for(const file of ['scripts/attention-events-check.ts','platform/bridge/world-tool-runtime.ts','platform/electron/src/modules/fox/index.ts'])assert.deepEqual(selectChecks([file]),trustChecks,file);
+for(const file of ['scripts/attention-events-check.ts','platform/bridge/world-tool-runtime.ts','platform/electron/src/modules/companion/index.ts'])assert.deepEqual(selectChecks([file]),trustChecks,file);
 assert.deepEqual(selectChecks([...popupPaths,'scripts/machine-wakeup.mjs']),all,'mixed changes retain operational checks');
 assert.deepEqual(selectChecks(['scripts/unknown-new-helper.ts']),all,'unclassified scripts remain conservative');
 assert(!workflow.includes('paths-ignore:')&&!workflow.includes('paths:'),'required check must always report');

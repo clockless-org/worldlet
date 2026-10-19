@@ -4,8 +4,8 @@ import {isItemHostAction,readItemHostRequest} from '../../contracts/item-actions
 import {readBrowserOutcomeRequest} from '../../contracts/browser-receipt.ts';
 import {isBrowserSurfaceAction,readBrowserSurfaceRequest} from '../../contracts/browser-surface.ts';
 import {isFoxHostAction} from '../../contracts/fox.ts';
-import {readFoxHostRequest} from '../../agent/fox/index.ts';
-import {changesModelStatus} from '../../agent/fox/index.ts';
+import {readFoxHostRequest} from '../../agent/companion/index.ts';
+import {changesModelStatus} from '../../agent/companion/index.ts';
 import type {HostCall,HostRequest,HostTransport} from '../../contracts/platform.ts';
 import {webHost} from './web-host.ts';
 import {roomHost} from './room-host.ts';

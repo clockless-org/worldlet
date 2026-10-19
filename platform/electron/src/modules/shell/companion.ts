@@ -3,7 +3,7 @@ import {WorldletError} from '../../files.ts';
 import type {Host,Row} from '../../host/types.ts';
 import {RUN_IN_BACKGROUND,type DesktopCompanionService} from '../../host/services.ts';
 import {companionEntry,companionMenu,type CompanionTray} from './companion-tray.ts';
-import {onboardingUnfinished} from '../../../../../agent/fox/index.ts';
+import {onboardingUnfinished} from '../../../../../agent/companion/index.ts';
 import {backgroundLaunch,showInBackground} from '../../background-launch.ts';
 
 const WORLD_BACKGROUND='#20251d';

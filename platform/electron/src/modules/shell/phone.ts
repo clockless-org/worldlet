@@ -16,7 +16,7 @@ import {createRemoteAgentHost} from './remote-host.ts';
 import {phoneWebRecording} from './web.ts';
 import {openInBrowser} from '../../system-browser.ts';
 import {attentionLaterUntil,hostAttention} from '../../../../../agent/attention/index.ts';
-import {onboardingUnfinished} from '../../../../../agent/fox/index.ts';
+import {onboardingUnfinished} from '../../../../../agent/companion/index.ts';
 import {taskPanel} from '../../../../../agent/tasks/index.ts';
 import {APP_DEFINITIONS} from '../../../../../context/applets/index.ts';
 import {readArtifact} from '../../../../../context/artifacts/index.ts';

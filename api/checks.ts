@@ -15,5 +15,5 @@ export {createRemoteAgentLink} from '../platform/electron/src/modules/shell/remo
 export {RemoteHarnessRuntime} from '../platform/electron/src/modules/agents/remote-harness.ts';
 export {locateLocalHarnesses} from '../platform/electron/src/modules/agents/local-harness.ts';
 export {readLocalAgentMemory} from '../platform/electron/src/modules/agents/local-memory.ts';
-export {bringAgent} from '../platform/electron/src/modules/fox/migration.ts';
+export {bringAgent} from '../platform/electron/src/modules/companion/migration.ts';
 export {WorldLedger} from '../platform/electron/src/store/ledger.ts';

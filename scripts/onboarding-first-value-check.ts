@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {attentionFailure} from '../agent/attention/attention-failure.ts';
-import {firstValueCandidate,firstValueLinks,firstValueRequest,updateOnboarding} from '../agent/fox/index.ts';
+import {firstValueCandidate,firstValueLinks,firstValueRequest,updateOnboarding} from '../agent/companion/index.ts';
 import {helpNarration,narrateHelp} from '../ui/companion/help-narration.ts';
 import {bundleScript} from './browser-test.ts';
 assert.deepEqual(attentionFailure("Worldlet's included AI service needs a billing update.",100),{code:'service_credits',nextAt:1000});

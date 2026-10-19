@@ -1,4 +1,4 @@
-// Reset Fox's file step (platform/electron/src/modules/fox/reset-files.ts): World data leaves the library, while
+// Reset Fox's file step (platform/electron/src/modules/companion/reset-files.ts): World data leaves the library, while
 // the model connection, the host's own files and the installation's folders (Hermes runtime, local speech, model
 // credential) stay. The runtime lives in <library>/runtime (on Mac too since 2026-10-04) and can be mid-install
 // while Reset runs; moving it failed with EPERM, so Reset never got back to the sign-in page (#1568). A move that
@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {HOST_RETAINED,removeExceptRetained} from '../platform/electron/src/modules/fox/reset-files.ts';
+import {HOST_RETAINED,removeExceptRetained} from '../platform/electron/src/modules/companion/reset-files.ts';
 
 const write=(root:string,file:string)=>{fs.mkdirSync(path.dirname(path.join(root,file)),{recursive:true});fs.writeFileSync(path.join(root,file),file);};
 const files=['world.sqlite','sources/notes/a.json','speech/py312/model/config.json','model-access/installation.token','runtime/0123456789abcdef0123456789abcdef01234567-0123456789ab/source/.venv/bin/python3','runtime/cache/wheel','runtime/python/cpython-3.12/bin/python3','agent/private/hermes/.env','agent/private/hermes/state.db','runtime/hermes-0123456789abcdef/source/.venv/Scripts/python.exe','runtime/hermes-0123456789abcdef.lock/pid','preferences.json','Browser/Local State'];

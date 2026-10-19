@@ -9,7 +9,7 @@ import {claudeCodeConversationTitle,claudeCodeTurn,hermesConversationIncluded,he
 import {openClawAgents,parseJSON5,readOpenClaw,reportOpenClawWorkspaces,scanOpenClawWorkspaces,surveyOpenClaw} from '../platform/electron/src/modules/agents/openclaw-files.ts';
 import {surveyAgentHistory} from '../platform/electron/src/modules/agents/agent-files.ts';
 import {firstSentence,localAgentModel,openClawWorkspace,readLocalAgentMemory,summarizeLocalAgent} from '../platform/electron/src/modules/agents/local-memory.ts';
-import {bringAgent,broughtFile,placeBrought,readBrought,restoreBrought} from '../platform/electron/src/modules/fox/migration.ts';
+import {bringAgent,broughtFile,placeBrought,readBrought,restoreBrought} from '../platform/electron/src/modules/companion/migration.ts';
 import {allowed as inBackup,validate as validateBackup} from '../platform/electron/src/modules/shell/backup.ts';
 import {digest} from '../platform/electron/src/files.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';

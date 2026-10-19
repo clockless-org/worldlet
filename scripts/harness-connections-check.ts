@@ -6,7 +6,7 @@ import {HARNESS_SERVICES,worldToolsCommands,isWorldToolsRegistrar,commandLine,co
  openClawConnectionCommand,openClawConnections,openClawMcpPrefixes,readConnectionAdd,withLastUse} from '../agent/gate/index.ts';
 import {harnessConnections,hermesConnectionsService,openClawConnectionsService} from '../platform/electron/src/modules/agents/harness-connections.ts';
 import type {HarnessEnvironment} from '../platform/electron/src/modules/agents/local-harness.ts';
-import {createHarnessConnections} from '../platform/electron/src/modules/fox/harness-connections.ts';
+import {createHarnessConnections} from '../platform/electron/src/modules/companion/harness-connections.ts';
 import {AGENT} from '../platform/electron/src/host/services.ts';
 import {connectionLine,connectionUseLine,showAgentConnections} from '../ui/settings/agent-connections.ts';
 import {withTempDir} from './test-temp.ts';

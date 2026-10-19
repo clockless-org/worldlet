@@ -1,6 +1,6 @@
 // Voice beyond OpenClaw and Hermes Agent (blueprint rows "Voice input" and "Spoken conversation voice"): dictation goes
 // into any text field of the World, not only Fox's bar (ui/companion/field-dictation.ts); local Whisper hears the
-// World's own names as its initial prompt (agent/fox/speech-vocabulary.ts, platform/local-tools/whisper_*.py);
+// World's own names as its initial prompt (agent/companion/speech-vocabulary.ts, platform/local-tools/whisper_*.py);
 // Fox's spoken replies use the Agent's own text-to-speech through the Harness `voice` service where the Harness has one
 // (agent/gate/harness-voice.ts, agent-runtime/harness-voice.ts), and a system voice otherwise.
 import assert from 'node:assert/strict';
@@ -8,7 +8,7 @@ import {execFileSync} from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {SPEECH_VOCABULARY,speechPrompt,speechTerm,speechTerms,worldSpeechTerms} from '../agent/fox/index.ts';
+import {SPEECH_VOCABULARY,speechPrompt,speechTerm,speechTerms,worldSpeechTerms} from '../agent/companion/index.ts';
 import {makeSampleWorld} from '../ui/world/sample-data.ts';
 import {dictationTarget,dictationWords} from '../ui/companion/field-dictation.ts';
 import {validateHarnessServices} from '../contracts/harness-services.ts';
@@ -31,7 +31,7 @@ assert.ok(prompt.startsWith('Fox, Kelvin Ren, ')&&prompt.endsWith('.')&&prompt.l
 assert.equal(speechPrompt([]),'');
 assert.equal(speechPrompt(Array.from({length:60},(_,i)=>'Someone Longname'+i)).length<=SPEECH_VOCABULARY.characters,true);
 // The hint reaches Whisper as its initial prompt from a file, on both computers, and an echo of it is not speech.
-const host=fs.readFileSync(new URL('../platform/electron/src/modules/fox/speech.ts',import.meta.url),'utf8');
+const host=fs.readFileSync(new URL('../platform/electron/src/modules/companion/speech.ts',import.meta.url),'utf8');
 assert.match(host,/this\.local\.transcribe\(pcm,this\.language,controller\.signal,this\.prompt\)/,'Fox and field dictation pass the World\'s names');
 assert.match(host,/fs\.writeFileSync\(hint,prompt,\{mode:0o600\}\)/,'the names go in a private file, never on the command line');
 const mac=fs.readFileSync(new URL('../platform/local-tools/whisper_local.py',import.meta.url),'utf8');

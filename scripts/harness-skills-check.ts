@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {harnessService,skillDraftProblem,skillFrontmatter,skillInvocation,skillLastRanLabel,skillLastRuns,skillMarkdown,skillRepeats,worldSkills,SKILL_REPEAT,type SkillTurn} from '../agent/gate/index.ts';
 import {harnessSkills} from '../platform/electron/src/modules/agents/harness-skills.ts';
-import {createFoxSkills} from '../platform/electron/src/modules/fox/skills.ts';
+import {createFoxSkills} from '../platform/electron/src/modules/companion/skills.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {withTempDir} from './test-temp.ts';
 

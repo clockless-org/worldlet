@@ -14,7 +14,7 @@ import path from 'node:path';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {WebRecorder,readRecordings} from '../platform/electron/src/modules/applets/recorder.ts';
 import {WEB_RECORD,webTranscript,type WebRecord} from '../agent/applets/index.ts';
-import {conversationGuidance} from '../agent/fox/conversation-guidance.ts';
+import {conversationGuidance} from '../agent/companion/conversation-guidance.ts';
 import {listWorldTools} from '../agent/gate/index.ts';
 import {BATTLE_REVIEW,battleNow,battleReviewDue,battleReviewTask,battleSummaryDue,battleWatch,battlesReviewed,battlesSummarized,finishedBattles,observeBattleMessage} from '../context/artifacts/index.ts';
 import {BattleReviews} from '../platform/electron/src/modules/applets/battle-review.ts';

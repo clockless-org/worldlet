@@ -25,11 +25,11 @@ import {AGENT,PHONE,VAULT,WORLD_ROOM_PAGE,WORLD_WEB,type AgentService,type Phone
 import type {Host,PageBridge} from '../../electron/src/host/types.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
 import {isWorldToolsRegistrar} from '../../../agent/gate/index.ts';
-import {onboardingUnfinished} from '../../../agent/fox/index.ts';
+import {onboardingUnfinished} from '../../../agent/companion/index.ts';
 import {ALREADY_RUNNING,controlSocketPath,serveControl,type ControlReply,type ControlRequest} from './control.ts';
 import {mcpHome,openMcpHome,registerAgent,registeredAgents} from './mcp-home.ts';
 import {installWorld} from '../../electron/src/modules/world/world.ts';
-import {installFox} from '../../electron/src/modules/fox/index.ts';
+import {installFox} from '../../electron/src/modules/companion/index.ts';
 import {installAttention} from '../../electron/src/modules/attention/index.ts';
 import {installAgentRuntime,scriptAgentService} from '../../electron/src/modules/agents/index.ts';
 import {installSources} from '../../electron/src/modules/sources/index.ts';

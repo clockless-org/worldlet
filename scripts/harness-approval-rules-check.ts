@@ -6,7 +6,7 @@ import {HARNESS_SERVICES,approvalChanges,approvalGrantFor,approvalThreadLabel,ch
  openClawApprovalsWithout,openClawChangesEvent,openClawGrantRules,openClawStandingRules,readApprovalGrants,readHarnessApprovalResult,rememberApprovalGrant,standingRuleId} from '../agent/gate/index.ts';
 import {hermesStandingRulesService,openClawStandingRulesService,standingRules} from '../platform/electron/src/modules/agents/harness-approvals.ts';
 import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/src/modules/agents/local-harness.ts';
-import {createHarnessApprovalRules} from '../platform/electron/src/modules/fox/harness-approvals.ts';
+import {createHarnessApprovalRules} from '../platform/electron/src/modules/companion/harness-approvals.ts';
 import {AGENT} from '../platform/electron/src/host/services.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {permissionLine,showAgentPermissions} from '../ui/settings/agent-permissions.ts';

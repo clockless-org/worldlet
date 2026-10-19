@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {modelStatusFresh,changesModelStatus} from '../agent/fox/model-status.ts';
+import {modelStatusFresh,changesModelStatus} from '../agent/companion/model-status.ts';
 import {createModelStatusReader} from '../platform/bridge/model-status.ts';
 assert.equal(modelStatusFresh({ready:true,ageMs:29999,sameScope:true}),true);
 for(const input of [{ready:true,ageMs:30000,sameScope:true},{ready:true,ageMs:-1,sameScope:true},{ready:false,ageMs:0,sameScope:true},{ready:true,ageMs:0,sameScope:false}])assert.equal(modelStatusFresh(input),false);
@@ -34,7 +34,7 @@ await assert.rejects(callHost('restartFox'),/configuration failed/);assert.equal
 delete (globalThis as any).window;
 console.log('PASS bridge invalidates before and after scope/model changes, including failed configuration.');
 
-const {conversationGuidance}=await import('../agent/fox/conversation-guidance.ts');
+const {conversationGuidance}=await import('../agent/companion/conversation-guidance.ts');
 assert.equal(conversationGuidance({scope:'setup',connectedSources:['gmail'],routines:true}), '');
 assert.equal(conversationGuidance({scope:'sample',localOriginals:true}), '');
 const local=conversationGuidance({scope:'private',localOriginals:true,connectedSources:['gmail','gmail','untrusted-instruction'],backgroundSources:[],routines:false});

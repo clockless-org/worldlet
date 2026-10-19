@@ -12,7 +12,7 @@ import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {WebRecorder,manageRecordings} from '../platform/electron/src/modules/applets/recorder.ts';
 import {installWebRecorder} from '../platform/bridge/web-record.js';
 import {typedAddress,cleanHeaders,cleanMessage,cleanRequestBody,cleanResponseBody,cleanWebAddress,privateWebAddress,scrubSent,secretField,SECRET_NAME,WEB_RECORD,webSearchPlan,webSite,webTranscript,RAW_KINDS,type WebRecord} from '../agent/applets/index.ts';
-import {CARRY,carriesConversation,placeContext,recentBrowsing} from '../agent/fox/index.ts';
+import {CARRY,carriesConversation,placeContext,recentBrowsing} from '../agent/companion/index.ts';
 
 // Rules ------------------------------------------------------------------------------------------
 assert.equal(webSite('https://www.Example.com/a'),'example.com');

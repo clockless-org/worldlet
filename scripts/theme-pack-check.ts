@@ -129,7 +129,7 @@ assert.deepEqual(layout.pins,{home:['app-gmail']});assert.equal(layout.names.hom
 assert.deepEqual(JSON.parse(JSON.stringify(storedRegionLayout(layout))).themePins,{castle:{home:['app-notion']}},'saving keeps the other theme\'s pins');
 assert.deepEqual(readRegionLayout('regions','castle').pins,{home:['app-notion']});
 // The World keeps every theme's pins (onboarding.regionLayout), and recent use stays shared.
-const {updateOnboarding}=await import('../agent/fox/onboarding.ts');const {parseRegionLayout}=await import('../ui/world/region-layout.ts');
+const {updateOnboarding}=await import('../agent/companion/onboarding.ts');const {parseRegionLayout}=await import('../ui/world/region-layout.ts');
 const inWorld=updateOnboarding({version:1,presets:['home'],completed:true},{operation:'regionLayout',layout:JSON.parse(JSON.stringify(storedRegionLayout({...layout,lastUsedAt:{'app-gmail':1000}})))}).regionLayout;
 assert.deepEqual(parseRegionLayout(inWorld,'castle').pins,{home:['app-notion']});assert.deepEqual(parseRegionLayout(inWorld,'village').pins,{home:['app-gmail']});
 assert.deepEqual(parseRegionLayout(inWorld,'castle').lastUsedAt,{'app-gmail':1000});

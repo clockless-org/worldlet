@@ -6,7 +6,7 @@ import path from 'node:path';
 import {appletAgentThread,harnessAgentInstructions,harnessService,hermesProfileModel,localHarnessInvocation,openClawAgentModel,openClawResponsesBody} from '../agent/gate/index.ts';
 import {hermesAgentsService,openClawAgentsService} from '../platform/electron/src/modules/agents/harness-agents.ts';
 import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/src/modules/agents/local-harness.ts';
-import {createHarnessAgents} from '../platform/electron/src/modules/fox/harness-agents.ts';
+import {createHarnessAgents} from '../platform/electron/src/modules/companion/harness-agents.ts';
 import {AGENT} from '../platform/electron/src/host/services.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {withTempDir} from './test-temp.ts';

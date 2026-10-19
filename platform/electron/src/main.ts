@@ -23,7 +23,7 @@ import {captureRequest,refuseBesideRunningCopy,runCapture,type CaptureRequest} f
 import {probeRequest,refuseProbeBesideRunningCopy,runProbe,type ProbeRequest} from './world/permission-probe.ts';
 import {loginItemCheckRequest,refuseLoginItemCheckBesideRunningCopy,runLoginItemCheck,type LoginItemCheckRequest} from './world/login-item-check.ts';
 import {openedAtLogin} from '../../../agent/base/index.ts';
-import {onboardingUnfinished} from '../../../agent/fox/index.ts';
+import {onboardingUnfinished} from '../../../agent/companion/index.ts';
 import {updateAcceptance} from './modules/shell/update-acceptance.ts';
 import {modules} from './modules/index.ts';
 import {runCheck} from './checks/index.ts';

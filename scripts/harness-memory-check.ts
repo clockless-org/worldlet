@@ -7,8 +7,8 @@ import {standingRules} from '../platform/electron/src/modules/agents/harness-app
 import {harnessConnections} from '../platform/electron/src/modules/agents/harness-connections.ts';
 import {harnessMemory} from '../platform/electron/src/modules/agents/harness-memory.ts';
 import {harnessSkills} from '../platform/electron/src/modules/agents/harness-skills.ts';
-import {createHarnessControls} from '../platform/electron/src/modules/fox/harness-controls.ts';
-import {createHarnessConnections} from '../platform/electron/src/modules/fox/harness-connections.ts';
+import {createHarnessControls} from '../platform/electron/src/modules/companion/harness-controls.ts';
+import {createHarnessConnections} from '../platform/electron/src/modules/companion/harness-connections.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Settings › Context and the read-only parts for Claude Code, Codex and pi (owner plan 2026-10-11, PR 3;

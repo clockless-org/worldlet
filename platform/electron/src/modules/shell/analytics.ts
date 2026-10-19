@@ -12,7 +12,7 @@ import {buildInfo,distribution,releaseBuild} from './release.ts';
 import {currentGraphics} from '../../graphics.ts';
 import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,ERROR_RULES,HERMES_FAILURES,HERMES_REASONS,HERMES_SETUP,HERMES_STAGES,INSTALL_STEPS,EXIT_CODE_NAMES,LOCAL_AGENT_IDS,MAIN_STALL_LIMIT,REPLY_BUCKETS,ROW_BUCKETS,SIZE_BUCKETS,UPDATE_WAIT_BUCKETS,localDataDimensions,deviceClass,stallTask,timingBucket,type DeviceClass,type LocalDataFacts} from '../../../../../agent/base/index.ts';
 import {WORLD_APPS} from '../../../../../context/applets/index.ts';
-import {PROACTIVE_MOMENTS} from '../../../../../agent/fox/index.ts';
+import {PROACTIVE_MOMENTS} from '../../../../../agent/companion/index.ts';
 
 // Explicit product events and account/installation profiles from the host. The World page adds PostHog's standard web
 // capture (webConfig and ingest below; ui/shell/posthog-web.ts): autocapture, pageleave, sessions and session replay,

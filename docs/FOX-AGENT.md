@@ -30,7 +30,7 @@ recorded visits so the person can keep talking meanwhile, owner Order 2026-10-10
   checks as the turn that started it. The one
   task Worldlet starts by itself is a [battle review](../context/artifacts/GAMES.md#battle-review) after each
   game and a summary every few games; with no person's words behind it, it starts untrusted (`reviewGames`).
-- The host (`platform/electron/src/modules/fox/index.ts`) runs it as its own chat in the Agent's task
+- The host (`platform/electron/src/modules/companion/index.ts`) runs it as its own chat in the Agent's task
   lane (Hermes `#tasks` worker, `worldlet.task.lock`), beside the conversation: one task per Applet,
   at most three at once, none in the practice world. The task lane is not counted as the
   conversation, so it neither makes the conversation wait nor holds back background checks.

@@ -164,7 +164,7 @@ for opens (owner decision 2026-10-08: "打开apple developer网站" was refused)
 
 ### Trusted UI tool waits
 
-A World tool can await trusted UI work, such as the automatic element check before a click, before issuing a browser command. Nothing asks the person (#671). Its call to the World page uses Core's foreground Agent deadline (`agentRequestDeadline`), rather than the 15-second page timeout (`platform/electron/src/modules/fox/index.ts`). Ordinary page inspections retain their short timeout.
+A World tool can await trusted UI work, such as the automatic element check before a click, before issuing a browser command. Nothing asks the person (#671). Its call to the World page uses Core's foreground Agent deadline (`agentRequestDeadline`), rather than the 15-second page timeout (`platform/electron/src/modules/companion/index.ts`). Ordinary page inspections retain their short timeout.
 
 ## Evidence history
 

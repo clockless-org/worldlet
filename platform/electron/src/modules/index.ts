@@ -1,13 +1,13 @@
 import type {Host} from '../host/types.ts';
 import {installWorld} from './world/world.ts';
-import {installFox} from './fox/index.ts';
+import {installFox} from './companion/index.ts';
 import {installAttention} from './attention/index.ts';
 import {installAgentRuntime} from './agents/index.ts';
 import {installShell} from './shell/index.ts';
 import {installSources} from './sources/index.ts';
 import {installMedia,installMediaClose} from './shell/media.ts';
 import {installWorldAudio} from './world/world-audio.ts';
-import {installVoice} from './fox/voice.ts';
+import {installVoice} from './companion/voice.ts';
 import {installAppletTools} from './applets/applet-tools.ts';
 import {installBrowser} from './applets/browser.ts';
 import {installPhone} from './shell/phone.ts';

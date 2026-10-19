@@ -64,7 +64,7 @@ The shared dispatcher the Platform calls is `agent/index.ts`, since it calls bot
 | Layer | Folders |
 | --- | --- |
 | UI | `ui/applets/` `ui/artifacts/` `ui/attention/` `ui/browser/` `ui/companion/` `ui/components/` `ui/distribution/` `ui/games/` `ui/hud/` `ui/onboarding/` `ui/practice/` `ui/settings/` `ui/shell/` `ui/theme-packages/` `ui/themes/` `ui/web/` `ui/world/` |
-| Agent (`agent/`) | `agent/fox/` `agent/applets/` `agent/attention/` `agent/tasks/` `agent/gate/` `agent/base/` |
+| Agent (`agent/`) | `agent/companion/` `agent/applets/` `agent/attention/` `agent/tasks/` `agent/gate/` `agent/base/` |
 | Context (`context/`) | `context/items/` `context/activity/` `context/sources/` `context/applets/` `context/artifacts/` |
 | Platform | `platform/bridge/` `platform/browser/` `platform/distribution/` `platform/electron/` `platform/install/` `platform/local-tools/` `platform/node/` `platform/web-engine/` |
 
@@ -80,7 +80,7 @@ component is missing or listed twice. Which layer each folder is in: [folders by
 | --- | --- | --- | --- | --- |
 | World | The place everything sits in: areas, HUD, themes | `ui/world/` `ui/hud/` `ui/themes/` `ui/theme-packages/` | `context/activity/` | `platform/electron/src/modules/world/` |
 | Applets | Where the person's data and actions live, with the real website beside them | `ui/applets/` `ui/browser/` `ui/games/` `ui/practice/` | `context/applets/` `agent/applets/` | `platform/electron/src/modules/applets/` |
-| Companion | Fox: the one conversation, voice, memory and what Fox is doing | `ui/companion/` | `agent/fox/` | `platform/electron/src/modules/fox/` |
+| Companion | Fox: the one conversation, voice, memory and what Fox is doing | `ui/companion/` | `agent/companion/` | `platform/electron/src/modules/companion/` |
 | Attention | What needs the person now: ranked, at most nine, each waiting for Done, Send or Later | `ui/attention/` | `agent/attention/` | `platform/electron/src/modules/attention/` |
 | Tasks | Work that runs without the person: routines, cron jobs, source checks, background drafts and Applet tasks. Fox starts some, Applets start others; the person's Agent does them | (no folder of its own: its status shows in Fox, on Applets and in the Ongoing Applet) | `agent/tasks/` | `platform/electron/src/modules/tasks/` |
 | Artifacts & Journal | What work produces: one artifact for every card, draft, page and brief, shown wherever it is needed (Attention, Fox, Applets), and the Journal that keeps them by day | `ui/artifacts/` | `context/artifacts/` | (in Attention's host module, `platform/electron/src/modules/attention/artifacts.ts`) |

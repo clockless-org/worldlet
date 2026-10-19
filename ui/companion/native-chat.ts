@@ -9,7 +9,7 @@ import {mountAppletTaskResults} from './applet-task-results.ts';
 import {mountFoxProactive,arriveProactive} from './fox-proactive.ts';
 import {isDesktopCompanion,requireWorldSurface} from './world-surface.ts';
 import {errorFields,isRequestCancellation,reportEngagement,reportProductEvent} from '../shell/index.ts';
-import {FOX_RETRY_ACTION,FOX_RETRY_DELAY_MS,foxTurnFailureText,foxTurnRetry} from '../../agent/fox/index.ts';
+import {FOX_RETRY_ACTION,FOX_RETRY_DELAY_MS,foxTurnFailureText,foxTurnRetry} from '../../agent/companion/index.ts';
 import {contextThread,cleanRecall,FOX_MAIN_THREAD,restoredMainHistory} from '../attention/index.ts';
 import {foxVisibleText,guidedVisibleText} from './fox-visible-text.ts';
 import {modelFailure} from './model-failure.ts';

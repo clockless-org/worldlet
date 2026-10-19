@@ -1,4 +1,4 @@
-import {firstValueCandidate} from '../../agent/fox/index.ts';
+import {firstValueCandidate} from '../../agent/companion/index.ts';
 import {connectionLive,sourcesReading} from '../../context/applets/index.ts';
 import {journalTarget} from '../../agent/gate/index.ts';
 import {createCoachMark,createTourSpotlight,elementBox} from './tour-spotlight.ts';

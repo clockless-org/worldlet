@@ -11,8 +11,8 @@ import {DatabaseSync} from 'node:sqlite';
 import {HARNESS_SERVICES,harnessService,MIGRATION_SOURCES,type MigrationSource} from '../agent/gate/index.ts';
 import {filesHistory} from '../platform/electron/src/modules/agents/agent-history.ts';
 import {writeSelection} from '../platform/electron/src/modules/agents/local-harness.ts';
-import {bringAgent,broughtTurnId} from '../platform/electron/src/modules/fox/migration.ts';
-import {createHistorySync,ownHarnessSession} from '../platform/electron/src/modules/fox/history-sync.ts';
+import {bringAgent,broughtTurnId} from '../platform/electron/src/modules/companion/migration.ts';
+import {createHistorySync,ownHarnessSession} from '../platform/electron/src/modules/companion/history-sync.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 
 for(const source of MIGRATION_SOURCES)assert.equal(harnessService(source,'history'),'files',source+' reads its history from its own files');

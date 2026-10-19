@@ -1,7 +1,7 @@
 import {createCompanionAI} from '../../ui/companion/companion-ai.ts';
 import {attentionRequest} from '../../agent/gate/index.ts';
-import {firstValueRequest} from '../../agent/fox/index.ts';
-import {validateConversationHistory} from '../../agent/fox/conversation-history.ts';
+import {firstValueRequest} from '../../agent/companion/index.ts';
+import {validateConversationHistory} from '../../agent/companion/conversation-history.ts';
 
 const w=window as any,key='synthetic-action-history';
 w.turns=[];w.saved=JSON.parse(localStorage.getItem(key)||'[]');

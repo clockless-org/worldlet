@@ -1,4 +1,4 @@
-// Whether anything on this computer answers for Fox (`modelSource`, platform/electron/src/modules/fox/model-source.ts, only its
+// Whether anything on this computer answers for Fox (`modelSource`, platform/electron/src/modules/companion/model-source.ts, only its
 // `source`). There is no energy, charge or battery any more (owner request 2026-10-10): Fox says once when no Agent can
 // answer and points to Settings › Agents.
 

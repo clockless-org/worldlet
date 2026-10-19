@@ -1,5 +1,5 @@
 import {app,BaseWindow} from 'electron';
-import {SPEECH_VOCABULARY,TALK,speechPrompt,speechTerms} from '../../../../../agent/fox/index.ts';
+import {SPEECH_VOCABULARY,TALK,speechPrompt,speechTerms} from '../../../../../agent/companion/index.ts';
 import {WorldletError} from '../../files.ts';
 import {AUDIO,BROWSER,DESKTOP_COMPANION,MEDIA,SPEECH,type AudioService,type BrowserService,type DesktopCompanionService,type MediaService,type SpeechService} from '../../host/services.ts';
 import type {Host,Row} from '../../host/types.ts';

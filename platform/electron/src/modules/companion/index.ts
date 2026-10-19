@@ -31,10 +31,10 @@ import {diagnosticError} from '../../../../../agent/base/index.ts';
 import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,hermesChannelTrust,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,reduceAgentResponse,routineScheduleResult,standingCallDecision,worldSinceNote,type MigrationSource} from '../../../../../agent/gate/index.ts';
 import {worldLogKeeps} from '../../../../../context/activity/index.ts';
 import {worldActionOf,worldActions} from '../../../../../agent/gate/index.ts';
-import {onboardingUnfinished} from '../../../../../agent/fox/index.ts';
+import {onboardingUnfinished} from '../../../../../agent/companion/index.ts';
 import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../context/artifacts/index.ts';
 import {phoneApprovalPush,phoneFoxPush,phoneLive,worldLinkReply} from '../../../../../agent/base/index.ts';
-import {placeKey,placeKind,proactiveAsked,proactiveDue,proactiveCard,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../../agent/fox/index.ts';
+import {placeKey,placeKind,proactiveAsked,proactiveDue,proactiveCard,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../../agent/companion/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
 /** What the World holds about the companion, for the Profile page: its saved memory and, in the
@@ -590,7 +590,7 @@ export function installFox(host:Host){
 
  // Fox speaks first ----------------------------------------------------------------------------
  /** At a quiet moment the World page asks whether Fox has one line worth saying (owner request
-  * 2026-10-06, agent/fox/fox-proactive.ts decides when). The ask runs in the Agent's task lane
+  * 2026-10-06, agent/companion/fox-proactive.ts decides when). The ask runs in the Agent's task lane
   * like the proactive game review: untrusted, so it reads but never writes, and without UI actions.
   * Most asks end in PASS and show nothing. The person's next message cancels an ask still running. */
  const proactive=proactiveState();
@@ -788,7 +788,7 @@ export function installFox(host:Host){
    const context:Row=scope.setup?{}:{...given};
    if(!scope.setup)context.history=recentHistory();
    // The place this turn is said in, its own earlier turns, and lately in the browser (spatial context
-   // switching, agent/fox/conversation-place.ts). The conversation itself stays one.
+   // switching, agent/companion/conversation-place.ts). The conversation itself stays one.
    const thread=typeof body.thread==='string'?body.thread.slice(0,1100):'';
    if(!scope.setup){
     try{const here=companion.place(scope,thread);if(here)context.here=here;}catch(error){host.diagnostics.record(error,'foxPlace');}

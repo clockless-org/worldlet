@@ -4,7 +4,7 @@ import path from 'node:path';
 import {hermesDisabledAfter,hermesDisabledSkills,hermesHubSkills,hermesJobCommand,hermesJobCreateCommand,hermesSkillCommand,isControlArgument,jobChangeDone,jobChangeOffered,openClawJobCommand,openClawJobCreateCommand,openClawSkillCommand,openClawSkillEnabled,openClawSkillKey,readJobChange,readJobCreate,readSkillChange,scheduleMatches} from '../agent/gate/index.ts';
 import {harnessScheduleControls} from '../platform/electron/src/modules/agents/harness-schedule-controls.ts';
 import {harnessSkills} from '../platform/electron/src/modules/agents/harness-skills.ts';
-import {createHarnessControls} from '../platform/electron/src/modules/fox/harness-controls.ts';
+import {createHarnessControls} from '../platform/electron/src/modules/companion/harness-controls.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {withTempDir} from './test-temp.ts';
 

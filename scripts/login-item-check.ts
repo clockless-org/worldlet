@@ -147,7 +147,7 @@ try{
 // Wiring that needs Electron: the guide is reachable, the policy knows the answer, the window starts quietly.
 const read=(file:string)=>fs.readFileSync(new URL('../'+file,import.meta.url),'utf8');
 assert.match(read('agent/gate/controls.ts'),/'data','login'\]/,'Fox can open the login guide');
-assert.match(read('platform/electron/src/modules/fox/index.ts'),/'data','login'\]/,'The host accepts the login guide');
+assert.match(read('platform/electron/src/modules/companion/index.ts'),/'data','login'\]/,'The host accepts the login guide');
 assert.match(read('contracts/world-event-policy.json'),/"loginItem:offered"/);
 assert.match(read('platform/electron/src/world/window.ts'),/quiet[\s\S]*showInactive\(\)[\s\S]*minimize\(\)/,'A login launch never takes focus');
 // A check launch on a release host (WORLDLET_BACKGROUND_WINDOWS) never takes focus on the Mac or Windows, and on the Mac

@@ -1,5 +1,5 @@
 import {connectionLive,getApp} from '../../context/applets/index.ts';
-import {tourInProgress} from '../../agent/fox/index.ts';
+import {tourInProgress} from '../../agent/companion/index.ts';
 import {appletBox,createCoachMark,createTourSpotlight,elementBox} from './tour-spotlight.ts';
 import {createTourLock} from './tour-lock.ts';
 import {pairingQR} from '../companion/index.ts';

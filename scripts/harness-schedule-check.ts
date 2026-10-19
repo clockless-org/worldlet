@@ -6,7 +6,7 @@ import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {afterScheduleCursor,harnessService,hermesScheduleJob,hermesScheduleRun,openClawScheduleJob,openClawScheduleRun,scheduleCursor,scheduleElsewhere,scheduleRunsAfter,scheduleStep,SCHEDULE_PUSH_MAX,dailyScheduleResult,dailyScheduleFailure,routineScheduleResult,journalTarget,WORLDLET_SCHEDULE} from '../agent/gate/index.ts';
 import {hermesSchedule,openClawSchedule} from '../platform/electron/src/modules/agents/harness-schedule.ts';
-import {createHarnessJobs} from '../platform/electron/src/modules/fox/harness-jobs.ts';
+import {createHarnessJobs} from '../platform/electron/src/modules/companion/harness-jobs.ts';
 import {AGENT,PHONE} from '../platform/electron/src/host/services.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 

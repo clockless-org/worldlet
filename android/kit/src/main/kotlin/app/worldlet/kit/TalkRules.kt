@@ -2,7 +2,7 @@ package app.worldlet.kit
 
 /**
  * Talk with Fox (owner parity plan item 7): a spoken conversation in the Fox dock. The rules match the computer's
- * (agent/fox/fox-talk.ts) and the iPhone's (WorldletKit TalkRules.swift): an utterance ends when the recognizer's
+ * (agent/companion/fox-talk.ts) and the iPhone's (WorldletKit TalkRules.swift): an utterance ends when the recognizer's
  * words stop changing for [PAUSE_MILLIS], a short "be quiet" (安静点, 别说话, shut up…) keeps Talk going without reading
  * replies aloud, the voice reads the reply without Markdown marks or link targets, and words of the person's own heard
  * while Fox speaks interrupt it ([interruption]).
@@ -16,7 +16,7 @@ object TalkRules {
     private val hush = Regex("^(fox|小狐狸)?(安静|闭嘴|少说)(点|一点|一下|些|两句)?(吧|啦)?$")
     private val english = Regex("^(please )?(shut up|be quiet|quiet|stop talking|stop interrupting|leave me alone)( please)?$")
 
-    /** A short request to stop talking; a longer message is a conversation, not a mute (agent/fox/fox-proactive.ts). */
+    /** A short request to stop talking; a longer message is a conversation, not a mute (agent/companion/fox-proactive.ts). */
     fun quietRequest(text: String): Boolean {
         val value = text.lowercase().replace(separators, " ").trim()
         if (value.isEmpty() || value.codePointCount(0, value.length) > 24) return false

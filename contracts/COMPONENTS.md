@@ -17,7 +17,7 @@ runtime stack remains **UI → Core → Platform → Harness → Models/Services
 | Layer | Components / directories | Public interface | Must not own |
 | --- | --- | --- | --- |
 | UI | `ui/world`, `ui/applets`, `ui/companion`, `ui/attention`, `ui/shell` | Versioned semantic World actions in `contracts/ui.ts`; component functions; host transport | OS branches, provider protocols, independent scheduling policy |
-| Agent and Context | `agent/gate`, `context/applets`, `agent/attention`, `agent/tasks`, `agent/fox`, `context/sources`, `context/items`, `agent/applets`, `agent/gate`, `agent/base`, `agent/fox` | Each component's `index.ts`; serialized native entry in `agent/index.ts` | DOM, filesystem, clocks, sockets, Electron/Node types, platform conditions |
+| Agent and Context | `agent/gate`, `context/applets`, `agent/attention`, `agent/tasks`, `agent/companion`, `context/sources`, `context/items`, `agent/applets`, `agent/gate`, `agent/base`, `agent/companion` | Each component's `index.ts`; serialized native entry in `agent/index.ts` | DOM, filesystem, clocks, sockets, Electron/Node types, platform conditions |
 | Platform | `platform/bridge`, `platform/electron`, `platform/browser`, `platform/local-tools` | `contracts/platform.ts`; shared Core requests/results; negotiated Harness contract | A second copy of onboarding, source processing, retry/priority or model-selection rules |
 | Harness | `harness/hermes` or an external adapter | `contracts/harness.ts`, capability discovery, tasks/events/cancellation | World UI implementation or ownership of portable user records |
 | Models/Services | `models` and provider APIs | Harness/provider protocols | UI navigation and OS permissions |
@@ -124,7 +124,7 @@ Directory ownership follows the [component table](#components-and-interfaces). E
 ### One component, one owner
 
 - **Applet definitions:** `context/applets/catalog.ts` and `context/applets/definitions/<key>.ts` own identity, capabilities and declared states. `ui/applets/<key>/` owns rendering, panels and logo presentation. Model context and tools can read the catalog without importing UI.
-- **Companion:** `agent/fox/` owns portable records, validation, recall and prompt rules; `ui/companion/` owns dialogue and animation. Host storage and credential operations remain in the Electron host (`modules/fox/companion.ts`, `src/vault.ts`).
+- **Companion:** `agent/companion/` owns portable records, validation, recall and prompt rules; `ui/companion/` owns dialogue and animation. Host storage and credential operations remain in the Electron host (`modules/fox/companion.ts`, `src/vault.ts`).
 - **Schedules:** `agent/tasks/` owns Worldlet source-check rules and settings policy. The platform supplies consent, app lifecycle and an awake clock. `harness/hermes/routines.py` claims due jobs, runs them and saves results. External backends must advertise and implement equivalent services.
 - **Host persistence:** `platform/electron/src/store/world-store.ts`, `store/ledger.ts` and the companion records in `modules/fox/companion.ts` belong to layer 3. Layer 2 owns the rules they apply. They are not listed as a second implementation in `core/`.
 - **Local execution:** `platform/local-tools/` supplies speech and coding CLI helpers independently of the selected Harness.
@@ -152,8 +152,8 @@ Business behavior is shared by default. A new condition, state transition, retry
 | Source completion and retry | `agent/tasks/source-checks.ts` | Clock, authorized read, persist result |
 | Queue priority, admission and preemption | `agent/tasks/agent-work.ts` | Reservations, process handles, cancellation and draining |
 | Execution deadlines | `agent/tasks/agent-deadline.ts` | Timers and process termination |
-| Onboarding transitions | `agent/fox/onboarding.ts` | Account authorization and persistence |
-| Model status and product guidance | `agent/fox/model-status.ts`, `conversation-guidance.ts` | Provider facts, capability facts and IO |
+| Onboarding transitions | `agent/companion/onboarding.ts` | Account authorization and persistence |
+| Model status and product guidance | `agent/companion/model-status.ts`, `conversation-guidance.ts` | Provider facts, capability facts and IO |
 | Trace/report projection and privacy | `agent/base/` | OS/build facts, bounded file IO, export picker |
 | Conversation/interface state | `ui/companion/`, `agent/gate/` | Harness transport and OS lifecycle |
 
@@ -203,9 +203,9 @@ Shared companion limits and timestamp/UUID policy live in
 | Core Activity | `context/activity/index.ts`, `contracts/activity.ts` | Local observation schemas, visit correlation, sampled foreground dwell, snapshot changes and redaction; no IO |
 | Core Items | `context/items/index.ts` | Identity, validation, state transitions, evidence projections; `worldHistoryQuery` and `worldHistoryPage` own shared history filtering and bounded retrieval |
 | Core Context | `context/sources/index.ts` | Source context, validation, schema and layout; Service sync snapshots, the saved Service context search (`world_context`) and selected Notion pages |
-| Core Companion / Agent | `agent/fox/index.ts`, `agent/gate/index.ts` | Portable memory/history, guidance, model freshness and response classification |
+| Core Companion / Agent | `agent/companion/index.ts`, `agent/gate/index.ts` | Portable memory/history, guidance, model freshness and response classification |
 | Core Browser / Tools | `agent/applets/index.ts`, `agent/gate/index.ts` | Browser action policy and declared tools; no browser IO |
-| Core Onboarding / Diagnostics | `agent/fox/index.ts`, `agent/base/index.ts` | Setup transitions and allowlisted diagnostic projection |
+| Core Onboarding / Diagnostics | `agent/companion/index.ts`, `agent/base/index.ts` | Setup transitions and allowlisted diagnostic projection |
 | Platform UI bridge | `platform/bridge/host.ts`, `contracts/platform.ts` | One trusted Host transport; capability discovery |
 | Platform Store / ledger | Host-facing Store domain operations; ledger transactions stay internal to domain adapters | Authorization, atomic claims, output writes, delivery acknowledgement and persistence |
 | Platform browser | World browser gateway; `platform/browser/README.md` | Selected-page IO, consent, confirmations, cancellation and receipts |
@@ -387,7 +387,7 @@ or abrupt process termination. Recording is not lossless: DOM changes immediatel
 before a close can miss the three-second poll.
 
 Conversation evidence uses `context/items.conversationEntries` and the host's
-conversation journal (`platform/electron/src/modules/fox/companion.ts`). It is written at the World/Harness boundary
+conversation journal (`platform/electron/src/modules/companion/companion.ts`). It is written at the World/Harness boundary
 before request delivery and before streamed text reaches UI. The selected Harness
 cannot disable this journal. The portable Companion archive remains a view of
 completed visible messages; interrupted streams live in the World ledger.

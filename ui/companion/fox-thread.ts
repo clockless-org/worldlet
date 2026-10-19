@@ -5,7 +5,7 @@
  * it shows Fox's steps while it works and becomes the answer when it finishes. */
 import {addHarnessUsage,harnessUsageLabel,legacyActionDisplayText,readHarnessUsage} from '../../agent/gate/index.ts';
 import type {HarnessUsage} from '../../contracts/harness-services.ts';
-import {conversationTopics} from '../../agent/fox/index.ts';
+import {conversationTopics} from '../../agent/companion/index.ts';
 import {contextThread} from '../attention/index.ts';
 import {uiIcon} from '../components/index.ts';
 
@@ -80,7 +80,7 @@ export function workingText(entry:ThreadEntry,current:string){
  return step.replace(/[\\`*_[\]<>#|]/g,'')+'…';
 }
 
-/** Earlier turns, oldest first, grouped by topic (owner Order 2026-10-08, agent/fox/conversation-topics.ts).
+/** Earlier turns, oldest first, grouped by topic (owner Order 2026-10-08, agent/companion/conversation-topics.ts).
  * A topic of one turn is a plain card: the question and its answer. A topic of several turns is one stack
  * showing its newest turn under the topic's name and count, with card edges behind it; its name opens it into
  * its turns' cards and closes it again. `open` holds the opened topics' ids; `answer` renders an answer's Markdown. */

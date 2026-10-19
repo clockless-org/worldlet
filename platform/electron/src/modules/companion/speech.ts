@@ -9,7 +9,7 @@ import type {Host} from '../../host/types.ts';
 import type {MediaSurface} from '../shell/surface.ts';
 import {WINDOWS_BASE,cancelled,environment,run} from '../shell/io.ts';
 import {helperPython} from '../shell/local-tools.ts';
-import {talkSpokenText} from '../../../../../agent/fox/index.ts';
+import {talkSpokenText} from '../../../../../agent/companion/index.ts';
 import type {HarnessVoice} from '../../../../../contracts/harness-services.ts';
 
 const LIMIT_SECONDS=45,LONG_LIMIT_SECONDS=180;

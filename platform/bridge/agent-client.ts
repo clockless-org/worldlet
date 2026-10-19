@@ -4,7 +4,7 @@ import {validateAgentEvent} from '../../contracts/agent.ts';
 import {createWorldToolRuntime} from './world-tool-runtime.ts';
 import {foxDoing,FOX_WORKING} from '../../ui/companion/index.ts';
 import {companionHistory} from '../../contracts/companion-conversation.ts';
-import {toolAnimationActivity,stageAnimationActivity} from '../../agent/fox/index.ts';
+import {toolAnimationActivity,stageAnimationActivity} from '../../agent/companion/index.ts';
 
 const stageMessages={waiting:'Waiting for current operation…',starting:'Getting ready…',connections:'Getting your accounts ready…',model:'Thinking…',compacting:'Catching up on our long conversation… this can take a few minutes.'};
 export function createAgentClient(call,{sample=false}={}){

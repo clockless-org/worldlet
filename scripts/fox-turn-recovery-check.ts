@@ -1,7 +1,7 @@
 // Fox's first reply must come back (owner request 2026-10-13): Core's rule for when a failed turn is tried once more by
 // itself, and what Fox says when it still fails. No model, no browser.
 import assert from 'node:assert/strict';
-import {FOX_CHOOSE_AGENT_ACTION,FOX_RETRY_ACTION,FOX_RETRY_FAST_MS,foxTurnFailureText,foxTurnRetry} from '../agent/fox/index.ts';
+import {FOX_CHOOSE_AGENT_ACTION,FOX_RETRY_ACTION,FOX_RETRY_FAST_MS,foxTurnFailureText,foxTurnRetry} from '../agent/companion/index.ts';
 import {diagnosticError} from '../agent/base/index.ts';
 import {replyAction} from '../ui/companion/reply-actions.ts';
 

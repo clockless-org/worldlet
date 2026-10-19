@@ -7,7 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {locateLocalHarnesses} from '../platform/electron/src/modules/agents/local-harness.ts';
 import {readLocalAgentMemory} from '../platform/electron/src/modules/agents/local-memory.ts';
-import {bringAgent} from '../platform/electron/src/modules/fox/migration.ts';
+import {bringAgent} from '../platform/electron/src/modules/companion/migration.ts';
 import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
 import {FIXTURE_AGENTS,FIXTURE_EXPECTATIONS,launchEnvironment,writeSetupFixtures} from './setup-fixtures.ts';
 import {BLOCKING,optionOutcome,parseOptions} from './setup-options.ts';
