@@ -16,7 +16,7 @@ export const LOCAL_HARNESS_RESIDENT:readonly LocalHarnessId[]=['hermes','opencla
 const clip=(text:string,limit:number)=>text.length>limit?text.slice(0,limit):text;
 
 /** The Fox thread a turn is said in, from the chat's place thread (ui/attention contextThread `["<place>","<view>"]`):
- * an item card's own thread, an Applet's own thread, else the main conversation. Same prefixes as core/phone phoneLive. */
+ * an item card's own thread, an Applet's own thread, else the main conversation. Same prefixes as agent/phone phoneLive. */
 export function harnessSessionThread(thread:unknown):string {
  let place='';
  try{const value=JSON.parse(String(thread??''));if(Array.isArray(value)&&typeof value[0]==='string')place=value[0];}catch{}
@@ -35,7 +35,7 @@ export function harnessChatThread(thread:string):string {
  if(thread.startsWith('session:')&&thread.length>8)return JSON.stringify([thread,'']);
  return 'fox-main';
 }
-/** The place thread a session thread came from, so a turn another Worldlet sends (core/phone remote-agent.ts) opens the
+/** The place thread a session thread came from, so a turn another Worldlet sends (agent/phone remote-agent.ts) opens the
  * same thread's session on this computer: `harnessSessionThread(harnessThreadPlace(t))===t` for each thread above. */
 export function harnessThreadPlace(thread:string):string {
  if(thread.startsWith('item:')&&thread.length>5)return JSON.stringify(['attention:'+clip(thread.slice(5),200),'']);

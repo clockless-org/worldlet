@@ -1,7 +1,7 @@
 import type {HarnessApprovalChoice} from '../../../../../contracts/harness-services.ts';
-import {REMOTE_TURN_LIMITS,readRemoteToHost,remoteAssembler,remoteParts,remoteSessionWorld,remoteTurnBody,type RemotePart,type RemoteToHost,type RemoteTurnEvent,type RemoteTurnRequest} from '../../../../../core/phone/index.ts';
+import {REMOTE_TURN_LIMITS,readRemoteToHost,remoteAssembler,remoteParts,remoteSessionWorld,remoteTurnBody,type RemotePart,type RemoteToHost,type RemoteTurnEvent,type RemoteTurnRequest} from '../../../../../agent/phone/index.ts';
 
-// The host side of Fox on another computer's Agent (core/phone/README.md#another-computers-agent), free of Electron so
+// The host side of Fox on another computer's Agent (agent/phone/README.md#another-computers-agent), free of Electron so
 // scripts/remote-agent-check.ts drives it in process. The paired client's `turn` runs on this computer's Agent (`run`,
 // the Agent service's own runtime, not the World page): in that Fox thread's session for the client, with the client's
 // instructions and view. Its words and steps go back as `events` (gathered for a quarter second), each World tool call
@@ -120,7 +120,7 @@ export function createRemoteAgentHost(options:RemoteHostOptions){
    if(runs.get(turn.id)===run)runs.delete(turn.id);
   }
  }
- /** One opened message from the client (core/phone readRemoteToHost); resolves true once taken. */
+ /** One opened message from the client (agent/phone readRemoteToHost); resolves true once taken. */
  async function receive(value:RemoteToHost|RemotePart):Promise<boolean>{
   if(value.type==='part'){
    const whole=readRemoteToHost(parts.add(value));

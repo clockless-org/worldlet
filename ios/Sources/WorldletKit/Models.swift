@@ -1,7 +1,7 @@
 import Foundation
 
 // The payloads the desktop seals for the phone and the messages the phone sends back. They mirror
-// core/phone/payloads.ts; change both together.
+// agent/phone/payloads.ts; change both together.
 
 public enum AttentionGroup: String, Codable, Sendable, CaseIterable {
     case event, needsAction, unseen
@@ -126,7 +126,7 @@ public struct AccountIssue: Codable, Identifiable, Hashable, Sendable {
     }
 }
 
-/// One Applet in the Applet world, the layer above Now (core/phone/payloads.ts PhoneApplet): where the grid shows it,
+/// One Applet in the Applet world, the layer above Now (agent/phone/payloads.ts PhoneApplet): where the grid shows it,
 /// its lamp, what it is doing or its status, its latest world log lines (newest last), the widget a moment Applet opens,
 /// its own thread of Fox's conversation, and where one of the person's own Applets came from (`site`, `page` or
 /// `conversation`; absent for a built-in one), so its tile carries the mark its device has on the computer.
@@ -213,7 +213,7 @@ public struct PhoneApplet: Codable, Identifiable, Hashable, Sendable {
     }
 }
 
-/// One card of the computer's Task panel, the cards either side of Fox (core/phone/payloads.ts PhoneTask), as the Tasks
+/// One card of the computer's Task panel, the cards either side of Fox (agent/phone/payloads.ts PhoneTask), as the Tasks
 /// tab lists it: its name and status, its time text ("In progress", "Tomorrow 6:00 AM"), its picture (`fox`, `clock` or an
 /// Applet's key), how far along it is, the Applet it opens, how often a routine runs and who runs it, and what a running
 /// task has said (newest last).
@@ -355,7 +355,7 @@ public struct Conversation: Codable, Sendable, Equatable {
     public static let empty = Conversation(v: 1, at: "", busy: false, name: "Fox", messages: [])
 }
 
-/// The person's own Agent asks before it acts (core/phone/payloads.ts PhoneApproval, contracts/harness-services.ts
+/// The person's own Agent asks before it acts (agent/phone/payloads.ts PhoneApproval, contracts/harness-services.ts
 /// `approvals`): a dangerous command of Hermes Agent's, an exec request of OpenClaw's. It rides on the running turn; the
 /// phone answers with `PhoneMessage.approval`, the same three choices as Fox's card on the computer.
 public struct HarnessApproval: Codable, Sendable, Equatable {
@@ -407,7 +407,7 @@ public struct HarnessApproval: Codable, Sendable, Equatable {
     }
 }
 
-/// The turn Fox is on now, as it streams (core/phone/payloads.ts PhoneLive): `steps` are its thinking, newest last, and
+/// The turn Fox is on now, as it streams (agent/phone/payloads.ts PhoneLive): `steps` are its thinking, newest last, and
 /// `text` the reply so far. `item` is the Attention item whose card the turn was asked from; nil for the main
 /// conversation. `done` marks the finished reply; `approval` is what the person's own Agent asks while it runs.
 public struct LiveTurn: Codable, Sendable, Equatable {
@@ -457,13 +457,13 @@ public struct DesktopInfo: Codable, Sendable, Equatable {
     public let at: String
     public let name: String
     public let version: String
-    /// True while the computer takes Orders (core/phone PhoneDesktop `order`): the dock shows its Order button. Absent
+    /// True while the computer takes Orders (agent/phone PhoneDesktop `order`): the dock shows its Order button. Absent
     /// from computers that don't.
     public let order: Bool?
-    /// True when the computer keeps this iPhone's notification token itself (core/phone PhoneDesktop `push`): the app
+    /// True when the computer keeps this iPhone's notification token itself (agent/phone PhoneDesktop `push`): the app
     /// hands it over with a `push` message and the relay keeps none. Absent from older computers.
     public let push: Bool?
-    /// True when the computer waits in the pairing room (core/phone PhoneDesktop `room`): the pairing moves there and the
+    /// True when the computer waits in the pairing room (agent/phone PhoneDesktop `room`): the pairing moves there and the
     /// relay keeps nothing more. Absent from older computers.
     public let room: Bool?
 }
@@ -505,15 +505,15 @@ public enum PhoneMessage: Encodable, Sendable, Equatable {
     /// What happened on a website opened in this app's own browser (owner request 2026-10-07): the page observer's
     /// reports, which the computer keeps in its World by its own recording rules.
     case web(id: String, applet: String, records: [WebReport])
-    /// The person's answer to the approval riding on the live turn (core/phone PhoneMessage `approval`).
+    /// The person's answer to the approval riding on the live turn (agent/phone PhoneMessage `approval`).
     case approval(id: String, approval: String, choice: HarnessApproval.Choice)
-    /// One part of a photo or file attached with "+" (owner request 2026-10-12; core/phone PhoneMessage `file`): `data`
+    /// One part of a photo or file attached with "+" (owner request 2026-10-12; agent/phone PhoneMessage `file`): `data`
     /// is a slice of the whole file's base64, sent before the line that names the file.
     case file(id: String, file: String, part: Int, parts: Int, name: String, mime: String, data: String)
     /// A line with attached files (each sent before as `file` parts), said in the main conversation, an item's card
     /// (`item`) or an Applet's page (`applet`).
     case attach(id: String, text: String, files: [String], item: String?, applet: String?)
-    /// This iPhone's notification token for a computer that keeps it (core/phone PhoneMessage `push`; empty takes it back).
+    /// This iPhone's notification token for a computer that keeps it (agent/phone PhoneMessage `push`; empty takes it back).
     case push(id: String, platform: String, token: String)
 
     private enum Keys: String, CodingKey { case type, id, text, item, applet, action, provider, widget, state, said, records, approval, choice, file, part, parts, name, mime, data, files, platform, token }
@@ -597,7 +597,7 @@ public enum PhoneMessage: Encodable, Sendable, Equatable {
 
 // MARK: Notifications
 
-/// What one notification says (core/phone/payloads.ts PhonePush), sealed by the computer with place "push" and carried
+/// What one notification says (agent/phone/payloads.ts PhonePush), sealed by the computer with place "push" and carried
 /// as `b` in the APNs payload, so Apple and the relay see only the fallback text. `open` is where a tap goes.
 public struct PhonePush: Codable, Sendable, Equatable {
     public enum Kind: String, Codable, Sendable { case attention, fox, routine, task }
@@ -613,7 +613,7 @@ public struct PhonePush: Codable, Sendable, Equatable {
         }
     }
 
-    /// What the notification's own buttons answer (core/phone/payloads.ts PhonePushAct): `attention` an item's id (Done,
+    /// What the notification's own buttons answer (agent/phone/payloads.ts PhonePushAct): `attention` an item's id (Done,
     /// Later), `reply` an inline reply where `open` points, `approval` a request's id (Allow once when `once`, and Deny).
     public struct Act: Codable, Sendable, Equatable {
         public let attention: String?
@@ -670,7 +670,7 @@ public struct PhonePush: Codable, Sendable, Equatable {
     public var target: PushTarget? { open.flatMap(PushTarget.init(open:)) }
 
     /// The notification category its buttons come from (the app registers them, PushAction.categories); nil for none.
-    /// The first set the push carries counts, as core/phone reads it.
+    /// The first set the push carries counts, as agent/phone reads it.
     public var category: String? {
         guard let act else { return nil }
         if let item = act.attention, !item.isEmpty { return PushAction.attentionCategory }
@@ -701,7 +701,7 @@ public struct PhonePush: Codable, Sendable, Equatable {
     }
 }
 
-/// A button on a notification (core/phone/README.md, Push › Actions); the raw value is its action identifier.
+/// A button on a notification (agent/phone/README.md, Push › Actions); the raw value is its action identifier.
 public enum PushAction: String, CaseIterable, Sendable {
     case done = "worldlet.done", later = "worldlet.later", reply = "worldlet.reply", allow = "worldlet.allow", deny = "worldlet.deny"
 
@@ -758,7 +758,7 @@ public enum PushTarget: Equatable, Sendable {
 // MARK: Website recording
 
 /// One report from the page observer (platform/bridge/web-record.js, copied to App/web-record.js) on a website opened
-/// in this app's browser, with this phone's time in seconds (core/phone/payloads.ts PhoneWebRecord). The observer
+/// in this app's browser, with this phone's time in seconds (agent/phone/payloads.ts PhoneWebRecord). The observer
 /// never reports passwords, card numbers or one-time codes, and says `private` when a page shows such a field.
 public struct WebReport: Codable, Hashable, Sendable {
     public var at: Double
@@ -882,7 +882,7 @@ public enum WidgetLimits {
     public static let key = 200
 }
 
-/// A widget for now (core/phone/payloads.ts PhoneWidget): a page made for the moment. `page` is the whole document with
+/// A widget for now (agent/phone/payloads.ts PhoneWidget): a page made for the moment. `page` is the whole document with
 /// the widget prelude and no seed (the phone injects its stored values); it is nil when the computer's slot had no room
 /// for it, and the phone keeps the page it already has for the same version.
 public struct PhoneWidget: Codable, Identifiable, Hashable, Sendable {
@@ -993,7 +993,7 @@ public func mergeWidgetState(_ state: WidgetState, _ incoming: WidgetState) -> (
     return (cleanWidgetState(merged), changed)
 }
 
-/// A photo or file attached with "+": split into `file` messages that each fit a sealed box (core/phone PHONE_LIMITS
+/// A photo or file attached with "+": split into `file` messages that each fit a sealed box (agent/phone PHONE_LIMITS
 /// `filePart`, base64 characters), sent before the line that names `file`.
 public struct PhoneAttachment: Sendable, Equatable {
     public static let partSize = 150_000

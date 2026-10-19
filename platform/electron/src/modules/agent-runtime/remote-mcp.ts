@@ -1,4 +1,4 @@
-import {DEFAULT_PAIR_RELAY} from '../../../../../core/phone/index.ts';
+import {DEFAULT_PAIR_RELAY} from '../../../../../agent/phone/index.ts';
 import {isWorldAddressRequest,MCP_FRONT_ORIGIN,REMOTE_MCP_LIMITS,agentRevoked,createRemoteMcpServer,emptyRemoteMcpState,newRemoteMcpToken,readRemoteMcpRequest,readRemoteMcpState,remoteConsentItem,
  remoteMcpAddress,remoteMcpAgent,remoteMcpHostEntry,remoteMcpResponseFrame,remoteMcpRoom,type RemoteMcpConsent,type RemoteMcpRequest,type RemoteMcpResponse,type RemoteMcpServer,type RemoteMcpState} from '../../../../../agent/agent/index.ts';
 import type {AgentAccess,VaultService} from '../../host/services.ts';

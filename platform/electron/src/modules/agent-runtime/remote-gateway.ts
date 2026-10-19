@@ -7,7 +7,7 @@ import {GatewayConversation,type GatewaySettings,type OwnSession,type ResidentSe
 import {ElsewhereAdapter} from './remote-harness.ts';
 import type {Adapter,AgentEventHandler,AgentRuntime,Row,RuntimeContext} from './types.ts';
 
-// Fox on an OpenClaw Gateway on another computer, reached directly (core/phone/README.md#an-agent-gateway-on-another-computer;
+// Fox on an OpenClaw Gateway on another computer, reached directly (agent/phone/README.md#an-agent-gateway-on-another-computer;
 // Harness `remote-openclaw`, location `native`): no Worldlet runs there. The person types its address and token in
 // Settings › Agents; the token is kept in the vault (safeStorage: the OS keychain's key), never in a settings file, a
 // log or what the page reads. Fox's conversation turns go to its `/v1/responses` in a session per Fox thread, the same
@@ -69,7 +69,7 @@ export class RemoteGatewayRuntime implements AgentRuntime {
   if(body.action!=='chat'||typeof body.text!=='string'||!body.text.trim())return this.local().run(body,home,onEvent);
   return ExecutionJournal.run(body,home,onEvent,observed=>this.execute(body,home,observed));
  }
- /** The practice world's threads and a paired client's (core/phone remoteTurnBody) keep sessions of their own. */
+ /** The practice world's threads and a paired client's (agent/phone remoteTurnBody) keep sessions of their own. */
  private world(body:Row){return body.sample===true?'sample':typeof body.harnessWorld==='string'&&/^remote:[A-Za-z0-9._-]{1,60}$/.test(body.harnessWorld)?body.harnessWorld:'private';}
  private key(body:Row){return {world:this.world(body),thread:harnessSessionThread(body.thread)};}
  private async warm(body:Row,home:string):Promise<Row> {

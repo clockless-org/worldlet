@@ -6,7 +6,7 @@ import {REMOTE_GATEWAY_HARNESS_ID,harnessLocation,harnessService,readRemoteGatew
 import {RemoteGatewayAdapter,checkRemoteGateway,readRemoteGateway,remoteGatewayView,writeRemoteGateway} from '../platform/electron/src/modules/agent-runtime/remote-gateway.ts';
 import {withTempDir} from './test-temp.ts';
 
-// Fox on an OpenClaw Gateway on another computer, reached directly (core/phone/README.md#an-agent-gateway-on-another-computer):
+// Fox on an OpenClaw Gateway on another computer, reached directly (agent/phone/README.md#an-agent-gateway-on-another-computer):
 // the address rules (TLS except loopback and Tailscale), the token kept in the vault and never shown, the check before
 // Fox switches, and Fox's turns on a fixture Gateway (`/v1/responses`, a session per thread, World tools as client
 // function tools run here, its approvals socket at the same address), with background work left on this computer.

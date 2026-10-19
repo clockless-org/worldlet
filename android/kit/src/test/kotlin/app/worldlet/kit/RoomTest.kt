@@ -35,7 +35,7 @@ class RoomTest {
     private fun frame(value: JsonObject) = event { put("t", "msg"); put("from", "desktop"); put("data", value.toString()) }
     private fun sentFrames(socket: FakeRoom.Socket) = socket.sent.map { Json.parseToJsonElement(Json.parseToJsonElement(it).jsonObject["data"]!!.jsonPrimitive.content).jsonObject }
 
-    /** The same vector as core/phone room.ts roomEntry, from the phone's side. */
+    /** The same vector as agent/phone room.ts roomEntry, from the phone's side. */
     @Test
     fun entryMatchesDesktop() {
         val (url, protocols) = roomEntry(keys, "https://worldlet.ai")

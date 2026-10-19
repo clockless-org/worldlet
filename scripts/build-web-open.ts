@@ -3,7 +3,7 @@ import {copyFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-// Worldlet in a web browser (ui/web, core/phone/README.md#web): the page the relay serves at /open/. The website build
+// Worldlet in a web browser (ui/web, agent/phone/README.md#web): the page the relay serves at /open/. The website build
 // (in the operations repository) calls this with its own output folder; `node scripts/build-web-open.ts <folder>` builds
 // it for a look or a check.
 export const WEB_OPEN_FILES=['index.html','open.js','open.css'];

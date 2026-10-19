@@ -461,7 +461,7 @@ class AppModel(
         send(PhoneMessage.Tell(UUID.randomUUID().toString(), line, inside.key)) { appletPending.remove(inside.key) }
     }
 
-    /** Sends what was said with the Order button as an Order from the computer (core/phone `order`), never a line for
+    /** Sends what was said with the Order button as an Order from the computer (agent/phone `order`), never a line for
      * Fox; false when it did not reach the relay. */
     suspend fun order(said: String): Boolean {
         val line = said.trim()

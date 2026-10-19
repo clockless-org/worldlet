@@ -244,7 +244,7 @@ console.log('PASS exception projection: type, failure code and sanitized frames 
 // Production metrics (owner 2026-10-11 20:21 PDT): a paired phone's system comes from the platform it registered for
 // notifications with, never its name; the page reports opened Attention cards and finished tasks as allowlisted kinds.
 {
- const {phonePlatform}=await import('../core/phone/index.ts');
+ const {phonePlatform}=await import('../agent/phone/index.ts');
  assert.deepEqual([{platform:'apns'},{platform:'apns-dev'},{platform:'fcm'},{platform:'Alex’s iPhone'},{platform:7},null,undefined].map(push=>phonePlatform(push as any)),['ios','ios','android','unknown','unknown','unknown','unknown']);
  const {reportProductEvent}=await import('../ui/shell/product-analytics.ts');
  const page=new EventTarget(),reported:any[]=[];

@@ -33,7 +33,7 @@ import {worldLogKeeps} from '../../../../../context/activity/index.ts';
 import {worldActionOf,worldActions} from '../../../../../agent/tools/index.ts';
 import {onboardingUnfinished} from '../../../../../agent/onboarding/index.ts';
 import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,readMorningBrief} from '../../../../../context/artifacts/index.ts';
-import {phoneApprovalPush,phoneFoxPush,phoneLive,worldLinkReply} from '../../../../../core/phone/index.ts';
+import {phoneApprovalPush,phoneFoxPush,phoneLive,worldLinkReply} from '../../../../../agent/phone/index.ts';
 import {placeKey,placeKind,proactiveAsked,proactiveDue,proactiveCard,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../../agent/companion/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
@@ -373,7 +373,7 @@ export function installFox(host:Host){
     page.event('worldlet:harness-approval',{...event.request,turn:id});
     if(!scope.sample&&!scope.setup)approvalRules.asked(event.request);
     // The paired phone is told too: the prompt rides with its live turn, and the tap opens Fox's dialogue there.
-    // Allow once and Deny are on the notification itself (core/phone phoneApprovalPush).
+    // Allow once and Deny are on the notification itself (agent/phone phoneApprovalPush).
     const push=phoneApprovalPush(event.request);
     if(push&&!scope.sample&&!scope.setup)void host.optional<PhoneService>(PHONE)?.notify(push).catch(()=>{});
     return null;
@@ -437,7 +437,7 @@ export function installFox(host:Host){
  }
  /** Turns said in a browser or on the phone while the World page is not there (converse): they run on the host alone. */
  const headless=new Set<string>();
- /** The headless turn as it streams, for an open phone or browser (core/phone phoneLive): its steps, its reply so far
+ /** The headless turn as it streams, for an open phone or browser (agent/phone phoneLive): its steps, its reply so far
   * and the Agent's permission prompt while it waits. Sent at most every quarter second, the finished reply at once. */
  let headlessLive:{event(event:Row):void,settled(id:string):void,done(text:string):Promise<unknown>}|null=null;
  function liveTurn(id:string,user:string){
@@ -464,7 +464,7 @@ export function installFox(host:Host){
    done(reply:string){text=reply||text;approval=null;return send(true);},
   };
  }
- /** A line said in a browser or on the phone (core/phone/README.md#web) while the World page is not there: it waits
+ /** A line said in a browser or on the phone (agent/phone/README.md#web) while the World page is not there: it waits
   * behind Fox's running turn, then runs as the person's own line in Fox's main conversation, without the page. Its
   * steps that only the page can do (a World view, an Applet's page) answer that the window must be open. The reply
   * reaches the browser or phone through the conversation the host already publishes. */

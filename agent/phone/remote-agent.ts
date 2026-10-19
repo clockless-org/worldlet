@@ -7,7 +7,7 @@
 // Shared rules only: the message shapes and bounds, the turn body the host runs and the parts. The relay calls belong
 // to the hosts (platform/electron/src/modules/phone/remote.ts and remote-host.ts).
 import {base64url,fromBase64url} from './pairing.ts';
-import {harnessSessionThread,harnessThreadPlace,isHarnessAgentId,isHarnessApprovalChoice,readHarnessApprovalRequest,readWorldSince} from '../../agent/agent/index.ts';
+import {harnessSessionThread,harnessThreadPlace,isHarnessAgentId,isHarnessApprovalChoice,readHarnessApprovalRequest,readWorldSince} from '../agent/index.ts';
 import type {HarnessApprovalChoice,HarnessApprovalRequest} from '../../contracts/harness-services.ts';
 
 /** The turn protocol a host speaks; it says so in its `desktop` slot, so a client never sends a turn to an older one. */

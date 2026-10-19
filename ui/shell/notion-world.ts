@@ -64,7 +64,7 @@ import {appLogoSource} from '../applets/index.ts';
 import {eventWhen} from '../attention/index.ts';
 import {appletIndicator,myAppletKind,momentAppletId,siteAppletId,siteAppletPage,websiteAppletFor} from '../../context/applets/index.ts';
 import {appletStatus as appStatus,connectionLive} from '../../context/applets/index.ts';
-import {phoneWebAddress} from '../../core/phone/index.ts';
+import {phoneWebAddress} from '../../agent/phone/index.ts';
 import {applyModuleWorld,moduleStatus} from '../world/index.ts';
 import {createModuleScene} from '../world/index.ts';
 import {settleItemPage} from '../../context/items/index.ts';
@@ -2270,7 +2270,7 @@ export function mountNotionWorld(data: World, native: any) {
   // The first-run tour's first value can be a conversation the person brought (ui/onboarding/first-value.ts).
   let firstValueOngoing:{list:()=>{id:string,title:string,say:string}[],make:(id:string)=>Promise<boolean>}|null=null;
   if(native){
-    // The paired iPhone mirrors the Center and talks to Fox through this page (core/phone/README.md).
+    // The paired iPhone mirrors the Center and talks to Fox through this page (agent/phone/README.md).
     let widgetsNow:any[]=[],phoneWorldLog:{lines:any[],now:any[]}={lines:[],now:[]};
     // Ongoing things (agent/tasks/README.md): proposals stand in Worth Doing as themes; each one kept earlier is a Thing of
     // its own, a device in the area Fox picked (app-job-…), with its own tile in the phone's Thing world and its own thread.
@@ -2320,7 +2320,7 @@ export function mountNotionWorld(data: World, native: any) {
      askItem:(id,text)=>{previewAttention({worldItemId:id});return voice?.ask(text,{origin:'user',displayText:text});},
      choose:id=>{if(id.startsWith('ongoing:'))return isOngoingThemeId(id.slice(8))?makeTheme(id.slice(8)):undefined;const page=itemPage(id);if(!page||!previewAttention({worldItemId:id}))return;return previewActions(page)[0]?.run();},
      itemFox:id=>{if(id.startsWith('ongoing:')){const theme=themesNow().find(t=>'ongoing:'+t.id===id);if(!theme)return null;return {say:theme.say,option:theme.option,turns:[]};}const page=itemPage(id);if(!page)return null;return {say:attentionPreviewData(page).suggestion,option:previewActions(page)[0]?.label||'',turns:voice?.threadOf?.('attention:'+id)||[]};},
-     // The Thing world (core/phone phoneApplets): the Things in this World with their lamps, what each is doing, the
+     // The Thing world (agent/phone phoneApplets): the Things in this World with their lamps, what each is doing, the
      // world log, the widgets for now and each Thing's thread. A line said in a Thing's page opens it here first.
      askApplet:async(key,text)=>{
       let r=sections.find(s=>s.entity==='app'&&s.key===key);

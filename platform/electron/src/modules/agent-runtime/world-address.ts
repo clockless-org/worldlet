@@ -1,4 +1,4 @@
-import {DEFAULT_PAIR_RELAY} from '../../../../../core/phone/index.ts';
+import {DEFAULT_PAIR_RELAY} from '../../../../../agent/phone/index.ts';
 import {WORLD_ADDRESS_LIMITS,addressNameFrom,createWorldAddressServer,emptyWorldAddressState,isWorldAddressRequest,readWorldAddressState,worldAddress,worldAddressRequestItem,
  type WorldAddressRequest,type WorldAddressServer,type WorldAddressState} from '../../../../../agent/agent/index.ts';
 import type {VaultService} from '../../host/services.ts';
