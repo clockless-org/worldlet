@@ -5,9 +5,9 @@ Platform host thin; the Harness and model service are replaceable through explic
 
 | Layer | Repository owner | Responsibility |
 | --- | --- | --- |
-| UI | `ui/world/` `ui/applets/` `ui/companion/` `ui/attention/` `ui/frame/` `ui/style/` |
+| UI | `ui/world/` `ui/applets/` `ui/companion/` `ui/attention/` `ui/frame/` `ui/style/` | Every screen and its interaction logic, one codebase every window shows |
 | Agent and Context | `agent/`, `context/` | Pure product rules, records, scheduling decisions and validation |
-| Platform | `platform/` | Electron desktop shell (and the Node host for computers without a display), permissions, persistence, processes and browser IO |
+| Platform | `platform/` | The shared Host that Desktop (Electron) and Server (Node, no display) run, Web, the phone companions: permissions, persistence, processes and browser IO |
 | Harness | The person's own Agent (`harness/` holds the reference adapter example and the `worldlet` skill) | Agent planning, tool loop and admitted job execution; Worldlet never customizes it |
 | Models/services | The person's provider, reached through their Agent | Inference access, quotas and usage; Worldlet provides no model |
 
@@ -64,7 +64,7 @@ The shared dispatcher the Platform calls is `agent/index.ts`, since it calls bot
 
 | Layer | Folders |
 | --- | --- |
-| UI | `ui/world/` `ui/applets/` `ui/companion/` `ui/attention/` `ui/frame/` `ui/style/` |
+| UI | `ui/world/` `ui/applets/` `ui/companion/` `ui/attention/` `ui/frame/` `ui/style/` | Every screen and its interaction logic, one codebase every window shows |
 | Agent (`agent/`) | `agent/companion/` `agent/applets/` `agent/attention/` `agent/tasks/` `agent/gate/` `agent/app/` |
 | Context (`context/`) | `context/store/` `context/applets/` `context/connectors/` |
 | Platform | `platform/host/` `platform/desktop/` `platform/server/` `platform/web/` `platform/ios/` `platform/android/` `platform/bridge/` `platform/browser/` `platform/distribution/` `platform/install/` `platform/local-tools/` `platform/web-engine/` |
@@ -200,19 +200,19 @@ capabilities fail explicitly; no silent Platform or Harness-specific alternate f
 
 This is the single audit checklist; other documents link here.
 
-- [ ] **Ownership:** identify one owner for each changed product rule; distinguish UI behavior, pure Core decisions, Platform effects and Harness execution.
+- [ ] **Ownership:** identify one owner for each changed product rule; distinguish UI behavior, pure Agent and Context decisions, Platform effects and Harness execution.
 - [ ] **Shared first:** check the Electron host modules for duplicate transitions, priorities, retry/timeout/cache policy, validation, prompts, status wording and privacy rules.
 - [ ] **Thin adapters:** each retained Platform decision has an OS/API/security reason. Shared code decides policy; the host still enforces actual permissions and validates untrusted inputs.
 - [ ] **Dependency direction:** Context imports only Context/Contracts, Agent only Agent/Context/Contracts; Contracts imports only Contracts. UI uses the bridge, not Platform implementations or Harness internals.
 - [ ] **Capabilities:** unsupported functionality follows declared host capabilities, not copied product flows or scattered platform-name checks.
 - [ ] **State and persistence:** Platform storage applies shared state transitions without losing stable IDs, account ownership or user decisions.
 - [ ] **Execution:** compare busy state, queueing, cancellation, deadlines, foreground priority and background recovery. OS-specific process mechanics may differ; product outcomes should not.
-- [ ] **Evidence:** trace the host path to the shared implementation. Run focused Core fixtures and the Electron module checks (`npm run test:electron`) for changed rules; list device-only verification separately.
+- [ ] **Evidence:** trace the host path to the shared implementation. Run focused Agent and Context fixtures and the Electron module checks (`npm run test:electron`) for changed rules; list device-only verification separately.
 - [ ] **Cleanup:** remove superseded Platform policy and tests that merely preserve its old implementation. Do not retain a silent duplicate as a fallback.
 - [ ] **Result:** mark each area pass/partial/fail, cite files, rank remaining work, and distinguish code validation from installed-app acceptance.
 
 Import checks do not prove behavior or performance on a device. The
-[parity ratchet](../contracts/README.md#parity-vectors) holds the Core operations the
+[parity ratchet](../contracts/README.md#parity-vectors) holds the shared Agent and Context operations the
 host must keep invoking (the union both native hosts used before #996). Focused commands live in
 [the component catalog](../contracts/COMPONENTS.md#architecture-audit). New changes require
 proportional checks and do not inherit blanket real-account or clean-machine acceptance.
@@ -221,7 +221,8 @@ proportional checks and do not inherit blanket real-account or clean-machine acc
 
 `npm run check:arch` resolves TypeScript imports (including baseUrl aliases,
 re-exports, type imports and dynamic imports), checks layer dependencies and public
-Core/UI component entry points, and rejects computed imports/CommonJS bypasses.
+UI, Agent and Context component entry points (each component's `index.ts`), the Context rules (UI only reads; only
+Connectors write Synced), and rejects computed imports/CommonJS bypasses.
 The policy lives in `scripts/architecture-boundaries.ts`; legacy edges are exact
 file pairs with reasons, and unused exceptions fail the check. New components follow
 the same rules without registration. The Electron host (`platform/desktop`) is in this graph; Python helper internals
@@ -236,6 +237,6 @@ wire changes require explicit version negotiation. Passing this gate does not pr
 that no product rule is duplicated in the Electron host: review that with the audit above.
 
 Task/run/event shapes also live in [Contracts](../contracts/README.md#execution-journal).
-Their validators and privacy projections run in Core; both Platform adapters persist
+Their validators and privacy projections run in Agent and Context; both Platform adapters persist
 results into the existing local journal. Harness output never acquires database or
 arbitrary event-write authority.

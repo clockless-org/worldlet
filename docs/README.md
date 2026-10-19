@@ -19,13 +19,13 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | --- | --- |
 | The principles everything is designed by | [Charter](CHARTER.md) |
 | The stack in computer terms, as a picture | [Stack diagram](stack-in-computer-terms.svg) ([Chinese](stack-in-computer-terms.zh.svg)) · [interactive architecture diagram](architecture.html) |
-| Five runtime layers: UI, Core, Platform, Harness, Models | [Five-layer architecture](UI-CORE-PLATFORM.md) · [shared UI, pure Core, thin Platform](../contracts/COMPONENTS.md) |
+| Five runtime layers: UI, Agent and Context, Platform, Harness, Models | [Five-layer architecture](UI-CORE-PLATFORM.md) · [shared UI, pure Agent and Context, thin Platform](../contracts/COMPONENTS.md) |
 | How Worldlet talks to an Agent, and an Agent to the World | [Platform–Harness contract](../contracts/HARNESS.md) · [Agent adapters](../harness/README.md) |
 | What each Agent may do in the World, and what it did | [Agent identity, Grants and audit](../agent/gate/GRANTS.md) |
 | Let a ChatGPT, Claude or Cursor connector, or a cloud Agent, use the World | [Remote MCP](../agent/gate/REMOTE-MCP.md) |
 | Interaction, HUD and Applet states | [Product interaction design](DESIGN.md) |
 | How the World is composed | [World and environment design](WORLD-LAYOUT.md) |
-| Applet lifecycle and execution | [Applet runtime](APPLET-RUNTIME.md) · [Core runtime](../context/applets/RUNTIME.md) |
+| Applet lifecycle and execution | [Applet runtime](APPLET-RUNTIME.md) · [Applet runtime rules](../context/applets/RUNTIME.md) |
 | The desktop host and its browser | [Electron host](../platform/desktop/README.md) · [browser](../platform/browser/README.md) |
 
 ## Building Applets and Worlds
