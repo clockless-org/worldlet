@@ -353,7 +353,8 @@ const AGENT_ACCESS_AUDIT=20;
  * Harness that is not signed in leaves setup's first page in place; `clear` leaves Fox without an Agent. Worldlet
  * provides no model (owner decision 2026-10-05) and customizes nothing below the Harness contract (owner decision
  * 2026-10-09): Hermes Agent, OpenClaw, pi and Claude Code answer for Fox themselves (`LocalHarnessAdapter`), with
- * World tools, and run the World's background work too. Codex alone is no Agent; stock Hermes Agent is offered instead.
+ * World tools, and run the World's background work too, Codex included (owner request 2026-10-20). With no Agent here,
+ * stock Hermes Agent is offered instead.
  * `pair` (with a `worldlet://agent` code) makes the Agent on another computer Fox's Agent instead (Harness location
  * remote, platform/web/README.md#another-computers-agent); `select` or `clear` ends that pairing.
  * `gateway` (an address and token, platform/web/README.md#an-agent-gateway-on-another-computer) proves an OpenClaw
@@ -417,8 +418,7 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
   }
   if(request.operation==='detect'){
    // The `hermes` command and ~/.hermes Worldlet set up for Fox's own profile are Fox, not another Agent to choose.
-   // Codex alone is no Agent: its sign-in is not borrowed for one (owner decision 2026-10-09 11:51 PDT), stock Hermes Agent is.
-   const found=locateLocalHarnesses().filter(item=>item.id!=='codex'&&(item.id!=='hermes'||discoverOtherHermes(context.root)!==null));
+   const found=locateLocalHarnesses().filter(item=>item.id!=='hermes'||discoverOtherHermes(context.root)!==null);
    // World tools come through Worldlet's MCP server. Only whether an Agent has a name or memory to bring is reported,
    // never its contents or paths.
    const agents=found.map(({id,title,configured})=>{
@@ -446,7 +446,7 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
    const elsewhere=remote?.paired||gateway()?.active===true;
    return {agents,recommended:recommendLocalHarness(agents),selected:elsewhere?null:readSelection(context.root),remote:remoteStatus(),gateway:remoteGatewayView(gateway()),...brokenHermes?{brokenHermes:true}:{}};
   }
-  // No Agent here (Codex alone included, owner decision 2026-10-09 11:51 PDT): stock Hermes Agent, installed the official
+  // No Agent here (owner decision 2026-10-09 11:51 PDT): stock Hermes Agent, installed the official
   // way to its default location, or the one already here as it is (12:11 PDT). The person then picks it like any other.
   if(request.operation==='install-hermes'){
    const install=await installHermes(context.root,{environment:currentEnvironment(),progress:step=>onHermesSetup({stage:'install',...step})});
@@ -479,7 +479,7 @@ export function localHarnessActions(context:RuntimeContext,switchTo:(adapter:Ada
   if(request.operation==='suggestions'){const install=selectedInstall(context.root);return {keys:install?agentProfileApplets(readAgentProfile(context.root,install.id),WORLD_APPS.map(app=>app.key)):[]};}
   if(request.operation==='select'){
    if(!isLocalHarnessId(request.id))throw new WorldletError('Choose an Agent found on this computer.');
-   const install=locateLocalHarnesses().find(item=>item.id===request.id&&item.id!=='codex'&&(item.id!=='hermes'||discoverOtherHermes(context.root)!==null));
+   const install=locateLocalHarnesses().find(item=>item.id===request.id&&(item.id!=='hermes'||discoverOtherHermes(context.root)!==null));
    if(!install)throw new WorldletError('That Agent is no longer on this computer.');
    if(remote?.paired)await remote.end();
    setAside();

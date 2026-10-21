@@ -229,8 +229,7 @@ async function answer(request:ControlRequest):Promise<ControlReply> {
  if(request.command==='setup'){
   const id=request.agent!,lines:string[]=[];
   // The same choice setup's first page makes in the World: it proves the Agent answers before Fox switches to it.
-  // Codex alone is no Agent for Fox; it gets World tools.
-  if(id!=='codex'){const chosen=await router.dispatch({action:'agentHarness',operation:'select',id}) as {title?:string};lines.push(`Fox talks through ${chosen.title??id}.`);}
+  const chosen=await router.dispatch({action:'agentHarness',operation:'select',id}) as {title?:string};lines.push(`Fox talks through ${chosen.title??id}.`);
   if(isWorldToolsRegistrar(id))lines.push(...await registerAgent(id));
   if(!setupDone())lines.push(NOT_SET_UP);
   return {lines};

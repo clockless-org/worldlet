@@ -66,7 +66,10 @@ export async function onboardingFlow({host,window,view}:CheckContext){
  const button=(label:string)=>`[...document.querySelectorAll('button')].find(b=>b.offsetParent&&b.textContent.trim()===${JSON.stringify(label)}&&!b.disabled)`;
  const press=async(label:string,seconds=30)=>{await wait(`button “${label}”`,`!!${button(label)}`,seconds);await js(`${button(label)}.click();true`);};
  const dialogue=(pattern:string)=>`${pattern}.test(document.querySelector('#companionDialogue')?.innerText||'')`;
- await wait('first-use screen',"!!document.querySelector('.setup-more-toggle')",20);
+ await wait('first-use screen',"!!document.querySelector('.setup-choose-again')||!!document.querySelector('.setup-more-toggle')&&!document.querySelector('.setup-agent-cards.is-loading')",20);
+ // The launcher already chose the test Agent, and setup shows it chosen once it finds it here (Codex too, owner request
+ // 2026-10-20); Choose again goes back to the choices, keeping that choice on the host.
+ if(await js("!!document.querySelector('.setup-choose-again')")){await js("document.querySelector('.setup-choose-again').click();true");await wait('the choices again',"!!document.querySelector('.setup-more-toggle')",10);}
  // The one setup page keeps every way in but the local Agents under More options (owner request 2026-10-09).
  await js("document.querySelector('.setup-more-toggle').click();true");
  await press('Use mock Google (Dev)');
