@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
-import {claudeCodeNeedsSignIn,LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,PROVIDER_SETTING,backgroundModel,chosenModel,hermesConfigValues,LOCAL_HARNESS_SPARE,modelAtCapacity,modelRefusedByAccount,providerModel,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessOriginId,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
+import {claudeCodeNeedsSignIn,claudeCodeSignInElsewhere,LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,PROVIDER_SETTING,backgroundModel,chosenModel,hermesConfigValues,LOCAL_HARNESS_SPARE,modelAtCapacity,modelRefusedByAccount,providerModel,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessOriginId,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
  readWorldSince,HERMES_CHANNEL_READ_ONLY,HERMES_STANDING_WRITE_DECLINED,HermesOwnCalls,hermesStandingWriteApproval,type LocalHarnessId,type ModelTier} from '../../../../agent/gate/index.ts';
 import {WorldletError,writeAtomic} from '../../files.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
@@ -23,7 +23,7 @@ import type {HarnessAgents,HarnessApprovalChoice,HarnessApprovals,HarnessModels,
 import {HARNESS_SCHEDULES} from './harness-schedule.ts';
 import {HARNESS_AGENTS} from './harness-agents.ts';
 import {runSendCommand} from './harness-send.ts';
-import {signInOnce} from './provider-sign-in.ts';
+import {signInOnce,signInRunning} from './provider-sign-in.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
 /** A turn the provider turned away because its model was busy for everyone, and that can run again as it is. */
@@ -583,7 +583,8 @@ export class LocalHarnessRuntime implements AgentRuntime {
     // A later session that no longer opens: the next turn goes back to the conversation's own.
     if(resume&&!started&&readContinued(home)[resume.origin]===resume.session)saveContinued(home,resume.origin,null);
     // Claude Code's sign-in ran out or never happened: its own sign-in page opens in the browser by itself, once per launch.
-    if(claudeCodeNeedsSignIn(outcome.error))signInOnce(this.install,harnessEnvironment(this.install,this.environment));
+    // After that, with no page open, the line points to Settings › Agents instead.
+    const error=claudeCodeNeedsSignIn(outcome.error)&&!signInOnce(this.install,harnessEnvironment(this.install,this.environment))&&!signInRunning()?claudeCodeSignInElsewhere(outcome.error):outcome.error;
     // It wrote nothing and exited with an error: when its command does not start at all, the turn says so plainly.
     if(received===0&&!started&&calls===0&&code!==0&&!this.cancelled&&!timedOut){const broken=await this.notStarting();if(broken)throw broken;}
     // Nothing shown and no World tool called yet, the same turn can simply run again. Background work (an Applet's
@@ -592,7 +593,7 @@ export class LocalHarnessRuntime implements AgentRuntime {
     if((body._background===true||(!started&&calls===0))&&modelAtCapacity(outcome.error))throw new ModelBusy(outcome.error);
     const own=model===null||!this.chosen(body,agent)&&model===refusedDefaults.get(this.install.command);
     if(own&&(body._background===true||(!started&&calls===0))&&modelRefusedByAccount(outcome.error))throw new ModelRefused(outcome.error,model);
-    throw new WorldletError(outcome.error);
+    throw new WorldletError(error);
    }
    if(!started&&outcome.message)await say(outcome.message);
    return {message:outcome.message};

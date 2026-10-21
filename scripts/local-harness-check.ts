@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,claudeCodeSignInExpired,codexProblem,codexWorldToolsFailed,modelAtCapacity,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
+import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,claudeCodeSignInExpired,claudeCodeSignInElsewhere,CLAUDE_CODE_NOT_SIGNED_IN,CLAUDE_CODE_SIGN_IN_EXPIRED,codexProblem,codexWorldToolsFailed,modelAtCapacity,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
  type LocalHarnessId} from '../agent/gate/index.ts';
 import {spawn} from 'node:child_process';
 import {openWorldToolBridge} from '../platform/host/modules/agents/world-tool-bridge.ts';
@@ -171,6 +171,10 @@ assert.equal(claudeCodeSignInExpired('Rate limited'),null);
 // Never signed in (Claude Code 2.1 `-p`): the same sign-in page, with its own line.
 assert.equal(claudeCodeSignInExpired('Not logged in · Please run /login'),'Claude Code isn’t signed in yet. Sign in in the browser page that opened.');
 assert.deepEqual(read('claude-code',[{type:'result',subtype:'success',is_error:true,result:'Invalid API key · Please run /login'}],1).outcome,{error:claudeCodeSignInExpired('Invalid API key')});
+// Once the page has opened this launch, the line points to Settings instead (Mac Beta 4508, 2026-10-20).
+assert.equal(claudeCodeSignInElsewhere(CLAUDE_CODE_NOT_SIGNED_IN),'Claude Code isn’t signed in yet. Sign in to it in Settings › Agents, under Provider.');
+assert.equal(claudeCodeSignInElsewhere(CLAUDE_CODE_SIGN_IN_EXPIRED),'Claude Code’s sign-in has expired. Sign in to it in Settings › Agents, under Provider.');
+assert.match(claudeCodeSignInElsewhere(CLAUDE_CODE_NOT_SIGNED_IN),/sign-in has expired|isn’t signed in/,'setup still shows its Sign in button');
 assert.deepEqual(read('claude-code',['not json','{"type":"other"}'],1,'boom\nError: connect ECONNREFUSED\n').outcome,{error:'Claude Code could not answer: Error: connect ECONNREFUSED'},'banners are not Fox’s words; stderr explains a failure');
 // A turn with no answer and nothing on stderr says what happened, not "sign in" (Mac Beta 4261, 2026-10-11: Codex was
 // signed in, yet the Attention check read "Open it once in Terminal to finish signing in").
