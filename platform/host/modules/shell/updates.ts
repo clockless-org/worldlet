@@ -12,6 +12,7 @@ import type {Host,Row} from '../../types.ts';
 import {ownerComputer} from './owner-computer.ts';
 import {buildInfo,buildNumber,distribution,packagedRelease,releaseBuild,versionText} from './release.ts';
 import {acceptanceReportPath,updateAcceptance,type UpdateAcceptance} from './update-acceptance.ts';
+import {macAppBundle} from './app-bundle.ts';
 import {downloadWindowsInstaller,fetchWindowsRelease,readManifest,retryStalled,stallGuard,UPDATE_STALLED,updaterAgent,verifyWindowsInstaller,windowsUpdateTest,WINDOWS_ALPHA_MANIFEST_URL,WINDOWS_MANIFEST_URL,WINDOWS_ORIGIN,type WindowsRelease} from './windows-release.ts';
 
 const SYSTEM_PATH='/usr/bin:/bin:/usr/sbin:/sbin';
@@ -183,7 +184,7 @@ export class MacUpdates extends Updates {
   this.acceptance=acceptance;
   const feed=acceptance?acceptance.feed:process.arch==='x64'&&typeof config.intelFeedURL==='string'?config.intelFeedURL:config.feedURL;
   const raw=typeof config.publicKey==='string'?Buffer.from(config.publicKey,'base64'):Buffer.alloc(0);
-  this.bundle=path.resolve(process.execPath,'../../../desktop');
+  this.bundle=macAppBundle(process.execPath);
   this.current=buildNumber(host);
   this.configured=process.platform==='darwin'&&(releaseBuild(host)||!!acceptance)&&typeof feed==='string'&&(!!acceptance||feed.startsWith('https://'))&&raw.length===32&&this.bundle.endsWith('.app')&&this.current>0;
   // Alpha's feed sits beside the release feed (scripts/release-alpha.mjs); both carry the universal DMG.
