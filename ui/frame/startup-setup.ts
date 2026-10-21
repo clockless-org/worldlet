@@ -36,7 +36,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
  // "My Agent is on another computer" (platform/web/README.md#another-computers-agent): the code Worldlet there shows,
  // pasted here, pairs this Worldlet with it and Fox's conversation runs on its Agent.
  let remoteForm=false,remoteCode='',pairingRemote=false;
- // No Agent here (Codex alone included): Worldlet installs stock Hermes Agent the official way (`install-hermes`), then
+ // No Agent here: Worldlet installs stock Hermes Agent the official way (`install-hermes`), then
  // the person signs in to ChatGPT inside it with Hermes' own sign-in (`sign-in-hermes`), owner decisions 2026-10-09.
  // `hermesStep` is the installer's step being run; `hermesCode` the code Hermes' device page asks for, when it does.
  let hermesSetup:'idle'|'installing'|'installed'|'signing-in'='idle',hermesStep='',hermesCode:string|null=null,hermesStepNo=0,hermesFailed=false,brokenHermes=false;
@@ -631,8 +631,8 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   * decision 2026-10-10: nothing the person cannot use sits on the first page). */
  function moreOptions(){
   const wrap=node('div','','setup-more-wrap');wrap.classList.toggle('is-open',more);
-  // Codex alone is no Agent for Fox (owner decision 2026-10-09), so it is not offered.
-  const missing=LOCAL_HARNESSES.filter(h=>h.id!=='codex'&&!agents.some(a=>a.id===h.id)&&(agents.length>0||detectingAgents||h.id!=='hermes')).sort(byPriority);
+  // Codex is offered like the others, found or not (owner request 2026-10-20: people who have it look for it here).
+  const missing=LOCAL_HARNESSES.filter(h=>!agents.some(a=>a.id===h.id)&&(agents.length>0||detectingAgents||h.id!=='hermes')).sort(byPriority);
   const toggle=node('button','','setup-more-toggle') as HTMLButtonElement;toggle.type='button';toggle.setAttribute('aria-expanded',String(more));toggle.setAttribute('aria-controls','setupMore');
   toggle.append(node('span','','setup-more-chevron'),node('span',t('More options'),'setup-more-label'));
   const peek=node('span','','setup-more-peek');peek.setAttribute('aria-hidden','true');
@@ -800,8 +800,7 @@ export function mountStartupSetup({state:initial,call,complete,move=false}:{stat
   detectingAgents=true;
   return Promise.resolve().then(()=>call('agentHarness',{operation:'detect',...fresh?{fresh:true}:{}})).then(result=>{
    if(disposed)return;
-   // Codex alone is no Agent for Fox (owner decision 2026-10-09).
-   const found=Array.isArray(result?.agents)?result.agents.filter(a=>typeof a?.id==='string'&&typeof a?.title==='string'&&a.id!=='codex'):[];
+   const found=Array.isArray(result?.agents)?result.agents.filter(a=>typeof a?.id==='string'&&typeof a?.title==='string'):[];
    // A choice the host no longer has (removed, or reset) returns to the first half.
    if(typeof draft.agent==='string'&&result?.selected!==draft.agent){delete draft.agent;persist();if(step===1&&!ready()){step=0;}}
    // Moving off Fox's own Hermes: an Agent it only copied from (or Codex it paid with) is not yet Fox's Agent.

@@ -78,7 +78,7 @@ await withBrowser(fileAccess,async browser=>{
    assert.equal(await page.locator('#setupMore').isVisible(),false);
    await toggle.click();
    assert.equal(await page.locator('#setupMore').isVisible(),true);
-   assert.deepEqual(await page.locator('.setup-more .setup-agent-button.is-missing').evaluateAll(list=>list.map(b=>b.getAttribute('aria-label'))),['OpenClaw','pi','Claude Code'],'Hermes Agent is the card, the rest wait in More options');
+   assert.deepEqual(await page.locator('.setup-more .setup-agent-button.is-missing').evaluateAll(list=>list.map(b=>b.getAttribute('aria-label'))),['OpenClaw','pi','Codex','Claude Code'],'Hermes Agent is the card, the rest wait in More options');
    assert.deepEqual(await page.locator('.setup-more :is(.setup-google-button,.setup-chatgpt-button)').allTextContents(),['Continue with Google'],'only the mock\'s row, no ChatGPT');
    assert.equal(await page.locator('.setup-google-button').isDisabled(),true,'the mock signs in from its own link');
    assert.equal(await page.locator('.setup-signin-tag',{hasText:'Coming soon'}).count(),0,'nothing coming soon');
@@ -247,11 +247,10 @@ await withBrowser(fileAccess,async browser=>{
   await page.goto(worldUrl());
   await page.locator('.setup-agent-card[data-agent="openclaw"]').waitFor();
   await page.waitForFunction(()=>!(document.querySelector('.setup-agent-card[data-agent="claude-code"]') as HTMLButtonElement)?.disabled);
-  // Picked for the person (owner request 2026-10-06): Hermes, OpenClaw, pi first, then Claude Code; Codex alone is no
-  // Agent (owner decision 2026-10-09), so it has no card. Hermes isn't here, so OpenClaw is picked, first and lifted;
+  // Picked for the person (owner request 2026-10-06): Hermes, OpenClaw, pi first, then Codex, then Claude Code; Codex
+  // has a card like the others (owner request 2026-10-20). Hermes isn't here, so OpenClaw is picked, first and lifted;
   // the big button names it by its own name.
-  assert.deepEqual(await page.locator('.setup-agent-cards .setup-agent-card').evaluateAll((list:HTMLElement[])=>list.map(b=>b.dataset.agent)),['openclaw','pi','claude-code']);
-  assert.equal(await page.locator('[data-agent="codex"]').count(),0,'Codex has no card');
+  assert.deepEqual(await page.locator('.setup-agent-cards .setup-agent-card').evaluateAll((list:HTMLElement[])=>list.map(b=>b.dataset.agent)),['openclaw','pi','codex','claude-code']);
   assert.equal(await page.locator('.setup-agent-default').getAttribute('data-agent'),'openclaw');
   assert.equal(await page.locator('.setup-agent-default').getAttribute('aria-pressed'),'true');
   assert.equal(await page.locator('.setup-next').textContent(),'Build your world');
@@ -550,8 +549,8 @@ await withBrowser(fileAccess,async browser=>{
     w.calls.push(b);
     if(b.action==='snapshot')return structuredClone(w.fixture);
     if(b.action==='installedApplets')return {keys:[]};
-    // Codex alone is no Agent; Hermes appears once it is installed and signed in.
-    if(b.action==='agentHarness'&&b.operation==='detect'){w.detects++;return {agents:w.signedIn?[{id:'hermes',title:'Hermes Agent',configured:true,worldTools:true}]:[{id:'codex',title:'Codex',configured:true,worldTools:true}],recommended:null,selected:sessionStorage.getItem('fixture-agent'),...w.detects===2?{brokenHermes:true}:{}};}
+    // Hermes appears once it is installed and signed in.
+    if(b.action==='agentHarness'&&b.operation==='detect'){w.detects++;return {agents:w.signedIn?[{id:'hermes',title:'Hermes Agent',configured:true,worldTools:true}]:[],recommended:null,selected:sessionStorage.getItem('fixture-agent'),...w.detects===2?{brokenHermes:true}:{}};}
     if(b.action==='agentHarness'&&b.operation==='install-hermes'){
      event({stage:'install',step:3,steps:7,title:'Create Python environment'});
      if(w.failOnce){w.failOnce=false;throw Error('Hermes Agent could not be installed. Check your internet connection and try again. (Create Python environment: bootstrap Python installation failed)');}
@@ -576,7 +575,8 @@ await withBrowser(fileAccess,async browser=>{
   },{platform});
   await page.goto(worldUrl());
   await page.getByText('No agent on this computer yet',{exact:true}).waitFor();
-  assert.equal(await page.locator('[data-agent="codex"]').count(),0,'Codex alone is no Agent');
+  // Codex is supported, so it waits under More options with the other Agents not installed here.
+  assert.equal(await page.locator('.setup-agent-card[data-agent="codex"]').count(),0,'no Codex card when it is not here');
   await page.getByText('No agent found on this computer. Worldlet installs Hermes Agent for you the official way, then you sign in to ChatGPT inside it.',{exact:true}).waitFor();
   await page.getByRole('button',{name:'Check again'}).click();
   await page.waitForFunction(()=>(window as any).detects>=2);
