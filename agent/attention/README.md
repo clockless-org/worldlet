@@ -53,7 +53,7 @@ Each Applet declares independent work in `ui/applets/<key>/applet.md` and `runti
 | `agent/attention/attention-center.ts` | Bounded observations, revision changes, affected-context selection, budgets, model-content migration, suppression and visibility |
 | `platform/host/modules/attention/center.ts` | Authorized IO, current cache, collection, isolated synthesis and publishing |
 | `platform/host/modules/attention/tools.ts` | World tools: read tickets, evidence checks, queries and item writes |
-| `platform/host/store/ledger.ts` | Durable items/user decisions; replacement of the expiring context working set |
+| `platform/host/store/ledger.ts`, `store/attention.ts` | Durable items/user decisions; replacement of the expiring context working set |
 | Existing HUD | Categories, ordering, interaction and source navigation |
 
 Adding a declaration does not implement a connector. A new provider must implement an authorized read service or trusted observation producer. There is no arbitrary downloaded code loader. Core rules are portable. The Electron host collects and synthesizes through the same path on every OS; it does not use the [Harness-owned Attention jobs](../../contracts/HARNESS.md#bundled-attention-extension) that the retired Windows host used. Native Calendar, Apple Notes and Reminders reads are macOS-only (`platform/host/modules/connectors/apple.ts`).
@@ -176,7 +176,7 @@ Source-level continuity is not obligation identity. A pure-core reproduction on 
 There are two independent causes:
 
 1. `agent/attention/attention-center.ts` matches owner/provider/source, without distinguishing the obligation's evidence.
-2. Host ledger identity (then `WorldLedger.swift` and `WorldLedgerItems.cs`; now `WorldLedger.identity` in `platform/host/store/ledger.ts`) replaced every Gmail evidence quote with the literal `thread`; tasks now keep their quotes (below). Even changing synthesis matching alone would still collapse both records during persistence. Non-Gmail persistence keeps quotes, but source-wide suppression can still conflate distinct obligations.
+2. Host ledger identity (then `WorldLedger.swift` and `WorldLedgerItems.cs`; now `WorldLedger.identity`, defined in `platform/host/store/attention.ts`) replaced every Gmail evidence quote with the literal `thread`; tasks now keep their quotes (below). Even changing synthesis matching alone would still collapse both records during persistence. Non-Gmail persistence keeps quotes, but source-wide suppression can still conflate distinct obligations.
 
 ### Required implementation, in order
 
@@ -213,7 +213,7 @@ A background re-read that quotes only part of the passage already saved for the 
 
 Validated background proposals queue silently. The next `query_world_items` in Fox restores pending reviews after a restart. Removing the ID and resubmitting the same pending evidence does not bypass review. Repeated proposals are deduplicated. A changed original or a proposal older than seven days must be reread; disconnecting prevents confirmation, and source/item deletion clears pending proposals. No external source is modified.
 
-Focused evidence: shared identity and UI-button fixtures, plus the native `--world-interaction-check` on the retired Mac host (not yet ported), covered restart, repeat requests, explicit approval, separate-task creation, stale decisions, settled state and deletion. This is not a semantic guarantee: genuinely new evidence submitted without an existing ID can still describe the same obligation. The Electron host offers the same review queue on every OS (`platform/host/store/ledger.ts`, `modules/world.ts`); its device acceptance is pending.
+Focused evidence: shared identity and UI-button fixtures, plus the native `--world-interaction-check` on the retired Mac host (not yet ported), covered restart, repeat requests, explicit approval, separate-task creation, stale decisions, settled state and deletion. This is not a semantic guarantee: genuinely new evidence submitted without an existing ID can still describe the same obligation. The Electron host offers the same review queue on every OS (`platform/host/store/attention.ts`, `modules/world.ts`); its device acceptance is pending.
 
 ## Collection coverage and incomplete synthesis
 
