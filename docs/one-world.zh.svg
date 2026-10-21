@@ -1,157 +1,127 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1680" height="770" viewBox="0 0 1680 770" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
-<rect width="1680" height="770" rx="18" fill="#FFFFFF"/><rect x="0.5" y="0.5" width="1679" height="769" rx="18" fill="none" stroke="#D8DDE4"/>
-<text x="32" y="52" font-size="28" font-weight="700" fill="#1F2328">一个人，一个 World</text>
-<text x="32" y="82" font-size="15" fill="#57606A">Agent 来了以后更乱了。Worldlet 在人和其他一切之间放一个 World。</text>
-<rect x="32" y="120" width="520" height="560" rx="16" fill="#F6F8FA" stroke="#D0D7DE"/>
-<text x="54" y="156" font-size="13" font-weight="700" fill="#57606A">以前</text>
-<text x="54" y="184" font-size="21" font-weight="800" fill="#1F2328">一个人，N 个 app</text>
-<line x1="292.0" y1="344.0" x2="92.0" y2="435.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
-<line x1="292.0" y1="344.0" x2="225.3" y2="435.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
-<line x1="292.0" y1="344.0" x2="358.7" y2="435.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
-<line x1="292.0" y1="344.0" x2="492.0" y2="435.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
-<line x1="292.0" y1="344.0" x2="92.0" y2="505.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
-<line x1="292.0" y1="344.0" x2="225.3" y2="505.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
-<line x1="292.0" y1="344.0" x2="358.7" y2="505.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
-<line x1="292.0" y1="344.0" x2="492.0" y2="505.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
-<circle cx="292.0" cy="276" r="13" fill="#1F4BB8"/><path d="M270.0 312 a22 22 0 0 1 44 0 z" fill="#1F4BB8"/>
-<text x="292.0" y="336" font-size="14" font-weight="700" text-anchor="middle" fill="#1F4BB8">你</text>
-<rect x="46.0" y="435" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="92.0" y="455" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Mail</text>
-<rect x="179.33333333333334" y="435" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="225.33333333333334" y="455" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Calendar</text>
-<rect x="312.6666666666667" y="435" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="358.6666666666667" y="455" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">GitHub</text>
-<rect x="446.0" y="435" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="492.0" y="455" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Notion</text>
-<rect x="46.0" y="505" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="92.0" y="525" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Slack</text>
-<rect x="179.33333333333334" y="505" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="225.33333333333334" y="525" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Docs</text>
-<rect x="312.6666666666667" y="505" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="358.6666666666667" y="525" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Photos</text>
-<rect x="446.0" y="505" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="492.0" y="525" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Maps</text>
-<text x="292.0" y="654" font-size="14" text-anchor="middle" fill="#57606A" font-weight="400">你自己一个个去开 app。</text>
-<path d="M559.0 391.0 L571.0 400.0 L559.0 409.0" fill="none" stroke="#8C959F" stroke-width="2"/>
-<rect x="580" y="120" width="520" height="560" rx="16" fill="#F6F8FA" stroke="#D0D7DE"/>
-<text x="602" y="156" font-size="13" font-weight="700" fill="#57606A">现在</text>
-<text x="602" y="184" font-size="21" font-weight="800" fill="#1F2328">一个人，M 个 Agent，N 个 app</text>
-<line x1="840.0" y1="324.0" x2="640.0" y2="375.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
-<line x1="840.0" y1="324.0" x2="740.0" y2="375.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
-<line x1="840.0" y1="324.0" x2="840.0" y2="375.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
-<line x1="840.0" y1="324.0" x2="940.0" y2="375.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
-<line x1="840.0" y1="324.0" x2="1040.0" y2="375.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
-<line x1="840.0" y1="324.0" x2="640.0" y2="525.0" stroke="#8C959F" stroke-width="1.4" opacity="0.5"/>
-<line x1="840.0" y1="324.0" x2="773.3" y2="525.0" stroke="#8C959F" stroke-width="1.4" opacity="0.5"/>
-<line x1="840.0" y1="324.0" x2="906.7" y2="525.0" stroke="#8C959F" stroke-width="1.4" opacity="0.5"/>
-<line x1="840.0" y1="324.0" x2="1040.0" y2="525.0" stroke="#8C959F" stroke-width="1.4" opacity="0.5"/>
-<line x1="840.0" y1="324.0" x2="640.0" y2="587.0" stroke="#8C959F" stroke-width="1.4" opacity="0.5"/>
-<line x1="840.0" y1="324.0" x2="773.3" y2="587.0" stroke="#8C959F" stroke-width="1.4" opacity="0.5"/>
-<line x1="840.0" y1="324.0" x2="906.7" y2="587.0" stroke="#8C959F" stroke-width="1.4" opacity="0.5"/>
-<line x1="840.0" y1="324.0" x2="1040.0" y2="587.0" stroke="#8C959F" stroke-width="1.4" opacity="0.5"/>
-<line x1="640.0" y1="405.0" x2="640.0" y2="525.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="640.0" y1="405.0" x2="906.7" y2="525.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="640.0" y1="405.0" x2="640.0" y2="587.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="640.0" y1="405.0" x2="906.7" y2="587.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="740.0" y1="405.0" x2="773.3" y2="525.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="740.0" y1="405.0" x2="1040.0" y2="525.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="740.0" y1="405.0" x2="773.3" y2="587.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="740.0" y1="405.0" x2="1040.0" y2="587.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="840.0" y1="405.0" x2="640.0" y2="525.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="840.0" y1="405.0" x2="906.7" y2="525.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="840.0" y1="405.0" x2="640.0" y2="587.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="840.0" y1="405.0" x2="906.7" y2="587.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="940.0" y1="405.0" x2="773.3" y2="525.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="940.0" y1="405.0" x2="1040.0" y2="525.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="940.0" y1="405.0" x2="773.3" y2="587.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="940.0" y1="405.0" x2="1040.0" y2="587.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="1040.0" y1="405.0" x2="640.0" y2="525.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="1040.0" y1="405.0" x2="906.7" y2="525.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="1040.0" y1="405.0" x2="640.0" y2="587.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<line x1="1040.0" y1="405.0" x2="906.7" y2="587.0" stroke="#CF222E" stroke-width="1.1" opacity="0.45"/>
-<circle cx="840.0" cy="256" r="13" fill="#1F4BB8"/><path d="M818.0 292 a22 22 0 0 1 44 0 z" fill="#1F4BB8"/>
-<text x="840.0" y="316" font-size="14" font-weight="700" text-anchor="middle" fill="#1F4BB8">你</text>
-<rect x="598.0" y="375" width="84" height="30" rx="15" fill="#FFFFFF" stroke="#1A7F37" stroke-width="1.6"/>
-<text x="640.0" y="395" font-size="13" font-weight="600" text-anchor="middle" fill="#1A7F37">ChatGPT</text>
-<rect x="698.0" y="375" width="84" height="30" rx="15" fill="#FFFFFF" stroke="#1A7F37" stroke-width="1.6"/>
-<text x="740.0" y="395" font-size="13" font-weight="600" text-anchor="middle" fill="#1A7F37">Claude</text>
-<rect x="798.0" y="375" width="84" height="30" rx="15" fill="#FFFFFF" stroke="#1A7F37" stroke-width="1.6"/>
-<text x="840.0" y="395" font-size="13" font-weight="600" text-anchor="middle" fill="#1A7F37">Codex</text>
-<rect x="898.0" y="375" width="84" height="30" rx="15" fill="#FFFFFF" stroke="#1A7F37" stroke-width="1.6"/>
-<text x="940.0" y="395" font-size="13" font-weight="600" text-anchor="middle" fill="#1A7F37">Hermes</text>
-<rect x="998.0" y="375" width="84" height="30" rx="15" fill="#FFFFFF" stroke="#1A7F37" stroke-width="1.6"/>
-<text x="1040.0" y="395" font-size="13" font-weight="600" text-anchor="middle" fill="#1A7F37">Cursor</text>
-<rect x="594.0" y="525" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="640.0" y="545" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Mail</text>
-<rect x="727.3333333333334" y="525" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="773.3333333333334" y="545" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Calendar</text>
-<rect x="860.6666666666667" y="525" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="906.6666666666667" y="545" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">GitHub</text>
-<rect x="994.0" y="525" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="1040.0" y="545" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Notion</text>
-<rect x="594.0" y="587" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="640.0" y="607" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Slack</text>
-<rect x="727.3333333333334" y="587" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="773.3333333333334" y="607" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Docs</text>
-<rect x="860.6666666666667" y="587" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="906.6666666666667" y="607" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Photos</text>
-<rect x="994.0" y="587" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="1040.0" y="607" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Maps</text>
-<text x="840.0" y="654" font-size="14" text-anchor="middle" fill="#57606A" font-weight="400">每个 Agent 各用各的方式连每个 app，你得自己记住这一切。</text>
-<path d="M1107.0 391.0 L1119.0 400.0 L1107.0 409.0" fill="none" stroke="#8C959F" stroke-width="2"/>
-<rect x="1128" y="120" width="520" height="560" rx="16" fill="#F1F8F3" stroke="#A9D8B8"/>
-<text x="1150" y="156" font-size="13" font-weight="700" fill="#1A7F37">Worldlet</text>
-<text x="1150" y="184" font-size="21" font-weight="800" fill="#1F2328">一个人，一个 World</text>
-<line x1="1388.0" y1="314.0" x2="1388.0" y2="382.0" stroke="#1F2328" stroke-width="2.4" opacity="1"/>
-<line x1="1240.0" y1="344.0" x2="1330.0" y2="440.0" stroke="#1A7F37" stroke-width="1.6" opacity="1"/>
-<line x1="1240.0" y1="392.0" x2="1330.0" y2="440.0" stroke="#1A7F37" stroke-width="1.6" opacity="1"/>
-<line x1="1240.0" y1="440.0" x2="1330.0" y2="440.0" stroke="#1A7F37" stroke-width="1.6" opacity="1"/>
-<line x1="1240.0" y1="488.0" x2="1330.0" y2="440.0" stroke="#1A7F37" stroke-width="1.6" opacity="1"/>
-<line x1="1240.0" y1="536.0" x2="1330.0" y2="440.0" stroke="#1A7F37" stroke-width="1.6" opacity="1"/>
-<line x1="1532.0" y1="328.0" x2="1446.0" y2="440.0" stroke="#9A6700" stroke-width="1.6" opacity="1"/>
-<line x1="1532.0" y1="362.0" x2="1446.0" y2="440.0" stroke="#9A6700" stroke-width="1.6" opacity="1"/>
-<line x1="1532.0" y1="396.0" x2="1446.0" y2="440.0" stroke="#9A6700" stroke-width="1.6" opacity="1"/>
-<line x1="1532.0" y1="430.0" x2="1446.0" y2="440.0" stroke="#9A6700" stroke-width="1.6" opacity="1"/>
-<line x1="1532.0" y1="464.0" x2="1446.0" y2="440.0" stroke="#9A6700" stroke-width="1.6" opacity="1"/>
-<line x1="1532.0" y1="498.0" x2="1446.0" y2="440.0" stroke="#9A6700" stroke-width="1.6" opacity="1"/>
-<line x1="1532.0" y1="532.0" x2="1446.0" y2="440.0" stroke="#9A6700" stroke-width="1.6" opacity="1"/>
-<line x1="1532.0" y1="566.0" x2="1446.0" y2="440.0" stroke="#9A6700" stroke-width="1.6" opacity="1"/>
-<circle cx="1388.0" cy="246" r="13" fill="#1F4BB8"/><path d="M1366.0 282 a22 22 0 0 1 44 0 z" fill="#1F4BB8"/>
-<text x="1388.0" y="306" font-size="14" font-weight="700" text-anchor="middle" fill="#1F4BB8">你</text>
-<circle cx="1388.0" cy="440" r="58" fill="#1F2328"/>
-<text x="1388.0" y="436" font-size="18" font-weight="800" text-anchor="middle" fill="#FFFFFF">你的 World</text>
-<text x="1388.0" y="458" font-size="11.5" text-anchor="middle" fill="#D0D7DE">一个门 · 一个存储</text>
-<rect x="1156.0" y="329" width="84" height="30" rx="15" fill="#FFFFFF" stroke="#1A7F37" stroke-width="1.6"/>
-<text x="1198" y="349" font-size="13" font-weight="600" text-anchor="middle" fill="#1A7F37">ChatGPT</text>
-<rect x="1156.0" y="377" width="84" height="30" rx="15" fill="#FFFFFF" stroke="#1A7F37" stroke-width="1.6"/>
-<text x="1198" y="397" font-size="13" font-weight="600" text-anchor="middle" fill="#1A7F37">Claude</text>
-<rect x="1156.0" y="425" width="84" height="30" rx="15" fill="#FFFFFF" stroke="#1A7F37" stroke-width="1.6"/>
-<text x="1198" y="445" font-size="13" font-weight="600" text-anchor="middle" fill="#1A7F37">Codex</text>
-<rect x="1156.0" y="473" width="84" height="30" rx="15" fill="#FFFFFF" stroke="#1A7F37" stroke-width="1.6"/>
-<text x="1198" y="493" font-size="13" font-weight="600" text-anchor="middle" fill="#1A7F37">Hermes</text>
-<rect x="1156.0" y="521" width="84" height="30" rx="15" fill="#FFFFFF" stroke="#1A7F37" stroke-width="1.6"/>
-<text x="1198" y="541" font-size="13" font-weight="600" text-anchor="middle" fill="#1A7F37">Cursor</text>
-<rect x="1532.0" y="313" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="1578" y="333" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Mail</text>
-<rect x="1532.0" y="347" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="1578" y="367" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Calendar</text>
-<rect x="1532.0" y="381" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="1578" y="401" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">GitHub</text>
-<rect x="1532.0" y="415" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="1578" y="435" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Notion</text>
-<rect x="1532.0" y="449" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="1578" y="469" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Slack</text>
-<rect x="1532.0" y="483" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="1578" y="503" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Docs</text>
-<rect x="1532.0" y="517" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="1578" y="537" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Photos</text>
-<rect x="1532.0" y="551" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
-<text x="1578" y="571" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Maps</text>
-<text x="1198" y="316" font-size="12" font-weight="700" text-anchor="middle" fill="#1A7F37">M 个 Agent</text>
-<text x="1578" y="300" font-size="12" font-weight="700" text-anchor="middle" fill="#9A6700">N 个 app</text>
-<text x="1388.0" y="654" font-size="14" text-anchor="middle" fill="#1A7F37" font-weight="700">你的 World 装着各个 app 的数据，所有 Agent 都从一个门进来。</text>
-<circle cx="40" cy="720" r="7" fill="#1F4BB8"/><text x="54" y="725" font-size="13" fill="#57606A">你</text>
-<circle cx="230" cy="720" r="7" fill="#1A7F37"/><text x="244" y="725" font-size="13" fill="#57606A">Agent</text>
-<circle cx="420" cy="720" r="7" fill="#9A6700"/><text x="434" y="725" font-size="13" fill="#57606A">app 和服务</text>
-<circle cx="610" cy="720" r="7" fill="#1F2328"/><text x="624" y="725" font-size="13" fill="#57606A">你的 World</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="722" viewBox="0 0 1000 722" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+<rect width="1000" height="722" rx="18" fill="#FFFFFF"/><rect x="0.5" y="0.5" width="999" height="721" rx="18" fill="none" stroke="#D8DDE4"/>
+<text x="28" y="50" font-size="28" font-weight="700" fill="#1F2328">一个人，一个 World</text>
+<text x="28" y="82" font-size="15" fill="#57606A">Agent 来了以后更乱了。Worldlet 在你和其他一切之间放一个 World。</text>
+<rect x="24.0" y="118" width="305.3" height="540" rx="16" fill="#F6F8FA" stroke="#D0D7DE"/>
+<text x="42.0" y="150" font-size="13" font-weight="700" fill="#57606A">以前</text>
+<text x="42.0" y="178" font-size="20" font-weight="800" fill="#1F2328">你和 N 个 app</text>
+<line x1="176.7" y1="302.0" x2="74.9" y2="423.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
+<line x1="176.7" y1="302.0" x2="176.7" y2="423.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
+<line x1="176.7" y1="302.0" x2="278.4" y2="423.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
+<line x1="176.7" y1="302.0" x2="74.9" y2="479.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
+<line x1="176.7" y1="302.0" x2="176.7" y2="479.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
+<line x1="176.7" y1="302.0" x2="278.4" y2="479.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
+<circle cx="176.66666666666666" cy="236" r="13" fill="#1F4BB8"/><path d="M154.66666666666666 272 a22 22 0 0 1 44 0 z" fill="#1F4BB8"/>
+<text x="176.66666666666666" y="294" font-size="15" font-weight="700" text-anchor="middle" fill="#1F4BB8">你</text>
+<rect x="33.9" y="423" width="82" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
+<text x="74.9" y="443" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Mail</text>
+<rect x="135.7" y="423" width="82" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
+<text x="176.7" y="443" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Calendar</text>
+<rect x="237.4" y="423" width="82" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
+<text x="278.4" y="443" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">GitHub</text>
+<rect x="33.9" y="479" width="82" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
+<text x="74.9" y="499" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Notion</text>
+<rect x="135.7" y="479" width="82" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
+<text x="176.7" y="499" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Slack</text>
+<rect x="237.4" y="479" width="82" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
+<text x="278.4" y="499" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Docs</text>
+<text x="176.7" y="610" font-size="14" text-anchor="middle" fill="#57606A" font-weight="400">你自己一个个去开 app。</text>
+<path d="M333.3 380.0 L342.3 388.0 L333.3 396.0" fill="none" stroke="#8C959F" stroke-width="2"/>
+<rect x="347.3" y="118" width="305.3" height="540" rx="16" fill="#F6F8FA" stroke="#D0D7DE"/>
+<text x="365.3" y="150" font-size="13" font-weight="700" fill="#57606A">现在</text>
+<text x="365.3" y="178" font-size="20" font-weight="800" fill="#1F2328">你、M 个 Agent、N 个 app</text>
+<line x1="500.0" y1="302.0" x2="385.5" y2="361.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
+<line x1="500.0" y1="302.0" x2="461.8" y2="361.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
+<line x1="500.0" y1="302.0" x2="538.2" y2="361.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
+<line x1="500.0" y1="302.0" x2="614.5" y2="361.0" stroke="#8C959F" stroke-width="1.4" opacity="1"/>
+<line x1="500.0" y1="302.0" x2="398.2" y2="483.0" stroke="#8C959F" stroke-width="1.4" opacity="0.45"/>
+<line x1="500.0" y1="302.0" x2="500.0" y2="483.0" stroke="#8C959F" stroke-width="1.4" opacity="0.45"/>
+<line x1="500.0" y1="302.0" x2="601.8" y2="483.0" stroke="#8C959F" stroke-width="1.4" opacity="0.45"/>
+<line x1="500.0" y1="302.0" x2="398.2" y2="539.0" stroke="#8C959F" stroke-width="1.4" opacity="0.45"/>
+<line x1="500.0" y1="302.0" x2="500.0" y2="539.0" stroke="#8C959F" stroke-width="1.4" opacity="0.45"/>
+<line x1="500.0" y1="302.0" x2="601.8" y2="539.0" stroke="#8C959F" stroke-width="1.4" opacity="0.45"/>
+<line x1="385.5" y1="391.0" x2="398.2" y2="483.0" stroke="#CF222E" stroke-width="1.1" opacity="0.5"/>
+<line x1="385.5" y1="391.0" x2="601.8" y2="483.0" stroke="#CF222E" stroke-width="1.1" opacity="0.5"/>
+<line x1="385.5" y1="391.0" x2="500.0" y2="539.0" stroke="#CF222E" stroke-width="1.1" opacity="0.5"/>
+<line x1="461.8" y1="391.0" x2="500.0" y2="483.0" stroke="#CF222E" stroke-width="1.1" opacity="0.5"/>
+<line x1="461.8" y1="391.0" x2="398.2" y2="539.0" stroke="#CF222E" stroke-width="1.1" opacity="0.5"/>
+<line x1="461.8" y1="391.0" x2="601.8" y2="539.0" stroke="#CF222E" stroke-width="1.1" opacity="0.5"/>
+<line x1="538.2" y1="391.0" x2="398.2" y2="483.0" stroke="#CF222E" stroke-width="1.1" opacity="0.5"/>
+<line x1="538.2" y1="391.0" x2="601.8" y2="483.0" stroke="#CF222E" stroke-width="1.1" opacity="0.5"/>
+<line x1="538.2" y1="391.0" x2="500.0" y2="539.0" stroke="#CF222E" stroke-width="1.1" opacity="0.5"/>
+<line x1="614.5" y1="391.0" x2="500.0" y2="483.0" stroke="#CF222E" stroke-width="1.1" opacity="0.5"/>
+<line x1="614.5" y1="391.0" x2="398.2" y2="539.0" stroke="#CF222E" stroke-width="1.1" opacity="0.5"/>
+<line x1="614.5" y1="391.0" x2="601.8" y2="539.0" stroke="#CF222E" stroke-width="1.1" opacity="0.5"/>
+<circle cx="500.0" cy="236" r="13" fill="#1F4BB8"/><path d="M478.0 272 a22 22 0 0 1 44 0 z" fill="#1F4BB8"/>
+<text x="500.0" y="294" font-size="15" font-weight="700" text-anchor="middle" fill="#1F4BB8">你</text>
+<rect x="353.5" y="361" width="64" height="30" rx="15" fill="#FFFFFF" stroke="#1A7F37" stroke-width="1.6"/>
+<text x="385.5" y="381" font-size="13" font-weight="600" text-anchor="middle" fill="#1A7F37">ChatGPT</text>
+<rect x="429.8" y="361" width="64" height="30" rx="15" fill="#FFFFFF" stroke="#1A7F37" stroke-width="1.6"/>
+<text x="461.8" y="381" font-size="13" font-weight="600" text-anchor="middle" fill="#1A7F37">Claude</text>
+<rect x="506.2" y="361" width="64" height="30" rx="15" fill="#FFFFFF" stroke="#1A7F37" stroke-width="1.6"/>
+<text x="538.2" y="381" font-size="13" font-weight="600" text-anchor="middle" fill="#1A7F37">Codex</text>
+<rect x="582.5" y="361" width="64" height="30" rx="15" fill="#FFFFFF" stroke="#1A7F37" stroke-width="1.6"/>
+<text x="614.5" y="381" font-size="13" font-weight="600" text-anchor="middle" fill="#1A7F37">Hermes</text>
+<rect x="357.2" y="483" width="82" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
+<text x="398.2" y="503" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Mail</text>
+<rect x="459.0" y="483" width="82" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
+<text x="500.0" y="503" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Calendar</text>
+<rect x="560.8" y="483" width="82" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
+<text x="601.8" y="503" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">GitHub</text>
+<rect x="357.2" y="539" width="82" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
+<text x="398.2" y="559" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Notion</text>
+<rect x="459.0" y="539" width="82" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
+<text x="500.0" y="559" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Slack</text>
+<rect x="560.8" y="539" width="82" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
+<text x="601.8" y="559" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Docs</text>
+<text x="500.0" y="610" font-size="14" text-anchor="middle" fill="#57606A" font-weight="400">每个 Agent 各用各的方式连每个 app，你得自</text>
+<text x="500.0" y="629" font-size="14" text-anchor="middle" fill="#57606A" font-weight="400">己记住这一切。</text>
+<path d="M656.7 380.0 L665.7 388.0 L656.7 396.0" fill="none" stroke="#8C959F" stroke-width="2"/>
+<rect x="670.7" y="118" width="305.3" height="540" rx="16" fill="#F1F8F3" stroke="#A9D8B8"/>
+<text x="688.7" y="150" font-size="13" font-weight="700" fill="#1A7F37">WORLDLET</text>
+<text x="688.7" y="178" font-size="20" font-weight="800" fill="#1F2328">你和一个 World</text>
+<line x1="823.3" y1="302.0" x2="823.3" y2="402.0" stroke="#1F2328" stroke-width="2.6" opacity="1"/>
+<line x1="777.3" y1="448.0" x2="744.7" y2="376.0" stroke="#1A7F37" stroke-width="1.6" opacity="1"/>
+<line x1="777.3" y1="448.0" x2="744.7" y2="424.0" stroke="#1A7F37" stroke-width="1.6" opacity="1"/>
+<line x1="777.3" y1="448.0" x2="744.7" y2="472.0" stroke="#1A7F37" stroke-width="1.6" opacity="1"/>
+<line x1="777.3" y1="448.0" x2="744.7" y2="520.0" stroke="#1A7F37" stroke-width="1.6" opacity="1"/>
+<line x1="869.3" y1="448.0" x2="888.0" y2="350.0" stroke="#9A6700" stroke-width="1.6" opacity="1"/>
+<line x1="869.3" y1="448.0" x2="888.0" y2="390.0" stroke="#9A6700" stroke-width="1.6" opacity="1"/>
+<line x1="869.3" y1="448.0" x2="888.0" y2="430.0" stroke="#9A6700" stroke-width="1.6" opacity="1"/>
+<line x1="869.3" y1="448.0" x2="888.0" y2="470.0" stroke="#9A6700" stroke-width="1.6" opacity="1"/>
+<line x1="869.3" y1="448.0" x2="888.0" y2="510.0" stroke="#9A6700" stroke-width="1.6" opacity="1"/>
+<line x1="869.3" y1="448.0" x2="888.0" y2="550.0" stroke="#9A6700" stroke-width="1.6" opacity="1"/>
+<circle cx="823.3333333333333" cy="236" r="13" fill="#1F4BB8"/><path d="M801.3333333333333 272 a22 22 0 0 1 44 0 z" fill="#1F4BB8"/>
+<text x="823.3333333333333" y="294" font-size="15" font-weight="700" text-anchor="middle" fill="#1F4BB8">你</text>
+<circle cx="823.3" cy="448" r="46" fill="#1F2328"/>
+<text x="823.3" y="449" font-size="15" font-weight="800" text-anchor="middle" fill="#FFFFFF">你的 World</text>
+<text x="823.3" y="466" font-size="10" text-anchor="middle" fill="#D0D7DE">一个门 · 一个存储</text>
+<rect x="680.7" y="361" width="64" height="30" rx="15" fill="#FFFFFF" stroke="#1A7F37" stroke-width="1.6"/>
+<text x="712.7" y="381" font-size="13" font-weight="600" text-anchor="middle" fill="#1A7F37">ChatGPT</text>
+<rect x="680.7" y="409" width="64" height="30" rx="15" fill="#FFFFFF" stroke="#1A7F37" stroke-width="1.6"/>
+<text x="712.7" y="429" font-size="13" font-weight="600" text-anchor="middle" fill="#1A7F37">Claude</text>
+<rect x="680.7" y="457" width="64" height="30" rx="15" fill="#FFFFFF" stroke="#1A7F37" stroke-width="1.6"/>
+<text x="712.7" y="477" font-size="13" font-weight="600" text-anchor="middle" fill="#1A7F37">Codex</text>
+<rect x="680.7" y="505" width="64" height="30" rx="15" fill="#FFFFFF" stroke="#1A7F37" stroke-width="1.6"/>
+<text x="712.7" y="525" font-size="13" font-weight="600" text-anchor="middle" fill="#1A7F37">Hermes</text>
+<rect x="888.0" y="335" width="82" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
+<text x="929.0" y="355" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Mail</text>
+<rect x="888.0" y="375" width="82" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
+<text x="929.0" y="395" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Calendar</text>
+<rect x="888.0" y="415" width="82" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
+<text x="929.0" y="435" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">GitHub</text>
+<rect x="888.0" y="455" width="82" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
+<text x="929.0" y="475" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Notion</text>
+<rect x="888.0" y="495" width="82" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
+<text x="929.0" y="515" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Slack</text>
+<rect x="888.0" y="535" width="82" height="30" rx="15" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.6"/>
+<text x="929.0" y="555" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Docs</text>
+<text x="712.7" y="346" font-size="12" font-weight="700" text-anchor="middle" fill="#1A7F37">M 个 Agent</text>
+<text x="929.0" y="320" font-size="12" font-weight="700" text-anchor="middle" fill="#9A6700">N 个 app</text>
+<text x="823.3" y="610" font-size="14" text-anchor="middle" fill="#1A7F37" font-weight="700">你的 World 装着各个 app 的数据，所有</text>
+<text x="823.3" y="629" font-size="14" text-anchor="middle" fill="#1A7F37" font-weight="700">Agent 都从一个门进来。</text>
+<circle cx="36" cy="692" r="7" fill="#1F4BB8"/><text x="50" y="697" font-size="14" fill="#57606A">你</text>
+<circle cx="206" cy="692" r="7" fill="#1A7F37"/><text x="220" y="697" font-size="14" fill="#57606A">Agent</text>
+<circle cx="376" cy="692" r="7" fill="#9A6700"/><text x="390" y="697" font-size="14" fill="#57606A">app 和服务</text>
+<circle cx="546" cy="692" r="7" fill="#1F2328"/><text x="560" y="697" font-size="14" fill="#57606A">你的 World</text>
 </svg>
