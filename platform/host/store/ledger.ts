@@ -1,14 +1,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import crypto from 'node:crypto';
 import {DatabaseSync} from 'node:sqlite';
 import {core} from '../core.ts';
 import {digest,ensureDirectory,WorldletError} from '../files.ts';
 import {swiftJSON,swiftFold,stableJSON,sameJSON} from './swift-json.ts';
-import {SERVICE_SYNC_BUCKETS} from '../../../contracts/service-sync.ts';
 import {WORLD_VIEWS_SQL} from '../../../contracts/storage/world-views.ts';
-import {AppletTables,ensureArtifactPages,ensureArtifacts,ensureKept} from './applets.ts';
-import {CompanionTables,ensureCompanion,OWN} from './companion.ts';
+import {AppTables} from './app.ts';
+import {AppletTables} from './applets.ts';
+import {CompanionTables,OWN} from './companion.ts';
+import {ConnectorTables,safeLibraryComponent,storedConfiguration} from './connectors.ts';
 import {RecordingTables} from './recordings.ts';
 import {TaskTables} from './tasks.ts';
 export {Cancelled} from './tasks.ts';
@@ -20,7 +20,7 @@ const iso=()=>new Date().toISOString();
 /** Worldlet's durable facts, independent of any Harness's conversation or memory files.
  * Only bound values reach SQL; an Agent never receives a SQL execution tool.
  * This file opens the database and keeps `entries` (history and state revisions); a component's tables are read
- * and written in its own file beside it (tasks.ts, companion.ts, applets.ts, recordings.ts), whose methods are this class's. */
+ * and written in its own file beside it (tasks.ts, companion.ts, applets.ts, recordings.ts, connectors.ts, app.ts), whose methods are this class's. */
 export class WorldLedger {
  db:DatabaseSync|null;
  readonly root:string;
@@ -40,6 +40,8 @@ export class WorldLedger {
   try{fs.chmodSync(file,0o600);}catch{}
  }
  static readonly OWN=OWN;
+ static safeLibraryComponent=safeLibraryComponent;
+ static storedConfiguration=storedConfiguration;
  /** Names each open savepoint; nested ones only need distinct names. */
  private savepoints=0;
  close(){this.db?.close();this.db=null;}
@@ -93,8 +95,6 @@ export class WorldLedger {
   const rows=key==null?this.all('SELECT seq,body FROM entries WHERE kind=? ORDER BY seq','state.'+bucket):this.all('SELECT seq,body FROM entries WHERE kind=? AND key=? ORDER BY seq','state.'+bucket,key);
   return rows.map(row=>{let body;try{body=JSON.parse(row.body);}catch{}if(!body||typeof body!=='object')throw new WorldletError('Invalid world data; existing data was preserved.');return {seq:Number(row.seq),body};});
  }
- /** Library rows last committed through this connection; lets an unchanged save skip a re-encode. */
- private savedLibrary:{sources:string,knowledge:string}|null=null;
  /** One Agent's audit entry (`agent.audit`, agent/gate/GRANTS.md), keyed by its Agent; only its newest `keep` stay. */
  recordAgentAudit(entry:Row,keep:number):boolean {
   const agent=typeof entry.agentId==='string'?entry.agentId:'';
@@ -182,64 +182,10 @@ export class WorldLedger {
  /** One request and its Attention item, saved together, as a draft is: the item is the host's own (provider `agents`),
   * its status the request's, set by the person's answer (`user`) or by the refused call that asked (`agent`). */
  saveServiceRequest(request:Row,item:Row,origin:'user'|'agent'){this.saveDraft('service-requests',request,item,origin);}
- // Service presets (context/connectors/services/presets.ts, context/applets/INTEGRATIONS.md#service-presets) ---------------
- /** Every saved Service preset (`state.service-presets`), by ID. */
- servicePresets():Row[]{return this.records('service-presets');}
- saveServicePreset(preset:Row){this.put('service-presets',preset.id,preset);}
- /** Removes the preset and its earlier revisions. */
- deleteServicePreset(id:string){
-  this.transaction(()=>{
-   if(this.value('service-sync-jobs',id))this.invalidateRuntimeTasks('service-sync:'+id);
-   for(const bucket of SERVICE_SYNC_BUCKETS)this.delete(bucket,id);
-   this.delete('service-presets',id);
-  });
- }
  // Agent reports (agent/gate/reports.ts, agent/gate/GRANTS.md#agent-reports) ------------------------------------
  /** Each Agent's one report (`state.agent-reports`, keyed by the Agent). */
  agentReports():Row[]{return this.records('agent-reports');}
  saveAgentReport(report:Row){this.put('agent-reports',report.agentId,report);}
- // The board (context/connectors/BOARD.md) -------------------------------------------------------------------------------
- /** The board's current definition and revision (`state.board`), or null with none. */
- board():Row|null{return this.value('board','board');}
- saveBoard(board:Row){this.put('board','board',board);}
- /** Identified history append; Core owns identity, so a retried (kind,key,id) adds no second row. */
- append(body:Row,key=''){
-  if(!this.db||typeof body.kind!=='string'||typeof body.at!=='number')throw new WorldletError('Cannot save history event.');
-  const plan=core('worldEventAppend',{kind:body.kind,key,at:body.at,observedAt:now(),body});
-  try{this.run(plan.sql,...plan.values);}catch{throw new WorldletError('Cannot save history event.');}
- }
- /** Bounded query for the history tool. Filters are optional and combine. */
- queryWorldHistory(args:Row){
-  const plan=core('worldHistoryQuery',args);
-  const rows=this.all(plan.sql,...plan.values).map(raw=>{
-   const row:Row={seq:Number(raw.seq),at:Number(raw.at)};
-   if(raw.kind!=null)row.kind=String(raw.kind);if(raw.key!=null)row.key=String(raw.key);
-   try{
-    const body=JSON.parse(raw.body);if(body&&typeof body==='object'&&!Array.isArray(body)){
-     row.body=body;
-     const ref=body.data?.payloadRef;
-     if(args.seq!=null&&typeof ref==='string'&&/^execution\/[a-zA-Z0-9_.-]{1,180}\.json$/.test(ref)){
-      try{const payload=this.payload(ref.slice('execution/'.length,-'.json'.length));if(payload!==undefined)row.payload=payload;}catch{}
-     }
-    }
-   }catch{}
-   return row;
-  });
-  return core('worldHistoryPage',{rows,limit:plan.limit,ascending:plan.ascending,contentOffset:plan.contentOffset??null,total:this.eventCount()});
- }
- history({since,until,kind,kinds,key,limit=200,before,after}:{since?:number,until?:number,kind?:string,kinds?:readonly string[],key?:string,limit?:number,before?:number,after?:number}={}){
-  let sql="SELECT seq,at,kind,key,body FROM entries WHERE kind NOT LIKE 'state.%'";const binds:any[]=[];
-  if(since!=null){sql+=' AND at>=?';binds.push(since);}
-  if(until!=null){sql+=' AND at<=?';binds.push(until);}
-  if(kind){sql+=' AND kind=?';binds.push(kind);}
-  if(kinds?.length){sql+=` AND kind IN (${kinds.map(()=>'?').join(',')})`;binds.push(...kinds);}
-  if(key){sql+=' AND key=?';binds.push(key);}
-  if(before!=null){sql+=' AND seq<?';binds.push(before);}
-  if(after!=null){sql+=' AND seq>?';binds.push(after);}
-  sql+=after==null?' ORDER BY seq DESC LIMIT ?':' ORDER BY seq ASC LIMIT ?';binds.push(Math.max(1,Math.min(1000,limit)));
-  return this.all(sql,...binds).map(raw=>{const row:Row={seq:Number(raw.seq),at:Number(raw.at),kind:raw.kind,key:raw.key};try{const body=JSON.parse(raw.body);if(body&&Object.keys(body).length)row.body=body;}catch{}return row;});
- }
- eventCount(){return Number(this.all("SELECT COUNT(*) AS n FROM entries WHERE kind NOT LIKE 'state.%'")[0]?.n??0);}
 
  // Items --------------------------------------------------------------------------------
  /** Evidence identity, byte-compatible with the Mac host's SHA-256 over sorted JSONSerialization. */
@@ -401,297 +347,20 @@ export class WorldLedger {
    this.put('meta','attention-policy-v2',{id:'attention-policy-v2',version:2});
   });
  }
-
- // Deletion ------------------------------------------------------------------------------
- /** Replaces one stored revision's body, or deletes it for null; an unchanged body is left alone. */
- private rewriteEntry(seq:unknown,body:Row,replacement:Row|null){
-  if(replacement&&sameJSON(replacement,body))return;
-  try{
-   if(replacement)this.run('UPDATE entries SET body=? WHERE seq=?',stableJSON(replacement),seq);
-   else this.run('DELETE FROM entries WHERE seq=?',seq);
-  }catch{throw new WorldletError('Could not remove source history.');}
- }
- /** Rewrites every past revision of a bucket in place; null removes that revision. */
- private scrubRevisions(bucket:string,scrub:(item:Row)=>Row|null){
-  for(const revision of this.revisions(bucket))this.rewriteEntry(revision.seq,revision.body,scrub(revision.body));
- }
- private scrubHistory(gone:string[],scrub:(item:Row)=>Row|null,source:string){
-  this.forgetTrail(gone,source);
-  for(const bucket of ['items','attention-backup','reviews'])this.scrubRevisions(bucket,scrub);
- }
- /** Rows that exist only because an item did: its review reasons and pre-migration copy. */
- private forgetTrail(ids:string[],source:string){
-  this.clearTaskReviews({gone:ids,source});
-  if(!ids.length)return;
-  const set=new Set(ids);
-  for(const id of set)this.delete('attention-backup',id);
-  for(const row of this.records('reviews'))if(set.has(row.id)&&typeof row.runId==='string')this.delete('reviews',row.runId+':'+row.id);
- }
- /** A forgotten local source leaves no copy, including in past item revisions and reviews. */
- forgetLocalSource(source:string){
-  this.transaction(()=>{
-   const scrub=(item:Row)=>{
-    if(!Array.isArray(item.sources))return item;
-    const remaining=item.sources.filter(ref=>!(ref?.local===true&&ref.id===source));
-    if(remaining.length===item.sources.length)return item;
-    return remaining.length?{...item,sources:remaining}:null;
-   };
-   const gone:string[]=[];
-   for(const item of this.records('items'))if(typeof item.id==='string'&&scrub(item)===null){this.delete('items',item.id);gone.push(item.id);}
-   this.scrubHistory(gone,scrub,source);
-  });
- }
- /** Applies Core's localDeletionRecord to every revision of the scope's buckets, invalidates
-  * runtime work and saves the trimmed library in one transaction. The files to remove are
-  * recorded in that transaction and removed by finishLocalDeletionFiles, retried on reopen. */
- deleteLocalContent(scope:Row,library:Row,paths:string[]){
-  const provider=scope.provider??null,item=typeof scope.item==='string'?scope.item:undefined,gone:string[]=[];
-  const scrub=(bucket:string,key:string,record:Row)=>core<Row|null>('localDeletionRecord',{provider,item,bucket,key,record,gone});
-  for(const file of paths)if(!WorldLedger.deletionPath(file))throw new WorldletError('Invalid local deletion cleanup path.');
-  try{
-   return this.transaction(()=>{
-    for(const row of this.records('items'))if(typeof row.id==='string'&&scrub('items',row.id,row)===null)gone.push(row.id);
-    if(item!==undefined&&!gone.length)return 0;
-    const owners=item!==undefined?[]:provider===null?this.records('runtime-tasks').map(row=>row.ownerId).filter(owner=>typeof owner==='string'):[provider];
-    for(const owner of new Set([...owners,'attention-center']))this.invalidateRuntimeTasks(owner);
-    // Browser actions are the task-review trail Core removes: only the deleted item's or provider's.
-    if(scope.buckets.includes('task-reviews'))this.clearTaskReviews({provider,...item!==undefined?{item}:{},gone});
-    for(const bucket of scope.buckets){
-     for(const revision of this.all('SELECT seq,key,body FROM entries WHERE kind=? ORDER BY seq','state.'+bucket)){
-      let record;try{record=JSON.parse(revision.body);}catch{}
-      if(!record||typeof record!=='object')throw new WorldletError('Invalid world data; existing data was preserved.');
-      this.rewriteEntry(revision.seq,record,scrub(bucket,String(revision.key),record));
-     }
-    }
-    this.saveLibrary(library);
-    if(paths.length){const id=crypto.randomUUID();this.put('local-deletion-files',id,{id,paths});}
-    return gone.length;
-   });
-  }catch(error){this.savedLibrary=null;throw error;}
- }
- /** Library-relative directories a deletion may remove: the World layout, caches and per-source copies. */
- static deletionPath(file:unknown){
-  if(typeof file!=='string')return false;
-  if(file==='world'||file==='cache')return true;
-  const match=/^(sources|knowledge|cache\/knowledge)\/([^/]+)$/.exec(file);
-  return !!match&&WorldLedger.safeLibraryComponent(match[2]);
- }
- finishLocalDeletionFiles(){
-  for(const job of this.records('local-deletion-files')){
-   const paths:unknown[]=Array.isArray(job.paths)?job.paths:[];
-   if(!paths.every(WorldLedger.deletionPath))throw new WorldletError('Invalid local deletion cleanup path.');
-   for(const file of paths as string[])fs.rmSync(path.join(this.root,...file.split('/')),{recursive:true,force:true});
-   this.delete('local-deletion-files',job.id);
-  }
- }
  replaceAttentionCache(bucket:string,value:Row){
   if(!['attention-context','attention-budget'].includes(bucket))throw new WorldletError('Invalid attention cache.');
   this.transaction(()=>{this.delete(bucket,'current');this.put(bucket,'current',{...value,id:'current'});});
  }
  attentionFacts():Row[]{const facts=this.records('attention-context')[0]?.facts;return Array.isArray(facts)?facts:[];}
  attentionBudget():Row{return this.records('attention-budget')[0]??{};}
- /** One-time import of legacy Knowledge into items; index.json and originals stay. */
- migrate(state:{sources:Row[],knowledge:Row[]}){
-  if(this.records('meta').length)return;
-  this.transaction(()=>{
-   const originals:Row={};
-   for(const source of state.sources){
-    if(!source.enabled||!state.knowledge.some(k=>k.sourceId===source.id&&k.sourceRevision===source.revision))continue;
-    const file=path.resolve(this.root,source.blob);
-    if(!file.startsWith(path.resolve(this.root)+path.sep))continue;
-    try{const original=JSON.parse(fs.readFileSync(file,'utf8'));const raw=JSON.parse(original.raw);if(raw&&typeof raw==='object')originals[source.id]=Object.fromEntries(Object.entries(raw).filter(([key])=>key==='id'||key==='threadId'));}catch{}
-   }
-   const migrated=core<Row[]>('worldItemsMigrate',{sources:state.sources,knowledge:state.knowledge,originals});
-   for(const row of migrated){
-    if(typeof row.identitySeed!=='string'||!row.item)throw new WorldletError('Invalid item migration result.');
-    const id=digest(row.identitySeed);this.put('items',id,{...row.item,id});
-   }
-   this.put('meta','migration',{id:'migration',version:1});
-  });
- }
-
- // Formal library tables -------------------------------------------------------------------
- static safeLibraryComponent(value:string){return !!value&&value!=='.'&&value!=='..'&&!/[\\/\0]/.test(value);}
- /** Loads Sources/Knowledge; a fresh database imports the configuration's legacy arrays once. */
- loadLibrary(state:Row){
-  if(state.libraryStorageVersion!=null&&state.libraryStorageVersion!==1)throw new WorldletError('This library needs a newer Worldlet.');
-  const markers=this.all("SELECT value FROM library_meta WHERE key='version'");
-  if(!markers.length){
-   if(state.libraryStorageVersion!=null)throw new WorldletError('The World library database is missing. Restore its backup before continuing.');
-   this.saveLibrary(state);
-  }else if(String(markers[0].value)!=='1')throw new WorldletError('This library database needs a newer Worldlet.');
-  const sources=this.all('SELECT body FROM sources ORDER BY position,id').map(row=>JSON.parse(row.body));
-  for(const source of sources){
-   const parts=String(source.blob).split('/');
-   if(!WorldLedger.safeLibraryComponent(source.id)||!WorldLedger.safeLibraryComponent(source.revision)||!String(source.blob).startsWith('sources/'+source.id+'/')||!String(source.blob).endsWith('.json')||!parts.every(WorldLedger.safeLibraryComponent))throw new WorldletError('Invalid library source identity; originals were preserved.');
-  }
-  state.sources=sources;
-  state.knowledge=this.all('SELECT body FROM knowledge ORDER BY position,source_id').map(row=>JSON.parse(row.body));
-  state.libraryStorageVersion=1;
-  this.savedLibrary={sources:stableJSON(state.sources),knowledge:stableJSON(state.knowledge)};
- }
- /** Only changed rows are written; their metadata journal commits atomically. */
- saveLibrary(state:Row){
-  const sources:Row[]=state.sources||[],knowledge:Row[]=state.knowledge||[];
-  if(new Set(sources.map(s=>s.id)).size!==sources.length||new Set(knowledge.map(k=>k.sourceId)).size!==knowledge.length)throw new WorldletError('Duplicate library identity. Existing data was preserved.');
-  const byID=new Map(sources.map(s=>[s.id,s]));
-  if(!knowledge.every(k=>byID.has(k.sourceId)))throw new WorldletError('Knowledge has no original source. Existing data was preserved.');
-  const encoded={sources:stableJSON(sources),knowledge:stableJSON(knowledge)};
-  if(this.savedLibrary&&this.savedLibrary.sources===encoded.sources&&this.savedLibrary.knowledge===encoded.knowledge)return;
-  this.transaction(()=>{
-   const oldSources=this.all('SELECT body FROM sources').map(row=>JSON.parse(row.body));
-   const oldKnowledge=this.all('SELECT body FROM knowledge').map(row=>JSON.parse(row.body));
-   const priorSources=new Map(oldSources.map(s=>[s.id,stableJSON(s)]));
-   const priorKnowledge=new Map(oldKnowledge.map(k=>[k.sourceId,stableJSON(k)]));
-   const journal=(domain:string,id:string,revision:string,operation:string)=>{if(!this.record('library.'+operation,id,{domain,revision}))throw new WorldletError('Cannot save library history.');};
-   const knowledgeIDs=new Set(knowledge.map(k=>k.sourceId));
-   for(const old of oldKnowledge)if(!knowledgeIDs.has(old.sourceId)){this.run('DELETE FROM knowledge WHERE source_id=?',old.sourceId);journal('knowledge',old.sourceId,old.sourceRevision??'','deleted');}
-   for(const old of oldSources)if(!byID.has(old.id)){this.run('DELETE FROM sources WHERE id=?',old.id);journal('sources',old.id,old.revision,'deleted');}
-   sources.forEach((source,position)=>{
-    const body=stableJSON(source);
-    if(priorSources.get(source.id)!==body){
-     this.run('INSERT INTO sources(id,revision,body,position) VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET revision=excluded.revision,body=excluded.body,position=excluded.position',source.id,source.revision,body,position);
-     journal('sources',source.id,source.revision,'saved');
-    }else this.run('UPDATE sources SET position=? WHERE id=? AND position!=?',position,source.id,position);
-   });
-   knowledge.forEach((item,position)=>{
-    const body=stableJSON(item);
-    if(priorKnowledge.get(item.sourceId)!==body){
-     this.run('INSERT INTO knowledge(source_id,source_revision,processing_version,body,position) VALUES(?,?,?,?,?) ON CONFLICT(source_id) DO UPDATE SET source_revision=excluded.source_revision,processing_version=excluded.processing_version,body=excluded.body,position=excluded.position',item.sourceId,item.sourceRevision??'legacy',String(item.activityVersion??0),body,position);
-     journal('knowledge',item.sourceId,item.sourceRevision??'legacy','saved');
-    }else this.run('UPDATE knowledge SET position=? WHERE source_id=? AND position!=?',position,item.sourceId,position);
-   });
-   const changed=new Set(oldSources.filter(s=>byID.get(s.id)?.revision!==s.revision).map(s=>s.id));
-   if(changed.size)for(const item of this.records('items')){
-    if(typeof item.id==='string'&&Array.isArray(item.sources)&&item.sources.some(ref=>ref?.local===true&&changed.has(ref.id)))this.put('items',item.id,{...item,attentionInvalidated:true});
-   }
-   this.run("INSERT INTO library_meta(key,value) VALUES('version','1') ON CONFLICT(key) DO NOTHING");
-  });
-  this.savedLibrary=encoded;
- }
- /** Consistent copy for backups, through SQLite rather than copying a live WAL file. */
- /** A copy for backup, without the search index (derived; rebuilt when the copy is opened). */
- snapshotTo(file:string){
-  fs.rmSync(file,{force:true});this.handle.prepare('VACUUM INTO ?').run(file);
-  const copy=new DatabaseSync(file);
-  try{
-   // Search indexes are rebuilt on open. `agent_conversations_search` is the index of a table older Worlds kept and
-   // nothing writes now; its rows stay, its index is left out.
-   const indexes=(copy.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('companion_turns_search','companion_notes_search','agent_conversations_search')").all() as Row[]).map(row=>String(row.name));
-   if(indexes.length){for(const name of indexes)copy.exec(`DROP TABLE ${name}`);copy.exec('VACUUM');}
-  }finally{copy.close();}
- }
- /** How much each kind of context this World keeps holds, for Settings › Context (context/connectors/world-context.ts): the
-  * past conversations (how many, and their text), each Service's synced context, the Journal's cards and what Agents
-  * saved there (with their pages), and the board's definition. Bytes of what is kept now, not of older revisions. */
- contextSizes():{conversations:{count:number;bytes:number};services:{provider:string;bytes:number}[];journal:{bytes:number};agentOutputs:{bytes:number};board:{bytes:number}} {
-  ensureCompanion(this);ensureArtifacts(this);ensureArtifactPages(this);
-  const bytes=(value:unknown)=>value==null?0:Buffer.byteLength(typeof value==='string'?value:JSON.stringify(value));
-  const turns=this.all("SELECT count(DISTINCT source||char(31)||session) AS n,coalesce(sum(length(CAST(text AS BLOB))),0) AS b FROM companion_turns")[0];
-  const notes=Number(this.all('SELECT coalesce(sum(length(CAST(text AS BLOB))),0) AS b FROM companion_notes')[0]?.b??0);
-  const [jobs,pages,snapshots]=SERVICE_SYNC_BUCKETS;
-  const providerOf=new Map(this.records(jobs).map(job=>[String(job.id),String(job.provider??'')]));
-  const services=new Map<string,number>();
-  for(const bucket of [pages,snapshots]){
-   const kind='state.'+bucket;
-   for(const row of this.all('SELECT key,length(CAST(body AS BLOB)) AS b FROM entries WHERE kind=? AND seq IN (SELECT MAX(seq) FROM entries WHERE kind=? GROUP BY key)',kind,kind)){
-    const provider=providerOf.get(String(row.key));
-    if(provider)services.set(provider,(services.get(provider)??0)+Number(row.b));
-   }
-  }
-  let journal=0,agentOutputs=0;
-  for(const row of this.all('SELECT a.record AS record,coalesce((SELECT length(CAST(p.record AS BLOB)) FROM artifact_pages p WHERE p.id=a.id),0) AS page FROM artifacts a')){
-   let agent=false;try{agent=typeof JSON.parse(String(row.record))?.agentId==='string';}catch{}
-   const size=bytes(String(row.record))+Number(row.page);
-   if(agent)agentOutputs+=size;else journal+=size;
-  }
-  return {conversations:{count:Number(turns?.n??0),bytes:Number(turns?.b??0)+notes},services:[...services].map(([provider,size])=>({provider,bytes:size})),
-   journal:{bytes:journal},agentOutputs:{bytes:agentOutputs},board:{bytes:bytes(this.board())}};
- }
-
- // Small World settings ----------------------------------------------------------------------------
- // One JSON value per key: the page's layout edits ('overlay') and weather ('environment'), before
- // 2026-10-03 overlay.json and environment.json (WorldStore.worldSetting moves them in); and the
- // World's configuration ('configuration', below).
- private settingsReady=false;
- private ensureSettings(){
-  if(this.settingsReady)return;
-  this.exec('CREATE TABLE IF NOT EXISTS world_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);');
-  this.settingsReady=true;
- }
- setting(key:string):Row|null {
-  this.ensureSettings();
-  const row=this.all('SELECT value FROM world_settings WHERE key=?',key)[0];
-  return row?JSON.parse(String(row.value)):null;
- }
- saveSetting(key:string,value:Row|null){
-  this.ensureSettings();
-  try{
-   if(value===null)this.run('DELETE FROM world_settings WHERE key=?',key);
-   else this.run('INSERT INTO world_settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',key,JSON.stringify(value));
-  }catch{throw new WorldletError('Could not save world settings.');}
- }
-
- // The World's configuration ------------------------------------------------------------------------
- // Connections, onboarding, layout and the rest of the library state (Sources and Knowledge have their
- // own tables) are the `world_settings` row 'configuration'; before 2026-10-03 the `index.json` file.
- /** The saved configuration, read without opening the ledger. An `index.json` beside the database is
-  * the earlier file, or one an older backup brought back, and is the newer copy until it moves in. */
- static storedConfiguration(root:string):Row|null {
-  const file=path.join(root,'index.json');
-  if(fs.existsSync(file))return JSON.parse(fs.readFileSync(file,'utf8'));
-  const database=path.join(root,'world.sqlite');
-  if(!fs.existsSync(database))return null;
-  const db=new DatabaseSync(database,{readOnly:true});
-  try{
-   if(!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='world_settings'").get())return null;
-   const row=db.prepare("SELECT value FROM world_settings WHERE key='configuration'").get() as Row|undefined;
-   return row?JSON.parse(String(row.value)):null;
-  }finally{db.close();}
- }
- /** Saves the library tables and the configuration in one transaction, then retires `index.json`. */
- saveConfiguration(state:Row){
-  try{this.transaction(()=>{this.saveLibrary(state);this.saveSetting('configuration',{...state,sources:[],knowledge:[],libraryStorageVersion:1});});}
-  catch(error){this.savedLibrary=null;throw error;}
-  const file=path.join(this.root,'index.json');
-  if(fs.existsSync(file))fs.renameSync(file,file+'.before-database');
- }
- /** How many events the World has written, deleted ones included (the newest sequence number). */
- eventRows():number {return Number(this.all('SELECT coalesce(max(seq),0) AS n FROM entries')[0]?.n??0);}
- /** One execution journal entry (agent-runtime/journal.ts) in one transaction: its runtime task and run,
-  * the history event and the payload its `execution/<id>.json` reference names. */
- recordExecution(entry:Row):boolean {
-  const event=entry?.event;
-  if(!event||typeof event!=='object')return false;
-  const reference=event.data?.payloadRef;
-  try{
-   return this.transaction(()=>{
-    if(typeof entry.task?.id==='string')this.put('runtime-tasks',entry.task.id,entry.task);
-    if(typeof entry.run?.id==='string')this.put('runtime-runs',entry.run.id,entry.run);
-    this.append(event,typeof event.runId==='string'?event.runId:'');
-    if(typeof reference==='string'&&/^execution\/[a-zA-Z0-9_.-]{1,180}\.json$/.test(reference))this.savePayload(reference.slice('execution/'.length,-'.json'.length),entry.payload);
-    return true;
-   });
-  }catch{return false;}
- }
- /** One execution journal payload, by the id in its `execution/<id>.json` reference. */
- savePayload(id:string,payload:unknown){
-  ensureKept(this);
-  this.run('INSERT INTO execution_payloads(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',id,JSON.stringify(payload??null));
- }
- payload(id:string):unknown {
-  ensureKept(this);
-  const row=this.all('SELECT payload FROM execution_payloads WHERE id=?',id)[0];
-  return row?JSON.parse(String(row.payload)):undefined;
- }
 }
 
 // Each component's methods are written with `this:WorldLedger`; on the ledger they are its own.
 type Tables<T>={[K in keyof T]:T[K] extends (this:WorldLedger,...args:infer A)=>infer R?(...args:A)=>R:T[K]};
-export interface WorldLedger extends Tables<AppletTables>,Tables<CompanionTables>,Tables<RecordingTables>,Omit<Tables<TaskTables>,'withRuntimeOutput'> {
+export interface WorldLedger extends Tables<AppTables>,Tables<AppletTables>,Tables<CompanionTables>,Tables<ConnectorTables>,Tables<RecordingTables>,Omit<Tables<TaskTables>,'withRuntimeOutput'> {
  /** Claim validation and the writes in `body` share one transaction; `body` must be synchronous. */
  withRuntimeOutput<T>(taskID:string,runID:string,body:()=>T):T;
 }
-for(const tables of [AppletTables,CompanionTables,RecordingTables,TaskTables]){
+for(const tables of [AppTables,AppletTables,CompanionTables,ConnectorTables,RecordingTables,TaskTables]){
  for(const [name,method] of Object.entries(Object.getOwnPropertyDescriptors(tables.prototype)))if(name!=='constructor')Object.defineProperty(WorldLedger.prototype,name,method);
 }
