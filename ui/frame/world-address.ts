@@ -1,9 +1,10 @@
-/** Your World's address, in Settings › Agents (agent/gate/WORLD-ADDRESS.md, host `worldAddress`): the person picks a
- * name and their World opens at `https://<name>.worldlet.ai` on any device. Nothing is visible there unless they allow
+/** Your World's address, in Settings › Agents (agent/gate/WORLD-ADDRESS.md, host `worldAddress`): every World has one,
+ * `https://<name>.worldlet.ai`, at first a default name (`w-…`); the person may choose a name of their own once, and it
+ * stays. The World opens there on any device, and Claude or ChatGPT connect to it at `/mcp`. Nothing is visible there unless they allow
  * a browser of their own (on a card in Attention) or share their board. Below the address: the browsers that can open
  * the World, what is shared and with whom, each with a way to end it. Plain words: no passkeys, tokens or rooms. */
 import {agentButton as button,agentDay,agentEl as el} from './agent-change.ts';
-type Status={name:string|null;address?:string;reachable:boolean;remote:boolean;error?:string;
+type Status={name:string|null;address?:string;chosen:boolean;defaultName:string|null;mcp?:string;reachable:boolean;remote:boolean;error?:string;
  devices:{id:string;name:string;addedAt:string;usedAt?:string}[];
  visitors:{id:string;name:string;sees:string[];seenAt?:string}[];
  shares:{id:string;title:string;open:boolean;link?:string;people:number}[]};
@@ -27,17 +28,17 @@ export async function showWorldAddress(target:HTMLElement,call:(action:string,bo
   const preview=el('span','companion-settings-quiet');
   const show=()=>{const v=name.value.trim().toLowerCase();preview.textContent=v?`Your address: https://${v}.worldlet.ai`:'3 to 32 letters or digits; hyphens between them are fine.';};
   name.oninput=show;show();
-  row.append(name,preview,button(status.name?'Change address':'Choose','world-address-claim',async()=>{
+  row.append(name,preview,button('Choose','world-address-claim',async()=>{
    said.textContent='';
    try{
     const check=await call('worldAddress',{operation:'check',name:name.value});
     if(!check?.valid){said.textContent='Use 3 to 32 lowercase letters or digits, with single hyphens between them. Some names are kept for Worldlet itself.';return;}
     if(!check.available&&!check.yours){said.textContent=`${check.name}.worldlet.ai is taken. Try another name.`;return;}
     await call('worldAddress',{operation:'claim',name:name.value});changing=false;await draw();
-    said.textContent=status.name?'Your World has a new address. Browsers you allowed before need to ask again there.':'Your World now has its own address. Open it on another device and ask to use that browser.';
+    said.textContent=status.devices.length?'Your World has its own name now, and it stays. Browsers you allowed before need to ask again there.':'Your World has its own name now, and it stays. Open it on another device and ask to use that browser.';
    }catch(e){said.textContent=(e as Error).message||'Could not choose that name. Try again.';}
   },true));
-  if(status.name)row.append(button('Cancel','world-address-cancel',async()=>{changing=false;await draw();}));
+  row.append(button('Cancel','world-address-cancel',async()=>{changing=false;await draw();}));
  }
  async function draw(){
   const status:Status|{error:string}=await call('worldAddress',{operation:'status'}).catch((e:Error)=>({error:e.message}));
@@ -46,8 +47,12 @@ export async function showWorldAddress(target:HTMLElement,call:(action:string,bo
   const row=el('div','companion-settings-row'),words=el('div');row.append(words);box.append(row);
   words.append(el('strong','','Your World\'s address'));
   if(!('devices' in status)){words.append(el('span','',status.error||'Not available here.'));return;}
-  if(!status.name||changing){
-   if(!status.name)words.append(el('span','','Give your World its own web address, like alex.worldlet.ai, and open it from any device. Nobody else sees anything there unless you allow them.'));
+  if(!status.name){
+   words.append(el('span','',status.remote?'Your World gets its own web address in a moment.':'Turn on remote access above, and your World gets its own web address, like w-7k3m9p2x.worldlet.ai.'));
+   return;
+  }
+  if(changing){
+   words.append(el('span','','Choose a name for your World, like alex.worldlet.ai. You choose it once and it stays; '+status.address+' keeps working too.'));
    const form=el('div','companion-settings-access-add');picker(form,status);box.append(form);
    return;
   }
@@ -57,8 +62,8 @@ export async function showWorldAddress(target:HTMLElement,call:(action:string,bo
   words.append(el('span','companion-settings-quiet','It works while this computer is on and Worldlet is running.'));
   const actions=el('div','companion-settings-actions');
   if(status.address)actions.append(button(copied===status.address?'Copied':'Copy address','world-address-copy',()=>copy(status.address!,'Address copied.'),true));
-  actions.append(button('Change','world-address-change',async()=>{changing=true;await draw();}),
-   button('Give up this address','world-address-release',()=>act({operation:'release'},'This World no longer has its own address. The name is free for anyone.')));
+  if(!status.chosen)actions.append(button('Choose a name','world-address-change',async()=>{changing=true;await draw();}));
+  else actions.append(button('Give up this name','world-address-release',()=>act({operation:'release'},`The name is free for anyone. Your World is at ${status.defaultName??'its first address'}.worldlet.ai again.`)));
   row.append(actions);
 
   // The person's own browsers.

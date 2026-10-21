@@ -37,7 +37,9 @@ export interface RemoteMcpHost {
  hostToken():string|null;
  /** Requests from the page at this World's own address (`kind: 'address'`), answered by `handler`; and `renewed`,
   * called with the old and new host token when New address replaces it. */
- serveAddress(handler:{handle(request:RemoteMcpRequest):Promise<RemoteMcpResponse>;renewed(previous:string,next:string):Promise<void>}):void;
+ serveAddress(handler:{handle(request:RemoteMcpRequest):Promise<RemoteMcpResponse>;renewed(previous:string,next:string):Promise<void>;
+  /** The remote MCP address on the World's own address (`https://<name>.worldlet.ai/mcp`), shown in place of the room's. */
+  mcpAddress?():string|null}):void;
  close():void;
 }
 const PING_MS=30_000,MAX_BACKOFF_MS=60_000;
@@ -86,7 +88,7 @@ export function createRemoteMcpHost({vault,access,tools,ledger,changed,services=
  });
  access.onRevoke(agentId=>server.forget(agentId));
 
- let address:{handle(request:RemoteMcpRequest):Promise<RemoteMcpResponse>;renewed(previous:string,next:string):Promise<void>}|null=null;
+ let address:{handle(request:RemoteMcpRequest):Promise<RemoteMcpResponse>;renewed(previous:string,next:string):Promise<void>;mcpAddress?():string|null}|null=null;
  let socket:Socket|null=null,connected=false,timer:ReturnType<typeof setTimeout>|null=null,ping:ReturnType<typeof setInterval>|null=null,backoff=1000,closed=false;
  const send=(ws:Socket,id:string,response:RemoteMcpResponse)=>{
   const fitted=response.body.length>REMOTE_MCP_LIMITS.body?{status:502,headers:{'content-type':'application/json'},body:JSON.stringify({error:'The answer was too large to send.'})}:response;
@@ -134,7 +136,7 @@ export function createRemoteMcpHost({vault,access,tools,ledger,changed,services=
   const seen=new Set<string>(),connectors:RemoteMcpStatus['connectors']=[];
   for(const c of saved.state.connections)if(!seen.has(c.agentId)&&active(c.agentId)){seen.add(c.agentId);connectors.push({id:c.agentId,name:access.identity(c.agentId)?.name??c.agentId});}
   for(const t of saved.state.tokens)if(!seen.has(t.agentId)&&active(t.agentId)){seen.add(t.agentId);connectors.push({id:t.agentId,name:access.identity(t.agentId)?.name??t.agentId,token:true});}
-  return {enabled:saved.enabled,connected:saved.enabled&&connected,address:remoteMcpAddress(await remoteMcpRoom(saved.token),frontOrigin),connectors};
+  return {enabled:saved.enabled,connected:saved.enabled&&connected,address:address?.mcpAddress?.()??remoteMcpAddress(await remoteMcpRoom(saved.token),frontOrigin),connectors};
  }
  // On by default (owner decision 2026-10-17) in the library the installed app opens: its first run makes the address
  // and opens the room. Nothing gets in without a connection the person allows on a card or a token they make, and

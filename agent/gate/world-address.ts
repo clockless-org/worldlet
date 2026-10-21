@@ -2,7 +2,9 @@ import {AGENT_ASK_PROVIDER} from '../../contracts/agent-asks.ts';
 import type {WorldItem} from '../../contracts/world.ts';
 import type {RemoteMcpConsent,RemoteMcpRequest,RemoteMcpResponse} from './remote-mcp.ts';
 
-// One address per World (WORLD-ADDRESS.md; owner decision 2026-10-18): `https://<name>.worldlet.ai`. The website
+// One address per World (WORLD-ADDRESS.md; owner decisions 2026-10-18 and 2026-10-21): `https://<name>.worldlet.ai`,
+// for the World's page and, at `/mcp`, its remote MCP server. Every World gets a default name on its first run
+// (`w-` and eight letters or digits); the person may choose a name of their own once, and it then stays. The website
 // serves one static page there for everyone and passes the page's requests to this computer over the remote MCP
 // connection, as `address` requests (`kind: 'address'` on the front's frame); it keeps only the name and its World's
 // front key. Every decision is made here, never on the website:
@@ -33,10 +35,16 @@ export const WORLD_ADDRESS_LIMITS=Object.freeze({
 });
 /** Whether `name` may be a World's address: well formed and not kept for Worldlet itself. */
 export const validAddressName=(name:unknown):name is string=>typeof name==='string'&&ADDRESS_NAME.test(name)&&!RESERVED_ADDRESS_NAMES.has(name);
-/** A name as the person typed it: trimmed and lowercased; '' when it cannot be one. */
+/** A World's default name, made by its computer (the website keeps it beside a chosen one): `w-` and eight lowercase
+ * letters or digits. Names a person chooses never start with `w-`. */
+export const DEFAULT_ADDRESS_NAME=/^w-[a-z0-9]{8}$/;
+const DEFAULT_LETTERS='abcdefghijklmnopqrstuvwxyz0123456789';
+/** A new default name: `w-` and eight random letters or digits. */
+export const newDefaultAddressName=()=>'w-'+Array.from(crypto.getRandomValues(new Uint8Array(8)),b=>DEFAULT_LETTERS[b%DEFAULT_LETTERS.length]).join('');
+/** A name as the person typed it: trimmed and lowercased; '' when it cannot be one they choose. */
 export function addressNameFrom(text:unknown):string {
  const name=typeof text==='string'?text.trim().toLowerCase():'';
- return validAddressName(name)?name:'';
+ return validAddressName(name)&&!name.startsWith('w-')?name:'';
 }
 /** The address of `name`: `https://<name>.worldlet.ai`, or on a development relay `<scheme>://<name>.<its host>`. */
 export function worldAddress(name:string,relay=`https://${ADDRESS_ZONE}`):string {
@@ -105,8 +113,9 @@ export type AddressShare={id:string;kind:'board';title:string;
 export type AddressVisitor={id:string;name:string;
  /** The shares they may see, read only. */
  shares:string[];createdAt:number;audit:{at:number;share:string}[]};
-export type WorldAddressState={name:string|null;passkeys:AddressPasskey[];shares:AddressShare[];visitors:AddressVisitor[]};
-export const emptyWorldAddressState=():WorldAddressState=>({name:null,passkeys:[],shares:[],visitors:[]});
+/** `name` is the address the World answers at: the chosen name, else the default one. */
+export type WorldAddressState={name:string|null;defaultName:string|null;passkeys:AddressPasskey[];shares:AddressShare[];visitors:AddressVisitor[]};
+export const emptyWorldAddressState=():WorldAddressState=>({name:null,defaultName:null,passkeys:[],shares:[],visitors:[]});
 /** A kept state, with anything that does not fit dropped. */
 export function readWorldAddressState(value:unknown):WorldAddressState {
  const v=value&&typeof value==='object'?value as any:{};
@@ -117,7 +126,7 @@ export function readWorldAddressState(value:unknown):WorldAddressState {
   .map((p:any)=>({id:p.id,publicKey:p.publicKey,algorithm:p.algorithm,label:text(p.label,WORLD_ADDRESS_LIMITS.label),...p.visitor?{visitor:p.visitor}:{},signCount:Number.isSafeInteger(p.signCount)?p.signCount:0,createdAt:p.createdAt,...Number.isFinite(p.usedAt)?{usedAt:p.usedAt}:{}}));
  const shares=(Array.isArray(v.shares)?v.shares:[]).filter((s:any)=>ID.test(s?.id)&&s.kind==='board'&&typeof s.title==='string'&&typeof s.open==='boolean'&&Number.isFinite(s.createdAt))
   .map((s:any)=>({id:s.id,kind:'board' as const,title:text(s.title,WORLD_ADDRESS_LIMITS.title)||'Board',open:s.open,...typeof s.tab==='string'&&/^[a-z0-9-]{1,40}$/.test(s.tab)?{tab:s.tab}:{},createdAt:s.createdAt}));
- return {name:validAddressName(v.name)?v.name:null,passkeys,shares,visitors};
+ return {name:validAddressName(v.name)?v.name:null,defaultName:typeof v.defaultName==='string'&&DEFAULT_ADDRESS_NAME.test(v.defaultName)?v.defaultName:null,passkeys,shares,visitors};
 }
 
 /** A request to be let in, shown as a card like a connector's (remote-mcp.ts RemoteMcpConsent), with what it asks. */

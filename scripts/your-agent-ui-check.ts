@@ -86,10 +86,10 @@ try{
    w.access=w.access.map(a=>a.id===b.id?{...a,wake:[...b.command],audit:[{at:'2026-10-15T08:30:00.000Z',agentId:a.id,target:'asks',action:b.command.length?'set-wake':'clear-wake',decision:'allowed'},...a.audit]}:a);return {ok:true};}
   // Your World's address (agent/gate/WORLD-ADDRESS.md): the page sends a name, a share choice or an ID, nothing else.
   if(b.action==='worldAddress'){
-   const a=w.address??={name:null,reachable:false,remote:true,devices:[],visitors:[],shares:[]};
+   const a=w.address??={name:'w-7k3m9p2x',defaultName:'w-7k3m9p2x',chosen:false,reachable:true,remote:true,devices:[],visitors:[],shares:[]};
    const out=()=>({...a,...a.name?{address:'https://'+a.name+'.worldlet.ai'}:{},shares:a.shares.map(s=>({...s,...a.name?{link:'https://'+a.name+'.worldlet.ai/s/'+s.id}:{}}))});
    if(b.operation==='check')return {name:String(b.name).trim().toLowerCase(),valid:/^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/.test(String(b.name).trim().toLowerCase()),available:String(b.name).trim()!=='taken'};
-   if(b.operation==='claim'){a.name=String(b.name).trim().toLowerCase();a.reachable=true;a.devices=[{id:'pk1',name:'Chrome on Mac',addedAt:'2026-10-18T12:00:00.000Z'}];a.visitors=[{id:'v1',name:'Sam',sees:['Board'],seenAt:'2026-10-18T13:00:00.000Z'}];return out();}
+   if(b.operation==='claim'){a.name=String(b.name).trim().toLowerCase();a.chosen=true;a.reachable=true;a.devices=[{id:'pk1',name:'Chrome on Mac',addedAt:'2026-10-18T12:00:00.000Z'}];a.visitors=[{id:'v1',name:'Sam',sees:['Board'],seenAt:'2026-10-18T13:00:00.000Z'}];return out();}
    if(b.operation==='share'){a.shares.push({id:'share'+a.shares.length+'AAAAAAAAAAAAAAA',title:'Board',open:b.open===true,people:0});return out();}
    if(b.operation==='unshare'){a.shares=a.shares.filter(s=>s.id!==b.id);return out();}
    if(b.operation==='remove'){a.devices=a.devices.filter(d=>d.id!==b.id);a.visitors=a.visitors.filter(v=>v.id!==b.id);return out();}
@@ -448,7 +448,10 @@ try{
  // Your World's address (agent/gate/WORLD-ADDRESS.md): a name, the browsers allowed, the board shared and the people
  // who see it, each with its own way to end it; only names, share choices and IDs go to the host.
  const addressRoot=local.locator('[data-part=world-address]'),addressPart=addressRoot.locator('[data-world-address]');
- await addressPart.getByText(/^Give your World its own web address, like alex\.worldlet\.ai/).waitFor();
+ // Every World has a default address from the start; the person may choose a name once, and it then stays.
+ await addressPart.locator('[data-world-address-link]').getByText('https://w-7k3m9p2x.worldlet.ai',{exact:true}).waitFor();
+ await addressPart.getByRole('button',{name:'Choose a name',exact:true}).click();
+ await addressPart.getByText(/^Choose a name for your World, like alex\.worldlet\.ai\. You choose it once and it stays/).waitFor();
  await addressPart.getByRole('textbox',{name:'Name for your World\'s address'}).fill('taken');
  await addressPart.getByRole('button',{name:'Choose',exact:true}).click();
  await addressRoot.getByText('taken.worldlet.ai is taken. Try another name.',{exact:true}).waitFor();
@@ -456,6 +459,8 @@ try{
  await addressPart.getByText('Your address: https://alex.worldlet.ai',{exact:true}).waitFor();
  await addressPart.getByRole('button',{name:'Choose',exact:true}).click();
  await addressPart.locator('[data-world-address-link]').getByText('https://alex.worldlet.ai',{exact:true}).waitFor();
+ assert.equal(await addressPart.getByRole('button',{name:'Choose a name',exact:true}).count(),0,'a chosen name stays');
+ await addressPart.getByRole('button',{name:'Give up this name',exact:true}).waitFor();
  await addressPart.locator('[data-world-address-browsers]').getByText(/^Chrome on Mac · added /).waitFor();
  await addressPart.getByRole('button',{name:'Share board with anyone who has the link',exact:true}).click();
  await addressRoot.getByText('Anyone with the link can now see your board, read only. Stop sharing whenever you like.',{exact:true}).waitFor();
