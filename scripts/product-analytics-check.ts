@@ -255,8 +255,8 @@ console.log('PASS exception projection: type, failure code and sanitized frames 
  assert.deepEqual(reported,[{event:'attention_item_opened',dimensions:{open_surface:'computer',item_kind:'task'}},{event:'task_completed',dimensions:{task_kind:'routine'}},{event:'task_completed',dimensions:{task_kind:'fox'}}]);
  // Each new event is emitted where its decision is made (the host allowlist and its checks are in modules/app).
  const {readFileSync}=await import('node:fs'),read=(file:string)=>readFileSync(new URL('../'+file,import.meta.url),'utf8');
- const world=read('ui/frame/notion-world.ts'),fox=read('platform/host/modules/companion/index.ts'),jobs=read('platform/host/modules/companion/harness-jobs.ts'),phone=read('platform/host/modules/windows/phone.ts'),shell=read('platform/host/modules/app/index.ts');
- assert.match(world,/if\(!advanced&&!data\.sample&&eventTrigger\(\)==='user'\)reportProductEvent\('attention_item_opened'/,'only the person\'s own opening, outside the practice world');
+ const world=read('ui/frame/notion-world.ts')+read('ui/attention/daily-cards.ts'),fox=read('platform/host/modules/companion/index.ts'),jobs=read('platform/host/modules/companion/harness-jobs.ts'),phone=read('platform/host/modules/windows/phone.ts'),shell=read('platform/host/modules/app/index.ts');
+ assert.match(world,/if\(!advanced&&!data(?:\(\))?\.sample&&eventTrigger\(\)==='user'\)reportProductEvent\('attention_item_opened'/,'only the person\'s own opening, outside the practice world');
  assert.match(world,/reportProductEvent\('task_completed',\{task_kind:'routine'\}\)/);assert.match(world,/reportProductEvent\('task_completed',\{task_kind:'fox'\}\)/);
  assert.match(fox,/'task_completed','',\{task_kind:'routine'\}/);assert.match(fox,/'task_completed','',\{task_kind:'applet'\}/);assert.match(jobs,/'task_completed','',\{task_kind:'routine'\}/);
  assert.match(phone,/usage\('phone_paired',\{phone_platform:phonePlatform\(push\)\}\)/);
