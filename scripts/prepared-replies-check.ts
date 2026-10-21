@@ -79,11 +79,11 @@ assert.equal(foxWorkDone('summary',0),'Wrap up today: ready');
 
 // The page executes these rules: the shared gate before any unasked request (the daily ask and the reply), the busy
 // retry, each item marked before asking, and the Task panel's Doing now hidden in onboarding and the tour.
-const world=fs.readFileSync('ui/frame/notion-world.ts','utf8');
-assert.match(world,/const backgroundMoment=\(\)=>backgroundBlocked\(\{sample:!!data\.sample,automated:!!navigator\.webdriver,onboarding:root\.dataset\.onboarding==='true'\|\|root\.dataset\.onboardingLocked==='true',tour:!!root\.dataset\.tourStep,firstRun:!!native\?\.firstRun\?\.\(\),asking:dailyAsking\|\|replyAsking\|\|followUpAsking\}\);/);
-assert.match(world,/if\(backgroundMoment\(\)\|\|foxArtifact\.visible\|\|\$\('notionDialog'\)\.open\|\|voice\?\.active\)return;\n\s*const due=dailyArtifactDue\(daily,new Date\(\),routinesOn\);\n\s*if\(!due\)\{void prepareReply\(\);return;\}/,'The reply is prepared only past the same gate, when no brief or summary is due');
+const world=fs.readFileSync('ui/frame/notion-world.ts','utf8')+fs.readFileSync('ui/attention/daily-cards.ts','utf8');
+assert.match(world,/const backgroundMoment=\(\)=>backgroundBlocked\(\{sample:!!data(?:\(\))?\.sample,automated:!!navigator\.webdriver,onboarding:root\.dataset\.onboarding==='true'\|\|root\.dataset\.onboardingLocked==='true',tour:!!root\.dataset\.tourStep,firstRun:!!native\?\.firstRun\?\.\(\),asking:dailyAsking\|\|replyAsking\|\|followUpAsking\}\);/);
+assert.match(world,/if\(backgroundMoment\(\)\|\|foxArtifact\.visible\|\|\$\('notionDialog'\)\.open\|\|voice(?:\(\))?\?\.active\)return;\n\s*const due=dailyArtifactDue\(daily,new Date\(\),routinesOn\);\n\s*if\(!due\)\{void prepareReply\(\);return;\}/,'The reply is prepared only past the same gate, when no brief or summary is due');
 assert.match(world,/replyPrepareDue\(replies,\{now,daily,waiting:drafts\.length\}\)\.due\)return;/);
-assert.match(world,/replies=markReplyPrepared\(replies,next\.id,now,\{thread:next\.thread\}\);saveReplies\(\);[\s\S]*voice\.background\(request\.text,\{displayText:request\.displayText\}\)[\s\S]*\/busy\/i[\s\S]*replies=before;saveReplies\(\);/,'Marked before asking; asked again only when other background work held it');
+assert.match(world,/replies=markReplyPrepared\(replies,next\.id,now,\{thread:next\.thread\}\);saveReplies\(\);[\s\S]*voice(?:\(\))?\.background\(request\.text,\{displayText:request\.displayText\}\)[\s\S]*\/busy\/i[\s\S]*replies=before;saveReplies\(\);/,'Marked before asking; asked again only when other background work held it');
 assert.match(fs.readFileSync('ui/index.ts','utf8'),/emailReviews:sample\?undefined:/,'No drafts are read in the practice world');
 assert.match(fs.readFileSync('ui/style/layout.css','utf8'),/\.notion-world:is\(\[data-onboarding=true\],\[data-onboarding-locked=true\],\[data-tour-step\]\) \.task-panel \.task-group\[data-group=now\]\{display:none\}/,'Doing now in the Task panel stays out of onboarding and the tour');
 // The host still refuses background work outside the person's own World and beside other background work.

@@ -12,7 +12,7 @@ import {carriesConversation,worldSpeechTerms} from '../../agent/companion/index.
 import {helpNarration,narrateHelp} from '../companion/index.ts';
 import {createWorldUI} from './public-interface.ts';
 import {eventTrigger,reportAppletOpened,reportEngagement,reportProductEvent} from './product-analytics.ts';
-import {mountFoxArtifact,flyIntoJournal,artifactPageSpec,turnIntoDock} from '../attention/index.ts';
+import {mountFoxArtifact,flyIntoJournal,artifactPageSpec,turnIntoDock,createDailyCards} from '../attention/index.ts';
 import {node,textButton,worldletMark,uiIcon} from '../style/index.ts';
 import {readRetryDelay,sourceReadAction} from '../../context/applets/index.ts';
 import {attentionRequest,journalTarget} from '../../agent/gate/index.ts';
@@ -1306,7 +1306,7 @@ export function mountNotionWorld(data: World, native: any) {
    // A scheduled result kept in the Journal (the morning brief, the day's summary) opens it on its card.
    const target=journalTarget(page.worldItemSources);
    if(target){attentionPreview.setDraft({text:'In your Journal',label:'Open',run:()=>{closeAttentionPreview(false);window.dispatchEvent(new CustomEvent('worldlet:journal-open',{detail:target}));}});return;}
-   const thread=page.worldItemKind==='task'?replyThread({sources:page.worldItemSources}):'',draft=thread?waitingDrafts.find(d=>d.thread===thread):null;
+   const thread=page.worldItemKind==='task'?replyThread({sources:page.worldItemSources}):'',draft=thread?dailyCards.waitingDrafts().find(d=>d.thread===thread):null;
    attentionPreview.setDraft(draft?{text:'Fox drafted a reply',label:'Review',run:()=>{closeAttentionPreview(false);window.dispatchEvent(new CustomEvent('worldlet:journal-open',{detail:{day:dayKey(new Date(draft.createdAt*1000||Date.now()))}}));}}:null);
   }
   function itemPage(id:string){return [...pages.values()].find(p=>p.worldItemId===id);}
@@ -1601,170 +1601,9 @@ export function mountNotionWorld(data: World, native: any) {
       button('Not now',close)]});
     voice?.revealGuide?.();
   }
-  // The day's plan in the morning and its summary in the evening (owner request 2026-10-06), each asked of Fox
-  // once a day: the two default Routines, Today's prep at 7 AM and Wrap up today at 6 PM (owner decision 2026-10-11),
-  // each on unless the person turned it off (host `dailyRoutines`, `worldlet:daily-routines`). The plan is the morning
-  // brief, made before the person sits down (owner Order 2026-10-07), so
-  // a hidden window or an open Applet does not hold it back; the summary waits for a day they used and for the World.
-  // Neither runs beside a dialog or a turn in progress, nor before the first-run tour is over (Fox stays quiet
-  // through it, #1948; Mac RCs 2983 and 2985 saw the plan take Fox's bubble from the first win). Automated
-  // browsers (the RC's UI checks) never get an unasked turn. Nor while the tour's phone step, which comes after the
-  // first win, is still to come or showing: the evening summary took the World from it (Mac RC 3035).
-  const DAILY_ARTIFACT=/^(Plan|Summary) · /;
-  const dailyKey='worldlet-daily-artifacts-'+(data.workspaceId||data.workspace);
-  let daily=readDailyArtifactsState(null);try{daily=readDailyArtifactsState(JSON.parse(localStorage.getItem(dailyKey)||'null'));}catch{}
-  const saveDaily=()=>{try{localStorage.setItem(dailyKey,JSON.stringify(daily));}catch{}announceDaily();};
-  window.addEventListener('worldlet:product-event',(event:any)=>{if(event.detail?.event!=='user_engaged'||data.sample)return;daily=markDailyUse(daily,new Date());saveDaily();});
-  let followUpAsking=false;
-  let dailyAsking=false,dailyAsked:{kind:'plan'|'summary';day:string}|null=null,dailyShown=false;
-  let routinesOn=DAILY_ROUTINES_ON;
-  const setRoutines=(value:unknown)=>{routinesOn=readDailyRoutines(value);announceDaily();};
-  if(!data.sample)void Promise.resolve(native?.dailyRoutines?.()).then(value=>{if(value)setRoutines(value);}).catch(()=>{});
-  window.addEventListener('worldlet:daily-routines',(event:any)=>setRoutines(event.detail));
-  // The morning brief and the day's summary are kept as cards in the Journal and arrive as an Attention item (Worth
-  // Knowing) that opens the Journal on that card: the host saves it with the card (core dailyScheduleResult), by the
-  // rule every scheduled result follows (docs/ATTENTION-CENTER.md). The Journal never opens by itself.
-  function showDailyInJournal(artifact){
-   const due=dailyAsked??{kind:/^Summary · /.test(String(artifact.title||''))?'summary':'plan',day:dayKey(new Date())};dailyShown=true;
-   void Promise.resolve(native?.artifacts?.({operation:'save',artifact,scheduled:due.kind,day:due.day})).catch(()=>{}).then(()=>{window.dispatchEvent(new Event('worldlet:artifacts'));void requestArtifactPage(artifact,false);});
-   return {ok:true,id:artifact.id,size:artifact.size,shown:'journal'};
-  }
-  // When the next brief and today's summary will be made, for the Task panel's Planned timeline (ui/world/task-panel.ts);
-  // nothing in the practice world or before the first run is over, which makes neither.
-  const announceDaily=()=>{const none=!!data.sample||!!native?.firstRun?.();window.dispatchEvent(new CustomEvent('worldlet:daily-planned',{detail:{planned:none?[]:dailyPlanned(daily,new Date(),routinesOn),paused:none?[]:(['plan','summary'] as const).filter(kind=>!routinesOn[kind])}}));};
-  setTimeout(announceDaily,0);
-  // The one gate for work Fox starts by itself (context/store/replies.ts backgroundBlocked): never in the practice
-  // world, an automated browser, onboarding, the first-run tour (its phone step included) or beside another request.
-  const backgroundMoment=()=>backgroundBlocked({sample:!!data.sample,automated:!!navigator.webdriver,onboarding:root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true',tour:!!root.dataset.tourStep,firstRun:!!native?.firstRun?.(),asking:dailyAsking||replyAsking||followUpAsking});
-  const dailyPoll=setInterval(()=>{
-    if(!root.isConnected){clearInterval(dailyPoll);return;}
-    announceDaily();startFirstCard();
-    if(backgroundMoment()||foxArtifact.visible||$('notionDialog').open||voice?.active)return;
-    const due=dailyArtifactDue(daily,new Date(),routinesOn);
-    if(!due){void prepareReply();return;}
-    if(due.kind==='summary'&&(document.hidden||insideApplet()||inPageLayer()))return;
-    void askDaily(due);
-  },30000);
-  // What Fox is doing, for its name tag and the World's Task panel (worldlet:fox-status): the step while it works, then
-  // empty with what was done, which closes its window in the panel (ui/world/task-panel.ts). Reply drafts made meanwhile
-  // are counted from the host's worldlet:email-drafted.
-  function backgroundWork(source:string,kind:FoxWorkKind,text:string,name?:string){
-    let drafted=0;const count=()=>{drafted++;};
-    window.addEventListener('worldlet:email-drafted',count);
-    window.dispatchEvent(new CustomEvent('worldlet:fox-status',{detail:{source,text,...(name?{name}:{})}}));
-    return {drafted:()=>drafted,end(ok:boolean){window.removeEventListener('worldlet:email-drafted',count);
-     window.dispatchEvent(new CustomEvent('worldlet:fox-status',{detail:{source,text:'',...(ok?{done:foxWorkDone(kind,drafted)}:{})}}));}};
-  }
-  async function askDaily(due:{kind:'plan'|'summary';day:string},first=false){
-    dailyAsking=true;dailyAsked=due;dailyShown=false;
-    // What the brief holds, as the person wrote it (Morning brief in the Journal, or told to Fox).
-    let brief:string|undefined;if(due.kind==='plan'&&!first)try{brief=await native?.morningBrief?.();}catch{}
-    const before=daily;daily=markDailyMade(daily,due.kind,due.day);saveDaily();
-    const request=first?{text:firstPrepRequest(due.day),displayText:DAILY_ROUTINE_NAMES.plan}:dailyArtifactRequest(due.kind,due.day,brief);
-    // Made quietly in a background session beside the conversation (owner Orders 2026-10-07): no message in Fox's card
-    // and no reply line, the person can talk to Fox meanwhile, and the long request never fills the conversation.
-    const work=backgroundWork('daily',due.kind,due.kind==='plan'?DAILY_ROUTINE_NAMES.plan+': preparing your day…':DAILY_ROUTINE_NAMES.summary+': writing it up…',DAILY_ROUTINE_NAMES[due.kind]);
-    let ok=true,failed='';
-    // Other background work still running: asked again at the next poll. Any other failure, or a turn that ended with
-    // no card, is said plainly as a Worth Doing item (host `artifacts` scheduleFailed), never silently dropped.
-    await Promise.resolve(voice?.background?.(request.text,{displayText:request.displayText}))
-     .then(()=>{if(!dailyShown)failed='It finished without making the card.';})
-     .catch(error=>{ok=false;const said=String(error?.message||'');if(/busy/i.test(said)){daily=before;saveDaily();}else failed=said||'Your Agent stopped.';})
-     .finally(()=>{work.end(ok);dailyAsking=false;dailyAsked=null;});
-    if(first)firstCardEnded(ok,failed);
-    // Today's prep and Wrap up today are Worldlet's own routines (owner 2026-10-11 20:21 PDT: Production metrics); a run
-    // put off because other work was busy did not run. The host leaves the practice world out.
-    if(ok||failed){reportProductEvent('routine_completed',{routine_source:'worldlet',routine_status:failed?'failed':'ok'});if(!failed)reportProductEvent('task_completed',{task_kind:'routine'});}
-    // The first card's failure is no Worth Doing item: the tour would pick it as the first thing to do together.
-    if(failed&&!first)void Promise.resolve(native?.artifacts?.({operation:'scheduleFailed',scheduled:due.kind,day:due.day,reason:failed})).catch(()=>{});
-  }
-  // The first card (owner decision 2026-10-13): a new person's first Today's prep starts the moment their World first
-  // opens, whatever the hour, in a background session beside the first-run tour, so the tour's pick step
-  // (ui/frame/first-value.ts) finds a card Fox already made and approving it is the first win, with no Google
-  // needed. It is the one background turn the first run allows; never in the practice world or an automated browser,
-  // once per World (a busy background session asks again at the next poll), not with Today's prep paused, and not
-  // with Mail connected.
-  // `data-first-card` tells the tour it is on its way (`preparing`), then `ready` or `failed`. Its steps are product
-  // events (agent/app/ANALYTICS.md#the-first-card): started, ready (with how it ended), shown and approved.
-  const firstCardKey='worldlet-first-card-'+(data.workspaceId||data.workspace);
-  let firstCardStarted=0,routinesKnown=!native?.dailyRoutines;
-  const firstCardEvent=(event:string,dimensions:Record<string,string>={},duration='')=>window.dispatchEvent(new CustomEvent('worldlet:product-event',{detail:{event,dimensions,duration}}));
-  function startFirstCard(){
-    if(data.sample||navigator.webdriver||!routinesKnown||!native?.firstRun?.()||!voice?.background||!routinesOn.plan||dailyAsking||replyAsking||followUpAsking)return;
-    // With Mail connected, the first thing to do together comes from the mail (a task outranks the card at the tour's pick
-    // step) and a card made beside it competes with Fox's help on that task (Mac Alpha 4386's onboarding check):
-    // the first card is for a World without mail.
-    try{if(localStorage.getItem(firstCardKey))return;localStorage.setItem(firstCardKey,connectionLive(data.moduleConnections?.find(c=>c.provider==='gmail')||{})?'mail':'started');if(localStorage.getItem(firstCardKey)==='mail')return;}catch{return;}
-    firstCardStarted=performance.now();root.dataset.firstCard='preparing';firstCardEvent('first_card_started');
-    void askDaily({kind:'plan',day:dayKey(new Date())},true);
-  }
-  function firstCardEnded(ok:boolean,failed:string){
-    // Other background work was running: the next poll starts it again.
-    if(!ok&&!failed){try{localStorage.removeItem(firstCardKey);}catch{}delete root.dataset.firstCard;return;}
-    const result=failed?(ok?'no_card':'failed'):'ok';
-    root.dataset.firstCard=result==='ok'?'ready':'failed';
-    try{localStorage.setItem(firstCardKey,result);}catch{}
-    firstCardEvent('first_card_ready',{first_card_result:result},timingBucket(performance.now()-firstCardStarted));
-  }
-  if(!data.sample)void Promise.resolve(native?.dailyRoutines?.()).catch(()=>null).finally(()=>{routinesKnown=true;setTimeout(startFirstCard,0);});
-  // A follow-up on an Artifact (context/store/follow-up.ts, owner request 2026-10-11): the card turns over and drops into
-  // the Doing now side beside Fox, and its request runs in a background session beside the conversation; what it makes
-  // comes back as a new card. Busy with other background work, it is an ordinary turn instead.
-  function followUp(sent:string){
-    const draft=followUpDraft;followUpDraft=null;
-    // The person's own request: only the practice world and work already running beside the conversation keep it a turn.
-    if(!draft||!voice?.background||data.sample||followUpAsking||dailyAsking||replyAsking)return false;
-    const request=artifactFollowUpRequest(draft,sent),input=$('notionInput') as HTMLTextAreaElement|HTMLInputElement;
-    input.value='';input.dispatchEvent(new Event('input',{bubbles:true}));
-    followUpAsking=true;
-    const work=backgroundWork('follow-up','follow-up',request.status,request.name);
-    void turnIntoDock(root,$('foxArtifact'),()=>{foxArtifact.close();delete root.dataset.attentionPreview;voice?.sync();},{title:request.name,status:request.status});
-    let ok=true;
-    void Promise.resolve(voice.background(request.text,{displayText:request.displayText}))
-     .catch(error=>{ok=false;if(/busy/i.test(String(error?.message||'')))voice?.submit?.(sent);})
-     // owner 2026-10-11 20:21 PDT: Production metrics: work the person asked Fox for finished in the background.
-     .finally(()=>{work.end(ok);followUpAsking=false;if(ok)reportProductEvent('task_completed',{task_kind:'fox'});});
-    return true;
-  }
-  // Replies Fox prepares by itself (owner decision 2026-10-09; rules in context/store/replies.ts): a new Worth Doing
-  // item from a Gmail thread that waits for the person gets a reply draft in a background session, a reply card in
-  // today's Journal that only the person sends. Each item once, a few a day, for someone who used Worldlet lately.
-  const repliesKey='worldlet-prepared-replies-'+(data.workspaceId||data.workspace);
-  let replies=readPreparedRepliesState(null);try{replies=readPreparedRepliesState(JSON.parse(localStorage.getItem(repliesKey)||'null'));}catch{}
-  const saveReplies=()=>{try{localStorage.setItem(repliesKey,JSON.stringify(replies));}catch{}};
-  let replyAsking=false;
-  // The drafts waiting for review, by Gmail thread, so an Attention card can point at the draft made for it.
-  let waitingDrafts:{id:string;thread:string;createdAt:number}[]=[];
-  async function readDrafts(){
-    if(!native?.emailReviews)return waitingDrafts=[];
-    const list=await native.emailReviews();
-    return waitingDrafts=(Array.isArray(list)?list:[]).filter(r=>r&&!r.attempted&&typeof r.id==='string').map(r=>({id:r.id,thread:String(r.draft?.threadId||''),createdAt:Number(r.createdAt)||0}));
-  }
-  window.addEventListener('worldlet:email-drafted',()=>{void readDrafts().then(()=>{if(attentionPage)showDraftLine(attentionPage);}).catch(()=>{});});
-  async function prepareReply(){
-    if(replyAsking||!native?.emailReviews||!voice?.background)return;
-    const now=new Date();
-    if(!replies.since){replies=preparedRepliesSettling(replies,now);saveReplies();return;}
-    const items=[...pages.values()].filter(p=>p.worldItemId).map(p=>({id:p.worldItemId,kind:p.worldItemKind,status:p.worldItemStatus,snoozedUntil:p.worldItemSnoozedUntil,ready:p.worldItemContentReady,title:p.worldItemSignal?.title||p.title,sources:p.worldItemSources,receivedAt:p.worldItemSignal?.receivedAt,occurredAt:p.worldItemSignal?.occurredAt,sourceUpdatedAt:p.worldItemSignal?.sourceUpdatedAt}));
-    if(!replyCandidates(items,replies,{now}).length)return;
-    replyAsking=true;
-    try{
-     const drafts=await readDrafts();
-     if(!replyPrepareDue(replies,{now,daily,waiting:drafts.length}).due)return;
-     const candidates=replyCandidates(items,replies,{now,drafted:drafts.map(d=>d.thread)});
-     // An item whose thread already has a draft waiting (the morning brief's, say) counts as prepared, without asking.
-     for(const item of items)if(!candidates.some(c=>c.id===item.id)&&drafts.some(d=>d.thread&&d.thread===replyThread(item))&&!replies.prepared.includes(item.id))replies=markReplyPrepared(replies,item.id,now,{asked:false,thread:replyThread(item)});
-     saveReplies();
-     const next=candidates[0];if(!next)return;
-     const before=replies;replies=markReplyPrepared(replies,next.id,now,{thread:next.thread});saveReplies();
-     const request=replyPrepareRequest(next),work=backgroundWork('reply','reply',replyPrepareStatus(next));
-     let ok=true;
-     // Busy with other background work: the item is asked again at the next poll.
-     await Promise.resolve(voice.background(request.text,{displayText:request.displayText}))
-      .catch(error=>{ok=false;if(/busy/i.test(String(error?.message||''))){replies=before;saveReplies();}})
-      .finally(()=>work.end(ok));
-    }catch{}finally{replyAsking=false;}
-  }
+  // The daily cards, the first card and prepared replies (ui/attention/daily-cards.ts).
+  const dailyCards=createDailyCards({data:()=>data,native,root,$,voice:()=>voice,foxArtifact,requestArtifactPage:(artifact,open)=>requestArtifactPage(artifact,open),takeFollowUpDraft:()=>{const draft=followUpDraft;followUpDraft=null;return draft;},attentionPage:()=>attentionPage,showDraftLine:page=>showDraftLine(page),pages:()=>pages,insideApplet:()=>insideApplet(),inPageLayer:()=>inPageLayer(),reportProductEvent});
+  const {showDailyInJournal,followUp,readDrafts}=dailyCards;
   window.addEventListener('pagehide',()=>clearInterval(meetingPoll),{once:true});
   const workPoll=setInterval(()=>{if(!document.hidden&&current==='building-work'){const r=sections.find(s=>s.key==='claude-code');if(r&&!data.sample&&native?.developmentSessions)void loadWork(r);}},15000);
   window.addEventListener('pagehide',()=>clearInterval(workPoll),{once:true});
@@ -2243,7 +2082,7 @@ export function mountNotionWorld(data: World, native: any) {
     ? execute('visit_context',{id:command.id})
     : execute('move_view',{direction:command.action}));
 
-  const executeAction=(name: string,args: any,meta?: any)=>{if(name==='show_artifact'){const tooLong=artifactFitProblem(args);if(tooLong)return {error:tooLong};const id=artifactId(),label=nextArtifactLabel;nextArtifactLabel=null;if(DAILY_ARTIFACT.test(String(args.title||'')))return showDailyInJournal({id,kind:'answer',title:args.title,body:args.body,brief:args.brief||undefined,detail:args.detail||undefined,chart:args.chart||null,actions:args.actions||[],blocks:args.blocks||[],tone:args.tone||undefined,art:args.art||undefined,size:args.size||'large',origin:{type:'conversation',place:current||'world'}});{const shown=showArtifact({...args,id,...label?{label}:{}},{id,kind:'answer',title:args.title,body:args.body,brief:args.brief||undefined,detail:args.detail||undefined,chart:args.chart||null,actions:args.actions||[],blocks:args.blocks||[],tone:args.tone||undefined,art:args.art||undefined,origin:{type:'conversation',place:current||'world'}});if(shown.ok)void requestArtifactPage({id,kind:'answer',size:shown.size as 'small'|'medium'|'large'});return shown;}}
+  const executeAction=(name: string,args: any,meta?: any)=>{if(name==='show_artifact'){const tooLong=artifactFitProblem(args);if(tooLong)return {error:tooLong};const id=artifactId(),label=nextArtifactLabel;nextArtifactLabel=null;if(dailyCards.isDaily(String(args.title||'')))return showDailyInJournal({id,kind:'answer',title:args.title,body:args.body,brief:args.brief||undefined,detail:args.detail||undefined,chart:args.chart||null,actions:args.actions||[],blocks:args.blocks||[],tone:args.tone||undefined,art:args.art||undefined,size:args.size||'large',origin:{type:'conversation',place:current||'world'}});{const shown=showArtifact({...args,id,...label?{label}:{}},{id,kind:'answer',title:args.title,body:args.body,brief:args.brief||undefined,detail:args.detail||undefined,chart:args.chart||null,actions:args.actions||[],blocks:args.blocks||[],tone:args.tone||undefined,art:args.art||undefined,origin:{type:'conversation',place:current||'world'}});if(shown.ok)void requestArtifactPage({id,kind:'answer',size:shown.size as 'small'|'medium'|'large'});return shown;}}
    if(name==='open_artifact')return openArtifact(String(args.id||''));
    if(name==='list_artifacts'){if(!native?.artifacts)return {artifacts:[],scope:'The practice world keeps no artifacts.'};return Promise.resolve(native.artifacts({operation:'list'})).then(r=>({artifacts:findArtifacts((r?.artifacts||[]).map(readArtifact).filter(Boolean),args.query||'',args.limit||12)}));}if(['run_practice_iteration','practice_applet'].includes(name))return practiceWalkthrough?practiceWalkthrough.execute(name,args,meta):{error:'Only available in the practice world.'};if(name==='customize_companion'){if(!data.sample)return {error:'This control belongs to the practice world.'};const name=String(args.name||'').trim();if(!name||name.length>24||!['idle','happy','waving','sleeping'].includes(args.expression))return {error:'Choose a short name and an available expression.'};window.dispatchEvent(new CustomEvent('worldlet:companion-appearance',{detail:{name,expression:args.expression}}));return {ok:true,name,expression:args.expression};}if(data.sample&&['delegate_codex','list_codex_tasks','read_codex_task','show_codex_task'].includes(name))return practiceCoding(name,args);if(name==='manage_weather_location')return environmentController.manageLocation(args,meta?.signal);if(name==='set_scene_lighting')return environmentController.setSceneLighting(args.lighting);if(name==='set_scene_weather')return environmentController.setSceneWeather(args.weather);if(name==='prepare_email')return preparePracticeEmail(args);const panelTool=PANEL_TOOLS.get(name);if(panelTool){const [key,title]=panelTool;if(current!=='app-'+key||content.hidden)visitObject('app-'+key);return appletPanels.get(key)?.agent(args)||{error:title+' is unavailable.'};}if(name==='review_email_drafts'){window.dispatchEvent(new Event('worldlet:email-drafts'));return {ok:true,status:'user_review'};}if(name==='review_notion_drafts'){window.dispatchEvent(new Event('worldlet:notion-reviews'));return {ok:true,status:'user_review'};}if(name==='manage_companion_memory'){window.dispatchEvent(new Event('worldlet:memory-manager'));return {ok:true,status:'user_review',guidance:'Memory management opened. The user makes changes directly.'};}if(name==='automate_browser')return automateBrowser(args,meta);if(name==='browse_web'){if(['records','record'].includes(args.operation)){if(data.sample)return {visits:[],scope:'The practice world records no browsing.'};return browserPanel.agent(args);}if(args.operation==='history'){if(data.sample)return {items:[],scope:'Practice world has no personal browsing history. Use find_content for authored history notes.'};return browserPanel.agent(args);}if(args.operation==='open'){if(!openWorldURL(args.url))return {error:'Use a valid HTTPS website URL.'};return browserPanel.agent(args);}if(['outline','focus'].includes(args.operation)&&(content.hidden||content.dataset.template!=='browser'))return {error:'Open the website first: Focus rules are for the site open in a website Thing.'};if(data.sample&&args.operation==='saved'){const terms=String(args.query||'').toLowerCase().split(/\s+/).filter(Boolean);const records=[...pages.values()].filter(p=>['sample-web-research-history','sample-web-shoes-history'].includes(p.id)&&terms.every(t=>(p.title+' '+p.markdown).toLowerCase().includes(t)));return {ok:true,fictional:true,results:records.map(p=>({id:p.id,title:p.title,text:p.markdown,url:p.markdown.match(/^URL: (.+)$/m)?.[1]}))};}if(args.operation!=='saved'&&(content.hidden||content.dataset.template!=='browser')){if(pages.has('device-x'))open('device-x');else {showModulePanel('module-browser');header('Browser','Library');browserPanel.mount();sceneState();}}return browserPanel.agent(args);}return executeWorld(name,args,meta);};
   const execute=(name: string,args: any,meta?: any)=>{toolNavigation=true;try{return native&&!data.sample?recordWorldCommand(name,args,()=>executeAction(name,args,meta)):executeAction(name,args,meta);}finally{toolNavigation=false;}};
