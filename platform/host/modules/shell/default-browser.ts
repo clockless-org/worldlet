@@ -3,6 +3,7 @@ import {execFile,spawn} from 'node:child_process';
 import path from 'node:path';
 import {defaultBrowserSupported,incomingLink,linksInArguments,type DefaultBrowserStatus} from '../../../../agent/app/index.ts';
 import {WorldletError} from '../../files.ts';
+import {macAppBundle} from './app-bundle.ts';
 import {handOffLinks,receiveLinks} from '../../system-browser.ts';
 import type {Host} from '../../types.ts';
 
@@ -21,7 +22,7 @@ const run=(file:string,args:string[])=>new Promise<string>((resolve,reject)=>exe
 export function createDefaultBrowser(host:Host){
  const supported=()=>defaultBrowserSupported({channel:host.profile.channel,platform:process.platform,windowsStore:!!process.windowsStore});
  // The Mac reports the app bundle; Windows the executable.
- const own=process.platform==='darwin'?path.resolve(process.execPath,'../../../desktop'):process.execPath;
+ const own=process.platform==='darwin'?macAppBundle(process.execPath):process.execPath;
  const same=(a:string,b:string)=>process.platform==='win32'?a.toLowerCase()===b.toLowerCase():a===b;
  const handler=async()=>{try{return (await app.getApplicationInfoForProtocol('https://example.com/'))?.path||'';}catch{return '';}};
  const read=async():Promise<DefaultBrowserStatus>=>{
