@@ -7,21 +7,22 @@ import {digest,ensureDirectory,WorldletError} from '../files.ts';
 import {swiftJSON,swiftFold,stableJSON,sameJSON} from './swift-json.ts';
 import {SERVICE_SYNC_BUCKETS} from '../../../contracts/service-sync.ts';
 import {WORLD_VIEWS_SQL} from '../../../contracts/storage/world-views.ts';
+import {RecordingTables} from './recordings.ts';
+import {TaskTables} from './tasks.ts';
+export {Cancelled} from './tasks.ts';
 
 type Row=Record<string,any>;
-export class Cancelled extends Error {constructor(){super('Cancelled.');}}
 const now=()=>Date.now()/1000;
 const iso=()=>new Date().toISOString();
-const RUNTIME_BUCKETS=['runtime-tasks','runtime-runs','runtime-generations','runtime-deliveries','runtime-operations'];
 
 /** Worldlet's durable facts, independent of any Harness's conversation or memory files.
- * Only bound values reach SQL; an Agent never receives a SQL execution tool. */
+ * Only bound values reach SQL; an Agent never receives a SQL execution tool.
+ * This file opens the database and keeps `entries` (history and state revisions); a component's tables are read
+ * and written in its own file beside it (tasks.ts, recordings.ts), whose methods are this class's. */
 export class WorldLedger {
  db:DatabaseSync|null;
- /** Library rows last committed through this connection; lets an unchanged save skip a re-encode. */
- private savedLibrary:{sources:string,knowledge:string}|null=null;
  readonly root:string;
- private readonly runtimeSpec:(owner:string)=>Row|null;
+ readonly runtimeSpec:(owner:string)=>Row|null;
  constructor(root:string,runtimeSpec:(owner:string)=>Row|null=()=>null){
   this.root=root;this.runtimeSpec=runtimeSpec;
   ensureDirectory(root);
@@ -39,12 +40,13 @@ export class WorldLedger {
  /** Names each open savepoint; nested ones only need distinct names. */
  private savepoints=0;
  close(){this.db?.close();this.db=null;}
- private get handle(){if(!this.db)throw new WorldletError('The world database is closed.');return this.db;}
+ // The component tables beside this file read and write through these.
+ get handle(){if(!this.db)throw new WorldletError('The world database is closed.');return this.db;}
  // A closed ledger keeps its own message, so a write racing quit is not reported as a failed save.
  exec(sql:string){const db=this.handle;try{db.exec(sql);}catch{throw new WorldletError('Could not save world data.');}}
- private all(sql:string,...values:any[]):Row[]{return this.handle.prepare(sql).all(...values) as Row[];}
- private run(sql:string,...values:any[]){return this.handle.prepare(sql).run(...values);}
- private tableExists(name:string){return this.all("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",name).length>0;}
+ all(sql:string,...values:any[]):Row[]{return this.handle.prepare(sql).all(...values) as Row[];}
+ run(sql:string,...values:any[]){return this.handle.prepare(sql).run(...values);}
+ tableExists(name:string){return this.all("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",name).length>0;}
  /** Version 2 kept a mutable record bucket beside an append-only stream; both now share entries. */
  private migrateLegacyTables(){
   if(!this.tableExists('events')&&!this.tableExists('records'))return;
@@ -61,10 +63,35 @@ export class WorldLedger {
  }
  // What happened in this world, kept whole and local. Recording never runs a model and
  // never fails the action it describes.
- record(kind:string,key='',body:Row={},at=now()):boolean {
+ record(kind:string,key='',body:Row={},at=Date.now()/1000):boolean {
   if(!this.db||!kind||kind.length>64)return false;
   try{this.run('INSERT INTO entries(at,kind,key,body) VALUES(?,?,?,?)',at,kind,key,stableJSON(body));return true;}catch{return false;}
  }
+ /** Current value per key of a state bucket. */
+ records(bucket:string):Row[] {
+  const kind='state.'+bucket;
+  return this.all('SELECT body FROM entries WHERE kind=? AND seq IN (SELECT MAX(seq) FROM entries WHERE kind=? GROUP BY key) ORDER BY key',kind,kind).map(row=>{
+   let value;try{value=JSON.parse(row.body);}catch{}
+   if(!value||typeof value!=='object'||Array.isArray(value))throw new WorldletError('Invalid world data; existing data was preserved.');
+   return value;
+  });
+ }
+ find(bucket:string,id:string){return this.records(bucket).find(row=>row.id===id);}
+ /** One key's current value in a state bucket, without reading the bucket's other values (large ones stay unread). */
+ value(bucket:string,id:string):Row|null {
+  const raw=this.all('SELECT body FROM entries WHERE kind=? AND key=? ORDER BY seq DESC LIMIT 1','state.'+bucket,id)[0];
+  if(!raw)return null;let value;try{value=JSON.parse(raw.body);}catch{return null;}
+  return value&&typeof value==='object'&&!Array.isArray(value)?value:null;
+ }
+ put(bucket:string,id:string,value:Row){if(!this.record('state.'+bucket,id,value))throw new WorldletError('Cannot save world data.');}
+ delete(bucket:string,id:string){try{this.run('DELETE FROM entries WHERE kind=? AND key=?','state.'+bucket,id);}catch{throw new WorldletError('Could not delete world data.');}}
+ /** Every stored revision of a state bucket (optionally one key), oldest first. */
+ revisions(bucket:string,key?:string){
+  const rows=key==null?this.all('SELECT seq,body FROM entries WHERE kind=? ORDER BY seq','state.'+bucket):this.all('SELECT seq,body FROM entries WHERE kind=? AND key=? ORDER BY seq','state.'+bucket,key);
+  return rows.map(row=>{let body;try{body=JSON.parse(row.body);}catch{}if(!body||typeof body!=='object')throw new WorldletError('Invalid world data; existing data was preserved.');return {seq:Number(row.seq),body};});
+ }
+ /** Library rows last committed through this connection; lets an unchanged save skip a re-encode. */
+ private savedLibrary:{sources:string,knowledge:string}|null=null;
  /** One Agent's audit entry (`agent.audit`, agent/gate/GRANTS.md), keyed by its Agent; only its newest `keep` stay. */
  recordAgentAudit(entry:Row,keep:number):boolean {
   const agent=typeof entry.agentId==='string'?entry.agentId:'';
@@ -210,30 +237,6 @@ export class WorldLedger {
   return this.all(sql,...binds).map(raw=>{const row:Row={seq:Number(raw.seq),at:Number(raw.at),kind:raw.kind,key:raw.key};try{const body=JSON.parse(raw.body);if(body&&Object.keys(body).length)row.body=body;}catch{}return row;});
  }
  eventCount(){return Number(this.all("SELECT COUNT(*) AS n FROM entries WHERE kind NOT LIKE 'state.%'")[0]?.n??0);}
- /** Current value per key of a state bucket. */
- records(bucket:string):Row[] {
-  const kind='state.'+bucket;
-  return this.all('SELECT body FROM entries WHERE kind=? AND seq IN (SELECT MAX(seq) FROM entries WHERE kind=? GROUP BY key) ORDER BY key',kind,kind).map(row=>{
-   let value;try{value=JSON.parse(row.body);}catch{}
-   if(!value||typeof value!=='object'||Array.isArray(value))throw new WorldletError('Invalid world data; existing data was preserved.');
-   return value;
-  });
- }
- find(bucket:string,id:string){return this.records(bucket).find(row=>row.id===id);}
- /** One key's current value in a state bucket, without reading the bucket's other values (large ones stay unread). */
- value(bucket:string,id:string):Row|null {
-  const raw=this.all('SELECT body FROM entries WHERE kind=? AND key=? ORDER BY seq DESC LIMIT 1','state.'+bucket,id)[0];
-  if(!raw)return null;let value;try{value=JSON.parse(raw.body);}catch{return null;}
-  return value&&typeof value==='object'&&!Array.isArray(value)?value:null;
- }
- put(bucket:string,id:string,value:Row){if(!this.record('state.'+bucket,id,value))throw new WorldletError('Cannot save world data.');}
- delete(bucket:string,id:string){try{this.run('DELETE FROM entries WHERE kind=? AND key=?','state.'+bucket,id);}catch{throw new WorldletError('Could not delete world data.');}}
- deleteRuntimeRecord(bucket:string,id:string){if(!RUNTIME_BUCKETS.includes(bucket))throw new WorldletError('Invalid runtime record.');this.delete(bucket,id);}
- /** Every stored revision of a state bucket (optionally one key), oldest first. */
- revisions(bucket:string,key?:string){
-  const rows=key==null?this.all('SELECT seq,body FROM entries WHERE kind=? ORDER BY seq','state.'+bucket):this.all('SELECT seq,body FROM entries WHERE kind=? AND key=? ORDER BY seq','state.'+bucket,key);
-  return rows.map(row=>{let body;try{body=JSON.parse(row.body);}catch{}if(!body||typeof body!=='object')throw new WorldletError('Invalid world data; existing data was preserved.');return {seq:Number(row.seq),body};});
- }
 
  // Items --------------------------------------------------------------------------------
  /** Evidence identity, byte-compatible with the Mac host's SHA-256 over sorted JSONSerialization. */
@@ -396,40 +399,6 @@ export class WorldLedger {
   });
  }
 
- // Browser receipts ----------------------------------------------------------------------
- beginBrowserAction(label:string,url:URL,taskID:string|undefined,attemptKey:string){
-  return this.transaction(()=>{
-   const id=crypto.randomUUID().toUpperCase();
-   const input:Row={id,label,origin:'https://'+url.hostname,attemptKey,items:this.records('items'),receipts:this.records('browser-actions'),now:now()};
-   if(taskID)input.taskID=taskID;
-   const row=core('browserReceiptBegin',input);
-   this.prepareRuntimeOperation(id,'browser','browser.submit',digest(row.origin??''));
-   this.transitionRuntimeOperation(id,'submit');
-   this.put('browser-actions',id,row);return row;
-  });
- }
- browserAction(id:string){const row=this.find('browser-actions',id);if(!row)throw new WorldletError('This browser action is no longer available.');return row;}
- observeBrowserAction(id:string,url:string){
-  return this.transaction(()=>{
-   let origin='';try{const value=new URL(url);if(value.protocol==='https:')origin='https://'+value.hostname;}catch{}
-   const row=core('browserReceiptObserve',{receipt:this.browserAction(id),origin,now:now()});
-   this.put('browser-actions',id,row);return row;
-  });
- }
- resolveBrowserAction(id:string,done:boolean){
-  return this.transaction(()=>{
-   const decision=core('browserReceiptResolve',{receipt:this.browserAction(id),done,items:this.records('items'),now:now()});
-   if(!decision?.receipt||typeof decision.event!=='string')throw new WorldletError('Invalid browser confirmation.');
-   const row={...decision.receipt};
-   // The receipt is Fox's own browser action, so the task is one Fox completed.
-   if(typeof decision.completeTaskID==='string')this.update(decision.completeTaskID,'done',undefined,false,'fox');
-   const operation=this.prepareRuntimeOperation(id,'browser','browser.submit',digest(row.origin??''));
-   if(operation.status==='prepared')this.transitionRuntimeOperation(id,'submit');
-   this.transitionRuntimeOperation(id,decision.event);
-   row.operationId=id;this.put('browser-actions',id,row);return row;
-  });
- }
-
  // Deletion ------------------------------------------------------------------------------
  /** Replaces one stored revision's body, or deletes it for null; an unchanged body is left alone. */
  private rewriteEntry(seq:unknown,body:Row,replacement:Row|null){
@@ -531,38 +500,6 @@ export class WorldLedger {
  }
  attentionFacts():Row[]{const facts=this.records('attention-context')[0]?.facts;return Array.isArray(facts)?facts:[];}
  attentionBudget():Row{return this.records('attention-budget')[0]??{};}
-
- // Execution bookkeeping -----------------------------------------------------------------
- static runsPerProvider=100;
- /** Check and run rows keep only their current revision; each provider keeps its newest receipts. */
- pruneExecution(){
-  for(const bucket of ['checks','runs'])this.run('DELETE FROM entries WHERE kind=? AND seq NOT IN (SELECT MAX(seq) FROM entries WHERE kind=? GROUP BY key)','state.'+bucket,'state.'+bucket);
-  const groups=new Map<string,Row[]>();
-  for(const run of this.records('runs')){const key=run.provider??'';groups.set(key,[...(groups.get(key)||[]),run]);}
-  for(const runs of groups.values()){
-   if(runs.length<=WorldLedger.runsPerProvider)continue;
-   for(const run of runs.sort((a,b)=>(b.startedAt??0)-(a.startedAt??0)).slice(WorldLedger.runsPerProvider))if(typeof run.id==='string'&&run.status!=='running')this.delete('runs',run.id);
-  }
- }
- recoverInterruptedChecks(){
-  // Each runtime settlement owns its transaction; they are idempotent, so recovery can resume.
-  this.recoverRuntimeTasks();
-  this.recoverRuntimeOperations();
-  this.transaction(()=>{
-   for(const bucket of ['checks','runs']){
-    const key=bucket==='checks'?'lastStatus':'status';
-    for(const row of this.records(bucket)){
-     if(row[key]!=='running'||typeof row.id!=='string')continue;
-     const next={...row,[key]:'error',error:'The previous check was interrupted. Saved items are kept.'};
-     if(bucket==='checks'&&row.enabled===true)next.nextAt=now()+60;
-     if(bucket==='runs'){next.finishedAt=now();next.errorCode='interrupted';}
-     this.put(bucket,row.id,next);
-    }
-   }
-   const budget=this.records('attention-budget')[0];
-   if(budget?.lastStatus==='running'){this.delete('attention-budget','current');this.put('attention-budget','current',{...budget,lastStatus:'error',lastErrorCode:'interrupted',nextAt:now()+60});}
-  });
- }
  /** One-time import of legacy Knowledge into items; index.json and originals stay. */
  migrate(state:{sources:Row[],knowledge:Row[]}){
   if(this.records('meta').length)return;
@@ -581,161 +518,6 @@ export class WorldLedger {
    }
    this.put('meta','migration',{id:'migration',version:1});
   });
- }
-
- // Runtime tasks (claims, leases and settlement decisions live in shared Core) -------------
- private generation(owner:string){return Number(this.find('runtime-generations',owner)?.generation??0);}
- private recordTaskExecution(claim:Row){for(const event of core<Row[]>('taskExecutionEvents',claim))this.append(event,event.taskId??'');}
- claimRuntimeTask(taskID:string,owner:string,pool:string,runID:string){
-  return this.transaction(()=>{
-   const old=this.find('runtime-tasks',taskID);
-   const lease=core<number>('runtimeTaskLease',{taskId:taskID,spec:this.runtimeSpec(owner)??{}});
-   if(typeof lease!=='number')throw new WorldletError('Invalid runtime lease policy');
-   const input:Row={taskId:taskID,ownerId:owner,pool,generation:this.generation(owner),runId:runID,now:now(),leaseSeconds:lease};
-   if(old)input.task=old;
-   if(typeof old?.runId==='string')input.previousRun=this.find('runtime-runs',old.runId);
-   const claim=core('runtimeTaskClaim',input);
-   if(!claim?.task||!claim.run)return false;
-   if(typeof claim.supersededRun?.id==='string'){this.deleteRuntimeRecord('runtime-runs',claim.supersededRun.id);this.put('runtime-runs',claim.supersededRun.id,claim.supersededRun);}
-   this.deleteRuntimeRecord('runtime-tasks',taskID);this.put('runtime-tasks',taskID,claim.task);
-   this.put('runtime-runs',runID,claim.run);
-   this.recordTaskExecution(claim);
-   return true;
-  });
- }
- finishRuntimeTask(taskID:string,runID:string,status:string,nextAt:number,errorCode?:string|null,waitReason?:string|null,failures?:number|null){
-  return this.transaction(()=>{
-   const task=this.find('runtime-tasks',taskID),run=this.find('runtime-runs',runID);
-   if(!task||typeof task.ownerId!=='string'||!run)return false;
-   const input:Row={task,run,now:now(),generation:this.generation(task.ownerId),status,nextAt};
-   if(errorCode!=null)input.errorCode=errorCode;if(waitReason!=null)input.waitReason=waitReason;if(failures!=null)input.failures=failures;
-   const result=core('runtimeTaskFinish',input);
-   if(!result?.task||!result.run)return false;
-   this.deleteRuntimeRecord('runtime-tasks',taskID);this.put('runtime-tasks',taskID,result.task);
-   this.deleteRuntimeRecord('runtime-runs',runID);this.put('runtime-runs',runID,result.run);
-   this.recordTaskExecution(result);
-   for(const id of core<string[]>('runtimeRunPrune',{taskId:taskID,runs:this.records('runtime-runs')}))this.deleteRuntimeRecord('runtime-runs',id);
-   return true;
-  });
- }
- /** Claim validation and the writes in `body` share one transaction; `body` must be synchronous. */
- withRuntimeOutput<T>(taskID:string,runID:string,body:()=>T):T {
-  return this.transaction(()=>{
-   const task=this.find('runtime-tasks',taskID),run=this.find('runtime-runs',runID);
-   if(!task||typeof task.ownerId!=='string'||!run)throw new Cancelled();
-   if(core('runtimeClaimCanWrite',{task,run,generation:this.generation(task.ownerId),now:now()})!==true)throw new Cancelled();
-   return body();
-  });
- }
- setRuntimeTasksEnabled(owner:string,enabled:boolean){
-  this.transaction(()=>{
-   for(let task of this.records('runtime-tasks').filter(row=>row.ownerId===owner)){
-    if(typeof task.id!=='string')continue;
-    if(!enabled&&task.status==='running'&&typeof task.runId==='string'){
-     this.finishRuntimeTask(task.id,task.runId,'cancelled',task.nextAt??0,'paused');
-     const receipt=this.records('runs').find(row=>row.id===task.runId&&row.status==='running');
-     if(receipt)this.put('runs',task.runId,{...receipt,status:'cancelled',errorCode:'paused',finishedAt:now()});
-     task=this.find('runtime-tasks',task.id)??task;
-    }
-    const updated=core('runtimeTaskEnabled',{task,enabled});
-    this.deleteRuntimeRecord('runtime-tasks',task.id);this.put('runtime-tasks',task.id,updated);
-   }
-  });
- }
- invalidateRuntimeTasks(owner:string){
-  this.transaction(()=>{
-   for(const task of this.records('runtime-tasks'))if(task.ownerId===owner&&task.status==='running'&&typeof task.id==='string'&&typeof task.runId==='string')this.finishRuntimeTask(task.id,task.runId,'interrupted',0,'configuration_changed');
-   const generation=this.generation(owner)+1;
-   this.deleteRuntimeRecord('runtime-generations',owner);this.put('runtime-generations',owner,{id:owner,generation});
-   const taskIDs=new Set(this.records('runtime-tasks').filter(row=>row.ownerId===owner).map(row=>row.id).filter(Boolean));
-   for(const id of taskIDs)this.deleteRuntimeRecord('runtime-tasks',id);
-   for(const row of this.records('runtime-runs'))if(taskIDs.has(row.taskId)&&typeof row.id==='string')this.deleteRuntimeRecord('runtime-runs',row.id);
-  });
- }
- configureRuntimeSource(check:Row){
-  if(typeof check.provider!=='string')throw new WorldletError('Missing source owner.');
-  const id='applet:'+check.provider+':check';
-  this.transaction(()=>{const task=this.find('runtime-tasks',id);if(!task)return;const next=core('runtimeSourceConfigure',{task,check});this.deleteRuntimeRecord('runtime-tasks',id);this.put('runtime-tasks',id,next);});
- }
- recoverRuntimeTasks(){for(const row of this.records('runtime-tasks'))if(row.status==='running'&&typeof row.id==='string'&&typeof row.runId==='string')this.finishRuntimeTask(row.id,row.runId,'interrupted',now(),'process_interrupted');}
-
- // Runtime operations (external writes with uncertain outcomes) ----------------------------
- prepareRuntimeOperation(id:string,owner:string,command:string,scope:string){
-  return this.transaction(()=>{
-   const existing=this.find('runtime-operations',id);
-   const input:Row={id,ownerId:owner,command,scope,reference:id,now:now()};if(existing)input.existing=existing;
-   const row=core('runtimeOperationPrepare',input);
-   if(!existing)this.put('runtime-operations',id,row);
-   return row;
-  });
- }
- transitionRuntimeOperation(id:string,event:string){
-  return this.transaction(()=>{
-   const row=this.find('runtime-operations',id);if(!row)throw new WorldletError('Operation is unavailable.');
-   const next=core('runtimeOperationTransition',{operation:row,event,now:now()});
-   this.deleteRuntimeRecord('runtime-operations',id);this.put('runtime-operations',id,next);
-   return next;
-  });
- }
- recoverRuntimeOperations(){this.transaction(()=>{for(const row of this.records('runtime-operations'))if(row.status==='submitted'&&typeof row.id==='string')this.transitionRuntimeOperation(row.id,'uncertain');});}
-
- // Runtime deliveries ----------------------------------------------------------------------
- runtimeSubscriptions():Row[] {
-  const rows=this.records('runtime-subscriptions');
-  if(!rows.some(row=>row.consumerId==='attention:center'))rows.push({consumerId:'attention:center',providers:['*'],enabled:true});
-  return core('runtimeSubscriptions',{rows});
- }
- /** Trusted host API. Registration does not grant source permissions or start an executor. */
- registerRuntimeSubscription(subscription:Row){
-  this.transaction(()=>{
-   if(typeof subscription.consumerId!=='string')throw new WorldletError('Missing subscriber.');
-   const rows=[...this.runtimeSubscriptions().filter(row=>row.consumerId!==subscription.consumerId),subscription];
-   core('runtimeSubscriptions',{rows});
-   this.put('runtime-subscriptions',subscription.consumerId,subscription);
-   if(subscription.consumerId==='attention:center')this.invalidateRuntimeTasks('attention-center');
-   this.publishAttentionFacts(this.attentionFacts());
-  });
- }
- subscribedAttentionProviders(providers:string[]){
-  const sub=this.runtimeSubscriptions().find(row=>row.consumerId==='attention:center');
-  if(sub?.enabled!==true)return [];
-  const selected:string[]=sub.providers||[];
-  return providers.filter(p=>selected.includes('*')||selected.includes(p));
- }
- attentionInputBudget(){
-  const budget={...this.attentionBudget()};
-  const rows=this.records('runtime-deliveries').filter(row=>row.consumerId==='attention:center');
-  if(rows.length)budget.seen=Object.fromEntries(rows.filter(row=>row.status==='acknowledged'&&typeof row.entityId==='string'&&(typeof row.revision==='number'||typeof row.revision==='string')).map(row=>[row.entityId,row.revision]));
-  return budget;
- }
- /** Facts and delivery metadata share a commit; payloads stay in the bounded context. */
- publishAttentionFacts(facts:Row[]){
-  this.transaction(()=>{
-   const budget=this.attentionBudget();
-   const rows=core<Row[]>('runtimeDeliveries',{rows:this.records('runtime-deliveries'),facts,seen:budget.seen??{},subscriptions:this.runtimeSubscriptions(),now:now()});
-   this.replaceAttentionCache('attention-context',{id:'current',facts});
-   this.saveDeliveries(rows);
-  });
- }
- acknowledgeRuntimeDeliveries(consumer:string,seeds:Row[]){
-  this.transaction(()=>{
-   if(!this.runtimeSubscriptions().some(row=>row.consumerId===consumer&&row.enabled===true))throw new Cancelled();
-   this.saveDeliveries(core('runtimeDeliveriesAck',{rows:this.records('runtime-deliveries'),seeds,consumerId:consumer,now:now()}));
-  });
- }
- acknowledgeAttentionDeliveries(seeds:Row[]){this.acknowledgeRuntimeDeliveries('attention:center',seeds);}
- failAttentionDeliveries(seeds:Row[],code:string,isolated:boolean){this.saveDeliveries(core('runtimeDeliveriesFail',{rows:this.records('runtime-deliveries'),seeds,consumerId:'attention:center',code,isolated}));}
- retryAttentionQuarantine(){
-  this.transaction(()=>{
-   const rows=core<Row[]>('runtimeDeliveriesRetry',{rows:this.records('runtime-deliveries'),consumerId:'attention:center'});
-   this.invalidateRuntimeTasks('attention-center');
-   this.saveDeliveries(rows);
-   this.replaceAttentionCache('attention-budget',{...this.attentionBudget(),nextAt:0,failures:0});
-  });
- }
- private saveDeliveries(rows:Row[]){
-  for(const row of this.records('runtime-deliveries'))if(typeof row.id==='string')this.deleteRuntimeRecord('runtime-deliveries',row.id);
-  for(const row of rows)if(typeof row.id==='string')this.put('runtime-deliveries',row.id,row);
  }
 
  // Formal library tables -------------------------------------------------------------------
@@ -1144,32 +926,6 @@ export class WorldLedger {
   if(fs.existsSync(file))fs.renameSync(file,file+'.before-database');
  }
 
- // Browsing history --------------------------------------------------------------------------------
- // Pages visited inside Worldlet, oldest first (Core bounds and dedupes them, browser/history.ts);
- // before 2026-10-03 browser-history.json. Times keep the Mac format: seconds since 2001.
- private visitsReady=false;
- private ensureVisits(){
-  if(this.visitsReady)return;
-  this.exec('CREATE TABLE IF NOT EXISTS browser_visits (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT NOT NULL, title TEXT NOT NULL, text TEXT NOT NULL, visited_at REAL NOT NULL);');
-  this.visitsReady=true;
- }
- browserVisits():{id:number;url:string;title:string;text:string;visitedAt:number}[] {
-  this.ensureVisits();
-  return this.all('SELECT id,url,title,text,visited_at AS visitedAt FROM browser_visits ORDER BY id').map(row=>({id:Number(row.id),url:String(row.url),title:String(row.title),text:String(row.text),visitedAt:Number(row.visitedAt)}));
- }
- /** Removes visits by id and appends new ones in order; returns the new ids. `replace` clears all first. */
- changeBrowserVisits(remove:number[],add:{url:string;title:string;text:string;visitedAt:number}[],replace=false):number[] {
-  this.ensureVisits();
-  try{
-   return this.transaction(()=>{
-    if(replace)this.run('DELETE FROM browser_visits');
-    const drop=this.handle.prepare('DELETE FROM browser_visits WHERE id=?'),insert=this.handle.prepare('INSERT INTO browser_visits(url,title,text,visited_at) VALUES(?,?,?,?)');
-    for(const id of remove)drop.run(id);
-    return add.map(visit=>Number(insert.run(visit.url,visit.title,visit.text,visit.visitedAt).lastInsertRowid));
-   });
-  }catch(error){if(error instanceof WorldletError)throw error;throw new WorldletError('Could not save browsing history.');}
- }
-
  // Skills and routines brought from another Agent --------------------------------------------------
  // The World's copy (owner decision 2026-10-03: whatever can be in SQLite is); Fox's Harness gets
  // its own copy from here (fox/migration.ts). Before 2026-10-03 it was companion/brought/<agent>.json.
@@ -1410,167 +1166,8 @@ export class WorldLedger {
   this.ensureCompanion();
   return String(this.all('SELECT thread FROM companion_turns WHERE source=? AND id<>? ORDER BY created_at DESC,rowid DESC LIMIT 1',WorldLedger.OWN,except)[0]?.thread??'');
  }
-
- // Website recordings ------------------------------------------------------------------------------
- // What happened in the built-in browser's pages (agent/applets/web-record.ts): one row per visit (a
- // stay on one site) and its records in order. Text is searchable through a trigram index.
- private webReady=false;
- private webSearchable=false;
- private ensureWeb(){
-  if(this.webReady)return;
-  this.exec(`CREATE TABLE IF NOT EXISTS web_visits (id TEXT PRIMARY KEY, site TEXT NOT NULL, url TEXT NOT NULL, title TEXT NOT NULL, applet TEXT NOT NULL, started_at REAL NOT NULL, ended_at REAL NOT NULL);
-   CREATE INDEX IF NOT EXISTS web_visits_time ON web_visits(started_at);
-   CREATE INDEX IF NOT EXISTS web_visits_site ON web_visits(site, started_at);
-   CREATE TABLE IF NOT EXISTS web_records (id INTEGER PRIMARY KEY AUTOINCREMENT, visit TEXT NOT NULL, at REAL NOT NULL, kind TEXT NOT NULL, url TEXT NOT NULL, meta TEXT NOT NULL, body TEXT NOT NULL);
-   CREATE INDEX IF NOT EXISTS web_records_visit ON web_records(visit, id);
-   CREATE INDEX IF NOT EXISTS web_records_kind ON web_records(kind, at);`);
-  try{
-   if(!this.tableExists('web_records_search'))this.handle.exec(`CREATE VIRTUAL TABLE web_records_search USING fts5(body, content='web_records', content_rowid='id', tokenize='trigram', detail='none');`);
-   this.webSearchable=true;
-  }catch{this.webSearchable=false;}
-  this.webReady=true;
- }
- /** Saves visits (new or extended) and their new records in one transaction. */
- recordWeb(visits:{id:string;site:string;url:string;title:string;applet:string;startedAt:number;endedAt:number}[],records:{visit:string;at:number;kind:string;url:string;meta:Row;body:string}[]){
-  this.ensureWeb();
-  try{
-   this.transaction(()=>{
-    const visit=this.handle.prepare(`INSERT INTO web_visits(id,site,url,title,applet,started_at,ended_at) VALUES(?,?,?,?,?,?,?)
-     ON CONFLICT(id) DO UPDATE SET title=CASE WHEN excluded.title<>'' THEN excluded.title ELSE web_visits.title END,ended_at=max(web_visits.ended_at,excluded.ended_at)`);
-    for(const v of visits)visit.run(v.id,v.site,v.url,v.title,v.applet,v.startedAt,v.endedAt);
-    const insert=this.handle.prepare('INSERT INTO web_records(visit,at,kind,url,meta,body) VALUES(?,?,?,?,?,?)');
-    const index=this.webSearchable?this.handle.prepare('INSERT INTO web_records_search(rowid,body) VALUES(?,?)'):null;
-    for(const r of records){
-     const id=Number(insert.run(r.visit,r.at,r.kind,r.url,JSON.stringify(r.meta??{}),r.body).lastInsertRowid);
-     if(index&&r.body)index.run(id,r.body);
-    }
-   });
-  }catch(error){if(error instanceof WorldletError)throw error;throw new WorldletError('Could not save the browsing recording.');}
- }
- private webVisitRow=(row:Row)=>({id:String(row.id),site:String(row.site),url:String(row.url),title:String(row.title),applet:String(row.applet),startedAt:Number(row.started_at),endedAt:Number(row.ended_at)});
- /** Visits newest first, optionally on one site, in a time range, and holding every term. Each comes
-  * with how much it recorded and, for a search, where the first term was found. */
- webVisits({terms=[],site='',after=null,before,offset=0,limit=10}:{terms?:string[];site?:string;after?:number|null;before:number;offset?:number;limit?:number}){
-  this.ensureWeb();
-  const where=['v.ended_at>=?','v.started_at<?'],values:any[]=[after??0,before];
-  if(site){where.push('(v.site=? OR v.site LIKE ?)');values.push(site,'%.'+site);}
-  for(const term of terms){
-   // Short terms cannot use the trigram index; they fall back to a scan of this visit's text.
-   const indexed=this.webSearchable&&term.length>=3&&!/[%_"]/.test(term);
-   where.push(`(instr(lower(v.title||' '||v.url),lower(?))>0 OR EXISTS (SELECT 1 FROM web_records r WHERE r.visit=v.id AND ${indexed?'r.id IN (SELECT rowid FROM web_records_search WHERE body LIKE ?) AND ':''}instr(lower(r.body),lower(?))>0))`);
-   values.push(term,...indexed?['%'+term+'%']:[],term);
-  }
-  const total=Number(this.all(`SELECT count(*) AS n FROM web_visits v WHERE ${where.join(' AND ')}`,...values)[0]?.n??0);
-  const rows=this.all(`SELECT v.* FROM web_visits v WHERE ${where.join(' AND ')} ORDER BY v.ended_at DESC LIMIT ? OFFSET ?`,...values,limit,offset);
-  return {total,visits:rows.map(row=>{
-   const visit=this.webVisitRow(row);
-   const counts=Object.fromEntries(this.all('SELECT kind,count(*) AS n FROM web_records WHERE visit=? GROUP BY kind',visit.id).map(r=>[String(r.kind),Number(r.n)]));
-   let found='';
-   if(terms[0]){const hit=this.all('SELECT body FROM web_records WHERE visit=? AND instr(lower(body),lower(?))>0 ORDER BY id DESC LIMIT 1',visit.id,terms[0])[0];
-    if(hit){const body=String(hit.body),at=body.toLowerCase().indexOf(terms[0].toLowerCase());found=body.slice(Math.max(0,at-160),at+240);}}
-   return {...visit,counts,...found?{found}:{}};
-  })};
- }
- webVisit(id:string){this.ensureWeb();const row=this.all('SELECT * FROM web_visits WHERE id=?',id)[0];return row?this.webVisitRow(row):null;}
- /** One visit's records in order from record number `offset` (#n, counted over the whole visit, so a
-  * page's number from `webPages` is a place to start even when reading only `kinds` or `term`),
-  * each with its number. `total` counts the matching records in the whole visit, `after` those from
-  * `offset` on. */
- webRecords(visit:string,{offset=0,limit=400,kinds=[],term=''}:{offset?:number;limit?:number;kinds?:string[];term?:string}={}){
-  this.ensureWeb();
-  const where=['1'],values:any[]=[];
-  if(kinds.length){where.push(`kind IN (${kinds.map(()=>'?').join(',')})`);values.push(...kinds);}
-  if(term){where.push('instr(lower(body),lower(?))>0');values.push(term);}
-  const numbered='WITH numbered AS (SELECT id,at,kind,url,meta,body,row_number() OVER (ORDER BY id)-1 AS idx FROM web_records WHERE visit=?)';
-  const counts=this.all(`${numbered} SELECT count(*) AS n,coalesce(sum(idx>=?),0) AS later FROM numbered WHERE ${where.join(' AND ')}`,visit,offset,...values)[0];
-  const rows=this.all(`${numbered} SELECT idx,at,kind,url,meta,body FROM numbered WHERE idx>=? AND ${where.join(' AND ')} ORDER BY id LIMIT ?`,visit,offset,...values,limit);
-  return {total:Number(counts?.n??0),after:Number(counts?.later??0),records:rows.map(row=>{let meta:Row={};try{meta=JSON.parse(String(row.meta));}catch{}return {index:Number(row.idx),at:Number(row.at),kind:String(row.kind),url:String(row.url),meta,body:String(row.body)};})};
- }
- /** Where a visit's address changed (`page` records), with each one's record number. */
- webPages(visit:string){
-  this.ensureWeb();
-  return this.all("SELECT r.at,r.url,r.meta,(SELECT count(*) FROM web_records x WHERE x.visit=r.visit AND x.id<r.id) AS idx FROM web_records r WHERE r.visit=? AND r.kind='page' ORDER BY r.id",visit)
-   .map(row=>{let title='';try{title=String(JSON.parse(String(row.meta)).title??'');}catch{}return {index:Number(row.idx),url:String(row.url),title,at:Number(row.at)};});
- }
- /** Meeting transcripts (`transcript` records), newest first: one per transcription session, with
-  * the meeting's title, its site, when it ran and how many lines it holds. */
- meetingTranscripts(limit=20){
-  this.ensureWeb();
-  return this.all(`SELECT json_extract(r.meta,'$.session') AS session,r.visit,v.site,max(json_extract(r.meta,'$.meeting')) AS meeting,min(r.at) AS started,max(r.at) AS ended,count(*) AS lines
-   FROM web_records r JOIN web_visits v ON v.id=r.visit WHERE r.kind='transcript' AND json_extract(r.meta,'$.session') IS NOT NULL
-   GROUP BY session ORDER BY ended DESC LIMIT ?`,limit)
-   .map(row=>({session:String(row.session),visit:String(row.visit),site:String(row.site),meeting:String(row.meeting??''),startedAt:Number(row.started),endedAt:Number(row.ended),lines:Number(row.lines)}));
- }
- /** One transcription session's lines in order. */
- meetingTranscript(session:string){
-  this.ensureWeb();
-  return this.all(`SELECT at,body,meta FROM web_records WHERE kind='transcript' AND json_extract(meta,'$.session')=? ORDER BY id LIMIT 5000`,session)
-   .map(row=>{let meta:Row={};try{meta=JSON.parse(String(row.meta));}catch{}return {at:Number(row.at),text:String(row.body),speaker:String(meta.speaker??''),meeting:String(meta.meeting??'')};});
- }
- /** A visit's newest whole-page text record and the additions after it, oldest first (core onScreenText). */
- webPageText(visit:string){
-  this.ensureWeb();
-  return this.all(`SELECT kind,body FROM web_records WHERE visit=? AND kind IN ('text','text-more')
-   AND id>=coalesce((SELECT max(id) FROM web_records WHERE visit=? AND kind='text'),0) ORDER BY id DESC LIMIT 40`,visit,visit)
-   .reverse().map(row=>({kind:String(row.kind),body:String(row.body)}));
- }
- /** The newest visits, for Fox's sense of what just happened. */
- recentWebVisits(limit:number){this.ensureWeb();return this.all('SELECT * FROM web_visits ORDER BY ended_at DESC LIMIT ?',limit).map(this.webVisitRow);}
- /** Removes raw network records older than `rawBefore` and, above `maxBytes`, the oldest raw records
-  * until the recordings fit; empty visits go too. Returns how many records were removed. */
- pruneWeb({rawKinds,rawBefore,maxBytes}:{rawKinds:string[];rawBefore:number;maxBytes:number}):number {
-  this.ensureWeb();
-  const kinds=rawKinds.map(()=>'?').join(',');
-  let removed=0,counted=0;
-  try{
-   this.transaction(()=>{
-    const drop=(where:string,...values:any[])=>{
-     if(this.webSearchable)this.run(`INSERT INTO web_records_search(web_records_search,rowid,body) SELECT 'delete',id,body FROM web_records WHERE ${where} AND body<>''`,...values);
-     removed+=Number(this.run(`DELETE FROM web_records WHERE ${where}`,...values).changes);
-    };
-    drop(`kind IN (${kinds}) AND at<?`,...rawKinds,rawBefore);
-    // octet_length reads each body's size from its row header; length() would read every body (gigabytes).
-    let bytes=Number(this.all('SELECT coalesce(sum(octet_length(body)),0) AS n FROM web_records')[0]?.n??0);
-    while(bytes>maxBytes){
-     const oldest=this.all(`SELECT id,octet_length(body) AS n FROM web_records WHERE kind IN (${kinds}) ORDER BY id LIMIT 500`,...rawKinds);
-     if(!oldest.length)break;
-     const last=Number(oldest[oldest.length-1].id);
-     drop(`kind IN (${kinds}) AND id<=?`,...rawKinds,last);
-     bytes-=oldest.reduce((sum,row)=>sum+Number(row.n),0);
-    }
-    this.run('DELETE FROM web_visits WHERE NOT EXISTS (SELECT 1 FROM web_records r WHERE r.visit=web_visits.id)');
-    counted=Math.max(0,bytes);
-   });
-   this.recordingBytes=counted;
-  }catch{throw new WorldletError('Could not tidy the browsing recordings.');}
-  return removed;
- }
- /** The recordings' size in bytes, from each row's header (octet_length reads no recorded body), as the last tidy
-  * (`pruneWeb`, a minute after start and hourly) counted it; a cold disk still takes a second to walk the headers. */
- private recordingBytes:number|null=null;
- webRecordBytes():number {this.ensureWeb();return this.recordingBytes??=Number(this.all('SELECT coalesce(sum(octet_length(body)),0) AS n FROM web_records')[0]?.n??0);}
  /** How many events the World has written, deleted ones included (the newest sequence number). */
  eventRows():number {return Number(this.all('SELECT coalesce(max(seq),0) AS n FROM entries')[0]?.n??0);}
- /** The recorded sites, most recently visited first, with how many visits each holds. */
- webSites():{site:string;visits:number;lastAt:number}[] {
-  this.ensureWeb();
-  return this.all('SELECT site,count(*) AS n,max(ended_at) AS last FROM web_visits GROUP BY site ORDER BY last DESC').map(row=>({site:String(row.site),visits:Number(row.n),lastAt:Number(row.last)}));
- }
- /** Deletes recordings on one site and its subdomains (or every site) in a time range, with their
-  * search index entries. Returns how many visits went. */
- deleteWeb({site='',after=0,before=Number.MAX_SAFE_INTEGER}:{site?:string;after?:number;before?:number}):number {
-  this.ensureWeb();
-  // The subdomain test compares the address's end exactly: LIKE would read `_` and `%` in a site as wildcards.
-  const where='ended_at>=? AND started_at<?'+(site?' AND (site=? OR substr(site,-?)=?)':''),values:any[]=[after,before,...site?[site,site.length+1,'.'+site]:[]];
-  const visits=`visit IN (SELECT id FROM web_visits WHERE ${where})`;
-  try{
-   return this.transaction(()=>{
-    if(this.webSearchable)this.run(`INSERT INTO web_records_search(web_records_search,rowid,body) SELECT 'delete',id,body FROM web_records WHERE ${visits} AND body<>''`,...values);
-    this.run(`DELETE FROM web_records WHERE ${visits}`,...values);
-    return Number(this.run(`DELETE FROM web_visits WHERE ${where}`,...values).changes);
-   });
-  }catch{throw new WorldletError('Could not delete the browsing recordings.');}
- }
 
  // Everything else the World keeps ----------------------------------------------------------------
  // Owner decision 2026-10-05: everything that happens in the World is recorded in this database, so a
@@ -1717,4 +1314,14 @@ export class WorldLedger {
   this.ensureKept();
   this.run('DELETE FROM sent_messages WHERE id=?',id);
  }
+}
+
+// Each component's methods are written with `this:WorldLedger`; on the ledger they are its own.
+type Tables<T>={[K in keyof T]:T[K] extends (this:WorldLedger,...args:infer A)=>infer R?(...args:A)=>R:T[K]};
+export interface WorldLedger extends Tables<RecordingTables>,Omit<Tables<TaskTables>,'withRuntimeOutput'> {
+ /** Claim validation and the writes in `body` share one transaction; `body` must be synchronous. */
+ withRuntimeOutput<T>(taskID:string,runID:string,body:()=>T):T;
+}
+for(const tables of [RecordingTables,TaskTables]){
+ for(const [name,method] of Object.entries(Object.getOwnPropertyDescriptors(tables.prototype)))if(name!=='constructor')Object.defineProperty(WorldLedger.prototype,name,method);
 }
