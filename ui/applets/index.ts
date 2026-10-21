@@ -42,3 +42,4 @@ export {createPracticeWalkthrough} from './practice-walkthrough.ts';
 export {tennisCard} from './tennis-card.ts';
 export {tennisDemo} from './tennis-demo.ts';
 export * from './game-boards.ts';
+export {createMeetings,type MeetingsHostOptions} from './meetings-host.ts';

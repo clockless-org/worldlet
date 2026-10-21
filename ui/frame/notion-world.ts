@@ -1,6 +1,6 @@
 import {createMailArrival} from '../world/index.ts';
 import {themeAppletIcon,ACTIVE_THEME,themeAmbientTrack,createMailArrivalObserver} from '../style/index.ts';
-import {renderHomeFocus,createPanelScene,appletSceneKey} from '../applets/index.ts';
+import {renderHomeFocus,createPanelScene,appletSceneKey,createMeetings} from '../applets/index.ts';
 import {mailMetadata} from '../applets/index.ts';
 import {safeAttentionURL as safeAttentionSourceURL} from '../../agent/attention/index.ts';
 import {getApp,inAppletCatalog,recommendForArea,appletHost,curatedConnection,CURATED_READERS,HOME_NATIVE,CODING_SESSIONS,MONEY_READERS,ORIGINAL_READERS} from '../../context/applets/index.ts';
@@ -29,14 +29,14 @@ import {resolvePlacements,lampLabels,lampNeeds} from '../world/index.ts';
 import {WORLD_LAYOUT,THEME_SCENE,themeAreaMap} from '../world/index.ts';
 import {createLocationWriter} from './navigation-history.ts';
 import {renderMailFocus} from '../applets/index.ts';
-import {renderTranscript,transcriptBar} from '../applets/index.ts';
+
 import {createVoiceMemoReader} from '../applets/index.ts';
 import {createMessagesReader} from './messages.ts';
 import {installTextReaderHUD} from '../style/index.ts';
 import {createPracticeWalkthrough} from '../applets/index.ts';
 import {createPracticeJob,practiceJobSession,practiceJobDetail,PRACTICE_BUILD_MS} from '../applets/index.ts';
 import {mountPracticeTimer,practiceTimerHTML} from '../applets/index.ts';
-import {MEETING_BRIEF_REQUEST,meetingSummaryRequest,calendarMeetings,dueMeeting,meetingContextDetail,meetingsStage} from '../../context/applets/index.ts';
+import {MEETING_BRIEF_REQUEST,meetingContextDetail} from '../../context/applets/index.ts';
 import {inspectBrowserOutcome} from '../applets/index.ts';
 import {presentEmailReview} from '../companion/index.ts';
 import {tennisDemo} from '../applets/index.ts';
@@ -961,14 +961,14 @@ export function mountNotionWorld(data: World, native: any) {
     if(r.key==='messages'&&messagesReader&&!content.hidden)return messagesReader.context();
     if(appReader?.app.key===r.key&&ORIGINAL_READERS.includes(r.key)&&!content.hidden&&content.dataset.template==='app-source')return {context:{key:r.key+':'+appReader.record.id,title:r.title+' · '+appReader.record.title,detail:libraryReadContext||'Selected original is loading. Do not infer its contents.'},actions:[]};
     if(r.key==='meetings'&&!content.hidden&&content.dataset.template==='browser'){
-      const meeting=openedMeeting,actions=[];
+      const meeting=meetings.opened(),actions=[];
       if(meeting)actions.push({id:'meeting:brief:'+meeting.id,label:'Brief',icon:'spark',placement:'contextual',kind:'navigation',run:()=>{voice?.setGuide?.(null);return voice?.ask(MEETING_BRIEF_REQUEST,{displayText:'Meeting brief',icon:'spark'});}});
       // Transcription starts only from the person's own click, never from Fox.
-      if(!data.sample&&native?.browser)actions.push(transcriptState?.active
+      if(!data.sample&&native?.browser)actions.push(meetings.transcript()?.active
         ?{id:'meeting:transcript:stop',label:'Stop transcript',icon:'pause',placement:'contextual',kind:'navigation',run:()=>setTranscribing(false)}
         :{id:'meeting:transcript:start',label:'Transcribe',icon:'mic',placement:'contextual',kind:'navigation',run:()=>setTranscribing(true)});
       const website=websiteContext(r);
-      if(meeting)return {context:{key:'meeting:'+meeting.id,title:'Meetings · '+meeting.title,detail:meetingContextDetail(meeting)+(transcriptState?.active?'\nThe call is being transcribed into the World.':'')},actions};
+      if(meeting)return {context:{key:'meeting:'+meeting.id,title:'Meetings · '+meeting.title,detail:meetingContextDetail(meeting)+(meetings.transcript()?.active?'\nThe call is being transcribed into the World.':'')},actions};
       return website?{context:website,actions}:{actions};
     }
     if(r.entity==='app'){
@@ -1428,111 +1428,13 @@ export function mountNotionWorld(data: World, native: any) {
     if(native?.codexSession)void ensureCodexApplet().refresh();
     const claude=sections.find(s=>s.key==='claude-code');if(claude&&native?.developmentSessions)void loadWork(claude);
   }
-  let meetingRecords=[],meetingLoading=false,meetingReadAt=0,meetingAttemptAt=0;
-  const meetingSeenKey='worldlet-meetings-seen-'+(data.workspaceId||data.workspace);
-  const meetingSeen=new Set<string>();try{for(const id of JSON.parse(localStorage.getItem(meetingSeenKey)||'[]'))meetingSeen.add(id);}catch{}
-  // The calendar call on screen (null for a new call or a pasted link): Fox's context and brief.
-  let openedMeeting=null;const briefedMeetings=new Map<string,number>();
-  function openMeeting(r,url,title,meeting=null){
-    libraryWebReturn={app:r,record:null};appReader=null;openedMeeting=meeting;transcriptDeclined=false;
-    header(title||r.title,'Meetings',{applet:true});browserPanel.mount('meetings',{url,platform:'web'});sceneState();
-    dismissFox();syncTranscriptBar();
-    // Opening a calendar call is the request for its brief: Fox says who and what, with what the
-    // World knows, while the meeting's waiting page loads. Once per call within half an hour.
-    if(meeting&&!data.sample&&Date.now()-(briefedMeetings.get(meeting.id)||0)>1800000){briefedMeetings.set(meeting.id,Date.now());void voice?.ask?.(MEETING_BRIEF_REQUEST,{displayText:'Meeting brief',icon:'spark'});}
-  }
-  function meetingsStageValue(error=''){return {...meetingsStage(meetingRecords,error),transcripts:meetingTranscripts,openTranscript,openLink:(url,provider)=>{const r=sections.find(s=>s.key==='meetings');if(r)openMeeting(r,url,provider);}};}
-  // Live transcripts of calls (Meetings): the host's state, the bar over the call while it runs, and the
-  // saved transcripts listed on the sheet. A call starts its transcript by itself (owner request
-  // 2026-10-06); once the person stops it, or it could not start, it stays off for that call.
-  let meetingTranscripts=[],transcriptState=null,transcriptView=null,transcriptBarTimer=null,transcriptDeclined=false;
-  // Every transcribed call gets a summary artifact once its last line is kept (owner request 2026-10-06).
-  const summarizedTranscripts=new Set<string>();
-  async function loadTranscripts(){
-    if(data.sample||!native?.browser)return;
-    try{const value=await native.browser.command('transcripts',{},false);if(!Array.isArray(value?.transcripts))return;meetingTranscripts=value.transcripts;
-      if(current==='app-meetings'&&content.hidden)scene?.setAppStage?.(current,meetingsStageValue());}catch{}
-  }
-  async function openTranscript(session,meeting){
-    const r=sections.find(s=>s.key==='meetings');if(!r||!native?.browser)return;
-    let lines=[];try{const value=await native.browser.command('transcript',{session},false);lines=Array.isArray(value?.lines)?value.lines:[];}catch{}
-    if(current!==r.moduleId)return;
-    header(meeting||'Transcript','Meetings',{applet:true});content.dataset.applet='meetings';content.dataset.template='meeting-transcript';
-    renderTranscript(content,{meeting,lines});sceneState();
-  }
-  function meetingCallOpen(){return current==='app-meetings'&&!content.hidden&&content.dataset.template==='browser';}
-  function syncTranscriptBar(){
-    const state=transcriptState,show=!!state&&(state.active||state.waiting>0||Date.now()-(state.endedAt||0)<4000)&&meetingCallOpen();
-    if(!show){transcriptView?.element.remove();return;}
-    transcriptView??=transcriptBar(()=>void setTranscribing(false));
-    transcriptView.update(state);
-    const viewport=content.querySelector('.browser-viewport');
-    if(viewport&&transcriptView.element.nextElementSibling!==viewport)content.insertBefore(transcriptView.element,viewport);
-  }
-  async function setTranscribing(on){
-    const title=openedMeeting?.title||browserPanel.lastVisit('meetings')?.title||'Meeting';
-    if(!on)transcriptDeclined=true;
-    let error='';
-    try{const value=await native?.browser?.command('transcribe',{on,meeting:title},false);if(value?.error)error=String(value.error);}
-    catch(e){error=e?.message||'Could not start the transcript.';}
-    if(error){transcriptDeclined=true;voice?.setGuide?.({source:'meeting-transcript',text:error});voice?.revealGuide?.();}
-    nativeHUD?.sync();
-  }
-  window.addEventListener('worldlet:browser',(event:any)=>{
-    const value=event.detail;
-    if(value?.phase==='meeting-ready'){if(!data.sample&&!transcriptDeclined&&!transcriptState?.active&&meetingCallOpen())void setTranscribing(true);return;}
-    if(value?.phase!=='transcript')return;
-    const ended=transcriptState?.active&&!value.active;
-    transcriptState={...value,endedAt:value.active?0:(transcriptState?.endedAt||Date.now())};
-    syncTranscriptBar();nativeHUD?.sync();
-    if(ended||!value.active&&!value.waiting){clearTimeout(transcriptBarTimer);transcriptBarTimer=setTimeout(()=>{syncTranscriptBar();void loadTranscripts();},4500);}
-    if(!value.active&&!value.waiting&&value.lines>0&&typeof value.visit==='string'&&value.visit&&!data.sample&&!summarizedTranscripts.has(value.session)){
-      summarizedTranscripts.add(value.session);
-      void voice?.ask?.(meetingSummaryRequest({meeting:value.meeting,visit:value.visit}),{displayText:'Meeting summary',icon:'spark'});
-    }
-  });
-  function showMeetings(r){
-    content.hidden=true;hud.classList.remove('is-reading');appReader=null;openedMeeting=null;void loadTranscripts();
-    // The sample world shows its authored meeting notes where calendar calls would be.
-    const stage=meetingsStageValue();if(data.sample)stage.items=[...appletStageData(r,sampleStageRecords(r)).items,...stage.items];
-    scene?.setAppStage?.(r.moduleId,stage);sceneState();
-    void refreshMeetings();
-  }
-  async function refreshMeetings(){
-    if(meetingLoading||data.sample||!native?.appContent)return;
-    const connected=connectionLive(data.moduleConnections?.find(c=>c.provider==='google-calendar')||{});
-    if(!connected){meetingRecords=[];if(current==='app-meetings')scene?.setAppStage?.(current,{...meetingsStageValue(),connected:false});return;}
-    meetingLoading=true;meetingAttemptAt=Date.now();
-    try{const value=await native.appContent({provider:'google-calendar',refresh:true});meetingRecords=calendarMeetings(value?.pages||[]);meetingReadAt=Date.now();
-      if(current==='app-meetings'&&content.hidden)scene?.setAppStage?.(current,meetingsStageValue());
-    }catch{meetingReadAt=0;if(current==='app-meetings'&&content.hidden)scene?.setAppStage?.(current,meetingsStageValue('Calendar could not refresh. Ask Fox to retry.'));}
-    finally{meetingLoading=false;}
-  }
-  const meetingPoll=setInterval(()=>{
-    if(!root.isConnected||data.sample)return;
-    // No stale/offline prompts, no replacement of a meeting already on screen.
-    // A hidden page offers nothing, so it does not read Calendar every minute either;
-    // the first tick after it is shown again refreshes.
-    if(!document.hidden&&Date.now()-meetingAttemptAt>60000&&!meetingLoading)void refreshMeetings();
-    if(document.hidden||root.dataset.onboarding==='true'||Date.now()-meetingReadAt>90000||current==='app-meetings'&&!content.hidden)return;
-    const due=dueMeeting(meetingRecords,meetingSeen),r=sections.find(s=>s.key==='meetings');if(!due||!r)return;
-    meetingSeen.add(due.id);try{localStorage.setItem(meetingSeenKey,JSON.stringify([...meetingSeen].slice(-200)));}catch{}
-    offerMeeting(r,due);
-  },5000);
-  // Any invite can put a valid meeting link on the calendar, so a due meeting is only
-  // offered: Fox shows it with an explicit Join action and nothing opens by itself.
-  function offerMeeting(r,due){
-    const source='meeting-due',close=()=>voice?.setGuide?.(null,{only:source,forget:true});
-    const body=element('p','',due.title+' · '+due.provider);
-    voice?.setGuide?.({source,text:'A meeting is starting.',body,actions:[
-      button('Join',()=>{close();visitObject(r.moduleId,{enter:false});openMeeting(r,due.url,due.title,due);}),
-      button('Not now',close)]});
-    voice?.revealGuide?.();
-  }
+  // Meetings: calendar calls, their transcripts and the offer when one is due (ui/applets/meetings-host.ts).
+  const meetings=createMeetings({data:()=>data,native,root,content,hud,current:()=>current,scene:()=>scene,voice:()=>voice,nativeHUD:()=>nativeHUD,sections,browserPanel,header,sceneState,dismissFox,visitObject,appletStageData,sampleStageRecords,setLibraryWebReturn:value=>{libraryWebReturn=value;},clearAppReader:()=>{appReader=null;}});
+  const {show:showMeetings,open:openMeeting,setTranscribing}=meetings;
   // The daily cards, the first card and prepared replies (ui/attention/daily-cards.ts).
   const dailyCards=createDailyCards({data:()=>data,native,root,$,voice:()=>voice,foxArtifact,requestArtifactPage:(artifact,open)=>requestArtifactPage(artifact,open),takeFollowUpDraft:artifacts.takeFollowUpDraft,attentionPage:()=>attentionPage,showDraftLine:page=>showDraftLine(page),pages:()=>pages,insideApplet:()=>insideApplet(),inPageLayer:()=>inPageLayer(),reportProductEvent});
   const {showDailyInJournal,followUp,readDrafts}=dailyCards;
-  window.addEventListener('pagehide',()=>clearInterval(meetingPoll),{once:true});
+  window.addEventListener('pagehide',()=>meetings.dispose(),{once:true});
   const workPoll=setInterval(()=>{if(!document.hidden&&current==='building-work'){const r=sections.find(s=>s.key==='claude-code');if(r&&!data.sample&&native?.developmentSessions)void loadWork(r);}},15000);
   window.addEventListener('pagehide',()=>clearInterval(workPoll),{once:true});
   function publishWork(r,value){
