@@ -124,9 +124,9 @@ Directory ownership follows the [component table](#components-and-interfaces). E
 ### One component, one owner
 
 - **Applet definitions:** `context/applets/catalog.ts` and `context/applets/definitions/<key>.ts` own identity, capabilities and declared states. `ui/applets/<key>/` owns rendering, panels and logo presentation. Model context and tools can read the catalog without importing UI.
-- **Companion:** `agent/companion/` owns portable records, validation, recall and prompt rules; `ui/companion/` owns dialogue and animation. Host storage and credential operations remain in the Electron host (`modules/companion/companion.ts`, `src/vault.ts`).
+- **Companion:** `agent/companion/` owns portable records, validation, recall and prompt rules; `ui/companion/` owns dialogue and animation. Host storage and credential operations remain in the Electron host (`modules/companion/companion.ts`, `platform/host/vault.ts`).
 - **Schedules:** `agent/tasks/` owns Worldlet source-check rules and settings policy. The platform supplies consent, app lifecycle and an awake clock. `harness/hermes/routines.py` claims due jobs, runs them and saves results. External backends must advertise and implement equivalent services.
-- **Host persistence:** `platform/host/store/world-store.ts`, `store/ledger.ts` and the companion records in `modules/companion/companion.ts` belong to layer 3. Layer 2 owns the rules they apply. They are not listed as a second implementation in `core/`.
+- **Host persistence:** `platform/host/store/world-store.ts`, `store/ledger.ts` (split into one file per component beside it) and the companion records in `modules/companion/companion.ts` belong to layer 3. Layer 2 owns the rules they apply. They are not listed as a second implementation in `core/`.
 - **Local execution:** `platform/local-tools/` supplies speech and coding CLI helpers independently of the selected Harness.
 - **Connectors:** Hermes-bound readers/authentication remain in `harness/hermes/`. There is no empty generic connectors folder or claim that these modules are independent. Do not put source connectors in `models/`; that directory owns only the hosted model API.
 
@@ -139,7 +139,7 @@ Directory ownership follows the [component table](#components-and-interfaces). E
 5. `models/` holds the independently deployed included-model API; provider configuration that requires Hermes stays with Hermes.
 6. `resources/` contains assets and declarations, not executable application logic. `ui/style/style.ts` is the read-only style lookup.
 
-The Electron host is one TypeScript project under `platform/desktop/`, with one module per domain (`src/modules/*`); modules do not represent extra product layers. It consumes shared rules through in-process Core (`src/core.ts`) with the same JSON envelope the retired native hosts used. This does not establish complete behavioral parity: the [parity ratchet](README.md#parity-vectors) and device acceptance remain explicit audit items.
+The shared Host is one TypeScript project under `platform/host/`, run by Desktop (Electron) and Server (Node), with one module per component (`platform/host/modules/*`); modules do not represent extra product layers. It consumes shared rules through in-process Core (`platform/host/core.ts`) with the same JSON envelope the retired native hosts used. This does not establish complete behavioral parity: the [parity ratchet](README.md#parity-vectors) and device acceptance remain explicit audit items.
 
 For recurring review criteria and the current migration gaps, use [the architecture audit](../docs/UI-CORE-PLATFORM.md#architecture-audit).
 
@@ -338,7 +338,7 @@ record concrete exceptions and required device checks in its issue/PR.
 is the only browser activity persistence adapter; the website panel (`device.ts`)
 supplies page/focus/clock facts, and website page views (`page.ts`) never open the
 ledger. Trusted World clicks/semantic commands use `platform/bridge/activity.ts` and
-Host `worldActivity` (`modules/world.ts`), then a Store operation (`WorldStore.recordActivity`). The window coordinator cannot write the
+Host `worldActivity` (`modules/world/world.ts`), then a Store operation (`WorldStore.recordActivity`). The window coordinator cannot write the
 ledger. Component checks enforce those call boundaries.
 
 `platform/bridge/activity-collector.js` is the shared DOM collector. The resource
