@@ -32,7 +32,7 @@ export class WorldWindow {
  readonly view:WebContentsView;
  readonly profile:Profile;
  /** `quiet`: launched by the login item (#1229), so the World opens minimized without taking focus. `hidden`: also set
-  * to run in background (modules/shell/companion.ts RUN_IN_BACKGROUND), so it does not open at all, and main.ts loads
+  * to run in background (modules/companion/window.ts RUN_IN_BACKGROUND), so it does not open at all, and main.ts loads
   * its page only when it is first shown. */
  constructor(profile:Profile,preload:string,hooks:WorldWindowHooks,{quiet=false,hidden=false}:{quiet?:boolean,hidden?:boolean}={}){
   this.profile=profile;

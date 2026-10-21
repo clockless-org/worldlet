@@ -7,12 +7,12 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {standingWorldTools} from '../../host/modules/agents/index.ts';
-import {mcpHome,worldletHome} from '../../host/modules/agents/script-agents.ts';
-import {currentEnvironment,locateLocalHarnesses} from '../../host/modules/agents/local-harness.ts';
-import {runHarnessCommand} from '../../host/modules/agents/harness-approvals.ts';
-import {codexHome} from '../../host/modules/agents/agent-files.ts';
-import type {StandingAgent} from '../../host/modules/agents/world-tool-bridge.ts';
+import {standingWorldTools} from '../../host/modules/companion/agent/index.ts';
+import {mcpHome,worldletHome} from '../../host/modules/gate/script-agents.ts';
+import {currentEnvironment,locateLocalHarnesses} from '../../host/modules/companion/agent/local-harness.ts';
+import {runHarnessCommand} from '../../host/modules/companion/agent/harness-approvals.ts';
+import {codexHome} from '../../host/modules/companion/agent/agent-files.ts';
+import type {StandingAgent} from '../../host/modules/gate/world-tool-bridge.ts';
 import {ensureDirectory,writeAtomic} from '../../host/files.ts';
 import {LOCAL_HARNESSES,commandReason,isWorldToolsRegistrar,worldToolsCommands,type WorldToolsRegistrar} from '../../../agent/gate/index.ts';
 

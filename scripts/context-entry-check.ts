@@ -133,7 +133,7 @@ await withTempDir('worldlet-context-entry-',async dir=>{
  }finally{ledger.close();}
 });
 // Grants and audit at the entry (agent/gate/GRANTS.md): the host injects the Gate's decision and its audit trail, as the
-// standing World tools server does (platform/host/modules/agents/world-tool-bridge.ts). Fictional Agents and records.
+// standing World tools server does (platform/host/modules/gate/world-tool-bridge.ts). Fictional Agents and records.
 {
  const now='2026-10-21T09:00:00.000Z';
  const alex:AgentIdentity={id:'agent-alex',name:'Alex\'s script',harness:'claude-code',kind:'local',createdAt:'2026-10-01T09:00:00.000Z'};

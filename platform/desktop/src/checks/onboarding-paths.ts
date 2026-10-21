@@ -1,8 +1,8 @@
 import path from 'node:path';
 import {dialog,Menu,shell,type BaseWindow,type MenuItem,type WebContents,type WebContentsView} from 'electron';
 import {AGENT,ANALYTICS,DESKTOP_COMPANION,type AgentService,type AnalyticsService,type DesktopCompanionService} from '../../../host/services.ts';
-import {readSelection} from '../../../host/modules/agents/local-harness.ts';
-import {readAdopted} from '../../../host/modules/agents/local-memory.ts';
+import {readSelection} from '../../../host/modules/companion/agent/local-harness.ts';
+import {readAdopted} from '../../../host/modules/companion/agent/local-memory.ts';
 import type {CheckContext} from './index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
@@ -104,7 +104,7 @@ export async function onboardingPaths({host,window,view}:CheckContext){
   for(let i=0;i<25&&!events.includes('local_agent_selected');i++)await sleep(200);
   if(!events.includes('local_agent_selected'))throw Error('choosing the local Agent reported no local_agent_selected');
   await sleep(1000);
-  // Before onboarding is over, closing the window quits (modules/shell/companion.ts); the launcher then
+  // Before onboarding is over, closing the window quits (modules/companion/window.ts); the launcher then
   // checks the exit and that nothing was left running, as after Quit Completely.
   console.log(`PASS onboarding paths ${phase}: chose ${choice} on the setup page and brought it in (${Math.round((Date.now()-started)/1000)}s); closing the window mid-onboarding`);
   window.close();
@@ -208,7 +208,7 @@ async function clickAt(web:WebContents,js:(code:string)=>Promise<any>,what:strin
 }
 
 /** Closing the World window keeps Fox on the desktop (the World view moves into the Companion's floating
- * window), and Back to World puts the same view back in the shown World window (modules/shell/companion.ts).
+ * window), and Back to World puts the same view back in the shown World window (modules/companion/window.ts).
  * The one-time hint needs a finished onboarding, so the mock-Google journey checks it (onboarding-flow.ts). */
 export async function desktopCompanion(companion:DesktopCompanionService,window:BaseWindow,view:WebContentsView,mark:(step:string)=>void,onDesktop?:()=>Promise<void>){
  window.close();

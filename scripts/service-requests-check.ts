@@ -9,9 +9,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {answerServiceRequest,serviceGranted,serviceRequestDue,serviceRequestItem,serviceRequestRefusal,STANDING_OUTSIDE_TURN} from '../agent/gate/index.ts';
 import {CONNECTOR_TECHNICAL_WORDS} from '../context/connectors/index.ts';
-import {createAgentAccess} from '../platform/host/modules/agents/agent-access.ts';
-import {createServiceRequests} from '../platform/host/modules/agents/service-requests.ts';
-import {openStandingWorldTools} from '../platform/host/modules/agents/world-tool-bridge.ts';
+import {createAgentAccess} from '../platform/host/modules/gate/agent-access.ts';
+import {createServiceRequests} from '../platform/host/modules/gate/service-requests.ts';
+import {openStandingWorldTools} from '../platform/host/modules/gate/world-tool-bridge.ts';
 import {WorldLedger} from '../platform/host/store/ledger.ts';
 import {withTempDir} from './test-temp.ts';
 

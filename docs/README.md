@@ -18,8 +18,8 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | Topic | Read |
 | --- | --- |
 | The principles everything is designed by | [Charter](CHARTER.md) |
-| The stack in computer terms, as a picture | [Stack diagram](stack-in-computer-terms.svg) ([Chinese](stack-in-computer-terms.zh.svg)) · [interactive architecture diagram](architecture.html) |
-| Five runtime layers: UI, Agent and Context, Platform, Harness, Models | [Five-layer architecture](UI-CORE-PLATFORM.md) · [shared UI, pure Agent and Context, thin Platform](../contracts/COMPONENTS.md) |
+| The stack in computer terms, as a picture | [Stack diagram](stack-in-computer-terms.svg) ([Chinese](stack-in-computer-terms.zh.svg)) · [the four layers and their components](four-layers.svg) |
+| Four layers and 20 components: UI, Agent, Context, Platform | [Architecture](UI-CORE-PLATFORM.md) · [shared UI, pure Agent and Context, thin Platform](../contracts/COMPONENTS.md) |
 | How Worldlet talks to an Agent, and an Agent to the World | [Platform–Harness contract](../contracts/HARNESS.md) · [Agent adapters](../harness/README.md) |
 | What each Agent may do in the World, and what it did | [Agent identity, Grants and audit](../agent/gate/GRANTS.md) |
 | Let a ChatGPT, Claude or Cursor connector, or a cloud Agent, use the World | [Remote MCP](../agent/gate/REMOTE-MCP.md) |
@@ -56,7 +56,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **286 Markdown documents** and **749 supporting documentation files**.
+Indexed: **286 Markdown documents** and **748 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -67,7 +67,7 @@ Indexed: **286 Markdown documents** and **749 supporting documentation files**.
 | Resource and artwork records | 74 |
 | Module and service documentation | 40 |
 | Website documentation and articles | 0 |
-| Documentation diagrams, previews and evidence | 749 |
+| Documentation diagrams, previews and evidence | 748 |
 
 <details><summary>Root entry points (6)</summary>
 
@@ -390,10 +390,9 @@ Indexed: **286 Markdown documents** and **749 supporting documentation files**.
 
 </details>
 
-<details><summary>Documentation diagrams, previews and evidence (749)</summary>
+<details><summary>Documentation diagrams, previews and evidence (748)</summary>
 
 - [agent/app/analytics-insights.json](../agent/app/analytics-insights.json)
-- [docs/architecture.html](architecture.html)
 - [docs/assets/readme/applet-notes.jpg](assets/readme/applet-notes.jpg)
 - [docs/assets/readme/attention.jpg](assets/readme/attention.jpg)
 - [docs/assets/readme/plan.jpg](assets/readme/plan.jpg)

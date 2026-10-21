@@ -1,4 +1,4 @@
-// DoorDash through its official CLI in the Platform (context/connectors/doordash.ts, platform/host/modules/sources/
+// DoorDash through its official CLI in the Platform (context/connectors/doordash.ts, platform/host/modules/connectors/
 // doordash.ts), with no Harness: a failed or timed-out cart change is uncertain and never retried, nothing like a
 // credential or the CLI's error output reaches Fox, payment is never an operation, checkout links are DoorDash's
 // own, a connection made in Fox's earlier Agent profile is kept, and Fox's use_doordash is admitted by its turn first.
@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {doordashArgs,doordashOutcome,validDoordashCheckout} from '../context/connectors/index.ts';
-import {DoorDash,DoorDashSourceAccess} from '../platform/host/modules/sources/doordash.ts';
+import {DoorDash,DoorDashSourceAccess} from '../platform/host/modules/connectors/doordash.ts';
 import {withTempDir} from './test-temp.ts';
 
 for(const run of [{timedOut:false,exitCode:1,stdout:'private token=must-not-leak'},{timedOut:false,exitCode:0,stdout:'not-json'},{timedOut:false,exitCode:0,stdout:'x'.repeat(1_000_001)},

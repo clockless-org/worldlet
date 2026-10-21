@@ -8,7 +8,7 @@ import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {CONVERSATION_ATTENTION,conversationAttentionId,conversationObservation,conversationOriginal,conversationsForAttention,validConversationAttentionId} from '../agent/tasks/index.ts';
 import {worldLogLines} from '../context/applets/index.ts';
-import {HERMES_OLDER,HERMES_RECENT,readOlderHermes,readOwnHermes} from '../platform/host/modules/agents/agent-files.ts';
+import {HERMES_OLDER,HERMES_RECENT,readOlderHermes,readOwnHermes} from '../platform/host/modules/companion/agent/agent-files.ts';
 import {createOlderHistory} from '../platform/host/modules/companion/older-history.ts';
 import {broughtConversations} from '../platform/host/modules/companion/migration.ts';
 import {WorldLedger} from '../platform/host/store/ledger.ts';

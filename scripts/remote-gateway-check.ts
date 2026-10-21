@@ -3,7 +3,7 @@ import http from 'node:http';
 import path from 'node:path';
 import {WebSocketServer} from 'ws';
 import {REMOTE_GATEWAY_HARNESS_ID,harnessLocation,harnessService,readRemoteGatewayToken,readRemoteGatewayUrl,remoteGatewaySocketUrl} from '../agent/gate/index.ts';
-import {RemoteGatewayAdapter,checkRemoteGateway,readRemoteGateway,remoteGatewayView,writeRemoteGateway} from '../platform/host/modules/agents/remote-gateway.ts';
+import {RemoteGatewayAdapter,checkRemoteGateway,readRemoteGateway,remoteGatewayView,writeRemoteGateway} from '../platform/host/modules/companion/agent/remote-gateway.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Fox on an OpenClaw Gateway on another computer, reached directly (platform/web/README.md#an-agent-gateway-on-another-computer):

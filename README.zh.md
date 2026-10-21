@@ -43,7 +43,7 @@ Worldlet 不提供自己的模型。它通过你的 Agent 对话，借用它的�
 | 系统 API | World 工具，通过 `worldlet` MCP 服务器提供给 Agent | 本项目 |
 | 磁盘 | 你电脑上的 `world.sqlite` 和 World 存储 | 本项目 |
 
-Worldlet 跑在你自己的 Harness 上，就像桌面环境 GNOME；加上它安装的 Hermes Agent，就像发行版 Ubuntu。World → Agent 的工具走 MCP；Agent → World 每种 Harness 一个适配器（[Harness 契约](contracts/HARNESS.md)、[交互式架构图](docs/architecture.html)）。
+Worldlet 跑在你自己的 Harness 上，就像桌面环境 GNOME；加上它安装的 Hermes Agent，就像发行版 Ubuntu。World → Agent 的工具走 MCP；Agent → World 每种 Harness 一个适配器（[Harness 契约](contracts/HARNESS.md)、[交互式架构图](docs/four-layers.svg)）。
 
 ## 安装
 

@@ -67,7 +67,7 @@ try{
  await web.getByRole('button',{name:'Copy link',exact:true}).click();
  await web.getByRole('button',{name:'Link copied',exact:true}).waitFor();
  assert.equal(await page.evaluate(()=>(window as any).copied),'https://worldlet.ai/open/#v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Studio+Mac','another device gets the relay link');
-// Run in background (modules/shell): only once a browser has opened a link, and the link stays as it was.
+// Run in background (modules/app): only once a browser has opened a link, and the link stays as it was.
 await web.getByRole('button',{name:'Run in background',exact:true}).click();
 await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='phonePair'&&c.kind==='local'&&c.operation==='background'));
 await web.getByText('Opened in Chrome on Mac · Active now').waitFor();

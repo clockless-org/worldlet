@@ -13,7 +13,7 @@ import {fakeMedia,pageErrors,worldUrl} from './browser-test.ts';
 
 const entry=`export * from './ui/companion/microphone.ts';export {mountMicrophonePicker} from './ui/companion/microphone-picker.ts';export {createBrowserSpeech} from './ui/companion/browser-speech.ts';export {createStreamingSpeech} from './ui/companion/streaming-speech.ts';`;
 const bundle=(await build({stdin:{contents:entry,resolveDir:process.cwd(),loader:'ts'},bundle:true,format:'iife',globalName:'mic',write:false})).outputFiles[0].text;
-const surface=/const PAGE=`[\s\S]*?<script>([\s\S]*?)<\/script>`;/.exec(await readFile('platform/host/modules/shell/surface.ts','utf8'))?.[1];
+const surface=/const PAGE=`[\s\S]*?<script>([\s\S]*?)<\/script>`;/.exec(await readFile('platform/host/modules/app/surface.ts','utf8'))?.[1];
 assert(surface?.includes('captureStart'),'the media surface page script is readable');
 const css=await readFile('resources/styles/builtin/controls.css','utf8');
 const html=`<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="/controls.css"><body><div id="notionWorld"><button class="companion-speech-button">mic</button></div>

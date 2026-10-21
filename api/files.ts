@@ -23,7 +23,7 @@ export const FILES=Object.freeze({
  analytics:'platform/desktop/distribution/Analytics.json',
  macBuild:'platform/desktop/distribution/mac/ci-build.sh',
  windowsInstaller:'platform/desktop/distribution/windows/installer.nsi',
- updatesModule:'platform/host/modules/shell/updates.ts',
+ updatesModule:'platform/host/modules/app/updates.ts',
  onboardingPaths:'platform/desktop/src/checks/onboarding-paths.ts',
  // The phone release jobs (Play, TestFlight) build these projects.
  iosProject:'platform/ios/',

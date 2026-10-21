@@ -3,7 +3,7 @@
 Chapters:
 - [Repository layers and components](#repository-layers)
 - [Component interfaces](#component-interfaces)
-- [Five-layer architecture audit](#architecture-audit)
+- [Architecture audit](#architecture-audit)
 
 
 Current migration status: layer boundaries are enforced, but behavioral parity is **not complete**. Current gaps are the [parity ratchet](README.md#parity-vectors): Core operations the retired native hosts invoked that the Electron host does not yet route through Core (`electronPending` in [`host-core-usage.json`](fixtures/parity/host-core-usage.json)). Earlier acceptance evidence is historical and remains in Git and PR #161.
@@ -89,7 +89,7 @@ Use the [architecture audit checklist](../docs/UI-CORE-PLATFORM.md#architecture-
 
 World/HUD, website and restricted media surfaces are Electron `WebContentsView`s on
 every OS. The same trusted live World view moves into the desktop Companion window
-(`modules/shell/companion.ts`), preserving its conversation and draft. Shared Core
+(`modules/companion/window.ts`), preserving its conversation and draft. Shared Core
 runs in-process (`platform/host/core.ts`); it is not a UI renderer. OS input,
 composition, focus and pixel presentation are IO; World rendering and interaction
 decisions stay in shared UI.
@@ -106,7 +106,7 @@ See the migration status at the [top of this catalog](#shared-ui-pure-core-thin-
 
 Current [component interfaces and browser/runtime audit](COMPONENTS.md#component-interfaces).
 
-The [architecture diagram](../docs/architecture.html) follows the source tree. Runtime layers have explicit owning directories; the independently deployed model API lives at the repository root. Shared contracts and resources are explicit supporting modules, not a catch-all `shared/` folder.
+The [architecture diagram](../docs/four-layers.svg) follows the source tree. Runtime layers have explicit owning directories; the independently deployed model API lives at the repository root. Shared contracts and resources are explicit supporting modules, not a catch-all `shared/` folder.
 
 Directory ownership follows the [component table](#components-and-interfaces). Each runtime layer has one root; host modules and subdirectories do not create additional layers.
 
@@ -180,7 +180,7 @@ capabilities; missing v1 flags are false and unknown versions fail explicitly.
 Legacy compatibility stays in one resolver. UI flags never replace host
 permission, frame/origin or account checks. In-process Core exchanges JSON only and
 gets no host IO. Whole-world backups are one SQLite file of the library's files on every
-OS (format 2, `modules/shell/backup.ts`); the Mac `WorldBackup.Archive` JSON (format 1) still
+OS (format 2, `modules/app/backup.ts`); the Mac `WorldBackup.Archive` JSON (format 1) still
 restores. Portable companion archives are a different contract.
 Shared companion limits and timestamp/UUID policy live in
 `contracts/companion-policy.json`; the host imports it directly, and `test:core`
@@ -215,7 +215,7 @@ Shared companion limits and timestamp/UUID policy live in
 
 ### Browser component implementation map
 
-The [component diagram](../docs/architecture.html) shows logical component groups,
+The [component diagram](../docs/four-layers.svg) shows logical component groups,
 public entry points, and browser/journal execution paths. UI and Core components
 have checked public module boundaries. Host modules below live inside the one Electron
 project, not separately packaged libraries. Paths are under `platform/desktop/src/`.
@@ -230,7 +230,7 @@ project, not separately packaged libraries. Paths are under `platform/desktop/sr
 | Selected-target CDP | Private commands/events; no browser-wide access | `page.ts` through `webContents.debugger`; `Target.*`/`Browser.*` refused |
 | World semantic actions | `contracts/ui.ts`, `window.worldletUI.snapshot/dispatch` | Trusted World view (`world/window.ts`) |
 | Headless Core execution | Serialized operations in `agent/index.ts` | `core.ts`, in-process |
-| Durable execution | `contracts/execution.ts`, `context/store/index.ts` | `store/ledger.ts`, `modules/agents/journal.ts` |
+| Durable execution | `contracts/execution.ts`, `context/store/index.ts` | `store/ledger.ts`, `modules/companion/agent/journal.ts` |
 
 Chromium paints pages; Electron embeds it. CDP controls the selected page;
 agent-browser interprets website elements and executes interactions through that
@@ -314,7 +314,7 @@ bounded projections; explicit original reads preserve full content. Shared item
 and presentation contracts reject unsupported state transitions and malformed data.
 
 <a id="architecture-audit"></a>
-## Five-layer architecture audit
+## Architecture audit
 
 <a id="architecture-audit-checklist-for-every-audit"></a>
 ### Checklist and current status

@@ -4,8 +4,8 @@ import path from 'node:path';
 import {validateHarnessServices} from '../contracts/harness-services.ts';
 import {HARNESS_SERVICES,approvalChanges,approvalGrantFor,approvalThreadLabel,changesAnswered,changesAsked,changesCall,harnessApprovalFeatures,hermesAllowlistWithout,hermesStandingRules,lineDiff,
  openClawApprovalsWithout,openClawChangesEvent,openClawGrantRules,openClawStandingRules,readApprovalGrants,readHarnessApprovalResult,rememberApprovalGrant,standingRuleId} from '../agent/gate/index.ts';
-import {hermesStandingRulesService,openClawStandingRulesService,standingRules} from '../platform/host/modules/agents/harness-approvals.ts';
-import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/host/modules/agents/local-harness.ts';
+import {hermesStandingRulesService,openClawStandingRulesService,standingRules} from '../platform/host/modules/companion/agent/harness-approvals.ts';
+import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/host/modules/companion/agent/local-harness.ts';
 import {createHarnessApprovalRules} from '../platform/host/modules/companion/harness-approvals.ts';
 import {AGENT} from '../platform/host/services.ts';
 import {WorldLedger} from '../platform/host/store/ledger.ts';

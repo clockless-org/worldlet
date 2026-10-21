@@ -19,7 +19,7 @@ The same code runs on every OS. Before #996 this policy existed only on Mac (Win
 
 ## Ownership
 
-[`src/modules/shell/companion.ts`](../host/modules/shell/companion.ts) owns detaching and reattaching the view, the floating window, the crop, dragging and restoration; [`src/modules/shell/index.ts`](../host/modules/shell/index.ts) registers its page actions and the Back to World / Quit Completely menus, [`src/modules/shell/companion-tray.ts`](../host/modules/shell/companion-tray.ts) owns that shared menu and the Windows tray icon, and the World window's close hook asks it whether to keep the app open. `ui/companion/desktop-companion.ts` and its stylesheet own presentation, with context handling in the existing Companion module.
+[`src/modules/companion/window.ts`](../host/modules/companion/window.ts) owns detaching and reattaching the view, the floating window, the crop, dragging and restoration; [`src/modules/app/index.ts`](../host/modules/app/index.ts) registers its page actions and the Back to World / Quit Completely menus, [`src/modules/companion/tray.ts`](../host/modules/companion/tray.ts) owns that shared menu and the Windows tray icon, and the World window's close hook asks it whether to keep the app open. `ui/companion/desktop-companion.ts` and its stylesheet own presentation, with context handling in the existing Companion module.
 
 ## Focused checks
 

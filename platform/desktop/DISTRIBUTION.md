@@ -55,7 +55,7 @@ Alpha carries the RC package's exact bytes, the same ones a release publishes ho
 
 Following a less stable channel only changes the feed. Following a more stable one (Alpha to Beta) installs that channel's newest build at the next update even when its Build is lower, then carries on from it. A prepared or downloaded update from the previous channel is dropped. The choice (`worldlet.update.channel`) belongs to this computer and is not part of World backups. A Microsoft Store or Steam copy is updated by its store and shows no choice. The phone apps keep their store tracks: Alpha is TestFlight's internal group and Play internal testing, Beta TestFlight's external group (public link) and Play open testing, Production the App Store and Google Play.
 
-**Who can switch** (owner request 2026-10-05). Worldlet has no accounts, so "the owner" is a computer that carries the owner's mark: a file named `owner` in `<library base>/Worldlet Internal/` (its contents are never read), or for the Dev app `.local/owner` in its checkout ([`owner-computer.ts`](../host/modules/shell/owner-computer.ts)). The older `machine-service.json` in either place, which the development Mac's daemon used to leave there, still counts, so keep it or add `owner` before deleting it. Only there does Settings › General show the switcher; the host refuses a channel change from any other copy whatever the page asks. Everyone else sees the channel they follow with no choice, and follows Beta: a copy that followed Alpha moves back to Beta at its next update check, installing Beta's newest even when its Build is lower. Adding or removing the mark takes effect within a minute, without a restart. The Dev app never switches: it follows main from its checkout, an installed copy never follows Dev, and neither shows a way across.
+**Who can switch** (owner request 2026-10-05). Worldlet has no accounts, so "the owner" is a computer that carries the owner's mark: a file named `owner` in `<library base>/Worldlet Internal/` (its contents are never read), or for the Dev app `.local/owner` in its checkout ([`owner-computer.ts`](../host/modules/app/owner-computer.ts)). The older `machine-service.json` in either place, which the development Mac's daemon used to leave there, still counts, so keep it or add `owner` before deleting it. Only there does Settings › General show the switcher; the host refuses a channel change from any other copy whatever the page asks. Everyone else sees the channel they follow with no choice, and follows Beta: a copy that followed Alpha moves back to Beta at its next update check, installing Beta's newest even when its Build is lower. Adding or removing the mark takes effect within a minute, without a restart. The Dev app never switches: it follows main from its checkout, an installed copy never follows Dev, and neither shows a way across.
 
 The Alpha feeds themselves stay public, like the release feeds. Gating them would put a machine-token check on the website Worker and the RC hosts' feed reads for builds that are the same signed bytes Beta publishes hours later; the app-side gate already keeps every copy off Alpha except the owner's.
 
@@ -75,7 +75,7 @@ and websites need a new sign-in (see [data compatibility](README.md#data-compati
 
 ### Electron updater
 
-The Electron app does not embed Sparkle. [`modules/shell/updates.ts`](../host/modules/shell/updates.ts)
+The Electron app does not embed Sparkle. [`modules/app/updates.ts`](../host/modules/app/updates.ts)
 (`MacUpdates`) reads the same appcast (`intelFeedURL` on x64, `feedURL` otherwise) and acts only in
 a packaged release build launched without arguments:
 
@@ -122,7 +122,7 @@ this updater, unattended:
    release smoke so it creates its data, and add a marker file to that data.
 3. Serve a loopback feed whose only item is the package's own appcast item, signature included, with
    the archive moved to `http://127.0.0.1:<port>/`. Launch the installed app with
-   `--update-feed <feed> --relaunch-capture <png>` ([`update-acceptance.ts`](../host/modules/shell/update-acceptance.ts)).
+   `--update-feed <feed> --relaunch-capture <png>` ([`update-acceptance.ts`](../host/modules/app/update-acceptance.ts)).
    That launch configures the updater despite its arguments, accepts only a loopback `http` feed,
    installs what it offers as if Update had been clicked and relaunches into `--window-capture <png>`.
    The published key, Build, bundle identifier, code signature and team checks all still apply.
@@ -247,7 +247,7 @@ It needs Accessibility and Screen Recording for the node that runs it, plus Auto
 
 ### Open at Login
 
-Issue #1229. The setting is the app menu's **Open at Login** checkbox (the Worldlet menu on Mac, File on Windows) and Fox's `login` guide. Both use the `loginItem` host action (`platform/host/modules/shell/login-item.ts`), which is backed by `app.setLoginItemSettings`/`getLoginItemSettings`. The status mapping is shared in `agent/app/login-item.ts`:
+Issue #1229. The setting is the app menu's **Open at Login** checkbox (the Worldlet menu on Mac, File on Windows) and Fox's `login` guide. Both use the `loginItem` host action (`platform/host/modules/app/login-item.ts`), which is backed by `app.setLoginItemSettings`/`getLoginItemSettings`. The status mapping is shared in `agent/app/login-item.ts`:
 
 - **enabled:** the system will open Worldlet at login.
 - **requires-approval:** registered, but the person still has to allow it. On macOS 13+ SMAppService reports this until Worldlet is allowed in System Settings → General → Login Items. On Windows it means the Run entry was turned off in Task Manager or Settings → Apps → Startup.
@@ -262,7 +262,7 @@ The NSIS uninstaller does not remove the Run entry. A leftover entry points at a
 
 ### Default browser
 
-The setting is **Default browser** in Settings → General, off until a person turns it on. It uses the `defaultBrowser` host action (`platform/host/modules/shell/default-browser.ts`); the support rule, the routing of an incoming link and the setting's words are shared in `agent/app/default-browser.ts`. Only the installed Mac and Windows apps offer it; a Dev build, Linux and a Microsoft Store package report `unsupported` and never touch the system's link handlers.
+The setting is **Default browser** in Settings → General, off until a person turns it on. It uses the `defaultBrowser` host action (`platform/host/modules/app/default-browser.ts`); the support rule, the routing of an incoming link and the setting's words are shared in `agent/app/default-browser.ts`. Only the installed Mac and Windows apps offer it; a Dev build, Linux and a Microsoft Store package report `unsupported` and never touch the system's link handlers.
 
 - **Mac:** the packaged app declares `http` and `https` URL types (`scripts/package-electron.ts`), which changes nothing by itself. Turning the setting on calls `app.setAsDefaultProtocolClient`, and macOS asks the person to confirm. Turning it off sets the browser recorded when it was turned on back as the handler (macOS asks again), or lets Electron pick another handler when none was recorded.
 - **Windows:** Windows lets only the person choose a default browser. Turning the setting on writes a per-user browser registration (`HKCU\Software\Clients\StartMenuInternet\Worldlet`, a `WorldletURL` ProgId and a `RegisteredApplications` entry) and opens Settings → Default apps at Worldlet. Each launch rewrites it so the registered path follows updates. Turning the setting off removes the registration and opens Default apps.
@@ -285,7 +285,7 @@ It writes `login-item.json` (the verdict), `login-item-app.json` and `login-item
 
 ### Release Fox setup check (Mac)
 
-`node scripts/release-fox-setup-mac.mjs --bootstrap <HermesBootstrap> --out <dir>` runs the first Fox setup that a brand-new Mac does. The RC package step runs it on 02 after the login item check, against `Worldlet.app/Contents/Resources/HermesBootstrap` inside the mounted DMG. It bundles the app's own `platform/host/modules/agents/installation.ts`, with Electron stubbed, and calls `HermesInstallation.prepare()`. The installer starts exactly as the app starts it, including its working directory. The run uses a temporary HOME whose path has spaces, like `Application Support`, and only the system PATH. No user, Homebrew or uv-managed Python is visible, so setup downloads and verifies the source, installs the app-owned Python and packages, and validates them.
+`node scripts/release-fox-setup-mac.mjs --bootstrap <HermesBootstrap> --out <dir>` runs the first Fox setup that a brand-new Mac does. The RC package step runs it on 02 after the login item check, against `Worldlet.app/Contents/Resources/HermesBootstrap` inside the mounted DMG. It bundles the app's own `platform/host/modules/companion/agent/installation.ts`, with Electron stubbed, and calls `HermesInstallation.prepare()`. The installer starts exactly as the app starts it, including its working directory. The run uses a temporary HOME whose path has spaces, like `Application Support`, and only the system PATH. No user, Homebrew or uv-managed Python is visible, so setup downloads and verifies the source, installs the app-owned Python and packages, and validates them.
 
 It passes when:
 
@@ -345,7 +345,7 @@ WebView2 nor .NET on the user's computer. Three channels share that payload:
 recorded in `build-info.json` / `build-identity.json`, so each channel needs its own
 package run from the same commit. A Store or Steam build (or any process with Store
 package identity) reports "Updates are managed by …" and never runs the EXE updater
-([`updates.ts`](../host/modules/shell/updates.ts)).
+([`updates.ts`](../host/modules/app/updates.ts)).
 
 **Signing.** Every Windows artifact is unsigned: the installer metadata, the manifest
 and the updater all require `signed: false`, and `package-electron.ts --sign` signs
@@ -442,7 +442,7 @@ preview: `formatVersion: 1`, `version`, `build`, `architecture: "x64"`, `signed:
 300 MiB), `sha256` and `googleSignIn`. Installed native previews read the same file;
 their update to the Electron installer has not been accepted on a device.
 
-[`windows-release.ts`](../host/modules/shell/windows-release.ts) holds discovery and
+[`windows-release.ts`](../host/modules/app/windows-release.ts) holds discovery and
 verification without Electron, so release scripts run the shipped code under Node. A
 direct-channel release build checks at launch and hourly (15 s, 16 KB, no redirects) and
 downloads a newer Build in the background at once: the EXE streams into `<library>\updates`

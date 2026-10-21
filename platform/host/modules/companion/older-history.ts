@@ -2,7 +2,7 @@ import {setTimeout as sleep} from 'node:timers/promises';
 import {AGENT,ONGOING,type AgentService,type OngoingService} from '../../services.ts';
 import type {Host,Row} from '../../types.ts';
 import {busyWith} from '../../busy.ts';
-import {readOlderHermes,TEXT_BUDGET,type HermesCursor,type HermesWindowResult} from '../agents/agent-files.ts';
+import {readOlderHermes,TEXT_BUDGET,type HermesCursor,type HermesWindowResult} from './agent/agent-files.ts';
 import {broughtConversations} from './migration.ts';
 import type {Companion} from './companion.ts';
 

@@ -220,7 +220,7 @@ export async function publish({channel,platform,dir,live=liveChannel(channel),st
    const exe=readdirOne(dir,/-windows-x64-unsigned\.exe$/),built=JSON.parse(readFileSync(exe+'.json','utf8')),name=path.basename(exe);
    if(built.sha256!==await sha256(exe)||built.build!==identity.build)throw Error('The Windows installer differs from its identity.');
    const manifest=windowsManifest(built,statSync(exe).size,keys.prefix,assetURL(own.repo,tag,name));
-   const {parseWindowsManifest}=await import(pathToFileURL(path.join(root,'platform/host/modules/shell/windows-release.ts')).href);
+   const {parseWindowsManifest}=await import(pathToFileURL(path.join(root,'platform/host/modules/app/windows-release.ts')).href);
    // The shipped updater reads /downloads/ and /downloads/alpha/; every other field is checked as it would check them.
    parseWindowsManifest(['','alpha/'].includes(keys.prefix)?manifest:{...manifest,url:'/downloads/'+name});
    const current=feedBuild('windows',await own.read(keys.feedTag,keys.windows));

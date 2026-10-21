@@ -1,6 +1,6 @@
 export type WindowsPreview={formatVersion:1,version:string,build:number,architecture:'x64',signed:false,url:string,size:number,sha256:string,googleSignIn:boolean};
 // The installer carries the website engine (CEF, #1170) since Build 1077, which took it past the former
-// 300 MiB limit (#1037). Keep in step with platform/host/modules/shell/windows-release.ts.
+// 300 MiB limit (#1037). Keep in step with platform/host/modules/app/windows-release.ts.
 export const windowsInstallerLimit=1024*1024*1024;
 export function windowsPreview(value:unknown):WindowsPreview{
  const v=value as WindowsPreview;

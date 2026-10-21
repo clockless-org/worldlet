@@ -6,15 +6,15 @@ import {dialog,powerMonitor,shell,type MessageBoxOptions,type OpenDialogOptions,
 import {core} from '../../core.ts';
 import {characterCount,characterPrefix,writeAtomic,WorldletError} from '../../files.ts';
 import {canBuild} from '../../store/world-store.ts';
-import {presentMailRead as presentLiveMail} from '../sources/records.ts';
+import {presentMailRead as presentLiveMail} from '../connectors/records.ts';
 import type {Host,Row} from '../../types.ts';
 import {AGENT,ANALYTICS,AUDIO,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,SOURCES,SPEECH,WORLD_TOOLS,
  type AgentRoutines,type AgentRuntime,type AgentScope,type AgentService,type AnalyticsService,type AudioService,type BrowserService,
  ONGOING,PHONE,WORLD_WEB,type PhoneService,type WorldWebService,type OngoingService,type CompanionService,type DesktopCompanionService,type FoxService,type SourcesService,type SpeechService,type WorldToolsService} from '../../services.ts';
 import {createCompanion,decode,type Scope} from './companion.ts';
 import {resetToFirstLaunch} from './reset.ts';
-import {readLocalAgentMemory,summarizeLocalAgent} from '../agents/local-memory.ts';
-import {hermesThreads} from '../agents/agent-files.ts';
+import {readLocalAgentMemory,summarizeLocalAgent} from './agent/local-memory.ts';
+import {hermesThreads} from './agent/agent-files.ts';
 import {readModelSource} from './model-source.ts';
 import {bringAgent} from './migration.ts';
 import {createOlderHistory} from './older-history.ts';
@@ -190,7 +190,7 @@ export function installFox(host:Host){
  // The World's Task panel (agent/tasks/task-panel.ts): one read of what it draws from. The person's scheduled jobs on
  // their own Agent's scheduler (its `schedule` service; names and schedules only, never prompts) and the Applet tasks
  // Fox handed over that are working now. Applets' own checks are not the person's tasks, and finished work lives in the
- // Journal: neither is read. Core decides the rows. The page's panel and, without the page, the host's (modules/shell).
+ // Journal: neither is read. Core decides the rows. The page's panel and, without the page, the host's (modules/app).
  async function taskPanelInput():Promise<Row>{
   if(store.sampleEnabled())return {sample:true};
   const runtime=agent(),schedule=runtime?.schedule?.();

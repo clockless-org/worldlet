@@ -1,7 +1,7 @@
 /** Public UI component interface. Keep implementation imports inside this component. */
 export {coreAppletItems,calendarDay} from './applet-content.ts';
 export {forecastStage,weatherGlyph} from './environment/weather-forecast.ts';
-export {WEATHER_TTL,environmentAt,forecastParams,normalizeWeather,validPlace,weatherKind} from './environment/world-environment.ts';
+export {environmentAt,forecastParams,normalizeWeather,weatherKind} from './environment/world-environment.ts';
 export {createModuleScene} from './world-scene.ts';
 export {applyRegionLayout,lastUse,moveRegionApplet,parseRegionLayout,pinRegionApplet,pinnedPlace,readRegionLayout,recentlyUsedFirst,recordAppletUse,regionId,storedRegionLayout} from './region-layout.ts';
 export {makeSampleWorld} from './sample-data.ts';
@@ -12,8 +12,8 @@ export {mountTravelExperiment} from './travel-experiment.ts';
 export {APPLET_OPTICAL_SCALE,APPLET_OVERVIEW_WIDTH,WORLD_HEIGHT,WORLD_WIDTH} from './world-design.ts';
 export {WORLD_LAYOUT} from './world-layout.ts';
 export {applyModuleWorld,moduleStatus} from './world-modules.ts';
-export {WORLD_PRESETS,applyPersonalWorld} from './world-presets.ts';
-export {attachBrowserDevice} from './browser-sample.ts';
+export {WORLD_PRESETS} from './world-presets.ts';
+
 export {createWorldProjector} from './world-projection-client.ts';
 
 export {lampLabels,lampNeeds} from './applet-lamp.ts';
@@ -33,4 +33,4 @@ export {WORLD_REVEAL_MS,dissolveWorldSurface} from './world-reveal.ts';
 export {bindWorldViewport} from './world-viewport.ts';
 // What was the hud folder (#714).
 export {mountNativeHUD} from './native-hud.ts';
-export {mountAppletShelf,type ShelfApplet} from './applet-shelf.ts';
+export {mountAppletShelf} from './applet-shelf.ts';

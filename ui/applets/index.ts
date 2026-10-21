@@ -3,7 +3,7 @@ export {CORE_APPLET_KINDS,coreAppletSource} from './_shared/core-applet-logo.ts'
 export {connectionGuide} from './connection-guide.ts';
 export {renderMailFocus} from './gmail/focus.ts';
 export {renderMailOpen} from './gmail/open.ts';
-export {mountAppletScene,sceneMaterialStyle,PLAIN_SCENE,type AppletScene,type AppletSceneRegion,type AppletSceneSource} from './scene/applet-scene.ts';
+export {mountAppletScene,PLAIN_SCENE,type AppletScene,type AppletSceneSource} from './scene/applet-scene.ts';
 export {renderSceneList} from './scene/scene-list.ts';
 export {appletSceneKey} from './scene/scene-family.ts';
 export {createPanelScene} from './scene/panel-scene.ts';
@@ -11,11 +11,11 @@ export {setMailAvatarLookup} from './gmail/presentation.ts';
 export {createAppletPanel} from './panels.ts';
 export {BOARD_READ_EVENT} from './board/panel.ts';
 export {createGameApplet} from './games.ts';
-export {stripeMoney} from './stripe/panel.ts';
+
 export {appHudIcon,appLogoSource,AGENT_ICONS} from './visuals.ts';
 export {createWeatherPanel} from './weather/panel.ts';
 export {momentLine} from './moment/panel.ts';
-export {requestOngoing,ongoingAsk} from './ongoing/panel.ts';
+
 export {default as xAppIcon} from './x/app-icon.ts';
 
 export {mailMetadata} from './gmail/metadata.ts';

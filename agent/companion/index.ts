@@ -19,6 +19,6 @@ export * from './speech-vocabulary.ts';
 export * from './fox-turn-recovery.ts';
 // What was the onboarding folder (#714).
 export * from './onboarding.ts';
-export {firstValueCandidate,firstValueRequest,firstValueLinks,firstValueNeedsSignIn,firstValueNeedsPayment} from './first-value.ts';
+export {firstValueCandidate,firstValueRequest,firstValueLinks} from './first-value.ts';
 export * from './world-menu.ts';
-export {TOUR_STAGES,tourInProgress,onboardingUnfinished} from './tour.ts';
+export {tourInProgress,onboardingUnfinished} from './tour.ts';

@@ -1,4 +1,7 @@
-import {canRenderWorld,createWebClient,createRoomWebClient,isRoomLink,worldLinkFromWeb,WebPairingEnded,type WorldDevice,type WebClient,type WebMessage,type WebView,type PhoneAttentionItem,type PhoneTask,type RoomSocketFactory} from '../index.ts';
+import {canRenderWorld,worldLinkFromWeb,type WorldDevice} from '../world-room.ts';
+import {createWebClient,WebPairingEnded,type WebClient,type WebMessage,type WebView} from '../web-client.ts';
+import {createRoomWebClient,isRoomLink,type RoomSocketFactory} from '../room.ts';
+import {type PhoneAttentionItem,type PhoneTask} from '../payloads.ts';
 
 // Worldlet in a web browser (platform/web/README.md#web): the page the relay serves at /open/ pairs with the computer
 // like the phone apps, from the link the computer's Mobile page makes, and shows what the phones show: what needs

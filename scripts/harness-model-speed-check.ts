@@ -6,7 +6,7 @@ import {acpModels,acpPromptUsage,acpUsageUpdate,addHarnessUsage,appletModelFor,c
  readAppletModels,readHarnessUsage,readResponsesChunk,responsesStream,responsesUsage,usageSince} from '../agent/gate/index.ts';
 import {foxTiming,foxTimingEvent} from '../agent/app/index.ts';
 import {restoreThread,threadFinish,threadRow,threadStart,threadUsage} from '../ui/companion/fox-thread.ts';
-import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/host/modules/agents/local-harness.ts';
+import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/host/modules/companion/agent/local-harness.ts';
 import {createHarnessModels} from '../platform/host/modules/companion/harness-models.ts';
 import {AGENT} from '../platform/host/services.ts';
 import {WorldLedger} from '../platform/host/store/ledger.ts';

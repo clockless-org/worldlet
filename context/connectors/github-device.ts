@@ -3,7 +3,7 @@
 // Worldlet, polling from this computer, receives the person's own user token. Only the App's client ID is used: it is
 // public by design. There is no client secret anywhere, no server of ours and no loopback address. The user token and
 // its refresh token stay in this computer's vault and are renewed with the client ID alone. Pure rules and shapes; the
-// Platform makes the requests (platform/host/modules/sources/mcp-account.ts).
+// Platform makes the requests (platform/host/modules/connectors/mcp-account.ts).
 
 /** The official Worldlet GitHub App. The client ID is public (it is in every device-flow request). */
 export const GITHUB_APP=Object.freeze({

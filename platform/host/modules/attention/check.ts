@@ -17,8 +17,8 @@ import {installArtifacts} from './artifacts.ts';
 import {journalTarget} from '../../../../agent/gate/index.ts';
 import {ONGOING,type OngoingService} from '../../services.ts';
 import {conversationAttentionId} from '../../../../agent/tasks/index.ts';
-import {writeSelection} from '../agents/local-harness.ts';
-import {writeAgentProfile} from '../agents/agent-profile.ts';
+import {writeSelection} from '../companion/agent/local-harness.ts';
+import {writeAgentProfile} from '../companion/agent/agent-profile.ts';
 import {errorMessage} from '../../files.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 

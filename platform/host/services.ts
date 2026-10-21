@@ -11,7 +11,7 @@ import type {PosthogRequest} from '../../agent/gate/index.ts';
 // `host.provide(NAME, impl)` and others reach it with `host.use(NAME)` / `host.optional(NAME)`.
 // Modules never import each other's implementation files.
 
-// Agent runtime (modules/agents) ---------------------------------------------------
+// Agent runtime (modules/companion/agent) ---------------------------------------------------
 /** One Harness conversation lane. `onEvent` receives adapter events; returning a value
  * answers a `tool` event (the value becomes the tool result). */
 export type AgentEventHandler=(event:Row)=>Promise<Row|null|undefined>|Row|null|undefined;
@@ -174,7 +174,7 @@ export interface WorldToolsService {
 }
 export const WORLD_TOOLS='worldTools';
 
-// Sources and connections (modules/sources) -------------------------------------------------
+// Sources and connections (modules/connectors) -------------------------------------------------
 export interface SourcesService {
  /** Persisted owner-collected Notion context. No live provider fallback. Caller keeps ordinary World Grants. */
  readNotionContext?(request:Row):Row;
@@ -250,12 +250,12 @@ export interface FoxService {
  /** Answers the Agent's permission prompt (as the `harnessApproval` action does), for a phone or browser without the page. */
  answerApproval?(id:string,choice:string):Promise<void>;
  /** What the Task panel draws from (agent/tasks TaskPanelInput: the Agent's scheduled jobs, the Applet tasks working now),
-  * for the host's own Center while the World page is not there (modules/shell). */
+  * for the host's own Center while the World page is not there (modules/app). */
  taskPanel?():Promise<Row>;
 }
 export const FOX='fox';
 
-// Phone pairing (modules/shell) and widgets (modules/attention) ------------------------------------
+// Phone pairing (modules/app) and widgets (modules/attention) ------------------------------------
 export interface PhoneService {
  /** Sends a desktop slot to the paired phone when it changed (kept for a phone that pairs later). */
  publish(slot:'widgets',value:unknown):Promise<boolean>;
@@ -274,17 +274,17 @@ export interface PhoneService {
  worldRoomLink?():Promise<Row>;
  /** A new full World link in place of the old one, whose pages close (a browser signed out of the World's address). */
  worldRoomRenew?():Promise<Row>;
- /** This computer's own server on 127.0.0.1 (modules/shell/local-relay.ts), started on first use on the port it used
+ /** This computer's own server on 127.0.0.1 (modules/windows/local-relay.ts), started on first use on the port it used
   * last: a browser link on this computer, and the World page a host without a window serves there (platform/server). */
- localServer?():Promise<import('./modules/shell/local-relay.ts').LocalServer>;
+ localServer?():Promise<import('./modules/windows/local-relay.ts').LocalServer>;
 }
 export const PHONE='phone';
-/** Opens the page that runs browsers' direct lines (modules/shell/rtc-host.ts): a hidden window in the Electron host
+/** Opens the page that runs browsers' direct lines (modules/windows/rtc-host.ts): a hidden window in the Electron host
  * (rtc-window.ts), provided before the modules install. A host without it runs a browser link through the room only. */
-export type RtcPageFactory=()=>import('./modules/shell/rtc-host.ts').RtcPage;
+export type RtcPageFactory=()=>import('./modules/windows/rtc-host.ts').RtcPage;
 export const RTC_PAGE='rtcPage';
 /** The person's activity fact for background admission (Core `userIdle`, #1650): seconds since their last input on
- * this computer or on an open paired phone. Owned by modules/shell. */
+ * this computer or on an open paired phone. Owned by modules/app. */
 export interface UserActivityService {
  idleSeconds():number;
 }
@@ -326,9 +326,9 @@ export interface BrowserService {
 }
 export const BROWSER='browser';
 
-// The media surface (modules/shell) ------------------------------------------------------------
+// The media surface (modules/app) ------------------------------------------------------------
 /** The host-owned playback and capture surface the World's sound, Fox's voice and Voice Memos share. */
-export interface MediaService {readonly surface:import('./modules/shell/surface.ts').MediaSurface}
+export interface MediaService {readonly surface:import('./modules/app/surface.ts').MediaSurface}
 export const MEDIA='media';
 
 // World sound (modules/world) and Fox's voice (modules/companion) -----------------------------
@@ -350,7 +350,7 @@ export interface SpeechService {
 }
 export const SPEECH='speech';
 
-// App shell (modules/shell) -------------------------------------------------------------------
+// App shell (modules/app) -------------------------------------------------------------------
 export interface DesktopCompanionService {
  readonly isDesktop:boolean;
  /** Window close/minimize keeps Fox on the desktop instead of quitting; so does the World losing the foreground. */
@@ -374,7 +374,7 @@ export interface DesktopCompanionService {
  backdropImage?():NativeImage|null;
 }
 export const DESKTOP_COMPANION='desktopCompanion';
-/** Run in background (platform/web/README.md#web): a preference set from the browser link's section (modules/shell) and
+/** Run in background (platform/web/README.md#web): a preference set from the browser link's section (modules/app) and
  * cleared when that link ends. Closing the World then leaves no window, not even Fox, and a login launch opens none. */
 export const RUN_IN_BACKGROUND='worldlet.runInBackground';
 export interface AppUpdatesService {snapshot():Row;activate():Promise<Row>}
@@ -389,7 +389,7 @@ export interface AnalyticsService {
  installation():string;
  setEnabled(enabled:boolean):void;
  enabled():boolean;
- /** The World page's PostHog web client settings, or null when it must not load (modules/shell/analytics.ts). */
+ /** The World page's PostHog web client settings, or null when it must not load (modules/app/analytics.ts). */
  webConfig():Row|null;
  /** The World page's worldlet://app/ingest/… requests, forwarded to PostHog. */
  ingest(request:Request):Promise<Response>;
@@ -465,10 +465,10 @@ export interface WorldWebService {
  link():Promise<string>;
 }
 export const WORLD_WEB='worldWeb';
-/** The World page on another device, met through the pairing room (modules/shell/world-room-link.ts): the host takes
+/** The World page on another device, met through the pairing room (modules/windows/world-room-link.ts): the host takes
  * each page that joined as it takes a browser's World page here (host/web-page.ts), with only what ROOM_ALLOWED lets
  * through (contracts/web-world.ts). */
 export interface WorldRoomPageService {
- accept(socket:import('./modules/shell/web-socket.ts').TextSocket):void;
+ accept(socket:import('./modules/windows/web-socket.ts').TextSocket):void;
 }
 export const WORLD_ROOM_PAGE='worldRoomPage';

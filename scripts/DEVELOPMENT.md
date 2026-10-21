@@ -208,7 +208,7 @@ The shared world renderer and fictional Applet previews remain below the film. H
 
 The app-issued installation token is stored in the installation's library as `model-access/installation.token` (for example `~/Library/Application Support/Worldlet/model-access/`). Until 2026-10-04 it sat beside the libraries in `Worldlet Model Access/<app-id>.model-access/`, the native Mac app's location; it moves in once on first use, so an updated app keeps its token. On Mac and Linux it is an owner-only plain file (0700 directory, 0600 file); on Windows the same file is encrypted with the user's DPAPI key through `safeStorage`. It is a revocable Worldlet credential, not an upstream provider key, and same-user processes can read it; it never involves a login-Keychain dialog. Concurrent first launches cannot enroll two tokens (hard-link into place). World backups and resets neither carry nor delete it ([installation folders](../context/store/STORAGE.md#physical-locations-and-preservation)). The native app's one-time legacy Keychain lookup is not ported. User-owned provider/OAuth secrets use the [credential vault](../platform/desktop/README.md#structure).
 
-`platform/host/modules/agents/check.ts` (`npm run test:electron`) exercises the token file with disposable directories and no network.
+`platform/host/modules/companion/agent/check.ts` (`npm run test:electron`) exercises the token file with disposable directories and no network.
 
 ### Deferred Dev updates
 
@@ -270,7 +270,7 @@ Feedback lives in Fox's Companion panel, as its last tab. It has no world device
 - In Feedback, hold the Fox below the panel and release to prepare a review card. Tap/keyboard activation can also start and finish dictation. The existing speech pipeline only fills a draft; it does not submit a chat or send feedback automatically. **Type instead / Edit words** is a collapsed fallback, not the default form. Closing the panel, leaving the window or navigating away cancels dictation.
 - **Send feedback** is explicit consent to send the reviewed text and bundled app version/build. No email field, automatic screenshots, audio attachment, chat history, source content, device identifier or analytics event is included in the voice-first panel. The receiver remains compatible with older clients supplying an optional reply email. Existing cloud transcription fallback may process audio separately, as disclosed beside the review card.
 - The draft survives panel rerenders, closing/reopening and failed requests for the current app session. It is not persisted across app restarts. Successful receipt clears it. Unchanged retries reuse an ID; edits create a new ID. There is no background sending.
-- The host `feedback` action (`platform/host/modules/shell/diagnostics.ts`) posts to the fixed HTTPS endpoint from the main process, without website or account cookies. It requires `confirmed: true`, validates size and checks the returned ID before acknowledging delivery.
+- The host `feedback` action (`platform/host/modules/app/diagnostics.ts`) posts to the fixed HTTPS endpoint from the main process, without website or account cookies. It requires `confirmed: true`, validates size and checks the returned ID before acknowledging delivery.
 
 ### Cloudflare inbox
 

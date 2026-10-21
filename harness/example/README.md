@@ -46,12 +46,12 @@ Only protocol JSON goes to stdout. Diagnostics go to stderr (currently discarded
 
 ### Checks
 
-- `npm run test:electron` (module `agent-runtime`) drives the Electron adapter (`platform/host/modules/agents/external.ts`) with a real Python executable fixture and no Hermes: handshake, status capabilities and minimal environment, a streamed turn with a World tool round trip, cancellation, and a bad configuration selecting the unavailable adapter. Protocol mismatch, adapter-wide shutdown and unsupported-service isolation were covered by a Swift fixture that retired with #996 and are not yet ported.
+- `npm run test:electron` (module `agent-runtime`) drives the Electron adapter (`platform/host/modules/companion/agent/external.ts`) with a real Python executable fixture and no Hermes: handshake, status capabilities and minimal environment, a streamed turn with a World tool round trip, cancellation, and a bad configuration selecting the unavailable adapter. Protocol mismatch, adapter-wide shutdown and unsupported-service isolation were covered by a Swift fixture that retired with #996 and are not yet ported.
 - `node scripts/external-agent-ui-check.ts` runs this real Python adapter through the bundled UI and existing World tool gateway. It verifies that the Browser Applet opens and replies stream, without Hermes calls. A real-window Electron check is not yet ported; a web fixture is not evidence of the whole app lifecycle.
 
 ## Optional local helpers
 
-External mode never prepares Hermes for speech or local CLI inventories. Helpers run on Worldlet's own tools Python, whichever Agent is used (`platform/host/modules/shell/tools-python.ts`): the bundled uv sets up a pinned CPython and a virtual environment with pip on first use. `WORLDLET_TOOLS_PYTHON` (absolute executable path) selects another one instead. Failure to prepare local speech does not prevent text chat. The development launcher forwards this setting.
+External mode never prepares Hermes for speech or local CLI inventories. Helpers run on Worldlet's own tools Python, whichever Agent is used (`platform/host/modules/app/tools-python.ts`): the bundled uv sets up a pinned CPython and a virtual environment with pip on first use. `WORLDLET_TOOLS_PYTHON` (absolute executable path) selects another one instead. Failure to prepare local speech does not prevent text chat. The development launcher forwards this setting.
 
 The example has no scheduled-task service. Opening the app does not start Hermes cron or simulate schedule results. Source and model-configuration services are explicitly unsupported; these requests do not get routed into the chat executable.
 

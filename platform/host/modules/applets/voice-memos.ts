@@ -8,8 +8,8 @@ import {WorldletError} from '../../files.ts';
 import {relaunchAfterQuit} from '../../quit.ts';
 import type {Host,Row} from '../../types.ts';
 import {SurfaceAudio} from '../world/audio.ts';
-import type {MediaSurface} from '../shell/surface.ts';
-import {cancelled} from '../shell/io.ts';
+import type {MediaSurface} from '../app/surface.ts';
+import {cancelled} from '../app/io.ts';
 
 const EXTENSIONS=new Set(['m4a','mp3','wav','aac','caf','aif','aiff']);
 const extension=(file:string)=>path.extname(file).slice(1).toLowerCase();

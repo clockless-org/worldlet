@@ -50,7 +50,7 @@ export function installDesktopCompanion(){
  };
  (window as any).worldletCompanionGeometry=capture;
  // The desktop window covers the whole World view and lets the pointer through except over Fox's cluster
- // (modules/shell/companion.ts pointer); while it lets it through, the window still hears the pointer move.
+ // (modules/companion/window.ts pointer); while it lets it through, the window still hears the pointer move.
  let over:boolean|null=null;
  const PORTABLE='.companion-pet,.companion-dialogue,.companion-text-entry,.desktop-companion-setup,dialog[open]';
  const point=(next:boolean)=>{if(!isDesktopCompanion()||next===over)return;over=next;void callHost('desktopCompanionPointer',{over:next}).catch(()=>{over=null;});};

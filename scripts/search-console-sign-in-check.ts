@@ -10,8 +10,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {CONNECTOR_TECHNICAL_WORDS,SEARCH_CONSOLE_GATE,SEARCH_CONSOLE_SCOPE,connector,connectorTiles} from '../context/connectors/index.ts';
 import {TOKEN_PROVIDERS,connectToken} from '../context/applets/index.ts';
-import {GoogleAccount,GOOGLE_SCOPES} from '../platform/host/modules/sources/google-account.ts';
-import {ServiceSource,ServiceSourceConnections} from '../platform/host/modules/sources/service-source.ts';
+import {GoogleAccount,GOOGLE_SCOPES} from '../platform/host/modules/connectors/google-account.ts';
+import {ServiceSource,ServiceSourceConnections} from '../platform/host/modules/connectors/service-source.ts';
 import {withTempDir} from './test-temp.ts';
 
 // The registry: a tile of its own that signs in with Google, into Work, asking only to read; a service account under Advanced.

@@ -1,7 +1,7 @@
 import {session} from 'electron';
 import {WorldletError} from '../../files.ts';
 import type {Row} from '../../types.ts';
-import {cancelled,readLimited,TooLarge} from '../shell/io.ts';
+import {cancelled,readLimited,TooLarge} from '../app/io.ts';
 
 const ORIGIN='https://worldlet.clockless.workers.dev';
 const PATHS=['/api/auth/session','/api/auth/login','/api/chat','/api/transcribe','/api/transcribe/preview'];

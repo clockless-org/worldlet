@@ -6,4 +6,4 @@ export * from './shell.ts';
 export {createCompanionSettings} from './companion-settings.ts';
 export {createFoxPreferences} from './fox-preferences.ts';
 export {routineTimePicker,routineWhenLine,scheduleWhen} from './agent-routines.ts';
-export {copyAndOpen,listenForSignInCode} from './sign-in-code.ts';
+

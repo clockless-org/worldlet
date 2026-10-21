@@ -10,11 +10,11 @@ import {acpApprovalOutcome,acpApprovalRequest,harnessSessionName,harnessSessionT
  openClawGateway,openClawResponsesBody,readHarnessApprovalRequest,readLocalHarnessLine,readOpenClawFrame,readResponsesChunk,responsesBody,responsesStream,turnWriteAdmission,usableHermesServerKey} from '../agent/gate/index.ts';
 import {phoneLive,readPhoneMessage} from '../platform/web/index.ts';
 import {mountHarnessApproval} from '../ui/companion/fox-harness-approval.ts';
-import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/host/modules/agents/local-harness.ts';
-import {hermesServer,keepHermesResident} from '../platform/host/modules/agents/hermes-service.ts';
+import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/host/modules/companion/agent/local-harness.ts';
+import {hermesServer,keepHermesResident} from '../platform/host/modules/companion/agent/hermes-service.ts';
 import {STANDING_OUTSIDE_TURN} from '../agent/gate/grants.ts';
-import {holdStandingTurn,openStandingWorldTools,STANDING_LEGACY_ENDPOINT_FILE,standingEndpointFile} from '../platform/host/modules/agents/world-tool-bridge.ts';
-import {createAgentAccess} from '../platform/host/modules/agents/agent-access.ts';
+import {holdStandingTurn,openStandingWorldTools,STANDING_LEGACY_ENDPOINT_FILE,standingEndpointFile} from '../platform/host/modules/gate/world-tool-bridge.ts';
+import {createAgentAccess} from '../platform/host/modules/gate/agent-access.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Resident Harness sessions (contracts/harness-services.ts `conversation` and `approvals`): the shared rules, then a

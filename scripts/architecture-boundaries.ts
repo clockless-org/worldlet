@@ -39,7 +39,7 @@ const exceptions=new Map([
 // the standing World tools server admits one (with the Grants and audit it injects), so only it imports `agentContext`.
 const CONTEXT_WRITERS=['contextWriter','syncedWriter','connectorWriter','agentContext'];
 const SYNCED_WRITERS=['syncedWriter'];
-const AGENT_ADMISSION=['agentContext'],ADMITS_AGENTS='platform/host/modules/agents/world-tool-bridge.ts';
+const AGENT_ADMISSION=['agentContext'],ADMITS_AGENTS='platform/host/modules/gate/world-tool-bridge.ts';
 export function checkContextNames(file:string,target:string,names:readonly string[]|'*'){
  if(!target.startsWith('context/'))return;
  if(layer(file)==='ui'){

@@ -6,11 +6,11 @@ import zlib from 'node:zlib';
 import {DatabaseSync} from 'node:sqlite';
 import {claudeCodeConversationTitle,claudeCodeTurn,hermesConversationIncluded,hermesConversationTitle,hermesRoutine,hermesTurn,migrationMemoryNote,migrationRoutineKey,migrationSkillMarkdown,migrationSkillPath,migrationSkillsSafe,
  openClawAgentSkill,openClawChannelPrompts,openClawConversationIncluded,openClawConversationSkill,openClawConversationTitle,openClawPromptFor,openClawRoutine,openClawSkillName,openClawTurn,piTurn} from '../agent/gate/index.ts';
-import {openClawAgents,parseJSON5,readOpenClaw,reportOpenClawWorkspaces,scanOpenClawWorkspaces,surveyOpenClaw} from '../platform/host/modules/agents/openclaw-files.ts';
-import {surveyAgentHistory} from '../platform/host/modules/agents/agent-files.ts';
-import {firstSentence,localAgentModel,openClawWorkspace,readLocalAgentMemory,summarizeLocalAgent} from '../platform/host/modules/agents/local-memory.ts';
+import {openClawAgents,parseJSON5,readOpenClaw,reportOpenClawWorkspaces,scanOpenClawWorkspaces,surveyOpenClaw} from '../platform/host/modules/companion/agent/openclaw-files.ts';
+import {surveyAgentHistory} from '../platform/host/modules/companion/agent/agent-files.ts';
+import {firstSentence,localAgentModel,openClawWorkspace,readLocalAgentMemory,summarizeLocalAgent} from '../platform/host/modules/companion/agent/local-memory.ts';
 import {bringAgent,broughtFile,placeBrought,readBrought,restoreBrought} from '../platform/host/modules/companion/migration.ts';
-import {allowed as inBackup,validate as validateBackup} from '../platform/host/modules/shell/backup.ts';
+import {allowed as inBackup,validate as validateBackup} from '../platform/host/modules/app/backup.ts';
 import {digest} from '../platform/host/files.ts';
 import {WorldLedger} from '../platform/host/store/ledger.ts';
 import {journalOrigin,readArtifact} from '../context/store/index.ts';
