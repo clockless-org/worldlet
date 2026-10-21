@@ -1,5 +1,5 @@
 import {AGENT_ASK_PROVIDER} from '../../../../contracts/agent-asks.ts';
-import {contextReader,contextWriter} from '../../../../context/store/index.ts';
+import {contextReader,contextWriter,type AgentContext} from '../../../../context/store/index.ts';
 import {core} from '../../core.ts';
 import {attentionImageURL} from '../../../../agent/attention/index.ts';
 import {WorldletError} from '../../files.ts';
@@ -22,7 +22,7 @@ const EVIDENCE_REJECTIONS=new Set([UNVERIFIED,...Object.values(EVIDENCE)]);
 
 /** Validation belongs to the tool result so the agent can correct its arguments; cancellation
  * and infrastructure errors still abort the turn. */
-export async function worldToolReply(center:AttentionCenter,name:string,args:Row,turn:string,monitorProvider?:string):Promise<Row> {
+export async function worldToolReply(center:AttentionCenter,name:string,args:Row,turn:string,monitorProvider?:string,agent?:AgentContext):Promise<Row> {
  const store=center.store;
  const recordOutcome=(status:string)=>{
   if(!TRACKED.includes(name)||!store.writable||!store.state.cloudConsent||store.sampleEnabled())return;
@@ -34,7 +34,7 @@ export async function worldToolReply(center:AttentionCenter,name:string,args:Row
   store.recordHistory({...body,...(typeof body.id==='string'?{targetId:body.id}:{}),id:uuid(),kind:'applet.activity',at:Date.now()/1000},monitorProvider??(typeof args.provider==='string'?args.provider:''));
  };
  try{
-  const result=await worldTool(center,name,args,turn,monitorProvider);
+  const result=await worldTool(center,name,args,turn,monitorProvider,agent);
   recordOutcome(result.error!=null||args.failed===true?'failed':'complete');
   if(name==='upsert_world_items'&&result.error==null)center.savedItems(turn);
   return result;
@@ -66,13 +66,15 @@ export async function worldToolReply(center:AttentionCenter,name:string,args:Row
  }
 }
 
-export async function worldTool(center:AttentionCenter,name:string,args:Row,turn:string,monitorProvider?:string):Promise<Row> {
+/** `agent`: the admitted call of the Agent a channel turn runs for (an Agent on the standing server, outside any Fox
+ * turn): its writes are that Agent's, under its Grants. Without it the turn is Fox's. */
+export async function worldTool(center:AttentionCenter,name:string,args:Row,turn:string,monitorProvider?:string,agent?:AgentContext):Promise<Row> {
  const store=center.store;
  if(!store.writable||!store.state.cloudConsent||store.sampleEnabled())throw new WorldletError('Allow private context in your personal world first.');
  const db=store.ledger();
- // Attention items through the one way in to Context (#676): an Agent on the standing server, or Fox.
+ // Attention items through the one way in to Context (#676): an Agent on the standing server, in its admitted call, or Fox.
  const items=()=>contextReader(store.context()).bodies('attention-items'),item=(id:string)=>contextReader(store.context()).get('attention-items',id)?.body;
- const writes=contextWriter(store.context(),turn.startsWith('channel-')?'agent':'fox');
+ const writes=agent?agent.writer(store.context()):contextWriter(store.context(),'fox');
  if(monitorProvider!==undefined&&!center.enabledCheck(monitorProvider))throw new WorldletError('This source check is paused.');
  if(name==='query_world_items'){
   const provider=monitorProvider??(typeof args.provider==='string'?args.provider:undefined);
@@ -148,7 +150,7 @@ export async function worldTool(center:AttentionCenter,name:string,args:Row,turn
   center.receiveAppletEvent({provider,callId:ticket,phase:'complete',count:records.length},turn);
   return {ok:true};
  }
- if(name==='upsert_world_items')return upsertWorldItems(center,args,turn,monitorProvider);
+ if(name==='upsert_world_items')return upsertWorldItems(center,args,turn,monitorProvider,agent);
  if(name==='review_world_item'){
   const id=args.id,assessment=args.assessment,reason=args.reason,refs=args.sources;
   const previous=typeof id==='string'?items().find(item=>item.id===id):undefined;
@@ -192,9 +194,9 @@ export async function worldTool(center:AttentionCenter,name:string,args:Row,turn
 }
 
 const RACES=[CONTEXT_CHANGED,SOURCE_PAUSED];
-async function upsertWorldItems(center:AttentionCenter,args:Row,turn:string,monitorProvider?:string):Promise<Row> {
+async function upsertWorldItems(center:AttentionCenter,args:Row,turn:string,monitorProvider?:string,agent?:AgentContext):Promise<Row> {
  const store=center.store,db=store.ledger();
- const writes=contextWriter(store.context(),turn.startsWith('channel-')?'agent':'fox');
+ const writes=agent?agent.writer(store.context()):contextWriter(store.context(),'fox');
  const items=args.items;
  if(!Array.isArray(items)||!store.worldEvidence[turn])throw new WorldletError('Read sources in this turn before saving findings.');
  const evidence=store.worldEvidence[turn];

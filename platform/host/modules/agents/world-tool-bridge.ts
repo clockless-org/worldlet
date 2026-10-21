@@ -3,7 +3,8 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {describeActions,resolveAction,worldActions,worldGatewayTools,type WorldAction} from '../../../../agent/gate/index.ts';
-import {GRANT_REASONS,HERMES_WORLD_TOOLS_SHIM,agentAuditEntry,artifactGranted,standingActions,standingCallDecision,type GrantDecision,type HermesOwnCalls,type HermesWorldToolsServer,type WorldToolServer} from '../../../../agent/gate/index.ts';
+import {GRANT_REASONS,HERMES_WORLD_TOOLS_SHIM,agentAuditEntry,agentContextWrites,artifactGranted,standingActions,standingCallDecision,type HermesOwnCalls,type HermesWorldToolsServer,type WorldToolServer} from '../../../../agent/gate/index.ts';
+import {ContextRefused,agentContext,type AgentContext} from '../../../../context/store/index.ts';
 import type {AgentAccess} from '../../services.ts';
 import type {AgentIdentity,Grant} from '../../../../contracts/agent-identity.ts';
 import {AGENT_REPORT_TARGET} from '../../../../contracts/agent-reports.ts';
@@ -109,12 +110,15 @@ const ARTIFACT_TOOL='agent_artifacts';
 /** The World tool behind `posthog-drafts/*` and `notion-drafts/*` (agent/gate/gateway.ts). */
 const SERVICE_DRAFT_TOOL='service_drafts';
 
-/** What one Agent may reach on the standing server (agent/gate/GRANTS.md): the actions it may discover and the decision
- * for one resolved call. Absent for a Fox turn's own bridge, whose calls the turn's trust alone decides. */
-export type GatewayAccess={actions:(all:WorldAction[])=>WorldAction[];decide:(target:string,action:string,tool:string,args:Row)=>GrantDecision};
+/** What one Agent may reach on the standing server (agent/gate/GRANTS.md): the actions it may discover, and `admit`, which
+ * has the Context entry decide one resolved call against its Grants and audit it (context/store/context.ts
+ * `agentContext`): the admitted call, or `ContextRefused` with the reason. Absent for a Fox turn's own bridge, whose calls
+ * the turn's trust alone decides. */
+export type GatewayAccess={actions:(all:WorldAction[])=>WorldAction[];admit:(target:string,action:string,tool:string,args:Row)=>AgentContext};
 /** describe_world_tools / call_world_tool, resolved by shared Core; `dispatch` runs the resolved tool. With `access`, an
- * Agent discovers only granted targets and a call runs only when its Grants allow it or send it to the person. */
-export async function worldGateway(name:unknown,args:unknown,{sample,dispatch,access}:{sample:boolean;dispatch:(name:string,args:Row)=>Promise<Row>;access?:GatewayAccess}):Promise<Row> {
+ * Agent discovers only granted targets and a call runs only when its Grants allow it or send it to the person; `dispatch`
+ * then gets the admitted call, the only way the host writes Context as that Agent. */
+export async function worldGateway(name:unknown,args:unknown,{sample,dispatch,access}:{sample:boolean;dispatch:(name:string,args:Row,agent?:AgentContext)=>Promise<Row>;access?:GatewayAccess}):Promise<Row> {
  try{
   const input=args&&typeof args==='object'&&!Array.isArray(args)?args as Row:{};
   const target=typeof input.target==='string'?input.target:'',action=typeof input.action==='string'?input.action:'';
@@ -124,11 +128,9 @@ export async function worldGateway(name:unknown,args:unknown,{sample,dispatch,ac
   // The schema says a JSON string; Harnesses sometimes send the object itself.
   const values=typeof input.arguments==='string'?JSON.parse(input.arguments||'{}'):input.arguments??{};
   const resolved=resolveAction(all,target,action,values);
-  if(access){
-   const decision=access.decide(target,action,resolved.name,resolved.args);
-   if(decision.decision==='denied')return {error:decision.reason||'This Agent may not do this.'};
-  }
-  return await dispatch(resolved.name,resolved.args);
+  // Refused here, the call runs nothing: ContextRefused's reason is what the Agent is told.
+  const agent=access?access.admit(target,action,resolved.name,resolved.args):undefined;
+  return await dispatch(resolved.name,resolved.args,agent);
  }catch(error){return {error:(error as Error)?.message||'World tool failed.'};}
 }
 
@@ -240,10 +242,10 @@ export const standingEndpointFile=(agentId:string)=>`worldlet-mcp-endpoint.${age
 /** `serviceRequest`: an Agent's `read_service` call was refused for a Service (not allowed to read it, or not connected):
  * the host may ask the person on an Attention card (agent/gate/service-requests.ts) and answers what the refusal says
  * after its reason. */
-export async function openStandingWorldTools({channel,access,asks,board,context,drafts,writes,reports,artifacts,serviceDrafts,serviceRequest,runner=process.execPath}:{channel:(name:string,args:Row,agent:string)=>Promise<Row>;access:AgentAccess;asks?:(agentId:string,args:Row)=>Row;
- board?:(agentId:string,args:Row,canRead:(provider:string,operation:string)=>boolean)=>Promise<Row>;context?:(args:Row,canRead:(provider:string)=>boolean)=>Row;drafts?:(agentId:string,args:Row)=>Promise<Row>;writes?:(agentId:string,args:Row,grants:Grant[])=>Promise<Row>;
- reports?:(agentId:string,args:Row)=>Row;
- artifacts?:(agentId:string,args:Row,readsAll:boolean)=>Row;serviceDrafts?:(agentId:string,args:Row)=>Promise<Row>;serviceRequest?:(agent:{id:string;name:string},provider:string)=>string;runner?:string}):Promise<StandingWorldTools> {
+export async function openStandingWorldTools({channel,access,asks,board,context,drafts,writes,reports,artifacts,serviceDrafts,serviceRequest,runner=process.execPath}:{channel:(name:string,args:Row,agent:AgentContext)=>Promise<Row>;access:AgentAccess;asks?:(agent:AgentContext,args:Row)=>Row;
+ board?:(agent:AgentContext,args:Row,canRead:(provider:string,operation:string)=>boolean)=>Promise<Row>;context?:(args:Row,canRead:(provider:string)=>boolean)=>Row;drafts?:(agent:AgentContext,args:Row)=>Promise<Row>;writes?:(agentId:string,args:Row,grants:Grant[])=>Promise<Row>;
+ reports?:(agent:AgentContext,args:Row)=>Row;
+ artifacts?:(agent:AgentContext,args:Row,readsAll:boolean)=>Row;serviceDrafts?:(agent:AgentContext,args:Row)=>Promise<Row>;serviceRequest?:(agent:{id:string;name:string},provider:string)=>string;runner?:string}):Promise<StandingWorldTools> {
  const route='/'+crypto.randomUUID();
  const call=(body:{name:unknown;arguments:unknown},identity:AgentIdentity)=>{
   const call:McpCall={name:body.name,arguments:body.arguments,agent:{id:identity.id,name:identity.name}};
@@ -252,26 +254,34 @@ export async function openStandingWorldTools({channel,access,asks,board,context,
   const turn=identity.id===HERMES_STANDING_AGENT.id?standingTurn(call):null,grants=access.grants(identity.id),now=new Date().toISOString();
   const foxTurn=turn?{own:turn.own.has(call)}:null;
   return worldGateway(body.name,body.arguments,{sample:false,
-   dispatch:async(name,args)=>name===ASK_TOOL?asks?.(identity.id,args)??{error:'Asks are not available in this build.'}
-    :name===DRAFT_TOOL?await drafts?.(identity.id,args)??{error:'GitHub drafts are not available in this build.'}
+   // Each runs with the call the Context entry admitted (`agent`): what it writes, it writes as that Agent only there.
+   dispatch:async(name,args,agent)=>name===ASK_TOOL?asks?.(agent!,args)??{error:'Asks are not available in this build.'}
+    :name===DRAFT_TOOL?await drafts?.(agent!,args)??{error:'GitHub drafts are not available in this build.'}
     :name===WRITE_TOOL?await writes?.(identity.id,args,grants)??{error:'GitHub writes are not available in this build.'}
-    :name===REPORT_TOOL?reports?.(identity.id,args)??{error:'Agent reports are not available in this build.'}
-    :name===ARTIFACT_TOOL?artifacts?.(identity.id,args,artifactGranted(identity.id,grants,'read',now))??{error:'Saving to the Journal is not available in this build.'}
-    :name===SERVICE_DRAFT_TOOL?await serviceDrafts?.(identity.id,args)??{error:'PostHog and Notion drafts are not available in this build.'}
+    :name===REPORT_TOOL?reports?.(agent!,args)??{error:'Agent reports are not available in this build.'}
+    :name===ARTIFACT_TOOL?artifacts?.(agent!,args,artifactGranted(identity.id,grants,'read',now))??{error:'Saving to the Journal is not available in this build.'}
+    :name===SERVICE_DRAFT_TOOL?await serviceDrafts?.(agent!,args)??{error:'PostHog and Notion drafts are not available in this build.'}
     :name===CONTEXT_TOOL?context?.(args,provider=>SERVICE_PROVIDERS.includes(provider)&&standingCallDecision({identity,grants,target:provider,action:Object.keys(SERVICE_ACTIONS[provider])[0],tool:'read_service',args:{provider,operation:Object.keys(SERVICE_ACTIONS[provider])[0]},foxTurn:null,now}).decision==='allowed')??{error:'Saved Service context is not available in this build.'}
-    :name===BOARD_TOOL?board?.(identity.id,args,(provider,operation)=>standingCallDecision({identity,grants,target:provider,action:operation,tool:provider===AGENT_REPORT_TARGET?REPORT_TOOL:'read_service',args:provider===AGENT_REPORT_TARGET?{operation}:{provider,operation},foxTurn:null,now}).decision==='allowed')??{error:'The board is not available in this build.'}
-    :turn?turn.dispatch(name,args,call):channel(name,args,identity.id),
+    :name===BOARD_TOOL?board?.(agent!,args,(provider,operation)=>standingCallDecision({identity,grants,target:provider,action:operation,tool:provider===AGENT_REPORT_TARGET?REPORT_TOOL:'read_service',args:provider===AGENT_REPORT_TARGET?{operation}:{provider,operation},foxTurn:null,now}).decision==='allowed')??{error:'The board is not available in this build.'}
+    :turn?turn.dispatch(name,args,call):channel(name,args,agent!),
    access:{
     actions:all=>standingActions(all,identity,grants,foxTurn!==null,now),
-    decide:(target,action,tool,args)=>{
-     const decision=standingCallDecision({identity,grants,target,action,tool,args,foxTurn,now});
-     access.audit(agentAuditEntry(identity.id,target,action,decision,now));
-     // A Service read it may not make: the person is asked once (a revoked or unknown Agent never asks).
-     if(decision.decision!=='allowed'&&tool==='read_service'&&SERVICE_PROVIDERS.includes(target)&&decision.reason!==GRANT_REASONS.revoked&&decision.reason!==GRANT_REASONS.unknown){
-      const said=serviceRequest?.({id:identity.id,name:identity.name},target)??'';
-      if(said)return {...decision,reason:decision.reason+said};
+    // The Context entry decides and audits the call (context/store/context.ts agentContext); the Agent's Grants and its
+    // audit trail are injected here, so the decision and its one audit record are made in one place.
+    admit:(target,action,tool,args)=>{
+     try{
+      return agentContext({
+       decide:()=>({...standingCallDecision({identity,grants,target,action,tool,args,foxTurn,now}),writes:agentContextWrites(target)}),
+       audit:(asked,verdict)=>access.audit(agentAuditEntry(identity.id,asked.target,asked.action,verdict,now)),
+      },{agentId:identity.id,target,action});
+     }catch(error){
+      // A Service read it may not make: the person is asked once (a revoked or unknown Agent never asks).
+      if(error instanceof ContextRefused&&tool==='read_service'&&SERVICE_PROVIDERS.includes(target)&&error.message!==GRANT_REASONS.revoked&&error.message!==GRANT_REASONS.unknown){
+       const said=serviceRequest?.({id:identity.id,name:identity.name},target)??'';
+       if(said)throw new ContextRefused(error.message+said);
+      }
+      throw error;
      }
-     return decision;
     }
    }});
  };

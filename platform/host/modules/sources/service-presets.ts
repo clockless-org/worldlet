@@ -1,5 +1,5 @@
 import {readStoredServicePreset,removeServicePreset,saveServicePreset} from '../../../../context/connectors/index.ts';
-import {contextReader,contextWriter,type ContextOrigin} from '../../../../context/store/index.ts';
+import {contextReader,contextWriter,type ContextWriter} from '../../../../context/store/index.ts';
 import {ledgerContext} from '../../store/context-storage.ts';
 import type {ServicePreset} from '../../../../contracts/service-presets.ts';
 import {WorldletError} from '../../files.ts';
@@ -22,9 +22,9 @@ const NOT_READY='Service presets are kept in your own World: finish setting it u
 export function loadServicePresets(db:PresetLedger):ServicePreset[] {
  return contextReader(ledgerContext(db)).bodies('service-presets').flatMap(row=>{const preset=readStoredServicePreset(row);return preset?[preset]:[];}).sort((a,b)=>a.id.localeCompare(b.id));
 }
-/** Saves the presets that changed and removes those that went, in one transaction. */
-export function storeServicePresets(db:PresetLedger,before:readonly ServicePreset[],after:readonly ServicePreset[],author:ContextOrigin={by:'person'}){
- const context=contextWriter(ledgerContext(db),author);
+/** Saves the presets that changed and removes those that went, in one transaction, with the writer given: the person's,
+ * or an Agent's in the call the Context entry admitted (the board). */
+export function storeServicePresets(context:ContextWriter,before:readonly ServicePreset[],after:readonly ServicePreset[]){
  context.transaction(()=>{
   const save=after.filter(preset=>JSON.stringify(before.find(item=>item.id===preset.id))!==JSON.stringify(preset));
   const forget=before.filter(preset=>!after.some(item=>item.id===preset.id)).map(preset=>preset.id);
@@ -46,12 +46,12 @@ export function createServicePresets({ledger,now=()=>new Date().toISOString()}:{
    try{
     if(operation==='save'){
      const saved=saveServicePreset(presets,request.preset,now());
-     storeServicePresets(db,presets,saved.presets);
+     storeServicePresets(contextWriter(ledgerContext(db),'person'),presets,saved.presets);
      return {presets:saved.presets,preset:saved.preset};
     }
     if(operation==='delete'){
      const next=removeServicePreset(presets,request.id);
-     storeServicePresets(db,presets,next);
+     storeServicePresets(contextWriter(ledgerContext(db),'person'),presets,next);
      return {presets:next};
     }
    }catch(error){

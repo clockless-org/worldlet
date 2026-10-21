@@ -1,5 +1,5 @@
 import {agentLiveness,listAgents,makeAgentReport,readStoredReport} from '../../../../agent/gate/index.ts';
-import {contextReader,contextWriter} from '../../../../context/store/index.ts';
+import {contextReader,type AgentContext} from '../../../../context/store/index.ts';
 import {ledgerContext} from '../../store/context-storage.ts';
 import type {AgentIdentity} from '../../../../contracts/agent-identity.ts';
 import type {AgentListEntry,AgentLiveness,AgentReport} from '../../../../contracts/agent-reports.ts';
@@ -12,8 +12,8 @@ import type {Row} from './types.ts';
 /** The World's ledger, while it is the person's own World (not the practice World) and writable. */
 export type ReportLedger={agentReports():Row[];saveAgentReport(report:Row):void};
 export interface AgentReports {
- /** One `agent_reports` call (`agents/report`, `agents/list`) by `agentId`, already admitted by its Grants. */
- call(agentId:string,args:Row):Row;
+ /** One `agent_reports` call (`agents/report`, `agents/list`) by the Agent the Context entry admitted under its Grants. */
+ call(agent:AgentContext,args:Row):Row;
  /** Every Agent the person has not revoked with its report, as `agents/list` answers, for the board's `agents` source
   * (context/connectors/BOARD.md#the-agents-source): null outside the person's own World. */
  list():AgentListEntry[]|null;
@@ -25,14 +25,14 @@ const NOT_READY='Worldlet is not ready for this yet: the person has not finished
 export function createAgentReports({ledger,identities,now=()=>new Date().toISOString()}:{ledger:()=>ReportLedger|null;identities:()=>AgentIdentity[];now?:()=>string}):AgentReports {
  const load=(db:ReportLedger)=>contextReader(ledgerContext(db)).bodies('agent-reports').flatMap(row=>{const report=readStoredReport(row);return report?[report]:[];});
  return {
-  call(agentId,args){
-   const db=ledger();
+  call(agent,args){
+   const db=ledger(),agentId=agent.call.agentId;
    if(!db)return {error:NOT_READY};
    try{
     const at=now(),{operation,...input}=args??{};
     if(operation==='report'){
      const report=makeAgentReport(agentId,input,at);
-     contextWriter(ledgerContext(db),{by:'agent',id:agentId}).write('agent-reports',{save:[report as unknown as Row]});
+     agent.writer(ledgerContext(db)).write('agent-reports',{save:[report as unknown as Row]});
      return {ok:true,liveness:agentLiveness(report,at),guidance:`The person and the Agents allowed to see other Agents now see this. Report again within ${report.ttlMinutes} minutes while it holds, or it reads stale; report offline when stopping.`};
     }
     if(operation==='list')return {agents:listAgents(identities(),load(db),input,at),untrustedContent:true};

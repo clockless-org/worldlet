@@ -67,6 +67,7 @@ import {McpAccounts} from '../sources/mcp-account.ts';
 import {McpSource,McpSourceAccess,McpSourceConnections} from '../sources/mcp-source.ts';
 import {ServiceSource,ServiceSourceAccess,ServiceSourceConnections} from '../sources/service-source.ts';
 import {DoorDash,DoorDashSourceAccess} from '../sources/doordash.ts';
+import type {AgentContext} from '../../../../context/store/index.ts';
 
 /** Which providers `install` is signed in to, as the Agent itself says (null: it does not say): Hermes Agent lists them
  * in a new ACP session, OpenClaw names their models in openclaw.json; Codex is signed in to ChatGPT when it has a
@@ -309,7 +310,7 @@ export function standingWorldTools():Promise<StandingWorldTools>|null {
   reports:(agentId,args)=>agentReports?agentReports.call(agentId,args):{error:'Worldlet is still starting. Try again in a moment.'},
   writes:(agentId,args,grants)=>githubDrafts?githubDrafts.run(agentId,args,grants):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'}),channel:(name,args,agent)=>channelTool?channelTool(name,args,agent):Promise.resolve({error:'Worldlet is still starting. Try again in a moment.'})});
 }
-let channelTool:((name:string,args:Row,agent?:string)=>Promise<Row>)|null=null;
+let channelTool:((name:string,args:Row,agent:AgentContext)=>Promise<Row>)|null=null;
 /** The World's saved Service context (`context/*`), read through the sources module once the runtime is installed. */
 let savedContext:((args:Row,canRead:(provider:string)=>boolean)=>Row|undefined)|null=null;
 /** Agents' first need of a Service (service-requests.ts), made with agentAccess. */

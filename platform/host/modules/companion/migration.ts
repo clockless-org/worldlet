@@ -49,7 +49,7 @@ function moveLegacyBrought(world:BroughtShelf){
   try{
    if(isLink(file)||!fs.existsSync(file))continue;
    const value=JSON.parse(fs.readFileSync(file,'utf8'));
-   if(value?.version===1&&value.source===source&&value.skills&&typeof value.skills==='object'&&Array.isArray(value.routines))contextChanges(ledgerContext(world),'agent','brought-agents').replaceBrought(source,value.skills,value.routines);
+   if(value?.version===1&&value.source===source&&value.skills&&typeof value.skills==='object'&&Array.isArray(value.routines))contextChanges(ledgerContext(world),'world','brought-agents').replaceBrought(source,value.skills,value.routines);
    fs.renameSync(file,file+'.before-database');
   }catch{}
  }
@@ -192,7 +192,8 @@ function journalNotes(world:BroughtShelf,source:MigrationSource,notes:{date:stri
  const {forget}=orderArtifacts([...pages,...kept.filter(a=>!ids.has(a.id)&&!earlier.includes(a.id))]);
  const gone=[...earlier,...forget];
  if(!pages.length&&!gone.length)return;
- const made=contextWriter(ledgerContext(world),'agent');
+ // The World copies them in; no Agent call writes here.
+ const made=contextWriter(ledgerContext(world),'world');
  made.write('artifacts',{save:pages.filter(page=>!forget.includes(page.id)) as unknown as Row[],forget:gone});
  if(world.deleteArtifactPages)made.remove('artifact-pages',gone);
 }
@@ -225,7 +226,7 @@ export async function bringAgent(source:MigrationSource,{companion,world,hermesH
  for(const result of data.routines){if('routine' in result)routines.push(result.routine);else stayed.push({name:result.name,reason:result.reason});}
  // The World keeps them first; Fox's Harness gets a copy.
  const entry:BroughtStore={version:1,source,skills,routines};
- if(world){try{moveLegacyBrought(world);contextChanges(ledgerContext(world),'agent','brought-agents').replaceBrought(source,skills,routines);}catch{partial=true;}}
+ if(world){try{moveLegacyBrought(world);contextChanges(ledgerContext(world),'world','brought-agents').replaceBrought(source,skills,routines);}catch{partial=true;}}
  const placed=await placeBrought(entry,{hermesHome,importRoutines});
  partial||=placed.partial;stayed.push(...placed.stayed);
  const created=placed.routines,placedSkills=placed.skills;

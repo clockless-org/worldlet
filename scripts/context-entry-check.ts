@@ -3,12 +3,16 @@ import path from 'node:path';
 import {withTempDir} from './test-temp.ts';
 import {WorldLedger} from '../platform/host/store/ledger.ts';
 import {contextChanges,contextReads,ledgerContext} from '../platform/host/store/context-storage.ts';
-import {CONTEXT_DOMAINS,CONTEXT_KINDS,contextEnvelope,contextReader,contextTime,contextWriter,syncedWriter,type ContextStorage} from '../context/store/index.ts';
+import {CONTEXT_DOMAINS,CONTEXT_KINDS,CONTEXT_REFUSALS,ContextRefused,agentContext,contextEnvelope,contextReader,contextTime,contextWriter,syncedWriter,type ContextCall,type ContextGuard,type ContextStorage} from '../context/store/index.ts';
+import {GRANT_REASONS,STANDING_OUTSIDE_TURN,agentAuditEntry,agentContextWrites,artifactGrant,channelDefaultGrants,standingCallDecision} from '../agent/gate/index.ts';
+import type {AgentAuditEntry,AgentIdentity,Grant} from '../contracts/agent-identity.ts';
 import {connectorWriter} from '../context/connectors/index.ts';
 
 // The one way in to Context (#676, context/store/context.ts) with fictional records: every domain has one kind; the
 // envelope is read from records as they are stored today; the general writer refuses Synced and the Connector's writer
-// writes only Synced; one search covers the four kinds; and the host's storage keeps the same tables and shapes.
+// writes only Synced; one search covers the four kinds; the host's storage keeps the same tables and shapes; and an
+// Agent reaches Context only in a call the entry admitted against its Grants, each decision audited, while the person and
+// Fox are never asked for one.
 
 // Every domain belongs to exactly one of the four kinds, once.
 assert.deepEqual([...new Set(CONTEXT_DOMAINS.map(domain=>domain.kind))].sort(),[...CONTEXT_KINDS].sort());
@@ -56,7 +60,8 @@ assert.deepEqual(reader.bodies('artifacts').map(row=>row.id),['art-1','art-2']);
 fox.remove('artifacts',['art-1']);
 assert.deepEqual(reader.bodies('artifacts').map(row=>row.id),['art-2']);
 assert.throws(()=>fox.write('service-sync',{save:[{id:'sync-2'}]}),/kept up to date by its Connector/);
-assert.throws(()=>contextWriter(storage,{by:'agent',id:'agent-alex'}).remove('service-sync',['sync-1']),/Connector/);
+assert.throws(()=>contextWriter(storage,{by:'agent',id:'agent-alex'} as any),/only in a call its Grants allowed/,'an Agent never writes without an admitted call');
+assert.throws(()=>contextWriter(storage,'agent' as any),ContextRefused);
 assert.throws(()=>syncedWriter(storage,'github').write('artifacts',{save:[]}),/not Synced/);
 connectorWriter(storage,'github').write('service-sync',{save:[{id:'sync-1',provider:'github',records:[],collectedAt:40}]});
 assert.equal(reader.get('service-sync','sync-1')?.updatedAt,40_000);
@@ -71,7 +76,8 @@ const writesBefore=writes.length;fox.remove('artifacts',[]);assert.equal(writes.
   update:(id:string,status:string,snoozedUntil:any,readOnly:boolean,by:any)=>{saved.push([id,status,snoozedUntil,readOnly,by].join(','));},value:()=>null} as any;
  const context=ledgerContext(fake);
  contextWriter(context,'person').write('agent-asks',{save:[{id:'a1'}],with:{item:{id:'ask-a1'}}});
- contextWriter(context,{by:'agent',id:'agent-alex'}).write('agent-asks',{save:[{id:'a1'}],with:{item:{id:'ask-a1'}}});
+ const asks=agentContext({decide:()=>({decision:'allowed',writes:['agent-asks']}),audit(){}},{agentId:'agent-alex',target:'asks',action:'post'});
+ asks.writer(context).write('agent-asks',{save:[{id:'a1'}],with:{item:{id:'ask-a1'}}});
  contextWriter(context,'person').write('attention-items',{operation:'status',with:{id:'i1',status:'read',snoozedUntil:null,readOnly:true}});
  assert.deepEqual(saved,['ask-a1:user','ask-a1:agent','i1,read,,true,']);
  assert.deepEqual([...contextReader(context).query<Uint8Array>('agent-asks','attachment',{askId:'a1',id:'f',offset:2,length:9})],[2,1,2,9]);
@@ -85,7 +91,7 @@ const writesBefore=writes.length;fox.remove('artifacts',[]);assert.equal(writes.
 await withTempDir('worldlet-context-entry-',async dir=>{
  const ledger=new WorldLedger(path.join(dir,'world'));
  try{
-  const context=ledgerContext(ledger),read=contextReader(context),write=contextWriter(context,{by:'agent',id:'agent-alex'});
+  const context=ledgerContext(ledger),read=contextReader(context),write=contextWriter(context,'fox');
   write.write('artifacts',{save:[{id:'art-abcdefghijkl',kind:'answer',title:'A table',body:'| pears | 3 |',agentId:'agent-alex',updatedAt:3}]});
   assert.deepEqual(ledger.artifactRows().map(row=>row.title),['A table']);
   assert.deepEqual(read.get('artifacts','art-abcdefghijkl')?.origin,{by:'agent',id:'agent-alex'});
@@ -126,4 +132,60 @@ await withTempDir('worldlet-context-entry-',async dir=>{
   assert.throws(()=>syncedWriter(context,'x').write('conversations',{operation:'addCompanionTurns',with:{args:['fox',[]]}}),/not Synced/);
  }finally{ledger.close();}
 });
-console.log('PASS one way in to Context: kinds, envelope, search across kinds, Synced only from Connectors, host tables unchanged');
+// Grants and audit at the entry (agent/gate/GRANTS.md): the host injects the Gate's decision and its audit trail, as the
+// standing World tools server does (platform/host/modules/agents/world-tool-bridge.ts). Fictional Agents and records.
+{
+ const now='2026-10-21T09:00:00.000Z';
+ const alex:AgentIdentity={id:'agent-alex',name:'Alex\'s script',harness:'claude-code',kind:'local',createdAt:'2026-10-01T09:00:00.000Z'};
+ const sam:AgentIdentity={id:'agent-sam',name:'Sam\'s script',harness:'codex',kind:'local',createdAt:'2026-10-01T09:00:00.000Z'};
+ const gone:AgentIdentity={...sam,id:'agent-gone',revokedAt:'2026-10-02T09:00:00.000Z'};
+ // Sam may save to the Journal; Alex has only the default Grants every Agent gets, which name no Journal.
+ const grants:Grant[]=[...channelDefaultGrants(alex.id,now),...channelDefaultGrants(sam.id,now),artifactGrant(sam.id,'save',now)!];
+ const audit:AgentAuditEntry[]=[];
+ const guard=(identity:AgentIdentity,tool:string):ContextGuard=>({
+  decide:call=>({...standingCallDecision({identity,grants:grants.filter(g=>g.agentId===identity.id),target:call.target,action:call.action,tool,args:{},foxTurn:null,now}),writes:agentContextWrites(call.target)}),
+  audit:(call,verdict)=>{audit.push(agentAuditEntry(call.agentId,call.target,call.action,verdict,now));},
+ });
+ const save:Omit<ContextCall,'agentId'>={target:'agent-artifacts',action:'save'};
+ const rows:Record<string,any>[]=[];
+ const journal:ContextStorage={domains:{artifacts:{rows:()=>rows,write:change=>{rows.push(...change.save??[]);}},'agent-reports':{rows:()=>[],write:()=>{throw Error('never written');}}}};
+ const card={id:'art-sam-1',kind:'answer',title:'Tomato plan',agentId:sam.id,updatedAt:1};
+
+ // An Agent without a Grant: refused before anything is read or written, with the Gate's own words, and audited.
+ assert.throws(()=>agentContext(guard(alex,'agent_artifacts'),{agentId:alex.id,...save}),(error:Error)=>error instanceof ContextRefused&&error.message===STANDING_OUTSIDE_TURN);
+ assert.deepEqual(audit.at(-1),{at:now,agentId:alex.id,target:'agent-artifacts',action:'save',decision:'denied',reason:STANDING_OUTSIDE_TURN});
+ // A revoked Agent: refused as revoked, audited too.
+ assert.throws(()=>agentContext(guard(gone,'agent_artifacts'),{agentId:gone.id,...save}),new RegExp(GRANT_REASONS.revoked.replace(/[.']/g,'.')));
+ assert.deepEqual(audit.at(-1),{at:now,agentId:gone.id,target:'agent-artifacts',action:'save',decision:'denied',reason:GRANT_REASONS.revoked});
+
+ // An Agent with a Grant: allowed, audited once with the Grant that decided, and it writes as itself.
+ const before=audit.length;
+ const admitted=agentContext(guard(sam,'agent_artifacts'),{agentId:sam.id,...save});
+ assert.deepEqual(audit.slice(before),[{at:now,agentId:sam.id,target:'agent-artifacts',action:'save',decision:'allowed',grantId:'agent-sam-artifacts-save'}],'one record per decision');
+ const sams=admitted.writer(journal);
+ assert.deepEqual(sams.author,{by:'agent',id:sam.id});
+ sams.write('artifacts',{save:[card]});
+ assert.deepEqual(contextReader(journal).get('artifacts','art-sam-1')?.origin,{by:'agent',id:sam.id});
+ assert.equal(audit.length,before+1,'writing in the admitted call decides nothing again');
+ // Only what its call changes: another domain, or Synced, is refused and audited.
+ assert.throws(()=>sams.write('agent-reports',{save:[{agentId:sam.id}]}),(error:Error)=>error instanceof ContextRefused&&error.message===CONTEXT_REFUSALS.domain.replace('{label}','agent reports'));
+ assert.deepEqual(audit.at(-1),{at:now,agentId:sam.id,target:'agent-artifacts',action:'save',decision:'denied',reason:'This call does not change agent reports.'});
+ assert.throws(()=>sams.write('service-sync',{save:[]}),/kept up to date by its Connector/);
+ assert.equal(audit.at(-1)?.decision,'denied');
+ // A call that changes no Context as an Agent (a default read) is admitted but writes nothing.
+ const query=agentContext(guard(alex,'query_world_items'),{agentId:alex.id,target:'items',action:'query'});
+ assert.equal(audit.at(-1)?.decision,'allowed');
+ assert.throws(()=>query.writer(journal).write('artifacts',{save:[{id:'art-alex'}]}),ContextRefused);
+ assert.equal(rows.some(row=>row.id==='art-alex'),false,'nothing was written');
+ // Without the host's Grants the entry refuses: there is nothing to decide by.
+ assert.throws(()=>agentContext(null,{agentId:sam.id,...save}),(error:Error)=>error instanceof ContextRefused&&error.message===CONTEXT_REFUSALS.unguarded);
+
+ // The person and Fox are never asked: no Grant, no audit, and they write as before.
+ const quiet=audit.length;
+ contextWriter(journal,'person').write('artifacts',{save:[{id:'art-person',title:'Seeds to buy',updatedAt:2}]});
+ contextWriter(journal,'fox').write('artifacts',{save:[{id:'art-fox',title:'Watering times',updatedAt:3}]});
+ assert.deepEqual(rows.map(row=>row.id),['art-sam-1','art-person','art-fox']);
+ assert.equal(audit.length,quiet,'the person and Fox leave no Agent audit');
+}
+
+console.log('PASS one way in to Context: kinds, envelope, search across kinds, Synced only from Connectors, host tables unchanged, Agents only in calls their Grants allowed with each decision audited, the person and Fox never asked');

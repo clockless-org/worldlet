@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import {artifactId,contextReader,contextWriter,readArtifact,type Artifact} from '../../../../context/store/index.ts';
+import {artifactId,contextReader,readArtifact,type AgentContext,type Artifact} from '../../../../context/store/index.ts';
 import {ledgerContext} from '../../store/context-storage.ts';
 import {findAgentArtifacts,readAgentArtifactRead,readAgentArtifactSave,saveAgentArtifact} from '../../../../agent/gate/index.ts';
 import type {Row} from './types.ts';
@@ -10,10 +10,10 @@ import type {Row} from './types.ts';
 /** The World's ledger, while it is the person's own World (not the practice World), writable, with private context. */
 export type ArtifactLedger={artifactRows():Row[];saveArtifacts(save:Row[],forget?:string[]):void;deleteArtifactPages(ids:string[]):void};
 export interface AgentArtifacts {
- /** One `agent_artifacts` call (`agent-artifacts/save`, `agent-artifacts/read`) by `agentId`, already admitted by its
-  * Grants. `readsAll` says whether they let it read every Agent's artifacts ("Can read Agents' Journal artifacts"); without it a
+ /** One `agent_artifacts` call (`agent-artifacts/save`, `agent-artifacts/read`) by the Agent the Context entry admitted
+  * under its Grants (`agent`). `readsAll` says whether they let it read every Agent's artifacts ("Can read Agents' Journal artifacts"); without it a
   * read returns only its own. */
- call(agentId:string,args:Row,readsAll:boolean):Row;
+ call(agent:AgentContext,args:Row,readsAll:boolean):Row;
 }
 const NOT_READY='Worldlet is not ready for this yet: the person has not finished setting up their own World.';
 /** A keyed artifact's ID: the same Agent and key always name the same artifact, and nothing else can be told from it. */
@@ -24,15 +24,15 @@ export function createAgentArtifacts({ledger,name,changed,clock=()=>Date.now(),n
  const load=(db:ArtifactLedger):Artifact[]=>contextReader(ledgerContext(db)).bodies('artifacts').flatMap(row=>{const artifact=readArtifact(row);return artifact?[artifact]:[];});
  const failure=(error:unknown)=>({error:error instanceof Error&&error.message?error.message:'Could not do that.'});
  return {
-  call(agentId,args,readsAll){
-   const db=ledger();
+  call(agent,args,readsAll){
+   const db=ledger(),agentId=agent.call.agentId;
    if(!db)return {error:NOT_READY};
    const {operation,...input}=args??{};
    try{
     if(operation==='save'){
      const save=readAgentArtifactSave(input),list=load(db);
      const {artifact,forget}=saveAgentArtifact(list,save,{agentId,agentName:name(agentId),id:save.key?agentArtifactId(agentId,save.key):newId(),now:clock()/1000});
-     const context=contextWriter(ledgerContext(db),{by:'agent',id:agentId});
+     const context=agent.writer(ledgerContext(db));
      context.write('artifacts',{save:[artifact as unknown as Row],forget});
      context.remove('artifact-pages',forget);
      changed(artifact.id);

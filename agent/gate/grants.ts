@@ -7,6 +7,7 @@ import {githubWriteScope,githubWriteScopeCovers,readGithubWriteScope} from './gi
 import {AGENT_REPORT_ACTIONS,AGENT_REPORT_TARGET} from '../../contracts/agent-reports.ts';
 import {AGENT_ARTIFACT_ACTIONS,AGENT_ARTIFACT_TARGET} from '../../contracts/agent-artifacts.ts';
 import {SERVICE_DRAFT_OPERATIONS,SERVICE_DRAFT_PROVIDERS,SERVICE_DRAFT_TARGETS,SERVICE_DRAFT_TITLES,serviceDraftTarget,type ServiceDraftProvider} from '../../contracts/service-drafts.ts';
+import type {ContextDomainId} from '../../context/store/index.ts';
 import {grantedActions,worldActions,type WorldAction} from './gateway.ts';
 import {turnGuardedWrite,turnWriteAdmission} from './turn-trust.ts';
 import {HERMES_CHANNEL_LINK_TOOL,HERMES_CHANNEL_READ_ONLY,HERMES_CHANNEL_TOOLS,hermesChannelTrust} from './hermes-server.ts';
@@ -368,6 +369,19 @@ export function serviceDraftGrantAuditEntry(agentId:string,provider:ServiceDraft
  * and Journal artifacts, so a Fox turn's Grant, which covers everything
  * else, never covers them. */
 export const OWN_GRANT_TARGETS:readonly string[]=Object.freeze([AGENT_ASK_TARGET,BOARD_TARGET,SERVICE_CONTEXT_TARGET,GITHUB_DRAFT_TARGET,GITHUB_WRITE_TARGET,AGENT_REPORT_TARGET,AGENT_ARTIFACT_TARGET,...SERVICE_DRAFT_TARGETS]);
+
+/** The Context each of an Agent's own targets changes (context/store/STORAGE.md#one-way-in): a call the entry admitted
+ * (`agentContext`) writes only these, as that Agent. Any other call writes no Context as an Agent: a Fox turn's writes
+ * are Fox's, and a call outside one changes nothing in the World (`STANDING_OUTSIDE_TURN`). */
+export function agentContextWrites(target:string):ContextDomainId[] {
+ if(target===AGENT_ASK_TARGET)return ['agent-asks'];
+ if(target===BOARD_TARGET)return ['board','service-presets'];
+ if(target===GITHUB_DRAFT_TARGET)return ['github-drafts'];
+ if((SERVICE_DRAFT_TARGETS as readonly string[]).includes(target))return ['service-drafts'];
+ if(target===AGENT_REPORT_TARGET)return ['agent-reports'];
+ if(target===AGENT_ARTIFACT_TARGET)return ['artifacts','artifact-pages'];
+ return [];
+}
 
 /** While a Fox turn holds the standing server, its Agent's calls go to that turn (world-tool-bridge.ts standingTurn), as
  * they did before Grants: a call the turn's own stream announced is Fox's and runs under the turn's trust; any other
