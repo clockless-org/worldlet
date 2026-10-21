@@ -73,6 +73,8 @@ export function backgroundSignIn(install:LocalHarnessInstall,args:string[],env:R
 /** Claude Code's sign-in ran out (a setup check, Fox's turn or background work said so): Worldlet opens its own
  * sign-in page in the browser by itself, at most once per launch, so a page the person closed never comes back on its
  * own (owner decision 2026-10-11). The Sign in buttons in setup and in Settings, Agent stay for another try. */
+/** Whether a Claude Code sign-in page is open in the browser right now. */
+export const signInRunning=()=>running!==null;
 export function signInOnce(install:LocalHarnessInstall,env:Record<string,string>):boolean {
  const args=providerSignIn(install.id,'anthropic');
  if(install.id!=='claude-code'||!args||triedThisLaunch||running)return false;

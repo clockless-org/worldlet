@@ -244,6 +244,10 @@ export function claudeCodeSignInExpired(text:string):string|null {
 }
 /** Whether a turn's error is one of Claude Code's sign-in lines, so its sign-in page opens. */
 export const claudeCodeNeedsSignIn=(error:string)=>error===CLAUDE_CODE_SIGN_IN_EXPIRED||error===CLAUDE_CODE_NOT_SIGNED_IN;
+/** The same line once the browser page has already opened this launch and is closed (Mac Beta 4508, 2026-10-20: every
+ * Fox turn of a new Claude Code user still said "Sign in in the browser page that opened" with no page open): it points
+ * to the Sign in button in Settings › Agents instead. */
+export const claudeCodeSignInElsewhere=(error:string)=>error.replace(/ Sign in (?:again )?in the browser page that opened\.$/,' Sign in to it in Settings › Agents, under Provider.');
 /** Codex's own sign-in or usage limit, told apart from its other failures (Mac Beta 4261, 2026-10-11: a turn that
  * failed for another reason read "finish signing in" while Codex was signed in). Null when the text is neither. */
 export function codexProblem(text:string):string|null {
