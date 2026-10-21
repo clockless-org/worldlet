@@ -3,9 +3,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {withTempDir} from './test-temp.ts';
 import {WorldLedger} from '../platform/host/store/ledger.ts';
-import {createAgentAccess} from '../platform/host/modules/agents/agent-access.ts';
-import {createAgentReports} from '../platform/host/modules/agents/agent-reports.ts';
-import {openStandingWorldTools} from '../platform/host/modules/agents/world-tool-bridge.ts';
+import {createAgentAccess} from '../platform/host/modules/gate/agent-access.ts';
+import {createAgentReports} from '../platform/host/modules/gate/agent-reports.ts';
+import {openStandingWorldTools} from '../platform/host/modules/gate/world-tool-bridge.ts';
 import {STANDING_OUTSIDE_TURN} from '../agent/gate/grants.ts';
 import {REPORT_REASONS} from '../agent/gate/reports.ts';
 

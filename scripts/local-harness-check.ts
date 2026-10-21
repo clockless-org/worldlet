@@ -4,8 +4,8 @@ import path from 'node:path';
 import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,claudeCodeSignInExpired,claudeCodeSignInElsewhere,CLAUDE_CODE_NOT_SIGNED_IN,CLAUDE_CODE_SIGN_IN_EXPIRED,codexProblem,codexWorldToolsFailed,modelAtCapacity,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
  type LocalHarnessId} from '../agent/gate/index.ts';
 import {spawn} from 'node:child_process';
-import {openWorldToolBridge} from '../platform/host/modules/agents/world-tool-bridge.ts';
-import {AgentNotStarting,BUSY_RETRIES,forgetNotStarting,LocalHarnessAdapter,LocalHarnessRuntime,harnessEnvironment,harnessVersion,locateLocalHarnesses,readSelection,searchDirectories,selectedInstall,writeSelection,type HarnessEnvironment} from '../platform/host/modules/agents/local-harness.ts';
+import {openWorldToolBridge} from '../platform/host/modules/gate/world-tool-bridge.ts';
+import {AgentNotStarting,BUSY_RETRIES,forgetNotStarting,LocalHarnessAdapter,LocalHarnessRuntime,harnessEnvironment,harnessVersion,locateLocalHarnesses,readSelection,searchDirectories,selectedInstall,writeSelection,type HarnessEnvironment} from '../platform/host/modules/companion/agent/local-harness.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Local Agent Harnesses at setup: the shared catalog, recommendation, per-command turns and output

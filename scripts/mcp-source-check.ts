@@ -1,4 +1,4 @@
-// The World's MCP connectors as every Agent's source access (platform/host/modules/sources/mcp-source.ts):
+// The World's MCP connectors as every Agent's source access (platform/host/modules/connectors/mcp-source.ts):
 // with no connection a read says to connect; a connection the Agent's Hermes profile has is read in the Platform
 // (Notion's shelf and read_world_source, a Todoist list through Core's curated read, a refresh test), connecting
 // through Worldlet with a token keeps it in the vault under the account owner's transport, disconnecting forgets only
@@ -6,10 +6,10 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {GoogleAccount} from '../platform/host/modules/sources/google-account.ts';
-import {GoogleSource,GoogleSourceAccess} from '../platform/host/modules/sources/google-source.ts';
-import {McpAccounts} from '../platform/host/modules/sources/mcp-account.ts';
-import {McpSource,McpSourceAccess,McpSourceConnections} from '../platform/host/modules/sources/mcp-source.ts';
+import {GoogleAccount} from '../platform/host/modules/connectors/google-account.ts';
+import {GoogleSource,GoogleSourceAccess} from '../platform/host/modules/connectors/google-source.ts';
+import {McpAccounts} from '../platform/host/modules/connectors/mcp-account.ts';
+import {McpSource,McpSourceAccess,McpSourceConnections} from '../platform/host/modules/connectors/mcp-source.ts';
 import {withTempDir} from './test-temp.ts';
 
 const PAGE='0123456789abcdef0123456789abcdef';

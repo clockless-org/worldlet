@@ -15,7 +15,7 @@ export function trustedWorldURL(value:string){
  try{const url=new URL(value);return url.protocol===WORLD_SCHEME+':'&&url.host==='app'&&url.pathname==='/index.html'&&!url.search&&!url.username&&!url.password;}catch{return false;}
 }
 /** Serves files from the packaged UI root after resolving links; nothing outside it is reachable. `ingest` answers
- * /ingest/… (the page's product analytics, forwarded by the host: modules/shell/analytics.ts). */
+ * /ingest/… (the page's product analytics, forwarded by the host: modules/app/analytics.ts). */
 export function serveWorld(session:Session,webRoot:()=>string,ingest?:(request:Request)=>Promise<Response>){
  // The root resolves once per configured path, not on every request.
  let resolved:{from:string,root:string}|null=null;

@@ -4,7 +4,7 @@ The desktop app's Platform layer is one Electron host in TypeScript, for macOS,
 Windows and Linux. It replaced the Swift/CEF Mac host and the C#/WebView2 Windows
 host (#996). Product rules stay in shared `agent/`, `context/` and `ui/`; this host supplies OS
 facts, permissions, persistence, processes and browser IO, and executes Core
-decisions. See the [five-layer standard](../../docs/UI-CORE-PLATFORM.md).
+decisions. See the [architecture](../../docs/UI-CORE-PLATFORM.md).
 
 ## Structure
 
@@ -19,16 +19,16 @@ decisions. See the [five-layer standard](../../docs/UI-CORE-PLATFORM.md).
 | `src/core.ts` | Shared Core in-process: the same `invoke(operation, json)` entry JavaScriptCore and Jint used |
 | `src/preferences.ts`, `src/vault.ts` | Display/companion preferences (`preferences.json`); credentials encrypted with `safeStorage` (or the storage a host passes in) |
 | `src/resources.ts` | Bundled helpers: Hermes bootstrap, agent-browser, Stripe CLI, imsg (Messages), Google OAuth registration, distribution config |
-| `src/modules/agents` | Harness adapters (Hermes worker, external Agent), model access, execution journal, routines |
+| `src/modules/companion/agent` | Harness adapters (Hermes worker, external Agent), model access, execution journal, routines |
 | `src/modules/companion` | Fox chat/model actions, World tool host services, conversation and companion records, reset |
-| `src/modules/sources` | Connections, Applet content readers, reviews (mail, Notion, Home), imports, onboarding, deletion |
+| `src/modules/connectors` | Connections, Applet content readers, reviews (mail, Notion, Home), imports, onboarding, deletion |
 | `src/modules/attention` | World tools, source checks, Applet analysis, Attention synthesis, runtime tasks |
 | `src/modules/applets` | Website views, agent-browser over CDP, history, bookmarks, picture-in-picture, YouTube, Stripe |
-| `src/modules/shell` | The shared media surface (hidden playback and capture view), helper processes, tools Python |
+| `src/modules/app` | The shared media surface (hidden playback and capture view), helper processes, tools Python |
 | `src/modules/world` | World ambience, music, radio/podcasts, the computer's own music players |
 | `src/modules/companion` | Fox's dictation and Talk capture, local Whisper, spoken replies, cloud requests |
 | `src/modules/applets` | Voice Memos, weather, Codex and Claude Code sessions, delegated coding tasks |
-| `src/modules/shell` | Menus, desktop Companion, updates, diagnostics, feedback, analytics, World backup |
+| `src/modules/app` | Menus, desktop Companion, updates, diagnostics, feedback, analytics, World backup |
 | `distribution/` | Public update feed config, analytics capture key, Mac entitlements, Mac release scripts (`mac/`), Windows installer and Store identity (`windows/`) |
 
 Modules register their own page actions and provide services through the contracts in

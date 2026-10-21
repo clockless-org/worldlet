@@ -2,7 +2,7 @@ import {app} from 'electron';
 import {WorldletError} from '../../files.ts';
 import type {Preferences} from '../../preferences.ts';
 import {referenceDate} from '../../store/world-store.ts';
-import {readLimited,TooLarge} from '../shell/io.ts';
+import {readLimited,TooLarge} from '../app/io.ts';
 
 export interface RadioStation {stationuuid:string;name:string;url_resolved:string;tags:string;codec:string;lastcheckok:number;publishedAt?:string}
 

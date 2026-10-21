@@ -6,9 +6,9 @@ import {shell} from 'electron';
 import {WorldletError,ensureDirectory,isoSeconds,writeAtomic,errorMessage} from '../../files.ts';
 import type {Host,Row} from '../../types.ts';
 import type {WorldLedger} from '../../store/ledger.ts';
-import {locateLocalHarnesses} from '../agents/local-harness.ts';
-import {WINDOWS_BASE,cancelled,children,environment,executable,jsonLines,run,which} from '../shell/io.ts';
-import {helperPython} from '../shell/local-tools.ts';
+import {locateLocalHarnesses} from '../companion/agent/local-harness.ts';
+import {WINDOWS_BASE,cancelled,children,environment,executable,jsonLines,run,which} from '../app/io.ts';
+import {helperPython} from '../app/local-tools.ts';
 
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const windows=process.platform==='win32';

@@ -14,8 +14,8 @@ import {turnTrustObserve} from '../agent/gate/turn-trust.ts';
 import {worldActionOf,worldActions} from '../agent/gate/gateway.ts';
 import {APP_DEFINITIONS,SOURCE_PROVIDERS,TOKEN_PROVIDERS,connectSettings,connectToken} from '../context/applets/index.ts';
 import {validateAppletRuntimes} from '../context/applets/runtime.ts';
-import {ExecutionJournal} from '../platform/host/modules/agents/journal.ts';
-import {ServiceSource,ServiceSourceAccess,ServiceSourceConnections} from '../platform/host/modules/sources/service-source.ts';
+import {ExecutionJournal} from '../platform/host/modules/companion/agent/journal.ts';
+import {ServiceSource,ServiceSourceAccess,ServiceSourceConnections} from '../platform/host/modules/connectors/service-source.ts';
 import {withTempDir} from './test-temp.ts';
 
 const TOKEN='Fixture_'+'cf1'.repeat(11);

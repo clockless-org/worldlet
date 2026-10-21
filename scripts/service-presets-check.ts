@@ -4,7 +4,7 @@ import {withTempDir} from './test-temp.ts';
 import {SERVICE_PRESET_LIMITS} from '../contracts/service-presets.ts';
 import {PRESET_REASONS,readServicePresetRead,readStoredServicePreset,removeServicePreset,saveServicePreset,servicePresetRead} from '../context/connectors/index.ts';
 import {WorldLedger} from '../platform/host/store/ledger.ts';
-import {createServicePresets,loadServicePresets} from '../platform/host/modules/sources/service-presets.ts';
+import {createServicePresets,loadServicePresets} from '../platform/host/modules/connectors/service-presets.ts';
 
 // Service presets (contracts/service-presets.ts, context/connectors/services/presets.ts): named, saved reads of a Worldlet
 // Service, checked as the Service's own reader checks them, holding no key, kept in world.sqlite.

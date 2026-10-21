@@ -4,7 +4,7 @@ import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {harnessService,harnessToolsLine,harnessToolsSummary,hermesConfigValues,hermesExternalEvent,hermesHarnessTools,localHarnessTurn,openClawExternalEvent,openClawHarnessTools} from '../agent/gate/index.ts';
 import {channelMessageAsks,channelMessageEvent,externalEventAttentionId,externalEventMatters,externalEventObservation,externalEventPush,externalEventsForAttention,validExternalEventAttentionId} from '../agent/tasks/index.ts';
-import {harnessEvents,harnessTools,readHarnessEvents} from '../platform/host/modules/agents/harness-services.ts';
+import {harnessEvents,harnessTools,readHarnessEvents} from '../platform/host/modules/companion/agent/harness-services.ts';
 import {withTempDir} from './test-temp.ts';
 
 // The `events` and `tools` Harness services (contracts/HARNESS.md#harness-services-v2; owner parity plan items 8 and

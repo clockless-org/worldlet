@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {PUSH_BOX_PLACE,boxPlace,openBox,pairKeys,phoneDesktop,readPairLink,readPhoneMessage,sealBox} from '../platform/web/index.ts';
-import {createLocalRelay} from '../platform/host/modules/shell/local-relay.ts';
-import {createPhoneRelay} from '../platform/host/modules/shell/relay.ts';
+import {createLocalRelay} from '../platform/host/modules/windows/local-relay.ts';
+import {createPhoneRelay} from '../platform/host/modules/windows/relay.ts';
 
 // The phone's notification token kept on the computer (platform/web/README.md#push): the phone hands it over with a sealed
 // `push` message, the computer keeps it in its vault and never delivers it, and a notification goes to the relay's

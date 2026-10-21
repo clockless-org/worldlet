@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import {withTempDir} from './test-temp.ts';
 import {WorldLedger} from '../platform/host/store/ledger.ts';
-import {createServiceSync} from '../platform/host/modules/sources/service-sync.ts';
+import {createServiceSync} from '../platform/host/modules/connectors/service-sync.ts';
 import {SERVICE_SYNC_DEFAULTS,SERVICE_SYNC_DEFAULT_MINUTES,serviceSyncDefaultId,serviceSyncDefaultStep,serviceSyncLine} from '../context/connectors/index.ts';
 import type {ServiceRead} from '../contracts/services.ts';
 

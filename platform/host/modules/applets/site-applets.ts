@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import {SITE_APPLET_LIMITS,mailIconURL,readSiteApplet,siteAppletFor,siteAppletPage,siteAppletRecord,validSiteAppletId,type SiteAppletRecord} from '../../../../context/applets/index.ts';
 import {WorldletError} from '../../files.ts';
 import type {Host} from '../../types.ts';
-import {readImage} from '../sources/mail-avatar.ts';
+import {readImage} from '../connectors/mail-avatar.ts';
 
 /** Website Applets made from the Browser (context/applets/site-applet.ts). The Browser's Make Applet button sends the
  * page it shows; the record (name, page, the site's icon as a data: image) is kept as a `site` row of the

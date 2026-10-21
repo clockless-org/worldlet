@@ -120,7 +120,7 @@ console.log('PASS Dev and packaged apps share scripts/mac-app-info.ts; macOS 14 
  const {appFuses,flipAppFuses}=await import('./electron-fuses.ts');
  const {FuseV1Options,FuseState,getCurrentFuseWire}=await import('@electron/fuses');
  assert.deepEqual(appFuses,{[FuseV1Options.RunAsNode]:true,[FuseV1Options.EnableNodeOptionsEnvironmentVariable]:false,[FuseV1Options.EnableNodeCliInspectArguments]:false});
- assert.match(readFileSync(path.join(root,'platform/host/modules/agents/world-tool-bridge.ts'),'utf8'),/ELECTRON_RUN_AS_NODE:'1'/,'RunAsNode stays on while the bridge needs it');
+ assert.match(readFileSync(path.join(root,'platform/host/modules/gate/world-tool-bridge.ts'),'utf8'),/ELECTRON_RUN_AS_NODE:'1'/,'RunAsNode stays on while the bridge needs it');
  const hook=/afterCopyExtraResources:\[async\(\{buildPath,arch:target\}[^\n]*await flipAppFuses\(buildPath,platform,arch!=='universal'\);\}\]/;
  assert.match(pkg,hook,'package-electron.ts flips the fuses in afterCopyExtraResources, which packager runs before signing');
  assert.equal(pkg.match(/flipAppFuses\(/g)?.length,1);

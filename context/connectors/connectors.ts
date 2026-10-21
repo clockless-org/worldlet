@@ -3,7 +3,7 @@
 
 /** How a service is connected by default.
  * - `mcp-oauth`: the service's own sign-in page, opened from this device; Worldlet registers itself there as a
- *   public client (no secret) and waits on a loopback address (platform/host/modules/sources/mcp-account.ts).
+ *   public client (no secret) and waits on a loopback address (platform/host/modules/connectors/mcp-account.ts).
  * - `google`: Worldlet's own Google sign-in (Mail, Calendar, Drive; Search Console adds its own read permission).
  * - `key`: a pasted key or file (`TOKEN_PROVIDERS` in context/applets/sources.ts), until the service gets a sign-in.
  * - `github-device`: the official Worldlet GitHub App's device code (context/connectors/github-device.ts): the person types a

@@ -1,42 +1,39 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="2460" height="910" viewBox="0 0 2460 910" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="2308" height="910" viewBox="0 0 2308 910" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
 <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#57606A"/></marker></defs>
-<rect width="2460" height="910" rx="18" fill="#FFFFFF"/><rect x="0.5" y="0.5" width="2459" height="909" rx="18" fill="none" stroke="#D8DDE4"/>
-<text x="32" y="50" font-size="26" font-weight="700" fill="#1F2328">Worldlet 架构：分层与组件</text>
+<rect width="2308" height="910" rx="18" fill="#FFFFFF"/><rect x="0.5" y="0.5" width="2307" height="909" rx="18" fill="none" stroke="#D8DDE4"/>
+<text x="32" y="50" font-size="26" font-weight="700" fill="#1F2328">每个组件在各层的代码目录</text>
 <text x="32" y="76" font-size="14" fill="#57606A">横向是四层，纵向是功能。每格列出这个功能在这一层的代码目录。调用只往下走。</text>
 <rect x="250" y="96" width="146" height="44" rx="8" fill="#F6F8FA" stroke="#D0D7DE"/>
 <text x="323.0" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#1F2328">World</text>
-<text x="323.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">区域 · HUD · 主题</text>
+<text x="323.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">区域 · HUD</text>
 <rect x="402" y="96" width="146" height="44" rx="8" fill="#F6F8FA" stroke="#D0D7DE"/>
 <text x="475.0" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#1F2328">Applets</text>
-<text x="475.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">数据 · 动作 · 看板</text>
+<text x="475.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">数据 · 动作 · 浏览器</text>
 <rect x="554" y="96" width="146" height="44" rx="8" fill="#F6F8FA" stroke="#D0D7DE"/>
-<text x="627.0" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#1F2328">Fox</text>
+<text x="627.0" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#1F2328">Companion</text>
 <text x="627.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">对话 · 语音</text>
 <rect x="706" y="96" width="146" height="44" rx="8" fill="#F6F8FA" stroke="#D0D7DE"/>
 <text x="779.0" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#1F2328">Attention</text>
-<text x="779.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">现在要你处理的</text>
+<text x="779.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">与 Journal</text>
 <rect x="858" y="96" width="146" height="44" rx="8" fill="#F6F8FA" stroke="#D0D7DE"/>
 <text x="931.0" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#1F2328">任务</text>
-<text x="931.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">定时 · 检查 · 起草</text>
-<rect x="1010" y="96" width="146" height="44" rx="8" fill="#F6F8FA" stroke="#D0D7DE"/>
-<text x="1083.0" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#1F2328">Artifacts</text>
-<text x="1083.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">与 Journal</text>
-<rect x="1162" y="96" width="146" height="44" rx="8" fill="#1F2328" stroke="#D0D7DE"/>
-<text x="1235.0" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#FFFFFF">Agents</text>
-<text x="1235.0" y="132" font-size="11" text-anchor="middle" fill="#D0D7DE">与门禁</text>
+<text x="931.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">定时 · 检查</text>
+<rect x="1010" y="96" width="146" height="44" rx="8" fill="#1F2328" stroke="#D0D7DE"/>
+<text x="1083.0" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#FFFFFF">Gate</text>
+<text x="1083.0" y="132" font-size="11" text-anchor="middle" fill="#D0D7DE">Agents · 权限 · 审计</text>
+<rect x="1162" y="96" width="146" height="44" rx="8" fill="#F6F8FA" stroke="#D0D7DE"/>
+<text x="1235.0" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#1F2328">Store</text>
+<text x="1235.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">hub</text>
 <rect x="1314" y="96" width="146" height="44" rx="8" fill="#F6F8FA" stroke="#D0D7DE"/>
-<text x="1387.0" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#1F2328">Context</text>
-<text x="1387.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">唯一的存储</text>
+<text x="1387.0" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#1F2328">Connectors</text>
+<text x="1387.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">进出外部服务</text>
 <rect x="1466" y="96" width="146" height="44" rx="8" fill="#F6F8FA" stroke="#D0D7DE"/>
-<text x="1539.0" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#1F2328">Connectors</text>
-<text x="1539.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">连外部服务</text>
+<text x="1539.0" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#1F2328">App</text>
+<text x="1539.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">外框 · 样式 · 更新</text>
 <rect x="1618" y="96" width="146" height="44" rx="8" fill="#F6F8FA" stroke="#D0D7DE"/>
 <text x="1691.0" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#1F2328">窗口</text>
 <text x="1691.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">网页 · 手机</text>
-<rect x="1770" y="96" width="146" height="44" rx="8" fill="#F6F8FA" stroke="#D0D7DE"/>
-<text x="1843.0" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#1F2328">基础</text>
-<text x="1843.0" y="132" font-size="11" text-anchor="middle" fill="#57606A">外壳 · 设置向导</text>
-<rect x="20" y="150" width="1906" height="170" rx="14" fill="#EEF4FF" stroke="#B6CCFE"/>
+<rect x="20" y="150" width="1754" height="170" rx="14" fill="#EEF4FF" stroke="#B6CCFE"/>
 <text x="36" y="182" font-size="20" font-weight="800" fill="#1F4BB8">1 · UI</text>
 <text x="36" y="204" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A">ui/</text>
 <text x="36" y="226" font-size="12" fill="#57606A">人看到、碰到的</text>
@@ -48,17 +45,16 @@
 <text x="627.0" y="179" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/companion/</text>
 <rect x="710" y="164" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#B6CCFE"/>
 <text x="779.0" y="179" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/attention/</text>
-<text x="931.0" y="180" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">显示在 Fox、Applet 里</text>
-<text x="1083.0" y="180" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">在 attention/ 里</text>
-<text x="1235.0" y="180" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">允许卡片 · 设置</text>
-<text x="1387.0" y="180" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">设置 › Context</text>
-<text x="1539.0" y="180" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">设置 › Connectors</text>
-<text x="1691.0" y="180" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">在 Platform：platform/web/</text>
-<rect x="1774" y="164" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#B6CCFE"/>
-<text x="1843.0" y="179" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/frame/</text>
-<rect x="1774" y="190" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#B6CCFE"/>
-<text x="1843.0" y="205" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/style/</text>
-<rect x="20" y="330" width="1906" height="170" rx="14" fill="#F1F8F3" stroke="#A9D8B8"/>
+<text x="931.0" y="180" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">显示在 companion 上</text>
+<text x="1083.0" y="180" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">在 Frame › 设置里</text>
+<text x="1235.0" y="180" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">所有组件都读它</text>
+<text x="1387.0" y="180" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">在 Frame › 设置里</text>
+<rect x="1470" y="164" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#B6CCFE"/>
+<text x="1539.0" y="179" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/frame/</text>
+<rect x="1470" y="190" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#B6CCFE"/>
+<text x="1539.0" y="205" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/style/</text>
+<text x="1691.0" y="180" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">每个窗口都显示这套 UI</text>
+<rect x="20" y="330" width="1754" height="170" rx="14" fill="#F1F8F3" stroke="#A9D8B8"/>
 <text x="36" y="362" font-size="20" font-weight="800" fill="#1A7F37">2 · Agent</text>
 <text x="36" y="384" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A">agent/</text>
 <text x="36" y="406" font-size="12" fill="#57606A">谁来干活</text>
@@ -71,17 +67,16 @@
 <text x="779.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/attention/</text>
 <rect x="862" y="344" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
 <text x="931.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/tasks/</text>
-<text x="1083.0" y="360" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<rect x="1166" y="344" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
-<text x="1235.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/gate/</text>
+<rect x="1014" y="344" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="1083.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/gate/</text>
+<text x="1235.0" y="360" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
 <text x="1387.0" y="360" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<text x="1539.0" y="360" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<text x="1691.0" y="360" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">在 agent/base 里</text>
-<rect x="1774" y="344" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
-<text x="1843.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/app/</text>
-<rect x="250" y="466" width="1666" height="26" rx="7" fill="#1F2328"/>
+<rect x="1470" y="344" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="1539.0" y="359" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/app/</text>
+<text x="1691.0" y="360" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
+<rect x="250" y="466" width="1514" height="26" rx="7" fill="#1F2328"/>
 <text x="262" y="483" font-size="12.5" fill="#FFFFFF"><tspan font-weight="800">门禁</tspan>  进 Context 的唯一入口：World tools · 每个 Agent 的权限 · 草稿等你批准 · 每次调用都有记录</text>
-<rect x="20" y="510" width="1906" height="170" rx="14" fill="#FFF8EC" stroke="#F0CF8E"/>
+<rect x="20" y="510" width="1754" height="170" rx="14" fill="#FFF8EC" stroke="#F0CF8E"/>
 <text x="36" y="542" font-size="20" font-weight="800" fill="#9A6700">3 · Context</text>
 <text x="36" y="564" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#57606A">context/</text>
 <text x="36" y="586" font-size="12" fill="#57606A">World 知道的一切</text>
@@ -91,17 +86,16 @@
 <text x="627.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
 <text x="779.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
 <text x="931.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<text x="1083.0" y="540" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">记录在 store/</text>
-<text x="1235.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
+<text x="1083.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
+<rect x="1166" y="524" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
+<text x="1235.0" y="539" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/store/</text>
 <rect x="1318" y="524" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
-<text x="1387.0" y="539" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/store/</text>
-<rect x="1470" y="524" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#F0CF8E"/>
-<text x="1539.0" y="539" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/connectors/</text>
+<text x="1387.0" y="539" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/connectors/</text>
+<text x="1539.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
 <text x="1691.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<text x="1843.0" y="540" font-size="12" text-anchor="middle" fill="#C9D1D9">—</text>
-<rect x="250" y="646" width="1666" height="26" rx="7" fill="#FFFFFF" stroke="#F0CF8E"/>
+<rect x="250" y="646" width="1514" height="26" rx="7" fill="#FFFFFF" stroke="#F0CF8E"/>
 <text x="262" y="663" font-size="12.5" fill="#1F2328"><tspan font-weight="800" fill="#9A6700">四类</tspan>  同步来的（来自服务）· 发生过的（对话、汇报）· 做出来的（Artifact、Applet）· 提炼出来的（记忆、摘要），统一搜索</text>
-<rect x="20" y="690" width="1906" height="170" rx="14" fill="#F6F8FA" stroke="#D0D7DE"/>
+<rect x="20" y="690" width="1754" height="170" rx="14" fill="#F6F8FA" stroke="#D0D7DE"/>
 <text x="36" y="722" font-size="20" font-weight="800" fill="#57606A">4 · Platform</text>
 <text x="36" y="744" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#57606A">platform/host/modules/</text>
 <text x="36" y="766" font-size="12" fill="#57606A">宿主：Electron 或 Node</text>
@@ -115,46 +109,46 @@
 <text x="779.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">attention/</text>
 <rect x="862" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
 <text x="931.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">tasks/</text>
-<text x="1083.0" y="720" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">在 attention/ 里</text>
+<rect x="1014" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="1083.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">gate/</text>
 <rect x="1166" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="1235.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agents/</text>
+<text x="1235.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">../store/</text>
 <rect x="1318" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="1387.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">../store/</text>
+<text x="1387.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">connectors/</text>
 <rect x="1470" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="1539.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">sources/</text>
-<text x="1691.0" y="720" font-size="11" text-anchor="middle" fill="#8C959F" font-style="italic">platform/web/ · shell/phone.ts</text>
-<rect x="1774" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="1843.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">shell/</text>
-<text x="1996" y="136" font-size="13" font-weight="700" fill="#57606A">World 之外，以及各自怎么连进来</text>
-<rect x="1996" y="150" width="440" height="170" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="2012" y="178" font-size="16" font-weight="700" fill="#1F2328">人和他的窗口</text>
-<text x="2012" y="204" font-size="12.5" fill="#1F2328">• 桌面窗口：Electron，本机</text>
-<text x="2012" y="224" font-size="12.5" fill="#1F2328">• 任何浏览器：ui/web/，打开 World 的链接</text>
-<text x="2012" y="244" font-size="12.5" fill="#1F2328">• iPhone ios/ · Android android/（原生）</text>
-<text x="2012" y="290" font-size="11.5" fill="#1F4BB8" font-style="italic">扫码配对 · 端到端加密中转，能直连时走 WebRTC</text>
-<line x1="1992" y1="235.0" x2="1930" y2="235.0" stroke="#1F4BB8" stroke-width="2.5" marker-start="url(#ar)" marker-end="url(#ar)"/>
-<rect x="1996" y="330" width="440" height="170" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="2012" y="358" font-size="16" font-weight="700" fill="#1F2328">外部 Agents</text>
-<text x="2012" y="384" font-size="12.5" fill="#1F2328">• Fox 用的 Agent（Hermes、Claude Code、OpenClaw…）：适配器</text>
-<text x="2012" y="404" font-size="12.5" fill="#1F2328">• 本机：Claude Code · Codex · Hermes · 脚本</text>
-<text x="2012" y="424" font-size="12.5" fill="#1F2328">• 云端：claude.ai · ChatGPT · Cursor · token</text>
-<text x="2012" y="470" font-size="11.5" fill="#1A7F37" font-style="italic">本地 MCP（stdio → 本机回环）· 远程 MCP 经</text>
-<text x="2012" y="486" font-size="11.5" fill="#1A7F37" font-style="italic">mcp.worldlet.ai，OAuth + 4 位码 → 门禁</text>
-<line x1="1992" y1="479" x2="1930" y2="479" stroke="#1A7F37" stroke-width="2.5" marker-start="url(#ar)" marker-end="url(#ar)"/>
-<rect x="1996" y="510" width="440" height="170" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="2012" y="538" font-size="16" font-weight="700" fill="#1F2328">外部服务</text>
-<text x="2012" y="564" font-size="12.5" fill="#1F2328">• Google · GitHub · Notion · Linear</text>
-<text x="2012" y="584" font-size="12.5" fill="#1F2328">• PostHog · Cloudflare · Search Console</text>
-<text x="2012" y="604" font-size="12.5" fill="#1F2328">• HTTP JSON · 本机自带的数据源</text>
-<text x="2012" y="650" font-size="11.5" fill="#9A6700" font-style="italic">登录（OAuth PKCE、device code、key）·</text>
-<text x="2012" y="666" font-size="11.5" fill="#9A6700" font-style="italic">API/MCP 读取 · 批准过的写操作 → Connectors</text>
-<line x1="1992" y1="595.0" x2="1930" y2="595.0" stroke="#9A6700" stroke-width="2.5" marker-start="url(#ar)" marker-end="url(#ar)"/>
-<rect x="1996" y="690" width="440" height="170" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
-<text x="2012" y="718" font-size="16" font-weight="700" fill="#1F2328">worldlet.ai Worker</text>
-<text x="2012" y="744" font-size="12.5" fill="#1F2328">• 远程 MCP、网页和手机配对的中转</text>
-<text x="2012" y="764" font-size="12.5" fill="#1F2328">• 只转发，不存任何 World 的数据</text>
-<text x="2012" y="784" font-size="12.5" fill="#1F2328">• 更新和下载</text>
-<text x="2012" y="830" font-size="11.5" fill="#57606A" font-style="italic">本机主动连出去的一条 WebSocket</text>
-<line x1="1992" y1="775.0" x2="1930" y2="775.0" stroke="#57606A" stroke-width="2.5" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<text x="1539.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">app/</text>
+<rect x="1622" y="704" width="138" height="22" rx="6" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="1691.0" y="719" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">windows/</text>
+<text x="1844" y="136" font-size="13" font-weight="700" fill="#57606A">World 之外，以及各自怎么连进来</text>
+<rect x="1844" y="150" width="440" height="170" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="1860" y="178" font-size="16" font-weight="700" fill="#1F2328">人和他的窗口</text>
+<text x="1860" y="204" font-size="12.5" fill="#1F2328">• 桌面窗口：Electron，本机</text>
+<text x="1860" y="224" font-size="12.5" fill="#1F2328">• 任何浏览器：ui/web/，打开 World 的链接</text>
+<text x="1860" y="244" font-size="12.5" fill="#1F2328">• iPhone ios/ · Android android/（原生）</text>
+<text x="1860" y="290" font-size="11.5" fill="#1F4BB8" font-style="italic">扫码配对 · 端到端加密中转，能直连时走 WebRTC</text>
+<line x1="1840" y1="235.0" x2="1778" y2="235.0" stroke="#1F4BB8" stroke-width="2.5" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<rect x="1844" y="330" width="440" height="170" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="1860" y="358" font-size="16" font-weight="700" fill="#1F2328">外部 Agents</text>
+<text x="1860" y="384" font-size="12.5" fill="#1F2328">• Fox 用的 Agent（Hermes、Claude Code、OpenClaw…）：适配器</text>
+<text x="1860" y="404" font-size="12.5" fill="#1F2328">• 本机：Claude Code · Codex · Hermes · 脚本</text>
+<text x="1860" y="424" font-size="12.5" fill="#1F2328">• 云端：claude.ai · ChatGPT · Cursor · token</text>
+<text x="1860" y="470" font-size="11.5" fill="#1A7F37" font-style="italic">本地 MCP（stdio → 本机回环）· 远程 MCP 经</text>
+<text x="1860" y="486" font-size="11.5" fill="#1A7F37" font-style="italic">mcp.worldlet.ai，OAuth + 4 位码 → 门禁</text>
+<line x1="1840" y1="479" x2="1778" y2="479" stroke="#1A7F37" stroke-width="2.5" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<rect x="1844" y="510" width="440" height="170" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="1860" y="538" font-size="16" font-weight="700" fill="#1F2328">外部服务</text>
+<text x="1860" y="564" font-size="12.5" fill="#1F2328">• Google · GitHub · Notion · Linear</text>
+<text x="1860" y="584" font-size="12.5" fill="#1F2328">• PostHog · Cloudflare · Search Console</text>
+<text x="1860" y="604" font-size="12.5" fill="#1F2328">• HTTP JSON · 本机自带的数据源</text>
+<text x="1860" y="650" font-size="11.5" fill="#9A6700" font-style="italic">登录（OAuth PKCE、device code、key）·</text>
+<text x="1860" y="666" font-size="11.5" fill="#9A6700" font-style="italic">API/MCP 读取 · 批准过的写操作 → Connectors</text>
+<line x1="1840" y1="595.0" x2="1778" y2="595.0" stroke="#9A6700" stroke-width="2.5" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<rect x="1844" y="690" width="440" height="170" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="1860" y="718" font-size="16" font-weight="700" fill="#1F2328">worldlet.ai Worker</text>
+<text x="1860" y="744" font-size="12.5" fill="#1F2328">• 远程 MCP、网页和手机配对的中转</text>
+<text x="1860" y="764" font-size="12.5" fill="#1F2328">• 只转发，不存任何 World 的数据</text>
+<text x="1860" y="784" font-size="12.5" fill="#1F2328">• 更新和下载</text>
+<text x="1860" y="830" font-size="11.5" fill="#57606A" font-style="italic">本机主动连出去的一条 WebSocket</text>
+<line x1="1840" y1="775.0" x2="1778" y2="775.0" stroke="#57606A" stroke-width="2.5" marker-start="url(#ar)" marker-end="url(#ar)"/>
 <text x="32" y="896" font-size="12" fill="#8C959F">contracts/ 放各层之间的接口。模型来自用户自己的 Agent，Worldlet 不提供模型。</text>
 </svg>

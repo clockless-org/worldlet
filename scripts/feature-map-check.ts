@@ -1,12 +1,11 @@
-// Every ui/, agent/ and context/ component, and every Electron host module, belongs to exactly one feature row in
-// docs/UI-CORE-PLATFORM.md#features (World, Applets, Companion, Attention, Tasks, Artifacts & Journal, Agents & Gate,
-// Context, Connectors, Windows, Base).
+// Every ui/, agent/ and context/ folder, and every host module, belongs to exactly one component row in
+// docs/UI-CORE-PLATFORM.md#features (World, Applets, Companion, Attention, Tasks, Gate, Store, Connectors, App, Windows).
 import {existsSync,readFileSync,readdirSync,statSync} from 'node:fs';
 import {join} from 'node:path';
-const FEATURES=['World','Applets','Companion','Attention','Tasks','Artifacts & Journal','Agents & Gate','Context','Connectors','Windows','Base'];
+const FEATURES=['World','Applets','Companion','Attention','Tasks','Gate','Store','Connectors','App','Windows'];
 const doc=readFileSync('docs/UI-CORE-PLATFORM.md','utf8');
-const start=doc.indexOf('## Features and the base'),end=doc.indexOf('\n## ',start+1);
-if(start<0)throw Error('docs/UI-CORE-PLATFORM.md has no "Features and the base" section.');
+const start=doc.indexOf('## Components across the layers'),end=doc.indexOf('\n## ',start+1);
+if(start<0)throw Error('docs/UI-CORE-PLATFORM.md has no "Components across the layers" section.');
 const rows=doc.slice(start,end).split('\n').filter(line=>FEATURES.some(feature=>line.startsWith(`| ${feature} |`)));
 const found=rows.map(row=>row.split('|')[1].trim());
 if(found.join('\n')!==FEATURES.join('\n'))throw Error(`Expected the feature rows ${FEATURES.join(', ')}; found ${found.join(', ')}.`);
@@ -28,22 +27,6 @@ for(const layer of [...COMPONENT_ROOTS,'platform/host/modules'])for(const name o
  owner.delete(dir);
 }
 for(const dir of owner.keys())problems.push(`${dir} is listed in docs/UI-CORE-PLATFORM.md#features but does not exist.`);
-// The architecture diagram's lanes (docs/architecture.html) are the same features: every ui/, agent/ and context/ component sits in
-// exactly one diagram component, in the lane its feature names.
-const html=readFileSync('docs/architecture.html','utf8');
-const lanes=new Map([...html.matchAll(/^ (\w+):\{title:'([^']+)'/gm)].map(([,key,title])=>[key,title]));
-if([...lanes.values()].join('\n')!==FEATURES.join('\n'))problems.push(`docs/architecture.html lanes are ${[...lanes.values()].join(', ')}, not ${FEATURES.join(', ')}.`);
-const drawn=new Map<string,string>();
-for(const [,id,folders,lane] of html.matchAll(/^ (\w+):\['[^']*','[^']*','([^']*)',.*,'(\w+)'\],?$/gm)){
- const feature=lanes.get(lane);
- if(!feature){problems.push(`docs/architecture.html component ${id} names no lane (${lane}).`);continue;}
- for(const [,dir] of folders.matchAll(/(?<![\w/])((?:ui|agent|context)\/[a-z-]+)\//g)){
-  if(drawn.has(dir))problems.push(`${dir} is drawn twice in docs/architecture.html.`);
-  drawn.set(dir,feature);
-  if(featureOf.get(dir)!==feature)problems.push(`docs/architecture.html draws ${dir} in the ${feature} lane; docs/UI-CORE-PLATFORM.md#features lists it under ${featureOf.get(dir)??'no feature'}.`);
- }
-}
-for(const [dir] of featureOf)if(!dir.startsWith('platform/')&&!drawn.has(dir))problems.push(`${dir} is not drawn in docs/architecture.html.`);
 // Every ui/, agent/, context/ and platform/ folder belongs to one of the four layers (docs/UI-CORE-PLATFORM.md#folders-by-layer):
 // ui/ is UI, agent/ is Agent, context/ is Context and platform/ is Platform (#681).
 const LAYERS:Record<string,{label:RegExp,roots:string[]}>={UI:{label:/^UI$/,roots:['ui']},Agent:{label:/^Agent\b/,roots:['agent']},Context:{label:/^Context\b/,roots:['context']},Platform:{label:/^Platform$/,roots:['platform']}};
@@ -68,4 +51,4 @@ for(const root of [...COMPONENT_ROOTS,'platform'])for(const name of readdirSync(
 }
 for(const dir of layerOf.keys())problems.push(`${dir} is in docs/UI-CORE-PLATFORM.md#folders-by-layer but does not exist.`);
 if(problems.length){console.error(problems.join('\n'));process.exit(1);}
-console.log(`Feature map: every ui/, agent/ and context/ component and Electron host module belongs to one of ${FEATURES.length} features, drawn in its lane in docs/architecture.html, and every ui/, agent/, context/ and platform/ folder is in one layer.`);
+console.log(`Feature map: every ui/, agent/ and context/ component and Electron host module belongs to one of ${FEATURES.length} components, and every ui/, agent/, context/ and platform/ folder is in one layer.`);

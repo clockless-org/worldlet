@@ -8,7 +8,7 @@
 // under Advanced replaces the sign-in, and Disconnect forgets both.
 import assert from 'node:assert/strict';
 import {cloudflareExecute,cloudflareExecuteAnswer,connectorScopes,plainConnectorText,CLOUDFLARE_GATE} from '../context/connectors/index.ts';
-import {ServiceSource} from '../platform/host/modules/sources/service-source.ts';
+import {ServiceSource} from '../platform/host/modules/connectors/service-source.ts';
 
 const MCP='https://mcp.cloudflare.com/mcp',ISSUER='https://mcp.cloudflare.com';
 const A='a'.repeat(32),B='b'.repeat(32),ZONE='c'.repeat(32);

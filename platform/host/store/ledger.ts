@@ -816,7 +816,7 @@ export class WorldLedger {
  // (owner decision 2026-10-03: whatever can be in SQLite is; the companion profile stays a small
  // JSON file). A trigram full-text index makes substring search fast in any language; it is
  // derived, left out of backups and rebuilt when missing. Writes keep it current by hand because
- // a World database never carries triggers (`shell/backup.ts`).
+ // a World database never carries triggers (`app/backup.ts`).
  static readonly OWN='fox';
  private companionReady=false;
  private searchable=false;

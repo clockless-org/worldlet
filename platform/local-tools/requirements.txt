@@ -1,4 +1,4 @@
-# Worldlet's local tools Python (platform/electron/src/modules/shell/tools-python.ts): the browser driver's relay
+# Worldlet's local tools Python (platform/electron/src/modules/app/tools-python.ts): the browser driver's relay
 # (platform/browser/agent_browser.py) needs websockets. Installed with --require-hashes --only-binary :all:.
 websockets==15.0.1 \
     --hash=sha256:3e90baa811a5d73f3ca0bcbf32064d663ed81318ab225ee4f427ad4e26e5aff3 \

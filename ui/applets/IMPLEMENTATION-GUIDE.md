@@ -115,7 +115,7 @@ using the same shell, with live data and explicit unavailable/error states.
 | Placement and world slots | `ui/world/world-layout.ts`, `ui/world/world-pack.ts`, `resources/worlds/`; retain compatible stored IDs |
 | Sprite rendering and Open items | `ui/world/village/pixi-world.ts`, `ui/world/pixi-stage.ts`, Applet-specific renderers |
 | Asset packaging | `scripts/build-world-assets.ts`; inspect the active asset paths before registering files |
-| Connections | `ui/applets/connection-guide.ts`, host adapters in `platform/host/modules/sources/` (`connections.ts`, `apple.ts`, `local.ts`) and `harness/hermes/` |
+| Connections | `ui/applets/connection-guide.ts`, host adapters in `platform/host/modules/connectors/` (`connections.ts`, `apple.ts`, `local.ts`) and `harness/hermes/` |
 | Routing and selected originals | `ui/frame/notion-world.ts` |
 | Browser Focus | `ui/applets/browser-device.ts`, host browser module `platform/host/modules/applets/` ([website views](../../platform/browser/INTEGRATION.md#native-browser)); dismiss must unload page/media unless the [resume rule](../../platform/browser/INTEGRATION.md#resuming-a-website-applet) keeps it |
 | Fox dialogue and actions | `ui/companion/native-chat.ts`, `ui/world/native-hud.ts` |

@@ -1,7 +1,7 @@
 import {app,shell} from 'electron';
 
 /** Links the system hands Worldlet as the default browser, and the pages Worldlet itself sends to "your browser".
- * The default-browser setting (modules/shell/default-browser.ts) receives the first and routes the second. */
+ * The default-browser setting (modules/app/default-browser.ts) receives the first and routes the second. */
 let receiver:((url:string)=>void)|null=null;
 let handOff:((url:string)=>Promise<boolean>)|null=null;
 const early:string[]=[];

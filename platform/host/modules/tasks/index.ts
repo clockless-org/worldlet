@@ -6,8 +6,8 @@ import {ONGOING,WORLD_TOOLS,type OngoingService,type WorldToolsService} from '..
 import type {Host} from '../../types.ts';
 import {installExternalEvents} from './external-events.ts';
 import {installHarnessCalls} from './harness-calls.ts';
-import {readAgentProfile} from '../agents/agent-profile.ts';
-import {readSelection} from '../agents/local-harness.ts';
+import {readAgentProfile} from '../companion/agent/agent-profile.ts';
+import {readSelection} from '../companion/agent/local-harness.ts';
 import {readAgentSetting,writeAgentSetting} from '../../store/agent-settings.ts';
 
 const HOUR=3_600_000;

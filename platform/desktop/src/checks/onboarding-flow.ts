@@ -6,7 +6,7 @@ import {execFileSync} from 'node:child_process';
 import {BrowserWindow,type BaseWindow} from 'electron';
 import {WorldLedger} from '../../../host/store/ledger.ts';
 import {createDiagnostics,type DiagnosticNote} from '../../../host/diagnostics.ts';
-import {ExecutionJournal} from '../../../host/modules/agents/journal.ts';
+import {ExecutionJournal} from '../../../host/modules/companion/agent/journal.ts';
 import {DEMO_HOST} from '../../../host/modules/applets/page.ts';
 import {AGENT,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,USER_ACTIVITY,type AgentService,type BrowserService,type CompanionService,type DesktopCompanionService,type FoxService,type UserActivityService} from '../../../host/services.ts';
 import {desktopCompanion} from './onboarding-paths.ts';
@@ -425,7 +425,7 @@ async function detectorCheck(){
  const db=new WorldLedger(root);
  try{
   if(recordedFailures(root,db).failures.length)throw Error('The failure detector reports failures in an empty library.');
-  // The Agent runtime's journal writer (modules/agents/index.ts) into this scratch ledger.
+  // The Agent runtime's journal writer (modules/companion/agent/index.ts) into this scratch ledger.
   const record=(entry:Row)=>db.recordExecution(entry);
   const home=(scope:string)=>ExecutionJournal.register(path.join(root,'agent',scope,'hermes'),true,record);
   const diagnostics=createDiagnostics(root);

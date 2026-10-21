@@ -39,8 +39,8 @@ for(const source of [
 ])assert.throws(()=>checkSource('ui/world/example.ts',source),/UI/,source);
 checkSource('agent/gate/example.ts',"import {contextWriter} from '../../context/store/index.ts'");
 checkSource('context/connectors/example.ts',"import {syncedWriter} from '../store/index.ts'");
-checkSource('platform/host/modules/sources/example.ts',"import {connectorWriter} from '../../../../context/connectors/index.ts'");
-for(const file of ['agent/gate/example.ts','context/applets/example.ts','platform/host/modules/sources/example.ts'])
+checkSource('platform/host/modules/connectors/example.ts',"import {connectorWriter} from '../../../../context/connectors/index.ts'");
+for(const file of ['agent/gate/example.ts','context/applets/example.ts','platform/host/modules/connectors/example.ts'])
  assert.throws(()=>checkSource(file,`import {syncedWriter} from '${'../'.repeat(file.split('/').length-1)}context/store/index.ts'`),/only context\/connectors writes Synced/,file);
 checkRepository();
 console.log('PASS resolved layer dependencies, public component APIs, Context reads and writes, exact exceptions and bypass rejection');

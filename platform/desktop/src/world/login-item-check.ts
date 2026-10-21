@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import {app,type WebContents} from 'electron';
-import {loginItemOptions} from '../../../host/modules/shell/login-item.ts';
+import {loginItemOptions} from '../../../host/modules/app/login-item.ts';
 import type {Row} from '../../../host/types.ts';
 import {errorMessage} from '../../../host/files.ts';
 /** RC login item check (#1229): the packaged app turns Open at Login on and off again through the same

@@ -78,7 +78,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  const panelButton=sideButton('companion-panel-button','settings','Agent','agents'),phoneButton=sideButton('companion-phone-button','phone','Phone','phone');
  side.append(panelButton,phoneButton);pet.append(side);hud.append(pet);
  // On the desktop a small hide button shows at Fox's shoulder while the pointer is on Fox (owner Order 2026-10-12);
- // Fox stays away until the person opens the World again (modules/shell/companion.ts hide).
+ // Fox stays away until the person opens the World again (modules/companion/window.ts hide).
  const hideButton=make('button','companion-hide-button');hideButton.type='button';hideButton.innerHTML=uiIcon('hide');
  hideButton.setAttribute('aria-label','Hide');hideButton.title='Hide';
  hideButton.addEventListener('pointerdown',(e:Event)=>e.stopPropagation());

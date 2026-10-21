@@ -3,10 +3,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {withTempDir} from './test-temp.ts';
 import {WorldLedger} from '../platform/host/store/ledger.ts';
-import {createAgentAccess} from '../platform/host/modules/agents/agent-access.ts';
-import {createAgentReports} from '../platform/host/modules/agents/agent-reports.ts';
-import {createScriptAgents} from '../platform/host/modules/agents/script-agents.ts';
-import {openStandingWorldTools,type StandingWorldTools} from '../platform/host/modules/agents/world-tool-bridge.ts';
+import {createAgentAccess} from '../platform/host/modules/gate/agent-access.ts';
+import {createAgentReports} from '../platform/host/modules/gate/agent-reports.ts';
+import {createScriptAgents} from '../platform/host/modules/gate/script-agents.ts';
+import {openStandingWorldTools,type StandingWorldTools} from '../platform/host/modules/gate/world-tool-bridge.ts';
 import {SCRIPT_AGENT_REASONS,scriptAgentId,scriptAgentName} from '../agent/gate/script-agents.ts';
 import {STANDING_OUTSIDE_TURN} from '../agent/gate/grants.ts';
 

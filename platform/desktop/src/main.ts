@@ -24,14 +24,14 @@ import {probeRequest,refuseProbeBesideRunningCopy,runProbe,type ProbeRequest} fr
 import {loginItemCheckRequest,refuseLoginItemCheckBesideRunningCopy,runLoginItemCheck,type LoginItemCheckRequest} from './world/login-item-check.ts';
 import {openedAtLogin} from '../../../agent/app/index.ts';
 import {onboardingUnfinished} from '../../../agent/companion/index.ts';
-import {updateAcceptance} from '../../host/modules/shell/update-acceptance.ts';
+import {updateAcceptance} from '../../host/modules/app/update-acceptance.ts';
 import {modules} from '../../host/modules/index.ts';
 import {runCheck} from './checks/index.ts';
 import {ensureDirectory,errorMessage} from '../../host/files.ts';
 import {createVault} from '../../host/vault.ts';
 import {ANALYTICS,DESKTOP_COMPANION,PHONE,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,WORLD_ROOM_PAGE,WORLD_WEB,type AnalyticsService,type DesktopCompanionService,type PhoneService,type RtcPageFactory,type VaultService,type WorldRoomPageService,type WorldWebService} from '../../host/services.ts';
 import {roomDenied} from '../../../contracts/web-world.ts';
-import {openRtcWindow} from '../../host/modules/shell/rtc-window.ts';
+import {openRtcWindow} from '../../host/modules/windows/rtc-window.ts';
 import type {Host} from '../../host/types.ts';
 import type {HostFeatures} from '../../../contracts/platform.ts';
 import {backgroundLaunchWanted,startBackgroundLaunch} from '../../host/background-launch.ts';
@@ -71,7 +71,7 @@ startGraphics(profile.root);
 // Chromium's own profile lives inside the library, beside the World data it serves.
 app.setPath('userData',path.join(profile.root,'Browser','Electron'));
 // Native crashes of the installed app leave a Crashpad report in the library's logs, never uploaded whole; the next
-// launch reports that one exists (`native_crash` on app_unclean_exit, modules/shell) and, on Windows, its crash address
+// launch reports that one exists (`native_crash` on app_unclean_exit, modules/app) and, on Windows, its crash address
 // (agent/app/ANALYTICS.md#native-crashes); an Order can name it.
 if(app.isPackaged&&profile.channel==='release'){
  try{app.setPath('crashDumps',path.join(profile.root,'logs','crashes'));crashReporter.start({uploadToServer:false});}catch{}
@@ -142,7 +142,7 @@ async function start(){
   gone:()=>{},
   failed,
  });
- // The World on another device, met through the pairing room (modules/shell/world-room-link.ts): a page beside the
+ // The World on another device, met through the pairing room (modules/windows/world-room-link.ts): a page beside the
  // others, with only what ROOM_ALLOWED lets through (contracts/web-world.ts roomDenied).
  const remote=createWebPage({
   platform:platformName(),

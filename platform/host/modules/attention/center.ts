@@ -5,7 +5,7 @@ import path from 'node:path';
 import {core} from '../../core.ts';
 import {digest,readJSON,WorldletError} from '../../files.ts';
 import {canBuild} from '../../store/world-store.ts';
-import {presentMailRead} from '../sources/records.ts';
+import {presentMailRead} from '../connectors/records.ts';
 import {Cancelled} from '../../store/ledger.ts';
 import {AGENT,ANALYTICS,COMPANION,SOURCES,USER_ACTIVITY} from '../../services.ts';
 import type {AgentRuntime,AgentService,AnalyticsService,CompanionService,SourcesService,UserActivityService} from '../../services.ts';

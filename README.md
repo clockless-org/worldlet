@@ -43,7 +43,7 @@ Worldlet provides no model of its own. It talks through your Agent and borrows i
 | System API | World tools, served to the Agent over the `worldlet` MCP server | This project |
 | Disk | `world.sqlite` and World storage, on your computer | This project |
 
-Worldlet on your own Harness is a desktop environment, like GNOME; with the Hermes Agent it installs, it is a distribution, like Ubuntu. World → Agent tools go over MCP; Agent → World goes through one adapter per Harness ([Harness contract](contracts/HARNESS.md), [interactive architecture diagram](docs/architecture.html)).
+Worldlet on your own Harness is a desktop environment, like GNOME; with the Hermes Agent it installs, it is a distribution, like Ubuntu. World → Agent tools go over MCP; Agent → World goes through one adapter per Harness ([Harness contract](contracts/HARNESS.md), [interactive architecture diagram](docs/four-layers.svg)).
 
 ## Install
 

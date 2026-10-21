@@ -14,7 +14,7 @@ import crypto from 'node:crypto';
 import path from 'node:path';
 import type {Duplex} from 'node:stream';
 import {withTempDir} from './test-temp.ts';
-import {createLocalRelay,serveLocalRelay} from '../platform/host/modules/shell/local-relay.ts';
+import {createLocalRelay,serveLocalRelay} from '../platform/host/modules/windows/local-relay.ts';
 import {createWebPage} from '../platform/host/web-page.ts';
 import {createPagePair,serveWorldWeb,WORLD_LINK_FILE,WORLD_TOKEN_VAULT} from '../platform/host/world-web.ts';
 import type {PageBridge} from '../platform/host/types.ts';

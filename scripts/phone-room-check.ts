@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {PUSH_BOX_PLACE,channelJoiner,channelPieces,boxPlace,openBox,pairKeys,readPairLink,readRoomFrame,roomEntry,sealBox,type PairKeys,type PhoneMessage} from '../platform/web/index.ts';
-import {createLocalRelay} from '../platform/host/modules/shell/local-relay.ts';
-import {createPhoneRelay} from '../platform/host/modules/shell/relay.ts';
+import {createLocalRelay} from '../platform/host/modules/windows/local-relay.ts';
+import {createPhoneRelay} from '../platform/host/modules/windows/relay.ts';
 import {memoryRoom} from './memory-room.ts';
 
 // The phone's pairing in the pairing room (platform/web/README.md#room): the computer's code says `m=room` and the computer

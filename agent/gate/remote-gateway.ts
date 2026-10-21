@@ -2,7 +2,7 @@
 // the person types its address and token in Settings › Agents, and Fox's conversation goes to that Gateway's
 // `/v1/responses` (the same path a local OpenClaw uses) with no Worldlet running there. Shared rules only: which
 // addresses are accepted, the WebSocket address its approvals use, and the token's shape. The host keeps the token in
-// its vault (safeStorage) and runs the turns (platform/host/modules/agents/remote-gateway.ts).
+// its vault (safeStorage) and runs the turns (platform/host/modules/companion/agent/remote-gateway.ts).
 
 /** The Harness id of a directly reached remote Gateway (its row in harness-services.ts). */
 export const REMOTE_GATEWAY_HARNESS_ID='remote-openclaw';

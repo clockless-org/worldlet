@@ -18,8 +18,8 @@ import {worldActionOf,worldActions} from '../agent/gate/gateway.ts';
 import {SOURCE_PROVIDERS,TOKEN_PROVIDERS,connectSettings,connectToken} from '../context/applets/index.ts';
 import {resolveBoard,readBoardDefinition} from '../context/connectors/index.ts';
 import {SERVICE_TITLES,type ServiceRecords} from '../contracts/services.ts';
-import {ExecutionJournal} from '../platform/host/modules/agents/journal.ts';
-import {ServiceSource,ServiceSourceAccess,ServiceSourceConnections} from '../platform/host/modules/sources/service-source.ts';
+import {ExecutionJournal} from '../platform/host/modules/companion/agent/journal.ts';
+import {ServiceSource,ServiceSourceAccess,ServiceSourceConnections} from '../platform/host/modules/connectors/service-source.ts';
 import {withTempDir} from './test-temp.ts';
 
 const API='https://www.googleapis.com',EMAIL='reader@example-project.iam.gserviceaccount.com',KEY_ID='0123456789abcdef0123456789abcdef01234567';

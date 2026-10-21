@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {AGENT_VERSIONS,LOCAL_HARNESSES,agentTooOldMessage,agentVersionStatus,compareAgentVersions,parseAgentVersion} from '../agent/gate/index.ts';
-import {UPDATED,signInScript} from '../platform/host/modules/agents/provider-sign-in.ts';
+import {UPDATED,signInScript} from '../platform/host/modules/companion/agent/provider-sign-in.ts';
 
 // The oldest version of each Agent Worldlet works with (agent/gate/agent-versions.ts): read from its `--version` line,
 // compared part by part, turned away below the minimum with its own update command, never when it cannot be read.

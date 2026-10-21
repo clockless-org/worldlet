@@ -1,0 +1,448 @@
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {app,BaseWindow,type WebContents} from 'electron';
+import {PostHog} from 'posthog-node';
+import {core} from '../../core.ts';
+import {isoSeconds,uuid} from '../../files.ts';
+import {platformName} from '../../profile.ts';
+import {AGENT,type AgentService,type AnalyticsService} from '../../services.ts';
+import type {Host,Row} from '../../types.ts';
+import {buildInfo,distribution,releaseBuild} from './release.ts';
+import {currentGraphics} from '../../../desktop/src/graphics.ts';
+import {AGENTS_FOUND,COUNT_BUCKETS,ERROR_CODES,ERROR_RULES,HERMES_FAILURES,HERMES_REASONS,HERMES_SETUP,HERMES_STAGES,INSTALL_STEPS,EXIT_CODE_NAMES,LOCAL_AGENT_IDS,MAIN_STALL_LIMIT,REPLY_BUCKETS,ROW_BUCKETS,SIZE_BUCKETS,UPDATE_WAIT_BUCKETS,localDataDimensions,deviceClass,stallTask,timingBucket,type DeviceClass,type LocalDataFacts} from '../../../../agent/app/index.ts';
+import {WORLD_APPS} from '../../../../context/applets/index.ts';
+import {PROACTIVE_MOMENTS} from '../../../../agent/companion/index.ts';
+
+// Explicit product events and account/installation profiles from the host. The World page adds PostHog's standard web
+// capture (webConfig and ingest below; ui/frame/posthog-web.ts): autocapture, pageleave, sessions and session replay,
+// with every text, input and attribute masked, so mail, chat and Fox content never leave the device readable.
+// Identity and delivery markers keep the Mac host's UserDefaults names in preferences.json.
+const ENABLED='WorldletUsageAnalyticsEnabled',ACCOUNT='WorldletUsageAccount',ANONYMOUS='WorldletUsageAnonymousID',INSTALLATION='WorldletUsageInstallID';
+// Download tracking (website/README.md#download-tracking): the opaque token of the download press this installation came
+// from, and whether this installation has asked. Never an email.
+const INVITE='WorldletInviteToken',INVITE_ASKED='WorldletInviteClaimAsked',LAST_DAY='WorldletUsageLastDay',DATA_DAY='WorldletUsageDataSizeDay';
+export const INSTALL_CLAIM_URL='https://worldlet.ai/api/install/claim';
+/** The World page sends its PostHog web traffic to worldlet://app/ingest/…, which the host forwards to the project's
+ * ingestion host (PostHog's reverse-proxy setup), so the page itself keeps no network access. Only these paths pass:
+ * events, batches, session replay snapshots, and the flags/remote config answer replay needs (JSON, never a script). */
+export const INGEST_PREFIX='/ingest';
+const INGEST_PATHS=[/^\/e\/?$/,/^\/i\/v0\/e\/?$/,/^\/batch\/?$/,/^\/s\/?$/,/^\/flags\/?$/,/^\/decide\/?$/,/^\/array\/phc_[A-Za-z0-9_-]+\/config$/];
+export function ingestPath(pathname:string){
+ if(!pathname.startsWith(INGEST_PREFIX+'/'))return null;
+ const rest=pathname.slice(INGEST_PREFIX.length);
+ return INGEST_PATHS.some(pattern=>pattern.test(rest))?rest:null;
+}
+/** What the World page's PostHog web client starts with (ui/frame/posthog-web.ts): the same project, identity and
+ * properties as the host's own events, so both count as one person on one installation. */
+export interface WebAnalyticsConfig {key:string,apiHost:string,distinctId:string,identified:boolean,properties:Row}
+/** This computer's analytics choice and identity: kept across World backup restores (preferences.json is not World data). */
+export const INSTALLATION_KEYS=[ENABLED,ACCOUNT,ANONYMOUS,INSTALLATION,INVITE,INVITE_ASKED];
+const EVENTS=new Set(['external_outcome_confirmed','content_opened','world_tool_started','world_tool_completed','world_tool_cancelled','world_tool_failed','world_item_rejected','source_connect_started','source_connect_completed','source_connect_cancelled','source_connect_failed','source_disconnect_started','source_disconnect_completed','source_disconnect_cancelled','source_disconnect_failed','onboarding_started','onboarding_apps_viewed','local_agent_selected','local_agents_detected','local_agent_select_failed','agent_bring_completed','agent_bring_failed','agent_profile_result','hermes_setup_started','hermes_setup_completed','hermes_setup_failed','tour_skipped','first_win','first_card_started','first_card_ready','first_card_shown','first_card_opened','first_card_approved','world_entered','google_connection_present','google_connection_absent','applet_opened','google_connect_started','google_connect_completed','google_connect_cancelled','google_connect_failed','fox_turn_started','fox_turn_completed','fox_turn_cancelled','fox_turn_failed','fox_turn_retried','content_read_started','content_read_completed','content_read_cancelled','content_read_failed','item_update_started','item_update_completed','item_update_cancelled','item_update_failed','applet_task_started','applet_task_completed','applet_task_cancelled','applet_task_failed','app_process_gone','app_unclean_exit','fox_timing','app_startup_timing','page_load_timing','update_prepared','update_applied','update_failed','app_build_changed','fox_proactive_asked','fox_proactive_shown',
+ 'attention_shown','attention_approved','attention_opened_from_fox','journal_opened','routine_completed','phone_paired','phone_approved','agent_settings_changed','main_stall','local_data_size','app_graphics_fallback',
+ // owner 2026-10-11 20:21 PDT: Production metrics.
+ 'attention_item_opened','task_completed','world_active_time']);
+/** Coarse timing only: turn and tool buckets, the longer ones of Applet tasks (`taskDuration` in modules/companion) and
+ * Fox and startup timings (`timingBucket` in agent/app). */
+const DURATIONS=['under_1s','1_5s','5_15s','over_15s','15_60s','1_5m','5_15m','over_15m'];
+const ALLOWED:Record<string,string[]>={
+ applet:['google','gmail','google-drive','google-calendar','apple-notes','apple-reminders','notion','obsidian','browser','youtube','x','github','codex','claude-code','weather','meetings','voice-memos','messages','stripe','paypal','airbnb','doordash','oura','strava','folder',
+  // Built-in catalog keys (public app names); custom Applets stay `other`.
+  ...WORLD_APPS.map(app=>app.key)],
+ operation:['appContent','original','notionContent','worldItemStatus','connect','disconnectSource'],
+ outcome_type:['email_delivery','notion_content','browser_user_confirmation'],
+ item_status:['open','done','dismissed','snoozed'],
+ tool_category:['reading','browser','navigation','other'],
+ // Whether the person's own gesture started it (user) or not: Fox's tools, restores, retries, scheduled work (background).
+ trigger:['user','background'],
+ // user_engaged: what the person did first that day.
+ engagement_kind:['input','fox_message','applet_open'],
+ // Core's classified failure (agent/app/report.ts); never the error text.
+ error_code:ERROR_CODES,
+ // Its fixed rule when Core has one (agent/app/report.ts ERROR_RULES); never the error text.
+ error_rule:ERROR_RULES,
+ // Electron render-process-gone / child-process-gone; a clean exit is not reported.
+ process_type:['renderer','gpu','utility','other','web_engine','web_page'],
+ exit_reason:['abnormal-exit','killed','crashed','oom','launch-failed','integrity-failure','memory-eviction'],
+ // Its exit code as a fixed name: a known Windows status, a small code, else other (agent/app/graphics-mode.ts).
+ exit_code:EXIT_CODE_NAMES,
+ // fox_timing / app_startup_timing: parts of a turn or a start, bucketed (agent/app/fox-timing.ts foxTimingEvent).
+ timing_outcome:['complete','error','cancelled'],
+ first_text_bucket:DURATIONS,model_bucket:DURATIONS,tools_bucket:DURATIONS,first_frame_bucket:DURATIONS,
+ // app_startup_timing: this start went through setup first, so its time includes the person's setup minutes.
+ startup_setup:['yes'],
+ // fox_timing: the reply and its first word in finer buckets split at 10 seconds (owner 2026-10-13: past 10 s is too slow).
+ reply_bucket:[...REPLY_BUCKETS],first_text_reply_bucket:[...REPLY_BUCKETS],
+ // app_unclean_exit: whether Crashpad wrote a crash report during that run (the report itself stays on the device).
+ native_crash:['yes','no'],
+ // Setup with a local Agent (agent/app/setup-events.ts): its public product ID, coarse counts and outcomes.
+ local_agent:LOCAL_AGENT_IDS,recommended_agent:[...LOCAL_AGENT_IDS,'none'],agents_found:[...AGENTS_FOUND],
+ // No Agent here: Worldlet installs Hermes Agent and signs ChatGPT in inside it; where a failure stopped, never its text.
+ hermes_setup:[...HERMES_SETUP],hermes_failure:[...HERMES_FAILURES],install_step:[...INSTALL_STEPS],hermes_stage:[...HERMES_STAGES],hermes_reason:[...HERMES_REASONS],hermes_broken:['yes'],
+ // Who answers for Fox: the built-in Hermes Agent on a model Fox has, or the chosen Agent on its own sign-in.
+ fox_brain:['built_in','agent'],
+ bring_conversations:[...COUNT_BUCKETS],bring_notes:[...COUNT_BUCKETS],bring_skills:[...COUNT_BUCKETS],bring_routines:[...COUNT_BUCKETS],bring_connections:[...COUNT_BUCKETS],
+ bring_model:['yes','no'],bring_memory:['yes','no'],integrations_came_over:[...COUNT_BUCKETS],integrations_reconnect:[...COUNT_BUCKETS],
+ // page_load_timing: which engine loaded a page in the browser device (no URL, no site).
+ page_engine:['cef','electron'],
+ // Updates (modules/app/updates.ts): how long a prepared update waited for Update, and which step failed.
+ update_wait:[...UPDATE_WAIT_BUCKETS],update_stage:['check','folder','download','prepare','install'],
+ update_error:['open','contents','copy','build','identity','signature','team','incomplete','disk','timeout','other'],
+ // Fox's speak-first ask (modules/companion proactiveRunTurn): the moment and whether Fox spoke, never the line.
+ proactive_moment:[...PROACTIVE_MOMENTS],proactive_status:['spoke','passed'],
+ // fox_proactive_shown: whether the line pointed to an open Attention card.
+ proactive_card:['yes','no'],
+ // How the chosen Agent's description of itself ended (agent/gate/agent-profile.ts).
+ profile_result:['ok','timeout','invalid','failed'],
+ // tour_skipped: the step of the first run's eight-step tour it was skipped on (ui/frame/ONBOARDING.md).
+ tour_step:['1','2','3','4','5','6','7','8'],
+ // first_card_ready: how a new person's first Today's prep ended (ui/frame/notion-world.ts startFirstCard).
+ first_card_result:['ok','no_card','failed'],
+ // attention_shown: how many items the Center showed (at most nine). attention_approved: where the person settled one
+ // (its card or row on this computer, or the phone) and the item's kind. Never a title or a source.
+ attention_count:['1','2','3','4','5','6','7','8','9'],approval_surface:['computer','phone'],item_kind:['task','event','update'],
+ // phone_approved: what the person approved on the phone, an Attention item or the Agent's permission prompt.
+ approval_kind:['attention','agent_permission'],
+ // routine_completed: whose scheduler ran it (Worldlet's own routines or the Agent's), how it ended, and whether it ran late.
+ routine_source:['worldlet','agent'],routine_status:['ok','failed'],routine_late:['yes','no'],
+ // agent_settings_changed: which part of Settings › Agents changed; never what it changed to.
+ agent_setting:['model','permission','account','routine','skill'],
+ // owner 2026-10-11 20:21 PDT: Production metrics. phone_paired: the phone's system, from its notification platform, or
+ // `web` for a web browser (platform/web/README.md#web).
+ // attention_item_opened: where the person opened the item's card. task_completed: which kind of background work finished.
+ phone_platform:['ios','android','web','unknown'],open_surface:['computer','phone'],task_kind:['routine','fox','applet'],
+ // local_data_size (agent/app/data-size.ts): how much this computer keeps, in bands; never a name or path.
+ world_db_size:[...SIZE_BUCKETS],recordings_size:[...SIZE_BUCKETS],hermes_db_size:[...SIZE_BUCKETS],openclaw_db_size:[...SIZE_BUCKETS],disk_free:[...SIZE_BUCKETS],history_rows:[...ROW_BUCKETS]
+};
+/** world_active_time: whole seconds, at most an hour per event. */
+export const ACTIVE_LIMIT=3600;
+export function safeDimensions(input:Row):Record<string,string|number> {
+ const result:Record<string,string|number>={};
+ for(const [key,values] of Object.entries(ALLOWED))if(typeof input[key]==='string')result[key]=values.includes(input[key])?input[key]:'other';
+ if(typeof input.outcome_key==='string'&&/^[a-f0-9]{64}$/.test(input.outcome_key))result.outcome_key=input.outcome_key;
+ // main_stall: the code name of the host action or background task that held the main process (host/busy.ts).
+ if(typeof input.stall_task==='string')result.stall_task=stallTask(input.stall_task);
+ // app_build_changed: the Build the previous launch ran (modules/app/updates.ts), a public release number.
+ if(typeof input.from_build==='string'&&/^[1-9]\d{0,4}$/.test(input.from_build))result.from_build=input.from_build;
+ // world_active_time: the only number a product event carries (owner 2026-10-11 20:21 PDT: Production metrics).
+ if(typeof input.active_seconds==='number'&&Number.isFinite(input.active_seconds)&&input.active_seconds>=1)result.active_seconds=Math.min(ACTIVE_LIMIT,Math.floor(input.active_seconds));
+ return result;
+}
+/** Input that is a person at the World: a key, a mouse button or the wheel, never a mouse move or key release.
+ * Script-dispatched DOM events never reach the host's input hooks; a page with a debugger attached is being driven
+ * by automation (CDP) and does not count, nor does input while no window of the app is focused. */
+export const PERSON_INPUT=new Set(['keyDown','rawKeyDown','mouseDown','mouseWheel']);
+export function personInput(type:unknown,{focused,automated}:{focused:boolean,automated:boolean}){return typeof type==='string'&&PERSON_INPUT.has(type)&&focused&&!automated;}
+const CHANNELS=['website','homebrew','steam','microsoft-store','mac-app-store','itch','setapp','winget'];
+
+/** Module checks replace the release configuration, the network, the focus test and the clock. */
+export interface AnalyticsOverrides {config?:{key:string,url:string,version:string,build:string,channel:string,host?:string},fetch?:typeof fetch,focused?:()=>boolean,now?:()=>number,system?:NodeJS.Platform}
+export class UsageAnalytics implements AnalyticsService {
+ private host:Host;
+ private send:typeof fetch;
+ private focused:()=>boolean;
+ private now:()=>number;
+ private system:NodeJS.Platform;
+ private engagedCheckedAt=-Infinity;
+ // world_active_time: active time not yet reported, the person's last counted input and when the span started.
+ private activeMs=0;private lastInput=-Infinity;private activeFrom=-Infinity;
+ private session=uuid();
+ private sending=new Map<string,AbortController>();
+ private client:PostHog|null=null;
+ private inflight=new Map<string,AbortController>();
+ private accepted=new Set<string>();
+ private exceptions=new Set<string>();
+ private stalls=0;
+ private deviceInfo:DeviceClass|null=null;
+ private config:{key:string,url:string,version:string,build:string,channel:string,host?:string}|null=null;
+ private listeners:(()=>void)[]=[];
+ constructor(host:Host,overrides:AnalyticsOverrides={}){
+  this.host=host;
+  this.send=overrides.fetch??(((input,init)=>fetch(input,init)) as typeof fetch);
+  this.focused=overrides.focused??(()=>BaseWindow.getFocusedWindow()!==null);
+  this.now=overrides.now??Date.now;
+  this.system=overrides.system??process.platform;
+  // Development builds (the Dev app runs from a checkout, unpackaged) and command-line checks never report, even with
+  // release credentials. Every installed app reports, whichever channel it follows (owner 2026-10-06: Dev sends no
+  // errors; Alpha, Beta and Production all do); each event names that channel in `update_channel`.
+  const settings=distribution(host,'Analytics.json');
+  if(releaseBuild(host)&&settings&&typeof settings.projectKey==='string'&&settings.projectKey.startsWith('phc_')&&settings.projectKey.length>4&&['https://us.i.posthog.com','https://eu.i.posthog.com'].includes(settings.host)){
+   const info=buildInfo(host);
+   this.config={key:settings.projectKey,url:settings.host+'/capture/',host:settings.host,version:typeof info.version==='string'?info.version:app.getVersion(),build:info.build==null?'':String(info.build),
+    channel:CHANNELS.includes(info.distributionChannel)?info.distributionChannel:'unknown'};
+  }
+  if(overrides.config)this.config=overrides.config;
+ }
+ onChange(listener:()=>void){this.listeners.push(listener);}
+ private get prefs(){return this.host.preferences;}
+ enabled(){return this.prefs.get(ENABLED)!==false;}
+ private profile():Record<string,string> {
+  const agent=this.host.optional<AgentService>(AGENT);
+  const google=agent?.googleAccount?.();
+  // The World's own Google connection; until it has read the mailbox once, the profile Fox's Hermes wrote before.
+  const value=google?.authorized()?google.profile():null;
+  if(google&&!google.authorized())return {};
+  if(value){
+   if(!value.email.includes('@')||value.email.length>320||!/^google-[a-f0-9]{64}$/.test(value.user_id))return {};
+   return {email:value.email,user_id:value.user_id,...value.name?{name:value.name.slice(0,200)}:{}};
+  }
+  const home=agent?agent.home('private'):path.join(this.host.profile.root,'agent/private/hermes');
+  try{
+   if(!fs.existsSync(path.join(home,'google_token.json')))return {};
+   const raw=JSON.parse(fs.readFileSync(path.join(home,'google_profile.json'),'utf8'));
+   const email=raw?.email,user=raw?.user_id;
+   if(typeof email!=='string'||!email.includes('@')||email.length>320||typeof user!=='string'||!/^google-[a-f0-9]{64}$/.test(user))return {};
+   const result:Record<string,string>={email,user_id:user};
+   if(typeof raw.name==='string'&&raw.name)result.name=raw.name.slice(0,200);
+   return result;
+  }catch{return {};}
+ }
+ private updateChannel:()=>string=()=>'';
+ /** The update channel this app follows (updates.ts), named on every event so Alpha and Beta can be told apart. */
+ followChannel(channel:()=>string){this.updateChannel=channel;}
+ installation(){return this.installationID();}
+ private installationID(){const id=this.prefs.string(INSTALLATION)||uuid();if(this.prefs.string(INSTALLATION)!==id)this.prefs.set(INSTALLATION,id);return id;}
+ private identity(profile:Record<string,string>){
+  const account=profile.user_id??'',previous=this.prefs.string(ACCOUNT);
+  // Never reuse an anonymous ID already linked to a different account.
+  if(account!==previous){if(previous)this.prefs.set(ANONYMOUS,uuid());this.prefs.set(ACCOUNT,account);}
+  const anonymous=this.prefs.string(ANONYMOUS)||this.installationID();
+  if(this.prefs.string(ANONYMOUS)!==anonymous)this.prefs.set(ANONYMOUS,anonymous);
+  return account||anonymous;
+ }
+ modelAnalyticsID(){return this.config&&this.enabled()?this.identity(this.profile()):'';}
+ /** The World page's PostHog web client: null in development builds, command-line checks and with sharing off, so
+  * the page then loads no client at all. */
+ webConfig():WebAnalyticsConfig|null {
+  const config=this.config;
+  if(!config?.host||!this.enabled())return null;
+  const account=this.profile(),identified=Object.keys(account).length>0;
+  return {key:config.key,apiHost:INGEST_PREFIX,distinctId:this.identity(account),identified,properties:{
+   surface:'app',environment:'production',install_channel:config.channel,...(this.updateChannel()?{update_channel:this.updateChannel()}:{}),
+   analytics_schema:4,installation_id:this.installationID(),app_build:config.build,platform:platformName(),app_version:config.version,...this.device(),$geoip_disable:true}};
+ }
+ /** Forwards one World page request under /ingest to PostHog. Anything else, or anything with sharing off, is dropped. */
+ async ingest(request:Request):Promise<Response> {
+  const config=this.config,url=new URL(request.url),target=ingestPath(url.pathname);
+  if(!config?.host||!this.enabled()||!target||!['GET','POST'].includes(request.method))return new Response(null,{status:204});
+  if(target.startsWith('/array/')&&target!=='/array/'+config.key+'/config')return new Response(null,{status:204});
+  try{
+   const headers:Record<string,string>={};
+   for(const name of ['content-type','content-encoding'])if(request.headers.get(name))headers[name]=request.headers.get(name)!;
+   const response=await this.send(config.host+target+url.search,{method:request.method,headers,...(request.method==='POST'?{body:await request.arrayBuffer()}:{}),signal:AbortSignal.timeout(20_000)});
+   return new Response(await response.arrayBuffer(),{status:response.status,headers:{'Content-Type':response.headers.get('content-type')||'application/json'}});
+  }catch{return new Response(null,{status:204});}
+ }
+ private claiming:Promise<void>|null=null;
+ /** A fresh installation (it never reported a day) asks worldlet.ai once whether a browser on this network
+  * pressed a download for this system in the last three days; the answer is that person's opaque token, sent with
+  * every event from then on so admin can tell which download (and its source) became this app. Release builds with sharing on only. */
+ claimInvite():Promise<void> {
+  if(!this.config||!this.enabled()||this.prefs.get(INVITE_ASKED)===true||this.prefs.string(LAST_DAY))return Promise.resolve();
+  const platform=this.system==='darwin'?'mac':this.system==='win32'?'windows':'';
+  if(!platform)return Promise.resolve();
+  return this.claiming??=this.send(INSTALL_CLAIM_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({platform}),signal:AbortSignal.timeout(8_000)})
+   .then(async response=>{
+    if(!response.ok)return;
+    const token=(await response.json() as Row)?.token;
+    if(typeof token==='string'&&/^[a-f0-9]{32}$/.test(token))this.prefs.set(INVITE,token);
+    this.prefs.set(INVITE_ASKED,true);
+   })
+   // Offline: the next activation asks again, while this installation has not reported a day.
+   .catch(()=>{})
+   .finally(()=>{this.claiming=null;});
+ }
+ recordActiveDay(){
+  if(!this.config||!this.enabled())return;
+  // The first day waits for the download answer, so the first app_active already carries it.
+  if(!this.prefs.string(LAST_DAY)&&this.prefs.get(INVITE_ASKED)!==true){void this.claimInvite().finally(()=>this.reportActiveDay());return;}
+  this.reportActiveDay();
+ }
+ private reportActiveDay(){
+  if(!this.config||!this.enabled())return;
+  const profile=this.profile(),id=this.identity(profile),day=id+':'+isoSeconds().slice(0,10);
+  if(Object.keys(profile).length)this.record('$identify','WorldletUsageIdentifiedDay.'+id,day);
+  this.record('app_active',LAST_DAY,day);
+ }
+ /** A person really used the app: `user_engaged` once per identity per UTC day, with what they did first. After
+  * a check the next one waits 30 s, so a stream of clicks costs no file reads. `app_active` only says the app ran. */
+ recordUserEngaged(kind:string){
+  if(!this.config||!this.enabled())return;
+  const now=this.now();
+  if(now-this.engagedCheckedAt<30_000)return;
+  this.engagedCheckedAt=now;
+  const id=this.identity(this.profile()),day=id+':'+isoSeconds(new Date(now)).slice(0,10);
+  this.record('user_engaged','WorldletUsageEngagedDay',day,true,'',{engagement_kind:safeDimensions({engagement_kind:kind}).engagement_kind??'input'});
+ }
+ /** The World page's own input counts as real use (main process, before the page sees it). A mouse press may arrive
+  * just before the click focuses the window, so an unfocused press is looked at again shortly after. */
+ watchInput(contents:WebContents){
+  const use=()=>{this.noteActive();this.recordUserEngaged('input');};
+  const seen=(type:unknown)=>{
+   if(typeof type!=='string'||!PERSON_INPUT.has(type)||contents.isDestroyed())return;
+   const automated=contents.debugger.isAttached();
+   if(personInput(type,{focused:this.focused(),automated}))use();
+   else if(!automated&&type==='mouseDown')setTimeout(()=>{if(!contents.isDestroyed()&&personInput(type,{focused:this.focused(),automated:contents.debugger.isAttached()}))use();},150);
+  };
+  contents.on('before-input-event',(_event,input)=>seen(input.type));
+  contents.on('before-mouse-event',(_event,mouse)=>seen(mouse.type));
+ }
+ /** world_active_time (owner 2026-10-11 20:21 PDT: Production metrics): the World counts as in use while it is focused
+  * and the person's own input (watchInput: never automation) came in the last minute, so each input adds the time
+  * since the one before, up to a minute. The total goes out at the first input ten minutes into a span, and when the
+  * window loses focus or hides and on quit (endActive); the practice world is not counted. */
+ private noteActive(){
+  const now=this.now();
+  if(!this.config||!this.enabled()||this.host.store?.sampleEnabled?.()){this.activeMs=0;this.lastInput=this.activeFrom=-Infinity;return;}
+  if(Number.isFinite(this.lastInput))this.activeMs+=Math.min(Math.max(0,now-this.lastInput),60_000);
+  this.lastInput=now;
+  if(!Number.isFinite(this.activeFrom))this.activeFrom=now;
+  if(now-this.activeFrom>=600_000)this.reportActive(now);
+ }
+ /** The World stopped being in use (blur, hide, quit): the minute after the last input counts up to now. */
+ endActive(){
+  const now=this.now();
+  if(Number.isFinite(this.lastInput))this.activeMs+=Math.min(Math.max(0,now-this.lastInput),60_000);
+  this.lastInput=this.activeFrom=-Infinity;
+  this.reportActive(now);
+ }
+ private reportActive(now:number){
+  const seconds=Math.floor(this.activeMs/1000);
+  this.activeMs-=seconds*1000;if(Number.isFinite(this.activeFrom))this.activeFrom=now;
+  if(seconds>=1)this.recordProductEvent('world_active_time','',{active_seconds:seconds});
+ }
+ recordOnboardingCompleted(){this.record('onboarding_completed','WorldletUsageOnboardingReported','1');}
+ recordProductEvent(event:string,duration:string,dimensions:Row){
+  // The World page reports the person's own Fox message or Applet opening; only when this app is focused.
+  if(event==='user_engaged'){if(this.focused())this.recordUserEngaged(typeof dimensions?.engagement_kind==='string'?dimensions.engagement_kind:'');return;}
+  if(!EVENTS.has(event))return;
+  // attention_shown: once per identity per UTC day, so the share of active days with an Attention card can be counted.
+  if(event==='attention_shown'){
+   if(!this.config||!this.enabled())return;
+   const id=this.identity(this.profile());
+   this.record(event,'WorldletUsageAttentionDay',id+':'+isoSeconds(new Date(this.now())).slice(0,10),true,'',safeDimensions(dimensions??{}));return;
+  }
+  if(['google_connect_completed','google_connection_present','google_connection_absent'].includes(event))this.recordActiveDay();
+  const timing=DURATIONS.includes(duration)?duration:'';
+  const safe=safeDimensions(dimensions??{});
+  if(event==='external_outcome_confirmed'){
+   if(!safe.outcome_key||!safe.outcome_type)return;
+   this.record(event,'WorldletOutcome:'+safe.outcome_key,'1',true,'',safe);return;
+  }
+  this.record(event,uuid(),'1',false,timing,safe);
+ }
+ /** The kind of computer, on every event (agent/app/device-class.ts): chip family, memory band, architecture and
+  * whether the app runs translated. Never the CPU's model string or the exact memory. */
+ private device():DeviceClass {
+  if(!this.deviceInfo){
+   let translated=false;try{translated=!!app.runningUnderARM64Translation;}catch{}
+   this.deviceInfo=deviceClass({cpuModel:os.cpus()[0]?.model??'',arch:process.arch,translated,memoryBytes:os.totalmem()});
+  }
+  return this.deviceInfo;
+ }
+ /** A second or more the main process did not answer (host/busy.ts), at most MAIN_STALL_LIMIT a run. */
+ recordMainStall(stall:{task:string,ms:number}){
+  if(!this.config||!this.enabled()||this.stalls>=MAIN_STALL_LIMIT)return;
+  this.stalls+=1;
+  this.recordProductEvent('main_stall',timingBucket(stall.ms),{stall_task:stall.task});
+ }
+ /** How much this computer keeps (agent/app/data-size.ts), once per UTC day; `facts` is read only when due. */
+ recordLocalData(facts:()=>LocalDataFacts|null){
+  if(!this.config||!this.enabled())return;
+  const day=isoSeconds(new Date(this.now())).slice(0,10);
+  if(this.prefs.string(DATA_DAY)===day)return;
+  const read=facts();
+  if(read)this.record('local_data_size',DATA_DAY,day,true,'',safeDimensions(localDataDimensions(read)));
+ }
+ /** PostHog error tracking: type, Core's failure code and sanitized frames of our own code, never the message.
+  * Each distinct exception is sent once per run, at most 30 per run. */
+ recordException(error:unknown,area:'main'|'renderer'|'host',operation=''){
+  if(!this.config||!this.enabled()||this.exceptions.size>=30)return;
+  const raw=error instanceof Error||(error&&typeof error==='object')?error as Row:{message:String(error)};
+  // A failure already reported once and only refused again (agent-runtime AgentNotStarting `repeat`).
+  if(raw.reported===true)return;
+  let report:Row;
+  try{report=core<Row>('exceptionReport',{name:raw.name,message:typeof raw.message==='string'?raw.message:'',stack:raw.stack,area,operation});}catch{return;}
+  if(!report)return;
+  const frames=Array.isArray(report.frames)?report.frames:[];
+  const key=[report.area,report.type,report.code,report.operation,...frames.slice(-5).map((f:Row)=>f.filename+':'+f.function+':'+f.lineno)].join('|');
+  if(this.exceptions.has(key))return;
+  this.exceptions.add(key);
+  this.record('$exception',uuid(),'1',false,'',{
+   $exception_list:[{type:report.type,value:`${report.type} (${report.code})`,mechanism:{handled:report.handled===true,synthetic:false,type:'generic'},stacktrace:{type:'raw',frames}}],
+   $exception_level:report.level,error_code:report.code,error_area:report.area,...(report.operation?{operation:report.operation}:{}),...(typeof report.rule==='string'?{error_rule:report.rule}:{})
+  });
+ }
+ /** A native crash of an earlier run (native-crashes.ts), as an unhandled `$exception` grouped by its module + offset
+  * frames: the crashed process, exception and build, never memory, registers, paths or other threads. */
+ recordNativeCrash(crash:Row){
+  if(!this.config||!this.enabled())return;
+  let report:Row;
+  try{report=core<Row>('nativeCrashReport',crash);}catch{return;}
+  const frames=Array.isArray(report.frames)?report.frames:[];
+  this.record('$exception',uuid(),'1',false,'',{
+   $exception_list:[{type:report.type,value:`${report.type} in ${report.module||'unknown'} (${report.program})`,mechanism:{handled:false,synthetic:false,type:'native'},stacktrace:{type:'raw',frames}}],
+   $exception_level:'fatal',error_code:'nativeCrash',error_area:'native',crash_process:report.program,
+   ...(report.signal?{crash_signal:report.signal}:{}),...(report.build?{crash_build:report.build}:{}),...(report.arch?{crash_arch:report.arch}:{}),...(report.moduleId?{crash_module_id:report.moduleId}:{}),
+   electron_version:process.versions.electron??''
+  });
+ }
+ preferenceChanged(setting:string,value:unknown){if(setting==='usage_analytics'&&typeof value==='boolean')this.setEnabled(value);}
+ setEnabled(enabled:boolean){
+  this.prefs.set(ENABLED,enabled);
+  if(enabled)this.recordActiveDay();
+  else{for(const controller of this.sending.values())controller.abort();this.sending.clear();}
+  for(const listener of this.listeners)try{listener();}catch{}
+ }
+ private record(event:string,marker:string,value:string,persist=true,duration='',dimensions:Row={}){
+  const config=this.config;
+  if(!config||!this.enabled()||this.sending.has(marker)||this.prefs.string(marker)===value)return;
+  const account=this.profile(),id=this.identity(account),identified=Object.keys(account).length>0;
+  const platform=platformName();
+  const person:Row={...account,identity_kind:identified?'google':'installation',platform,app_version:config.version};
+  if(event==='google_connection_present'||event==='google_connect_completed')person.google_connected=true;
+  if(event==='google_connection_absent')person.google_connected=false;
+  if(event==='onboarding_completed')person.onboarding_completed=true;
+  const invite=this.prefs.string(INVITE);
+  const pendingKey=marker+'.'+id+'.pending';
+  const saved=persist?this.prefs.get<Row|undefined>(pendingKey):undefined;
+  // A retry resends the same event: same UUID, time and dimensions (user_engaged keeps its first kind).
+  const envelope=saved?.value===value&&saved?.uuid&&saved?.timestamp?saved:{value,uuid:uuid(),timestamp:isoSeconds(new Date(this.now())),...(Object.keys(dimensions).length?{dimensions}:{})};
+  if(persist)this.prefs.set(pendingKey,envelope);
+  if(envelope.dimensions&&typeof envelope.dimensions==='object')dimensions=envelope.dimensions;
+  const properties:Row={
+   surface:'app',environment:'production',install_channel:config.channel,...(this.updateChannel()?{update_channel:this.updateChannel()}:{}),$session_id:this.session,analytics_schema:4,installation_id:this.installationID(),
+   app_build:config.build,platform,app_version:config.version,duration_bucket:duration,os_version:process.getSystemVersion(),...this.device(),
+   // A launch in software graphics after a crashing GPU process (graphics.ts) says so on every event.
+   ...(currentGraphics()==='software'?{graphics_mode:'software'}:{}),
+   language:(app.getPreferredSystemLanguages()[0]??'und').split('-')[0]||'und',$set:person,$set_once:{first_profile_seen_at:isoSeconds(),...(invite?{invite_token:invite}:{})},$process_person_profile:identified,$geoip_disable:true,
+   ...(invite?{invite_token:invite}:{}),...dimensions
+  };
+  if(event==='$identify'&&identified&&this.prefs.string(ANONYMOUS))properties.$anon_distinct_id=this.prefs.string(ANONYMOUS);
+  const controller=new AbortController(),eventID=String(envelope.uuid);
+  this.sending.set(marker,controller);this.inflight.set(eventID,controller);
+  void this.posthog(config).captureImmediate({distinctId:id,event,uuid:eventID,timestamp:new Date(String(envelope.timestamp)),properties})
+   .then(()=>{if(persist&&this.accepted.has(eventID)&&!controller.signal.aborted&&this.enabled()){this.prefs.set(marker,value);this.prefs.remove(pendingKey);}})
+   // Analytics never interrupts the app; a later activation retries.
+   .catch(()=>{})
+   .finally(()=>{this.accepted.delete(eventID);this.inflight.delete(eventID);if(this.sending.get(marker)===controller)this.sending.delete(marker);});
+ }
+ /** PostHog's Node SDK, one event per request and no retries of its own: the pending markers above retry on a later
+  * activation. Uncompressed, so delivery can tell which events PostHog accepted; it resolves even when sending fails. */
+ private posthog(config:{key:string,url:string}){
+  if(this.client)return this.client;
+  const client=new PostHog(config.key,{host:new URL(config.url).origin,flushAt:1,flushInterval:0,fetchRetryCount:0,requestTimeout:10_000,disableGeoip:true,disableCompression:true,
+   fetch:(url,options)=>this.deliver(url,options) as any});
+  client.on('error',()=>{});
+  return this.client=client;
+ }
+ private async deliver(url:string,options:{body?:unknown,signal?:AbortSignal}&Row){
+  let ids:string[]=[];
+  try{ids=(JSON.parse(String(options.body)).batch??[]).map((event:Row)=>String(event.uuid));}catch{}
+  const controllers=ids.flatMap(id=>this.inflight.get(id)??[]);
+  // Switching sharing off aborts what is still on its way.
+  const response=await this.send(url,{...options,signal:AbortSignal.any([...(options.signal?[options.signal]:[]),...controllers.map(c=>c.signal)])} as RequestInit);
+  if(response.ok)for(const id of ids)this.accepted.add(id);
+  return response;
+ }
+}

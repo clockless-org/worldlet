@@ -31,9 +31,9 @@ import {mcpHome,openMcpHome,registerAgent,registeredAgents} from './mcp-home.ts'
 import {installWorld} from '../../host/modules/world/world.ts';
 import {installFox} from '../../host/modules/companion/index.ts';
 import {installAttention} from '../../host/modules/attention/index.ts';
-import {installAgentRuntime,scriptAgentService} from '../../host/modules/agents/index.ts';
-import {installSources} from '../../host/modules/sources/index.ts';
-import {installPhone} from '../../host/modules/shell/phone.ts';
+import {installAgentRuntime,scriptAgentService} from '../../host/modules/companion/agent/index.ts';
+import {installSources} from '../../host/modules/connectors/index.ts';
+import {installPhone} from '../../host/modules/windows/phone.ts';
 import {installOngoing} from '../../host/modules/tasks/index.ts';
 import {installArtifacts} from '../../host/modules/attention/artifacts.ts';
 import {installCalendar} from '../../host/modules/applets/calendar.ts';

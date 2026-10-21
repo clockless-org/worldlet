@@ -335,7 +335,7 @@ Checks:
   - the frame rate follows `pageFrameRate`;
   - through the panel's own device and real windows, Fox's page moves beside the Companion and back
     with its press and close.
-- `npm run test:electron -- modules/shell`: the Companion tells the panel when it is out and back.
+- `npm run test:electron -- modules/app`: the Companion tells the panel when it is out and back.
 - The browser surface contract check.
 
 ## Saving X posts

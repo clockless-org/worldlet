@@ -11,11 +11,11 @@ import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
-import {createPhoneRelay} from '../platform/host/modules/shell/relay.ts';
-import {createLocalRelay,serveLocalRelay,LOCAL_RELAY_LIMITS} from '../platform/host/modules/shell/local-relay.ts';
-import {createRoomLink} from '../platform/host/modules/shell/room-link.ts';
-import {createRtcHost,type RtcPage} from '../platform/host/modules/shell/rtc-host.ts';
-import {RTC_PAGE_SCRIPT} from '../platform/host/modules/shell/rtc-page.ts';
+import {createPhoneRelay} from '../platform/host/modules/windows/relay.ts';
+import {createLocalRelay,serveLocalRelay,LOCAL_RELAY_LIMITS} from '../platform/host/modules/windows/local-relay.ts';
+import {createRoomLink} from '../platform/host/modules/windows/room-link.ts';
+import {createRtcHost,type RtcPage} from '../platform/host/modules/windows/rtc-host.ts';
+import {RTC_PAGE_SCRIPT} from '../platform/host/modules/windows/rtc-page.ts';
 import {memoryRoom} from './memory-room.ts';
 import {createWebClient,createRoomWebClient,isRoomLink,readWebPairLink,WebPairingEnded,pairKeys,fromBase64url,sha256Hex,worldLinkReply,type PhoneMessage} from '../platform/web/index.ts';
 import {resolveAction,worldActions} from '../agent/gate/index.ts';
@@ -313,7 +313,7 @@ await server.close();await rm(out,{recursive:true,force:true});
 // A line said in the browser or on the phone while the World page is not there (platform/web/README.md#web, Fox without
 // the page): the host gives it to Fox's main conversation on its own, and the turn is not ended for want of the page.
 {
- const phone=readFileSync('platform/host/modules/shell/phone.ts','utf8'),fox=readFileSync('platform/host/modules/companion/index.ts','utf8');
+ const phone=readFileSync('platform/host/modules/windows/phone.ts','utf8'),fox=readFileSync('platform/host/modules/companion/index.ts','utf8');
  assert.match(phone,/if\(!host\.page\.ready\(\)\)\{[\s\S]{0,2400}message\.type!=='chat'\|\|!fox\?\.converse[\s\S]{0,1600}fox\.converse\(message\.text,place\)/,'a main-conversation line without the page goes to Fox on the host');
  assert.match(phone,/if\(!host\.page\.ready\(\)\)\{[\s\S]{0,800}message\.type==='attention'&&hostRows\.has\(message\.id\)[\s\S]{0,600}host\.store\.setWorldItemStatus\(id,status,until\)/,'Done or Later without the page settles the item on the host');
  assert.match(phone,/if\(link\.phone\)await hostCenter\(\);/,'the host publishes the Center while the page is not there');

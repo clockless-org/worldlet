@@ -7,8 +7,8 @@ import {MIGRATION_SOURCES,MIGRATION_SOURCE_TITLES,migrationMemoryNote,migrationN
  type MigrationRoutine,type MigrationSource} from '../../../../agent/gate/index.ts';
 import {contextReader,contextWriter,dailyNoteArtifacts,journalOrigin,orderArtifacts,readArtifact} from '../../../../context/store/index.ts';
 import {ensureDirectory,isLink,isoSeconds,writeAtomic} from '../../files.ts';
-import {readClaudeCode,readCodex,readOwnHermes,readPi,type AgentHistory,type BroughtSkill} from '../agents/agent-files.ts';
-import {readOpenClaw,type OpenClawData} from '../agents/openclaw-files.ts';
+import {readClaudeCode,readCodex,readOwnHermes,readPi,type AgentHistory,type BroughtSkill} from './agent/agent-files.ts';
+import {readOpenClaw,type OpenClawData} from './agent/openclaw-files.ts';
 import type {Companion} from './companion.ts';
 import type {Row} from '../../types.ts';
 

@@ -1,4 +1,4 @@
-// The World's own Google connection (platform/host/modules/sources/google-account.ts) against a fake Google:
+// The World's own Google connection (platform/host/modules/connectors/google-account.ts) against a fake Google:
 // a grant made in Fox's Hermes profile is adopted once, consent runs on a loopback address with PKCE and state,
 // a reusable grant is refreshed instead of asking again, access tokens refresh before they expire and after a 401,
 // a revoked grant says so, a disconnect is not undone by adopting the old grant again, and receipts are created once.
@@ -7,7 +7,7 @@ import {assertOAuthCallback} from './oauth-callback-fixture.ts';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import {GoogleAccount,GOOGLE_SCOPES} from '../platform/host/modules/sources/google-account.ts';
+import {GoogleAccount,GOOGLE_SCOPES} from '../platform/host/modules/connectors/google-account.ts';
 import {GoogleRestError} from '../context/connectors/google/rest.ts';
 import {withTempDir} from './test-temp.ts';
 

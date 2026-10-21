@@ -2,8 +2,8 @@ import path from 'node:path';
 import {WorldletError} from '../../files.ts';
 import {WORLD_TOOLS,type WorldToolsService} from '../../services.ts';
 import type {Host,Row} from '../../types.ts';
-import {environment,readLimited,run,WINDOWS_BASE} from '../shell/io.ts';
-import type {MediaSurface} from '../shell/surface.ts';
+import {environment,readLimited,run,WINDOWS_BASE} from '../app/io.ts';
+import type {MediaSurface} from '../app/surface.ts';
 
 // Fixed-purpose weather transport. No model calls, source data, tokens or arbitrary URLs.
 export function weatherURL(operation:string,params:Row){
