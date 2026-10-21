@@ -7,6 +7,7 @@ import {digest,ensureDirectory,WorldletError} from '../files.ts';
 import {swiftJSON,swiftFold,stableJSON,sameJSON} from './swift-json.ts';
 import {SERVICE_SYNC_BUCKETS} from '../../../contracts/service-sync.ts';
 import {WORLD_VIEWS_SQL} from '../../../contracts/storage/world-views.ts';
+import {CompanionTables,ensureCompanion,OWN} from './companion.ts';
 import {RecordingTables} from './recordings.ts';
 import {TaskTables} from './tasks.ts';
 export {Cancelled} from './tasks.ts';
@@ -18,7 +19,7 @@ const iso=()=>new Date().toISOString();
 /** Worldlet's durable facts, independent of any Harness's conversation or memory files.
  * Only bound values reach SQL; an Agent never receives a SQL execution tool.
  * This file opens the database and keeps `entries` (history and state revisions); a component's tables are read
- * and written in its own file beside it (tasks.ts, recordings.ts), whose methods are this class's. */
+ * and written in its own file beside it (tasks.ts, companion.ts, recordings.ts), whose methods are this class's. */
 export class WorldLedger {
  db:DatabaseSync|null;
  readonly root:string;
@@ -37,6 +38,7 @@ export class WorldLedger {
   this.exec('PRAGMA user_version=3;');
   try{fs.chmodSync(file,0o600);}catch{}
  }
+ static readonly OWN=OWN;
  /** Names each open savepoint; nested ones only need distinct names. */
  private savepoints=0;
  close(){this.db?.close();this.db=null;}
@@ -591,199 +593,11 @@ export class WorldLedger {
    if(indexes.length){for(const name of indexes)copy.exec(`DROP TABLE ${name}`);copy.exec('VACUUM');}
   }finally{copy.close();}
  }
-
- // Conversations and notes ----------------------------------------------------------------------
- // Fox's own conversation turns and everything brought from another Agent share one table, marked
- // by `source` ('fox', or the Agent it came from), plus one table of notes an Agent wrote itself
- // (owner decision 2026-10-03: whatever can be in SQLite is; the companion profile stays a small
- // JSON file). A trigram full-text index makes substring search fast in any language; it is
- // derived, left out of backups and rebuilt when missing. Writes keep it current by hand because
- // a World database never carries triggers (`app/backup.ts`).
- static readonly OWN='fox';
- private companionReady=false;
- private searchable=false;
- private ensureCompanion(){
-  if(this.companionReady)return;
-  this.exec(`CREATE TABLE IF NOT EXISTS companion_turns (id TEXT PRIMARY KEY, source TEXT NOT NULL, session TEXT NOT NULL, role TEXT NOT NULL, text TEXT NOT NULL, created_at TEXT NOT NULL, thread TEXT NOT NULL DEFAULT '');
-   CREATE INDEX IF NOT EXISTS companion_turns_source ON companion_turns(source, created_at);
-   CREATE INDEX IF NOT EXISTS companion_turns_time ON companion_turns(created_at);
-   CREATE TABLE IF NOT EXISTS companion_notes (id TEXT PRIMARY KEY, source TEXT NOT NULL, session TEXT NOT NULL, date TEXT NOT NULL, text TEXT NOT NULL, created_at TEXT NOT NULL);
-   CREATE INDEX IF NOT EXISTS companion_notes_source ON companion_notes(source);`);
-  // The first version had no thread: a brought turn's thread is its own conversation; Fox's
-  // earlier turns stay in no particular context ('').
-  if(!this.all("SELECT 1 FROM pragma_table_info('companion_turns') WHERE name='thread'").length)this.transaction(()=>{
-   this.exec(`ALTER TABLE companion_turns ADD COLUMN thread TEXT NOT NULL DEFAULT '';UPDATE companion_turns SET thread=session WHERE source<>'${WorldLedger.OWN}';`);
-  });
-  this.exec('CREATE INDEX IF NOT EXISTS companion_turns_thread ON companion_turns(source, thread, created_at);');
-  this.moveBroughtTables();
-  try{
-   const missing=!this.tableExists('companion_turns_search')||!this.tableExists('companion_notes_search');
-   if(missing)this.transaction(()=>{
-    for(const table of ['companion_turns','companion_notes']){
-     this.handle.exec(`DROP TABLE IF EXISTS ${table}_search;CREATE VIRTUAL TABLE ${table}_search USING fts5(text, content='${table}', content_rowid='rowid', tokenize='trigram', detail='none');INSERT INTO ${table}_search(${table}_search) VALUES('rebuild');`);
-    }
-   });
-   this.searchable=true;
-  }catch{this.searchable=false;}
-  this.companionReady=true;
- }
- /** The first version kept brought history in `brought_*` tables; they join the shared ones once. */
- private moveBroughtTables(){
-  if(!this.tableExists('brought_messages'))return;
-  this.transaction(()=>{
-   this.exec(`INSERT OR IGNORE INTO companion_turns(id,source,session,role,text,created_at,thread) SELECT m.id,m.source,c.session,m.role,m.text,m.created_at,c.session FROM brought_messages m JOIN brought_conversations c ON c.id=m.conversation_id;
-    INSERT OR IGNORE INTO companion_notes(id,source,session,date,text,created_at) SELECT id,source,session,date,text,created_at FROM brought_notes;
-    DROP TABLE brought_messages;DROP TABLE IF EXISTS brought_conversations;DROP TABLE IF EXISTS brought_notes;`);
-  });
- }
- private indexRows(table:'companion_turns'|'companion_notes',where:string,...values:any[]){
-  if(this.searchable)this.run(`INSERT INTO ${table}_search(rowid,text) SELECT rowid,text FROM ${table} WHERE ${where}`,...values);
- }
- private unindexRows(table:'companion_turns'|'companion_notes',where:string,...values:any[]){
-  if(this.searchable)this.run(`INSERT INTO ${table}_search(${table}_search,rowid,text) SELECT 'delete',rowid,text FROM ${table} WHERE ${where}`,...values);
- }
- /** Adds turns that are not here yet (by id); returns how many were added. `thread` is the context
-  * a turn was said in: for Fox, the place and view it was asked from (one Harness session covers the
-  * whole World, so the session cannot tell them apart); for a brought turn, its own conversation. */
- addCompanionTurns(source:string,turns:{id:string;session:string;role:string;text:string;createdAt:string;thread?:string}[]):number {
-  this.ensureCompanion();
-  let added=0;
-  try{
-   this.transaction(()=>{
-    const insert=this.handle.prepare('INSERT OR IGNORE INTO companion_turns(id,source,session,role,text,created_at,thread) VALUES(?,?,?,?,?,?,?)');
-    for(const turn of turns){
-     const thread=typeof turn.thread==='string'?turn.thread:source===WorldLedger.OWN?'':turn.session;
-     if(Number(insert.run(turn.id,source,turn.session,turn.role,turn.text,turn.createdAt,thread).changes)===0)continue;
-     this.indexRows('companion_turns','id=?',turn.id);added++;
-    }
-   });
-  }catch(error){if(error instanceof WorldletError)throw error;throw new WorldletError('Could not save the conversation.');}
-  return added;
- }
- /** Replaces every turn and note from `source`. Returns how many it now holds. */
- replaceCompanionHistory(source:string,{turns,notes}:{turns:{id:string;session:string;role:string;text:string;createdAt:string}[];notes:{id:string;session:string;date:string;text:string;createdAt:string}[]}):number {
-  this.ensureCompanion();
-  try{
-   this.transaction(()=>{
-    this.unindexRows('companion_turns','source=?',source);this.run('DELETE FROM companion_turns WHERE source=?',source);
-    // Bringing again starts the continuous read over (its turns keep their IDs, so nothing comes twice).
-    this.ensureHistory();this.run('DELETE FROM harness_history WHERE source=?',source);
-    this.unindexRows('companion_notes','source=?',source);this.run('DELETE FROM companion_notes WHERE source=?',source);
-    const note=this.handle.prepare('INSERT OR REPLACE INTO companion_notes(id,source,session,date,text,created_at) VALUES(?,?,?,?,?,?)');
-    for(const n of notes){note.run(n.id,source,n.session,n.date,n.text,n.createdAt);}
-    this.indexRows('companion_notes','source=?',source);
-    this.addCompanionTurns(source,turns);
-   });
-  }catch(error){if(error instanceof WorldletError)throw error;throw new WorldletError('Could not save the conversation history.');}
-  return turns.length+notes.length;
- }
- /** `source`'s turns, oldest first; `limit` keeps only the newest ones. */
- companionTurns(source:string,limit?:number):Row[] {
-  this.ensureCompanion();
-  const rows=limit===undefined?this.all('SELECT id,session,role,text,created_at AS createdAt FROM companion_turns WHERE source=? ORDER BY created_at,rowid',source)
-   :this.all('SELECT * FROM (SELECT id,session,role,text,created_at AS createdAt,rowid AS r FROM companion_turns WHERE source=? ORDER BY created_at DESC,rowid DESC LIMIT ?) ORDER BY createdAt,r',source,limit);
-  return rows.map(({r:_,...row})=>({...row}));
- }
- /** The person's turns, in any conversation, that invoked a skill (`/name` as typed, or Hermes Agent's expanded form
-  * of one), newest first and only their start (agent/gate skillInvocation reads the name). */
- skillTurns(limit=2000):{role:string;text:string;at:number}[] {
-  this.ensureCompanion();
-  return this.all("SELECT role,substr(text,1,200) AS text,created_at FROM companion_turns WHERE role='user' AND (text LIKE '/%' OR text LIKE '[IMPORTANT: The user has invoked the %') ORDER BY created_at DESC LIMIT ?",limit)
-   .map(row=>({role:String(row.role),text:String(row.text),at:Date.parse(String(row.created_at))}));
- }
- private static SEARCH=`SELECT id,session,thread,role,text,createdAt,kind,own FROM (
-  SELECT t.id AS id,t.session AS session,t.thread AS thread,t.role AS role,t.text AS text,t.created_at AS createdAt,'conversation' AS kind,t.source=? AS own,t.rowid AS r FROM companion_turns t WHERE {turns}
-  UNION ALL SELECT n.id,n.session,n.session,'assistant',CASE WHEN n.date<>'' THEN 'Notes for '||n.date||char(10)||char(10)||n.text ELSE n.text END,n.created_at,'note',0,n.rowid FROM companion_notes n WHERE {notes})`;
- private searchPlan(query:string):{sql:string;values:any[]} {
-  // The index answers substring LIKE; the exact check keeps the archive's own rule (any case).
-  const indexed=this.searchable&&query!==''&&!/[%_]/.test(query);
-  const filter=(alias:string,table:string)=>query===''?'1':indexed?`${alias}.rowid IN (SELECT rowid FROM ${table}_search WHERE text LIKE ?) AND instr(lower(${alias}.text),lower(?))>0`:`instr(lower(${alias}.text),lower(?))>0`;
-  const args=query===''?[]:indexed?['%'+query+'%',query]:[query];
-  return {sql:WorldLedger.SEARCH.replace('{turns}',filter('t','companion_turns')).replace('{notes}',filter('n','companion_notes')),values:[WorldLedger.OWN,...args,...args]};
- }
- /** Turns and notes containing `query` (any case): Fox's own first, then the rest, newest first. */
- searchCompanion(query:string,offset:number,limit:number):{rows:Row[];total:number} {
-  this.ensureCompanion();
-  const plan=this.searchPlan(query);
-  const total=Number(this.all(`SELECT count(*) AS n FROM (${plan.sql})`,...plan.values)[0]?.n??0);
-  const rows=limit>0?this.all(`${plan.sql} ORDER BY own DESC, createdAt DESC, id LIMIT ? OFFSET ?`,...plan.values,limit,offset):[];
-  return {rows:rows.map(({own:_,...row})=>({...row})),total};
- }
- /** One turn or note by id, or null. */
- companionRecord(id:string):Row|null {
-  this.ensureCompanion();
-  const plan=this.searchPlan('');
-  const row=this.all(`SELECT * FROM (${plan.sql}) WHERE id=? LIMIT 1`,...plan.values,id)[0];
-  if(!row)return null;
-  const {own:_,...rest}=row;return {...rest};
- }
- /** How much each source holds: {source: {turns, notes}}. */
- companionCounts():Record<string,{turns:number;notes:number}> {
-  this.ensureCompanion();
-  const counts:Record<string,{turns:number;notes:number}>={};
-  const at=(source:string)=>counts[source]??={turns:0,notes:0};
-  for(const row of this.all('SELECT source,count(*) AS n FROM companion_turns GROUP BY source'))at(row.source).turns=Number(row.n);
-  for(const row of this.all('SELECT source,count(*) AS n FROM companion_notes GROUP BY source'))at(row.source).notes=Number(row.n);
-  return counts;
- }
-
- // History read continuously (fox/history-sync.ts) ------------------------------------------------------
- // Where the World got to in each Harness thread (`harness_history`: the last turn ID taken and the session its turns
- // are filed under; the row with no thread says when the source was last checked) and the Harness sessions that are
- // Fox's own (`harness_own_sessions`), which never come back as another conversation.
- private historyReady=false;
- private ensureHistory(){
-  if(this.historyReady)return;
-  this.exec(`CREATE TABLE IF NOT EXISTS harness_history (source TEXT NOT NULL, thread TEXT NOT NULL, cursor TEXT, session TEXT NOT NULL DEFAULT '', checked_at INTEGER NOT NULL, PRIMARY KEY(source, thread));
-   CREATE TABLE IF NOT EXISTS harness_own_sessions (source TEXT NOT NULL, session TEXT NOT NULL, thread TEXT NOT NULL DEFAULT '', created_at INTEGER NOT NULL, PRIMARY KEY(source, session));`);
-  // Whether the thread is a group or channel others write in (HarnessThread.shared); null until it is listed again.
-  if(!this.all("SELECT 1 FROM pragma_table_info('harness_history') WHERE name='shared'").length)this.exec('ALTER TABLE harness_history ADD COLUMN shared INTEGER');
-  this.historyReady=true;
- }
- /** Where the World got to in one thread, and when it was last read through (milliseconds; 0 when left part-way). */
- historyCursor(source:string,thread:string):{cursor:string|null;session:string;checkedAt:number;shared:boolean|null}|null {
-  this.ensureHistory();
-  const row=this.all('SELECT cursor,session,checked_at,shared FROM harness_history WHERE source=? AND thread=?',source,thread)[0];
-  return row?{cursor:row.cursor==null?null:String(row.cursor),session:String(row.session),checkedAt:Number(row.checked_at),shared:row.shared==null?null:!!row.shared}:null;
- }
- /** `shared` undefined keeps what is known of the thread. */
- saveHistoryCursor(source:string,thread:string,cursor:string|null,session:string,at=Date.now(),shared?:boolean){
-  this.ensureHistory();
-  this.run('INSERT INTO harness_history(source,thread,cursor,session,checked_at,shared) VALUES(?,?,?,?,?,?) ON CONFLICT(source,thread) DO UPDATE SET cursor=excluded.cursor,session=excluded.session,checked_at=excluded.checked_at,shared=coalesce(excluded.shared,harness_history.shared)',source,thread,cursor,session,Math.round(at),shared===undefined?null:shared?1:0);
- }
- saveHistoryShared(source:string,thread:string,shared:boolean){this.ensureHistory();this.run('UPDATE harness_history SET shared=? WHERE source=? AND thread=?',shared?1:0,source,thread);}
- /** Whether a brought conversation is a group (one of its threads is shared), a direct one, or not known yet (null). */
- historyShared(source:string,session:string):boolean|null {
-  this.ensureHistory();
-  const row=this.all("SELECT max(shared) AS shared FROM harness_history WHERE source=? AND session=? AND thread<>''",source,session)[0];
-  return row?.shared==null?null:!!row.shared;
- }
- /** When `source` was last checked (milliseconds), or null before the first time. */
- historyCheckedAt(source:string):number|null {
-  this.ensureHistory();
-  const row=this.all("SELECT checked_at FROM harness_history WHERE source=? AND thread=''",source)[0];
-  return row?Number(row.checked_at):null;
- }
- historySources():string[] {this.ensureHistory();return this.all("SELECT DISTINCT source FROM harness_history ORDER BY source").map(row=>String(row.source));}
- /** The Harness threads whose turns are filed under `session`, most recently read first (a reply goes to one of them). */
- historyThreads(source:string,session:string):string[] {this.ensureHistory();return this.all("SELECT thread FROM harness_history WHERE source=? AND session=? AND thread<>'' ORDER BY checked_at DESC",source,session).map(row=>String(row.thread));}
- /** A Harness session that is Fox's own (a resident session, harness-sessions), with the Fox thread it carries. */
- rememberOwnHarnessSession(source:string,session:string,thread=''){
-  this.ensureHistory();
-  this.run('INSERT OR REPLACE INTO harness_own_sessions(source,session,thread,created_at) VALUES(?,?,?,?)',source,session,thread,Math.round(Date.now()));
- }
- ownHarnessSessions(source:string):Set<string> {this.ensureHistory();return new Set(this.all('SELECT session FROM harness_own_sessions WHERE source=?',source).map(row=>String(row.session)));}
- /** Fox's own sessions in `source`, each with its Fox thread (a call one of them placed reports back there). */
- ownHarnessSessionThreads(source:string):Map<string,string> {this.ensureHistory();return new Map(this.all('SELECT session,thread FROM harness_own_sessions WHERE source=?',source).map(row=>[String(row.session),String(row.thread??'')]));}
- /** The session a turn is filed under, or null when it is not here. */
- companionSession(id:string):string|null {this.ensureCompanion();const row=this.all('SELECT session FROM companion_turns WHERE id=?',id)[0];return row?String(row.session):null;}
- /** The text `source` keeps, in bytes. */
- companionBytes(source:string):number {this.ensureCompanion();return Number(this.all('SELECT coalesce(sum(length(CAST(text AS BLOB))),0) AS n FROM companion_turns WHERE source=?',source)[0]?.n??0);}
  /** How much each kind of context this World keeps holds, for Settings › Context (context/connectors/world-context.ts): the
   * past conversations (how many, and their text), each Service's synced context, the Journal's cards and what Agents
   * saved there (with their pages), and the board's definition. Bytes of what is kept now, not of older revisions. */
  contextSizes():{conversations:{count:number;bytes:number};services:{provider:string;bytes:number}[];journal:{bytes:number};agentOutputs:{bytes:number};board:{bytes:number}} {
-  this.ensureCompanion();this.ensureArtifacts();this.ensureArtifactPages();
+  ensureCompanion(this);this.ensureArtifacts();this.ensureArtifactPages();
   const bytes=(value:unknown)=>value==null?0:Buffer.byteLength(typeof value==='string'?value:JSON.stringify(value));
   const turns=this.all("SELECT count(DISTINCT source||char(31)||session) AS n,coalesce(sum(length(CAST(text AS BLOB))),0) AS b FROM companion_turns")[0];
   const notes=Number(this.all('SELECT coalesce(sum(length(CAST(text AS BLOB))),0) AS b FROM companion_notes')[0]?.b??0);
@@ -805,77 +619,6 @@ export class WorldLedger {
   }
   return {conversations:{count:Number(turns?.n??0),bytes:Number(turns?.b??0)+notes},services:[...services].map(([provider,size])=>({provider,bytes:size})),
    journal:{bytes:journal},agentOutputs:{bytes:agentOutputs},board:{bytes:bytes(this.board())}};
- }
-
- // What Fox's chat shows, place by place -----------------------------------------------------------
- // The chat keeps one card per turn (the question, Fox's steps, the answer) and, for each place,
- // the reply shown there last. Each card and reply belongs to a thread: the place and view it was
- // asked in (`contextThread` in ui/attention), the same key Fox's turns carry in companion_turns.
- // Rows are saved and read back whole, in order; before 2026-10-03 they were conversation-recall.json.
- private viewsReady=false;
- private ensureViews(){
-  if(this.viewsReady)return;
-  this.exec(`CREATE TABLE IF NOT EXISTS companion_views (position INTEGER PRIMARY KEY, thread TEXT NOT NULL, body TEXT NOT NULL);
-   CREATE TABLE IF NOT EXISTS companion_cards (position INTEGER PRIMARY KEY, id TEXT NOT NULL, thread TEXT NOT NULL, body TEXT NOT NULL);
-   CREATE INDEX IF NOT EXISTS companion_cards_thread ON companion_cards(thread, position);`);
-  this.viewsReady=true;
- }
- static readonly CARDS_ROW='fox-thread';
- private static thread=(row:Row)=>JSON.stringify([String(row?.key||'overview'),String(row?.view||'')]);
- /** Whether the chat rows were ever saved here. */
- hasCompanionViews():boolean {
-  this.ensureViews();
-  return this.all('SELECT 1 FROM companion_views LIMIT 1').length>0||this.all('SELECT 1 FROM companion_cards LIMIT 1').length>0;
- }
- /** The chat rows as saved; the cards row gets its cards back. */
- companionViews():Row[] {
-  this.ensureViews();
-  const cards=this.all('SELECT body FROM companion_cards ORDER BY position').map(row=>JSON.parse(String(row.body)));
-  return this.all('SELECT body FROM companion_views ORDER BY position').map(row=>{
-   const value=JSON.parse(String(row.body));
-   return value?.key===WorldLedger.CARDS_ROW?{...value,entries:cards}:value;
-  });
- }
- /** Replaces the chat rows: each card is its own row, tagged with its thread. */
- replaceCompanionViews(rows:Row[]){
-  this.ensureViews();
-  try{
-   this.transaction(()=>{
-    this.run('DELETE FROM companion_views');this.run('DELETE FROM companion_cards');
-    const view=this.handle.prepare('INSERT INTO companion_views(position,thread,body) VALUES(?,?,?)'),card=this.handle.prepare('INSERT INTO companion_cards(position,id,thread,body) VALUES(?,?,?,?)');
-    rows.forEach((row,position)=>{
-     if(row?.key===WorldLedger.CARDS_ROW){
-      const {entries,...rest}=row;
-      (Array.isArray(entries)?entries:[]).forEach((entry:Row,n:number)=>card.run(n,String(entry?.id??''),WorldLedger.thread(entry),JSON.stringify(entry)));
-      view.run(position,'',JSON.stringify(rest));
-     }else view.run(position,WorldLedger.thread(row),JSON.stringify(row));
-    });
-   });
-  }catch(error){if(error instanceof WorldletError)throw error;throw new WorldletError('Could not save the conversation history.');}
- }
-
- // Who Fox is ---------------------------------------------------------------------------------------
- // Per scope ('private', 'setup', 'sample'): 'profile' (identity, personality, memory; conversations
- // live in companion_turns), 'memory-edits' (sections the person wrote) and 'session' (the marker
- // that starts a fresh Harness session after an import or edit). Before 2026-10-03 these were
- // companion/profile.json, memory-edits.json and imported.json (fox/companion.ts moves them in).
- private profileReady=false;
- private ensureProfile(){
-  if(this.profileReady)return;
-  this.exec('CREATE TABLE IF NOT EXISTS companion_profile (scope TEXT NOT NULL, name TEXT NOT NULL, value TEXT NOT NULL, PRIMARY KEY(scope, name));');
-  this.profileReady=true;
- }
- companionStored(scope:string,name:string):Row|null {
-  this.ensureProfile();
-  const row=this.all('SELECT value FROM companion_profile WHERE scope=? AND name=?',scope,name)[0];
-  return row?JSON.parse(String(row.value)):null;
- }
- saveCompanionStored(scope:string,name:string,value:Row|null){
-  this.ensureProfile();
-  try{
-   if(value===null)this.run('DELETE FROM companion_profile WHERE scope=? AND name=?',scope,name);
-   else this.run('INSERT INTO companion_profile(scope,name,value) VALUES(?,?,?) ON CONFLICT(scope,name) DO UPDATE SET value=excluded.value',scope,name,JSON.stringify(value));
-  }catch{throw new WorldletError('Could not save the companion profile.');}
  }
 
  // Small World settings ----------------------------------------------------------------------------
@@ -924,38 +667,6 @@ export class WorldLedger {
   catch(error){this.savedLibrary=null;throw error;}
   const file=path.join(this.root,'index.json');
   if(fs.existsSync(file))fs.renameSync(file,file+'.before-database');
- }
-
- // Skills and routines brought from another Agent --------------------------------------------------
- // The World's copy (owner decision 2026-10-03: whatever can be in SQLite is); Fox's Harness gets
- // its own copy from here (fox/migration.ts). Before 2026-10-03 it was companion/brought/<agent>.json.
- private broughtReady=false;
- private ensureBrought(){
-  if(this.broughtReady)return;
-  this.exec(`CREATE TABLE IF NOT EXISTS brought_skills (source TEXT NOT NULL, folder TEXT NOT NULL, path TEXT NOT NULL, text TEXT NOT NULL, PRIMARY KEY(source, folder, path));
-   CREATE TABLE IF NOT EXISTS brought_routines (source TEXT NOT NULL, position INTEGER NOT NULL, body TEXT NOT NULL, PRIMARY KEY(source, position));`);
-  this.broughtReady=true;
- }
- /** Every Agent's skills ({folder: {path: text}}) and routines, by source. */
- broughtStores():{source:string;skills:Record<string,Record<string,string>>;routines:Row[]}[] {
-  this.ensureBrought();
-  const stores=new Map<string,{source:string;skills:Record<string,Record<string,string>>;routines:Row[]}>();
-  const at=(source:string)=>{let value=stores.get(source);if(!value)stores.set(source,value={source,skills:{},routines:[]});return value;};
-  for(const row of this.all('SELECT source,folder,path,text FROM brought_skills ORDER BY source,folder,path'))(at(row.source).skills[row.folder]??={})[row.path]=String(row.text);
-  for(const row of this.all('SELECT source,body FROM brought_routines ORDER BY source,position'))at(row.source).routines.push(JSON.parse(String(row.body)));
-  return [...stores.values()];
- }
- /** Replaces what `source` brought. */
- replaceBrought(source:string,skills:Record<string,Record<string,string>>,routines:Row[]){
-  this.ensureBrought();
-  try{
-   this.transaction(()=>{
-    this.run('DELETE FROM brought_skills WHERE source=?',source);this.run('DELETE FROM brought_routines WHERE source=?',source);
-    const skill=this.handle.prepare('INSERT INTO brought_skills(source,folder,path,text) VALUES(?,?,?,?)'),routine=this.handle.prepare('INSERT INTO brought_routines(source,position,body) VALUES(?,?,?)');
-    for(const [folder,files] of Object.entries(skills))for(const [file,text] of Object.entries(files))skill.run(source,folder,file,text);
-    routines.forEach((value,position)=>routine.run(source,position,JSON.stringify(value)));
-   });
-  }catch(error){if(error instanceof WorldletError)throw error;throw new WorldletError('Could not save what this Agent brought.');}
  }
 
  // My Applets ---------------------------------------------------------------------------------------
@@ -1128,44 +839,6 @@ export class WorldLedger {
    });
   }catch{throw new WorldletError('Could not save what is ongoing.');}
  }
- /** Every brought conversation (not Fox's own): its Agent, session, turns, the person's own turns and its first and last time. */
- broughtConversations():{source:string;session:string;turns:number;userTurns:number;first:string;last:string}[] {
-  this.ensureCompanion();
-  return this.all(`SELECT source,session,count(*) AS turns,sum(role='user') AS userTurns,min(created_at) AS first,max(created_at) AS last FROM companion_turns WHERE source<>? GROUP BY source,session`,WorldLedger.OWN)
-   .map(row=>({source:String(row.source),session:String(row.session),turns:Number(row.turns),userTurns:Number(row.userTurns??0),first:String(row.first),last:String(row.last)}));
- }
- /** The person's own newest `limit` messages in one brought conversation, oldest first, one per line (to tell what
-  * it is about, agent/tasks kinds). */
- ownText(source:string,session:string,limit:number):string {
-  this.ensureCompanion();
-  return this.all(`SELECT text FROM (SELECT text,created_at,rowid AS r FROM companion_turns WHERE source=? AND session=? AND role='user' ORDER BY created_at DESC,rowid DESC LIMIT ?) ORDER BY created_at,r`,source,session,limit)
-   .map(row=>String(row.text).replace(/\s+/g,' ').trim().slice(0,400)).join('\n');
- }
- /** The newest `limit` turns of one brought conversation, oldest first. */
- conversationTurns(source:string,session:string,limit:number):{role:string;text:string;createdAt:string}[] {
-  this.ensureCompanion();
-  return this.all('SELECT role,text,created_at AS createdAt FROM (SELECT role,text,created_at,rowid AS r FROM companion_turns WHERE source=? AND session=? ORDER BY created_at DESC,rowid DESC LIMIT ?) ORDER BY created_at,r',source,session,limit)
-   .map(row=>({role:String(row.role),text:String(row.text),createdAt:String(row.createdAt)}));
- }
-
- /** The newest `limit` of Fox's own turns said in one place (`thread`, the chat's context key), oldest
-  * first, leaving out `except` (the turn being answered). */
- threadTurns(thread:string,limit:number,except=''):{role:string;text:string;createdAt:string}[] {
-  this.ensureCompanion();
-  return this.all('SELECT role,text,created_at AS createdAt FROM (SELECT role,text,created_at,rowid AS r FROM companion_turns WHERE source=? AND thread=? AND id<>? ORDER BY created_at DESC,rowid DESC LIMIT ?) ORDER BY created_at,r',WorldLedger.OWN,thread,except,limit)
-   .map(row=>({role:String(row.role),text:String(row.text),createdAt:String(row.createdAt)}));
- }
- /** Fox's own newest turns, where each was said and when, without their text (core worldSinceCutoff). */
- recentTurnPlaces(limit:number):{thread:string;role:string;createdAt:string}[] {
-  this.ensureCompanion();
-  return this.all('SELECT thread,role,created_at AS createdAt FROM companion_turns WHERE source=? ORDER BY created_at DESC,rowid DESC LIMIT ?',WorldLedger.OWN,Math.max(1,Math.min(2000,limit)))
-   .map(row=>({thread:String(row.thread??''),role:String(row.role),createdAt:String(row.createdAt)}));
- }
- /** Where Fox's previous turn before `except` was said, or ''. */
- previousThread(except:string):string {
-  this.ensureCompanion();
-  return String(this.all('SELECT thread FROM companion_turns WHERE source=? AND id<>? ORDER BY created_at DESC,rowid DESC LIMIT 1',WorldLedger.OWN,except)[0]?.thread??'');
- }
  /** How many events the World has written, deleted ones included (the newest sequence number). */
  eventRows():number {return Number(this.all('SELECT coalesce(max(seq),0) AS n FROM entries')[0]?.n??0);}
 
@@ -1318,10 +991,10 @@ export class WorldLedger {
 
 // Each component's methods are written with `this:WorldLedger`; on the ledger they are its own.
 type Tables<T>={[K in keyof T]:T[K] extends (this:WorldLedger,...args:infer A)=>infer R?(...args:A)=>R:T[K]};
-export interface WorldLedger extends Tables<RecordingTables>,Omit<Tables<TaskTables>,'withRuntimeOutput'> {
+export interface WorldLedger extends Tables<CompanionTables>,Tables<RecordingTables>,Omit<Tables<TaskTables>,'withRuntimeOutput'> {
  /** Claim validation and the writes in `body` share one transaction; `body` must be synchronous. */
  withRuntimeOutput<T>(taskID:string,runID:string,body:()=>T):T;
 }
-for(const tables of [RecordingTables,TaskTables]){
+for(const tables of [CompanionTables,RecordingTables,TaskTables]){
  for(const [name,method] of Object.entries(Object.getOwnPropertyDescriptors(tables.prototype)))if(name!=='constructor')Object.defineProperty(WorldLedger.prototype,name,method);
 }
