@@ -37,6 +37,9 @@ export class DesktopCompanion implements DesktopCompanionService {
  private attached:BaseWindow|null=null;
  private desktop=false;
  private detaching=false;
+ /** The World window is being closed: Fox moves out and the window hides. Moving the view out can focus the
+  * still-visible World on Mac, which must not count as the person coming back (Alpha 4585, #770). */
+ private closing=false;
  private generation=0;
  private viewport={width:0,height:0};
  private crop:Crop={x:0,y:0,width:0,height:0};
@@ -90,7 +93,7 @@ export class DesktopCompanion implements DesktopCompanionService {
   world.on('move',remember);world.on('resize',remember);world.on('show',remember);remember();
   world.on('minimize',()=>{if(!this.unfinished())void this.showDesktop(false);});
   world.on('restore',()=>{if(this.desktop||this.detaching)this.reattach();});
-  world.on('focus',()=>{this.cancelInactive();if(this.desktop)this.reattach();});
+  world.on('focus',()=>{this.cancelInactive();if(this.desktop&&!this.closing)this.reattach();});
   world.on('resize',()=>{if(this.backdrop){const [width,height]=world.getContentSize();this.backdrop.setBounds({x:0,y:0,width,height});}});
   // Another app in front: Mac reports the whole app resigning; every OS blurs the World window.
   world.on('blur',()=>this.scheduleInactive());
@@ -132,7 +135,10 @@ export class DesktopCompanion implements DesktopCompanionService {
  async showDesktop(hideWorld:boolean,automatic=false){
   const world=this.host.window(),view=this.host.worldView();
   if(this.desktop||this.detaching||!world||!view||this.sheets>0)return;
-  this.detaching=true;
+  this.detaching=true;this.closing=hideWorld;
+  try{await this.moveOut(world,view,hideWorld,automatic);}finally{this.closing=false;}
+ }
+ private async moveOut(world:BaseWindow,view:WebContentsView,hideWorld:boolean,automatic:boolean){
   const generation=++this.generation;
   // Capture screen coordinates before the OS starts its minimize animation.
   const frame=world.isMinimized()&&this.frame?this.frame:this.viewFrame(world);
