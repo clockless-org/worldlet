@@ -14,3 +14,4 @@ export {mountJournalBook,flyIntoJournal} from './journal-book.ts';
 export {artifactPageSpec} from './artifact-spec.ts';
 export {turnIntoDock} from './artifact-turn.ts';
 export {createDailyCards,type DailyCardsHost} from './daily-cards.ts';
+export {createArtifactHost,type ArtifactHostOptions} from './artifact-host.ts';
