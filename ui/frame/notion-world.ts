@@ -12,7 +12,7 @@ import {carriesConversation,worldSpeechTerms} from '../../agent/companion/index.
 import {helpNarration,narrateHelp} from '../companion/index.ts';
 import {createWorldUI} from './public-interface.ts';
 import {eventTrigger,reportAppletOpened,reportEngagement,reportProductEvent} from './product-analytics.ts';
-import {mountFoxArtifact,flyIntoJournal,artifactPageSpec,createDailyCards} from '../attention/index.ts';
+import {flyIntoJournal,createDailyCards,createArtifactHost} from '../attention/index.ts';
 import {node,textButton,worldletMark,uiIcon} from '../style/index.ts';
 import {readRetryDelay,sourceReadAction} from '../../context/applets/index.ts';
 import {attentionRequest,journalTarget} from '../../agent/gate/index.ts';
@@ -22,7 +22,7 @@ import {mountAttentionPreview,taskReviewLine} from '../attention/index.ts';
 import {attentionPreviewData,attentionLaterUntil} from '../../agent/attention/index.ts';
 import {mountCompanionNative} from '../companion/index.ts';
 import {attentionBrief} from '../../agent/attention/index.ts';
-import {artifactFollowUpSent,type ArtifactFollowUpDraft,artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,dayKey,backgroundBlocked,replyThread} from '../../context/store/index.ts';
+import {artifactFollowUpSent,artifactFitProblem,artifactId,attentionArtifactId,findArtifacts,readArtifact,dayKey,replyThread} from '../../context/store/index.ts';
 
 import {applyRegionLayout,readRegionLayout,parseRegionLayout,moveRegionApplet,pinRegionApplet,pinnedPlace,recordAppletUse,regionId,recentlyUsedFirst,storedRegionLayout} from '../world/index.ts';
 import {resolvePlacements,lampLabels,lampNeeds} from '../world/index.ts';
@@ -146,81 +146,9 @@ export function mountNotionWorld(data: World, native: any) {
   }
   // A card the person closes goes into the Journal on its way out (owner request 2026-10-08).
   const attentionPreview=mountAttentionPreview({root,onClose:()=>{flyIntoJournal(root,$('attentionPreview'));closeAttentionPreview();},onOriginal:openAttentionOriginal,onLink:href=>{const page=attentionPage;closeAttentionPreview(false);openWorldURL(href,{attention:page});}});
-  // Every card Fox shows is kept as an artifact (context/store/ARTIFACTS.md); the person finds it again in Fox's panel.
-  let shownArtifact:any=null,artifactsShown=0,nextArtifactLabel:string|null=null;
-  // The last save, so a page is asked for only once its artifact is kept.
-  let keeping:Promise<unknown>=Promise.resolve();
-  const keepArtifact=(artifact)=>{if(native?.artifacts)keeping=Promise.resolve(native.artifacts({operation:'save',artifact})).then(()=>window.dispatchEvent(new Event('worldlet:journal-changed'))).catch(()=>{});};
-  const foxArtifact=mountFoxArtifact(root,renderMarkdown,putArtifactAway,href=>openWorldURL(href),size=>{if(shownArtifact){shownArtifact={...shownArtifact,size};keepArtifact(shownArtifact);}},
-   // A next step on the card drafts the person's request in Fox's message bar; it goes to Fox only when they send it,
-   // so a card made from untrusted content can never speak for them (context/store/ARTIFACTS.md#actions).
-   action=>draftRequest(action),
-   // What the person ticks or sets on the card's blocks is kept with it, so the Journal and a reopened card show it.
-   blocks=>{if(shownArtifact){shownArtifact={...shownArtifact,blocks};keepArtifact(shownArtifact);}},
-   native?.artifactPages);
-  function putArtifactAway(){flyIntoJournal(root,$('foxArtifact'));foxArtifact.close();delete root.dataset.attentionPreview;voice?.sync();}
-  // The next step picked on the open card, until it is sent: sent while the card is still open, it runs in the
-  // background as a follow-up beside Fox (context/store/follow-up.ts, followUp below).
-  // An emptied bar drops it.
-  let followUpDraft:ArtifactFollowUpDraft|null=null,followUpWatched=false;
-  function draftRequest(action:{request:string}){if(shownArtifact&&foxArtifact.visible)followUpDraft={id:String(shownArtifact.id),title:String(shownArtifact.title||''),request:action.request};const input=root.querySelector('#notionInput') as HTMLTextAreaElement|HTMLInputElement|null;if(!input)return;
-   if(!followUpWatched){followUpWatched=true;input.addEventListener('input',()=>{if(!input.value.trim())followUpDraft=null;});}input.value=action.request;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();input.setSelectionRange?.(input.value.length,input.value.length);}
-  // Theme-driven Artifacts (context/store/ARTIFACTS.md#theme-driven-artifacts): an answer shown at medium or large size in
-  // the World is laid out as a page in the theme's style by a quiet background task; the template card shows until then.
-  async function requestArtifactPage(artifact:{id:string;kind:'answer'|'attention';size:'small'|'medium'|'large'},inApplet=insideApplet()){
-   if(!native?.artifactPages||artifactRenderMode(artifact,{theme:true,generator:true,inApplet})!=='page')return;
-   // Work Fox starts by itself waits out the practice world, onboarding, the tour, the first run and automated browsers.
-   if(backgroundBlocked({sample:!!data.sample,automated:!!navigator.webdriver,onboarding:root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true',tour:!!root.dataset.tourStep,firstRun:!!native?.firstRun?.(),asking:false}))return;
-   const look=await artifactPageSpec();if(!look)return;
-   await keeping;
-   const result:any=await native.artifactPages({operation:'make',id:artifact.id,size:artifact.size,spec:look.spec,materials:look.materials}).catch(()=>null);
-   if(result?.ready)foxArtifact.page(artifact.id);
-  }
-  async function showKeptPage(id:string){
-   if(!native?.artifactPages)return;
-   const result:any=await native.artifactPages({operation:'get',id}).catch(()=>null);
-   if(result?.page)foxArtifact.page(id);
-  }
-  // A page became ready, or the person clicked one of its actions: it drafts Fox's own request, as a next step does.
-  window.addEventListener('worldlet:artifact-page',(event:any)=>{
-   const {id,ready,action}=event.detail||{};if(typeof id!=='string')return;
-   if(ready===true)foxArtifact.page(id);
-   if(typeof action==='number'&&shownArtifact?.id===id&&foxArtifact.shownId===id){const chosen=artifactPageActions(shownArtifact)[action];if(chosen)draftRequest(chosen);}
-  });
-  function showArtifact(args,artifact){
-   const result=foxArtifact.show(args);
-   if(result.ok){artifactsShown++;closeAttentionPreview(false);root.dataset.attentionPreview='true';voice?.sync();shownArtifact=artifact?{...artifact,size:result.size}:null;if(shownArtifact)keepArtifact(shownArtifact);}
-   return result;
-  }
-  async function openArtifact(id):Promise<{error?:string;[key:string]:unknown}>{
-   if(!native?.artifacts)return {error:'The practice world keeps no artifacts.'};
-   const artifact=readArtifact((await native.artifacts({operation:'get',id}))?.artifact);
-   if(!artifact)return {error:'That artifact is not in this World any more.'};
-   // An Attention card opens on its item while the item is in the World, with its outcomes.
-   if(artifact.origin.type==='attention'&&previewAttention({worldItemId:artifact.origin.item}))return {ok:true,id:artifact.id,title:artifact.title};
-   const label=artifact.kind==='attention'?(artifact.category||'Attention')+' · earlier':'From an earlier conversation';
-   const shown=showArtifact({id:artifact.id,title:artifact.title,body:artifact.body||' ',brief:artifact.brief||null,detail:artifact.detail||null,chart:artifact.chart,size:artifact.size,actions:artifact.actions,blocks:artifact.blocks||null,tone:artifact.tone||null,art:artifact.art||null,label},artifact.kind==='answer'?artifact:null);
-   if(shown.ok&&artifact.kind==='answer')void showKeptPage(artifact.id);
-   return shown;
-  }
-  // A page Fox made is an Applet while its moment lasts or once kept; a finished one comes back when the person keeps it.
-  async function openMade(widget:string,keep:boolean){
-   const applet=momentAppletId(widget);
-   if(keep){if(!native?.widgets)return;try{await native.widgets({operation:'pin',id:widget});}catch(error){notify(error.message||'Could not bring it back.');return;}}
-   const here=()=>sections.some(r=>r.moduleId===applet);
-   for(let tries=0;tries<25&&!here();tries++)await new Promise(resolve=>setTimeout(resolve,120));
-   if(here())visitObject(applet);else notify('That Thing is not in this World any more.');
-  }
-  // Fox's line pointed to an Attention item (ui/companion/fox-proactive.ts): its card opens, or the person hears it is settled.
-  window.addEventListener('worldlet:attention-open',(event:any)=>{
-   const id=event.detail?.id;
-   if(typeof id==='string'&&id&&!previewAttention({worldItemId:id}))notify('That card is not in Attention any more.');
-  });
-  window.addEventListener('worldlet:artifact-open',(event:any)=>{
-   const detail=event.detail||{};
-   if(typeof detail.made==='string'){void openMade(detail.made,detail.keep===true);return;}
-   void openArtifact(String(detail.id||'')).then(result=>{if(result?.error)notify(result.error);});
-  });
+  // The cards the companion shows and the Journal that keeps them (ui/attention/artifact-host.ts).
+  const artifacts=createArtifactHost({data:()=>data,native,root,$,voice:()=>voice,sections,renderMarkdown,openWorldURL,insideApplet,previewAttention,closeAttentionPreview,visitObject,notify});
+  const {foxArtifact,keep:keepArtifact,putAway:putArtifactAway,draft:draftRequest,requestPage:requestArtifactPage,show:showArtifact,open:openArtifact}=artifacts;
   root.addEventListener('click',e=>{
    // A click elsewhere in the World puts the card away into the Journal. Over an Applet the card stays pinned in the
    // top-right corner until its × (owner Order 2026-10-09: a click beside it made it vanish with no way back).
@@ -343,7 +271,7 @@ export function mountNotionWorld(data: World, native: any) {
       visitObject(site.moduleId,{enter:false});
       header(site.title,'Website',{applet:true});browserPanel.mount(site.key,{url:url.href,platform:'web'});sceneState();return true;
     }
-    const origin=inPageLayer()?pageLayer:{depth,current,attention:from.attention||null,artifact:from.artifact||(foxArtifact.visible?shownArtifact:null)};
+    const origin=inPageLayer()?pageLayer:{depth,current,attention:from.attention||null,artifact:from.artifact||(foxArtifact.visible?artifacts.shown():null)};
     closeRegionShelf();header(webSite(url.href),'Web');browserPanel.mount('web',{url:url.href,platform:'web'});pageLayer=origin;sceneState();return true;
   }
   window.addEventListener('worldlet:open-url',(event:any)=>openWorldURL(event.detail?.url||''));
@@ -1315,7 +1243,7 @@ export function mountNotionWorld(data: World, native: any) {
    // owner 2026-10-11 20:21 PDT: Production metrics: the person opened this item's card themselves; Fox, a restore and the
    // next card shown after one is settled do not count.
    if(!advanced&&!data.sample&&eventTrigger()==='user')reportProductEvent('attention_item_opened',{open_surface:'computer',item_kind:String(page.worldItemKind||'')});
-   foxArtifact.close();shownArtifact=null;attentionPage=page;attentionPreview.open({...page,attentionTimeMembers:(item.pageIds||[page.id]).map(id=>pages.get(id)).filter(Boolean).map(p=>p.worldItemSignal||{})});nativeHUD?.sync();showAttentionGuide(page);
+   foxArtifact.close();artifacts.clearShown();attentionPage=page;attentionPreview.open({...page,attentionTimeMembers:(item.pageIds||[page.id]).map(id=>pages.get(id)).filter(Boolean).map(p=>p.worldItemSignal||{})});nativeHUD?.sync();showAttentionGuide(page);
    const card=attentionPreviewData(page);
    // A scheduled result already kept in the Journal (the morning brief) is not kept a second time as its Attention card.
    if(!journalTarget(page.worldItemSources))keepArtifact({id:attentionArtifactId(item.worldItemId),kind:'attention',title:card.title,body:card.summary,chart:null,size:'medium',category:card.category,origin:{type:'attention',item:item.worldItemId}});
@@ -1602,7 +1530,7 @@ export function mountNotionWorld(data: World, native: any) {
     voice?.revealGuide?.();
   }
   // The daily cards, the first card and prepared replies (ui/attention/daily-cards.ts).
-  const dailyCards=createDailyCards({data:()=>data,native,root,$,voice:()=>voice,foxArtifact,requestArtifactPage:(artifact,open)=>requestArtifactPage(artifact,open),takeFollowUpDraft:()=>{const draft=followUpDraft;followUpDraft=null;return draft;},attentionPage:()=>attentionPage,showDraftLine:page=>showDraftLine(page),pages:()=>pages,insideApplet:()=>insideApplet(),inPageLayer:()=>inPageLayer(),reportProductEvent});
+  const dailyCards=createDailyCards({data:()=>data,native,root,$,voice:()=>voice,foxArtifact,requestArtifactPage:(artifact,open)=>requestArtifactPage(artifact,open),takeFollowUpDraft:artifacts.takeFollowUpDraft,attentionPage:()=>attentionPage,showDraftLine:page=>showDraftLine(page),pages:()=>pages,insideApplet:()=>insideApplet(),inPageLayer:()=>inPageLayer(),reportProductEvent});
   const {showDailyInJournal,followUp,readDrafts}=dailyCards;
   window.addEventListener('pagehide',()=>clearInterval(meetingPoll),{once:true});
   const workPoll=setInterval(()=>{if(!document.hidden&&current==='building-work'){const r=sections.find(s=>s.key==='claude-code');if(r&&!data.sample&&native?.developmentSessions)void loadWork(r);}},15000);
@@ -2082,7 +2010,7 @@ export function mountNotionWorld(data: World, native: any) {
     ? execute('visit_context',{id:command.id})
     : execute('move_view',{direction:command.action}));
 
-  const executeAction=(name: string,args: any,meta?: any)=>{if(name==='show_artifact'){const tooLong=artifactFitProblem(args);if(tooLong)return {error:tooLong};const id=artifactId(),label=nextArtifactLabel;nextArtifactLabel=null;if(dailyCards.isDaily(String(args.title||'')))return showDailyInJournal({id,kind:'answer',title:args.title,body:args.body,brief:args.brief||undefined,detail:args.detail||undefined,chart:args.chart||null,actions:args.actions||[],blocks:args.blocks||[],tone:args.tone||undefined,art:args.art||undefined,size:args.size||'large',origin:{type:'conversation',place:current||'world'}});{const shown=showArtifact({...args,id,...label?{label}:{}},{id,kind:'answer',title:args.title,body:args.body,brief:args.brief||undefined,detail:args.detail||undefined,chart:args.chart||null,actions:args.actions||[],blocks:args.blocks||[],tone:args.tone||undefined,art:args.art||undefined,origin:{type:'conversation',place:current||'world'}});if(shown.ok)void requestArtifactPage({id,kind:'answer',size:shown.size as 'small'|'medium'|'large'});return shown;}}
+  const executeAction=(name: string,args: any,meta?: any)=>{if(name==='show_artifact'){const tooLong=artifactFitProblem(args);if(tooLong)return {error:tooLong};const id=artifactId(),label=artifacts.takeNextLabel();if(dailyCards.isDaily(String(args.title||'')))return showDailyInJournal({id,kind:'answer',title:args.title,body:args.body,brief:args.brief||undefined,detail:args.detail||undefined,chart:args.chart||null,actions:args.actions||[],blocks:args.blocks||[],tone:args.tone||undefined,art:args.art||undefined,size:args.size||'large',origin:{type:'conversation',place:current||'world'}});{const shown=showArtifact({...args,id,...label?{label}:{}},{id,kind:'answer',title:args.title,body:args.body,brief:args.brief||undefined,detail:args.detail||undefined,chart:args.chart||null,actions:args.actions||[],blocks:args.blocks||[],tone:args.tone||undefined,art:args.art||undefined,origin:{type:'conversation',place:current||'world'}});if(shown.ok)void requestArtifactPage({id,kind:'answer',size:shown.size as 'small'|'medium'|'large'});return shown;}}
    if(name==='open_artifact')return openArtifact(String(args.id||''));
    if(name==='list_artifacts'){if(!native?.artifacts)return {artifacts:[],scope:'The practice world keeps no artifacts.'};return Promise.resolve(native.artifacts({operation:'list'})).then(r=>({artifacts:findArtifacts((r?.artifacts||[]).map(readArtifact).filter(Boolean),args.query||'',args.limit||12)}));}if(['run_practice_iteration','practice_applet'].includes(name))return practiceWalkthrough?practiceWalkthrough.execute(name,args,meta):{error:'Only available in the practice world.'};if(name==='customize_companion'){if(!data.sample)return {error:'This control belongs to the practice world.'};const name=String(args.name||'').trim();if(!name||name.length>24||!['idle','happy','waving','sleeping'].includes(args.expression))return {error:'Choose a short name and an available expression.'};window.dispatchEvent(new CustomEvent('worldlet:companion-appearance',{detail:{name,expression:args.expression}}));return {ok:true,name,expression:args.expression};}if(data.sample&&['delegate_codex','list_codex_tasks','read_codex_task','show_codex_task'].includes(name))return practiceCoding(name,args);if(name==='manage_weather_location')return environmentController.manageLocation(args,meta?.signal);if(name==='set_scene_lighting')return environmentController.setSceneLighting(args.lighting);if(name==='set_scene_weather')return environmentController.setSceneWeather(args.weather);if(name==='prepare_email')return preparePracticeEmail(args);const panelTool=PANEL_TOOLS.get(name);if(panelTool){const [key,title]=panelTool;if(current!=='app-'+key||content.hidden)visitObject('app-'+key);return appletPanels.get(key)?.agent(args)||{error:title+' is unavailable.'};}if(name==='review_email_drafts'){window.dispatchEvent(new Event('worldlet:email-drafts'));return {ok:true,status:'user_review'};}if(name==='review_notion_drafts'){window.dispatchEvent(new Event('worldlet:notion-reviews'));return {ok:true,status:'user_review'};}if(name==='manage_companion_memory'){window.dispatchEvent(new Event('worldlet:memory-manager'));return {ok:true,status:'user_review',guidance:'Memory management opened. The user makes changes directly.'};}if(name==='automate_browser')return automateBrowser(args,meta);if(name==='browse_web'){if(['records','record'].includes(args.operation)){if(data.sample)return {visits:[],scope:'The practice world records no browsing.'};return browserPanel.agent(args);}if(args.operation==='history'){if(data.sample)return {items:[],scope:'Practice world has no personal browsing history. Use find_content for authored history notes.'};return browserPanel.agent(args);}if(args.operation==='open'){if(!openWorldURL(args.url))return {error:'Use a valid HTTPS website URL.'};return browserPanel.agent(args);}if(['outline','focus'].includes(args.operation)&&(content.hidden||content.dataset.template!=='browser'))return {error:'Open the website first: Focus rules are for the site open in a website Thing.'};if(data.sample&&args.operation==='saved'){const terms=String(args.query||'').toLowerCase().split(/\s+/).filter(Boolean);const records=[...pages.values()].filter(p=>['sample-web-research-history','sample-web-shoes-history'].includes(p.id)&&terms.every(t=>(p.title+' '+p.markdown).toLowerCase().includes(t)));return {ok:true,fictional:true,results:records.map(p=>({id:p.id,title:p.title,text:p.markdown,url:p.markdown.match(/^URL: (.+)$/m)?.[1]}))};}if(args.operation!=='saved'&&(content.hidden||content.dataset.template!=='browser')){if(pages.has('device-x'))open('device-x');else {showModulePanel('module-browser');header('Browser','Library');browserPanel.mount();sceneState();}}return browserPanel.agent(args);}return executeWorld(name,args,meta);};
   const execute=(name: string,args: any,meta?: any)=>{toolNavigation=true;try{return native&&!data.sample?recordWorldCommand(name,args,()=>executeAction(name,args,meta)):executeAction(name,args,meta);}finally{toolNavigation=false;}};
@@ -2104,13 +2032,13 @@ export function mountNotionWorld(data: World, native: any) {
    // In a website, an address typed to Fox opens there: the input is also the address bar.
    const input=$('notionInput') as HTMLTextAreaElement|HTMLInputElement,address=!content.hidden&&content.dataset.template==='browser'?typedAddress(input.value):null;
    if(address&&openWorldURL(address)){input.value='';input.dispatchEvent(new Event('input'));return;}
-   if(artifactFollowUpSent(followUpDraft,input.value,foxArtifact.visible&&shownArtifact?String(shownArtifact.id):null)&&followUp(input.value))return;
+   if(artifactFollowUpSent(artifacts.followUpDraft(),input.value,foxArtifact.visible&&artifacts.shown()?String(artifacts.shown().id):null)&&followUp(input.value))return;
    voice.submit()};
   // The first-run tour's first value can be a conversation the person brought (ui/frame/first-value.ts).
   let firstValueOngoing:{list:()=>{id:string,title:string,say:string}[],make:(id:string)=>Promise<boolean>}|null=null;
   if(native){
     // The paired phone, the widgets for now and the ongoing things (ui/companion/phone-ongoing.ts).
-    const companionNative=mountCompanionNative({data:()=>data,native,root,voice:()=>voice,nativeHUD:()=>nativeHUD,sections,regionLayout,notify:text=>notify(text),visitObject:id=>visitObject(id),previewAttention:item=>previewAttention(item),itemPage:id=>itemPage(id),previewActions:page=>previewActions(page),settleAttention:(...args)=>(settleAttention as any)(...args),artifactsShown:()=>artifactsShown,setNextArtifactLabel:label=>{nextArtifactLabel=label;},setFirstValueOngoing:value=>{firstValueOngoing=value;},resetSourceIssues:()=>{sourceIssueSignature='';publishSourceIssues();}});
+    const companionNative=mountCompanionNative({data:()=>data,native,root,voice:()=>voice,nativeHUD:()=>nativeHUD,sections,regionLayout,notify:text=>notify(text),visitObject:id=>visitObject(id),previewAttention:item=>previewAttention(item),itemPage:id=>itemPage(id),previewActions:page=>previewActions(page),settleAttention:(...args)=>(settleAttention as any)(...args),artifactsShown:artifacts.count,setNextArtifactLabel:artifacts.setNextLabel,setFirstValueOngoing:value=>{firstValueOngoing=value;},resetSourceIssues:()=>{sourceIssueSignature='';publishSourceIssues();}});
     const {phone,widgetsNow,themesNow,offerOngoing}=companionNative;
     nativeHUD=mountNativeHUD({root,onAttention:view=>{phone?.attention(view);if(!data.sample&&view?.now?.length)reportProductEvent('attention_shown',{attention_count:String(Math.min(9,view.now.length))});},calendar:calendarSoon,openCalendar:openCalendarEvent,widgets:widgetsNow,openWidget:id=>visitObject(momentAppletId(id)),ongoing:()=>themesNow().map(({id,title,context})=>({id,title,context})),openOngoing:offerOngoing,updates:native.updates,connectApplet:moduleId=>{const r=sections.find(s=>s.moduleId===moduleId);if(r?.key==='voice-memos'){visitObject(r.moduleId,{enter:false});showVoiceMemos(r,'connect');}else if(r?.key==='messages'){visitObject(r.moduleId,{enter:false});showMessages(r);}else if(r?.key==='obsidian'){visitObject(r.moduleId);showObsidian(r,'choose');}else if(r&&native?.setup)native.setup('connection',r.region,r.key);},snapshot:()=>({data,pages,sections,areas,buildings,composites,arrivals,read,current,currentSpace,depth,attentionItemId:attentionPage?.worldItemId}),previewAttention,open,visitArea,visitSpace,visitBuilding,visitObject,focusContent,showSearch,connect:()=>{if(data.personal)templateLibrary();else sourceInfo();},original:async id=>{const item=pages.get(id);if(data.sample&&item?.noteId&&pages.has(item.noteId)){open(item.noteId);return;}const result=await native.original(pages.get(id).sourceId);const body=dialog(result.title);body.append(element('pre','private-original',result.text));},chat:()=>voice,back,home,leaveApplet:()=>{libraryWebReturn=null;back();},dialog,itemActions,onDecision:(d,choice)=>{const p=pages.get(d.pageId);if(!p)return {error:'Note not found'};const r=contentStore.mutate('patch_content',{id:p.id,revision:p.revision,field:'body',old_text:'',new_text:'\n## Selected option\n'+choice+'\nPlan only. No booking, payment or message was sent.'},{operationId:crypto.randomUUID()});if(r.ok)contentChanged(r);return r;},storage:native.storage,sample:()=>!!data.sample,toggleSample:native.toggleSample,contextual:()=>attentionPage?moduleContext():travelExperiment?.context()||moduleContext(),tasks:()=>travelExperiment?.tasks()||[]});
     // The Thing shelf above an open Thing (ui/world/applet-shelf.ts): the recently used Things, the open one in the middle.
