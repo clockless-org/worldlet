@@ -21,3 +21,4 @@ export {pairingQR} from './companion-phone.ts';
 // Settings (ui/frame/) draws Fox's guides and model failures the way the conversation does.
 export {replyMarkdown} from './reply-markdown.ts';
 export {modelFailure} from './model-failure.ts';
+export {mountCompanionNative,type CompanionNativeHost} from './phone-ongoing.ts';
