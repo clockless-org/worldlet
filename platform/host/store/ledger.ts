@@ -7,6 +7,7 @@ import {digest,ensureDirectory,WorldletError} from '../files.ts';
 import {swiftJSON,swiftFold,stableJSON,sameJSON} from './swift-json.ts';
 import {SERVICE_SYNC_BUCKETS} from '../../../contracts/service-sync.ts';
 import {WORLD_VIEWS_SQL} from '../../../contracts/storage/world-views.ts';
+import {AppletTables,ensureArtifactPages,ensureArtifacts,ensureKept} from './applets.ts';
 import {CompanionTables,ensureCompanion,OWN} from './companion.ts';
 import {RecordingTables} from './recordings.ts';
 import {TaskTables} from './tasks.ts';
@@ -19,7 +20,7 @@ const iso=()=>new Date().toISOString();
 /** Worldlet's durable facts, independent of any Harness's conversation or memory files.
  * Only bound values reach SQL; an Agent never receives a SQL execution tool.
  * This file opens the database and keeps `entries` (history and state revisions); a component's tables are read
- * and written in its own file beside it (tasks.ts, companion.ts, recordings.ts), whose methods are this class's. */
+ * and written in its own file beside it (tasks.ts, companion.ts, applets.ts, recordings.ts), whose methods are this class's. */
 export class WorldLedger {
  db:DatabaseSync|null;
  readonly root:string;
@@ -487,19 +488,6 @@ export class WorldLedger {
   if(!['attention-context','attention-budget'].includes(bucket))throw new WorldletError('Invalid attention cache.');
   this.transaction(()=>{this.delete(bucket,'current');this.put(bucket,'current',{...value,id:'current'});});
  }
- replaceAppletState(bucket:string,provider:string,value:Row){
-  if(!['applet-observations','applet-findings','applet-cursors'].includes(bucket))throw new WorldletError('Invalid Applet state.');
-  this.transaction(()=>{this.delete(bucket,provider);this.put(bucket,provider,{...value,id:provider,provider});});
- }
- forgetAppletState(provider:string){
-  this.transaction(()=>{
-   this.invalidateRuntimeTasks(provider);
-   this.invalidateRuntimeTasks('attention-center');
-   for(const row of this.records('runtime-operations'))if(row.ownerId===provider&&typeof row.id==='string')this.delete('runtime-operations',row.id);
-   for(const row of this.records('runtime-deliveries'))if(row.provider===provider&&typeof row.id==='string')this.delete('runtime-deliveries',row.id);
-   for(const bucket of ['applet-observations','applet-findings','applet-cursors'])this.delete(bucket,provider);
-  });
- }
  attentionFacts():Row[]{const facts=this.records('attention-context')[0]?.facts;return Array.isArray(facts)?facts:[];}
  attentionBudget():Row{return this.records('attention-budget')[0]??{};}
  /** One-time import of legacy Knowledge into items; index.json and originals stay. */
@@ -597,7 +585,7 @@ export class WorldLedger {
   * past conversations (how many, and their text), each Service's synced context, the Journal's cards and what Agents
   * saved there (with their pages), and the board's definition. Bytes of what is kept now, not of older revisions. */
  contextSizes():{conversations:{count:number;bytes:number};services:{provider:string;bytes:number}[];journal:{bytes:number};agentOutputs:{bytes:number};board:{bytes:number}} {
-  ensureCompanion(this);this.ensureArtifacts();this.ensureArtifactPages();
+  ensureCompanion(this);ensureArtifacts(this);ensureArtifactPages(this);
   const bytes=(value:unknown)=>value==null?0:Buffer.byteLength(typeof value==='string'?value:JSON.stringify(value));
   const turns=this.all("SELECT count(DISTINCT source||char(31)||session) AS n,coalesce(sum(length(CAST(text AS BLOB))),0) AS b FROM companion_turns")[0];
   const notes=Number(this.all('SELECT coalesce(sum(length(CAST(text AS BLOB))),0) AS b FROM companion_notes')[0]?.b??0);
@@ -668,201 +656,8 @@ export class WorldLedger {
   const file=path.join(this.root,'index.json');
   if(fs.existsSync(file))fs.renameSync(file,file+'.before-database');
  }
-
- // My Applets ---------------------------------------------------------------------------------------
- // The person's own Applets (context/applets/MY-APPLETS.md#one-table), one row each in one table: a website made into
- // one (`site`), a page Fox made with its page and what was ticked (`page`), a brought conversation (`conversation`;
- // Fox's proposals wait here too until kept or declined), and the pictures painted for it. Before 2026-10-06 they
- // lived in the `widgets` and `ongoing` tables and the `site-applets` and `applet-art` buckets; those move in once
- // and stay as they were for a month.
- private myAppletsReady=false;
- private ensureMyApplets(){
-  if(this.myAppletsReady)return;
-  this.exec(`CREATE TABLE IF NOT EXISTS my_applets (id TEXT PRIMARY KEY, kind TEXT NOT NULL, record TEXT NOT NULL, html TEXT NOT NULL DEFAULT '', state TEXT NOT NULL DEFAULT '{}', icon TEXT NOT NULL DEFAULT '', background TEXT NOT NULL DEFAULT '', painted_at REAL NOT NULL DEFAULT 0);
-   CREATE INDEX IF NOT EXISTS my_applets_kind ON my_applets(kind);`);
-  this.myAppletsReady=true;
-  if(!this.setting(WorldLedger.MY_APPLETS_MOVED))this.moveInMyApplets();
- }
- static readonly MY_APPLETS_MOVED='my-applets-moved';
- private moveInMyApplets(){
-  const latest=(bucket:string)=>this.all('SELECT key,body FROM entries WHERE kind=? AND seq IN (SELECT MAX(seq) FROM entries WHERE kind=? GROUP BY key)','state.'+bucket,'state.'+bucket)
-   .flatMap(row=>{try{const body=JSON.parse(String(row.body));return body&&typeof body==='object'&&!Array.isArray(body)?[{key:String(row.key),body}]:[];}catch{return [];}});
-  try{
-   this.transaction(()=>{
-    if(this.tableExists('widgets'))this.exec("INSERT OR IGNORE INTO my_applets(id,kind,record,html,state) SELECT id,'page',record,html,state FROM widgets;");
-    if(this.tableExists('ongoing'))this.exec("INSERT OR IGNORE INTO my_applets(id,kind,record) SELECT id,'conversation',record FROM ongoing;");
-    for(const {key,body} of latest('site-applets'))this.run("INSERT OR IGNORE INTO my_applets(id,kind,record) VALUES(?,'site',?)",key,JSON.stringify(body));
-    for(const {body} of latest('applet-art'))if(typeof body.applet==='string'&&body.applet.startsWith('app-'))
-     this.run('UPDATE my_applets SET icon=?,background=?,painted_at=? WHERE id=?',String(body.icon??''),String(body.background??''),Number(body.madeAt)||0,body.applet.slice(4));
-    this.saveSetting(WorldLedger.MY_APPLETS_MOVED,{at:now()});
-   });
-  }catch{throw new WorldletError('Could not move your Applets into their table; they were kept where they were.');}
- }
- /** One kind of the person's own Applets: each record and state (pages and pictures stay in the table until asked for). */
- myApplets(kind:'site'|'page'|'conversation'):{id:string;record:Row;state:Row;painted:boolean}[] {
-  this.ensureMyApplets();
-  return this.all("SELECT id,record,state,icon<>'' AS painted FROM my_applets WHERE kind=? ORDER BY id",kind)
-   .map(row=>({id:String(row.id),record:JSON.parse(String(row.record)),state:JSON.parse(String(row.state)),painted:Boolean(row.painted)}));
- }
- /** Saves one of the person's own Applets: its record, and its page and state when given; a new page needs its page. */
- saveMyApplet(id:string,kind:'site'|'page'|'conversation',record:Row,{html,state}:{html?:string;state?:Row}={}){
-  this.ensureMyApplets();
-  try{
-   const sets=['record=excluded.record',...(html!==undefined?['html=excluded.html']:[]),...(state!==undefined?['state=excluded.state']:[])];
-   this.run(`INSERT INTO my_applets(id,kind,record,html,state) VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET ${sets.join(',')}`,id,kind,JSON.stringify(record),html??'',JSON.stringify(state??{}));
-  }catch{throw new WorldletError('Could not save the Applet.');}
- }
- /** Forgets the person's own Applets, their pages and pictures with them. */
- deleteMyApplets(ids:string[]){
-  this.ensureMyApplets();
-  try{this.transaction(()=>{for(const id of ids)this.run('DELETE FROM my_applets WHERE id=?',id);});}catch{throw new WorldletError('Could not delete the Applet.');}
- }
- myAppletPage(id:string):string|null {
-  this.ensureMyApplets();
-  const row=this.all("SELECT html FROM my_applets WHERE id=? AND kind='page'",id)[0];
-  return row?String(row.html):null;
- }
- /** Every painted icon, by Applet ID (small: they ride in the snapshot). */
- myAppletIcons():Record<string,string> {
-  this.ensureMyApplets();
-  return Object.fromEntries(this.all("SELECT id,icon FROM my_applets WHERE icon<>''").map(row=>[String(row.id),String(row.icon)]));
- }
- myAppletArt(id:string):{icon:string;background:string;paintedAt:number}|null {
-  this.ensureMyApplets();
-  const row=this.all("SELECT icon,background,painted_at FROM my_applets WHERE id=? AND icon<>''",id)[0];
-  return row?{icon:String(row.icon),background:String(row.background),paintedAt:Number(row.painted_at)}:null;
- }
- /** Keeps (or with null forgets) the pictures painted for one of the person's own Applets; false when it is gone. */
- saveMyAppletArt(id:string,art:{icon:string;background:string;paintedAt:number}|null):boolean {
-  this.ensureMyApplets();
-  try{return Number(this.run('UPDATE my_applets SET icon=?,background=?,painted_at=? WHERE id=?',art?.icon??'',art?.background??'',art?.paintedAt??0,id).changes)>0;}
-  catch{throw new WorldletError('Could not keep the pictures.');}
- }
-
- // Pages Fox made (context/store): `page` rows of the person's own Applets.
- widgetRows():{record:Row;state:Row}[] {return this.myApplets('page').map(({record,state})=>({record,state}));}
- widgetPage(id:string):string|null {return this.myAppletPage(id);}
- /** Saves a page's record, and its page and state when given; a new page needs both. */
- saveWidget(id:string,record:Row,{html,state}:{html?:string;state?:Row}={}){
-  if(html===undefined&&!this.all("SELECT 1 FROM my_applets WHERE id=? AND kind='page'",id).length)return;
-  this.saveMyApplet(id,'page',record,{html,state});
- }
- deleteWidget(id:string){this.deleteMyApplets([id]);}
-
- // Artifacts ---------------------------------------------------------------------------------------
- // Every card Fox showed (context/store): one row each, newest shown last in `at`.
- private artifactsReady=false;
- private ensureArtifacts(){
-  if(this.artifactsReady)return;
-  this.exec('CREATE TABLE IF NOT EXISTS artifacts (id TEXT PRIMARY KEY, record TEXT NOT NULL, at REAL NOT NULL);');
-  this.artifactsReady=true;
- }
- artifactRows():Row[] {
-  this.ensureArtifacts();
-  return this.all('SELECT record FROM artifacts ORDER BY at DESC').map(row=>JSON.parse(String(row.record)));
- }
- /** Saves artifacts and forgets the ones given, in one transaction. */
- saveArtifacts(save:Row[],forget:string[]=[]){
-  this.ensureArtifacts();
-  try{
-   this.transaction(()=>{
-    for(const record of save)this.run('INSERT INTO artifacts(id,record,at) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET record=excluded.record,at=excluded.at',String(record.id),JSON.stringify(record),Number(record.updatedAt)||0);
-    for(const id of forget)this.run('DELETE FROM artifacts WHERE id=?',id);
-   });
-  }catch{throw new WorldletError('Could not save the artifact.');}
- }
-
- // A page the Agent wrote for an artifact (context/store/artifact-render.ts), kept apart from the record so listing
- // artifacts never reads the documents.
- private artifactPagesReady=false;
- private ensureArtifactPages(){
-  if(this.artifactPagesReady)return;
-  this.exec('CREATE TABLE IF NOT EXISTS artifact_pages (id TEXT PRIMARY KEY, record TEXT NOT NULL, at REAL NOT NULL);');
-  this.artifactPagesReady=true;
- }
- artifactPage(id:string):Row|null {
-  this.ensureArtifactPages();
-  const row=this.all('SELECT record FROM artifact_pages WHERE id=?',id)[0];
-  return row?JSON.parse(String(row.record)):null;
- }
- /** The IDs of every kept page, newest first. */
- artifactPageIds():string[] {
-  this.ensureArtifactPages();
-  return this.all('SELECT id FROM artifact_pages ORDER BY at DESC').map(row=>String(row.id));
- }
- saveArtifactPage(record:Row){
-  this.ensureArtifactPages();
-  try{this.run('INSERT INTO artifact_pages(id,record,at) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET record=excluded.record,at=excluded.at',String(record.id),JSON.stringify(record),Number(record.createdAt)||0);}
-  catch{throw new WorldletError('Could not save the artifact page.');}
- }
- deleteArtifactPages(ids:string[]){
-  if(!ids.length)return;
-  this.ensureArtifactPages();
-  try{this.transaction(()=>{for(const id of ids)this.run('DELETE FROM artifact_pages WHERE id=?',id);});}
-  catch{throw new WorldletError('Could not forget the artifact page.');}
- }
-
- // Local calendar events ---------------------------------------------------------------------------
- // Events the person made in the Calendar Applet (context/applets/calendar-events.ts): one row each.
- private calendarReady=false;
- private ensureCalendar(){
-  if(this.calendarReady)return;
-  this.exec('CREATE TABLE IF NOT EXISTS calendar_events (id TEXT PRIMARY KEY, record TEXT NOT NULL);');
-  this.calendarReady=true;
- }
- calendarEventRows():Row[] {
-  this.ensureCalendar();
-  return this.all('SELECT record FROM calendar_events ORDER BY id').map(row=>JSON.parse(String(row.record)));
- }
- /** Saves events and forgets the ones given, in one transaction. */
- saveCalendarEvents(save:Row[],forget:string[]=[]){
-  this.ensureCalendar();
-  try{
-   this.transaction(()=>{
-    for(const record of save)this.run('INSERT INTO calendar_events(id,record) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET record=excluded.record',String(record.id),JSON.stringify(record));
-    for(const id of forget)this.run('DELETE FROM calendar_events WHERE id=?',id);
-   });
-  }catch{throw new WorldletError('Could not save the event.');}
- }
-
- // Ongoing things --------------------------------------------------------------------------------
- // Brought conversations the person made into Applets (agent/tasks): `conversation` rows of the person's own
- // Applets, one record per thing. The conversation itself stays in companion_turns.
- ongoingRows():Row[] {return this.myApplets('conversation').map(row=>row.record);}
- /** Saves and forgets records in one transaction. */
- saveOngoing(save:Row[],forget:string[]=[]){
-  this.ensureMyApplets();
-  try{
-   this.transaction(()=>{
-    for(const record of save)this.saveMyApplet(String(record.id),'conversation',record);
-    this.deleteMyApplets(forget);
-   });
-  }catch{throw new WorldletError('Could not save what is ongoing.');}
- }
  /** How many events the World has written, deleted ones included (the newest sequence number). */
  eventRows():number {return Number(this.all('SELECT coalesce(max(seq),0) AS n FROM entries')[0]?.n??0);}
-
- // Everything else the World keeps ----------------------------------------------------------------
- // Owner decision 2026-10-05: everything that happens in the World is recorded in this database, so a
- // backup restored on another computer brings the whole World back. Each was a file of its own before
- // (store/moved-in.ts moves those in once): the execution journal's payloads (`execution/<id>.json`,
- // still the reference recorded in history), made games (`games/<id>/`), reviewed email drafts
- // (`mail/reviews.json`) and Codex coding tasks (`agent/private/codex/<id>/task.json` and `files/`).
- // Order submissions, which used to leave no local copy, are kept here too, and so are the messages sent
- // from the Messages Applet (sources/messages.ts). (The YouTube queue,
- // `youtube.json`, is the `world_settings` row 'youtube', moved in by WorldStore.worldSetting.)
- private keptReady=false;
- private ensureKept(){
-  if(this.keptReady)return;
-  this.exec(`CREATE TABLE IF NOT EXISTS execution_payloads (id TEXT PRIMARY KEY, payload TEXT NOT NULL);
-   CREATE TABLE IF NOT EXISTS made_games (id TEXT PRIMARY KEY, record TEXT NOT NULL, html TEXT NOT NULL);
-   CREATE TABLE IF NOT EXISTS made_game_versions (id TEXT NOT NULL, version INTEGER NOT NULL, html TEXT NOT NULL, PRIMARY KEY(id, version));
-   CREATE TABLE IF NOT EXISTS mail_reviews (id TEXT PRIMARY KEY, review TEXT NOT NULL);
-   CREATE TABLE IF NOT EXISTS coding_tasks (id TEXT PRIMARY KEY, record TEXT NOT NULL, files TEXT NOT NULL);
-   CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, at REAL NOT NULL, record TEXT NOT NULL);
-   CREATE TABLE IF NOT EXISTS sent_messages (id TEXT PRIMARY KEY, at TEXT NOT NULL, record TEXT NOT NULL);`);
-  this.keptReady=true;
- }
  /** One execution journal entry (agent-runtime/journal.ts) in one transaction: its runtime task and run,
   * the history event and the payload its `execution/<id>.json` reference names. */
  recordExecution(entry:Row):boolean {
@@ -881,120 +676,22 @@ export class WorldLedger {
  }
  /** One execution journal payload, by the id in its `execution/<id>.json` reference. */
  savePayload(id:string,payload:unknown){
-  this.ensureKept();
+  ensureKept(this);
   this.run('INSERT INTO execution_payloads(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',id,JSON.stringify(payload??null));
  }
  payload(id:string):unknown {
-  this.ensureKept();
+  ensureKept(this);
   const row=this.all('SELECT payload FROM execution_payloads WHERE id=?',id)[0];
   return row?JSON.parse(String(row.payload)):undefined;
- }
- /** Every made game's record (pages stay in the table until asked for). */
- madeGameRecords():Row[] {
-  this.ensureKept();
-  return this.all('SELECT record FROM made_games ORDER BY id').map(row=>JSON.parse(String(row.record)));
- }
- madeGamePage(id:string):string|null {
-  this.ensureKept();
-  const row=this.all('SELECT html FROM made_games WHERE id=?',id)[0];
-  return row?String(row.html):null;
- }
- /** Saves a game's record, and its page when given; a changed page keeps the last `versions` pages. */
- saveMadeGame(id:string,record:Row,html?:string,versions=0){
-  this.ensureKept();
-  try{
-   this.transaction(()=>{
-    const previous=this.all('SELECT record,html FROM made_games WHERE id=?',id)[0];
-    if(html===undefined){this.run('UPDATE made_games SET record=? WHERE id=?',JSON.stringify(record),id);return;}
-    if(previous&&versions>0){
-     const version=Number(record.version)-1;
-     if(Number.isInteger(version)&&version>0)this.run('INSERT INTO made_game_versions(id,version,html) VALUES(?,?,?) ON CONFLICT(id,version) DO UPDATE SET html=excluded.html',id,version,String(previous.html));
-     this.run('DELETE FROM made_game_versions WHERE id=? AND version NOT IN (SELECT version FROM made_game_versions WHERE id=? ORDER BY version DESC LIMIT ?)',id,id,versions);
-    }
-    this.run('INSERT INTO made_games(id,record,html) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET record=excluded.record,html=excluded.html',id,JSON.stringify(record),html);
-   });
-  }catch(error){if(error instanceof WorldletError)throw error;throw new WorldletError('Could not save the game.');}
- }
- madeGameVersions(id:string):{version:number;html:string}[] {
-  this.ensureKept();
-  return this.all('SELECT version,html FROM made_game_versions WHERE id=? ORDER BY version DESC',id).map(row=>({version:Number(row.version),html:String(row.html)}));
- }
- deleteMadeGame(id:string){
-  this.ensureKept();
-  try{this.transaction(()=>{this.run('DELETE FROM made_game_versions WHERE id=?',id);this.run('DELETE FROM made_games WHERE id=?',id);});}
-  catch{throw new WorldletError('Could not delete the game.');}
- }
- /** Reviewed email drafts by id (sources/reviews.ts validates them). */
- mailReviews():Record<string,Row> {
-  this.ensureKept();
-  return Object.fromEntries(this.all('SELECT id,review FROM mail_reviews ORDER BY id').map(row=>[String(row.id),JSON.parse(String(row.review))]));
- }
- /** Replaces every reviewed email draft at once. */
- replaceMailReviews(reviews:Record<string,Row>){
-  this.ensureKept();
-  try{
-   this.transaction(()=>{
-    this.run('DELETE FROM mail_reviews');
-    for(const [id,review] of Object.entries(reviews))this.run('INSERT INTO mail_reviews(id,review) VALUES(?,?)',id,JSON.stringify(review));
-   });
-  }catch{throw new WorldletError('Could not save the email review.');}
- }
- /** Codex coding tasks: the record and the files it made ({path: content}). */
- codingTasks():{record:Row;files:Record<string,string>}[] {
-  this.ensureKept();
-  return this.all('SELECT record,files FROM coding_tasks ORDER BY id').map(row=>({record:JSON.parse(String(row.record)),files:JSON.parse(String(row.files))}));
- }
- codingTask(id:string):{record:Row;files:Record<string,string>}|null {
-  this.ensureKept();
-  const row=this.all('SELECT record,files FROM coding_tasks WHERE id=?',id)[0];
-  return row?{record:JSON.parse(String(row.record)),files:JSON.parse(String(row.files))}:null;
- }
- /** Saves a task's record, and the files it made when given. */
- saveCodingTask(record:Row,files?:Record<string,string>){
-  this.ensureKept();
-  const id=String(record.id);
-  try{
-   if(files===undefined)this.run("INSERT INTO coding_tasks(id,record,files) VALUES(?,?,'{}') ON CONFLICT(id) DO UPDATE SET record=excluded.record",id,JSON.stringify(record));
-   else this.run('INSERT INTO coding_tasks(id,record,files) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET record=excluded.record,files=excluded.files',id,JSON.stringify(record),JSON.stringify(files));
-  }catch{throw new WorldletError('Could not save the coding task.');}
- }
- /** Order submissions from before Orders were retired (2026-10-18), newest first; kept for backups and restores. */
- orders(limit=100):Row[] {
-  this.ensureKept();
-  return this.all('SELECT record FROM orders ORDER BY at DESC LIMIT ?',Math.max(1,Math.min(1000,limit))).map(row=>JSON.parse(String(row.record)));
- }
- saveOrder(id:string,at:number,record:Row){
-  this.ensureKept();
-  try{this.run('INSERT INTO orders(id,at,record) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET at=excluded.at,record=excluded.record',id,at,JSON.stringify(record));}
-  catch{throw new WorldletError('Could not save the Order.');}
- }
- /** Messages sent from the Messages Applet, newest first: to whom, the words, and whether Messages sent them. */
- sentMessages(limit=100):Row[] {
-  this.ensureKept();
-  return this.all('SELECT record FROM sent_messages ORDER BY at DESC LIMIT ?',Math.max(1,Math.min(1000,limit))).map(row=>JSON.parse(String(row.record)));
- }
- sentMessage(id:string):Row|null {
-  this.ensureKept();
-  const row=this.all('SELECT record FROM sent_messages WHERE id=?',id)[0];
-  return row?JSON.parse(String(row.record)):null;
- }
- saveSentMessage(record:Row){
-  this.ensureKept();
-  try{this.run('INSERT INTO sent_messages(id,at,record) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET at=excluded.at,record=excluded.record',String(record.id),String(record.at),JSON.stringify(record));}
-  catch{throw new WorldletError('Could not record the message.');}
- }
- deleteSentMessage(id:string){
-  this.ensureKept();
-  this.run('DELETE FROM sent_messages WHERE id=?',id);
  }
 }
 
 // Each component's methods are written with `this:WorldLedger`; on the ledger they are its own.
 type Tables<T>={[K in keyof T]:T[K] extends (this:WorldLedger,...args:infer A)=>infer R?(...args:A)=>R:T[K]};
-export interface WorldLedger extends Tables<CompanionTables>,Tables<RecordingTables>,Omit<Tables<TaskTables>,'withRuntimeOutput'> {
+export interface WorldLedger extends Tables<AppletTables>,Tables<CompanionTables>,Tables<RecordingTables>,Omit<Tables<TaskTables>,'withRuntimeOutput'> {
  /** Claim validation and the writes in `body` share one transaction; `body` must be synchronous. */
  withRuntimeOutput<T>(taskID:string,runID:string,body:()=>T):T;
 }
-for(const tables of [CompanionTables,RecordingTables,TaskTables]){
+for(const tables of [AppletTables,CompanionTables,RecordingTables,TaskTables]){
  for(const [name,method] of Object.entries(Object.getOwnPropertyDescriptors(tables.prototype)))if(name!=='constructor')Object.defineProperty(WorldLedger.prototype,name,method);
 }
