@@ -6,7 +6,7 @@ import type {AgentAuditEntry} from '../../../../contracts/agent-identity.ts';
 import type {McpSession} from '../../../../context/connectors/index.ts';
 import type {PosthogRequest} from '../../../../agent/gate/index.ts';
 import type {PosthogSettings} from '../../../../context/connectors/index.ts';
-import {contextReader,contextWriter} from '../../../../context/store/index.ts';
+import {contextReader,contextWriter,type AgentContext} from '../../../../context/store/index.ts';
 import {ledgerContext} from '../../store/context-storage.ts';
 import type {Row} from './types.ts';
 
@@ -32,9 +32,9 @@ export type ServiceDraftConnections={
  notion():(McpSession&{close():Promise<void>})|null;
 };
 export interface ServiceDrafts {
- /** One `service_drafts` call (`<provider>-drafts/create` or `read`; `provider` set by the gateway) by `agentId`,
-  * already admitted by its Grants. */
- call(agentId:string,args:Row):Promise<Row>;
+ /** One `service_drafts` call (`<provider>-drafts/create` or `read`; `provider` set by the gateway) by the Agent the
+  * Context entry admitted under its Grants. */
+ call(agent:AgentContext,args:Row):Promise<Row>;
  /** The person chose Approve on the draft's card (`serviceDraft` `approve`): read the target again, refuse when it
   * changed, otherwise write once. */
  approve(id:unknown):Promise<Row>;
@@ -51,7 +51,8 @@ export function createServiceDrafts({ledger,connections,name,changed,now=()=>new
  {ledger:()=>ServiceDraftLedger|null;connections:()=>ServiceDraftConnections|null;name:(agentId:string)=>string;changed:()=>void;now?:()=>string;newId?:()=>string}):ServiceDrafts {
  const load=(db:ServiceDraftLedger)=>contextReader(ledgerContext(db)).bodies('service-drafts').flatMap(row=>{const draft=readStoredServiceDraft(row);return draft?[draft]:[];});
  // Through the one way in to Context (#676): who writes decides whether the item's status is the person's or the Agent's.
- const save=(db:ServiceDraftLedger,draft:ServiceDraft,origin:'user'|'agent')=>contextWriter(ledgerContext(db),origin==='user'?{by:'person'}:{by:'agent',id:draft.agentId})
+ // The Agent writes only in its admitted call (`agent`); otherwise it is the person.
+ const save=(db:ServiceDraftLedger,draft:ServiceDraft,agent:AgentContext|'user')=>(agent==='user'?contextWriter(ledgerContext(db),'person'):agent.writer(ledgerContext(db)))
   .write('service-drafts',{save:[draft as unknown as Row],with:{item:serviceDraftAttentionItem(draft,name(draft.agentId)) as Row}});
  const audit=(db:ServiceDraftLedger,draft:ServiceDraft,action:string,decision:AgentAuditEntry['decision'],reason:string,at:string)=>{
   try{db.recordAgentAudit({at,agentId:draft.agentId,target:serviceDraftTarget(draft.provider),action,decision,reason:[...reason].slice(0,300).join('')},AGENT_AUDIT_KEEP);}catch{}
@@ -87,8 +88,8 @@ export function createServiceDrafts({ledger,connections,name,changed,now=()=>new
  const running=new Set<string>();
 
  return {
-  async call(agentId,args){
-   const db=ledger();
+  async call(agent,args){
+   const db=ledger(),agentId=agent.call.agentId;
    if(!db)return {error:NOT_READY};
    try{
     const at=now(),{operation,...input}=args??{},drafts=settle(db,load(db),at);
@@ -101,7 +102,7 @@ export function createServiceDrafts({ledger,connections,name,changed,now=()=>new
     const {target}=await using(provider,io=>readServiceDraftTarget(io,create));
     if(!target)return {error:SERVICE_DRAFT_MESSAGES.notFound(provider)};
     const draft=makeServiceDraft(drafts,agentId,input,target,newId(),now());
-    save(db,draft,'agent');changed();
+    save(db,draft,agent);changed();
     return {ok:true,draft,untrustedContent:true,guidance:'The person sees this in their Attention Center and approves or dismisses it. Nothing is written until they approve. Read it later with read to see what happened; do not draft it again.'};
    }catch(failure){return {error:own(failure)};}
   },

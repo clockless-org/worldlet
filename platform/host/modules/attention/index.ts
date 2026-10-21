@@ -16,7 +16,7 @@ export function installAttention(host:Host){
  };
  const service:WorldToolsService={
   names:WORLD_TOOL_NAMES,
-  reply:(name,args,turn,monitorProvider)=>worldToolReply(center,name,args,turn,monitorProvider),
+  reply:(name,args,turn,monitorProvider,agent)=>worldToolReply(center,name,args,turn,monitorProvider,agent),
   start:()=>center.start(),
   stop:()=>center.stop(),
   requestAttentionSynthesis:()=>center.requestAttentionSynthesis(),

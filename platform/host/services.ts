@@ -5,6 +5,7 @@ import type {HarnessApprovals,HarnessCalls,HarnessEvents,HarnessSend,HarnessSkil
 import type {PhonePushRequest} from '../web/index.ts';
 import type {AgentAuditEntry,AgentIdentity,Grant} from '../../contracts/agent-identity.ts';
 import type {McpSession,PosthogSettings} from '../../context/connectors/index.ts';
+import type {AgentContext} from '../../context/store/index.ts';
 import type {PosthogRequest} from '../../agent/gate/index.ts';
 // Cross-module service contracts inside the Electron host. A module provides one with
 // `host.provide(NAME, impl)` and others reach it with `host.use(NAME)` / `host.optional(NAME)`.
@@ -97,9 +98,9 @@ export interface AgentService {
   * declares none or is not installed here: a reply the person approved goes into that Agent's channel thread. */
  channelSend?(source:string):HarnessSend|null;
  /** Where a World tool call that reaches Worldlet outside any Fox turn goes (World tools on Hermes: another Hermes channel,
-  * owner decision 2026-10-08 19:15Z); Fox's module answers it as a turn of its own. `agent` is the Agent whose token made
-  * the call (agent/gate/GRANTS.md). */
- onChannelTool?(handler:(name:string,args:Row,agent?:string)=>Promise<Row>):void;
+  * owner decision 2026-10-08 19:15Z); Fox's module answers it as a turn of its own. `agent` is the call of the Agent whose
+  * token made it, as the Context entry admitted it under that Agent's Grants (agent/gate/GRANTS.md). */
+ onChannelTool?(handler:(name:string,args:Row,agent:AgentContext)=>Promise<Row>):void;
  /** Each Agent's identity, Grants and audit (agent/gate/GRANTS.md); null where the host keeps none. */
  agentAccess?():AgentAccess|null;
  /** Fox's Harness's own text-to-speech (`voice`), null when it declares none or is not installed here: spoken replies
@@ -148,8 +149,9 @@ export const AGENT='agent';
 // World tools, Attention and scheduling (modules/attention) ---------------------------------
 export interface WorldToolsService {
  readonly names:string[];
- /** Validation errors come back as `{error,guidance}` tool results; cancellation throws. */
- reply(name:string,args:Row,turn:string,monitorProvider?:string):Promise<Row>;
+ /** Validation errors come back as `{error,guidance}` tool results; cancellation throws. `agent`: the admitted call of
+  * the Agent a turn outside Fox's runs for (a channel call), whose writes are that Agent's. */
+ reply(name:string,args:Row,turn:string,monitorProvider?:string,agent?:AgentContext):Promise<Row>;
  /** Start/stop the background loop (source checks, Applet analysis, Attention synthesis). */
  start():void;
  stop():void;

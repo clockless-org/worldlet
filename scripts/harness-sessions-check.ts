@@ -366,7 +366,7 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
   // An install from before per-Agent tokens: its registered entry names the profile's one endpoint file.
   fs.writeFileSync(path.join(profile,STANDING_LEGACY_ENDPOINT_FILE),'{}');
   const askCalls:[string,any][]=[];
-  const standing=await openStandingWorldTools({access,asks:(agentId,args)=>{askCalls.push([agentId,args]);return {ok:true,by:agentId};},channel:async(name,args,agent)=>{channel.push([name,args,agent]);return hermesChannelToolAllowed({name,args})?{items:[]}:{error:HERMES_CHANNEL_READ_ONLY};}});
+  const standing=await openStandingWorldTools({access,asks:(agent,args)=>{askCalls.push([agent.call.agentId,args]);return {ok:true,by:agent.call.agentId};},channel:async(name,args,agent)=>{channel.push([name,args,agent.call.agentId]);return hermesChannelToolAllowed({name,args})?{items:[]}:{error:HERMES_CHANNEL_READ_ONLY};}});
   const entry=standing.server(profile);
   assert.equal(entry.env.WORLDLET_MCP_ENDPOINT_FILE,path.join(profile,standingEndpointFile('hermes')),'Hermes Agent\'s own endpoint file');
   const endpoint=JSON.parse(fs.readFileSync(entry.env.WORLDLET_MCP_ENDPOINT_FILE,'utf8'));

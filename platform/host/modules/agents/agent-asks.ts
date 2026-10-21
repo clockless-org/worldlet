@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import {AGENT_AUDIT_KEEP,ASK_REASONS,askApprovesDrafts,answerAsk,askAttachment,askAttentionItem,askItemId,askOpen,claimAsks,postAsk,readAskAttachment,readAsks,readStoredAsk,resolveAsk} from '../../../../agent/gate/index.ts';
 import {AGENT_ASK_TARGET,type AgentAsk} from '../../../../contracts/agent-asks.ts';
-import {contextReader,contextWriter} from '../../../../context/store/index.ts';
+import {contextReader,contextWriter,type AgentContext} from '../../../../context/store/index.ts';
 import {ledgerContext} from '../../store/context-storage.ts';
 import type {Row} from './types.ts';
 
@@ -21,9 +21,9 @@ export type AskLedger={
  recordAgentAudit(entry:Row,keep:number):boolean;
 };
 export interface AgentAsks {
- /** One `agent_asks` call (`asks/post`, `read`, `claim`, `resolve`, `attachment`) by `agentId`, already admitted by
-  * its Grants. */
- call(agentId:string,args:Row):Row;
+ /** One `agent_asks` call (`asks/post`, `read`, `claim`, `resolve`, `attachment`) by the Agent the Context entry
+  * admitted under its Grants (`agent`): what it saves, it saves as that Agent. */
+ call(agent:AgentContext,args:Row):Row;
  /** The person's answer on the ask's Attention card (`agentAsk` `answer`): a choice and note, Done or Dismiss. Its
   * Approve on an ask that carries GitHub drafts is `approveDrafts` instead, which only this computer's pages may send
   * (contracts/web-world.ts ROOM_ALLOWED): each draft is approved as on its own card, then the ask is answered. */
@@ -57,9 +57,9 @@ export function createAgentAsks({ledger,name,changed,drafts,orders,now=()=>new D
  const load=(db:AskLedger)=>contextReader(ledgerContext(db)).bodies('agent-asks').flatMap(row=>{const ask=readStoredAsk(row);return ask?[ask]:[];});
  const item=(ask:AgentAsk)=>askAttentionItem(ask,name(ask.agentId),ask.for?name(ask.for):undefined,ask.draftIds?.length?own(ask).map(d=>d.service):[]) as Row;
  // Through the one way in to Context (#676): who writes decides whether the item's status is the person's or the Agent's.
- const author=(ask:AgentAsk,origin:'user'|'agent')=>origin==='user'?{by:'person' as const}:{by:'agent' as const,id:ask.agentId};
- const save=(db:AskLedger,ask:AgentAsk,origin:'user'|'agent',attachments?:{id:string;data:Uint8Array}[])=>
-  contextWriter(ledgerContext(db),author(ask,origin)).write('agent-asks',{save:[ask as unknown as Row],with:{item:item(ask),...attachments?{attachments}:{}}});
+ // The Agent writes only in its admitted call (`agent`); otherwise it is the person.
+ const save=(db:AskLedger,ask:AgentAsk,agent:AgentContext|'user',attachments?:{id:string;data:Uint8Array}[])=>
+  (agent==='user'?contextWriter(ledgerContext(db),'person'):agent.writer(ledgerContext(db))).write('agent-asks',{save:[ask as unknown as Row],with:{item:item(ask),...attachments?{attachments}:{}}});
  const audit=(db:AskLedger,ask:AgentAsk,at:string)=>{
   try{db.recordAgentAudit({at,agentId:ask.agentId,target:AGENT_ASK_TARGET,action:'answer',decision:'allowed',reason:'The person answered this Agent\'s ask in Attention.'},AGENT_AUDIT_KEEP);}catch{}
  };
@@ -73,8 +73,8 @@ export function createAgentAsks({ledger,name,changed,drafts,orders,now=()=>new D
   return next;
  });
  return {
-  call(agentId,args){
-   const db=ledger();
+  call(agent,args){
+   const db=ledger(),agentId=agent.call.agentId;
    if(!db)return {error:NOT_READY};
    try{
     const at=now(),{operation,...input}=args??{},asks=settle(db,load(db),at);
@@ -91,7 +91,7 @@ export function createAgentAsks({ledger,name,changed,drafts,orders,now=()=>new D
       const found=drafts?.()?.summaries(ask.draftIds)??[];
       if(found.length!==ask.draftIds.length||found.some(draft=>draft.agentId!==agentId||draft.status!=='pending'))return {error:ASK_REASONS.drafts};
      }
-     save(db,ask,'agent',files);changed();
+     save(db,ask,agent,files);changed();
      // Saved first: the woken Agent claims it with asks/claim as usual.
      try{order?.assigned(ask);}catch{}
      return {ok:true,ask,guidance:'The person sees this in their Attention Center. Read it later with asks/read to get their answer; do not post it again.'};
@@ -107,13 +107,13 @@ export function createAgentAsks({ledger,name,changed,drafts,orders,now=()=>new D
     }
     if(operation==='claim'){
      const claimed=claimAsks(asks,agentId,input,at);
-     for(const ask of claimed)save(db,ask,'agent');
+     for(const ask of claimed)save(db,ask,agent);
      if(claimed.length)changed();
      return {asks:claimed,untrustedContent:true};
     }
     if(operation==='resolve'){
      const ask=resolveAsk(asks.find(item=>item.id===input.id),agentId,input,at);
-     save(db,ask,'agent');changed();
+     save(db,ask,agent);changed();
      return {ok:true,ask};
     }
     return {error:'Unknown asks operation.'};

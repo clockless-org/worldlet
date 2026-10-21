@@ -42,7 +42,8 @@ export function installOngoing(host:Host){
    // their conversations are here; a removed one stays removed (agent/tasks ongoingFromAgent).
    const chosen=readSelection(host.profile.root),said=chosen?readAgentProfile(host.profile.root,chosen)?.things??[]:[];
    const keep=said.length?ongoingFromAgent(said,things(),contextReads(ledgerContext(ledger),'conversations').broughtConversations(),now(),c=>contextReads(ledgerContext(ledger),'conversations').ownText(c.source,c.session,60),chosen??undefined):[];
-   if(keep.length){contextWriter(store.context(),'agent').write('ongoing',{save:keep as any[]});changed();store.changed();}
+   // The World keeps them; no Agent call writes here (an Agent writes Context only in a call its Grants admitted).
+   if(keep.length){contextWriter(store.context(),'world').write('ongoing',{save:keep as any[]});changed();store.changed();}
   }catch(error){host.diagnostics.record(error,'ongoing');}
   observe();
  }

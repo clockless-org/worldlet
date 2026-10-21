@@ -29,11 +29,10 @@ import {createHarnessConnections} from './harness-connections.ts';
 import {createHarnessControls} from './harness-controls.ts';
 import {WORLD_APPS,MOMENT_MAKER} from '../../../../context/applets/index.ts';
 import {diagnosticError} from '../../../../agent/app/index.ts';
-import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,hermesChannelTrust,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,reduceAgentResponse,routineScheduleResult,standingCallDecision,worldSinceNote,type MigrationSource} from '../../../../agent/gate/index.ts';
+import {HERMES_CHANNEL_READ_ONLY,MIGRATION_SOURCE_TITLES,WORLD_SINCE_KINDS,WORLD_SINCE_LIMITS,harnessLocation,hermesChannelToolAllowed,hermesChannelTrust,harnessService,isHarnessApprovalChoice,isMigrationSource,localHarnessAdapterId,reduceAgentResponse,routineScheduleResult,worldSinceNote,type MigrationSource} from '../../../../agent/gate/index.ts';
 import {worldLogKeeps} from '../../../../context/applets/index.ts';
-import {worldActionOf,worldActions} from '../../../../agent/gate/index.ts';
 import {onboardingUnfinished} from '../../../../agent/companion/index.ts';
-import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,contextWriter,readMorningBrief} from '../../../../context/store/index.ts';
+import {ARTIFACT_PAGE_MAKER,MORNING_BRIEF_DEFAULT,contextWriter,readMorningBrief,type AgentContext} from '../../../../context/store/index.ts';
 import {phoneApprovalPush,phoneFoxPush,phoneLive,worldLinkReply} from '../../../web/index.ts';
 import {placeKey,placeKind,proactiveAsked,proactiveDue,proactiveCard,proactiveHeard,proactiveLine,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed,PROACTIVE_MOMENTS,PROACTIVE_READ_ONLY,type ProactiveMoment} from '../../../../agent/companion/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
@@ -108,6 +107,8 @@ export function installFox(host:Host){
  /** Each running turn's shared trust state (the conversation's and every Applet task's), and this
   * session's undoable Fox writes. */
  const trusts=new Map<string,Row>();
+ /** The admitted call each channel turn runs for (channelToolReply): its writes are that Agent's. */
+ const channelAgents=new Map<string,AgentContext>();
  type AppletTask={id:string,applet:string,key:string,title:string,runtime:AgentRuntime,startedAt:number,cancelled:boolean,proactive?:boolean,quiet?:boolean};
  /** Applet tasks running now, by id (see Applet tasks below). */
  const appletTasks=new Map<string,AppletTask>();
@@ -299,7 +300,7 @@ export function installFox(host:Host){
   }
   const tools=worldTools();
   if(!tools)throw new WorldletError('World tools are unavailable in this build.');
-  const result=await tools.reply(name,args,turn);
+  const result=await tools.reply(name,args,turn,undefined,channelAgents.get(turn));
   if(name==='_source_result'&&args.provider==='gmail'&&args.failed!==true&&Array.isArray(args.records)){
    const records=args.records.filter((row:Row)=>row&&row.metadataOnly!==true);
    if(records.length)page.event('worldlet:source-results',{provider:'gmail',pages:presentMailRead(records)});
@@ -495,31 +496,27 @@ export function installFox(host:Host){
   * (`share_world_link`, owner decision 2026-10-15): its turn starts trusted (core hermesChannelTrust), so it runs.
   * Anything else is refused with the reason; the World page runs no tools for it, since nobody there asked. What a
   * channel may do is the calling Agent's Grants (agent/gate/GRANTS.md; its default Grants are the list above), decided
-  * on the standing server and again here. */
- async function channelToolReply(name:string,args:Row,agentId?:string):Promise<Row> {
+  * and audited once, by the Context entry on the standing server (`agent`, the admitted call); what the turn writes, it
+  * writes as that Agent, in that call. */
+ async function channelToolReply(name:string,args:Row,agent:AgentContext):Promise<Row> {
   const id='channel-'+crypto.randomUUID().toUpperCase(),scope={sample:false,setup:false};
   trusts.set(id,hermesChannelTrust({name}));
-  // A service the calling Agent's own Grants admitted below (read_service, which no default Grant names) asks the turn
-  // to authorize it too: that one authorization runs, as the default channel reads' do.
-  let granted='';
+  // A service the calling Agent's own Grants admitted (read_service, which no default Grant names) asks the turn to
+  // authorize it too: that one authorization runs, as the default channel reads' do.
+  const granted=agent?name:'';
   const reads=(event:Row)=>hermesChannelToolAllowed(event)||!!granted&&event.name==='_world_authorize'&&(event.args as Row|undefined)?.name===granted;
   const handle=turnEvents(id,scope,{active:()=>true,allowActions:false,reads,record:false});
   try{
    if(store.sampleEnabled()||!store.writable||store.state.cloudConsent!==true||onboardingUnfinished(store.state.onboarding))return {error:'Worldlet is not ready for this yet: the person has not finished setting up their own World.'};
-   const access=agent()?.agentAccess?.()??null;
-   if(!access&&!hermesChannelToolAllowed({name,args}))return {error:HERMES_CHANNEL_READ_ONLY};
-   if(access){
-    const at=worldActionOf(worldActions(),name,args),identity=agentId?access.identity(agentId):null;
-    const decision=at?standingCallDecision({identity,grants:identity?access.grants(identity.id):[],target:at.target,action:at.action,tool:name,args,foxTurn:null,now:new Date().toISOString()}):null;
-    if(decision?.decision!=='allowed')return {error:decision?.reason||HERMES_CHANNEL_READ_ONLY};
-    granted=name;
-   }
+   // Only a call the entry admitted runs here.
+   if(!agent)return {error:HERMES_CHANNEL_READ_ONLY};
+   channelAgents.set(id,agent);
    const event={type:'tool',id:'world-1',name,args},served=await trustedServiceReply(event,id,scope)??await accountServiceReply(event,id,scope,handle);
    return served??{error:'This World tool works only in a conversation with Fox in Worldlet.'};
   }catch(error){
    if(error instanceof Cancelled)return {error:'Worldlet stopped this before it finished.'};
    return {error:error instanceof Error&&error.message?error.message:'World tool is unavailable.'};
-  }finally{finishTurn(id,false);}
+  }finally{channelAgents.delete(id);finishTurn(id,false);}
  }
  /** Core's conversation guidance for Fox's model, for the conversation and Applet tasks alike. */
  function guidanceFor(scope:Scope){

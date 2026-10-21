@@ -1,8 +1,11 @@
 // The one way in to Context (#676): every Context domain is read, written and searched through this entry. Records keep
 // the formats they are stored in today; the envelope (id, kind, origin, times, revision, derivedFrom) is read from each
 // stored record, not written beside it. Platform persists (it gives a `ContextStorage`); this decides who may write what.
+// An Agent reaches Context only in a call the entry admitted against its Grants (`agentContext`), and each decision is
+// audited here; the host injects the Grants and the audit (`ContextGuard`), so Context never imports Agent.
 // Rules (scripts/architecture-boundaries.ts): UI only reads Context, so `ui/` never imports `contextWriter`; only
-// Connectors write the Synced kind, so only `context/connectors/` imports `syncedWriter`.
+// Connectors write the Synced kind, so only `context/connectors/` imports `syncedWriter`; only the standing World tools
+// server admits an Agent, so only it imports `agentContext`.
 
 type Row=Record<string,any>;
 export const CONTEXT_KINDS=['synced','recorded','made','known'] as const;
@@ -197,12 +200,12 @@ export function contextAuthor(author:ContextOrigin['by']|ContextOrigin):ContextO
  if(!value||!['service','agent','person','fox','world'].includes(value.by))throw Error('Say who writes this Context.');
  return value.id?{by:value.by,id:String(value.id)}:{by:value.by};
 }
-function writer(storage:ContextStorage,author:ContextOrigin,allowed:(kind:ContextKind)=>boolean,refusal:string) {
+function writer(storage:ContextStorage,author:ContextOrigin,check:(domain:ContextDomain)=>void) {
  const change=(domain:ContextDomainId,work:ContextChange):unknown=>{
-  const {kind,label}=contextDomain(domain);
-  if(!allowed(kind))throw Error(refusal.replace('{label}',label));
+  const found=contextDomain(domain);
+  check(found);
   const kept=store(storage,domain);
-  if(!kept.write)throw Error(`${label} cannot be changed here.`);
+  if(!kept.write)throw Error(`${found.label} cannot be changed here.`);
   return kept.write(work,author);
  };
  return {
@@ -215,15 +218,65 @@ function writer(storage:ContextStorage,author:ContextOrigin,allowed:(kind:Contex
   transaction:<T>(work:()=>T):T=>storage.transaction?storage.transaction(work):work(),
  };
 }
-/** Writing Recorded, Made and Known Context. Agents, the person, Fox and the World write here; Synced is refused, since
- * only Connectors write it (`syncedWriter`). UI never writes: it asks Agent. */
-export function contextWriter(storage:ContextStorage,author:Exclude<ContextOrigin['by'],'service'>|ContextOrigin) {
- const who=contextAuthor(author);
+const CONNECTOR_ONLY='{label} is kept up to date by its Connector; nothing else writes it.';
+/** Who writes through `contextWriter`: the person, Fox or the World. An Agent writes only in a call the entry admitted
+ * (`agentContext`), and a Service only through its Connector (`syncedWriter`). */
+export type ContextAuthor='person'|'fox'|'world'|{by:'person'|'fox'|'world';id?:string};
+/** Writing Recorded, Made and Known Context. The person, Fox and the World write here; Synced is refused, since only
+ * Connectors write it (`syncedWriter`), and so is an Agent, which writes only under its Grants (`agentContext`). UI never
+ * writes: it asks Agent. */
+export function contextWriter(storage:ContextStorage,author:ContextAuthor) {
+ const who=contextAuthor(author as ContextOrigin);
  if(who.by==='service')throw Error('A Service\'s records are written by its Connector.');
- return writer(storage,who,kind=>kind!=='synced','{label} is kept up to date by its Connector; nothing else writes it.');
+ if(who.by==='agent')throw new ContextRefused(CONTEXT_REFUSALS.unadmitted);
+ return writer(storage,who,({kind,label})=>{if(kind==='synced')throw Error(CONNECTOR_ONLY.replace('{label}',label));});
 }
 /** Writing Synced Context: the bounded copies of Services. Only Connectors (context/connectors) use this. */
 export function syncedWriter(storage:ContextStorage,service:string) {
- return writer(storage,service?{by:'service',id:service}:{by:'service'},kind=>kind==='synced','Only Recorded, Made and Known Context is written there; {label} is not Synced.');
+ return writer(storage,service?{by:'service',id:service}:{by:'service'},({kind,label})=>{if(kind!=='synced')throw Error(`Only Recorded, Made and Known Context is written there; ${label} is not Synced.`);});
 }
-export type ContextWriter=ReturnType<typeof contextWriter>;
+export type ContextWriter=ReturnType<typeof writer>;
+
+/** One call an Agent makes into the World, as the Gate names it (agent/gate/GRANTS.md): which Agent, and the World
+ * gateway target and action it called. */
+export type ContextCall={agentId:string;target:string;action:string};
+/** What the Agent's Grants decided about one call, in the Gate's words: `allowed`, `denied`, or `asked` (it goes on, and
+ * the person confirms its write on a card); the Grant that decided and why; and the domains the call may write (none
+ * when absent). */
+export type ContextVerdict={decision:'allowed'|'denied'|'asked';grantId?:string;reason?:string;writes?:readonly ContextDomainId[]};
+/** What Platform injects so the entry decides an Agent's calls without importing Agent: `decide`, the call against the
+ * Agent's own Grants, and `audit`, where the one record of each decision goes, allowed or refused. */
+export type ContextGuard={decide(call:ContextCall):ContextVerdict;audit(call:ContextCall,verdict:ContextVerdict):void};
+/** What the entry refused an Agent, with the reason the Agent is told. */
+export class ContextRefused extends Error {
+ constructor(message:string){super(message);this.name='ContextRefused';}
+}
+export const CONTEXT_REFUSALS=Object.freeze({
+ unguarded:'Worldlet cannot check this Agent\'s Grants here, so it may not do this.',
+ unadmitted:'An Agent changes Context only in a call its Grants allowed.',
+ denied:'This Agent may not do this.',
+ domain:'This call does not change {label}.',
+});
+/** An Agent's way in to Context: its call is decided against its Grants here, once, and audited (allowed or refused),
+ * before anything is read or written for it. Refused, it throws `ContextRefused` with the reason. Admitted, it gives the
+ * writer the call may use: written as that Agent, only the domains its verdict names, never Synced, and a write outside
+ * them is refused and audited too. Every Context read and write the host makes for an Agent's call happens after this. */
+export function agentContext(guard:ContextGuard|null|undefined,call:ContextCall) {
+ if(!guard||typeof guard.decide!=='function'||typeof guard.audit!=='function')throw new ContextRefused(CONTEXT_REFUSALS.unguarded);
+ if(!call||typeof call.agentId!=='string'||!call.agentId||typeof call.target!=='string'||typeof call.action!=='string')throw new ContextRefused(CONTEXT_REFUSALS.denied);
+ const asked={agentId:call.agentId,target:call.target,action:call.action};
+ const verdict=guard.decide(asked);
+ guard.audit(asked,verdict);
+ if(verdict?.decision!=='allowed'&&verdict?.decision!=='asked')throw new ContextRefused(verdict?.reason||CONTEXT_REFUSALS.denied);
+ const author:ContextOrigin={by:'agent',id:asked.agentId},writes=[...verdict.writes??[]];
+ const refuse=(reason:string):never=>{guard.audit(asked,{decision:'denied',reason});throw new ContextRefused(reason);};
+ return {
+  call:asked,author,verdict,
+  /** Writes as this Agent, in this call: only the domains the call may write. */
+  writer:(storage:ContextStorage):ContextWriter=>writer(storage,author,({id,kind,label})=>{
+   if(kind==='synced')refuse(CONNECTOR_ONLY.replace('{label}',label));
+   if(!writes.includes(id))refuse(CONTEXT_REFUSALS.domain.replace('{label}',label.toLowerCase()));
+  }),
+ };
+}
+export type AgentContext=ReturnType<typeof agentContext>;

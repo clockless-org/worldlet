@@ -28,6 +28,8 @@ import {createWebPage} from '../platform/host/web-page.ts';
 import {createPagePair,NO_PAGE} from '../platform/host/world-web.ts';
 import {ROOM_ALLOWED,ROOM_DENIED_MESSAGE,WEB_DENIED_MESSAGE,WEB_PAGE_FEATURES,WEB_PAGE_UNAVAILABLE,WORLD_PAGE_CSP_META,roomDenied,worldRoomCsp} from '../contracts/web-world.ts';
 import {canRenderWorld,withWorldLink,worldLinkFromWeb,newPairSecret,openHello,pairKeys,readWorldRoomFrame,readWorldRoomLink,roomEntry,sealJoin,worldBundlePath,worldRoomLink,worldRoomNonce,worldRoomSession,WORLD_ROOM_PIECE,ROOM_PROTOCOL,isWorldRoomPage} from '../platform/web/index.ts';
+import {agentContextWrites} from '../agent/gate/grants.ts';
+import {agentContext} from '../context/store/index.ts';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 /** The room's own limit on one message (worker/room.ts in the operations repository). */
@@ -148,7 +150,9 @@ await withTempDir('worldlet-room-board-',async dir=>{
   return {provider:'posthog',operation:'query',scope:'Fixture',records:[{id:'row/1',title:'Installs',fields:{installed:120}}]};
  }});
  const definition={title:'Product',tabs:[{id:'growth',title:'Growth',blocks:[{id:'installs',title:'Installs',kind:'number',preset:'funnel',field:'installed'}]}]};
- assert.equal((await board.call('fixture',{operation:'define',expectedRevision:0,definition,presets:[{id:'funnel',name:'Funnel',provider:'posthog',read:{operation:'query',query:'SELECT 120 AS installed'}}]},()=>true)).ok,true);
+ // The Agent's call as the Context entry admits it on the standing server.
+ const fixture=agentContext({decide:()=>({decision:'allowed',writes:agentContextWrites('board')}),audit(){}},{agentId:'fixture',target:'board',action:'define'});
+ assert.equal((await board.call(fixture,{operation:'define',expectedRevision:0,definition,presets:[{id:'funnel',name:'Funnel',provider:'posthog',read:{operation:'query',query:'SELECT 120 AS installed'}}]},()=>true)).ok,true);
  const before=ledger.board();
  const room=memoryRoom(),secrets=new Map<string,string>(),vault={get:(id:string)=>secrets.get(id)??null,set:(id:string,v:string)=>void secrets.set(id,v),delete:(id:string)=>void secrets.delete(id)};
  const dispatched:Record<string,unknown>[]=[],statuses:string[]=[];

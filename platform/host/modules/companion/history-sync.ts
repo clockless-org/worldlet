@@ -97,7 +97,7 @@ export function createHistorySync(host:Host,{history=filesHistory,every=HISTORY_
      if(thread.shared&&turn.role==='user'&&turn.at>=fresh){const event=channelMessageEvent({source,thread:thread.id,title:session,turn:{id:turn.id,text,at:turn.at},before});if(event)asks.push(event);}
      before.push(text);if(before.length>3)before.shift();
     }
-    if(rows.length)added+=contextChanges(ledgerContext(ledger),'agent','conversations').addCompanionTurns(source,rows);
+    if(rows.length)added+=contextChanges(ledgerContext(ledger),'world','conversations').addCompanionTurns(source,rows);
     if(left<=0||stopped)break;
     if(page.turns.length<HISTORY_SYNC.turns){through=true;break;}
     await sleep(0);

@@ -5,7 +5,7 @@ import {GITHUB_DRAFT_TARGET,type GithubAppCredentials,type GithubDraft,type Gith
 import type {AgentAuditEntry,Grant} from '../../../../contracts/agent-identity.ts';
 import type {VaultService} from '../../services.ts';
 import {GITHUB_APP} from '../../../../context/connectors/index.ts';
-import {contextReader,contextWriter} from '../../../../context/store/index.ts';
+import {contextReader,contextWriter,type AgentContext} from '../../../../context/store/index.ts';
 import {ledgerContext} from '../../store/context-storage.ts';
 import type {Row} from './types.ts';
 
@@ -33,8 +33,8 @@ export type DraftLedger={
 /** `fetch`, as far as this module uses it. */
 export type GithubFetch=(url:string,init:{method:string;headers:Record<string,string>;body?:string;redirect:'manual';signal?:AbortSignal})=>Promise<{status:number;json():Promise<unknown>}>;
 export interface GithubDrafts {
- /** One `github_drafts` call (`github-drafts/create`, `read`) by `agentId`, already admitted by its Grants. */
- call(agentId:string,args:Row):Promise<Row>;
+ /** One `github_drafts` call (`github-drafts/create`, `read`) by the Agent the Context entry admitted under its Grants. */
+ call(agent:AgentContext,args:Row):Promise<Row>;
  /** The person chose Approve on the draft's card (`githubDraft` `approve`): read the target again, refuse when it
   * changed, otherwise write once. */
  approve(id:unknown):Promise<Row>;
@@ -43,7 +43,7 @@ export interface GithubDrafts {
  /** What became of these drafts, for the asks that carry them (agent-asks.ts): each found draft's Agent, status, result
   * link and why it was not written. */
  summaries(ids:readonly string[]):{id:string;agentId:string;service:'github';status:string;resultUrl?:string;reason?:string}[];
- /** One `github_writes` call (`github-writes/run`) by `agentId`, already admitted by its Grants (`grants`, its own):
+ /** One `github_writes` call (`github-writes/run`) by `agentId`, admitted under its Grants (`grants`, its own):
   * refused unless one of its standing GitHub write Grants reaches this repository, write and label prefix; otherwise
   * the target is read again, refused when it is not as the Agent read it, and written once. Each is audited. */
  run(agentId:string,args:Row,grants:readonly Grant[]):Promise<Row>;
@@ -83,7 +83,8 @@ export function createGithubDrafts({ledger,vault,name,changed,userToken=async()=
  {ledger:()=>DraftLedger|null;vault:VaultService;name:(agentId:string)=>string;changed:()=>void;userToken?:(force?:boolean)=>Promise<string|null>;signedIn?:()=>boolean;fetch?:GithubFetch;api?:string;userAgent?:string;now?:()=>string;clock?:()=>number;newId?:()=>string}):GithubDrafts {
  const load=(db:DraftLedger)=>contextReader(ledgerContext(db)).bodies('github-drafts').flatMap(row=>{const draft=readStoredGithubDraft(row);return draft?[draft]:[];});
  // Through the one way in to Context (#676): who writes decides whether the item's status is the person's or the Agent's.
- const save=(db:DraftLedger,draft:GithubDraft,origin:'user'|'agent')=>contextWriter(ledgerContext(db),origin==='user'?{by:'person'}:{by:'agent',id:draft.agentId})
+ // The Agent writes only in its admitted call (`agent`); otherwise it is the person.
+ const save=(db:DraftLedger,draft:GithubDraft,agent:AgentContext|'user')=>(agent==='user'?contextWriter(ledgerContext(db),'person'):agent.writer(ledgerContext(db)))
   .write('github-drafts',{save:[draft as unknown as Row],with:{item:githubDraftAttentionItem(draft,name(draft.agentId)) as Row}});
  const audit=(db:DraftLedger,draft:GithubDraft,action:string,decision:AgentAuditEntry['decision'],reason:string,at:string)=>{
   try{db.recordAgentAudit({at,agentId:draft.agentId,target:GITHUB_DRAFT_TARGET,action,decision,reason:[...reason].slice(0,300).join('')},AGENT_AUDIT_KEEP);}catch{}
@@ -191,8 +192,8 @@ export function createGithubDrafts({ledger,vault,name,changed,userToken=async()=
  const writing=new Set<string>();
 
  return {
-  async call(agentId,args){
-   const db=ledger();
+  async call(agent,args){
+   const db=ledger(),agentId=agent.call.agentId;
    if(!db)return {error:NOT_READY};
    try{
     const at=now(),{operation,...input}=args??{},drafts=settle(db,load(db),at);
@@ -203,7 +204,7 @@ export function createGithubDrafts({ledger,vault,name,changed,userToken=async()=
     const found=await target(create.write,{owner:create.owner,repo:create.repoName,...create.number?{number:create.number}:{}});
     if(!found)return {error:GITHUB_DRAFT_MESSAGES.notFound};
     const draft=makeGithubDraft(drafts,agentId,input,found,newId(),now());
-    save(db,draft,'agent');changed();
+    save(db,draft,agent);changed();
     return {ok:true,draft,untrustedContent:true,guidance:'The person sees this in their Attention Center and approves or dismisses it. Nothing is written to GitHub until they approve. Read it later with github-drafts/read to see what happened; do not draft it again.'};
    }catch(failure){return {error:own(failure)};}
   },

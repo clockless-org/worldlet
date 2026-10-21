@@ -35,9 +35,11 @@ const exceptions=new Map([
 ]);
 // The one way in to Context (#676, context/store/context.ts). UI only reads Context: to change anything it hands the work
 // to Agent, so it never imports a writer. Only Connectors write the Synced kind, so only context/connectors (and the Store
-// that defines it) imports the Synced writer.
-const CONTEXT_WRITERS=['contextWriter','syncedWriter','connectorWriter'];
+// that defines it) imports the Synced writer. An Agent writes only in a call the entry admitted under its Grants, and only
+// the standing World tools server admits one (with the Grants and audit it injects), so only it imports `agentContext`.
+const CONTEXT_WRITERS=['contextWriter','syncedWriter','connectorWriter','agentContext'];
 const SYNCED_WRITERS=['syncedWriter'];
+const AGENT_ADMISSION=['agentContext'],ADMITS_AGENTS='platform/host/modules/agents/world-tool-bridge.ts';
 export function checkContextNames(file:string,target:string,names:readonly string[]|'*'){
  if(!target.startsWith('context/'))return;
  if(layer(file)==='ui'){
@@ -48,6 +50,11 @@ export function checkContextNames(file:string,target:string,names:readonly strin
  if(names!=='*'&&!file.startsWith('context/connectors/')&&!file.startsWith('context/store/')){
   const synced=names.filter(name=>SYNCED_WRITERS.includes(name));
   assert(!synced.length,`${file}: only context/connectors writes Synced Context (${synced.join(', ')})`);
+ }
+ if(file!==ADMITS_AGENTS&&!file.startsWith('context/store/')){
+  const admits=names==='*'?[]:names.filter(name=>AGENT_ADMISSION.includes(name));
+  assert(names!=='*'||!target.startsWith('context/store/'),`${file}: import Context's store by name, so who admits an Agent stays visible: ${target}`);
+  assert(!admits.length,`${file}: only ${ADMITS_AGENTS} admits an Agent's call to Context (${admits.join(', ')})`);
  }
 }
 const used=new Set<string>();

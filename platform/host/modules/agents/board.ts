@@ -1,6 +1,6 @@
 import {BOARD_PROVIDERS,BOARD_REASONS,boardPresetIds,defineBoard,readBoardReadArgs,readStoredBoard,resolveBoard,type BoardRead} from '../../../../context/connectors/index.ts';
 import {servicePresetRead} from '../../../../context/connectors/index.ts';
-import {contextReader,contextWriter} from '../../../../context/store/index.ts';
+import {contextReader,type AgentContext} from '../../../../context/store/index.ts';
 import {ledgerContext} from '../../store/context-storage.ts';
 import {agentBoardRecords} from '../../../../agent/gate/index.ts';
 import type {AgentListEntry} from '../../../../contracts/agent-reports.ts';
@@ -22,10 +22,10 @@ export type ServiceReader=(read:ServiceRead)=>Promise<unknown>;
  * World. */
 export type AgentLister=()=>AgentListEntry[]|null;
 export interface WorldBoard {
- /** One `world_board` call (`board/read`, `board/define`) by `agentId`, already admitted by its Grants. `canRead` says
+ /** One `world_board` call (`board/read`, `board/define`) by the Agent the Context entry admitted under its Grants. `canRead` says
   * whether this Agent's own Grants let it read a Service (`agents`, `list`: whether it may see other Agents): a block of
   * a source it may not read shows that, never the source's data. */
- call(agentId:string,args:Row,canRead:(provider:string,operation:string)=>boolean):Promise<Row>;
+ call(agent:AgentContext,args:Row,canRead:(provider:string,operation:string)=>boolean):Promise<Row>;
  /** The board as the person sees it (host action `board`, `read`): every Service the World is connected to, and every
   * Agent's report. */
  view(request:Row):Promise<Row>;
@@ -77,8 +77,8 @@ export function createWorldBoard({ledger,read,agents=()=>null,now=()=>new Date()
  }
  const failure=(error:unknown)=>({error:error instanceof Error&&error.message?error.message:'Could not do that.'});
  return {
-  async call(agentId,args,canRead){
-   const db=ledger();
+  async call(agent,args,canRead){
+   const db=ledger(),agentId=agent.call.agentId;
    if(!db)return {error:NOT_READY};
    const {operation,...input}=args??{};
    try{
@@ -86,8 +86,8 @@ export function createWorldBoard({ledger,read,agents=()=>null,now=()=>new Date()
     if(operation==='define'){
      const before=loadServicePresets(db),current=stored(db);
      const defined=defineBoard(current,before,input,agentId,now());
-     const context=contextWriter(ledgerContext(db),{by:'agent',id:agentId});
-     context.transaction(()=>{storeServicePresets(db,before,defined.presets,{by:'agent',id:agentId});context.write('board',{save:[defined.board as unknown as Row]});});
+     const context=agent.writer(ledgerContext(db));
+     context.transaction(()=>{storeServicePresets(context,before,defined.presets);context.write('board',{save:[defined.board as unknown as Row]});});
      return {ok:true,revision:defined.board.revision,guidance:'The person\'s board now shows this. Read it with board/read to see each block\'s value or error.'};
     }
     return {error:'Unknown board operation.'};

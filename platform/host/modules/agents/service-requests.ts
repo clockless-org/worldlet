@@ -27,8 +27,10 @@ export function createServiceRequests({ledger,access,connected,title,changed,now
  // A Service that signs in is connected from the card itself; one that takes a key, under Settings › Connectors.
  const signsIn=(provider:string)=>['mcp-oauth','google'].includes(connector(provider)?.mechanism??'');
  const load=(db:ServiceRequestLedger)=>contextReader(ledgerContext(db)).bodies('service-requests').flatMap(row=>{const request=readServiceRequest(row);return request?[request]:[];});
- // Through the one way in to Context (#676): who writes decides whether the item's status is the person's or the Agent's.
- const save=(db:ServiceRequestLedger,request:ServiceRequest,origin:'user'|'agent')=>contextWriter(ledgerContext(db),origin==='user'?{by:'person'}:{by:'agent',id:request.agentId})
+ // Through the one way in to Context (#676): who writes decides whether the item's status is the person's. A request is
+ // written by the World on a refused call's behalf (the Agent's call was not admitted, so it writes nothing itself); its
+ // record still names the Agent.
+ const save=(db:ServiceRequestLedger,request:ServiceRequest,origin:'user'|'world')=>contextWriter(ledgerContext(db),origin==='user'?'person':'world')
   .write('service-requests',{save:[request as unknown as Row],with:{item:serviceRequestItem(request,title(request.provider),{signIn:signsIn(request.provider),region:connector(request.provider)?.region}) as unknown as Row}});
  return {
   asked(agent,provider){
@@ -37,7 +39,7 @@ export function createServiceRequests({ledger,access,connected,title,changed,now
     if(!db)return '';
     const previous=load(db).find(item=>item.agentId===agent.id&&item.provider===provider)??null,linked=connected(provider);
     const due=serviceRequestDue(previous,agent,provider,linked,now());
-    if(due){save(db,due,'agent');changed();return serviceRequestRefusal(title(provider),linked,true);}
+    if(due){save(db,due,'world');changed();return serviceRequestRefusal(title(provider),linked,true);}
     return previous?.status==='pending'?serviceRequestRefusal(title(provider),linked,false):'';
    }catch{return '';}
   },

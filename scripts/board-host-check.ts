@@ -7,7 +7,8 @@ import {createAgentAccess} from '../platform/host/modules/agents/agent-access.ts
 import {createAgentReports} from '../platform/host/modules/agents/agent-reports.ts';
 import {BOARD_READ_REUSE_MS,createWorldBoard} from '../platform/host/modules/agents/board.ts';
 import {openStandingWorldTools} from '../platform/host/modules/agents/world-tool-bridge.ts';
-import {STANDING_OUTSIDE_TURN} from '../agent/gate/grants.ts';
+import {STANDING_OUTSIDE_TURN,agentContextWrites} from '../agent/gate/grants.ts';
+import {agentContext} from '../context/store/index.ts';
 import {BOARD_REASONS} from '../context/connectors/index.ts';
 import {PRESET_REASONS,saveServicePreset} from '../context/connectors/index.ts';
 import type {ServiceRead} from '../contracts/services.ts';
@@ -142,7 +143,9 @@ await withTempDir('worldlet-board-',async dir=>{
   // The World's own `agents` source beside a GitHub releases preset: a release machine reports its runs; the board shows
   // them to the person, and to an Agent only when its own Grants let it see other Agents (agents/list).
   agent('release-pc','Release PC');
-  assert.equal(reports.call('release-pc',{operation:'report',status:'working',role:'release',tags:['release','windows'],runs:[
+  // Its own call, as the Context entry admits it on the standing server.
+  const admitted=agentContext({decide:()=>({decision:'allowed',writes:agentContextWrites('agents')}),audit(){}},{agentId:'release-pc',target:'agents',action:'report'});
+  assert.equal(reports.call(admitted,{operation:'report',status:'working',role:'release',tags:['release','windows'],runs:[
    {id:'beta-1234-windows',title:'Beta 1234 · Windows',status:'running',startedAt:'2026-10-15T12:00:00.000Z'},
    {id:'alpha-1233-windows',title:'Alpha 1233 · Windows',status:'failed',url:'https://ci.example.com/runs/7',startedAt:'2026-10-15T11:00:00.000Z'}]}).ok,true);
   const releases={id:'releases',title:'Releases',blocks:[
