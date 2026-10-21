@@ -1,14 +1,17 @@
 # Your World's address
 
-Every World can have its own web address, `https://<name>.worldlet.ai`. Open it on any device to reach your World. Nobody else sees anything there unless you allow them. The World, your records and Fox stay on your computer. The address works while that computer is on and Worldlet runs there; when it is off, the page says the World is offline.
+Every World has its own web address, `https://<name>.worldlet.ai`, and it is the only address you need: open it on any device to reach your World, and connect Claude, ChatGPT or another MCP client at `https://<name>.worldlet.ai/mcp` ([remote MCP](REMOTE-MCP.md)). Nobody else sees anything there unless you allow them. The World, your records and Fox stay on your computer. The address works while that computer is on and Worldlet runs there; when it is off, the page says the World is offline.
 
-## Choose a name
+## Your default address, and a name of your own
 
-In Settings › Agents, under **Your World's address**, type a name and choose **Choose**. A name is 3 to 32 lowercase letters or digits, with single hyphens between them. Some names are kept for Worldlet itself (`www`, `mcp`, `api`, `admin` and others). Names are first come, first served, and each World holds one.
+On its first run with remote access on (owner decision 2026-10-21), your World gets a default address, `https://w-<8 letters or digits>.worldlet.ai`, shown in Settings › Agents under **Your World's address**.
 
-- **Change** picks another name. The old one is freed at once. Browsers and people you allowed must ask again at the new address, because their passkeys belong to the old one.
-- **Give up this address** frees the name for anyone.
-- The address reaches your computer over [remote access](REMOTE-MCP.md)'s connection, so choosing a name turns remote access on. Turning remote access off makes the address say your World is offline. **New address** under remote access keeps your name.
+**Choose a name** gives your World a name of your own, like `alex.worldlet.ai`. A name is 3 to 32 lowercase letters or digits, with single hyphens between them. Names starting with `w-` are default addresses, and some names are kept for Worldlet itself (`www`, `mcp`, `api`, `admin` and others). Names are first come, first served.
+
+- You choose a name once, and it stays: it is your World's handle. The page and `/mcp` move to it.
+- The default address is kept beside it, so a connector added at the default `/mcp` keeps working. Browsers and people you allowed must ask again at the new name, because their passkeys belong to the address they were made for.
+- **Give up this name** frees it for anyone and takes your World back to its default address, where browsers must ask again. Then you can choose a name again.
+- The address reaches your computer over [remote access](REMOTE-MCP.md)'s connection, so choosing a name turns remote access on. Turning remote access off makes the address say your World is offline. **New address** under remote access keeps both names.
 
 ## Your browsers
 

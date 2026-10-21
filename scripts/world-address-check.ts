@@ -7,7 +7,7 @@ import {createAgentAccess} from '../platform/host/modules/gate/agent-access.ts';
 import {openStandingWorldTools} from '../platform/host/modules/gate/world-tool-bridge.ts';
 import {REMOTE_MCP_VAULT,createRemoteMcpHost} from '../platform/host/modules/gate/remote-mcp.ts';
 import {WORLD_ADDRESS_VAULT,createWorldAddressHost} from '../platform/host/modules/gate/world-address.ts';
-import {WORLD_ADDRESS_LIMITS,addressNameFrom,derToRaw,readWorldAddressState,validAddressName,worldAddress} from '../agent/gate/world-address.ts';
+import {DEFAULT_ADDRESS_NAME,WORLD_ADDRESS_LIMITS,addressNameFrom,newDefaultAddressName,derToRaw,readWorldAddressState,validAddressName,worldAddress} from '../agent/gate/world-address.ts';
 import {readRemoteMcpRequest,remoteConsentItemId} from '../agent/gate/remote-mcp.ts';
 import {roomDenied} from '../contracts/web-world.ts';
 import {projectWorldItems} from '../context/store/world-items.ts';
@@ -75,10 +75,12 @@ await withTempDir('worldlet-world-address-',async dir=>{
   if(method==='GET'){const name=url.split('/').pop()!;return Response.json({name,valid:validAddressName(name),available:!names.has(name)});}
   if(!token)return Response.json({error:'token'},{status:401});
   const key=keyOf(token);
-  if(method==='DELETE'){for(const [n,k] of names)if(k===key)names.delete(n);return Response.json({released:[]});}
+  const only=new URL(url).searchParams.get('name');
+  if(method==='DELETE'){for(const [n,k] of names)if(k===key&&(only===null||n===only))names.delete(n);return Response.json({released:[]});}
   const {name}=JSON.parse(init.body);
   if(names.has(name)&&names.get(name)!==key)return Response.json({error:'This name is taken. Choose another.',code:'taken'},{status:409});
-  for(const [n,k] of names)if(k===key)names.delete(n);
+  // A World keeps its default name beside a chosen one; a claim replaces only its other name of the same kind.
+  for(const [n,k] of names)if(k===key&&DEFAULT_ADDRESS_NAME.test(n)===DEFAULT_ADDRESS_NAME.test(name))names.delete(n);
   names.set(name,key);return Response.json({name,address:`https://${name}.worldlet.ai`},{status:201});
  };
  // A long random stand-in for the World link's secret, so the ledger check below can only match the secret itself.
@@ -94,6 +96,8 @@ await withTempDir('worldlet-world-address-',async dir=>{
   for(const ok of ['kelvin','abc','team-board'])assert.ok(validAddressName(ok),ok);
   for(const bad of ['ab','a--b','xn--abc','-ab','ab-','www','mcp','Kelvin','x'.repeat(33)])assert.ok(!validAddressName(bad),bad);
   assert.equal(addressNameFrom(' Kelvin '),'kelvin');
+  assert.equal(addressNameFrom('w-7k3m9p2x'),'','names starting w- are default names, never chosen');
+  assert.match(newDefaultAddressName(),DEFAULT_ADDRESS_NAME);assert.ok(validAddressName(newDefaultAddressName()));
   assert.equal(worldAddress('kelvin'),'https://kelvin.worldlet.ai');
   assert.equal(worldAddress('kelvin','http://localhost:8766'),'http://kelvin.localhost:8766');
   // The front's frame for the page: `kind: 'address'`, with the address's origin as base.
@@ -118,7 +122,16 @@ await withTempDir('worldlet-world-address-',async dir=>{
   assert.deepEqual([status.name,status.address,status.remote],['kelvin','https://kelvin.worldlet.ai',true]);
   let ws=FakeSocket.last!;ws.open();
   assert.equal((await address.status()).reachable,true);
-  say('PASS choosing a name turns remote access on and claims it on the website with the host token; a taken name is refused.');
+  // With remote access on, the World also gets its default name, kept beside the chosen one; the remote MCP address is
+  // the World's own address.
+  const settled=async()=>{for(let i=0;i<50&&!(await address.status()).defaultName;i++)await new Promise(r=>setTimeout(r,5));return address.status();};
+  status=await settled();
+  assert.match(status.defaultName!,DEFAULT_ADDRESS_NAME);assert.equal(names.get(status.defaultName!),keyOf(token));
+  assert.deepEqual([status.name,status.chosen,status.mcp],['kelvin',true,'https://kelvin.worldlet.ai/mcp']);
+  assert.equal((await remote.status()).address,'https://kelvin.worldlet.ai/mcp','Claude and ChatGPT connect at the World\'s own address');
+  const firstDefault=status.defaultName!;
+  await assert.rejects(address.claim('kelvin-two'),/stays/,'a chosen name stays');
+  say('PASS choosing a name turns remote access on and claims it on the website with the host token; a taken name is refused; the default name is kept beside it, and the MCP address is the World\'s own.');
 
   // The page's requests, as the front sends them over remote access's connection.
   let next=0;
@@ -276,14 +289,17 @@ await withTempDir('worldlet-world-address-',async dir=>{
   await remote.renew();
   ws=FakeSocket.last!;ws.open();
   const fresh=JSON.parse(secrets.get(REMOTE_MCP_VAULT)!).token;
-  assert.equal(names.get('kelvin'),keyOf(fresh));
-  status=await address.claim('kelvin-studio');
-  assert.equal(names.has('kelvin'),false);assert.equal(names.get('kelvin-studio'),keyOf(fresh));
-  assert.deepEqual([status.devices.length,status.visitors.length],[0,0],'passkeys belong to the old address');
+  assert.equal(names.get('kelvin'),keyOf(fresh));assert.equal(names.get(firstDefault),keyOf(fresh),'the default name moves too');
+  // Giving the chosen name up: the World is at its default name again, sign-ins start over, and a name may be chosen anew.
   status=await address.release();
-  assert.equal(status.name,null);assert.equal(names.size,1,'only the other World\'s name is left');
-  assert.equal((await page('GET','/hello',{base:'https://kelvin-studio.worldlet.ai'})).status,404);
-  say('PASS New address keeps the name on the new host token; renaming starts sign-ins over; giving the name up frees it on the website.');
+  assert.deepEqual([status.name,status.chosen,status.devices.length,status.visitors.length],[firstDefault,false,0,0],'passkeys belong to the old address');
+  assert.equal(names.has('kelvin'),false);assert.equal(names.get(firstDefault),keyOf(fresh));
+  await assert.rejects(address.release(),/no name of its own/);
+  status=await address.claim('kelvin-studio');
+  assert.equal(names.get('kelvin-studio'),keyOf(fresh));assert.equal(names.get(firstDefault),keyOf(fresh));
+  assert.deepEqual([status.name,status.chosen,status.defaultName],['kelvin-studio',true,firstDefault]);
+  assert.equal((await page('GET','/hello',{base:'https://kelvin.worldlet.ai'})).status,404);
+  say('PASS New address keeps both names on the new host token; giving the chosen name up goes back to the default one and starts sign-ins over.');
 
   // Nothing a browser could reuse is kept outside the vault or logged; the vault keeps public keys, never sessions.
   const kept=JSON.stringify(readWorldAddressState(JSON.parse(secrets.get(WORLD_ADDRESS_VAULT)!)));

@@ -1,12 +1,12 @@
 # Remote MCP
 
-Agents in the cloud can use a person's World the same way local Agents do: a ChatGPT, Claude or Cursor connector, or an Agent session running on another machine. They reach the `worldlet` MCP server on the person's own computer through an HTTPS front at `https://mcp.worldlet.ai/<room>`. The person allows each connection on a card in Attention, and from then on it is an Agent of its own, with its own Grants and audit ([GRANTS.md](GRANTS.md)).
+Agents in the cloud can use a person's World the same way local Agents do: a ChatGPT, Claude or Cursor connector, or an Agent session running on another machine. They reach the `worldlet` MCP server on the person's own computer through an HTTPS front at the World's own address, `https://<name>.worldlet.ai/mcp` ([WORLD-ADDRESS.md](WORLD-ADDRESS.md); every World has a default one, `w-…`). The room's address, `https://mcp.worldlet.ai/<room>`, reaches the same server and keeps working for connectors added there. The person allows each connection on a card in Attention, and from then on it is an Agent of its own, with its own Grants and audit ([GRANTS.md](GRANTS.md)).
 
 Remote access is on by default (owner decision 2026-10-17): the installed app's first run makes the address and keeps the room open, so the person only copies the address. Nothing gets in until the person allows a connection on a card or makes a token. **Turn off** in Settings › Agents, or `worldlet remote off` on the [Node host](../../platform/server/README.md#the-worldlet-command), closes the room and stays off after restarts. Development builds, release checks and libraries other than the installed app's own stay off until turned on. Remote access works while the computer is on and Worldlet is running.
 
 ## Connect a connector
 
-1. In Worldlet, open Settings › Agents and choose **Copy address** under **Use your World in Claude or ChatGPT**, below the list of Agents (**Turn on** first if it was turned off). The same address and Copy address are under **Remote access**, folded below it.
+1. In Worldlet, open Settings › Agents and choose **Copy address** under **Use your World in Claude or ChatGPT**, below the list of Agents (**Turn on** first if it was turned off). It is your World's own address with `/mcp`, `https://<name>.worldlet.ai/mcp`. The same address and Copy address are under **Remote access**, folded below it.
 2. Add the address as a remote MCP server in the client:
    - **Claude** (claude.ai, the desktop app, and cloud sessions that use the account's connectors): Settings › Connectors › Add custom connector. Paste the address and leave the OAuth fields empty.
    - **ChatGPT**: Settings › Connectors (Apps) › Create, with developer mode on where the plan asks for it. Paste the address as the MCP server URL and choose OAuth.
