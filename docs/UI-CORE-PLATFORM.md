@@ -18,8 +18,8 @@ Inside the app there are four layers ([#677](https://github.com/clockless-org/wo
 | --- | --- | --- | --- |
 | 1 | **UI** (See) | Every screen and its interaction logic, one codebase that every window shows. World (`ui/world/`: places, HUD), Applets (`ui/applets/`: each Applet's screen beside its real website, games, practice), Companion (`ui/companion/`: face, conversation, voice), Attention (`ui/attention/`: what needs the person now, the artifact card and the Journal), Frame (`ui/frame/`: start, setup, settings, navigation), Style (`ui/style/`: shared controls, tokens and themes) | `ui/` |
 | 2 | **Agent** (Do) | Who does the work. Companion (`agent/companion/`: turns through the person's own Agent, memory, setup), Tasks (`agent/tasks/`: routines, checks, drafts), Applets (`agent/applets/`: running Applets, driving the browser), Attention (`agent/attention/`: deciding and ranking what needs the person), Gate (`agent/gate/`: every Agent, its Grants, World tools, approvals and audit, local and remote MCP), App rules (`agent/app/`: what the app reports, update channels). Everyone, the companion included, passes the Gate | `agent/` |
-| 3 | **Context** (Know) | Everything the World knows, in one hub on the person's own machine. Store (`context/store/`: the hub; every record, history, artifacts and made games; one way in and out and one search, `context/store/context.ts`, #676), Applets (`context/applets/`: the catalog, each Applet's records and the World log), Connectors (`context/connectors/`: Services in and out, what they sync, Service presets and the board). Four kinds of record live in the Store: Synced, Recorded, Made, Known ([#676](https://github.com/clockless-org/worldlet/issues/676)) | `context/` |
-| 4 | **Platform** (Host) | Where the World runs and every window that reaches it. Host (`platform/host/`: the shared host Desktop and Server both run: router, host modules, storage, vault, the relay link), Desktop (`platform/desktop/`: Electron around the Host, the window, OS permissions, updates, installers), Server (`platform/server/`: Node around the Host, no screen), Web (`platform/web/`: how a page talks to its host, the page a browser opens, pairing), Phone (`platform/ios/`, `platform/android/`). It runs things and makes no product decisions | `platform/` |
+| 3 | **Context** (Know) | Everything the World knows, in one hub on the person's own machine. Store (`context/store/`: the hub; every record, history, artifacts and made games; one way in and out, `context/store/context.ts`, which decides and audits every Agent's call against its Grants, and one search across the four kinds), Applets (`context/applets/`: the catalog, each Applet's records and the World log), Connectors (`context/connectors/`: Services in and out, what they sync, Service presets and the board). Four kinds of record live in the Store: Synced, Recorded, Made, Known ([#676](https://github.com/clockless-org/worldlet/issues/676)) | `context/` |
+| 4 | **Platform** (Host) | Where the World runs and every window that reaches it. Host (`platform/host/`: the shared host Desktop and Server both run; its `modules/` and `store/` have one part per component: world, applets, companion, attention, tasks, gate, connectors, app, windows), Desktop (`platform/desktop/`: Electron around the Host, the window, OS permissions, updates, installers), Server (`platform/server/`: Node around the Host, no screen), Web (`platform/web/`: how a page talks to its host, the page a browser opens, pairing), Phone (`platform/ios/`, `platform/android/`). It runs things and makes no product decisions | `platform/` |
 
 Someone asks in UI (or an Agent asks directly) → Agent runs it through the Gate, reading
 and writing Context → the result is a Made record (an Artifact) → shown in Attention and kept in the Journal (UI).
@@ -39,10 +39,11 @@ Rules:
 - Nothing reads storage except through Context's single entry.
 - Nothing is deleted automatically; only a retention period the person sets removes data.
 
-The record envelope, the single read/write entry (`contextReader`, `contextWriter`, and `connectorWriter` for Synced) and
-one search across all four kinds are in `context/store/context.ts` ([one way in](../context/store/STORAGE.md#one-way-in));
-`npm run check:arch` enforces that UI only reads and only Connectors write Synced. Routing the remaining domains with
-Grants and audit, one database with content-addressed files, and draft and pin state for Made records are next steps.
+The record envelope, the single read/write entry (`contextReader`, `contextWriter`, and `connectorWriter` for Synced),
+the decision and audit of every Agent's call at that entry (`agentContext`), and one search across all four kinds are in
+`context/store/context.ts` ([one way in](../context/store/STORAGE.md#one-way-in)); `npm run check:arch` enforces that UI
+only reads and only Connectors write Synced. Everything is kept in `world.sqlite`, persisted on the Host one file per
+component (`platform/host/store/`). Draft and pin state for Made records is the next step.
 
 <a id="folders-by-layer"></a>
 ### Folders by layer
@@ -76,7 +77,7 @@ Server (`platform/server/`) both run the shared Host (`platform/host/`).
 | Attention | What needs the person now, at most nine, and the Journal of everything work produced | `ui/attention/` | `agent/attention/` | `platform/host/modules/attention/` |
 | Tasks | Work without the person: routines, checks, drafts, Applet jobs | (none: its status shows on the companion and on Applets) | `agent/tasks/` | `platform/host/modules/tasks/` |
 | Gate | Every Agent that reaches the World, its Grants, World tools, approvals and audit; local and remote MCP | (none: its pages are in the Frame's Settings) | `agent/gate/` | `platform/host/modules/gate/` |
-| Store | The hub: every record, one way in and out, one search | (none: every component reads it) | `context/store/` | (none of its own: `platform/host/store/` persists it) |
+| Store | The hub: every record, one way in and out that decides and audits each Agent's call, one search | (none: every component reads it) | `context/store/` | `platform/host/store/` persists it, one file per component (`app.ts`, `applets.ts`, `attention.ts`, `companion.ts`, `connectors.ts`, `gate.ts`, `tasks.ts`) |
 | Connectors | Services in and out: sign-in, what they sync, Service presets and the board, approved writes | (none: its page is in the Frame's Settings) | `context/connectors/` | `platform/host/modules/connectors/` |
 | App | The app around it all: start, setup, settings, shared controls and themes, what it reports, updates | `ui/frame/` `ui/style/` | `agent/app/` | `platform/host/modules/app/` |
 | Windows | The same World in another window: a browser at its link, the phones | (none: every window shows the same UI) | (none) | `platform/host/modules/windows/` (the host side; `platform/web/`, `platform/ios/` and `platform/android/` are the windows) |
