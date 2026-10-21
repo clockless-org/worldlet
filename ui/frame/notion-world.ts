@@ -12,7 +12,7 @@ import {carriesConversation,worldSpeechTerms} from '../../agent/companion/index.
 import {helpNarration,narrateHelp} from '../companion/index.ts';
 import {createWorldUI} from './public-interface.ts';
 import {eventTrigger,reportAppletOpened,reportEngagement,reportProductEvent} from './product-analytics.ts';
-import {mountFoxArtifact,flyIntoJournal,artifactPageSpec,turnIntoDock,createDailyCards} from '../attention/index.ts';
+import {mountFoxArtifact,flyIntoJournal,artifactPageSpec,createDailyCards} from '../attention/index.ts';
 import {node,textButton,worldletMark,uiIcon} from '../style/index.ts';
 import {readRetryDelay,sourceReadAction} from '../../context/applets/index.ts';
 import {attentionRequest,journalTarget} from '../../agent/gate/index.ts';
@@ -20,11 +20,11 @@ import {FOCUS_RULES_REQUEST,browserEffectDecision,browserFinalStep,browserFollow
 import {quietSourceReader} from '../applets/index.ts';
 import {mountAttentionPreview,taskReviewLine} from '../attention/index.ts';
 import {attentionPreviewData,attentionLaterUntil} from '../../agent/attention/index.ts';
-import {mountPhoneBridge} from '../companion/index.ts';
+import {mountCompanionNative} from '../companion/index.ts';
 import {attentionBrief} from '../../agent/attention/index.ts';
-import {artifactFollowUpSent,artifactFollowUpRequest,type ArtifactFollowUpDraft,artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,readDailyArtifactsState,markDailyUse,markDailyMade,dayKey,dailyArtifactDue,dailyPlanned,dailyArtifactRequest,firstPrepRequest,readDailyRoutines,DAILY_ROUTINES_ON,DAILY_ROUTINE_NAMES,readPreparedRepliesState,preparedRepliesSettling,markReplyPrepared,backgroundBlocked,replyThread,replyCandidates,replyPrepareDue,replyPrepareRequest,replyPrepareStatus,foxWorkDone,type FoxWorkKind} from '../../context/store/index.ts';
-import {timingBucket} from '../../agent/app/index.ts';
-import {applyRegionLayout,lastUse,readRegionLayout,parseRegionLayout,moveRegionApplet,pinRegionApplet,pinnedPlace,recordAppletUse,regionId,recentlyUsedFirst,storedRegionLayout} from '../world/index.ts';
+import {artifactFollowUpSent,type ArtifactFollowUpDraft,artifactFitProblem,artifactId,artifactPageActions,artifactRenderMode,attentionArtifactId,findArtifacts,readArtifact,dayKey,backgroundBlocked,replyThread} from '../../context/store/index.ts';
+
+import {applyRegionLayout,readRegionLayout,parseRegionLayout,moveRegionApplet,pinRegionApplet,pinnedPlace,recordAppletUse,regionId,recentlyUsedFirst,storedRegionLayout} from '../world/index.ts';
 import {resolvePlacements,lampLabels,lampNeeds} from '../world/index.ts';
 import {WORLD_LAYOUT,THEME_SCENE,themeAreaMap} from '../world/index.ts';
 import {createLocationWriter} from './navigation-history.ts';
@@ -45,10 +45,10 @@ import {createClaudeSession} from '../applets/index.ts';
 import {forecastStage,weatherGlyph} from '../world/index.ts';
 import {createWeatherPanel} from '../applets/index.ts';
 import {createGameApplet} from '../applets/index.ts';
-import {foxSessions,ongoingLine,ongoingThemes,ongoingThemeRequest,isOngoingThemeId,type OngoingThing} from '../../agent/tasks/index.ts';
+
 import {loadMoney,readMoneyItem} from '../applets/index.ts';
 import {WORK_APPLETS,workItems,workError,renderWorkDetail,sampleWork,sampleWorkDetail} from '../applets/index.ts';
-import {attentionIcon} from '../attention/index.ts';
+
 import {coreAppletItems} from '../world/index.ts';
 import {localCalendarItems} from '../applets/index.ts';
 import {alertAt,upcomingCalendarEvents} from '../../context/applets/index.ts';
@@ -64,7 +64,7 @@ import {appLogoSource} from '../applets/index.ts';
 import {eventWhen} from '../attention/index.ts';
 import {appletIndicator,myAppletKind,momentAppletId,siteAppletId,siteAppletPage,websiteAppletFor} from '../../context/applets/index.ts';
 import {appletStatus as appStatus,connectionLive} from '../../context/applets/index.ts';
-import {phoneWebAddress} from '../../platform/web/index.ts';
+
 import {applyModuleWorld,moduleStatus} from '../world/index.ts';
 import {createModuleScene} from '../world/index.ts';
 import {settleItemPage} from '../../context/store/index.ts';
@@ -74,13 +74,13 @@ import {detailTemplate} from '../style/index.ts';
 import {searchNotes} from '../applets/index.ts';
 import {mountTravelExperiment} from '../world/index.ts';
 import {mountWorldEnvironment} from '../world/index.ts';
-import { bindWorldViewport } from '../world/index.ts';
-import { createContentStore } from './content-store.ts';
-import { describePlace } from '../world/index.ts';
-import { marked } from 'marked';
+import {bindWorldViewport} from '../world/index.ts';
+import {createContentStore} from './content-store.ts';
+import {describePlace} from '../world/index.ts';
+import {marked} from 'marked';
 import DOMPurify from 'dompurify';
 import {roomObjects} from '../world/index.ts';
-import { createWorldTools } from './live-world-tools.ts';
+import {createWorldTools} from './live-world-tools.ts';
 import {mountNativeHUD,mountAppletShelf} from '../world/index.ts';
 
 const element:(tag:string,cls?:string,text?:unknown)=>any=node;
@@ -2109,114 +2109,10 @@ export function mountNotionWorld(data: World, native: any) {
   // The first-run tour's first value can be a conversation the person brought (ui/frame/first-value.ts).
   let firstValueOngoing:{list:()=>{id:string,title:string,say:string}[],make:(id:string)=>Promise<boolean>}|null=null;
   if(native){
-    // The paired iPhone mirrors the Center and talks to Fox through this page (platform/web/README.md).
-    let widgetsNow:any[]=[],phoneWorldLog:{lines:any[],now:any[]}={lines:[],now:[]};
-    // Ongoing things (agent/tasks/README.md): proposals stand in Worth Doing as themes; each one kept earlier is a Thing of
-    // its own, a device in the area Fox picked (app-job-…), with its own tile in the phone's Thing world and its own thread.
-    let ongoingProposals:OngoingThing[]=[],ongoingKept:(OngoingThing&{recent:{text:string,at:string}[]})[]=[];
-    // Every other brought conversation that looks like one job (agent/tasks ongoingCandidates): the phone lists each as a
-    // thing of its own, and the first line said in one keeps it here (owner request 2026-10-11).
-    let ongoingOthers:(OngoingThing&{recent:{text:string,at:string}[]})[]=[];
-    // Today's Journal cards and the Task panel's cards, for the phone's Today and Tasks tabs.
-    let journalToday:any[]=[],taskPanelNow:any=null;
-    const ongoingDecide=async(id:string,operation:'later'|'decline')=>{if(native.ongoing)await native.ongoing({operation,id});};
-    // What Fox offers from them is a theme, never one conversation (agent/tasks/themes.ts): the conversations about one part
-    // of life, pulled together by Fox into one artifact laid out like every other (Kelvin 2026-10-07).
-    const themesNow=()=>ongoingThemes(ongoingProposals,Date.now()/1000);
-    const decideTheme=async(id:string,operation:'later'|'decline')=>{
-     const theme=themesNow().find(t=>t.id===id);if(!theme)return null;
-     for(const thing of theme.things)await ongoingDecide(thing.id,operation);
-     ongoingProposals=ongoingProposals.filter(t=>!theme.things.some(x=>x.id===t.id));nativeHUD?.sync();phone?.world();
-     return theme;
-    };
-    // Asking for the page puts the theme off for a while (Not now's week), so the row leaves Worth Doing; Fox's turn makes
-    // the artifact. Resolves when the turn is over, telling whether Fox showed one.
-    const makeTheme=async(id:string)=>{
-     const theme=await decideTheme(id,'later');if(!theme||!voice?.ask)return false;
-     const before=artifactsShown,request=ongoingThemeRequest(theme);
-     // The page comes from several past conversations, so its card says so instead of "From this conversation".
-     nextArtifactLabel=theme.label;
-     await voice.ask(request.text,{displayText:request.displayText,icon:'spark'});
-     for(let i=0;i<1500&&voice?.active;i++)await new Promise(resolve=>setTimeout(resolve,400));
-     nextArtifactLabel=null;
-     return artifactsShown>before;
-    };
-    firstValueOngoing={list:()=>themesNow().map(t=>({id:t.id,title:t.title,say:t.say})),make:makeTheme};
-    // Fox lays the offer out the way it lays out an item's card: why, then the choices.
-    const offerOngoing=(id:string)=>{
-     const theme=themesNow().find(t=>t.id===id);if(!theme||!voice?.setGuide)return;
-     const choice=(label:string,run:()=>Promise<unknown>)=>{
-      const b=document.createElement('button');b.type='button';b.textContent=label;
-      b.onclick=()=>{voice?.setGuide?.(null);void run().catch(error=>notify(error?.message||String(error)));};
-      return b;
-     };
-     voice.setGuide({source:'ongoing:'+id,takeover:true,text:theme.say,actions:[choice(theme.option,()=>makeTheme(id)),choice('Not now',()=>decideTheme(id,'later')),choice('Don\'t ask again',()=>decideTheme(id,'decline'))]});
-     voice.revealGuide?.();
-    };
-    const phone=!data.sample&&native.phonePublish?mountPhoneBridge({publish:native.phonePublish,publishLive:value=>native.phonePublish(value,'live'),answer:(id,choice)=>native.harnessApproval?.(id,choice),ask:text=>voice?.ask(text,{origin:'user',displayText:text}),
-     // A line or the option chosen on the phone with an item's card open opens that card here too, so it joins the
-     // item's own conversation and both screens show the same dialogue.
-     askItem:(id,text)=>{previewAttention({worldItemId:id});return voice?.ask(text,{origin:'user',displayText:text});},
-     choose:id=>{if(id.startsWith('ongoing:'))return isOngoingThemeId(id.slice(8))?makeTheme(id.slice(8)):undefined;const page=itemPage(id);if(!page||!previewAttention({worldItemId:id}))return;return previewActions(page)[0]?.run();},
-     itemFox:id=>{if(id.startsWith('ongoing:')){const theme=themesNow().find(t=>'ongoing:'+t.id===id);if(!theme)return null;return {say:theme.say,option:theme.option,turns:[]};}const page=itemPage(id);if(!page)return null;return {say:attentionPreviewData(page).suggestion,option:previewActions(page)[0]?.label||'',turns:voice?.threadOf?.('attention:'+id)||[]};},
-     // The Thing world (agent/app phoneApplets): the Things in this World with their lamps, what each is doing, the
-     // world log, the widgets for now and each Thing's thread. A line said in a Thing's page opens it here first.
-     askApplet:async(key,text)=>{
-      let r=sections.find(s=>s.entity==='app'&&s.key===key);
-      // A thing not kept yet becomes a Thing first, so the line joins its own thread; its device arrives with the
-      // World update keeping it sends.
-      if(!r&&ongoingOthers.some(t=>t.id===key)&&native.ongoing){
-       try{await native.ongoing({operation:'keep',id:key});}catch{}
-       for(let i=0;i<40&&!(r=sections.find(s=>s.entity==='app'&&s.key===key));i++)await new Promise(resolve=>setTimeout(resolve,150));
-      }
-      if(r&&root.appletLayout.has(r.moduleId))visitObject(r.moduleId);return voice?.ask(text,{origin:'user',displayText:text});},
-     openApplet:key=>{const r=sections.find(s=>s.entity==='app'&&s.key===key);if(r&&root.appletLayout.has(r.moduleId))visitObject(r.moduleId);},
-     world:()=>({places:sections.filter(r=>r.entity==='app'&&r.key&&!r.ongoing&&!r.moment&&root.appletLayout.has(r.moduleId)).sort((a,b)=>lastUse(b,regionLayout)-lastUse(a,regionLayout)).map(r=>{const status=appStatus(r,data.moduleConnections||[]),phase=status.phase;
-       return {key:r.key,title:r.title,provider:r.provider||r.key,label:status.label,source:!['browser','local','unavailable','planned'].includes(phase),mine:myAppletKind(r)??undefined,url:phoneWebAddress(r),
-        state:['reading','syncing'].includes(phase)?'busy':status.failed?'failed':status.connected||status.usableWithoutLogin||['browser','local'].includes(phase)?'ready':'off'};}),
-      now:phoneWorldLog.now,log:phoneWorldLog.lines,widgets:widgetsNow.map(w=>({id:w.id,title:w.title})),jobs:[...ongoingKept,...ongoingOthers].map(t=>({id:t.id,title:t.title,line:ongoingLine(t,Date.now()/1000),recent:t.recent})),thread:key=>voice?.threadOf?.('object:app-'+key)||[]}),
-     // On the phone, Done asks Fox for a theme's page, Later is Not now and Remove is Don't ask again.
-     tasks:()=>taskPanelNow,journal:()=>journalToday,
-     settle:(item,status,until)=>{if(!item.worldItemId.startsWith('ongoing:'))return settleAttention(item,status,until,{surface:'phone'});const id=item.worldItemId.slice(8);return status==='dismissed'?decideTheme(id,'decline'):until?decideTheme(id,'later'):makeTheme(id);},kindOf:id=>itemPage(id)?.worldItemKind,ready:()=>!!voice&&root.dataset.onboardingLocked!=='true'}):null;
-    if(phone)root.addEventListener('worldlet:fox-thread',()=>phone.refresh());
-    window.addEventListener('worldlet:world-log',(event:any)=>{phoneWorldLog=event.detail||phoneWorldLog;phone?.world();});
-    if(phone)root.addEventListener('worldlet:fox-live',(event:any)=>phone.live(event.detail));
-    if(phone)window.addEventListener('worldlet:harness-approval',(event:any)=>phone.approval(event.detail));
-    if(phone){root.addEventListener('worldlet:source-issues',(event:any)=>phone.accounts(event.detail||[]));sourceIssueSignature='';publishSourceIssues();}
-    // Widgets for now lead the Center (context/store/ARTIFACTS.md); the first one Fox makes puts the Widgets Thing on the
-    // ground, and the panel opens it next.
-
-    const loadWidgets=()=>{if(data.sample||!native.widgets)return;void native.widgets({operation:'list'}).then(result=>{widgetsNow=Array.isArray(result?.now)?result.now:[];nativeHUD?.sync();phone?.world();}).catch(()=>{});};
-    // A made Thing's device arrives with the World update the host sends with this event.
-    window.addEventListener('worldlet:widgets',()=>loadWidgets());
-    loadWidgets();
-    const loadOngoing=async()=>{
-     if(data.sample||!native.ongoing)return;
-     try{
-      const result=await native.ongoing({operation:'list'});
-      ongoingProposals=Array.isArray(result?.proposals)?result.proposals.filter(t=>!(t.laterUntil>Date.now()/1000)):[];
-      const kept:OngoingThing[]=Array.isArray(result?.kept)?result.kept:[];
-      const withRecent=(list:OngoingThing[])=>Promise.all(list.map(async t=>{const r=await native.ongoing({operation:'turns',id:t.id,limit:4}).catch(()=>null);
-       return {...t,recent:Array.isArray(r?.recent)?r.recent:[]};}));
-      const others:OngoingThing[]=Array.isArray(result?.candidates)?result.candidates:[];
-      // Fox's sessions beside its conversation (agent/tasks/fox-sessions.ts): the Things, then the other conversations.
-      root.dispatchEvent(new CustomEvent('worldlet:fox-sessions',{detail:{sessions:foxSessions(kept,others),turns:(id:string)=>native.ongoing({operation:'turns',id,limit:24})}}));
-      ongoingKept=await withRecent(kept);
-      ongoingOthers=phone?await withRecent(others):[];
-      nativeHUD?.sync();phone?.world();
-     }catch{}
-    };
-    window.addEventListener('worldlet:ongoing',()=>void loadOngoing());
-    void loadOngoing();
-    if(phone){
-     window.addEventListener('worldlet:task-panel',(event:any)=>{taskPanelNow=event.detail??null;phone.world();});
-     // Today's Journal, read again when a card is kept and every few minutes (the day turns over, the host keeps the
-     // morning brief and the day's summary itself).
-     const loadJournal=()=>{if(!native.artifacts)return;void Promise.resolve(native.artifacts({operation:'list'})).then(r=>{journalToday=(r?.artifacts||[]).map(readArtifact).filter(Boolean);phone.world();}).catch(()=>{});};
-     window.addEventListener('worldlet:journal-changed',()=>loadJournal());
-     setInterval(loadJournal,5*60_000);loadJournal();
-    }
-    nativeHUD=mountNativeHUD({root,onAttention:view=>{phone?.attention(view);if(!data.sample&&view?.now?.length)reportProductEvent('attention_shown',{attention_count:String(Math.min(9,view.now.length))});},calendar:calendarSoon,openCalendar:openCalendarEvent,widgets:()=>widgetsNow,openWidget:id=>visitObject(momentAppletId(id)),ongoing:()=>themesNow().map(({id,title,context})=>({id,title,context})),openOngoing:offerOngoing,updates:native.updates,connectApplet:moduleId=>{const r=sections.find(s=>s.moduleId===moduleId);if(r?.key==='voice-memos'){visitObject(r.moduleId,{enter:false});showVoiceMemos(r,'connect');}else if(r?.key==='messages'){visitObject(r.moduleId,{enter:false});showMessages(r);}else if(r?.key==='obsidian'){visitObject(r.moduleId);showObsidian(r,'choose');}else if(r&&native?.setup)native.setup('connection',r.region,r.key);},snapshot:()=>({data,pages,sections,areas,buildings,composites,arrivals,read,current,currentSpace,depth,attentionItemId:attentionPage?.worldItemId}),previewAttention,open,visitArea,visitSpace,visitBuilding,visitObject,focusContent,showSearch,connect:()=>{if(data.personal)templateLibrary();else sourceInfo();},original:async id=>{const item=pages.get(id);if(data.sample&&item?.noteId&&pages.has(item.noteId)){open(item.noteId);return;}const result=await native.original(pages.get(id).sourceId);const body=dialog(result.title);body.append(element('pre','private-original',result.text));},chat:()=>voice,back,home,leaveApplet:()=>{libraryWebReturn=null;back();},dialog,itemActions,onDecision:(d,choice)=>{const p=pages.get(d.pageId);if(!p)return {error:'Note not found'};const r=contentStore.mutate('patch_content',{id:p.id,revision:p.revision,field:'body',old_text:'',new_text:'\n## Selected option\n'+choice+'\nPlan only. No booking, payment or message was sent.'},{operationId:crypto.randomUUID()});if(r.ok)contentChanged(r);return r;},storage:native.storage,sample:()=>!!data.sample,toggleSample:native.toggleSample,contextual:()=>attentionPage?moduleContext():travelExperiment?.context()||moduleContext(),tasks:()=>travelExperiment?.tasks()||[]});
+    // The paired phone, the widgets for now and the ongoing things (ui/companion/phone-ongoing.ts).
+    const companionNative=mountCompanionNative({data:()=>data,native,root,voice:()=>voice,nativeHUD:()=>nativeHUD,sections,regionLayout,notify:text=>notify(text),visitObject:id=>visitObject(id),previewAttention:item=>previewAttention(item),itemPage:id=>itemPage(id),previewActions:page=>previewActions(page),settleAttention:(...args)=>(settleAttention as any)(...args),artifactsShown:()=>artifactsShown,setNextArtifactLabel:label=>{nextArtifactLabel=label;},setFirstValueOngoing:value=>{firstValueOngoing=value;},resetSourceIssues:()=>{sourceIssueSignature='';publishSourceIssues();}});
+    const {phone,widgetsNow,themesNow,offerOngoing}=companionNative;
+    nativeHUD=mountNativeHUD({root,onAttention:view=>{phone?.attention(view);if(!data.sample&&view?.now?.length)reportProductEvent('attention_shown',{attention_count:String(Math.min(9,view.now.length))});},calendar:calendarSoon,openCalendar:openCalendarEvent,widgets:widgetsNow,openWidget:id=>visitObject(momentAppletId(id)),ongoing:()=>themesNow().map(({id,title,context})=>({id,title,context})),openOngoing:offerOngoing,updates:native.updates,connectApplet:moduleId=>{const r=sections.find(s=>s.moduleId===moduleId);if(r?.key==='voice-memos'){visitObject(r.moduleId,{enter:false});showVoiceMemos(r,'connect');}else if(r?.key==='messages'){visitObject(r.moduleId,{enter:false});showMessages(r);}else if(r?.key==='obsidian'){visitObject(r.moduleId);showObsidian(r,'choose');}else if(r&&native?.setup)native.setup('connection',r.region,r.key);},snapshot:()=>({data,pages,sections,areas,buildings,composites,arrivals,read,current,currentSpace,depth,attentionItemId:attentionPage?.worldItemId}),previewAttention,open,visitArea,visitSpace,visitBuilding,visitObject,focusContent,showSearch,connect:()=>{if(data.personal)templateLibrary();else sourceInfo();},original:async id=>{const item=pages.get(id);if(data.sample&&item?.noteId&&pages.has(item.noteId)){open(item.noteId);return;}const result=await native.original(pages.get(id).sourceId);const body=dialog(result.title);body.append(element('pre','private-original',result.text));},chat:()=>voice,back,home,leaveApplet:()=>{libraryWebReturn=null;back();},dialog,itemActions,onDecision:(d,choice)=>{const p=pages.get(d.pageId);if(!p)return {error:'Note not found'};const r=contentStore.mutate('patch_content',{id:p.id,revision:p.revision,field:'body',old_text:'',new_text:'\n## Selected option\n'+choice+'\nPlan only. No booking, payment or message was sent.'},{operationId:crypto.randomUUID()});if(r.ok)contentChanged(r);return r;},storage:native.storage,sample:()=>!!data.sample,toggleSample:native.toggleSample,contextual:()=>attentionPage?moduleContext():travelExperiment?.context()||moduleContext(),tasks:()=>travelExperiment?.tasks()||[]});
     // The Thing shelf above an open Thing (ui/world/applet-shelf.ts): the recently used Things, the open one in the middle.
     const shelfApp=(id:string)=>{const r=sections.find(s=>s.moduleId===id&&s.entity==='app');if(!r||!root.appletLayout?.has(id))return null;return {title:r.title,image:themeAppletIcon(r.key)||appLogoSource(r)||''};};
     appletShelf=mountAppletShelf({root,applet:shelfApp,lastUsed:id=>regionLayout.lastUsedAt[id]||0,
