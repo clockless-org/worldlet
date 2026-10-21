@@ -1,6 +1,6 @@
 /** Public UI component interface. Keep implementation imports inside this component. */
 export {worldletMark} from './brand.ts';
-export {mountUIGallery} from './gallery.ts';
+
 export {modelMarkdown} from './markdown.ts';
 export {viewMode} from './mode.ts';
 export {applyTextScale,restoreTextScale} from './preferences.ts';

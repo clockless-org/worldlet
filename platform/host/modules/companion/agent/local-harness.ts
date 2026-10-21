@@ -77,7 +77,7 @@ export class AgentNotStarting extends WorldletError {
   super(install.id==='hermes'?`${install.title} does not start on this computer. Open Settings › Agents and choose Install again.`:`${install.title} does not start on this computer. Open it once in Terminal to check it, or choose another Agent in Settings › Agents.`);
   this.name='AgentNotStarting';this.repeat=repeat;
  }
- /** Already reported once; the host records it locally but sends it nowhere again (modules/shell). */
+ /** Already reported once; the host records it locally but sends it nowhere again (modules/app). */
  get reported(){return this.repeat;}
 }
 /** When each Agent command was last found not to start: its turns are refused for NOT_STARTING_MS without starting it
