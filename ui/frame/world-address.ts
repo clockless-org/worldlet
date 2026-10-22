@@ -48,7 +48,10 @@ export async function showWorldAddress(target:HTMLElement,call:(action:string,bo
   words.append(el('strong','','Your World\'s address'));
   if(!('devices' in status)){words.append(el('span','',status.error||'Not available here.'));return;}
   if(!status.name){
-   words.append(el('span','',status.remote?'Your World gets its own web address in a moment.':'Turn on remote access above, and your World gets its own web address, like w-7k3m9p2x.worldlet.ai.'));
+   words.append(el('span','',!status.remote?'Turn on remote access above, and your World gets its own web address, like w-7k3m9p2x.worldlet.ai.'
+    :status.error?`Your World could not get its web address yet: ${status.error} Worldlet keeps trying.`:'Your World gets its own web address in a moment.'));
+   // The host makes the default name in the background: look again until it is there.
+   if(status.remote)setTimeout(()=>{if(current())void draw();},5000);
    return;
   }
   if(changing){
