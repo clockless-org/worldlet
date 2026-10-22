@@ -1,12 +1,12 @@
 # Remote MCP
 
-Agents in the cloud can use a person's World the same way local Agents do: a ChatGPT, Claude or Cursor connector, or an Agent session running on another machine. They reach the `worldlet` MCP server on the person's own computer through an HTTPS front at the World's own address, `https://<name>.worldlet.ai/mcp` ([WORLD-ADDRESS.md](WORLD-ADDRESS.md); every World has a default one, `w-…`). The room's address, `https://mcp.worldlet.ai/<room>`, reaches the same server and keeps working for connectors added there. The person allows each connection on a card in Attention, and from then on it is an Agent of its own, with its own Grants and audit ([GRANTS.md](GRANTS.md)).
+Agents in the cloud can use a person's World the same way local Agents do: a ChatGPT, Claude or Cursor connector, or an Agent session running on another machine. They reach the `worldlet` MCP server on the person's own computer through an HTTPS front at the World's own address, `https://<room>.worldlet.ai/mcp` ([WORLD-ADDRESS.md](WORLD-ADDRESS.md); every World has a default one, `w-…`). The room's address, `https://mcp.worldlet.ai/<room>`, reaches the same server and keeps working for connectors added there. The person allows each connection on a card in Attention, and from then on it is an Agent of its own, with its own Grants and audit ([GRANTS.md](GRANTS.md)).
 
 Remote access is on by default (owner decision 2026-10-17): the installed app's first run makes the address and keeps the room open, so the person only copies the address. Nothing gets in until the person allows a connection on a card or makes a token. `worldlet remote off` on the [Node host](../../platform/server/README.md#the-worldlet-command) closes the room and stays off after restarts; Settings has no switch for it (owner request 2026-10-22: no Advanced) and offers **Turn on** on Your World's address only while it is off. Development builds, release checks and libraries other than the installed app's own stay off until turned on. Remote access works while the computer is on and Worldlet is running.
 
 ## Connect a connector
 
-1. In Worldlet, open Settings › Agents and choose **Copy for Claude or ChatGPT** on **Your World's address**, below the list of Agents (**Turn on** first if it was turned off). It is your World's own address with `/mcp`, `https://<name>.worldlet.ai/mcp`.
+1. In Worldlet, open Settings › Agents and choose **Copy for Claude or ChatGPT** on **Your World's address**, below the list of Agents (**Turn on** first if it was turned off). It is your World's own address with `/mcp`, `https://<room>.worldlet.ai/mcp`.
 2. Add the address as a remote MCP server in the client:
    - **Claude** (claude.ai, the desktop app, and cloud sessions that use the account's connectors): Settings › Connectors › Add custom connector. Paste the address and leave the OAuth fields empty.
    - **ChatGPT**: Settings › Connectors (Apps) › Create, with developer mode on where the plan asks for it. Paste the address as the MCP server URL and choose OAuth.
@@ -23,7 +23,7 @@ An Agent that cannot open a browser, such as a script, a daemon on another compu
 
 The token makes an Agent of its own (kind `remote`, Harness `token`), listed in Settings › Agents with the default Grants, its own audit and Revoke. It does not run out. Making a new token for the same Agent (`remoteMcp` `token` with its `id`) stops the old one, and Revoke ends it. Only its SHA-256 hash is kept, in the vault. Anyone who has the token can act as that Agent, so keep it as secret as a password.
 
-A new address (`remoteMcp` `renew`) ends every connection and registration, and each client must be added again. A World with [its own address](WORLD-ADDRESS.md) keeps its name, and `https://<name>.worldlet.ai/mcp` reaches the same server. Turning it off stops the address answering but keeps it, so turning it on again needs no new connectors.
+A new address (`remoteMcp` `renew`) ends every connection and registration, and each client must be added again; [the World's address](WORLD-ADDRESS.md) is the room, so it changes with it. Turning it off stops the address answering but keeps it, so turning it on again needs no new connectors.
 
 ## How it works
 

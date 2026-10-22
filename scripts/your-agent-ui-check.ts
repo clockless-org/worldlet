@@ -86,10 +86,8 @@ try{
    w.access=w.access.map(a=>a.id===b.id?{...a,wake:[...b.command],audit:[{at:'2026-10-15T08:30:00.000Z',agentId:a.id,target:'asks',action:b.command.length?'set-wake':'clear-wake',decision:'allowed'},...a.audit]}:a);return {ok:true};}
   // Your World's address (agent/gate/WORLD-ADDRESS.md): the page sends a name, a share choice or an ID, nothing else.
   if(b.action==='worldAddress'){
-   const a=w.address??={name:'w-7k3m9p2x',defaultName:'w-7k3m9p2x',chosen:false,reachable:true,remote:true,devices:[],visitors:[],shares:[]};
+   const a=w.address??={name:'3f9a0c213f9a0c213f9a0c213f9a0c21',reachable:true,remote:true,devices:[{id:'pk1',name:'Chrome on Mac',addedAt:'2026-10-18T12:00:00.000Z'}],visitors:[{id:'v1',name:'Sam',sees:['Board'],seenAt:'2026-10-18T13:00:00.000Z'}],shares:[{id:'share0AAAAAAAAAAAAAAA',title:'Board',open:true,people:0}]};
    const out=()=>({...a,...a.name?{address:'https://'+a.name+'.worldlet.ai',mcp:'https://'+a.name+'.worldlet.ai/mcp'}:{},shares:a.shares.map(s=>({...s,...a.name?{link:'https://'+a.name+'.worldlet.ai/s/'+s.id}:{}}))});
-   if(b.operation==='check')return {name:String(b.name).trim().toLowerCase(),valid:/^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/.test(String(b.name).trim().toLowerCase()),available:String(b.name).trim()!=='taken'};
-   if(b.operation==='claim'){a.name=String(b.name).trim().toLowerCase();a.chosen=true;a.reachable=true;a.devices=[{id:'pk1',name:'Chrome on Mac',addedAt:'2026-10-18T12:00:00.000Z'}];a.visitors=[{id:'v1',name:'Sam',sees:['Board'],seenAt:'2026-10-18T13:00:00.000Z'}];a.shares=[{id:'share0AAAAAAAAAAAAAAA',title:'Board',open:true,people:0}];return out();}
    if(b.operation==='share'){a.shares.push({id:'share'+a.shares.length+'AAAAAAAAAAAAAAA',title:'Board',open:b.open===true,people:0});return out();}
    if(b.operation==='unshare'){a.shares=a.shares.filter(s=>s.id!==b.id);return out();}
    if(b.operation==='remove'){a.devices=a.devices.filter(d=>d.id!==b.id);a.visitors=a.visitors.filter(v=>v.id!==b.id);return out();}
@@ -268,26 +266,15 @@ try{
  assert.equal(await local.locator('details[data-part=advanced]').count(),0,'no Advanced');
  assert.equal(await local.locator('[data-script-agents],[data-wake],[data-github-writes]').count(),0,'no script Agents, wake commands or standing writes here');
  assert.equal(await local.getByRole('combobox',{name:'Give new work to',exact:true}).count(),0,'no work routing here');
- // Your World's address (agent/gate/WORLD-ADDRESS.md): one card with the address, Copy for Claude or ChatGPT and Choose a
- // name; who can open it is listed only when there is someone, each with its own way to end it; only names and IDs go
- // to the host.
+ // Your World's address (agent/gate/WORLD-ADDRESS.md): one card with the address and Copy for Claude or ChatGPT, nothing
+ // to choose (owner request 2026-10-22); who can open it is listed only when there is someone, each with its own way to
+ // end it; only IDs go to the host.
  const addressRoot=local.locator('[data-part=world-address]'),addressPart=addressRoot.locator('[data-world-address]');
- // Every World has a default address from the start; the person may choose a name once, and it then stays.
- await addressPart.locator('[data-world-address-link]').getByText('w-7k3m9p2x.worldlet.ai',{exact:true}).waitFor();
- assert.equal(await addressPart.locator('[data-world-address-who]').count(),0,'nobody listed yet');
+ await addressPart.locator('[data-world-address-link]').getByText('3f9a0c213f9a0c213f9a0c213f9a0c21.worldlet.ai',{exact:true}).waitFor();
  await addressPart.getByRole('button',{name:'Copy for Claude or ChatGPT',exact:true}).click();
  await addressRoot.getByText('Copied. Paste it in Claude or ChatGPT as a connector.',{exact:true}).waitFor();
- await addressPart.getByRole('button',{name:'Choose a name',exact:true}).click();
- await addressPart.getByText(/^Choose a name, like alex\.worldlet\.ai\. You choose it once and it stays/).waitFor();
- await addressPart.getByRole('textbox',{name:'Name for your World\'s address'}).fill('taken');
- await addressPart.getByRole('button',{name:'Choose',exact:true}).click();
- await addressRoot.getByText('taken.worldlet.ai is taken. Try another name.',{exact:true}).waitFor();
- await addressPart.getByRole('textbox',{name:'Name for your World\'s address'}).fill('Alex');
- await addressPart.getByText('Your address: https://alex.worldlet.ai',{exact:true}).waitFor();
- await addressPart.getByRole('button',{name:'Choose',exact:true}).click();
- await addressPart.locator('[data-world-address-link]').getByText('alex.worldlet.ai',{exact:true}).waitFor();
- assert.equal(await addressPart.getByRole('button',{name:'Choose a name',exact:true}).count(),0,'a chosen name stays');
- assert.equal(await addressPart.getByRole('button',{name:'Give up this name',exact:true}).count(),0,'nothing advanced');
+ assert.deepEqual(await page.evaluate(()=>(window as any).copied),['https://3f9a0c213f9a0c213f9a0c213f9a0c21.worldlet.ai/mcp']);
+ for(const gone of ['Choose a name','Give up this name'])assert.equal(await addressPart.getByRole('button',{name:gone,exact:true}).count(),0,gone+' is gone');
  const who=addressPart.locator('[data-world-address-who]');
  await who.getByText(/^Chrome on Mac · your browser · added /).waitFor();
  await who.getByText('Board · shared with anyone with the link',{exact:true}).waitFor();
@@ -300,8 +287,7 @@ try{
  await addressRoot.getByText('Board is no longer shared.',{exact:true}).waitFor();
  assert.equal(await addressPart.locator('[data-world-address-who]').count(),0,'nobody left to list');
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='worldAddress'&&c.operation!=='status')),
-  [{action:'worldAddress',operation:'check',name:'taken'},{action:'worldAddress',operation:'check',name:'Alex'},{action:'worldAddress',operation:'claim',name:'Alex'},
-   {action:'worldAddress',operation:'remove',id:'v1'},{action:'worldAddress',operation:'remove',id:'pk1'},{action:'worldAddress',operation:'unshare',id:'share0AAAAAAAAAAAAAAA'}],'only names and IDs');
+  [{action:'worldAddress',operation:'remove',id:'v1'},{action:'worldAddress',operation:'remove',id:'pk1'},{action:'worldAddress',operation:'unshare',id:'share0AAAAAAAAAAAAAAA'}],'only IDs');
  // What your own Agent may do: switches on its page, each sending only the Agent and which, never targets.
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'model'}})));
  await local.locator('[data-view=own-agent]').waitFor();

@@ -39,8 +39,8 @@ await withBrowser(async browser=>{
    if(action==='agentAccess'&&body.operation==='grantAsks'){w.access=w.access.map((a:any)=>a.id===body.id?{...a,asks:{...a.asks,[body.kind]:true}}:a);return {ok:true};}
    if(action==='remoteMcp'&&body.operation==='status')return structuredClone(w.remote);
    if(action==='remoteMcp'&&body.operation==='enable'){w.remote.enabled=true;return {ok:true};}
-   if(action==='worldAddress'&&body.operation==='status')return w.remote.enabled?{name:'w-7k3m9p2x',address:'https://w-7k3m9p2x.worldlet.ai',mcp:'https://w-7k3m9p2x.worldlet.ai/mcp',chosen:false,defaultName:'w-7k3m9p2x',reachable:true,remote:true,devices:[],visitors:[],shares:[]}
-    :{name:null,chosen:false,defaultName:null,reachable:false,remote:false,devices:[],visitors:[],shares:[]};
+   if(action==='worldAddress'&&body.operation==='status')return w.remote.enabled?{name:'3f9a0c213f9a0c213f9a0c213f9a0c21',address:'https://3f9a0c213f9a0c213f9a0c213f9a0c21.worldlet.ai',mcp:'https://3f9a0c213f9a0c213f9a0c213f9a0c21.worldlet.ai/mcp',reachable:true,remote:true,devices:[],visitors:[],shares:[]}
+    :{name:null,reachable:false,remote:false,devices:[],visitors:[],shares:[]};
    if(action==='harnessSkills'||action==='harnessSchedule'||action==='harnessApprovalRules'||action==='harnessConnections')return {current:{harness:'hermes',title:'Hermes Agent'},harnesses:[]};
    if(action==='foxPreferences')return {ok:true,dailyRoutines:{plan:true,summary:true}};
    if(action==='snapshot')return {connections:[]};
@@ -120,16 +120,16 @@ await withBrowser(async browser=>{
  await claudePage.getByRole('button',{name:'‹ All Agents',exact:true}).click();
  await rows.first().waitFor();
  // Your World's address: one card (owner request 2026-10-22: no Advanced). Turn on when it is off, then the address,
- // Copy for Claude or ChatGPT and Choose a name; no remote access controls, tokens, script Agents or work routing.
+ // Copy for Claude or ChatGPT, nothing to choose; no remote access controls, tokens, script Agents or work routing.
  const card=detail.locator('[data-world-address]');
  await detail.getByText('Use your World anywhere',{exact:true}).waitFor();
  assert.equal(await card.getByRole('button',{name:'Copy for Claude or ChatGPT',exact:true}).count(),0,'nothing to copy while it is off');
  await card.getByRole('button',{name:'Turn on',exact:true}).click();
- await card.locator('[data-world-address-link]').getByText('w-7k3m9p2x.worldlet.ai',{exact:true}).waitFor();
+ await card.locator('[data-world-address-link]').getByText('3f9a0c213f9a0c213f9a0c213f9a0c21.worldlet.ai',{exact:true}).waitFor();
  await card.getByRole('button',{name:'Copy for Claude or ChatGPT',exact:true}).click();
  await page.getByText('Copied. Paste it in Claude or ChatGPT as a connector.',{exact:true}).waitFor();
- assert.deepEqual(await page.evaluate(()=>(window as any).copied),['https://w-7k3m9p2x.worldlet.ai/mcp']);
- await card.getByRole('button',{name:'Choose a name',exact:true}).waitFor();
+ assert.deepEqual(await page.evaluate(()=>(window as any).copied),['https://3f9a0c213f9a0c213f9a0c213f9a0c21.worldlet.ai/mcp']);
+ assert.equal(await card.getByRole('button',{name:'Choose a name',exact:true}).count(),0,'nothing to choose');
  for(const gone of ['details[data-part=advanced]','details[data-part=remote]','[data-use-in-claude]','[data-script-agents]','details[data-remote-tokens]'])
   assert.equal(await detail.locator(gone).count(),0,gone+' is gone');
  for(const word of ['Advanced','Turn off','New address','Give new work to:','Add an Agent for a script'])
@@ -209,4 +209,4 @@ await withBrowser(async browser=>{
  if(screenshot)await page.screenshot({path:screenshot.replace(/\.png$/,'-narrow.png'),fullPage:true});
  assert.deepEqual(errors,[]);
 });
-console.log('PASS Settings in three areas: Services, Agents and Your data first, each with an icon, and the rest smaller; Agents lists your own Agent first with Manage for its page (Status, Scheduled, Does without asking and What it may do) and Back, what each may do in one line, Manage for each other Agent’s page of switches and Remove, nothing folded, Your World’s address as one card (Turn on, Copy for Claude or ChatGPT, Choose a name) and no Advanced; Your data shows how much each kind holds (only past conversations counted), Save a copy, the memory under Show and a Delete on each kind that asks first, nothing folded; old entry points land in their area; no technical word on the default path; narrow layout');
+console.log('PASS Settings in three areas: Services, Agents and Your data first, each with an icon, and the rest smaller; Agents lists your own Agent first with Manage for its page (Status, Scheduled, Does without asking and What it may do) and Back, what each may do in one line, Manage for each other Agent’s page of switches and Remove, nothing folded, Your World’s address as one card (Turn on, Copy for Claude or ChatGPT) and no Advanced; Your data shows how much each kind holds (only past conversations counted), Save a copy, the memory under Show and a Delete on each kind that asks first, nothing folded; old entry points land in their area; no technical word on the default path; narrow layout');
