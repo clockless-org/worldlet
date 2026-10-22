@@ -37,7 +37,7 @@ await withBrowser(fileAccess,async browser=>{
   await ready;return {worldVisible,firstFramePending,resolved,worldDrew:frames()>=from+2};
  });
  assert.deepEqual(painted,{worldVisible:true,firstFramePending:true,resolved:true,worldDrew:true},'World restore waits beyond DOM changes until the World itself has drawn again');
- const entry=page.locator(SETTINGS_BUTTON),type=page.locator('#notionInput'),mic=page.locator('.companion-speech-button'),controls=page.locator('.companion-controls>button:visible:not(.companion-order-button,.companion-speech-button,.companion-plus-button,.companion-voice-cancel,.companion-voice-stop)'),form=page.locator('#notionCommand'),panel=page.locator('#companionInfo');
+ const entry=page.locator(SETTINGS_BUTTON),type=page.locator('#notionInput'),mic=page.locator('.companion-speech-button'),controls=page.locator('.companion-controls>button:visible:not(.companion-bug-button,.companion-speech-button,.companion-plus-button,.companion-voice-cancel,.companion-voice-stop)'),form=page.locator('#notionCommand'),panel=page.locator('#companionInfo');
  const typing=()=>page.evaluate(()=>(document.querySelector('.notion-world') as HTMLElement).dataset.entryExpanded==='true');
  // One message bar under Fox (owner decision 2026-10-04): the field and Send, the microphone on its right (2026-10-07); the settings button beside Fox opens the panel.
  assert.equal(await controls.count(),0,'No icon row in the World');assert(await form.isVisible(),'The message bar is always there');
@@ -182,8 +182,8 @@ await withBrowser(fileAccess,async browser=>{
  await page.evaluate(()=>(window as any).worldletDesktopCompanion(false));await settle();
  {const world=await form.boundingBox();await page.evaluate(()=>(window as any).worldletDesktopCompanion(true));await settle();sameLine(await form.boundingBox(),world,'The bar keeps its place on the desktop');}
  await assertDesktopRow();
- // Orders were retired (2026-10-18): no bug button sits in the bar, in the World or on the desktop.
- assert.equal(await page.locator('.companion-order-button').count(),0);
+ // Orders were retired (2026-10-18); the bug that reports a problem shows only on Dev, Alpha and Beta (feedback-ui-check).
+ assert.equal(await page.locator('.companion-order-button').count(),0);assert.equal(await page.locator('.companion-bug-button').isVisible(),false);
  await page.mouse.move(5,5);await page.waitForTimeout(400);await page.evaluate(()=>(window as any).worldletDesktopCompanion(false));await settle();
  await page.emulateMedia({reducedMotion:'no-preference'});
  // Focus and sample in one step so a slow runner cannot finish the .22s widening first. It widens from

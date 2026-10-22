@@ -169,6 +169,11 @@ body.ui-gallery:has([data-theme=night]){background:#233c34}
 #notionWorld.native-console .companion-input-wave{padding-right:calc(var(--companion-bar-tools) + 12px);padding-left:calc(var(--companion-bar-lead,0px) + 16px)}
 #notionWorld.native-console .companion-controls.companion-voice-controls{left:auto;right:calc(50% - min(var(--companion-bar-width),calc(100vw - 32px)) / 2 + 4px);gap:2px;z-index:1;transition:right .22s ease-out}
 #notionWorld.native-console .companion-controls:empty{display:none}
+/* The bug (native-chat.ts, Dev, Alpha and Beta only) stands at the bar's left end, after "+" while the bar is open. */
+#notionWorld.native-console .companion-text-entry:has(>.companion-voice-controls>.companion-bug-button:not([hidden])){--companion-bar-lead:40px}
+#notionWorld.native-console .companion-voice-controls>.companion-bug-button{position:absolute;top:4px;right:calc(min(var(--companion-bar-width),calc(100vw - 32px)) - 44px);display:grid;place-items:center;width:36px;height:36px;min-height:36px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--hud-scene-ink,#fffdf4);cursor:pointer;transition:right .22s ease-out}
+#notionWorld.native-console .companion-voice-controls>.companion-bug-button:is(:hover,:focus-visible){background:var(--system-glass-press)}
+#notionWorld.native-console .companion-voice-controls>.companion-bug-button[hidden],#notionWorld.native-console:is([data-onboarding=true],[data-onboarding-locked=true],[data-tour-lock=true],[data-tour-spotlight=true]) .companion-bug-button{display:none}
 /* The microphone menu under the mic (#1228): long device names ellipsize; the current one is checked. */
 .companion-mic-menu{position:fixed;z-index:200;transform:translateX(-50%);display:flex;flex-direction:column;gap:2px;min-width:180px;max-width:min(320px,calc(100vw - 16px));padding:6px;box-sizing:border-box;border:1px solid var(--hud-scene-line,#ffffff40);border-radius:12px;background:#181b20e0;color:var(--hud-scene-ink,#fff);backdrop-filter:var(--hud-scene-blur,blur(12px));-webkit-backdrop-filter:var(--hud-scene-blur,blur(12px));pointer-events:auto}
 .companion-mic-menu[hidden]{display:none}
@@ -443,3 +448,5 @@ body>.tour-switch.tutorial-switch{position:fixed;left:0;top:0;z-index:2147483001
 #notionWorld.native-console .companion-voice-controls>.companion-plus-button:is(:hover,:focus-visible){background:var(--system-glass-press)}
 #notionWorld.native-console .companion-voice-controls>.companion-plus-button[hidden]{display:none}
 #notionWorld.native-console .companion-text-entry[data-send=true]{--companion-bar-lead:40px}
+#notionWorld.native-console .companion-text-entry[data-send=true]:has(>.companion-voice-controls>.companion-bug-button:not([hidden])){--companion-bar-lead:78px}
+#notionWorld.native-console .companion-text-entry[data-send=true] .companion-voice-controls>.companion-bug-button{right:calc(min(var(--companion-bar-width),calc(100vw - 32px)) - 120px)}

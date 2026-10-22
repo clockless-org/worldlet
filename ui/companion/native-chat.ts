@@ -128,7 +128,16 @@ export function createNativeChat(call){return function({button,input,status,exec
  voiceCancel.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
  voiceStop.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>';
  for(const button of [voiceCancel,voiceStop])button.addEventListener('pointerdown',e=>e.stopPropagation());
- voiceControls.append(plusButton,voiceCancel,voiceStop,speechButton);entry.append(voiceControls);
+ // The bug at the bar's left end reports a problem (owner request 2026-10-22, after Orders left with their bug on
+ // 2026-10-18): a click opens Feedback over the World. Only the Dev, Alpha and Beta apps show it; Production keeps
+ // Feedback in Settings › Help.
+ const bugButton=make('button','companion-bug-button');bugButton.type='button';bugButton.innerHTML=uiIcon('bug');
+ bugButton.title='Report a bug to the Worldlet team';bugButton.setAttribute('aria-label','Report a bug');bugButton.hidden=true;
+ bugButton.addEventListener('pointerdown',e=>e.stopPropagation());
+ bugButton.onclick=e=>{e.stopPropagation();window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Feedback'}}));};
+ const bugChannel=()=>call('appUpdate',{operation:'status'}).then(r=>{bugButton.hidden=!['dev','alpha','beta'].includes(r?.channel);},()=>{bugButton.hidden=true;});
+ void bugChannel();window.addEventListener('worldlet:app-update',()=>void bugChannel());
+ voiceControls.append(plusButton,bugButton,voiceCancel,voiceStop,speechButton);entry.append(voiceControls);
  // In one of Fox's other sessions the bar names it (“Message Fox · #diet”) and this ×, beside the microphone, goes back
  // to the main one.
  const sessionLeave=make('button','companion-session-leave');sessionLeave.type='button';sessionLeave.hidden=true;sessionLeave.setAttribute('aria-label','Back to the main conversation');
