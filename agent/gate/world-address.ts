@@ -1,6 +1,6 @@
 import {AGENT_ASK_PROVIDER} from '../../contracts/agent-asks.ts';
 import type {WorldItem} from '../../contracts/world.ts';
-import type {RemoteMcpConsent,RemoteMcpRequest,RemoteMcpResponse} from './remote-mcp.ts';
+import {remoteRequestFrom,type RemoteMcpConsent,type RemoteMcpRequest,type RemoteMcpResponse} from './remote-mcp.ts';
 
 // One address per World (WORLD-ADDRESS.md; owner decisions 2026-10-18 and 2026-10-22): `https://<room>.worldlet.ai`,
 // for the World's page and, at `/mcp`, its remote MCP server. The name is the room of remote access's host token, so
@@ -8,7 +8,7 @@ import type {RemoteMcpConsent,RemoteMcpRequest,RemoteMcpResponse} from './remote
 // serves one static page there for everyone and passes the page's requests to this computer over the remote MCP
 // connection, as `address` requests (`kind: 'address'` on the front's frame); it keeps only the name and its World's
 // front key. Every decision is made here, never on the website:
-// - The owner's new browser asks to be let in with a passkey it just made for this address and a four-digit code; a
+// - The owner's new browser asks to be let in with a passkey it just made for this address; a
 //   card in Attention on this computer asks the person to allow it. Then the passkey signs it in, and it is handed
 //   this World's link, which opens the full World on that origin, sealed end to end through the pairing room.
 // - Other people see nothing unless the person shares one thing (the board, for now): open to anyone with its link,
@@ -130,12 +130,12 @@ export function worldAddressRequestItem(request:WorldAddressRequest,address:stri
  const at=new Date(request.createdAt).toISOString();
  const title=request.asks==='owner'?`Allow ${request.client} to open your World?`:`${request.client} wants to see your ${request.share?.title??'board'}`;
  const summary=request.asks==='owner'
-  ?`A browser called ${request.client} asks to open your whole World at ${address}, as you. Allow only if you are using it right now and it shows the code ${request.code}. It keeps a passkey for this World; sign it out in Settings › Agents.`
-  :`Someone who gave the name ${request.client} asked to see ${request.share?.title??'your board'} at ${address}. They can only read it. Allow only if you meant to share it with them; you can ask them for the code ${request.code}. Remove them in Settings › Agents.`;
+  ?`A browser called ${request.client} asks to open your whole World at ${address}, as you. Allow only if you are using it right now${request.from?` (${request.from})`:''}. It keeps a passkey for this World; sign it out in Settings › Agents.`
+  :`Someone who gave the name ${request.client} asked to see ${request.share?.title??'your board'} at ${address}. They can only read it. Allow only if you meant to share it with them${request.from?` (they asked from ${request.from})`:''}. Remove them in Settings › Agents.`;
  return {id:'remote-mcp-consent:'+request.id,provider:AGENT_ASK_PROVIDER,kind:'task',status:ITEM_STATUS[request.status],title:[...title].slice(0,200).join(''),context:summary,summary,
   reason:request.asks==='owner'?'A browser asks to open your World':'Someone asks to see what you shared',attentionContentVersion:1,attentionReason:summary,
   sources:[{provider:AGENT_ASK_PROVIDER,id:request.id,quote:title}],
-  remoteConsentId:request.id,remoteConsentClient:request.client,remoteConsentCode:request.code,remoteConsentReturnsTo:request.returnsTo,remoteConsentStatus:request.status,
+  remoteConsentId:request.id,remoteConsentClient:request.client,remoteConsentFrom:request.from,remoteConsentReturnsTo:request.returnsTo,remoteConsentStatus:request.status,
   remoteConsentAsks:request.asks,...request.share?{remoteConsentShare:request.share.title}:{},
   createdAt:at,updatedAt:at} as WorldItem;
 }
@@ -239,13 +239,13 @@ export function createWorldAddressServer(deps:WorldAddressDeps):WorldAddressServ
   if(state.passkeys.some(p=>p.id===c.id))return json(409,{error:'This passkey is already known here. Sign in with it.'});
   sweep();
   if([...pending.values()].filter(p=>p.request.status==='pending').length>=WORLD_ADDRESS_LIMITS.requests)return json(429,{error:'Too many requests are waiting for an answer. Try again later.'});
-  const at=now(),n=random(4);
-  const req:WorldAddressRequest={id:WORLD_ADDRESS_REQUEST_PREFIX+b64url(random(16)),client:label,returnsTo:new URL(origin).hostname,code:String(1000+((n[0]<<8|n[1])%9000)),
+  const at=now();
+  const req:WorldAddressRequest={id:WORLD_ADDRESS_REQUEST_PREFIX+b64url(random(16)),client:label,returnsTo:new URL(origin).hostname,from:remoteRequestFrom(request),
    createdAt:at,expiresAt:at+WORLD_ADDRESS_LIMITS.requestSeconds*1000,status:'pending',asks:share?'visitor':'owner',...share?{share:{id:share.id,title:share.title}}:{}};
   const passkey:AddressPasskey={id:c.id,publicKey:b64url(spki),algorithm:c.algorithm,label,signCount:signCount(authData),createdAt:at};
   if(!deps.show(req))return json(503,{error:'This World cannot ask its owner yet. Try again later.'});
   pending.set(req.id,{request:req,passkey,...share?{share:share.id}:{},waiters:new Set()});
-  return json(200,{id:req.id,code:req.code});
+  return json(200,{id:req.id});
  }
  async function wait(request:RemoteMcpRequest){
   sweep();

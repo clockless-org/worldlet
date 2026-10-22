@@ -33,7 +33,7 @@ export const REMOTE_MCP_LIMITS=Object.freeze({
 /** MCP protocol versions this server speaks, newest first. */
 export const REMOTE_MCP_PROTOCOLS=['2025-06-18','2025-03-26','2024-11-05'] as const;
 export const REMOTE_MCP_INSTRUCTIONS='Worldlet is the person\'s World, running on their own computer. Call describe_world_tools to see what you may do here, then call_world_tool. Some calls wait for the person\'s approval in Worldlet; a refused call says why.';
-const FORWARDED_HEADERS=['authorization','content-type','accept','mcp-protocol-version','mcp-session-id'];
+const FORWARDED_HEADERS=['authorization','content-type','accept','mcp-protocol-version','mcp-session-id','x-mcp-from'];
 
 const enc=new TextEncoder();
 const randomBytes=(n:number)=>crypto.getRandomValues(new Uint8Array(n));
@@ -112,10 +112,12 @@ export function redirectPlace(value:string):string {
  try{const url=new URL(value);return url.protocol==='https:'||url.protocol==='http:'?url.hostname:url.protocol.slice(0,-1)+' app';}catch{return 'an unknown place';}
 }
 
+/** Where a request comes from, as the front words it ("Chrome on Mac · San Francisco, US"), or '' when it does not say. */
+export const remoteRequestFrom=(request:RemoteMcpRequest)=>text(request.headers['x-mcp-from'],80);
 /** One authorization waiting on, or answered by, the person. The client's name is what it registered itself: the card
- * also names where it returns and a code the waiting page shows, so the person can tell it is the one they started. */
+ * also names where it returns and the browser and city it was started from, so the person can tell it is theirs. */
 export type RemoteMcpConsentStatus='pending'|'allowed'|'denied'|'expired';
-export type RemoteMcpConsent={id:string;client:string;returnsTo:string;code:string;createdAt:number;expiresAt:number;status:RemoteMcpConsentStatus};
+export type RemoteMcpConsent={id:string;client:string;returnsTo:string;from:string;createdAt:number;expiresAt:number;status:RemoteMcpConsentStatus};
 export const remoteConsentItemId=(id:string)=>'remote-mcp-consent:'+id;
 const CONSENT_ITEM_STATUS:Record<RemoteMcpConsentStatus,'open'|'done'|'dismissed'>={pending:'open',allowed:'done',denied:'dismissed',expired:'dismissed'};
 /** The connected Services in a sentence: "GitHub", "GitHub and PostHog", "GitHub, PostHog and Cloudflare". */
@@ -129,11 +131,11 @@ export function remoteConsentItem(consent:RemoteMcpConsent,services:readonly str
  const title=`${consent.client} wants to use your World`;
  const named=services.filter(name=>typeof name==='string'&&name).slice(0,10);
  const reads=named.length?` Allow also lets it read your ${remoteConsentServicesWords(named)}, so it can answer with them; it never changes anything there without asking you. Choose Allow without them to keep them private.`:'';
- const summary=`Allow only if you just started connecting ${consent.client} and its page shows the code ${consent.code}. It returns to ${consent.returnsTo}.${reads} It connects as an Agent of its own: you choose what it may do, and can revoke it, in Settings › Agents.`;
+ const summary=`Allow only if you just started connecting ${consent.client}${consent.from?` from ${consent.from}`:''}. It returns to ${consent.returnsTo}.${reads} It connects as an Agent of its own: you choose what it may do, and can revoke it, in Settings › Agents.`;
  return {id:remoteConsentItemId(consent.id),provider:AGENT_ASK_PROVIDER,kind:'task',status:CONSENT_ITEM_STATUS[consent.status],title:[...title].slice(0,200).join(''),context:summary,summary,
   reason:'A connector asks to reach your World',attentionContentVersion:1,attentionReason:summary,
   sources:[{provider:AGENT_ASK_PROVIDER,id:consent.id,quote:title}],
-  remoteConsentId:consent.id,remoteConsentClient:consent.client,remoteConsentCode:consent.code,remoteConsentReturnsTo:consent.returnsTo,remoteConsentStatus:consent.status,...named.length?{remoteConsentServices:named}:{},
+  remoteConsentId:consent.id,remoteConsentClient:consent.client,remoteConsentFrom:consent.from,remoteConsentReturnsTo:consent.returnsTo,remoteConsentStatus:consent.status,...named.length?{remoteConsentServices:named}:{},
   createdAt:at,updatedAt:at} as WorldItem;
 }
 /** The Agent an allowed connection becomes: its own ID, the client's name, kind `remote`. */
@@ -185,7 +187,7 @@ const escapeHtml=(text:string)=>text.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 const scriptValue=(value:unknown)=>JSON.stringify(value).replace(/</g,'\\u003c');
 function page(title:string,lines:string[],script='',nonce=''):RemoteMcpResponse {
  const body=`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>${escapeHtml(title)}</title>`+
-  `<style>body{font:16px/1.5 system-ui,sans-serif;max-width:32rem;margin:12vh auto;padding:0 16px;color:#1d1b18;background:#faf7f2}@media(prefers-color-scheme:dark){body{color:#eee8df;background:#1c1a17}}h1{font-size:1.4rem}.code{font-size:2rem;letter-spacing:.2em;font-weight:600}</style></head>`+
+  `<style>body{font:16px/1.5 system-ui,sans-serif;max-width:32rem;margin:12vh auto;padding:0 16px;color:#1d1b18;background:#faf7f2}@media(prefers-color-scheme:dark){body{color:#eee8df;background:#1c1a17}}h1{font-size:1.4rem}</style></head>`+
   `<body><h1>${escapeHtml(title)}</h1>${lines.join('')}${script?`<script nonce="${nonce}">${script}</script>`:''}</body></html>`;
  return {status:200,headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store','referrer-policy':'no-referrer','content-security-policy':PAGE_CSP(nonce||'none')},body};
 }
@@ -269,8 +271,8 @@ export function createRemoteMcpServer(deps:RemoteMcpDeps):RemoteMcpServer {
   if(q.get('code_challenge_method')!=='S256'||!/^[A-Za-z0-9_-]{43}$/.test(challenge))return fail('invalid_request','PKCE with S256 is required.');
   const waiting=[...pending.values()].filter(p=>p.consent.status==='pending');
   if(waiting.length>=REMOTE_MCP_LIMITS.consents)return errorPage(429,'Too many connections are waiting for an answer in Worldlet. Answer or let them run out, then try again.');
-  const at=now(),n=random(4),code=String(1000+((n[0]<<8|n[1])%9000));
-  const consent:RemoteMcpConsent={id:b64url(random(16)),client:client.name,returnsTo:redirectPlace(redirectUri),code,createdAt:at,expiresAt:at+REMOTE_MCP_LIMITS.consentSeconds*1000,status:'pending'};
+  const at=now();
+  const consent:RemoteMcpConsent={id:b64url(random(16)),client:client.name,returnsTo:redirectPlace(redirectUri),from:remoteRequestFrom(request),createdAt:at,expiresAt:at+REMOTE_MCP_LIMITS.consentSeconds*1000,status:'pending'};
   if(!deps.show(consent))return errorPage(503,'Worldlet cannot ask you yet: finish setting it up on your computer, then try again.');
   pending.set(consent.id,{consent,clientId:client.id,redirectUri,challenge,state,base:request.base,redirect:null,waiters:new Set()});
   const nonce=b64url(random(16));
@@ -279,8 +281,7 @@ export function createRemoteMcpServer(deps:RemoteMcpDeps):RemoteMcpServer {
    `if(r.redirect){say(r.allowed?'Allowed. Returning…':'You declined. Returning…');location.replace(r.redirect);return;}`+
    `if(r.expired){say('This request ran out. Start connecting again.');return;}}})();`;
   return page('Connect to your World',[`<p>${escapeHtml(client.name)} wants to use your World.</p>`,
-   '<p>Open Worldlet on your computer and choose Allow on the card in Attention. Allow only if the card shows this code:</p>',
-   `<p class="code">${code}</p>`,'<p id="said" role="status">Waiting for your answer…</p>'],script,nonce);
+   '<p>Open Worldlet on your computer and choose Allow on the card in Attention.</p>','<p id="said" role="status">Waiting for your answer…</p>'],script,nonce);
  }
  async function wait(request:RemoteMcpRequest){
   if(request.method!=='GET')return notAllowed('GET');

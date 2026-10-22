@@ -1192,7 +1192,7 @@ export function mountNotionWorld(data: World, native: any) {
     };
     attentionPreview.setActions([{key:'allow',label:'Allow',primary:true,run:act('allow')},...named&&!consent.asks?[{key:'allow-basic',label:'Allow without them',run:act('allow-basic')}]:[],{key:'deny',label:'Deny',run:act('deny')}]);
     attentionPreview.setReview({text:consent.asks==='owner'?`${consent.client} · at ${consent.returnsTo} · opens your whole World as you`:consent.asks==='visitor'?`${consent.client} · at ${consent.returnsTo} · may only read your ${consent.share||'board'}`
-     :`${consent.client} · returns to ${consent.returnsTo}${named?` · Allow also lets it read your ${named}`:''}`,quote:`Code ${consent.code}`,choices:[]});
+     :`${consent.client} · returns to ${consent.returnsTo}${named?` · Allow also lets it read your ${named}`:''}`,quote:consent.from?`From ${consent.from}`:'',choices:[]});
     showDraftLine(page);voice?.setAttentionActions?.([]);
     return;
    }
