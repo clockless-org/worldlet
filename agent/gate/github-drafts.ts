@@ -263,7 +263,7 @@ export function githubDraftCreatedPath(draft:GithubDraft):string {
  const since=new Date(Date.parse(draft.writeStartedAt??draft.updatedAt)-60_000).toISOString();
  return `${githubDraftReadPath('issue.create',githubDraftTargetParts(draft))}/issues?state=all&sort=created&direction=desc&per_page=50&since=${encodeURIComponent(since)}`;
 }
-/** Who writes: the person's own GitHub App (`appId`, Settings › Connectors › Advanced), or the person through their
+/** Who writes: the person's own GitHub App (`appId`, Settings › Services › Advanced), or the person through their
  * GitHub sign-in with the Worldlet GitHub App (`clientId`, its public client ID, and `slug`). */
 export type GithubWriter={appId:string}|{clientId:string;slug:string};
 /** The link of the Issue a started create made, from GitHub's answer to githubDraftCreatedPath: one with exactly the

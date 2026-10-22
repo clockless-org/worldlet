@@ -24,7 +24,7 @@ export interface ServiceRequests {
 
 export function createServiceRequests({ledger,access,connected,title,changed,now=()=>new Date().toISOString()}:
  {ledger:()=>ServiceRequestLedger|null;access:()=>AgentAccess|null;connected:(provider:string)=>boolean;title:(provider:string)=>string;changed:()=>void;now?:()=>string}):ServiceRequests {
- // A Service that signs in is connected from the card itself; one that takes a key, under Settings › Connectors.
+ // A Service that signs in is connected from the card itself; one that takes a key, under Settings › Services.
  const signsIn=(provider:string)=>['mcp-oauth','google'].includes(connector(provider)?.mechanism??'');
  const load=(db:ServiceRequestLedger)=>contextReader(ledgerContext(db)).bodies('service-requests').flatMap(row=>{const request=readServiceRequest(row);return request?[request]:[];});
  // Through the one way in to Context (#676): who writes decides whether the item's status is the person's. A request is

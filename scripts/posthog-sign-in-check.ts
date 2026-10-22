@@ -81,7 +81,7 @@ assert.equal(state.tokens.at(-1)!.grant_type,'refresh_token');
 assert.equal(state.api.at(-1)!.auth,'Bearer pha_2');
 // PostHog no longer accepts the sign-in: the read says to sign in again, in plain words.
 state.valid.clear();state.refuseRefresh=true;clock+=7200_000;
-await assert.rejects(source.read('posthog',{operation:'read',id:'insights'}),/^Error: PostHog signed you out\. Sign in to PostHog again in Settings › Connectors\.$|PostHog signed you out/);
+await assert.rejects(source.read('posthog',{operation:'read',id:'insights'}),/^Error: PostHog signed you out\. Sign in to PostHog again in Settings › Services\.$|PostHog signed you out/);
 state.refuseRefresh=false;
 // Sign in again; the first approved change asks for the write scopes in the browser, then writes.
 await source.connect('posthog','',{},browser);

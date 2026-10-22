@@ -200,6 +200,26 @@
 .companion-settings-memory .companion-settings-rows>button{align-self:flex-start}
 .companion-settings-memory .companion-settings-rows>.companion-settings-quiet{font-size:12px;color:#656651}
 .companion-settings-row .companion-settings-tag{display:inline-block;margin-left:2px;padding:0 6px;border-radius:8px;background:#d9cbae80;font-size:11px;font-weight:500;color:#5b5440;vertical-align:1px}
+/* Icons make Settings clear at a glance (owner request 2026-10-21, ui/frame/settings-rows.ts): one on each list item
+   and on the left of each row; services wear their logo, an Agent without one its first letter. */
+.companion-settings-icon{flex:none;display:grid;place-items:center;width:34px;height:34px;border:1px solid #e3d6bb;border-radius:10px;background:#fffaf0;color:#5a6b4f}
+.companion-settings-icon img{width:22px;height:22px;object-fit:contain}
+.companion-settings-icon.is-letter{background:#f6e3c2;color:#7a4e1f;font-size:14px;font-weight:700}
+.companion-settings-item .companion-settings-icon{width:auto;height:auto;border:0;background:none;color:#6b7a5d}
+.companion-settings-item[aria-current] .companion-settings-icon{color:#8a5a1c}
+.companion-info-panel .companion-settings-item.has-icon{flex-direction:row;align-items:flex-start;gap:10px}
+.companion-settings-item.is-minor span.companion-settings-icon{display:grid}
+.companion-settings-item.has-icon>.companion-settings-item-words{display:flex;flex-direction:column;min-width:0}
+.companion-settings-row.has-icon{align-self:stretch}
+.companion-settings-slot{display:contents}
+.companion-settings-rows>.companion-settings-status:empty{display:none}
+.companion-settings-switch{all:unset;box-sizing:border-box;flex:none;position:relative;width:38px;height:22px;border-radius:11px;background:#cfc6b3;cursor:pointer;transition:background .15s}
+.companion-settings-switch::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0003;transition:left .15s}
+.companion-settings-switch[aria-checked=true]{background:#4f9a5a}
+.companion-settings-switch[aria-checked=true]::after{left:18px}
+.companion-settings-switch:focus-visible{outline:2px solid #a38048;outline-offset:2px}
+.companion-settings-switch:disabled{opacity:.6;cursor:default}
+.companion-settings-ok::before{content:"";display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;background:#3c9a4c}
 .companion-settings-agent-routines code{font-size:12px;overflow-wrap:anywhere}
 .companion-settings-row>.companion-settings-actions{flex:0 0 auto;flex-direction:row;align-items:center;justify-content:flex-end}
 .companion-settings-row>.companion-settings-confirm{flex:1 1 100%;flex-direction:row}

@@ -172,7 +172,7 @@ export function createAgentService(context:RuntimeContext,selected:Adapter|(()=>
    const rules=standingRules(install,currentEnvironment());
    return rules?[{harness:install.id,title:install.title,rules:{list:()=>rules.list(),revoke:async(id:string)=>{await rules.revoke(id);current().forgetApprovals?.(install.id);}}}]:[];
   }),
-  // The same Harnesses' connections (Settings › Connectors); Fox's own Hermes profile is not the person's Hermes Agent.
+  // The same Harnesses' connections (Settings › Services); Fox's own Hermes profile is not the person's Hermes Agent.
   harnessConnections:()=>personsHarnesses().flatMap(install=>{
    const connections=harnessConnections(install,currentEnvironment());
    return connections?[{harness:install.id,title:install.title,connections}]:[];
@@ -691,7 +691,7 @@ export function installAgentRuntime(host:Host){
  const githubSignIn=new McpAccounts({vault,agentHomes:()=>[]});
  githubDrafts=createGithubDrafts({ledger:()=>{try{return host.store.writable&&!host.store.sampleEnabled()&&host.store.state.cloudConsent===true?host.store.ledger():null;}catch{return null;}},
   vault,name:agentId=>agentAccess?.identity(agentId)?.name??agentId,changed:()=>host.store.worldChanged(),userAgent:`Worldlet/${app.getVersion()}`,
-  // Writes as the person through their GitHub sign-in (Settings › Connectors), when no own GitHub App is connected.
+  // Writes as the person through their GitHub sign-in (Settings › Services), when no own GitHub App is connected.
   signedIn:()=>githubSignIn.signedInWith('github',GITHUB_APP.clientId),
   userToken:async force=>githubSignIn.signedInWith('github',GITHUB_APP.clientId)?(await githubSignIn.bearer('github',force))?.replace(/^Bearer /,'')??null:null});
  // What Agents save to the Journal (agent/gate/GRANTS.md#agent-artifacts): in the person's own World with private context allowed, as asks
@@ -722,7 +722,7 @@ export function installAgentRuntime(host:Host){
   }catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
   throw new WorldletError('Unknown draft operation.');
  }});
- /** The GitHub App that writes approved drafts (Settings › Connectors): `status`, `connect` (its App ID,
+ /** The GitHub App that writes approved drafts (Settings › Services): `status`, `connect` (its App ID,
   * installation ID and private key, checked with GitHub before they are kept in the vault) and `disconnect`. None
   * answers with the App's settings. Not in ROOM_ALLOWED. */
  host.register({githubApp:async request=>{
@@ -733,7 +733,7 @@ export function installAgentRuntime(host:Host){
   }catch(error){throw new WorldletError(error instanceof Error&&error.message?error.message:'Could not do that.');}
   throw new WorldletError('Unknown GitHub App operation.');
  }});
- /** HTTP JSON's endpoints (Settings › Connectors): `list` (each one's name, address and whether it has a token,
+ /** HTTP JSON's endpoints (Settings › Services): `list` (each one's name, address and whether it has a token,
   * never the token) and `remove` (one by `name`; the last goes with Disconnect). Connecting one is `connect` with
   * provider `http`. Not in ROOM_ALLOWED. */
  host.register({httpJson:async request=>{
@@ -813,7 +813,7 @@ export function installAgentRuntime(host:Host){
  host.store.onChange(connectedNow);
  host.register({agentAccess:async request=>{
   const access=agentAccess!;
-  // "Who may use it" under a connected Service's tile in Settings › Connectors: the Agent Fox uses and every other Agent
+  // "Who may use it" under a connected Service's tile in Settings › Services: the Agent Fox uses and every other Agent
   // not revoked, each with whether it may read that Service now. Changing one is grantService or ungrantService.
   if(request.operation==='serviceReaders'){
    const provider=typeof request.provider==='string'?request.provider:'';
@@ -876,7 +876,7 @@ export function installAgentRuntime(host:Host){
    if(!identity)throw new WorldletError('That Agent is not known here.');
    if(request.operation==='grantGithubDrafts'){
     if(agentRevoked(identity,new Date().toISOString()))throw new WorldletError('This Agent was revoked.');
-    if(!githubDrafts?.writer())throw new WorldletError('Connect GitHub in Settings › Connectors first.');
+    if(!githubDrafts?.writer())throw new WorldletError('Connect GitHub in Settings › Services first.');
     if(!access.grantGithubDrafts(id))throw new WorldletError('Could not change that.');
    }else if(!access.ungrantGithubDrafts(id))throw new WorldletError('Could not change that.');
    return {ok:true};
@@ -905,7 +905,7 @@ export function installAgentRuntime(host:Host){
    if(!identity)throw new WorldletError('That Agent is not known here.');
    if(request.operation==='grantGithubWrites'){
     if(agentRevoked(identity,new Date().toISOString()))throw new WorldletError('This Agent was revoked.');
-    if(!githubDrafts?.app.status().connected)throw new WorldletError('Changing GitHub without asking needs your own GitHub App, under Settings › Connectors › Advanced.');
+    if(!githubDrafts?.app.status().connected)throw new WorldletError('Changing GitHub without asking needs your own GitHub App, under Settings › Services › Advanced.');
     if(!access.grantGithubWrites(id,request.repo,request.choice,request.labelPrefix))throw new WorldletError(`Could not allow that. Name the repository as owner/repo, and a label prefix such as state: for labels; one Agent can have this on at most ${GITHUB_WRITE_LIMITS.grantsPerAgent} repositories.`);
    }else if(!access.ungrantGithubWrites(id,request.repo))throw new WorldletError('Could not change that.');
    return {ok:true};

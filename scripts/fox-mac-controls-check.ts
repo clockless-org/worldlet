@@ -165,7 +165,7 @@ await withBrowser(fileAccess,async browser=>{
  // Settings work like a settings window (owner feedback 2026-10-03, one list since 2026-10-10): the list on the left,
  // the chosen section's details on the right, and nothing hands off to Fox's speech bubble. No animation tools.
  assert.deepEqual(await panel.locator('.companion-settings-item strong').allTextContents(),
-  ['Connectors','Agents','Context','Fox','Phone','General','Help']);
+  ['Services','Agents','Your data','Fox','Phone','General','Help']);
  assert.equal(await panel.getByRole('button',{name:/Animation timing|Preview animation/}).count(),0);
  const detail=panel.locator('.companion-settings-detail');
  // The one privacy choice left is the usage counts switch in General (owner request 2026-10-10).
@@ -203,6 +203,8 @@ await withBrowser(fileAccess,async browser=>{
  // computer only open channels can be chosen, anywhere else there is no switcher.
  assert.equal(await panel.locator('.companion-settings-version').textContent(),'Worldlet 2026.1004.2750 · Beta','the version and channel show under the Settings list');
  await panel.locator('[data-setting=general]').click();
+ await detail.locator('[data-setting=updates]').getByText('Worldlet 2026.1004.2750',{exact:true}).waitFor();
+ await detail.locator('details[data-setting=update-channel]>summary').click();
  await detail.getByText('Worldlet 2026.1004.2750 · Build 2750',{exact:false}).waitFor();
  const follow=(id:string)=>detail.locator(`[data-channel=${id}] button`);
  assert.deepEqual(await Promise.all(['dev','alpha','beta','production'].map(async id=>[await follow(id).textContent(),await follow(id).isDisabled()])),[['Follow',true],['Follow',false],['Following',true],['Follow',true]]);
@@ -213,10 +215,12 @@ await withBrowser(fileAccess,async browser=>{
  await page.screenshot({path:'output/fox-mac/updates.png'});
  await page.evaluate(()=>{window.updateSwitchable=false;});
  await panel.locator('[data-setting=help]').click();await panel.locator('[data-setting=general]').click();
+ await detail.locator('details[data-setting=update-channel]>summary').click();
  await detail.locator('[data-channel=beta]').getByText('Beta · 公测',{exact:false}).waitFor();
  assert.equal(await detail.locator('[data-channel] button').count(),0,'off the owner’s computer there is nothing to switch');
  assert.equal(await detail.locator('[data-channel]').count(),1,'only the channel it follows shows');
  await panel.locator('[data-setting=help]').click();
+ await detail.locator('details[data-setting=help-more]>summary').click();
  await detail.getByRole('button',{name:'Reset',exact:true}).click();
  await page.waitForFunction(()=>calls.some(c=>c.action==='resetFox'));
  assert.equal(await page.evaluate(()=>sessionStorage.getItem('fox-reset')),'cancelled');

@@ -1,4 +1,4 @@
-// Settings › Connectors (ui/frame/connectors-page.ts) against a fake host: one tile per sign-in service with
+// Settings › Services (ui/frame/connectors-page.ts) against a fake host: one tile per sign-in service with
 // Connect, the waiting state with Cancel, Connected with Disconnect that asks once, a plain line when a sign-in did not
 // finish or the service signed the person out, key services shown once connected, and every key, address and file
 // under Advanced. Fails when the default path (everything outside Advanced) shows a technical word
@@ -228,4 +228,4 @@ await withBrowser(async browser=>{
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'narrow settings do not overflow horizontally');
  if(screenshot)await page.screenshot({path:screenshot.replace(/\.png$/,'-narrow.png'),fullPage:true});
 });
-console.log('PASS Settings › Connectors: Services only (using the World in Claude or ChatGPT is under Agents), GitHub\'s code with Copy and open GitHub and Choose projects, sign-in tiles with Connect, waiting and Cancel, Connected as, Disconnect asks once, plain words for a refusal and a sign-out, who may use it (the Agent in use on, Choose Agents), kept up to date ("Updated 5 minutes ago", the switch on by default), the PostHog project and Cloudflare account choices, Search Console signing in with Google, key services shown connected, keys and addresses only under Advanced, no technical word on the default path, narrow layout');
+console.log('PASS Settings › Services: Services only (using the World in Claude or ChatGPT is under Agents), GitHub\'s code with Copy and open GitHub and Choose projects, sign-in tiles with Connect, waiting and Cancel, Connected as, Disconnect asks once, plain words for a refusal and a sign-out, who may use it (the Agent in use on, Choose Agents), kept up to date ("Updated 5 minutes ago", the switch on by default), the PostHog project and Cloudflare account choices, Search Console signing in with Google, key services shown connected, keys and addresses only under Advanced, no technical word on the default path, narrow layout');

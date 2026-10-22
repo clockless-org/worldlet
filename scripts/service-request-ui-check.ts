@@ -3,7 +3,7 @@ import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld} from './browser
 // An Agent's first need of a Service on its Attention card (agent/gate/GRANTS.md#when-an-agent-first-needs-a-service):
 // Allow and Not now go to the host's `serviceRequest` with only the request's ID; a Service that is not connected and
 // signs in is connected from the card (the host's `connect`, into its Thing's region) before Allow; one that takes a key
-// opens Settings › Connectors. Never the ordinary item status. Bundled UI, faked bridge, fictional requests.
+// opens Settings › Services. Never the ordinary item status. Bundled UI, faked bridge, fictional requests.
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1440,height:1000},reducedMotion:'reduce'});page.setDefaultTimeout(15000);
  const errors=pageErrors(page);
@@ -56,11 +56,11 @@ await withBrowser(fileAccess,async browser=>{
  await preview.getByRole('button',{name:'Connect Cloudflare'}).click();
  await page.waitForFunction(()=>(window as any).calls.filter((c:any)=>c.action==='serviceRequest').length===2);
  assert.deepEqual((await sent()).slice(1),[{action:'connect',provider:'cloudflare',region:'work'},{action:'serviceRequest',operation:'allow',id:'claude-code.cloudflare'}]);
- // Takes a key: Open Connectors opens Settings › Connectors and answers nothing; Not now declines.
+ // Takes a key: Open Services opens Settings › Services and answers nothing; Not now declines.
  await row('service-request:codex.github').click({timeout:30000});
- await preview.getByRole('button',{name:'Open Connectors'}).waitFor();
- assert.deepEqual(await preview.locator('.attention-preview-action').allTextContents(),['Open Connectors','Allow','Not now']);
- await preview.getByRole('button',{name:'Open Connectors'}).click();
+ await preview.getByRole('button',{name:'Open Services'}).waitFor();
+ assert.deepEqual(await preview.locator('.attention-preview-action').allTextContents(),['Open Services','Allow','Not now']);
+ await preview.getByRole('button',{name:'Open Services'}).click();
  assert.deepEqual(await page.evaluate(()=>(window as any).opened),[{tab:'Settings',setting:'connectors'}]);
  assert.equal((await sent()).length,3,'opening Connectors answers nothing');
  await preview.getByRole('button',{name:'Not now'}).click();
@@ -69,4 +69,4 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal((await sent()).some((c:any)=>c.action==='worldItemStatus'||c.action==='agentAccess'),false,'only serviceRequest decides');
  assert.deepEqual(errors,[]);
 });
-console.log('PASS Service requests on their Attention cards: Allow and Not now send only the request ID; Connect signs in into the Thing\'s region, then allows; a key service opens Settings › Connectors');
+console.log('PASS Service requests on their Attention cards: Allow and Not now send only the request ID; Connect signs in into the Thing\'s region, then allows; a key service opens Settings › Services');

@@ -22,8 +22,8 @@ export const CLOUDFLARE_GATE:ServiceGate=Object.freeze({name:'cloudflare',title:
  missing:'Cloudflare has no such account for this token. Check the account ID.',
  invalid:'Cloudflare could not run this read.',
  busy:'Cloudflare is limiting reads right now. Try again in a minute.',
- signedOut:'Cloudflare signed you out. Sign in to Cloudflare again in Settings › Connectors.',
- signInForbidden:'Your Cloudflare sign-in does not let Worldlet read that. Sign in to Cloudflare again in Settings › Connectors and keep reading analytics allowed.'});
+ signedOut:'Cloudflare signed you out. Sign in to Cloudflare again in Settings › Services.',
+ signInForbidden:'Your Cloudflare sign-in does not let Worldlet read that. Sign in to Cloudflare again in Settings › Services and keep reading analytics allowed.'});
 
 /** Cloudflare's own MCP server, where the person signs in. */
 export const CLOUDFLARE_SIGN_IN='https://mcp.cloudflare.com/mcp';

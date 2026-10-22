@@ -1,4 +1,4 @@
-// Who may use a connected service (agent/gate/GRANTS.md#settings--connectors): the sentences under its tile in plain
+// Who may use a connected service (agent/gate/GRANTS.md#settings--services): the sentences under its tile in plain
 // words (core connectorWhoMayUse), reading on by default for the Agent Fox uses when a Service becomes connected
 // (agent-runtime/service-readers.ts serviceReadDefaults) and nothing on a restart, a Grant the person took back staying
 // off until the Service is connected anew, nothing for a revoked Agent or before anything was seen, and the Agents the

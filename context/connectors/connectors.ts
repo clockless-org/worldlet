@@ -31,7 +31,7 @@ export interface Connector {
  /** After sign-in, the one choice the person makes when the service has several (a project, an account). */
  readonly pick?:string;
  readonly fallback:readonly ConnectorFallback[];
- /** Where Settings › Connectors shows it: `always` a tile of its own; `connected` a tile only once connected (a
+ /** Where Settings › Services shows it: `always` a tile of its own; `connected` a tile only once connected (a
   * service that connects with a key, under Advanced, or from its Thing); `advanced` only under Advanced. */
  readonly shown:'always'|'connected'|'advanced';
  /** The World region its Thing lives in (context/applets catalog), so a connection made in Settings lands there. */
@@ -77,7 +77,7 @@ export const CONNECTORS:readonly Connector[]=Object.freeze([
  entry({id:'http',name:'HTTP JSON',purpose:'Read your own JSON address.',mechanism:'key',providers:['http'],shown:'advanced',scopes:scopes([]),fallback:['key'],headless:true}),
 ]);
 
-/** Words the default path of Settings › Connectors never shows (they belong under Advanced): someone who knows nothing
+/** Words the default path of Settings › Services never shows (they belong under Advanced): someone who knows nothing
  * about computers connects a service without meeting them. `scripts/connectors-check.ts` and
  * `scripts/connectors-ui-check.ts` fail when one appears. */
 export const CONNECTOR_TECHNICAL_WORDS=/\b(?:keys?|tokens?|scopes?|mcp|oauth|apis?|ids?|endpoints?|grants?|terminal)\b/i;

@@ -9,7 +9,7 @@ import {copyAndOpen,listenForSignInCode} from './sign-in-code.ts';
 const el=(tag: string,text?: string,cls?: string): any=>Object.assign(document.createElement(tag),{...(text==null?{}:{textContent:text}),className:cls||''});
 const providerTitle=p=>getApp(p)?.title||{google:'Google','google-drive':'Google Drive',folder:'Local folder'}[p];
 const suggestions={home:[...HOME_NATIVE],work:[],library:['notion'],money:[],health:[],travel:[],people:[]};
-/** Regions whose step shows the same tiles as Settings › Connectors (core connectorTiles): each service that signs in,
+/** Regions whose step shows the same tiles as Settings › Services (core connectorTiles): each service that signs in,
  * with Connect; the ones that take a key only under Advanced. */
 const TILED=['work'];
 /** A source that also signs in (TOKEN_PROVIDERS `signIn`) connects with no key by default; its key is under Advanced. */
@@ -188,7 +188,7 @@ export function mountWorldOnboarding({root,call,view,state:initial,toggleSample,
    // for is the list underneath. head() also cleared the panel, so clear it here.
    guideText='';panel.replaceChildren();
    if(built)panel.append(button('Explore '+preset().title,explore,true));
-   // The same tiles as Settings › Connectors: Connect signs in with the service's own page; nothing to paste.
+   // The same tiles as Settings › Services: Connect signs in with the service's own page; nothing to paste.
    const tiles=TILED.includes(region)?connectorTiles(state.connections).filter(tile=>tile.region===region&&(tile.signIn||tile.state==='connected')):[];
    if(tiles.length){
     const grid=el('div',null,'onboarding-regions onboarding-connectors');grid.setAttribute('role','list');grid.setAttribute('aria-label','Services');

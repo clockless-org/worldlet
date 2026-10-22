@@ -9,14 +9,14 @@ import {agentEl as el} from './agent-change.ts';
 const DISCONNECTABLE=['apple-notes','apple-reminders','google-calendar'];
 
 /** Settings › Agents › Your Agent › Connections (it was a section of its own, Accounts, until the Agent page took it in): what Worldlet
- * reads that is not a service of Settings › Connectors (this computer's own apps), then the tools and chat accounts in
+ * reads that is not a service of Settings › Services (this computer's own apps), then the tools and chat accounts in
  * the person's Agent (agent-connections.ts). The services themselves, and their keys under Advanced, are in
- * Settings › Connectors (connectors-page.ts). */
+ * Settings › Services (connectors-page.ts). */
 export async function showWorldletAccounts(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){
  const action=(label:string,run:()=>Promise<void>)=>{const b=el('button','companion-info-action',label) as HTMLButtonElement;b.type='button';b.onclick=async()=>{if(b.disabled)return;b.disabled=true;try{await run();}finally{if(b.isConnected)b.disabled=false;}};return b;};
  const own=el('div','companion-settings-worldlet-accounts'),said=el('p','companion-settings-status');said.setAttribute('role','status');
  own.dataset.accounts='worldlet';
- // The rows Settings › Connectors owns (connectorTiles) are not listed again here.
+ // The rows Settings › Services owns (connectorTiles) are not listed again here.
  const services=new Set(['google',...CONNECTORS.flatMap(item=>item.providers)]);
  async function draw(){
   const state=await call('snapshot').catch(()=>null);if(!current())return;
@@ -29,7 +29,7 @@ export async function showWorldletAccounts(target:HTMLElement,call:(action:strin
    rows.append(row);
   }
   own.replaceChildren(el('h5','companion-settings-subhead','In Worldlet'),
-   el('p','companion-info-note','Services such as Google, Notion and GitHub are in Settings › Connectors.'),...live.length?[rows]:[]);
+   el('p','companion-info-note','Services such as Google, Notion and GitHub are in Settings › Services.'),...live.length?[rows]:[]);
  }
  target.append(own,said);
  await draw();
@@ -38,7 +38,7 @@ export async function showWorldletAccounts(target:HTMLElement,call:(action:strin
  if(current())await showAgentConnections(target,call,current);
 }
 
-/** Your own GitHub App (agent/gate/GRANTS.md#github-drafts), under Settings › Connectors › Advanced: GitHub drafts the
+/** Your own GitHub App (agent/gate/GRANTS.md#github-drafts), under Settings › Services › Advanced: GitHub drafts the
  * person approves are written through their GitHub sign-in by default; connecting their own App writes them as that App
  * instead (and allows standing writes). Its App ID, installation ID and private key go to the host once, are checked with GitHub
  * and kept only in the vault; the page never gets them back and clears the fields at once. */

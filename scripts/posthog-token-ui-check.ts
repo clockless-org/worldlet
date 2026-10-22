@@ -30,7 +30,7 @@ await withBrowser(async browser=>{
   const view={metrics:{buildings:[]},revealGuide(){},openApplet(){},setGuide(value){const guide=document.getElementById('guide');guide.replaceChildren();if(value?.text)guide.append(document.createTextNode(value.text));if(value?.body)guide.append(value.body);for(const b of value?.actions||[])guide.append(b);}};
   tokenGuide=TokenSetup.mountWorldOnboarding({root:document.querySelector('main'),state:tokenState,call,view});tokenGuide.show('sources','work');
  });
- // The Work step: the same tiles as Settings › Connectors, plain words, nothing to type outside Advanced.
+ // The Work step: the same tiles as Settings › Services, plain words, nothing to type outside Advanced.
  const tiles=page.locator('[data-connector]');
  await tiles.first().waitFor();
  assert.deepEqual(await tiles.evaluateAll(nodes=>nodes.map(node=>(node as HTMLElement).dataset.connector)),['notion','linear','todoist','supabase','github','posthog','cloudflare','search-console'],'sign-in services, GitHub with its code');

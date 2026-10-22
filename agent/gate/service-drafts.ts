@@ -33,8 +33,8 @@ export const SERVICE_DRAFT_STALE=Object.freeze({
 });
 /** The host's own words for a Service that could not be asked: never a message that could carry a request. */
 export const SERVICE_DRAFT_MESSAGES=Object.freeze({
- posthogMissing:'Connect PostHog first. The person connects it in Settings › Connectors.',
- notionMissing:'Connect Notion first. The person connects it in Settings › Connectors.',
+ posthogMissing:'Connect PostHog first. The person connects it in Settings › Services.',
+ notionMissing:'Connect Notion first. The person connects it in Settings › Services.',
  posthogKey:'PostHog no longer accepts its personal API key. The person connects PostHog again with a new key.',
  posthogRead:'This PostHog key cannot read that. Check that it has read access to the project and its feature flags.',
  notFound:(provider:ServiceDraftProvider)=>`Your ${SERVICE_DRAFT_TITLES[provider]} connection cannot see this. Check the name and that the connection can reach it.`,

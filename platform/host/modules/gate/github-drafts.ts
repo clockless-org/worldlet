@@ -12,7 +12,7 @@ import type {Row} from '../companion/agent/types.ts';
 // GitHub drafts (agent/gate/GRANTS.md#github-drafts). Core decides; this keeps the records and talks to GitHub: each
 // draft in the World's ledger (`state.github-drafts` in world.sqlite) beside its Attention item (provider `agents`), and
 // each GitHub request over GitHub's REST API as the person, through their GitHub sign-in with the Worldlet GitHub App
-// (context/applets/INTEGRATIONS.md#github-sign-in; `userToken`), or, when they connected one under Settings › Connectors ›
+// (context/applets/INTEGRATIONS.md#github-sign-in; `userToken`), or, when they connected one under Settings › Services ›
 // Advanced, as their own GitHub App. That App's ID, installation ID and private key are kept only in the vault
 // (`github-app`); they, the token the App signs, the installation token GitHub gives for it and the sign-in's user token
 // never leave this module: not to a page, an Agent, an audit entry, a log or an event. Every error here is one of this
@@ -56,13 +56,13 @@ export interface GithubDrafts {
 }
 const NOT_READY='Worldlet is not ready for this yet: the person has not finished setting up their own World.';
 export const GITHUB_DRAFT_MESSAGES=Object.freeze({
- noApp:'GitHub writes need GitHub connected. The person connects it in Settings › Connectors.',
- standingNeedsApp:'Changing GitHub without asking needs the person\'s own GitHub App, under Settings › Connectors › Advanced. Draft the change instead; the person approves it.',
- signedOut:'GitHub no longer accepts the sign-in. The person connects GitHub again in Settings › Connectors.',
+ noApp:'GitHub writes need GitHub connected. The person connects it in Settings › Services.',
+ standingNeedsApp:'Changing GitHub without asking needs the person\'s own GitHub App, under Settings › Services › Advanced. Draft the change instead; the person approves it.',
+ signedOut:'GitHub no longer accepts the sign-in. The person connects GitHub again in Settings › Services.',
  keyRefused:'GitHub did not accept the GitHub App. Check its App ID and private key, then connect it again.',
  noInstallation:'GitHub does not know this installation of the GitHub App. Check the installation ID, then connect it again.',
  unreachable:'GitHub did not answer. Try again in a moment.',
- notFound:'Worldlet cannot see this on GitHub. Check the name, and that Worldlet may see that repository (Choose projects on the GitHub tile in Settings › Connectors).',
+ notFound:'Worldlet cannot see this on GitHub. Check the name, and that Worldlet may see that repository (Choose projects on the GitHub tile in Settings › Services).',
  unreadable:'GitHub could not read this right now. Try again in a moment.',
  busy:'This draft is already being written.',
  lost:'GitHub did not answer the write, so it may or may not have been made. Check on GitHub before drafting it again.',

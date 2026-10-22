@@ -407,7 +407,7 @@ await withTempDir('worldlet-github-drafts-',async dir=>{
   assert.equal((await codex('create',comment)).error,GITHUB_DRAFT_MESSAGES.noApp);
   assert.equal(drafts.writer(),null);
 
-  // Through the GitHub sign-in (Settings › Connectors), with no own App: the person writes what they approve, with the
+  // Through the GitHub sign-in (Settings › Services), with no own App: the person writes what they approve, with the
   // sign-in's user token; a token GitHub refuses is renewed once; the Agent's line ends each new Issue and comment.
   signedIn=true;
   assert.equal(drafts.writer(),'person');
