@@ -132,10 +132,16 @@ export function githubStore(repo=process.env.GITHUB_REPOSITORY,gh=(args,input)=>
    if(found){if(found.size!==statSync(file).size)throw Error(`${tag}/${found.name} already exists with different bytes.`);return {reused:true};}
    run('release','upload',tag,file,'--repo',repo);return {reused:false};
   },
-  put(tag,name,body){
+  // A feed replaced in place. `--clobber` deletes the old asset before uploading, and once (Mac Alpha 4586, 2026-10-21)
+  // the asset was simply gone afterwards, so the feed is uploaded again until it reads back the same.
+  async put(tag,name,body,wait=ms=>new Promise(resolve=>setTimeout(resolve,ms))){
    const file=path.join(scratch,name);writeFileSync(file,body);
-   run('release','upload',tag,file,'--repo',repo,'--clobber');
-   if(this.read(tag,name)!==body)throw Error(`The stored feed differs: ${tag}/${name}`);
+   for(let attempt=1;;attempt++){
+    run('release','upload',tag,file,'--repo',repo,'--clobber');
+    if(this.read(tag,name)===body)return;
+    if(attempt===3)throw Error(`The stored feed differs: ${tag}/${name}`);
+    await wait(5000*attempt);
+   }
   },
   promote(tag){run('release','edit',tag,'--repo',repo,'--prerelease=false','--latest');},
   // The release of a Build (v<label>) and its asset names, or null.

@@ -174,6 +174,20 @@ assert.deepEqual(superseded.writes,[]);
  assert.equal(await gh.read('v0','appcast.xml'),'');
  assert.throws(()=>gh.upload('v1',dmg),/different bytes/);
  gh.close();
+ // A feed whose upload is lost is uploaded again; one that never reads back fails.
+ {
+  let uploads=0,stored='';
+  const feeds=(lost)=>githubStore('example/worldlet',args=>{
+   if(args[0]==='api')return {status:0,stdout:JSON.stringify({assets:stored?[{name:'appcast-alpha.xml',size:1}]:[]})};
+   if(args[1]==='upload'){uploads++;stored=uploads>lost?readFileSync(args[3],'utf8'):'';return {status:0,stdout:''};}
+   if(args[1]==='download'){writeFileSync(args[args.indexOf('--output')+1],stored);return {status:0,stdout:''};}
+   return {status:0,stdout:''};});
+  const once=feeds(1);await once.put('channel-alpha','appcast-alpha.xml','<rss/>',async()=>{});once.close();
+  assert.equal(uploads,2,'a lost feed upload is retried');
+  uploads=0;stored='';
+  const never=feeds(9);await assert.rejects(never.put('channel-alpha','appcast-alpha.xml','<rss/>',async()=>{}),/stored feed differs/);never.close();
+  assert.equal(uploads,3);
+ }
  const compare=(stdout,exists=false)=>githubStore('example/worldlet',args=>args[1].startsWith('repos/example/worldlet/releases/')?(exists?{status:0,stdout:'{}'}:{status:1,stderr:'HTTP 404'}):{status:0,stdout});
  const listing=githubStore('example/worldlet',()=>({status:0,stdout:JSON.stringify([{tag:'v2026.1009.41190',assets:[]},{tag:'v2026.1009.4119',assets:['a.dmg']},{tag:'channel-alpha',assets:[]}])}));
  assert.deepEqual(listing.findBuild(4119),{tag:'v2026.1009.4119',assets:['a.dmg']},'the Build\'s own release, not one whose number merely starts the same');
