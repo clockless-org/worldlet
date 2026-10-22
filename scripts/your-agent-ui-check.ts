@@ -298,7 +298,7 @@ try{
  await scTile.getByRole('button',{name:'Disconnect',exact:true}).click();
  await scTile.getByRole('group').getByRole('button',{name:'Disconnect',exact:true}).click();
  // Its tile stays, off again (Search Console is always shown: it can sign in with Google).
- await settingsPage.locator('[data-connector=search-console][data-state=off]').waitFor();
+ await settingsPage.locator('[data-connector=search-console][data-state=off]').waitFor({state:'attached'});
  await searchConsole.getByRole('textbox',{name:'Service account key'}).waitFor();
  // HTTP JSON: a name, an HTTPS base address and an optional token; the token field is cleared as soon as it is sent and
  // the token never comes back. Remove forgets one endpoint; the last one is disconnected.

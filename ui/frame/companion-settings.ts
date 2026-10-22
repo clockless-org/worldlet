@@ -369,8 +369,6 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   const remote=el('details','companion-settings-elsewhere companion-settings-remote-access') as HTMLDetailsElement;remote.dataset.part='remote';
   remote.append(el('summary','','Remote access'));
   advanced.append(work,subhead('Your World’s web address'),address,remote);
-  // A part named from outside (the board opens `remote`, say) opens the fold it is in.
-  if(['remote','world-address'].includes(at))advanced.open=true;
   target.append(list,claude,advanced);
   const own=await ownAgent();if(!live())return;
   await Promise.all([showAgentAccess(list,call,live,{own:{...own,open:()=>void show('agents','model')},advanced:work}),showUseInClaude(claude,call,live),showWorldAddress(address,call,live),showRemoteAccess(remote,call,live)]);

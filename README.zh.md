@@ -133,7 +133,7 @@ Fox 是你用文字或语音对话的伙伴。它通过你的 Agent 干活，把
 - **[你的 World 地址](agent/gate/WORLD-ADDRESS.md)**：在 设置 › Agents › Your World's address 给你的 World 起一个自己的网址，比如 `alex.worldlet.ai`，在任何设备上打开它。新的浏览器要先申请，你在 Attention 的卡片上允许；之后用通行密钥（passkey）登录。你也可以在那里只读地分享你的看板，给你允许的人，或给任何拿到链接的人。除此之外别人什么都看不到，World 一直留在你的电脑上。
 - **[另一台电脑上的 Agent](agent/gate/PORTABILITY.md#an-agent-on-another-computer)**：和一直开着、跑着你 Agent 的那台电脑配对，在这个 World 里和它对话。
 - **[本地优先](docs/WORLD-STORAGE.md)**：你的记录留在你电脑上的 `world.sqlite` 里。
-- **[设置](agent/gate/GRANTS.md#settings--agents)** 分三块，每项和每行都有图标：**Services**（你的 World 读取的服务）、**Agents**（每个使用你 World 的 Agent，你自己的排在最前，各自写明能做什么、最近做了什么，并可 Revoke）和 **Your data**（你的 World 保存的一切、各占多少，可以 Save a copy 和删除）。Fox、Phone、General 和 Help 排在它们下面。
+- **[设置](agent/gate/GRANTS.md#settings--agents)** 分三块，每项和每行都有图标：**Services**（你的 World 读取的服务）、**Agents**（每个使用你 World 的 Agent，你自己的排在最前，各自写明能做什么、最近做了什么，并可 Remove）和 **Your data**（你的 World 保存的一切、各占多少，可以 Save a copy，删除收在折叠里）。Fox、Phone、General 和 Help 排在它们下面。
 
 ## 在另一台设备上打开你的 World
 
