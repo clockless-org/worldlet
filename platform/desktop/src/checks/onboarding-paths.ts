@@ -175,8 +175,12 @@ export async function onboardingPaths({host,window,view}:CheckContext){
   const confirm=dialog.showMessageBox;
   dialog.showMessageBox=(async(...args:any[])=>{const options=args.find(arg=>arg&&typeof arg==='object'&&'message' in arg);if(options?.message!=='Reset Worldlet?')return (confirm as any)(...args);mark('confirmed Reset Worldlet?');return {response:0,checkboxChecked:false};}) as typeof dialog.showMessageBox;
   try{
-   const clicked=await js("(()=>{const settings=document.getElementById('notionWorld')?.companionSettings;settings?.querySelector('[data-setting=general]')?.click();const reset=settings?.querySelector('[data-action=reset]');if(!reset)return false;reset.click();return true;})()");
-   if(clicked!==true)throw Error('Settings has no Reset button');
+   // General draws Start over after its update, login, browser and usage rows have asked the host (#787), so the
+   // button is waited for, not looked up at once (Windows Alpha 4601, #796).
+   await js("(()=>{document.getElementById('notionWorld')?.companionSettings?.querySelector('[data-setting=general]')?.click();return true;})()");
+   let clicked=false;
+   for(let i=0;i<100&&!clicked;i++){clicked=await js("(()=>{const reset=document.getElementById('notionWorld')?.companionSettings?.querySelector('[data-action=reset]');if(!reset||reset.disabled)return false;reset.click();return true;})()").catch(()=>false)===true;if(!clicked)await sleep(200);}
+   if(!clicked)throw Error(`Settings has no Reset button after 20 s\n  screen: ${await seen()}`);
    await wait('Reset Fox returned to the setup page',signInPage,120);
   }finally{dialog.showMessageBox=confirm;}
   const agent=host.use<AgentService>(AGENT).id;
