@@ -1,7 +1,7 @@
 // Settings › Services (ui/frame/connectors-page.ts) against a fake host: one tile per sign-in service with
 // Connect, the waiting state with Cancel, Connected with Disconnect that asks once, a plain line when a sign-in did not
-// finish or the service signed the person out, key services shown once connected, and every key, address and file
-// under Advanced. Fails when the default path (everything outside Advanced) shows a technical word
+// finish or the service signed the person out, key services shown once connected, and nothing folded and nothing to
+// type (owner request 2026-10-22: no Advanced in Settings). Fails when the page shows a technical word
 // (CONNECTOR_TECHNICAL_WORDS). `--screenshot <file.png>` saves the page, and `-narrow.png` beside it at phone width.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -75,53 +75,28 @@ await withBrowser(async browser=>{
  const plain=async(when:string)=>{for(const text of await defaultPath())assert.doesNotMatch(text,CONNECTOR_TECHNICAL_WORDS,`${when}: "${text}" is on the default path`);};
 
  assert.equal(await page.title(),'Worldlet connectors settings check');
- assert.deepEqual(await page.locator('[data-connector]').evaluateAll(nodes=>nodes.map(node=>(node as HTMLElement).dataset.connector)),['google','notion','linear','todoist','github','posthog','supabase','cloudflare','search-console']);
- // The builders' services wait, folded, under More services until one is in use.
- const more=page.locator('details[data-more-services]');
- assert.deepEqual(await more.locator('[data-connector]').evaluateAll(nodes=>nodes.map(node=>(node as HTMLElement).dataset.connector)),['supabase','cloudflare','search-console']);
- assert.equal(await more.evaluate(n=>(n as HTMLDetailsElement).open),false,'More services starts folded');
+ assert.deepEqual(await page.locator('[data-connector]').evaluateAll(nodes=>nodes.map(node=>(node as HTMLElement).dataset.connector)),['google','notion','linear','todoist','supabase','github','posthog','cloudflare','search-console']);
+ // Every service is on the page, nothing folded.
+ assert.equal(await page.locator('#settings details').count(),0,'nothing folded');
  assert.match(await tile('notion').innerText(),/See your pages and databases in Notion\./);
  assert.equal(await tile('github').getByRole('button',{name:'Disconnect',exact:true}).count(),1,'a service connected with a key shows as connected');
  assert.equal(await tile('github').getByRole('button',{name:'Connect',exact:true}).count(),0);
- assert.equal(await page.locator('[data-advanced]').evaluate(node=>(node as HTMLDetailsElement).open),false,'Advanced starts folded');
- assert.equal(await page.locator('input:visible:not([type="checkbox"]),textarea:visible').count(),0,'nothing to type on the default path');
+ assert.equal(await page.locator('[data-advanced]').count(),0,'no Advanced');
+ assert.equal(await page.locator('input,textarea').count(),0,'nothing to type');
  await plain('opened');
  // Using this World in Claude or ChatGPT is under Settings › Agents (issue #674; settings-areas-ui-check.ts covers it):
  // they are Agents, not Services, so this page does not ask for Remote access at all.
  assert.equal(await page.locator('[data-use-in-claude]').count(),0,'not on the Connectors page');
  assert.equal(await page.evaluate(()=>(window as any).calls.some((c:any)=>c.action==='remoteMcp')),false);
- // Who may use it: the Agent Fox uses is on, changes always ask, the other Agents behind Choose Agents.
- const who=tile('github').locator('[data-who]');
- const main=who.getByRole('checkbox',{name:'Fox and Claude Code can look at your GitHub.',exact:true});
- assert.equal(await main.isChecked(),true,'reading is on by default for the Agent in use');
- await who.getByText('Before anything is changed, Worldlet asks you.',{exact:true}).waitFor();
- await who.getByText('Other Agents ask you the first time.',{exact:true}).waitFor();
- assert.equal(await who.getByRole('checkbox').count(),1,'the other Agents stay folded');
- await main.uncheck();
- await page.waitForFunction(()=>(window as any).calls.some((c:any)=>c.action==='agentAccess'&&c.operation==='ungrantService'));
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.operation==='ungrantService')),[{action:'agentAccess',operation:'ungrantService',id:'claude-code',provider:'github'}]);
- await tile('github').getByRole('checkbox',{name:'Fox and Claude Code can look at your GitHub.',exact:true,checked:false}).waitFor();
- await tile('github').getByRole('button',{name:'Choose Agents',exact:true}).click();
- const codex=tile('github').getByRole('checkbox',{name:'Codex can look at your GitHub',exact:true});
- await codex.check();
- await tile('github').getByText('Codex can look too. Other Agents ask you the first time.',{exact:true}).waitFor();
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.operation==='grantService')),[{action:'agentAccess',operation:'grantService',id:'codex',provider:'github'}]);
- await plain('who may use it');
- await tile('github').getByRole('button',{name:'Done',exact:true}).click();
- assert.equal(await tile('github').getByRole('checkbox').count(),1);
- // Kept up to date: "Updated 5 minutes ago" on the tile, and the switch under its details, on by default.
- const fresh=tile('github').locator('[data-sync=github]');
- await fresh.getByText('Updated 5 minutes ago.',{exact:true}).waitFor();
- await fresh.locator('summary').click();
- const keep=fresh.getByRole('checkbox',{name:'Keep GitHub up to date in your World, every hour',exact:true});
- assert.equal(await keep.isChecked(),true,'on by default');
- await keep.uncheck();
- await page.waitForFunction(()=>(window as any).calls.some((c:any)=>c.action==='serviceSync'&&c.operation==='configure'));
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='serviceSync'&&c.operation==='configure')),[{action:'serviceSync',operation:'configure',id:'github-updates',enabled:false}]);
- await tile('github').locator('[data-sync=github]').getByText('Not kept up to date.',{exact:true}).waitFor();
- assert.equal(await tile('github').locator('[data-sync=github]').evaluate(node=>(node as HTMLDetailsElement).open),true,'its details stay open');
- await plain('kept up to date');
- await tile('github').locator('[data-sync=github]').getByRole('checkbox').check();
+ // Who may look at it is decided for the person: the Agent in use reads, other Agents ask the first time; Settings ›
+ // Agents takes it back. So the tile has no switch.
+ assert.equal(await tile('github').getByRole('checkbox').count(),0,'no who-may-use switches');
+ assert.equal(await page.evaluate(()=>(window as any).calls.some((c:any)=>c.action==='agentAccess')),false);
+ // Kept up to date by itself: "Updated 5 minutes ago" on the tile, no switch.
+ await tile('github').locator('[data-sync=github]').getByText('Updated 5 minutes ago.',{exact:true}).waitFor();
+ // One turned off before is turned on again.
+ await page.evaluate(async()=>{const w=window as any;w.syncs[0].check.enabled=false;await w.draw();});
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='serviceSync'&&c.operation==='configure')),[{action:'serviceSync',operation:'configure',id:'github-updates',enabled:true}]);
  await tile('github').locator('[data-sync=github]').getByText('Updated 5 minutes ago.',{exact:true}).waitFor();
  const screenshot=process.argv.includes('--screenshot')?process.argv[process.argv.indexOf('--screenshot')+1]:'';
 
@@ -177,7 +152,6 @@ await withBrowser(async browser=>{
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='connect'&&c.provider==='posthog')),[{action:'connect',provider:'posthog',region:'work'},{action:'connect',provider:'posthog',settings:{project:'1'}}]);
  await plain('choosing a project');
  // Cloudflare signs in the same way and asks which account; once it is in use it stays with the others.
- await more.locator('summary').click();
  await tile('cloudflare').getByRole('button',{name:'Connect',exact:true}).click();
  await page.evaluate(()=>(window as any).pending.resolve());
  const account=tile('cloudflare').getByLabel('Which Cloudflare account?',{exact:true});
@@ -187,13 +161,12 @@ await withBrowser(async browser=>{
  await page.getByText('Cloudflare now shows Shop.',{exact:true}).waitFor();
  assert.deepEqual((await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='connect'&&c.provider==='cloudflare'))).at(-1).settings,{account:'b'.repeat(32)});
  await plain('choosing an account');
- // Search Console signs in with Google, into Work, with nothing typed; its box under Advanced then says it is connected.
+ // Search Console signs in with Google, into Work, with nothing typed.
  await tile('search-console').getByRole('button',{name:'Connect',exact:true}).click();
  await page.evaluate(()=>(window as any).pending.resolve());
  await page.getByText('Search Console is connected.',{exact:true}).waitFor();
  assert.deepEqual((await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='connect'&&c.provider==='search-console'))),[{action:'connect',provider:'search-console',region:'work'}]);
  assert.equal(await tile('search-console').getAttribute('data-state'),'connected');
- await page.locator('[data-advanced] [data-accounts="search-console"]').getByText(/^Connected\./).waitFor({state:'attached'});
  await plain('Search Console signed in');
  // The service signed the person out: Sign in again, in plain words.
  await page.evaluate(async()=>{const w=window as any;w.connections.push({provider:'supabase',label:'Supabase',transport:'hermes',syncStatus:'sync_error',syncError:'Supabase is disconnected. Reconnect with Fox.',connected:true,failed:true});await w.draw();});
@@ -214,23 +187,10 @@ await withBrowser(async browser=>{
  await tile('notion').getByRole('button',{name:'Connect',exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='disconnectSource')),[{action:'disconnectSource',provider:'notion'}]);
 
- // Advanced: the keys, your own GitHub App, Search Console and HTTP JSON. A key leaves the page once.
- await page.getByText('Advanced',{exact:true}).click();
- for(const key of ['github','posthog','cloudflare'])await page.locator(`[data-advanced] [data-key="${key}"]`).waitFor();
- for(const box of ['github-app','search-console','http'])await page.locator(`[data-advanced] [data-accounts="${box}"]`).waitFor();
- const posthog=page.locator('[data-key="posthog"]');
- await posthog.getByLabel('PostHog personal API key',{exact:true}).fill('phx_aaaaaaaaaaaaaaaaaaaaaaaa');
- await posthog.getByLabel('Project ID',{exact:true}).fill('12345');
- await posthog.getByRole('button',{name:'Connect',exact:true}).click();
- await posthog.getByText('PostHog is connected.',{exact:true}).waitFor();
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.token).at(-1)),{action:'connect',provider:'posthog',token:'phx_aaaaaaaaaaaaaaaaaaaaaaaa',settings:{host:'https://us.posthog.com',project:'12345'}});
- assert.equal(await posthog.getByLabel('PostHog personal API key',{exact:true}).inputValue(),'','the key field is cleared at once');
- await plain('Advanced open');
  assert.deepEqual(errors,[]);
 
- if(screenshot)await page.screenshot({path:screenshot.replace(/\.png$/,'-advanced.png'),fullPage:true});
- await page.setViewportSize({width:390,height:844});
+  await page.setViewportSize({width:390,height:844});
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'narrow settings do not overflow horizontally');
  if(screenshot)await page.screenshot({path:screenshot.replace(/\.png$/,'-narrow.png'),fullPage:true});
 });
-console.log('PASS Settings › Services: Services only (using the World in Claude or ChatGPT is under Agents), GitHub\'s code with Copy and open GitHub and Choose projects, sign-in tiles with Connect, waiting and Cancel, Connected as, Disconnect asks once, plain words for a refusal and a sign-out, who may use it (the Agent in use on, Choose Agents), kept up to date ("Updated 5 minutes ago", the switch on by default), the PostHog project and Cloudflare account choices, Search Console signing in with Google, key services shown connected, keys and addresses only under Advanced, no technical word on the default path, narrow layout');
+console.log('PASS Settings › Services: Services only (using the World in Claude or ChatGPT is under Agents), GitHub\'s code with Copy and open GitHub and Choose projects, sign-in tiles with Connect, waiting and Cancel, Connected as, Disconnect asks once, plain words for a refusal and a sign-out, kept up to date by itself ("Updated 5 minutes ago", no switch), the PostHog project and Cloudflare account choices, Search Console signing in with Google, key services shown connected, nothing folded and nothing to type, no technical word, narrow layout');

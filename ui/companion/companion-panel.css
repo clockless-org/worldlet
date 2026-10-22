@@ -194,6 +194,7 @@
 .companion-settings-agent-skills,.companion-settings-agent-routines,.companion-settings-agent-memory{display:flex;flex-direction:column;align-items:flex-start;gap:8px;align-self:stretch}
 .companion-settings-agent-skills .companion-settings-row,.companion-settings-agent-routines .companion-settings-row,.companion-settings-agent-memory .companion-settings-row{flex-wrap:wrap}
 .companion-settings-memory{display:flex;flex-direction:column;align-items:flex-start;gap:10px;align-self:stretch}
+.companion-settings-memory[hidden]{display:none}
 .companion-settings-memory-group{font-size:13px;color:#354132}
 .companion-settings-memory-text{white-space:pre-line;overflow-wrap:anywhere;font-size:13px;color:#354132}
 .companion-settings-agent-memory .companion-settings-row>div{flex:1 1 260px;min-width:0}

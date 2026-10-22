@@ -133,7 +133,7 @@ Mail, Calendar, Notes, GitHub, Notion, Linear and the other Applets that connect
 - **[Your World's address](agent/gate/WORLD-ADDRESS.md)**: give your World its own web address, like `alex.worldlet.ai`, in Settings › Agents › Your World's address, and open it from any device. A new browser asks first, and you allow it on a card in Attention; after that a passkey signs it in. You can also share your board there, read only, with people you allow or with anyone who has the link. Nobody sees anything else, and the World stays on your computer.
 - **[Your Agent on another computer](agent/gate/PORTABILITY.md#an-agent-on-another-computer)**: pair with the always-on machine where your Agent runs, and talk to it from this World.
 - **[Local first](docs/WORLD-STORAGE.md)**: your records stay in `world.sqlite` on your computer.
-- **[Settings](agent/gate/GRANTS.md#settings--agents)** in three parts, each item and row with an icon: **Services** (the services your World reads), **Agents** (every Agent that uses your World, your own first, each with what it may do, what it did lately and Remove) and **Your data** (everything your World keeps, how much each holds and Save a copy, with deletes folded). Fox, Phone, General and Help sit below them.
+- **[Settings](agent/gate/GRANTS.md#settings--agents)** in three parts, each item and row with an icon: **Services** (the services your World reads), **Agents** (every Agent that uses your World, your own first, each with what it may do, what it did lately and Remove) and **Your data** (everything your World keeps, how much each holds, Save a copy and a Delete on each). Fox, Phone, General and Help sit below them.
 
 ## Your World on another device
 
