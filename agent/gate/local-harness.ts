@@ -247,11 +247,11 @@ export const claudeCodeNeedsSignIn=(error:string)=>error===CLAUDE_CODE_SIGN_IN_E
 /** The same line once the browser page has already opened this launch and is closed (Mac Beta 4508, 2026-10-20: every
  * Fox turn of a new Claude Code user still said "Sign in in the browser page that opened" with no page open): it points
  * to the Sign in button in Settings › Agents instead. */
-export const claudeCodeSignInElsewhere=(error:string)=>error.replace(/ Sign in (?:again )?in the browser page that opened\.$/,' Sign in to it in Settings › Agents, under Provider.');
+export const claudeCodeSignInElsewhere=(error:string)=>error.replace(/ Sign in (?:again )?in the browser page that opened\.$/,' Sign in to it in Settings › Agents: Manage on your Agent, then Sign in under Provider.');
 /** Codex's own sign-in or usage limit, told apart from its other failures (Mac Beta 4261, 2026-10-11: a turn that
  * failed for another reason read "finish signing in" while Codex was signed in). Null when the text is neither. */
 export function codexProblem(text:string):string|null {
- if(/usage limit|insufficient_quota|quota|rate.?limit|\b429\b/i.test(text))return 'Codex has reached its usage limit. Try again later, or switch its model in Settings › Agents.';
+ if(/usage limit|insufficient_quota|quota|rate.?limit|\b429\b/i.test(text))return 'Codex has reached its usage limit. Try again later, or use another Agent in Settings › Agents.';
  if(/not (?:logged|signed) in|\b401\b|unauthori[sz]ed|refresh token|token (?:has )?expired|codex login/i.test(text))return 'Codex is not signed in. Open Terminal, run codex login, then try again.';
  return null;
 }

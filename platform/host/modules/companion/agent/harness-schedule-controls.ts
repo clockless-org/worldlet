@@ -11,7 +11,7 @@ import {discoverHermes} from './hermes-files.ts';
 import {openClawState} from './local-memory.ts';
 import type {HarnessEnvironment,LocalHarnessInstall} from './local-harness.ts';
 
-// Settings › Agents › Your Agent › Routines (owner plan 2026-10-11, PR 2): the person's jobs as their Agent's own
+// Settings › Agents › Your Agent › Scheduled (owner plan 2026-10-11, PR 2): the person's jobs as their Agent's own
 // scheduler keeps them (the read-only `files` readers of harness-schedule.ts), each with its newest result, and Pause,
 // Resume, Run now or Remove, each run as the Agent's own command after the person confirmed it (fox/harness-controls.ts):
 // Hermes Agent's `hermes cron pause|resume|run|remove` in its home, OpenClaw's `openclaw cron disable|enable|run|rm`
@@ -84,7 +84,7 @@ export function harnessScheduleControls(install:LocalHarnessInstall,environment:
    return (hermes?hermesLatest(base):openClawLatest(base))??newestByPaging(read);
   },
   // The scheduler's own install command (`hermes gateway install`, `openclaw gateway install`), which also starts it and
-  // keeps it running when the computer starts; only on the person's own Start in Settings › Agents › Your Agent › Routines.
+  // keeps it running when the computer starts; only on the person's own Start in Settings › Agents › Your Agent › Scheduled.
   ...read.start?{async startScheduler(){
    const base=root();
    if(hermes&&!base)throw new WorldletError(`${install.title}’s home was not found on this computer.`);

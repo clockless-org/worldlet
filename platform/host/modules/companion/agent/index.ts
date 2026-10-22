@@ -902,7 +902,7 @@ export function installAgentRuntime(host:Host){
    if(!identity)throw new WorldletError('That Agent is not known here.');
    if(request.operation==='grantGithubWrites'){
     if(agentRevoked(identity,new Date().toISOString()))throw new WorldletError('This Agent was revoked.');
-    if(!githubDrafts?.app.status().connected)throw new WorldletError('Changing GitHub without asking needs your own GitHub App, under Settings › Services › Advanced.');
+    if(!githubDrafts?.app.status().connected)throw new WorldletError('Changing GitHub without asking needs your own GitHub App connected.');
     if(!access.grantGithubWrites(id,request.repo,request.choice,request.labelPrefix))throw new WorldletError(`Could not allow that. Name the repository as owner/repo, and a label prefix such as state: for labels; one Agent can have this on at most ${GITHUB_WRITE_LIMITS.grantsPerAgent} repositories.`);
    }else if(!access.ungrantGithubWrites(id,request.repo))throw new WorldletError('Could not change that.');
    return {ok:true};

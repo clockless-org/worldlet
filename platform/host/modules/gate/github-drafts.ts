@@ -57,7 +57,7 @@ export interface GithubDrafts {
 const NOT_READY='Worldlet is not ready for this yet: the person has not finished setting up their own World.';
 export const GITHUB_DRAFT_MESSAGES=Object.freeze({
  noApp:'GitHub writes need GitHub connected. The person connects it in Settings › Services.',
- standingNeedsApp:'Changing GitHub without asking needs the person\'s own GitHub App, under Settings › Services › Advanced. Draft the change instead; the person approves it.',
+ standingNeedsApp:'Changing GitHub without asking needs the person\'s own GitHub App connected. Draft the change instead; the person approves it.',
  signedOut:'GitHub no longer accepts the sign-in. The person connects GitHub again in Settings › Services.',
  keyRefused:'GitHub did not accept the GitHub App. Check its App ID and private key, then connect it again.',
  noInstallation:'GitHub does not know this installation of the GitHub App. Check the installation ID, then connect it again.',

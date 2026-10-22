@@ -74,7 +74,7 @@ export function localHarnessStarts(install:LocalHarnessInstall,environment:Harne
 export class AgentNotStarting extends WorldletError {
  readonly repeat:boolean;
  constructor(install:Pick<LocalHarnessInstall,'id'|'title'>,repeat=false){
-  super(install.id==='hermes'?`${install.title} does not start on this computer. Open Settings › Agents and choose Install again.`:`${install.title} does not start on this computer. Open it once in Terminal to check it, or choose another Agent in Settings › Agents.`);
+  super(install.id==='hermes'?`${install.title} does not start on this computer. Open Settings › Agents, choose Manage on your Agent, then Install again.`:`${install.title} does not start on this computer. Open it once in Terminal to check it, or choose another Agent in Settings › Agents.`);
   this.name='AgentNotStarting';this.repeat=repeat;
  }
  /** Already reported once; the host records it locally but sends it nowhere again (modules/app). */
