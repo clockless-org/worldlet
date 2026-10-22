@@ -3,13 +3,11 @@ import {BROWSER_HOME,createBrowserHome} from '../../agent/applets/index.ts';
 import {createPanelGuide} from './panel-guide.ts';
 import {modelHealthView,type ModelFix} from './model-health.ts';
 import {showAgentPermissions} from './agent-permissions.ts';
-import {agentIcon,showAgentAccess,type OwnAgent} from './agent-access.ts';
+import {agentIcon,showAgentAccess,showOwnAgentMay,type OwnAgent} from './agent-access.ts';
 import {showWorldAddress} from './world-address.ts';
 import {showWorldContext} from './world-context-page.ts';
 import {showAgentRoutines} from './agent-routines.ts';
-import {showAgentSkills} from './agent-skills.ts';
 import {showAgentMemory} from './agent-memory.ts';
-import {showWorldletAccounts} from './worldlet-accounts.ts';
 import {showConnectors} from './connectors-page.ts';
 import {agentEl as el} from './agent-change.ts';
 import {settingsIcon,settingsRow,settingsSwitch} from './settings-rows.ts';
@@ -25,12 +23,13 @@ const MODEL_EVENTS=['worldlet:model-changed','worldlet:model-refresh'];
 // Settings is three areas, Connectors, Agents and Context, with Fox, Phone, General and Help below them (issue #674).
 // Entry points that name a section or part Settings no longer has open the area that took it in, at its part: `model`
 // (what Fox runs on) and the standing rules (`approvals`, `permissions`) are parts of your own Agent's page under Agents;
-// `access` (the board's empty state opens it) is the list of Agents; `memory` is in Context; Accounts became Connectors.
-const MOVED:Record<string,{section:string;part:string}>={integrations:{section:'connectors',part:''},accounts:{section:'connectors',part:''},
+// `access` (the board's empty state opens it) is the list of Agents; `memory` is in Your data; Accounts became Services;
+// Skills went with Advanced (owner request 2026-10-22), so `skills` opens your own Agent's page.
+const MOVED:Record<string,{section:string;part:string}>={integrations:{section:'connectors',part:''},accounts:{section:'connectors',part:''},skills:{section:'agents',part:'model'},
  model:{section:'agents',part:'model'},approvals:{section:'agents',part:'permissions'},permissions:{section:'agents',part:'permissions'},
  access:{section:'agents',part:'access'},memory:{section:'context',part:'memory'}};
 /** The parts of your own Agent's page (Agents › Your Agent); any other part of Agents is on its list. */
-const OWN_PARTS=['model','skills','routines','permissions','accounts'];
+const OWN_PARTS=['model','routines','permissions','may'];
 
 /** The whole companion panel is one settings window (owner request 2026-10-10): one list of sections on the left, the
  * chosen section's details on the right, no tabs. Everything finishes here; nothing hands off to Fox's speech bubble. */
@@ -162,24 +161,25 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
  // This is the one place to connect it and to see and fix what is wrong with it (owner request 2026-10-06):
  // which path is in use, its model, the last reply's problem in plain words, and the fix for it.
  async function ownAgentPage(target:HTMLElement){
-  let showElsewhere=false;
   const turn=ticket,said=status(),now=el('div','companion-settings-row has-icon companion-settings-model-now'),words=el('div'),fixes=el('span','companion-settings-actions'),agents=el('div','companion-settings-rows'),providers=el('div','companion-settings-rows');
-  // Choosing another Agent or provider, and the other ways to connect, fold under the status (owner request
-  // 2026-10-21); a problem whose fix is there opens it.
-  const choose=el('details','companion-settings-elsewhere companion-settings-choose-agent') as HTMLDetailsElement;choose.dataset.chooseAgent='';
-  choose.append(el('summary','','Use a different Agent or AI provider'),agents);
+  // The Agents on this computer to switch to, under the status, nothing folded (owner requests 2026-10-21 and
+  // 2026-10-22); the providers only while the Agent needs signing in to one.
+  const choose=el('div','companion-settings-choose-agent');choose.dataset.chooseAgent='';choose.append(agents);
+  let needsSignIn=false;
   let icon=settingsIcon({icon:'people'});
   now.append(icon,words,fixes);
   // Signing in happens in the Agent itself, from its provider list below (Worldlet sets nothing up under the Agent).
   const fixButton=(fix:ModelFix)=>fix==='connect'?action('Sign in to a provider',async()=>{
     if(!providers.childElementCount){said.textContent='Sign in to a provider in your Agent itself, then choose Check connection.';return;}
-    choose.open=true;providers.scrollIntoView({block:'nearest'});(providers.querySelector('button') as HTMLButtonElement|null)?.focus();
+    providers.scrollIntoView({block:'nearest'});(providers.querySelector('button') as HTMLButtonElement|null)?.focus();
    },{primary:true,id:'fix-connect'})
    :action('Restart Fox',()=>restartFox(said),{primary:true,id:'fix-restart'});
   // The provider the Agent in use answers with (agent/gate/model-providers.ts, owner decisions 2026-10-10): only a
   // provider is chosen, never a model; each maps to small, balanced and large models and Fox's turns use the balanced
-  // one. Every provider the Agent supports is listed, signed in or not; signing in happens in the Agent itself.
+  // one. Every provider the Agent supports is listed, signed in or not; signing in happens in the Agent itself. Shown only
+  // while the Agent needs signing in: otherwise it answers with its own setting, and nothing is to choose.
   const drawProviders=async()=>{
+   if(!needsSignIn){providers.replaceChildren();return;}
    const found=await call('agentHarness',{operation:'providers'}).catch(()=>null);
    if(turn!==ticket)return;
    providers.replaceChildren();
@@ -208,26 +208,25 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     providers.append(row);
    }
   };
-  // Stop using the Agent, the paired computer or the Gateway in use: Fox goes back to its own model connection.
+  // Stop using the Agent in use: Fox goes back to its own model connection.
   const stopUsing=(working:string,id:string)=>action('Stop using',async()=>{
    said.textContent=working;
    try{await call('agentHarness',{operation:'clear'});modelRefresh();said.textContent='';await draw();}
    catch(e){said.textContent=(e as Error).message||'Could not switch.';}
   },{id});
   const draw=async()=>{
-   void drawProviders();
    const [health,found]=await Promise.all([call('modelHealth').catch(()=>null),call('agentHarness',{operation:'detect'}).catch(()=>null)]);
    if(turn!==ticket)return;
    const list=Array.isArray(found?.agents)?found.agents.filter((a:any)=>typeof a?.id==='string'&&typeof a?.title==='string'):[];
    const inUse=typeof found?.selected==='string'?found.selected:null;
    const view=modelHealthView(health,list.find((a:any)=>a.id===inUse)?.title??null);
    now.dataset.state=view.state==='ok'?'ready':view.state;now.dataset.path=view.path;
-   if(view.state!=='ok'&&view.fixes.includes('connect'))choose.open=true;
+   needsSignIn=view.state!=='ok'&&view.fixes.includes('connect');void drawProviders();
    words.replaceChildren(el('strong',view.state==='ok'?'companion-settings-ok':'',view.title),el('span','',view.detail),...view.problem?[el('span','companion-settings-model-problem',view.problem)]:[]);
    fixes.replaceChildren(...view.fixes.map(fixButton),
     action('Check connection',async()=>{said.textContent='Checking…';await draw();said.textContent='Checked just now.';},{id:'check-model'}));
    agents.replaceChildren();
-   if(list.length)agents.append(subhead('On this computer'));
+   if(list.length)agents.append(subhead('Agents on this computer'));
    for(const agent of list){
     const using=inUse===agent.id,row=el('div','companion-settings-row'),text=el('div');row.dataset.agent=agent.id;
     text.append(el('strong','',agent.title+(using?' · In use':'')),el('span','',agent.id==='codex'?(agent.model===false?'Sign in to Codex on this computer first.':'Your ChatGPT plan through Codex.'):agent.memory?.model?'Runs on its own API key.':'Answers for Fox on its own sign-in.'),
@@ -257,7 +256,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    // official installer, which repairs it, then chooses it (Windows Beta 4384, 2026-10-13: it stayed chosen, and every
    // background turn failed on it).
    if(found?.brokenHermes===true){
-    if(!list.length)agents.append(subhead('On this computer'));
+    if(!list.length)agents.append(subhead('Agents on this computer'));
     const row=el('div','companion-settings-row'),text=el('div');row.dataset.agent='hermes';
     text.append(el('strong','','Hermes Agent'+(inUse==='hermes'?' · In use':'')),el('span','companion-settings-model-problem','It is on this computer but does not start. Install again sets it up the official way.'));
     row.append(text,action('Install again',async()=>{
@@ -269,75 +268,30 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    }
    // The provider of the Agent in use comes right under the Agents here.
    agents.append(providers);
-   // An Agent on another computer and an OpenClaw Gateway are for few people: folded away unless one is in use.
-   const elsewhere=el('details','companion-settings-elsewhere') as HTMLDetailsElement;elsewhere.append(el('summary','','Other ways to connect'));
-   elsewhere.ontoggle=()=>{showElsewhere=elsewhere.open;};
-   // An Agent on another computer (platform/web/README.md#another-computers-agent): the code from Worldlet there pairs
-   // this one with it, and Fox's conversation runs on it; this World stays here.
-   const remote=found?.remote,row=el('div','companion-settings-row'),text=el('div');row.dataset.agent='remote';
-   if(remote&&typeof remote.computer==='string'){
-    const away=!remote.seenAt||Date.now()-remote.seenAt>120_000;
-    text.append(el('strong','',`Agent on ${remote.computer} · In use`),el('span','',away?`${remote.computer} is away. Fox answers once it is awake with Worldlet open.`:'Fox’s conversation runs there. Your apps and Attention Center stay on this computer.'));
-    row.append(text,stopUsing('Ending the pairing…','stop-remote'));
-   }else{
-    const code=document.createElement('input');code.className='companion-settings-input';code.placeholder='worldlet://agent?…';code.spellcheck=false;code.autocomplete='off';code.setAttribute('aria-label','Code from Worldlet on your other computer');
-    text.append(el('strong','','My Agent is on another computer'),el('span','','On that computer, open Settings › Phone › Pair another computer, then paste its code here.'),code);
-    row.append(text,action('Pair',async()=>{
-     said.textContent='Pairing with your other computer…';
-     try{const result=await call('agentHarness',{operation:'pair',link:code.value.trim()});modelRefresh();said.textContent=`Fox now uses your Agent on ${result?.remote?.computer||'your other computer'}.`;await draw();}
-     catch(e){said.textContent=(e as Error).message||'Could not pair.';}
-    },{id:'pair-remote'}));
-   }
-   elsewhere.append(row);
-   // An OpenClaw Gateway on another computer, reached directly with its address and token, nothing of Worldlet there
-   // (platform/web/README.md#an-agent-gateway-on-another-computer). The token goes to the host's vault and never comes back.
-   const gateway=found?.gateway&&typeof found.gateway.host==='string'?found.gateway:null,gRow=el('div','companion-settings-row'),gText=el('div');gRow.dataset.agent='gateway';
-   const connect=async(request:Record<string,unknown>)=>{
-    said.textContent='Connecting to your Gateway…';
-    try{const result=await call('agentHarness',{operation:'gateway',...request});modelRefresh();said.textContent=`Fox now uses OpenClaw at ${result?.gateway?.host||'your Gateway'}.`;await draw();}
-    catch(e){said.textContent=(e as Error).message||'Could not connect.';}
-   };
-   const forget=action('Forget',async()=>{
-    try{await call('agentHarness',{operation:'forget-gateway'});modelRefresh();said.textContent='The Gateway and its token are forgotten.';await draw();}
-    catch(e){said.textContent=(e as Error).message||'Could not forget it.';}
-   },{id:'forget-gateway'});
-   if(gateway?.active){
-    gText.append(el('strong','',`OpenClaw at ${gateway.host} · In use`),el('span','','Fox talks to that Gateway directly; nothing of Worldlet runs there. Your apps and Attention Center stay on this computer.'));
-    gRow.append(gText,stopUsing('Fox goes back to its own model connection…','stop-gateway'),forget);
-   }else{
-    const address=document.createElement('input');address.className='companion-settings-input';address.placeholder='https://gateway.example.com';address.spellcheck=false;address.autocomplete='off';address.value=gateway?.url??'';address.setAttribute('aria-label','Gateway address');
-    const token=document.createElement('input');token.className='companion-settings-input';token.type='password';token.placeholder=gateway?'Saved token (type a new one to replace it)':'Gateway token';token.autocomplete='off';token.setAttribute('aria-label','Gateway token');
-    gText.append(el('strong','','My OpenClaw Gateway is on another computer'),el('span','','Its address and its access token, both from that OpenClaw.'),address,token);
-    gRow.append(gText,action(gateway?'Use':'Connect',()=>connect({url:address.value.trim(),token:token.value}),{id:'connect-gateway'}),...gateway?[forget]:[]);
-   }
-   elsewhere.append(gRow);elsewhere.open=showElsewhere||!!(remote&&typeof remote.computer==='string')||!!gateway?.active;
-   agents.append(elsewhere);
   };
   // The connection steps open under the buttons; a new connection redraws what Fox runs on.
   const changed=()=>{if(turn!==ticket||!target.isConnected){for(const name of MODEL_EVENTS)window.removeEventListener(name,changed);return;}void draw();};
   for(const name of MODEL_EVENTS)window.addEventListener(name,changed);
-  // Your Agent's page (owner decisions 2026-10-11 and 2026-10-21, issue #674): its status first (what Fox runs on, with
-  // the other Agents and providers folded), then Scheduled (the same jobs as the Task panel's), then, folded under
-  // Advanced, what lives in the Agent and Worldlet only shows and changes its way: Skills, Permissions (its standing rules)
-  // and Connections (Worldlet's own, then the Agent's tools and chat accounts). What it remembers is in Your data; what
-  // each Agent may do is on Agents' list.
+  // Your Agent's page (owner decisions 2026-10-11, 2026-10-21 and 2026-10-22, issue #674): its status first (what Fox runs
+  // on, and the Agents on this computer to switch to), then Scheduled (the same jobs as the Task panel's), then what it
+  // does without asking (its standing rules, from Always on an approval card), then what it may do (its switches).
+  // Nothing is folded: Skills, Connections,
+  // providers that need nothing and the Gateway left with Advanced. What it remembers is in Your data; using the Agent on
+  // another computer is in Phone.
   const live=()=>turn===ticket&&target.isConnected;
   const model=part('model','Status','How the Agent Fox thinks with is doing.');
-  const skills=part('skills','Skills','Steps your Agent follows for tasks it knows how to do. They live in your Agent; Worldlet changes them only with its own commands.');
   const routines=part('routines','Scheduled','What your Agent does on its own, on a schedule. The same tasks are in the Task panel.');
-  const permissions=part('permissions','Permissions','What your Agent may do without asking you first, from each time you chose Always on an approval card.');
-  const accounts=part('accounts','Connections','What Worldlet reads on this computer, then the tools and chat accounts set up in your Agent.');
+  const permissions=part('permissions','Does without asking','What your Agent may do without asking you first, from each time you chose Always on an approval card.');
+  const may=part('may','What it may do','What your Agent may look at and do in your World. Each switch changes at once.');
   // A request for Fox (set up or change a routine, forget something) goes to its conversation with the panel closed.
   const ask=(text:string)=>{close();window.dispatchEvent(new CustomEvent('worldlet:fox-ask',{detail:{text}}));};
   model.append(now,guide.element,said,choose);
-  const advanced=el('details','companion-settings-elsewhere companion-settings-own-advanced') as HTMLDetailsElement;advanced.dataset.ownAdvanced='';
-  advanced.append(el('summary','','Advanced'),skills,permissions,accounts);
   // Back to every Agent, then the page: its name is what the header says once it is known.
   const back=action('‹ All Agents',()=>void show('agents'),{id:'agents-back'}),title=el('h5','companion-settings-own-title','Your Agent');
   const header=el('div','companion-settings-own-head');header.dataset.view='own-agent';header.append(back,title);
-  void ownAgent().then(own=>{if(!live())return;title.textContent=own.title;const next=settingsIcon(agentIcon(own.harness??'',own.title));icon.replaceWith(next);icon=next;});
-  target.append(header,model,routines,advanced);
-  await Promise.all([draw(),showAgentSkills(skills,call,live),showAgentRoutines(routines,call,live,{ask}),showAgentPermissions(permissions,call,live),showWorldletAccounts(accounts,call,live)]);
+  const known=ownAgent().then(own=>{if(live()){title.textContent=own.title;const next=settingsIcon(agentIcon(own.harness??'',own.title));icon.replaceWith(next);icon=next;}return own;});
+  target.append(header,model,routines,permissions,may);
+  await Promise.all([draw(),showAgentRoutines(routines,call,live,{ask}),showAgentPermissions(permissions,call,live),known.then(own=>live()?showOwnAgentMay(may,call,live,own.harness):undefined)]);
  }
  const part=(id:string,heading:string,line:string)=>{const box=el('section','companion-settings-part');box.dataset.part=id;box.append(el('h5','companion-settings-parthead',heading),el('p','companion-info-note companion-settings-partnote',line));return box;};
  // The Agent Fox works through, as Agents' list names it (agent-access.ts OwnAgent): the one chosen on this computer,
@@ -362,7 +316,7 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   const address=el('section');address.dataset.part='world-address';
   target.append(list,address);
   const own=await ownAgent();if(!live())return;
-  await Promise.all([showAgentAccess(list,call,live,{own:{...own,open:()=>void show('agents','model')},advanced:null}),showWorldAddress(address,call,live)]);
+  await Promise.all([showAgentAccess(list,call,live,{own:{...own,open:()=>void show('agents','model')}}),showWorldAddress(address,call,live)]);
  }
  // One list, in the order a person looks for things (owner request 2026-10-10: no tabs, nothing technical): the three
  // areas first (issue #674), connectors on one side, Agents on the other, and everything the World keeps in one place;

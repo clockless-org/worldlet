@@ -4,7 +4,8 @@ import qrcode from 'qrcode-generator';
 // phone and whether it takes notifications, unpair. The host owns the pairing (`phonePair`) and reports changes as
 // `worldlet:phone-status`. Below it, another Worldlet (a laptop) can use this computer's Agent for Fox (`phonePair` with
 // `kind: 'agent'`, `worldlet:agent-pair-status`, platform/web/README.md#another-computers-agent): its code is pasted there
-// (a laptop rarely scans), so it shows as text to copy. Last, any web browser can open the same Center and Fox
+// (a laptop rarely scans), so it shows as text to copy; on the laptop, the same section takes that code (`agentHarness`
+// `pair`) and shows the Agent it uses until Stop using (`clear`). Last, any web browser can open the same Center and Fox
 // (platform/web/README.md#web): a browser on this computer opens a link this app serves itself (`phonePair` with `kind:
 // 'local'`, `worldlet:local-pair-status`), and another device's browser a link to copy (`kind: 'web'`,
 // `worldlet:web-pair-status`). That link carries the full World's own pairing (`kind: 'world'`,
@@ -23,7 +24,7 @@ const seen=(at?:number|null)=>{
 export function createCompanionPhone({call}:{call:(action:string,body?:any)=>Promise<any>}){
  const el=(tag:string,cls='',text='')=>Object.assign(document.createElement(tag),{className:cls,textContent:text});
  const element=el('section','companion-info-section companion-phone-page');element.dataset.section='Mobile';
- let status:Status|null=null,agent:Status|null=null,web:Status|null=null,local:Status|null=null,world:Status|null=null,busy=false,error='',copied=false,agentCopied=false,webCopied=false;
+ let status:Status|null=null,agent:Status|null=null,away:{computer:string;seenAt?:number}|null=null,code='',web:Status|null=null,local:Status|null=null,world:Status|null=null,busy=false,error='',copied=false,agentCopied=false,webCopied=false;
  const button=(label:string,run:()=>Promise<unknown>|void,primary=false)=>{
   const b=el('button','companion-info-action'+(primary?' primary':''),label) as HTMLButtonElement;b.type='button';b.disabled=busy;
   b.onclick=async()=>{if(busy)return;busy=true;error='';render();try{await run();}catch(e){error=(e as Error).message||'Please try again.';}finally{busy=false;render();}};
@@ -61,6 +62,8 @@ export function createCompanionPhone({call}:{call:(action:string,body?:any)=>Pro
   }
   return box;
  }
+ const readAway=async()=>{const found=await call('agentHarness',{operation:'detect'}).catch(()=>null);away=found?.remote&&typeof found.remote.computer==='string'?found.remote:null;};
+ const modelRefresh=()=>window.dispatchEvent(new Event('worldlet:model-refresh'));
  function computers(){
   const box=el('div','companion-phone-computers');
   box.append(el('h4','','Another computer'),el('p','','Let Worldlet on your laptop use the Agent on this computer for Fox. Fox keeps the laptop’s own conversations and works in its World there. Keep this computer awake with Worldlet open.'));
@@ -70,6 +73,17 @@ export function createCompanionPhone({call}:{call:(action:string,body?:any)=>Pro
     button(agentCopied?'Code copied':'Copy code',async()=>{await navigator.clipboard.writeText(link);agentCopied=true;}),button('Cancel',()=>pairAgent('end')));
   }else if(agent?.state==='paired')box.append(el('p','',(agent.phone?.name?`Paired with ${agent.phone.name}`:'Paired with your other computer')+' · '+seen(agent.seenAt)),button('Unpair',()=>pairAgent('end')));
   else if(agent)box.append(button('Pair another computer',()=>pairAgent('start')));
+  // This computer using the Agent on another one (platform/web/README.md#another-computers-agent).
+  if(away){
+   const gone=!away.seenAt||Date.now()-away.seenAt>120_000;
+   box.append(el('p','',`Fox uses the Agent on ${away.computer}.`+(gone?` ${away.computer} is away; Fox answers once it is awake with Worldlet open.`:'')),
+    button('Stop using',async()=>{await call('agentHarness',{operation:'clear'});modelRefresh();await readAway();}));
+  }else{
+   const input=el('input','companion-settings-input') as HTMLInputElement;input.placeholder='worldlet://agent?…';input.spellcheck=false;input.autocomplete='off';input.value=code;
+   input.setAttribute('aria-label','Code from Worldlet on your other computer');input.oninput=()=>{code=input.value;};
+   box.append(el('p','','Or use the Agent on another computer: on that computer choose Pair another computer, then paste its code here.'),input,
+    button('Pair',async()=>{await call('agentHarness',{operation:'pair',link:code.trim()});code='';modelRefresh();await readAway();}));
+  }
   return box;
  }
  function render(){
@@ -104,5 +118,5 @@ export function createCompanionPhone({call}:{call:(action:string,body?:any)=>Pro
  render();
  return {element,
   /** The panel opened: read the current pairing. */
-  async refresh(){try{await pair('status');await pairAgent('status');await pairWeb('status');await pairLocal('status');await pairWorld('status');}catch(e){error=(e as Error).message;}render();}};
+  async refresh(){try{await readAway();await pair('status');await pairAgent('status');await pairWeb('status');await pairLocal('status');await pairWorld('status');}catch(e){error=(e as Error).message;}render();}};
 }

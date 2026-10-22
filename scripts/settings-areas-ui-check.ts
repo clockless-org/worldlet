@@ -1,11 +1,11 @@
 // Settings in three areas (issue #674, ui/frame/companion-settings.ts) against a fake host: Connectors, Agents and
 // Context first, then Fox, Phone, General and Help smaller below a line. Agents lists every Agent that reaches the World,
-// your own Agent first with Open for its page (Model, Skills, Scheduled, Permissions, Connections) and Back, each with
-// what it may do in one line, what it did lately and Revoke, its switches folded; then using the World in Claude or
-// ChatGPT (steps, Turn on, Copy address without showing it) and Remote access folded. Context shows each kind of
+// your own Agent first with Manage for its page (Status, Scheduled, Does without asking) and Back, each other Agent with
+// what it may do in one line, Manage for its page of switches and Remove; then Your World's address as one card. Nothing
+// is folded (owner request 2026-10-22: no Advanced). Context shows each kind of
 // context with how much it holds (only past conversations counted), what Fox and the Agents remember, Save a copy, and
 // deletes that ask first. Old entry points (model, access, permissions, memory) land in the area that took them in.
-// Fails when a default path (outside folded parts) shows a technical word (CONNECTOR_TECHNICAL_WORDS).
+// Fails when a page shows a technical word (CONNECTOR_TECHNICAL_WORDS).
 // `--screenshot <file.png>` saves the Agents page, and `-own`, `-context` and `-narrow` beside it.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -36,6 +36,7 @@ await withBrowser(async browser=>{
    if(action==='agentHarness'&&body.operation==='providers')return {agent:null,providers:[],chosen:null};
    if(action==='agentAccess'&&body.operation==='list')return {orders:{},agents:structuredClone(w.access)};
    if(action==='agentAccess'&&body.operation==='revoke'){w.access=w.access.map((a:any)=>a.id===body.id?{...a,revokedAt:'2026-10-18T09:00:00.000Z'}:a);return {ok:true};}
+   if(action==='agentAccess'&&body.operation==='grantAsks'){w.access=w.access.map((a:any)=>a.id===body.id?{...a,asks:{...a.asks,[body.kind]:true}}:a);return {ok:true};}
    if(action==='remoteMcp'&&body.operation==='status')return structuredClone(w.remote);
    if(action==='remoteMcp'&&body.operation==='enable'){w.remote.enabled=true;return {ok:true};}
    if(action==='worldAddress'&&body.operation==='status')return w.remote.enabled?{name:'w-7k3m9p2x',address:'https://w-7k3m9p2x.worldlet.ai',mcp:'https://w-7k3m9p2x.worldlet.ai/mcp',chosen:false,defaultName:'w-7k3m9p2x',reachable:true,remote:true,devices:[],visitors:[],shares:[]}
@@ -88,8 +89,7 @@ await withBrowser(async browser=>{
  const [big,small]=await Promise.all([list.locator('[data-setting=agents] strong').evaluate(e=>parseFloat(getComputedStyle(e).fontSize)),list.locator('[data-setting=help] strong').evaluate(e=>parseFloat(getComputedStyle(e).fontSize))]);
  assert.ok(small<big,'the rest is smaller');
 
- // Agents: your own Agent first, then the others, each with its picture, what it may do and Remove; what it did lately is
- // folded with its switches (owner request 2026-10-21).
+ // Agents: your own Agent first, then the others, each with its picture, what it may do, Manage and Remove; nothing folded.
  await open('agents');
  await list.locator('[data-setting=agents][aria-current=true]').waitFor();
  const rows=detail.locator('[data-part=access] [data-access-agent]');
@@ -104,12 +104,21 @@ await withBrowser(async browser=>{
  assert.equal(await rows.locator('.companion-settings-icon').count(),2,'each Agent has its picture');
  assert.equal(await claude.locator('.companion-settings-icon img').count(),1,'Claude wears its logo');
  assert.equal(await claude.getByRole('button',{name:'Remove',exact:true}).count(),1);
- assert.equal(await claude.getByRole('button',{name:'Manage',exact:true}).count(),0,'Manage only for your own Agent');
- // Its Grants and switches are folded under Change what it may do.
- assert.equal(await claude.getByRole('checkbox',{name:'Can read GitHub',exact:true}).isVisible(),false,'switches folded');
- await claude.locator('[data-access-more] > summary').click();
- assert.equal(await claude.getByRole('checkbox',{name:'Can read GitHub',exact:true}).isChecked(),true);
- await claude.locator('.companion-settings-access-audit li').getByText(/items query · Allowed$/).waitFor();
+ assert.equal(await detail.locator('details').count(),0,'nothing folded');
+ assert.equal(await detail.getByRole('checkbox').count(),0,'no switches on the list');
+ // Manage on another Agent: its page, one switch per thing it may do, Remove, and back to the list.
+ await claude.getByRole('button',{name:'Manage',exact:true}).click();
+ const claudePage=detail.locator('[data-view=agent][data-agent=claude-ai]');
+ await claudePage.waitFor();
+ const may=detail.locator('[data-agent-may=claude-ai]');
+ assert.deepEqual(await may.getByRole('switch').evaluateAll(n=>n.map(b=>b.getAttribute('aria-label'))),['Can read GitHub','Can ask you','Can take work','Can see your board','Can set up your board']);
+ assert.equal(await may.getByRole('switch',{name:'Can read GitHub',exact:true}).getAttribute('aria-checked'),'true');
+ await may.getByRole('switch',{name:'Can take work',exact:true}).click();
+ await page.waitForFunction(()=>(window as any).calls.some((c:any)=>c.action==='agentAccess'&&c.operation==='grantAsks'));
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.operation==='grantAsks')),[{action:'agentAccess',operation:'grantAsks',id:'claude-ai',kind:'work'}]);
+ await plain('an Agent’s page');
+ await claudePage.getByRole('button',{name:'‹ All Agents',exact:true}).click();
+ await rows.first().waitFor();
  // Your World's address: one card (owner request 2026-10-22: no Advanced). Turn on when it is off, then the address,
  // Copy for Claude or ChatGPT and Choose a name; no remote access controls, tokens, script Agents or work routing.
  const card=detail.locator('[data-world-address]');
@@ -131,15 +140,14 @@ await withBrowser(async browser=>{
  await claude.getByRole('button',{name:'Remove',exact:true}).click();
  await claude.locator('[data-action=confirm-revoke-agent]').click();
  await detail.getByText('Claude can no longer reach your World.',{exact:true}).waitFor();
- // Manage: your own Agent's page, its status and Scheduled first, Skills, Permissions and Connections folded under
- // Advanced (owner request 2026-10-21), and back to every Agent.
+ // Manage: your own Agent's page, its status, Scheduled and what it does without asking, nothing folded, and back to every
+ // Agent.
  await hermes.getByRole('button',{name:'Manage',exact:true}).click();
  const own=detail.locator('[data-view=own-agent]');
  await own.getByText('Hermes Agent',{exact:true}).waitFor();
- assert.deepEqual(await detail.locator('[data-part]').evaluateAll(n=>n.map(p=>(p as HTMLElement).dataset.part)),['model','routines','skills','permissions','accounts']);
- assert.deepEqual(await detail.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Status','Scheduled','Skills','Permissions','Connections']);
- assert.equal(await detail.locator('details[data-own-advanced]').evaluate(n=>(n as HTMLDetailsElement).open),false,'Advanced starts folded');
- assert.equal(await detail.locator('details[data-choose-agent]').evaluate(n=>(n as HTMLDetailsElement).open),false,'other Agents and providers start folded while it works');
+ assert.deepEqual(await detail.locator('[data-part]').evaluateAll(n=>n.map(p=>(p as HTMLElement).dataset.part)),['model','routines','permissions','may']);
+ assert.deepEqual(await detail.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Status','Scheduled','Does without asking','What it may do']);
+ assert.equal(await detail.locator('details').count(),0,'nothing folded');
  assert.equal(await detail.locator('[data-part=memory],[data-part=access]').count(),0,'memory is in Context and the Agents are on the list');
  await detail.getByText('Fox’s model is connected',{exact:true}).waitFor();
  assert.equal(await detail.getByText(/claude-|gpt-/).count(),0,'no model names');
@@ -153,7 +161,6 @@ await withBrowser(async browser=>{
   await detail.locator(`[data-view=own-agent]`).waitFor();
   await detail.locator(`[data-part=${part}]`).waitFor();
  }
- assert.equal(await detail.locator('details[data-own-advanced]').evaluate(n=>(n as HTMLDetailsElement).open),true,'a part named from outside opens the fold it is in');
  await open('access');
  await detail.locator('[data-part=access] [data-access-agent]').first().waitFor();
 
@@ -202,4 +209,4 @@ await withBrowser(async browser=>{
  if(screenshot)await page.screenshot({path:screenshot.replace(/\.png$/,'-narrow.png'),fullPage:true});
  assert.deepEqual(errors,[]);
 });
-console.log('PASS Settings in three areas: Services, Agents and Your data first, each with an icon, and the rest smaller; Agents lists your own Agent first with Manage for its page (Status and Scheduled, then Skills, Permissions and Connections under Advanced) and Back, what each may do in one line, what it did lately and Remove, switches folded, Your World’s address as one card (Turn on, Copy for Claude or ChatGPT, Choose a name) and no Advanced; Your data shows how much each kind holds (only past conversations counted), Save a copy, the memory under Show and a Delete on each kind that asks first, nothing folded; old entry points land in their area; no technical word on the default path; narrow layout');
+console.log('PASS Settings in three areas: Services, Agents and Your data first, each with an icon, and the rest smaller; Agents lists your own Agent first with Manage for its page (Status, Scheduled, Does without asking and What it may do) and Back, what each may do in one line, Manage for each other Agent’s page of switches and Remove, nothing folded, Your World’s address as one card (Turn on, Copy for Claude or ChatGPT, Choose a name) and no Advanced; Your data shows how much each kind holds (only past conversations counted), Save a copy, the memory under Show and a Delete on each kind that asks first, nothing folded; old entry points land in their area; no technical word on the default path; narrow layout');
