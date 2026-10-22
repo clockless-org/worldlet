@@ -14,6 +14,8 @@ const KIND_ICONS:Record<WorldContextKind,string>={conversations:'chat',memory:'h
 type Options={
  /** What Fox and the Agents remember, drawn by the page into this part. */
  memory:HTMLElement;
+ /** Show it from the start: Settings opened at the memory (an old entry point). */
+ showMemory?:boolean;
  /** Whether this host deletes saved local data (`deleteSourceData`, `clearWorldContent`). */
  localDeletion:()=>boolean;
  /** The practice world: it keeps nothing of the person's own. */
@@ -32,24 +34,21 @@ async function memoryBytes(call:AgentCall):Promise<number> {
 }
 
 /** The page leads with one row, everything stays on this computer, and Save a copy; then one row per kind with an
- * icon; what Fox and the Agents remember folds under Show; every delete folds under Delete… at the end (owner request
- * 2026-10-21: Settings for people who know nothing about computers). */
-export async function showWorldContext(target:HTMLElement,call:AgentCall,current:()=>boolean,{memory,localDeletion,sample,openJournal}:Options){
+ * icon, each with its own Delete that asks first; Show on the memory row opens what Fox and the Agents remember below
+ * it. Nothing is folded (owner requests 2026-10-21 and 2026-10-22: Settings for people who know nothing about computers,
+ * no Advanced). */
+export async function showWorldContext(target:HTMLElement,call:AgentCall,current:()=>boolean,{memory,showMemory=false,localDeletion,sample,openJournal}:Options){
  const page=el('div','companion-settings-context');page.dataset.context='page';
  const rows=el('div','companion-settings-rows'),said=el('p','companion-settings-status');said.setAttribute('role','status');
  const actions=el('div','companion-settings-rows');actions.dataset.context='actions';
- // What Fox and the Agents remember, folded; Show on the memory row opens it.
- const remembered=el('details','companion-settings-elsewhere companion-settings-memory') as HTMLDetailsElement;remembered.dataset.context='memory-fold';
- remembered.append(el('summary','','What Fox and your Agents remember'),memory);
- const deletes=el('details','companion-settings-elsewhere companion-settings-context-deletes') as HTMLDetailsElement;deletes.dataset.context='deletes';
- const deleteRows=el('div','companion-settings-rows');
- deletes.append(el('summary','','Delete…'),deleteRows);
+ // What Fox and the Agents remember, shown under the list once Show is chosen on the memory row.
+ const remembered=el('div','companion-settings-memory');remembered.dataset.context='remembered';remembered.hidden=!showMemory;remembered.append(memory);
  page.append(actions,rows,said);
- target.append(page,remembered,deletes);
- let asking:WorldContextKind|null=null;
- const ask=(row:HTMLElement,question:string,label:string,run:()=>Promise<void>)=>{
-  const box=el('div','companion-settings-confirm');box.setAttribute('role','group');box.dataset.confirm=row.dataset.delete??'';
-  box.append(el('span','',question),button(label,'confirm-delete-context',async()=>{asking=null;said.textContent='';try{await run();}catch(e){said.textContent='Could not delete: '+((e as Error).message||'try again.');}await draw();},true),
+ target.append(page,remembered);
+ let asking:string|null=null;
+ const ask=(row:HTMLElement,id:string,question:string,run:()=>Promise<void>)=>{
+  const box=el('div','companion-settings-confirm');box.setAttribute('role','group');box.dataset.confirm=id;
+  box.append(el('span','',question),button('Delete','confirm-delete-context',async()=>{asking=null;said.textContent='';try{await run();}catch(e){said.textContent='Could not delete: '+((e as Error).message||'try again.');}await draw();},true),
    button('Keep','keep-context',()=>{asking=null;said.textContent='Nothing was deleted.';void draw();}));
   row.append(box);
  };
@@ -60,10 +59,17 @@ export async function showWorldContext(target:HTMLElement,call:AgentCall,current
   for(const id of ids)await call('artifacts',{operation:'delete',id});
   said.textContent=ids.length?agents?'What your Agents saved is deleted.':'Your Journal is empty now.':'Nothing was left to delete.';
  }
+ /** The host asks once more and says what stays (core localDeletionRequest). */
+ const hostDelete=(action:string,body:Record<string,unknown>,done:string)=>async()=>{
+  said.textContent='';
+  try{const result=await call(action,body);if(result?.cancelled)return;said.textContent=done;}
+  catch(e){said.textContent='Could not delete: '+((e as Error).message||'try again.');}
+  await draw();
+ };
  async function draw(){
   const [sizes,bytes]=await Promise.all([call('worldContext').then(readWorldContextSizes).catch(()=>null) as Promise<WorldContextSizes|null>,memoryBytes(call)]);
   if(!current())return;
-  rows.replaceChildren();deleteRows.replaceChildren();actions.replaceChildren();
+  rows.replaceChildren();actions.replaceChildren();
   if(sizes)actions.append(settingsRow({icon:{icon:'lock'},title:'Everything stays on this computer',line:'Save a copy to keep it safe. Keep the copy private: it holds your conversations and what your World read.',setting:'save-copy',
    controls:[button('Save a copy','export-world',async()=>{
     said.textContent='Saving a copy of your World…';
@@ -72,60 +78,32 @@ export async function showWorldContext(target:HTMLElement,call:AgentCall,current
    },true)]}));
   if(!sizes&&sample()){rows.append(el('p','companion-info-note','The sample world keeps nothing of yours. Turn it off in General to see your own World’s context.'));}
   for(const item of worldContextRows(sizes,bytes)){
-   const row=el('div','companion-settings-row has-icon'),words=el('div');row.dataset.context=item.id;row.dataset.empty=String(item.empty);
+   const row=el('div','companion-settings-row has-icon'),words=el('div'),controls=el('span','companion-settings-actions');row.dataset.context=item.id;row.dataset.empty=String(item.empty);
    words.append(el('strong','',item.title),el('span','companion-settings-context-amount',item.amount),el('span','companion-settings-quiet',item.line));
-   row.append(settingsIcon({icon:KIND_ICONS[item.id]??'file'}),words);
-   if(item.id==='memory')row.append(button('Show','show-memory',()=>{remembered.open=true;remembered.scrollIntoView({block:'start'});}));
+   row.append(settingsIcon({icon:KIND_ICONS[item.id]??'file'}),words,controls);
+   if(item.id==='memory')controls.append(button(remembered.hidden?'Show':'Hide','show-memory',()=>{remembered.hidden=!remembered.hidden;if(!remembered.hidden)remembered.scrollIntoView({block:'start'});void draw();}));
    if(item.id==='services'){
     const services=worldContextServices(sizes);
     if(services.length){
      const list=el('ul','companion-settings-context-services');list.setAttribute('aria-label','From each service');
      for(const service of services){
-      const line=el('li','');line.dataset.provider=service.provider;line.append(el('span','',`${service.name} · ${service.amount}`));list.append(line);
-      // The host asks once more and says what stays (core localDeletionRequest).
-      if(localDeletion()){
-       const del=el('div','companion-settings-row');del.dataset.provider=service.provider;
-       const text=el('div');text.append(el('strong','',`What ${service.name} brought in`),el('span','',`${service.amount}. It is read again while ${service.name} stays connected.`));
-       del.append(text,button('Delete','delete-service-context',async()=>{
-        said.textContent='';
-        try{const result=await call('deleteSourceData',{provider:service.provider});if(result?.cancelled)return;said.textContent=`What ${service.name} brought in is deleted. It is read again while it stays connected.`;}
-        catch(e){said.textContent='Could not delete: '+((e as Error).message||'try again.');}
-        await draw();
-       }));
-       deleteRows.append(del);
-      }
+      const line=el('li','');line.dataset.provider=service.provider;line.append(el('span','',`${service.name} · ${service.amount}`));
+      if(localDeletion())line.append(button('Delete','delete-service-context',hostDelete('deleteSourceData',{provider:service.provider},`What ${service.name} brought in is deleted. It is read again while it stays connected.`)));
+      list.append(line);
      }
      words.append(list);
     }
    }
-   if(item.id==='journal')row.append(button('Open Journal','open-journal',()=>openJournal()));
+   if(item.id==='journal')controls.append(button('Open Journal','open-journal',()=>openJournal()));
    if((item.id==='journal'||item.id==='agent-outputs')&&!item.empty){
-    const agents=item.id==='agent-outputs',del=el('div','companion-settings-row');del.dataset.delete=item.id;
-    const text=el('div');text.append(el('strong','',agents?'What your Agents saved':'Your Journal'),el('span','',item.amount));
-    del.append(text);
-    if(asking===item.id)ask(del,agents?'Delete everything your Agents saved to your Journal? This can’t be undone.':'Delete every card in your Journal? This can’t be undone.','Delete',()=>deleteCards(agents));
-    else del.append(button('Delete…','delete-'+item.id,()=>{asking=item.id;said.textContent='';void draw();}));
-    deleteRows.append(del);
-   }
-   if(item.id==='conversations'&&!item.empty){
-    const del=el('div','companion-settings-row'),text=el('div');del.dataset.delete=item.id;
-    text.append(el('strong','','Conversations'),el('span','','Reset, under Help › More, starts over without them.'));
-    del.append(text);deleteRows.append(del);
+    const agents=item.id==='agent-outputs';
+    if(asking===item.id)ask(row,item.id,agents?'Delete everything your Agents saved to your Journal? This can’t be undone.':'Delete every card in your Journal? This can’t be undone.',()=>deleteCards(agents));
+    else controls.append(button('Delete…','delete-'+item.id,()=>{asking=item.id;said.textContent='';void draw();}));
    }
    rows.append(row);
   }
-  if(sizes&&localDeletion()){
-   const all=el('div','companion-settings-row'),text=el('div');
-   text.append(el('strong','','Everything saved from your services'),el('span','','Worldlet asks you once more first.'));
-   all.append(text,button('Delete everything saved','clear-world-content',async()=>{
-    said.textContent='';
-    try{const result=await call('clearWorldContent');if(result?.cancelled)return;said.textContent='Everything your World saved from your services is deleted.';}
-    catch(e){said.textContent='Could not delete: '+((e as Error).message||'try again.');}
-    await draw();
-   }));
-   deleteRows.append(all);
-  }
-  deletes.hidden=!deleteRows.childElementCount;
+  if(sizes&&localDeletion()&&worldContextServices(sizes).length)rows.append(settingsRow({icon:{icon:'alert'},title:'Everything saved from your services',line:'Worldlet asks you once more first.',setting:'clear-world-content',
+   controls:[button('Delete all','clear-world-content',hostDelete('clearWorldContent',{},'Everything your World saved from your services is deleted.'))]}));
  }
  await draw();
 }

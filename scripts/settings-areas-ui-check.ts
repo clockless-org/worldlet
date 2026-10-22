@@ -177,29 +177,29 @@ await withBrowser(async browser=>{
  const amount=(id:string)=>context.locator(`[data-context=${id}] .companion-settings-context-amount`).textContent();
  assert.deepEqual(await Promise.all(['conversations','memory','services','journal','agent-outputs','board'].map(amount)),['12 past conversations','3 KB','1.3 MB','9 KB','Under 1 KB','Not set up'],'only past conversations are counted');
  assert.deepEqual(await context.locator('[data-context=services] li').allInnerTexts().then(t=>t.map(s=>s.split('\n')[0].trim())),['PostHog · 1.3 MB','GitHub · 2 KB'],'each service, the largest first');
- // Memory: folded; Show opens what Fox knows and what each Agent remembers, here.
- const memoryFold=detail.locator('details[data-context=memory-fold]');
- assert.equal(await memoryFold.evaluate(n=>(n as HTMLDetailsElement).open),false,'memory starts folded');
+ // Memory: shown under the list once Show is chosen; nothing on the page is folded.
+ assert.equal(await detail.locator('details').count(),0,'nothing folded');
+ const remembered=detail.locator('[data-context=remembered]');
+ assert.equal(await remembered.isHidden(),true,'memory waits for Show');
  await context.locator('[data-context=memory]').getByRole('button',{name:'Show',exact:true}).click();
- assert.equal(await memoryFold.evaluate(n=>(n as HTMLDetailsElement).open),true,'Show opens it');
+ await remembered.waitFor();
  const memory=detail.locator('[data-part=memory]');
  await memory.locator('[data-knows]').waitFor();
  await memory.locator('[data-harness=hermes]').getByText('Lives in Lisbon.',{exact:true}).waitFor();
  await plain('Context');
- // Save a copy is the World backup; deletes are folded, a Journal delete asks first and deletes only Fox's cards.
+ // Save a copy is the World backup; each kind has its own Delete; a Journal delete asks first and deletes only Fox's cards.
  await detail.getByRole('button',{name:'Save a copy',exact:true}).click();
  await detail.getByText(/^A copy of your World is saved\./).waitFor();
- const deletes=detail.locator('details[data-context=deletes]');
- assert.equal(await deletes.evaluate(n=>(n as HTMLDetailsElement).open),false,'deletes start folded');
- await deletes.locator('summary').click();
- await deletes.locator('[data-delete=journal]').getByRole('button',{name:'Delete…',exact:true}).click();
- await deletes.locator('[data-delete=journal]').getByText('Delete every card in your Journal? This can’t be undone.',{exact:true}).waitFor();
+ const journal=context.locator('[data-context=journal]');
+ await journal.getByRole('button',{name:'Delete…',exact:true}).click();
+ await journal.getByText('Delete every card in your Journal? This can’t be undone.',{exact:true}).waitFor();
  assert.equal(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='artifacts'&&c.operation==='delete').length),0,'asks first');
- await deletes.locator('[data-delete=journal] [data-action=confirm-delete-context]').click();
+ await journal.locator('[data-action=confirm-delete-context]').click();
  await detail.getByText('Your Journal is empty now.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='artifacts'&&c.operation==='delete').map((c:any)=>c.id)),['art-0001','art-0002'],'only Fox\'s own cards');
- await deletes.locator('[data-provider=github]').getByRole('button',{name:'Delete',exact:true}).click();
+ await context.locator('[data-context=services] [data-provider=github]').getByRole('button',{name:'Delete',exact:true}).click();
  await detail.getByText(/^What GitHub brought in is deleted\./).waitFor();
+ await detail.locator('[data-setting=clear-world-content]').getByRole('button',{name:'Delete all',exact:true}).waitFor();
  await context.locator('[data-context=journal]').getByRole('button',{name:'Open Journal',exact:true}).click();
  assert.deepEqual(await page.evaluate(()=>[(window as any).closes,(window as any).journalOpened]),[1,1]);
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter((c:any)=>['dataBackup','deleteSourceData'].includes(c.action))),[{action:'dataBackup',operation:'export'},{action:'deleteSourceData',provider:'github'}]);
@@ -213,4 +213,4 @@ await withBrowser(async browser=>{
  if(screenshot)await page.screenshot({path:screenshot.replace(/\.png$/,'-narrow.png'),fullPage:true});
  assert.deepEqual(errors,[]);
 });
-console.log('PASS Settings in three areas: Services, Agents and Your data first, each with an icon, and the rest smaller; Agents lists your own Agent first with Manage for its page (Status and Scheduled, then Skills, Permissions and Connections under Advanced) and Back, what each may do in one line, what it did lately and Remove, switches folded, using the World in Claude or ChatGPT and Remote access folded; Your data shows how much each kind holds (only past conversations counted), Save a copy, the memory folded and deletes folded that ask first; old entry points land in their area; no technical word on the default path; narrow layout');
+console.log('PASS Settings in three areas: Services, Agents and Your data first, each with an icon, and the rest smaller; Agents lists your own Agent first with Manage for its page (Status and Scheduled, then Skills, Permissions and Connections under Advanced) and Back, what each may do in one line, what it did lately and Remove, switches folded, using the World in Claude or ChatGPT and Remote access folded; Your data shows how much each kind holds (only past conversations counted), Save a copy, the memory under Show and a Delete on each kind that asks first, nothing folded; old entry points land in their area; no technical word on the default path; narrow layout');

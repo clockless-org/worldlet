@@ -381,10 +381,10 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   {id:'connectors',label:'Services',hint:'Apps your World can read',icon:'plug',show:async target=>{const turn=ticket;await showConnectors(target,call,()=>turn===ticket&&target.isConnected);}},
   {id:'agents',label:'Agents',hint:'AI helpers working for you',icon:'people',show:agentsSetting},
   // Everything the World keeps (world-context-page.ts), with what each Agent and Fox remember.
-  {id:'context',label:'Your data',hint:'What is kept on this computer',icon:'lock',show:async target=>{const turn=ticket,live=()=>turn===ticket&&target.isConnected;
+  {id:'context',label:'Your data',hint:'What is kept on this computer',icon:'lock',show:async (target,at)=>{const turn=ticket,live=()=>turn===ticket&&target.isConnected;
    const memory=part('memory','Memory','What Fox and your Agent remember about you and your work. Your Agent’s memory lives in your Agent; Worldlet only shows it.');
    memory.append(pages.knows);
-   await showWorldContext(target,call,live,{memory,localDeletion:()=>!!host()?.localDataDeletion(),sample:()=>!!host()?.sample(),
+   await showWorldContext(target,call,live,{memory,showMemory:at==='memory',localDeletion:()=>!!host()?.localDataDeletion(),sample:()=>!!host()?.sample(),
     openJournal:()=>{close();window.dispatchEvent(new CustomEvent('worldlet:journal-open',{detail:{}}));}});
    await showAgentMemory(memory,call,live,{ask:text=>{close();window.dispatchEvent(new CustomEvent('worldlet:fox-ask',{detail:{text}}));}});
   }},
