@@ -134,13 +134,14 @@ try{
  assert.equal(await local.locator('[data-part=access] [data-access-agent]').first().getAttribute('data-access-agent'),'hermes','your own Agent first');
  await local.locator('[data-access-agent=hermes]').getByRole('button',{name:'Manage',exact:true}).click();
  await local.locator('[data-view=own-agent]').waitFor();
+ await local.locator('details[data-own-advanced] > summary').click();
  await local.getByText('Fox’s model is connected',{exact:true}).waitFor();
  // The Accounts section is part of this page now: Settings lists no section of its own for it.
  assert.equal(await settingsPage.locator('[data-setting=integrations]').count(),0,'no Accounts section');
  const permissions=local.locator('[data-part=permissions]'),accounts=local.locator('[data-part=accounts]');
- // Five named parts in the owner's order (2026-10-11, issue #674), each a heading and one plain line.
- assert.deepEqual(await local.locator('[data-part]').evaluateAll(parts=>parts.map(p=>(p as HTMLElement).dataset.part)),['model','skills','routines','permissions','accounts'],'Model, Skills, Routines, Permissions, then Accounts last');
- assert.deepEqual(await local.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Model','Skills','Scheduled','Permissions','Connections']);
+ // Five named parts in the owner's order (2026-10-11 and 2026-10-21, issue #674), each a heading and one plain line.
+ assert.deepEqual(await local.locator('[data-part]').evaluateAll(parts=>parts.map(p=>(p as HTMLElement).dataset.part)),['model','routines','skills','permissions','accounts'],'Status, Scheduled, then Skills, Permissions and Connections under Advanced');
+ assert.deepEqual(await local.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Status','Scheduled','Skills','Permissions','Connections']);
  for(const line of await local.locator('[data-part] > .companion-settings-partnote').allTextContents())assert.ok(line.length>20&&line.length<160&&!line.includes('\n'),'one plain line: '+line);
  assert.equal(await local.locator('[data-part] > .companion-settings-partnote').count(),5,'each part has its line');
  // Memory, in Context: what each Agent remembers, About you first, the first few with Show all; read only.
@@ -162,6 +163,7 @@ try{
  await ccMemory.getByText('Worldlet only shows this. To have Claude Code forget something, ask it in its own chat.',{exact:true}).waitFor();
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'model'}})));
  await local.locator('[data-view=own-agent]').waitFor();
+ await local.locator('details[data-own-advanced] > summary').click();
  // Claude Code: its skills, rules and tools shown read-only, each with where to change them.
  const ccSkills=local.locator('[data-part=skills] [data-harness=claude-code]');
  await ccSkills.getByText('release-notes').waitFor();
@@ -175,7 +177,7 @@ try{
  await ccTools.getByText('linear',{exact:true}).waitFor();
  assert.equal(await ccTools.getByRole('button').count(),0,'read only');
  await ccTools.getByText('Claude Code keeps these in its own settings. Change them in Claude Code itself.',{exact:true}).waitFor();
- await local.locator('[data-part=routines]').getByText(/the same Scheduled tasks as in the Task panel/).waitFor();
+ await local.locator('[data-part=routines]').getByText(/The same tasks are in the Task panel/).waitFor();
  await permissions.getByRole('heading',{name:'Permissions',exact:true}).waitFor();
  await accounts.getByRole('heading',{name:'Connections',exact:true}).waitFor();
  // Skills: the Agent's own, with when each last ran and an Off mark; Turn off asks first, then runs its own command.
@@ -325,6 +327,7 @@ try{
   [['connect','status',endpointToken.length],['connect','status',endpointToken.length],['connect','open',0],['httpJson','status',0],['disconnectSource','http',0]],'the token goes to the host only with connect');
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'model'}})));
  await settingsPage.locator('[data-setting=agents][aria-current=true]').waitFor();
+ await local.locator('[data-view=own-agent]').waitFor();await local.locator('details[data-own-advanced] > summary').click();
  const rule=permissions.locator('[data-rule=rule-00000000000000a1]');
  await rule.getByText('npm test',{exact:true}).waitFor();
  await rule.getByText(/^Allowed .*2026, in Fox’s main conversation\.$/).waitFor();
@@ -524,6 +527,7 @@ try{
  // Revoked, it is no longer your Agent's row on the list: your Agent has a row of its own, with Open.
  await accessPart.locator('[data-own-agent]').getByRole('button',{name:'Manage',exact:true}).click();
  await local.locator('[data-view=own-agent]').waitFor();
+ await local.locator('details[data-choose-agent] > summary').click();
  await local.locator('[data-agent=claude-code]').getByRole('button',{name:'Use',exact:true}).click();
  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='localAgent'&&c.operation==='adopt'&&c.id==='claude-code'));
  await local.getByText('Claude Code on this computer answers for Fox.').waitFor();

@@ -142,12 +142,15 @@ await withBrowser(async browser=>{
  await claude.getByRole('button',{name:'Remove',exact:true}).click();
  await claude.locator('[data-action=confirm-revoke-agent]').click();
  await detail.getByText('Claude can no longer reach your World.',{exact:true}).waitFor();
- // Manage: your own Agent's page, its five parts in order, and back to every Agent.
+ // Manage: your own Agent's page, its status and Scheduled first, Skills, Permissions and Connections folded under
+ // Advanced (owner request 2026-10-21), and back to every Agent.
  await hermes.getByRole('button',{name:'Manage',exact:true}).click();
  const own=detail.locator('[data-view=own-agent]');
  await own.getByText('Hermes Agent',{exact:true}).waitFor();
- assert.deepEqual(await detail.locator('[data-part]').evaluateAll(n=>n.map(p=>(p as HTMLElement).dataset.part)),['model','skills','routines','permissions','accounts']);
- assert.deepEqual(await detail.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Model','Skills','Scheduled','Permissions','Connections']);
+ assert.deepEqual(await detail.locator('[data-part]').evaluateAll(n=>n.map(p=>(p as HTMLElement).dataset.part)),['model','routines','skills','permissions','accounts']);
+ assert.deepEqual(await detail.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Status','Scheduled','Skills','Permissions','Connections']);
+ assert.equal(await detail.locator('details[data-own-advanced]').evaluate(n=>(n as HTMLDetailsElement).open),false,'Advanced starts folded');
+ assert.equal(await detail.locator('details[data-choose-agent]').evaluate(n=>(n as HTMLDetailsElement).open),false,'other Agents and providers start folded while it works');
  assert.equal(await detail.locator('[data-part=memory],[data-part=access]').count(),0,'memory is in Context and the Agents are on the list');
  await detail.getByText('Fox’s model is connected',{exact:true}).waitFor();
  assert.equal(await detail.getByText(/claude-|gpt-/).count(),0,'no model names');
@@ -161,6 +164,7 @@ await withBrowser(async browser=>{
   await detail.locator(`[data-view=own-agent]`).waitFor();
   await detail.locator(`[data-part=${part}]`).waitFor();
  }
+ assert.equal(await detail.locator('details[data-own-advanced]').evaluate(n=>(n as HTMLDetailsElement).open),true,'a part named from outside opens the fold it is in');
  await open('access');
  await detail.locator('[data-part=access] [data-access-agent]').first().waitFor();
 
@@ -202,4 +206,4 @@ await withBrowser(async browser=>{
  if(screenshot)await page.screenshot({path:screenshot.replace(/\.png$/,'-narrow.png'),fullPage:true});
  assert.deepEqual(errors,[]);
 });
-console.log('PASS Settings in three areas: Services, Agents and Your data first, each with an icon, and the rest smaller; Agents lists your own Agent first with Open for its page (Model, Skills, Scheduled, Permissions, Connections) and Back, what each may do in one line, what it did lately and Revoke, switches folded, using the World in Claude or ChatGPT and Remote access folded; Context shows how much each kind holds (only past conversations counted), the memory, Save a copy and deletes that ask first; old entry points land in their area; no technical word on the default path; narrow layout');
+console.log('PASS Settings in three areas: Services, Agents and Your data first, each with an icon, and the rest smaller; Agents lists your own Agent first with Manage for its page (Status and Scheduled, then Skills, Permissions and Connections under Advanced) and Back, what each may do in one line, what it did lately and Revoke, switches folded, using the World in Claude or ChatGPT and Remote access folded; Context shows how much each kind holds (only past conversations counted), the memory, Save a copy and deletes that ask first; old entry points land in their area; no technical word on the default path; narrow layout');

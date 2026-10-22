@@ -3,7 +3,7 @@ import {BROWSER_HOME,createBrowserHome} from '../../agent/applets/index.ts';
 import {createPanelGuide} from './panel-guide.ts';
 import {modelHealthView,type ModelFix} from './model-health.ts';
 import {showAgentPermissions} from './agent-permissions.ts';
-import {showAgentAccess,type OwnAgent} from './agent-access.ts';
+import {agentIcon,showAgentAccess,type OwnAgent} from './agent-access.ts';
 import {showRemoteAccess,showUseInClaude} from './remote-access.ts';
 import {showWorldAddress} from './world-address.ts';
 import {showWorldContext} from './world-context-page.ts';
@@ -164,12 +164,17 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
  // which path is in use, its model, the last reply's problem in plain words, and the fix for it.
  async function ownAgentPage(target:HTMLElement){
   let showElsewhere=false;
-  const turn=ticket,said=status(),now=el('div','companion-settings-row companion-settings-model-now'),words=el('div'),fixes=el('div','companion-settings-actions'),agents=el('div','companion-settings-rows'),providers=el('div','companion-settings-rows');
-  now.append(words);
+  const turn=ticket,said=status(),now=el('div','companion-settings-row has-icon companion-settings-model-now'),words=el('div'),fixes=el('span','companion-settings-actions'),agents=el('div','companion-settings-rows'),providers=el('div','companion-settings-rows');
+  // Choosing another Agent or provider, and the other ways to connect, fold under the status (owner request
+  // 2026-10-21); a problem whose fix is there opens it.
+  const choose=el('details','companion-settings-elsewhere companion-settings-choose-agent') as HTMLDetailsElement;choose.dataset.chooseAgent='';
+  choose.append(el('summary','','Use a different Agent or AI provider'),agents);
+  let icon=settingsIcon({icon:'people'});
+  now.append(icon,words,fixes);
   // Signing in happens in the Agent itself, from its provider list below (Worldlet sets nothing up under the Agent).
   const fixButton=(fix:ModelFix)=>fix==='connect'?action('Sign in to a provider',async()=>{
     if(!providers.childElementCount){said.textContent='Sign in to a provider in your Agent itself, then choose Check connection.';return;}
-    providers.scrollIntoView({block:'nearest'});(providers.querySelector('button') as HTMLButtonElement|null)?.focus();
+    choose.open=true;providers.scrollIntoView({block:'nearest'});(providers.querySelector('button') as HTMLButtonElement|null)?.focus();
    },{primary:true,id:'fix-connect'})
    :action('Restart Fox',()=>restartFox(said),{primary:true,id:'fix-restart'});
   // The provider the Agent in use answers with (agent/gate/model-providers.ts, owner decisions 2026-10-10): only a
@@ -218,7 +223,8 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    const inUse=typeof found?.selected==='string'?found.selected:null;
    const view=modelHealthView(health,list.find((a:any)=>a.id===inUse)?.title??null);
    now.dataset.state=view.state==='ok'?'ready':view.state;now.dataset.path=view.path;
-   words.replaceChildren(el('strong','',view.title),el('span','',view.detail),...view.problem?[el('span','companion-settings-model-problem',view.problem)]:[]);
+   if(view.state!=='ok'&&view.fixes.includes('connect'))choose.open=true;
+   words.replaceChildren(el('strong',view.state==='ok'?'companion-settings-ok':'',view.title),el('span','',view.detail),...view.problem?[el('span','companion-settings-model-problem',view.problem)]:[]);
    fixes.replaceChildren(...view.fixes.map(fixButton),
     action('Check connection',async()=>{said.textContent='Checking…';await draw();said.textContent='Checked just now.';},{id:'check-model'}));
    agents.replaceChildren();
@@ -311,24 +317,27 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   // The connection steps open under the buttons; a new connection redraws what Fox runs on.
   const changed=()=>{if(turn!==ticket||!target.isConnected){for(const name of MODEL_EVENTS)window.removeEventListener(name,changed);return;}void draw();};
   for(const name of MODEL_EVENTS)window.addEventListener(name,changed);
-  // Your Agent's page is five named parts in this order, each with one plain line (owner decision 2026-10-11, issue #674):
-  // Model (what Fox runs on), then what lives in the Agent and Worldlet only shows and changes its way: Skills, Routines
-  // (the same jobs as the Task panel's Routines), Permissions (its standing rules) and, last, Connections (Worldlet's own,
-  // then the Agent's tools and chat accounts). What it remembers is in Context; what each Agent may do is on Agents' list.
+  // Your Agent's page (owner decisions 2026-10-11 and 2026-10-21, issue #674): its status first (what Fox runs on, with
+  // the other Agents and providers folded), then Scheduled (the same jobs as the Task panel's), then, folded under
+  // Advanced, what lives in the Agent and Worldlet only shows and changes its way: Skills, Permissions (its standing rules)
+  // and Connections (Worldlet's own, then the Agent's tools and chat accounts). What it remembers is in Your data; what
+  // each Agent may do is on Agents' list.
   const live=()=>turn===ticket&&target.isConnected;
-  const model=part('model','Model','The Agent Fox thinks with, on its own sign-in, and the provider it answers with.');
+  const model=part('model','Status','How the Agent Fox thinks with is doing.');
   const skills=part('skills','Skills','Steps your Agent follows for tasks it knows how to do. They live in your Agent; Worldlet changes them only with its own commands.');
-  const routines=part('routines','Scheduled','What your Agent does on its own schedule, the same Scheduled tasks as in the Task panel. Worldlet changes them only with its own commands.');
+  const routines=part('routines','Scheduled','What your Agent does on its own, on a schedule. The same tasks are in the Task panel.');
   const permissions=part('permissions','Permissions','What your Agent may do without asking you first, from each time you chose Always on an approval card.');
   const accounts=part('accounts','Connections','What Worldlet reads on this computer, then the tools and chat accounts set up in your Agent.');
   // A request for Fox (set up or change a routine, forget something) goes to its conversation with the panel closed.
   const ask=(text:string)=>{close();window.dispatchEvent(new CustomEvent('worldlet:fox-ask',{detail:{text}}));};
-  model.append(now,fixes,guide.element,agents,said);
+  model.append(now,guide.element,said,choose);
+  const advanced=el('details','companion-settings-elsewhere companion-settings-own-advanced') as HTMLDetailsElement;advanced.dataset.ownAdvanced='';
+  advanced.append(el('summary','','Advanced'),skills,permissions,accounts);
   // Back to every Agent, then the page: its name is what the header says once it is known.
   const back=action('‹ All Agents',()=>void show('agents'),{id:'agents-back'}),title=el('h5','companion-settings-own-title','Your Agent');
   const header=el('div','companion-settings-own-head');header.dataset.view='own-agent';header.append(back,title);
-  void ownAgent().then(own=>{if(live())title.textContent=own.title;});
-  target.append(header,model,skills,routines,permissions,accounts);
+  void ownAgent().then(own=>{if(!live())return;title.textContent=own.title;const next=settingsIcon(agentIcon(own.harness??'',own.title));icon.replaceWith(next);icon=next;});
+  target.append(header,model,routines,advanced);
   await Promise.all([draw(),showAgentSkills(skills,call,live),showAgentRoutines(routines,call,live,{ask}),showAgentPermissions(permissions,call,live),showWorldletAccounts(accounts,call,live)]);
  }
  const part=(id:string,heading:string,line:string)=>{const box=el('section','companion-settings-part');box.dataset.part=id;box.append(el('h5','companion-settings-parthead',heading),el('p','companion-info-note companion-settings-partnote',line));return box;};
@@ -515,7 +524,10 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   // A companion page brings its own heading.
   const body=el('div','companion-settings-body');detail.replaceChildren(...item.page?[]:[el('h4','',item.label)],body);detail.classList.toggle('is-page',!!item.page);
   try{await item.show(body,part);}catch(e){if(turn===ticket)body.append(note((e as Error).message||'This setting is unavailable right now.'));}
-  if(part&&turn===ticket)body.querySelector<HTMLElement>(`[data-part="${part}"]`)?.scrollIntoView({block:'start'});
+  // A part folded away (under Advanced, say) opens first.
+  const named=part&&turn===ticket?body.querySelector<HTMLElement>(`[data-part="${part}"]`):null;
+  for(let fold=named?.closest('details');fold;fold=fold.parentElement?.closest('details'))fold.open=true;
+  named?.scrollIntoView({block:'start'});
  }
  return {element,
   /** The panel opened: show `setting`, else the section last chosen, or the first. */
