@@ -3,6 +3,8 @@ import {SERVICE_SYNC_DEFAULTS,serviceSyncLine} from '../../context/connectors/in
 import {connector,connectorTiles,connectorDisconnectQuestion,connectorFailure,connectorWhoMayUse,type ConnectorReaders,type ConnectorTile} from '../../context/connectors/index.ts';
 import {SERVICE_PROVIDERS} from '../../contracts/services.ts';
 import {agentButton as button,agentEl as el} from './agent-change.ts';
+import {appLogoSource} from '../applets/index.ts';
+import {settingsIcon} from './settings-rows.ts';
 import {showGithubApp,showHttpJson,showSearchConsole} from './worldlet-accounts.ts';
 import {chooseProjectsButton,listenForSignInCode,signInCodeBox} from './sign-in-code.ts';
 import type {SignInCode} from '../../contracts/platform.ts';
@@ -11,6 +13,12 @@ type Call=(action:string,body?:any)=>Promise<any>;
 /** The services that connect with a key, under Advanced › Connect with a key (Search Console and HTTP JSON have boxes
  * of their own there). */
 const KEYED=['github','posthog','cloudflare'];
+/** Services for people who build software, folded under More services until one is connected (owner request
+ * 2026-10-21: Settings for people who know nothing about computers). */
+const MORE=['supabase','cloudflare','search-console'];
+/** Each service's logo on its tile: the brand pictures the World already has, else its first letter. */
+const BRAND:Record<string,string>={google:'brands/google.png',github:'brands/github.png','search-console':'brands/google.png'};
+const serviceIcon=(item:ConnectorTile)=>{const logo=BRAND[item.id]||appLogoSource({key:item.id});return settingsIcon(logo?{logo}:{letter:item.name});};
 
 /** Settings › Services (context/applets/INTEGRATIONS.md#settings--services): one tile per service with Connect, Disconnect
  * and its state in plain words, decided in Core (connectorTiles). Connect opens the service's own sign-in in the browser
@@ -19,6 +27,9 @@ const KEYED=['github','posthog','cloudflare'];
 export async function showConnectors(target:HTMLElement,call:Call,current:()=>boolean){
  const page=el('div','companion-settings-connectors');page.dataset.connectors='page';
  const grid=el('div','companion-settings-connector-grid');grid.setAttribute('role','list');grid.setAttribute('aria-label','Services');
+ const moreGrid=el('div','companion-settings-connector-grid');moreGrid.setAttribute('role','list');moreGrid.setAttribute('aria-label','More services');
+ const more=el('details','companion-settings-elsewhere companion-settings-more-services') as HTMLDetailsElement;more.dataset.moreServices='';
+ more.append(el('summary','','More services'),moreGrid);
  const said=el('p','companion-settings-status');said.setAttribute('role','status');
  // The connector whose sign-in is open now; the one asking "Disconnect?"; what a tile last said after Connect failed.
  let waiting:string|null=null,asking:string|null=null;
@@ -37,7 +48,11 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
  let searchConsole=async()=>{};
  async function read(){const state=await call('snapshot').catch(()=>null);if(Array.isArray(state?.connections))connections=state.connections;}
  function render(){
-  grid.replaceChildren(...connectorTiles(connections,waiting).map(tile));
+  // The builders' services wait under More services until one is in use; tiles keep their place so none jumps away.
+  const tiles=connectorTiles(connections,waiting),inUse=(t:ConnectorTile)=>t.state!=='off';
+  const main=tiles.filter(t=>inUse(t)||!MORE.includes(t.id)),rest=tiles.filter(t=>!inUse(t)&&MORE.includes(t.id));
+  grid.replaceChildren(...main.map(tile));
+  moreGrid.replaceChildren(...rest.map(tile));more.hidden=!rest.length;
  }
  async function draw(){
   await read();
@@ -62,7 +77,8 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
  function tile(item:ConnectorTile){
   const box=el('div','companion-settings-connector');box.setAttribute('role','listitem');box.dataset.connector=item.id;box.dataset.state=item.state;
   const words=el('div','companion-settings-connector-words');
-  words.append(el('strong','',item.name),el('span','',notes.get(item.id)??item.line));
+  const head=el('div','companion-settings-connector-head');head.append(serviceIcon(item),el('strong','',item.name));
+  words.append(head,el('span','',notes.get(item.id)??item.line));
   const actions=el('div','companion-settings-connector-actions');
   if(item.state==='waiting')actions.append(button('Cancel','cancel-sign-in',async()=>{await call('connectCancel').catch(()=>{});}));
   else if(item.state==='off'&&item.signIn)actions.append(button('Connect','connect',()=>signIn(item),true));
@@ -165,9 +181,8 @@ export async function showConnectors(target:HTMLElement,call:Call,current:()=>bo
   finally{waiting=null;code=null;stop();}
   await draw();await searchConsole();
  }
- page.append(grid,
-  el('p','companion-info-note','Once you connect a service, Fox and the Agent it uses can look at it. Other Agents ask you the first time. Before anything is changed, Worldlet asks you.'),
-  said);
+ page.append(el('p','companion-info-note','Connect a service with one click. Fox and the Agent it uses can then look at it; other Agents ask you the first time, and anything that changes it asks you first.'),
+  grid,said,more);
  target.append(page);
  await draw();
  if(!current())return;

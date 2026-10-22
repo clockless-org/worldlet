@@ -75,7 +75,11 @@ await withBrowser(async browser=>{
  const plain=async(when:string)=>{for(const text of await defaultPath())assert.doesNotMatch(text,CONNECTOR_TECHNICAL_WORDS,`${when}: "${text}" is on the default path`);};
 
  assert.equal(await page.title(),'Worldlet connectors settings check');
- assert.deepEqual(await page.locator('[data-connector]').evaluateAll(nodes=>nodes.map(node=>(node as HTMLElement).dataset.connector)),['google','notion','linear','todoist','supabase','github','posthog','cloudflare','search-console']);
+ assert.deepEqual(await page.locator('[data-connector]').evaluateAll(nodes=>nodes.map(node=>(node as HTMLElement).dataset.connector)),['google','notion','linear','todoist','github','posthog','supabase','cloudflare','search-console']);
+ // The builders' services wait, folded, under More services until one is in use.
+ const more=page.locator('details[data-more-services]');
+ assert.deepEqual(await more.locator('[data-connector]').evaluateAll(nodes=>nodes.map(node=>(node as HTMLElement).dataset.connector)),['supabase','cloudflare','search-console']);
+ assert.equal(await more.evaluate(n=>(n as HTMLDetailsElement).open),false,'More services starts folded');
  assert.match(await tile('notion').innerText(),/See your pages and databases in Notion\./);
  assert.equal(await tile('github').getByRole('button',{name:'Disconnect',exact:true}).count(),1,'a service connected with a key shows as connected');
  assert.equal(await tile('github').getByRole('button',{name:'Connect',exact:true}).count(),0);
@@ -172,7 +176,8 @@ await withBrowser(async browser=>{
  await page.getByText('PostHog now shows Mobile.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter((c:any)=>c.action==='connect'&&c.provider==='posthog')),[{action:'connect',provider:'posthog',region:'work'},{action:'connect',provider:'posthog',settings:{project:'1'}}]);
  await plain('choosing a project');
- // Cloudflare signs in the same way and asks which account.
+ // Cloudflare signs in the same way and asks which account; once it is in use it stays with the others.
+ await more.locator('summary').click();
  await tile('cloudflare').getByRole('button',{name:'Connect',exact:true}).click();
  await page.evaluate(()=>(window as any).pending.resolve());
  const account=tile('cloudflare').getByLabel('Which Cloudflare account?',{exact:true});

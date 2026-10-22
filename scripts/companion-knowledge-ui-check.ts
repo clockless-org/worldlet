@@ -26,8 +26,9 @@ await withBrowser(fileAccess,async browser=>{
  await waitForWorld(page);
  await openCompanionPanel(page);
  const panel=page.locator('#companionInfo');
- // What Fox knows sits first in Settings › Context, beside the Agent's own memory (owner request 2026-10-11).
+ // What Fox knows sits first in Settings › Your data, beside the Agent's own memory (owner request 2026-10-11), folded until Show.
  await panel.locator('[data-setting=context]').click();
+ await panel.locator('[data-context=memory]').getByRole('button',{name:'Show',exact:true}).click();
  const block=panel.locator('[data-part=memory] .companion-profile-knowledge');
  await block.getByRole('heading',{name:'What Nova knows'}).waitFor();
  const groups=block.locator('details.companion-knowledge-group');

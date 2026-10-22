@@ -358,3 +358,5 @@
 .companion-settings-how>summary{cursor:pointer;color:#5a6b4f;text-decoration:underline}
 .companion-settings-how .companion-settings-steps{margin:6px 0 0;padding-left:18px}
 .companion-settings-agents{display:flex;flex-direction:column;gap:8px;align-self:stretch}
+.companion-settings-connector-head{display:flex;align-items:center;gap:10px}
+.companion-settings-connector .companion-settings-connector-head strong{flex:1}
