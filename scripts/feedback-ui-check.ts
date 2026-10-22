@@ -10,20 +10,20 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await page.locator('#notionInput').evaluate(e=>e===document.activeElement),true,'Clicking the message bar focuses the conversation');
  await page.evaluate(()=>{const r=document.querySelector<HTMLElement>('#notionWorld')!;r.dataset.depth='overview';r.dataset.page='';});
  await page.keyboard.press('Escape');
- // Feedback opens from Settings › Help into a small panel of its own over the World (owner request 2026-10-11): no
+ // Feedback opens from Settings › General into a small panel of its own over the World (owner request 2026-10-11): no
  // button in the World's corner.
  const panel=page.locator('#worldFeedback'),settings=page.locator('#companionInfo');
  assert.equal(await page.locator('.world-feedback-button,.world-feedback-corner').count(),0,'no Feedback button in the World');
- assert.equal(await page.locator('#companionInfo [data-setting=feedback]').count(),0,'no Feedback section of its own: it is in Help');
+ assert.equal(await page.locator('#companionInfo [data-setting=feedback]').count(),0,'no Feedback section of its own: it is in General');
  const openFeedback=async()=>{
   if(await panel.isVisible())return;
   if(!await settings.evaluate(e=>(e as HTMLDialogElement).open))await page.locator(SETTINGS_BUTTON).click();
-  await settings.locator('[data-setting=help]').click();
+  await settings.locator('[data-setting=general]').click();
   await settings.getByRole('button',{name:'Send feedback',exact:true}).click();
   await panel.waitFor();
   assert.equal(await settings.evaluate(e=>(e as HTMLDialogElement).open),false,'Settings steps aside for it');
  };
- // Production keeps Feedback in Help; the Dev, Alpha and Beta apps also show the bug in Fox's bar, which opens it.
+ // Production keeps Feedback in General; the Dev, Alpha and Beta apps also show the bug in Fox's bar, which opens it.
  const bug=page.locator('.companion-bug-button');
  assert.equal(await bug.isVisible(),false,'no bug in Production');
  for(const channel of ['alpha','beta']){
@@ -66,5 +66,5 @@ await withBrowser(fileAccess,async browser=>{
  await page.screenshot({path:'/tmp/worldlet-feedback-desktop.png'});
  await page.setViewportSize({width:375,height:812});await openFeedback();
  const small=(await panel.boundingBox())!;assert(small.x>=0&&small.y>=0&&small.x+small.width<=375&&small.y+small.height<=812,'fits a phone: '+JSON.stringify(small));assert(await panel.evaluate(e=>e.scrollWidth<=e.clientWidth+1));await page.screenshot({path:'/tmp/worldlet-feedback-small.png'});
- assert.deepEqual(errors,[]);console.log('PASS feedback UI: opened from Settings › Help or the bug in Fox’s bar on Alpha and Beta into its own panel, no button in the World, the box and microphone up front, Escape and outside click close it, retry/dedup, retained draft, receipt-only success, reviewed dictation, cancellation and small viewport.');
+ assert.deepEqual(errors,[]);console.log('PASS feedback UI: opened from Settings › General or the bug in Fox’s bar on Alpha and Beta into its own panel, no button in the World, the box and microphone up front, Escape and outside click close it, retry/dedup, retained draft, receipt-only success, reviewed dictation, cancellation and small viewport.');
 });

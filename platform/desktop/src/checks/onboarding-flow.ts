@@ -205,11 +205,11 @@ export async function onboardingFlow({host,window,view}:CheckContext){
   await sleep(1000);
  }
  for(const line of noRecordedFailures(host,'after the first win'))console.log('  self-corrected: '+line);
- // The tour replays on demand from Show the tutorial in Settings › Help (#1327; owner request 2026-10-11: no switch in
+ // The tour replays on demand from Show the tutorial in Settings › General (#1327; owner request 2026-10-11: no switch in
  // the World's corner) and leaves the finished journey alone; Esc ends it. It waits while Fox works, so allow for a
  // turn still finishing.
  await wait('Agent beside Fox',"(()=>{const b=document.querySelector('.companion-side .companion-panel-button');if(!b||!b.checkVisibility({visibilityProperty:true}))return false;b.click();return true;})()",20);
- await wait('Settings › Help',"(()=>{const b=document.querySelector('.companion-settings-item[data-setting=help]');if(!b)return false;b.click();return true;})()",10);
+ await wait('Settings › General',"(()=>{const b=document.querySelector('.companion-settings-item[data-setting=general]');if(!b)return false;b.click();return true;})()",10);
  await wait('Show the tutorial',"(()=>{const b=document.querySelector('.companion-info-action[data-action=tutorial]');if(!b)return false;b.click();return true;})()",10);
  await step('hello',120);
  // A key reaches the page only while it has keyboard focus, which another window on the test computer can take
@@ -252,7 +252,7 @@ export async function onboardingFlow({host,window,view}:CheckContext){
     });
   }catch(error){if(COMPANION_BLOCKING)throw error;console.log('ADVISORY FAIL onboarding flow, desktop Companion: '+message(error));}
  }
- console.log(`PASS onboarding flow: mock sign-in → apps → tour → Attention → Fox’s first task finished in the browser → confirmed → first win → tour replayed from Settings › Help → Fox fetched the inbox and drafted a reply in conversation, with no failed background work (${Math.round((Date.now()-started)/1000)}s)`);
+ console.log(`PASS onboarding flow: mock sign-in → apps → tour → Attention → Fox’s first task finished in the browser → confirmed → first win → tour replayed from Settings › General → Fox fetched the inbox and drafted a reply in conversation, with no failed background work (${Math.round((Date.now()-started)/1000)}s)`);
 }
 
 interface MailContext {host:CheckContext['host'];js:(code:string)=>Promise<any>;wait:(what:string,code:string,seconds:number)=>Promise<void>;mark:(step:string)=>void;press:(label:string,seconds?:number)=>Promise<void>;seen:()=>Promise<string>}

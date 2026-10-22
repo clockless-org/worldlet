@@ -23,7 +23,7 @@ const plain=(message:string)=>message.split('\n\n').filter(part=>!part.includes(
 export function modelHealthView(health:ModelHealth|null,agentTitle:string|null=null):ModelHealthView {
  if(!health||!health.available)return {path:'none',state:'none',title:'Fox’s Agent is not running',
   detail:health?.error||'Fox’s Agent on this computer did not start or did not answer.',
-  problem:'Restart Fox. If it still does not start, save diagnostics in Settings › Help.',fixes:['restart']};
+  problem:'Restart Fox. If it still does not start, save a diagnostics file from Send feedback in Settings › General.',fixes:['restart']};
  // An Agent on another computer: its model is that computer's business; only how the last reply went is said here.
  if(health.location?.kind==='remote'){
   // Reached directly (its own Gateway address) or through Worldlet there (a pairing code).

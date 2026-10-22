@@ -165,7 +165,7 @@ await withBrowser(fileAccess,async browser=>{
  // Settings work like a settings window (owner feedback 2026-10-03, one list since 2026-10-10): the list on the left,
  // the chosen section's details on the right, and nothing hands off to Fox's speech bubble. No animation tools.
  assert.deepEqual(await panel.locator('.companion-settings-item strong').allTextContents(),
-  ['Services','Agents','Your data','Fox','Phone','General','Help']);
+  ['Services','Agents','Your data','Fox','Phone','General']);
  assert.equal(await panel.getByRole('button',{name:/Animation timing|Preview animation/}).count(),0);
  const detail=panel.locator('.companion-settings-detail');
  // The one privacy choice left is the usage counts switch in General (owner request 2026-10-10).
@@ -175,9 +175,12 @@ await withBrowser(fileAccess,async browser=>{
  await panel.locator('[data-setting=general]').click();
  assert.equal(await detail.locator('.world-recovery-switch').count(),0,'no sample world switch in your own world (owner request 2026-10-10)');
  await page.screenshot({path:'output/fox-mac/recovery.png'});
- // With the Browser folded in General: the person deletes what the built-in browser recorded, one site or all, after an in-page question.
- await panel.locator('[data-setting=general]').click();
- await detail.locator('details[data-setting=browser]>summary').click();
+ // In Your data (owner request 2026-10-22: no Browser fold in General): the person deletes what the built-in browser
+ // recorded, one site or all, after an in-page question. General has no Browser home page.
+ await panel.locator('[data-setting=general]').click();await detail.locator('[data-setting=usage-analytics]').waitFor();
+ assert.equal(await detail.locator('details').count(),0,'nothing folded in General');
+ assert.equal(await detail.getByLabel('Home page').count(),0,'no Browser home page');
+ await panel.locator('[data-setting=context]').click();
  const recordings=detail.locator('.companion-settings-recordings');
  await recordings.getByText('2 sites',{exact:true}).waitFor();await recordings.getByText('4 visits',{exact:true}).waitFor();
  const deletes=()=>page.evaluate(()=>calls.filter(c=>c.action==='browserCommand'&&c.operation==='deleteRecordings'));
@@ -199,36 +202,23 @@ await withBrowser(fileAccess,async browser=>{
  await recordings.getByText('Nothing recorded',{exact:true}).waitFor();
  assert.deepEqual((await deletes()).at(-1),{action:'browserCommand',operation:'deleteRecordings',args:{all:true},agent:false},'Delete all, confirmed in the page');
  assert.equal(await recordings.getByRole('button',{name:/Delete/}).count(),0,'nothing left to delete');
- // Updates (owner requests 2026-10-04 and 2026-10-05): the installed version and the channel it follows; on the owner's
- // computer only open channels can be chosen, anywhere else there is no switcher.
+ // Updates (owner requests 2026-10-04, 2026-10-05 and 2026-10-22): the installed version, with the channel it follows
+ // under the list; the channel follows the download, so General has nothing to switch.
  assert.equal(await panel.locator('.companion-settings-version').textContent(),'Worldlet 2026.1004.2750 · Beta','the version and channel show under the Settings list');
  await panel.locator('[data-setting=general]').click();
  await detail.locator('[data-setting=updates]').getByText('Worldlet 2026.1004.2750',{exact:true}).waitFor();
- await detail.locator('details[data-setting=update-channel]>summary').click();
- await detail.getByText('Worldlet 2026.1004.2750 · Build 2750',{exact:false}).waitFor();
- const follow=(id:string)=>detail.locator(`[data-channel=${id}] button`);
- assert.deepEqual(await Promise.all(['dev','alpha','beta','production'].map(async id=>[await follow(id).textContent(),await follow(id).isDisabled()])),[['Follow',true],['Follow',false],['Following',true],['Follow',true]]);
- await detail.locator('[data-channel=dev]').getByText('Runs from a checkout.',{exact:false}).waitFor();
- await follow('alpha').click();
- await page.waitForFunction(()=>calls.some(c=>c.action==='appUpdate'&&c.operation==='channel'&&c.channel==='alpha'));
- assert.equal(await follow('alpha').textContent(),'Following');await page.waitForFunction(()=>document.querySelector('.companion-settings-version')?.textContent==='Worldlet 2026.1004.2750 · Alpha');assert.equal(await follow('beta').isDisabled(),false,'Beta can be chosen again');
+ assert.equal(await detail.locator('[data-channel]').count(),0,'no update channel to switch');
  await page.screenshot({path:'output/fox-mac/updates.png'});
- await page.evaluate(()=>{window.updateSwitchable=false;});
- await panel.locator('[data-setting=help]').click();await panel.locator('[data-setting=general]').click();
- await detail.locator('details[data-setting=update-channel]>summary').click();
- await detail.locator('[data-channel=beta]').getByText('Beta · 公测',{exact:false}).waitFor();
- assert.equal(await detail.locator('[data-channel] button').count(),0,'off the owner’s computer there is nothing to switch');
- assert.equal(await detail.locator('[data-channel]').count(),1,'only the channel it follows shows');
- await panel.locator('[data-setting=help]').click();
- await detail.locator('details[data-setting=help-more]>summary').click();
- await detail.getByRole('button',{name:'Reset',exact:true}).click();
+ // What Help had is in General, one row each: Start over asks first (the host's own question, cancelled here).
+ await detail.getByRole('button',{name:'Start over',exact:true}).click();
  await page.waitForFunction(()=>calls.some(c=>c.action==='resetFox'));
  assert.equal(await page.evaluate(()=>sessionStorage.getItem('fox-reset')),'cancelled');
  // Restart Fox says what it is for.
  await detail.getByText('If Fox stops answering or seems stuck.',{exact:false}).waitFor();
- // The Debug window is folded away, for the Worldlet team (owner request 2026-10-10).
- assert.equal(await detail.getByRole('button',{name:'Open Debug',exact:true}).isVisible(),false);
- await detail.getByText('For the Worldlet team',{exact:true}).click();
+ // The Debug window is for the Worldlet team: not on the list, opened by clicking the version line five times.
+ assert.equal(await detail.getByRole('button',{name:'Open Debug',exact:true}).count(),0);
+ const version=panel.locator('.companion-settings-version');
+ for(let i=0;i<5;i++)await version.click();
  await detail.getByRole('button',{name:'Open Debug',exact:true}).click();
  await page.waitForFunction(()=>calls.some(c=>c.action==='showDebug'));
  // The last reply's problem offers Restart Fox on your own Agent's page (Settings › Agents › Your Agent).

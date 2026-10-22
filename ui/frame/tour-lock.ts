@@ -7,7 +7,7 @@
  *   so nothing in the World, the corner controls or Fox's input responds. It draws nothing.
  * - **Tutorial**, a switch in the window's bottom-right corner while a tour runs (owner Order 2026-10-07),
  *   turned on: it is the one way out of the first run, and a replayed tour uses it too. It stays above the
- *   spotlight and the lock. Once the tour is over it goes: the tour is shown again from Settings › Help
+ *   spotlight and the lock. Once the tour is over it goes: the tour is shown again from Settings › General
  *   (owner request 2026-10-11: Tutorial and Feedback go back into Settings), never from a corner of the World.
  */
 import {uiIcon} from '../style/index.ts';

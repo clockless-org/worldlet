@@ -25,9 +25,9 @@ export function mountCompanionInfo({root,pet,call,getName}){
  syncEntry();
  let dismissClick=false;
  const feedback=createCompanionFeedback({call,onVoice:phase=>root.dataset.feedbackVoice=phase});
- // Every recorded event, for the Worldlet team, folded away in Settings › Help.
+ // Every recorded event, for the Worldlet team, on the page the version line opens after five clicks.
  const records=createActivityRecords({call});
- // Feedback opens from Settings › Help in a small panel of its own over the World (owner request 2026-10-11: back
+ // Feedback opens from Settings › General in a small panel of its own over the World (owner request 2026-10-11: back
  // into Settings; no button in the World's corner), so Fox stays in view to dictate into it.
  const feedbackPanel=el('dialog','companion-feedback-panel ui-hud-panel');feedbackPanel.id='worldFeedback';feedbackPanel.setAttribute('aria-label','Feedback');
  const feedbackClose=el('button','companion-info-close','×');feedbackClose.type='button';feedbackClose.setAttribute('aria-label','Close feedback');

@@ -1,5 +1,4 @@
 import {defaultBrowserText,displayReleaseVersion,loginItemText} from '../../agent/app/index.ts';
-import {BROWSER_HOME,createBrowserHome} from '../../agent/applets/index.ts';
 import {createPanelGuide} from './panel-guide.ts';
 import {modelHealthView,type ModelFix} from './model-health.ts';
 import {showAgentPermissions} from './agent-permissions.ts';
@@ -17,26 +16,28 @@ export type CompanionSettingsHost={toggleSample?:()=>Promise<unknown>;sample:()=
 /** The companion pages that are sections of their own in the one list: Fox's profile and Phone. */
 export type CompanionSettingsPages={fox:HTMLElement;phone:HTMLElement;/** What Fox itself knows, shown first in Context › Memory. */knows:HTMLElement};
 /** `minor`: below the three areas, smaller. `show` gets the part to open, if one was named. */
-type Item={id:string;label:string;hint:string;/** Its line icon in the list (ui/style/primitives/icons.ts). */icon:string;page?:boolean;minor?:boolean;show:(detail:HTMLElement,part:string)=>void|Promise<void>};
+type Item={id:string;label:string;hint:string;/** Its line icon in the list (ui/style/primitives/icons.ts). */icon:string;page?:boolean;minor?:boolean;/** Not on the list: opened another way. */hidden?:boolean;show:(detail:HTMLElement,part:string)=>void|Promise<void>};
 
 const MODEL_EVENTS=['worldlet:model-changed','worldlet:model-refresh'];
-// Settings is three areas, Connectors, Agents and Context, with Fox, Phone, General and Help below them (issue #674).
+// Settings is three areas, Connectors, Agents and Context, with Fox, Phone and General below them (issue #674; Help
+// joined General, owner request 2026-10-22).
 // Entry points that name a section or part Settings no longer has open the area that took it in, at its part: `model`
 // (what Fox runs on) and the standing rules (`approvals`, `permissions`) are parts of your own Agent's page under Agents;
 // `access` (the board's empty state opens it) is the list of Agents; `memory` is in Your data; Accounts became Services;
 // Skills went with Advanced (owner request 2026-10-22), so `skills` opens your own Agent's page.
 const MOVED:Record<string,{section:string;part:string}>={integrations:{section:'connectors',part:''},accounts:{section:'connectors',part:''},skills:{section:'agents',part:'model'},
  model:{section:'agents',part:'model'},approvals:{section:'agents',part:'permissions'},permissions:{section:'agents',part:'permissions'},
- access:{section:'agents',part:'access'},memory:{section:'context',part:'memory'}};
+ access:{section:'agents',part:'access'},memory:{section:'context',part:'memory'},
+ help:{section:'general',part:''},browser:{section:'context',part:''}};
 /** The parts of your own Agent's page (Agents › Your Agent); any other part of Agents is on its list. */
 const OWN_PARTS=['model','routines','permissions','may'];
 
 /** The whole companion panel is one settings window (owner request 2026-10-10): one list of sections on the left, the
  * chosen section's details on the right, no tabs. Everything finishes here; nothing hands off to Fox's speech bubble. */
 export function createCompanionSettings({call,host,pages,records,onShow,close,openFeedback,replayTutorial}:{call:(action:string,body?:any)=>Promise<any>;host:()=>CompanionSettingsHost|undefined;pages:CompanionSettingsPages;records:{records:HTMLElement;showRecords:()=>void};onShow:(id:string)=>void;close:()=>void;
- /** Help's Feedback: the feedback panel over the World. */
+ /** General's Send feedback: the feedback panel over the World. */
  openFeedback:()=>void;
- /** Help's Show the tutorial: Settings closes and the World's tour plays again. */
+ /** General's Show the tutorial: Settings closes and the World's tour plays again. */
  replayTutorial:()=>void}){
  const element=el('section','companion-info-section companion-settings');element.dataset.section='Settings';
  const list=el('nav','companion-settings-list'),detail=el('div','companion-settings-detail');
@@ -113,12 +114,10 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   target.append(box,said);
   await draw();
  }
- // Updates are one row: the version, what the updater is doing, and Check for updates. The update channel
- // (agent/app/update-channel.ts: Dev, Alpha, Beta and Production, the release stages) is folded under it in `more`.
- // Only the owner's installed copy can switch (`switchable`); the Dev app and everyone else see the channel they follow
- // and nothing to change. Only the channels this copy can follow can be chosen; the host says why not.
- async function updates(box:HTMLElement,more:HTMLElement){
-  const turn=ticket,rows=el('div','companion-settings-rows'),said=status(),about=note('');
+ // Updates are one row: the version, what the updater is doing, and Check for updates. The channel follows the
+ // download (owner request 2026-10-22: nothing to switch in Settings); the version line under the list names it.
+ async function updates(box:HTMLElement){
+  const turn=ticket,said=status();
   let state=await call('appUpdate',{operation:'status'});if(turn!==ticket)return;
   const line=el('span',''),title=el('strong','');
   const check=action('Check for updates',async()=>{said.textContent='Checking…';try{state=await call('appUpdate',{operation:'check'});said.textContent='';draw();}catch(e){said.textContent=(e as Error).message||'Could not check for updates.';}},{id:'check-updates'});
@@ -126,34 +125,13 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   const draw=()=>{
    const installed=state?.installed?.build?['Worldlet',displayReleaseVersion(state.installed.version||'',state.installed.build)].filter(Boolean).join(' '):'';
    title.textContent=installed||'Updates';
-   about.textContent=[installed&&installed+' · Build '+state.installed.build,state?.channelNote||''].filter(Boolean).join('. ');
    const doing=['checking','downloading','preparing','current','available','ready','error','installing'].includes(state?.state)?(state.detail||state.label||''):'';
    line.textContent=doing||'Worldlet updates itself.';
-   rows.replaceChildren();
-   if(!state?.switchable){
-    const c=(state?.channels||[]).find((o:any)=>o.id===state?.channel);
-    if(c){const row=el('div','companion-settings-row'),words=el('div');row.dataset.channel=c.id;
-     words.append(el('strong','',`${c.name} · ${c.stage}`),el('span','',c.summary));row.append(words);rows.append(row);}
-    return;
-   }
-   for(const c of state?.channels||[]){
-    const row=el('div','companion-settings-row'),words=el('div'),on=c.id===state.channel;row.dataset.channel=c.id;
-    words.append(el('strong','',`${c.name} · ${c.stage}`),el('span','',c.available||on?c.summary:`${c.summary} ${c.reason||''}`.trim()));
-    const b=action(on?'Following':'Follow',async()=>{
-     said.textContent='';
-     try{state=await call('appUpdate',{operation:'channel',channel:c.id});draw();void showVersion();}
-     catch(e){said.textContent=(e as Error).message||'Could not change the update channel.';}
-    },{id:'channel-'+c.id});
-    b.disabled=on||!c.available;if(on)b.setAttribute('aria-pressed','true');
-    row.append(words,b);rows.append(row);
-   }
   };
   const changed=(event:Event)=>{if(turn!==ticket||!box.isConnected){window.removeEventListener('worldlet:app-update',changed);return;}state={...state,...(event as CustomEvent).detail};draw();};
   window.addEventListener('worldlet:app-update',changed);leaving.push(()=>window.removeEventListener('worldlet:app-update',changed));
   draw();
-  const channel=el('details','companion-settings-elsewhere') as HTMLDetailsElement;channel.dataset.setting='update-channel';
-  channel.append(el('summary','','Update channel'),about,rows,...state?.switchable?[note('Moving to a steadier channel installs its newest build at the next update, even when it is older than this one. Your world and accounts stay as they are.')]:[]);
-  box.after(said);more.append(channel);
+  box.after(said);
  }
  const restartFox=async(said:HTMLElement)=>{said.textContent='Restarting Fox…';try{await call('restartFox');window.location.reload();}catch(e){said.textContent='Could not restart: '+((e as Error).message||'reopen Worldlet and try again.');}};
  // The model Fox thinks with (owner request 2026-10-05). Worldlet provides none: it is the person's Agent, answering
@@ -320,9 +298,9 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
  }
  // One list, in the order a person looks for things (owner request 2026-10-10: no tabs, nothing technical): the three
  // areas first (issue #674), connectors on one side, Agents on the other, and everything the World keeps in one place;
- // then, smaller, Fox, Phone, General and Help.
+ // then, smaller, Fox, Phone and General.
  const items:Item[]=[
-  // The services Worldlet connects itself, one tile each, with keys folded under Advanced (connectors-page.ts).
+  // The services Worldlet connects itself, one tile each (connectors-page.ts).
   {id:'connectors',label:'Services',hint:'Apps your World can read',icon:'plug',show:async target=>{const turn=ticket;await showConnectors(target,call,()=>turn===ticket&&target.isConnected);}},
   {id:'agents',label:'Agents',hint:'AI helpers working for you',icon:'people',show:agentsSetting},
   // Everything the World keeps (world-context-page.ts), with what each Agent and Fox remember.
@@ -332,17 +310,19 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    await showWorldContext(target,call,live,{memory,showMemory:at==='memory',localDeletion:()=>!!host()?.localDataDeletion(),sample:()=>!!host()?.sample(),
     openJournal:()=>{close();window.dispatchEvent(new CustomEvent('worldlet:journal-open',{detail:{}}));}});
    await showAgentMemory(memory,call,live,{ask:text=>{close();window.dispatchEvent(new CustomEvent('worldlet:fox-ask',{detail:{text}}));}});
+   // What the built-in browser keeps, with its deletes (owner request 2026-10-22: here, not under General's Browser).
+   if(live()){void savedLogins(target);if(!host()?.sample())await recordings(target);}
   }},
   {id:'fox',label:'Fox',hint:'Name, look and personality',icon:'heart',page:true,minor:true,show:target=>{target.append(pages.fox);}},
   {id:'phone',label:'Phone',hint:'Attention and Fox on your phone',icon:'phone',page:true,minor:true,show:target=>{target.append(pages.phone);}},
-  {id:'general',label:'General',hint:'Updates, start at login, default browser, usage counts',icon:'settings',minor:true,show:async target=>{
+  {id:'general',label:'General',hint:'Updates, feedback, restart, start over',icon:'settings',minor:true,show:async target=>{
    // One row each with a switch where it is on or off (owner request 2026-10-21: Settings for people who know nothing
    // about computers). A row's slot is drawn again when what it shows changes.
    const turn=ticket,said=status(),rows=el('div','companion-settings-rows');
    const slot=()=>{const box=el('div','companion-settings-slot');rows.append(box);return box;};
    const failed=(e:unknown)=>{said.textContent=(e as Error).message||'Could not change it.';return false;};
    target.append(rows,said);
-   await updates(slot(),target);
+   await updates(slot());
    // Open at login shows what the system reports, not what was last asked for (#1229).
    {
     const box=slot();
@@ -384,23 +364,18 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     };
     await draw();
    }
-   // The Browser's own settings, folded away (owner request 2026-10-11: Settings has too much).
-   const general=target;
-   {
-    const browser=el('details','companion-settings-elsewhere') as HTMLDetailsElement;browser.dataset.setting='browser';
-    browser.append(el('summary','','Browser'));target.append(browser);target=browser;
-    target.append(subhead('Browser home page'));
-    const home=createBrowserHome(host()?.sample()?null:(()=>{try{return globalThis.localStorage;}catch{return null;}})()),said=status();
-    const input=el('input','companion-settings-input') as HTMLInputElement;input.type='url';input.value=home.get();input.setAttribute('aria-label','Home page');input.spellcheck=false;input.autocapitalize='off';
-    const save=()=>{const page=home.set(input.value);if(!page){said.textContent='Type a website address, like google.com.';return;}input.value=page;said.textContent='The Browser starts here.';};
-    input.addEventListener('keydown',event=>{if(event.key==='Enter')save();});
-    target.append(note('Opening the Browser after '+BROWSER_HOME.idleMs/60_000+' minutes away starts on this page; within that time it is where you left it. Home in the Browser’s top bar goes here too.'),
-     input,action('Save',save,{primary:true,id:'browser-home-save'}),action('Use Google',()=>{input.value=home.set('')||'';said.textContent='The Browser starts on Google.';},{id:'browser-home-reset'}),said);
-    void savedLogins(target);
-    // What the built-in browser recorded, with Delete, sits with the Browser now the Privacy section is gone.
-    if(!host()?.sample())await recordings(target);
-   }
-   target=general;
+   // Then what Help had (owner request 2026-10-22: Help is part of General): feedback, restarting Fox, the tutorial and
+   // starting over, one row each. Diagnostics are offered with feedback; the team's tools open from the version line.
+   rows.append(
+    settingsRow({icon:{icon:'chat'},title:'Send feedback',line:'Tell the Worldlet team what works and what doesn’t. Type it, or hold Fox to say it.',
+     controls:[action('Send feedback',()=>openFeedback(),{primary:true,id:'feedback'})]}),
+    settingsRow({icon:{icon:'refresh'},title:'Restart Fox',line:'If Fox stops answering or seems stuck. Conversations, memory and connections are kept.',
+     controls:[action('Restart Fox',()=>restartFox(said),{id:'restart'})]}));
+   // The practice world has no tour.
+   if(!host()?.sample())rows.append(settingsRow({icon:{icon:'map'},title:'Tutorial',line:'Walk through the World again.',
+    controls:[action('Show the tutorial',()=>replayTutorial(),{id:'tutorial'})]}));
+   rows.append(settingsRow({icon:{icon:'alert'},title:'Start over',line:'Erases Fox’s memory, your saved items and account connections on this computer, keeps your Agent, and starts setup again. Asks you first.',
+    controls:[action('Start over',async()=>{said.textContent='';try{const result=await call('resetFox');if(result?.cancelled)return;window.location.reload();}catch(e){said.textContent='Could not start over: '+((e as Error).message||'reopen Worldlet and try again.');}},{id:'reset'})]}));
    // Only inside the sample world, as the way back to one's own (owner request 2026-10-10: no sample switch otherwise).
    if(host()?.sample()){
     target.append(subhead('Sample world'));
@@ -411,34 +386,14 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     target.append(note(on?'You are in the sample world. Turn it off to return to your own world.':'Look around a made-up world with sample mail, events and tasks. Your own world and accounts stay as they are.'),toggle,said);
    }
   }},
-  {id:'help',label:'Help',hint:'Feedback, restart, reset',icon:'chat',minor:true,show:target=>{
-   const said=status(),rows=el('div','companion-settings-rows');
-   // Feedback, restarting Fox and the tutorial first, one row each (owner requests 2026-10-11 and 2026-10-21);
-   // diagnostics, Reset and the team's tools under More.
-   rows.append(
-    settingsRow({icon:{icon:'chat'},title:'Send feedback',line:'Tell the Worldlet team what works and what doesn’t. Type it, or hold Fox to say it.',
-     controls:[action('Send feedback',()=>openFeedback(),{primary:true,id:'feedback'})]}),
-    settingsRow({icon:{icon:'refresh'},title:'Restart Fox',line:'If Fox stops answering or seems stuck. Conversations, memory and connections are kept.',
-     controls:[action('Restart Fox',()=>restartFox(said),{id:'restart'})]}));
-   // The practice world has no tour.
-   if(!host()?.sample())rows.append(settingsRow({icon:{icon:'map'},title:'Tutorial',line:'Walk through the World again.',
-    controls:[action('Show the tutorial',()=>replayTutorial(),{id:'tutorial'})]}));
-   const more=el('details','companion-settings-elsewhere') as HTMLDetailsElement;more.dataset.setting='help-more';
-   more.append(el('summary','','More'));
-   const moreRows=el('div','companion-settings-rows');
-   moreRows.append(
-    settingsRow({icon:{icon:'download'},title:'Save diagnostics',line:'A file to send with your feedback when something is wrong.',
-     controls:[action('Save diagnostics',async()=>{try{await call('exportDiagnostics');}catch(e){said.textContent=(e as Error).message||'Could not save diagnostics.';}},{id:'diagnostics'})]}),
-    settingsRow({icon:{icon:'alert'},title:'Start over',line:'Reset erases Fox’s memory, your saved items and account connections on this computer, keeps your model setup, and starts setup again. You will be asked to confirm first.',
-     controls:[action('Reset',async()=>{said.textContent='';try{const result=await call('resetFox');if(result?.cancelled)return;window.location.reload();}catch(e){said.textContent='Could not reset: '+((e as Error).message||'reopen Worldlet and try again.');}},{id:'reset'})]}));
-   // The Debug window and every recorded event are for the Worldlet team: folded away (owner request 2026-10-10).
-   const team=el('details','companion-settings-elsewhere') as HTMLDetailsElement;
-   team.append(el('summary','','For the Worldlet team'),
-    action('Open Debug',async()=>{try{close();await call('showDebug');}catch{said.textContent='Could not open Debug.';}}),
-    subhead('Activity records'),note('Every event Worldlet recorded on this computer, newest first.'),records.records);
-   team.ontoggle=()=>{if(team.open)records.showRecords();};
-   more.append(moreRows,team);
-   target.append(rows,said,more);
+  // For the Worldlet team (owner request 2026-10-22: not in Settings' list): the Debug window and every recorded event,
+  // opened by clicking the version line under the list five times.
+  {id:'team',label:'For the Worldlet team',hint:'',icon:'settings',minor:true,hidden:true,show:target=>{
+   const said=status();
+   target.append(settingsRow({icon:{icon:'settings'},title:'Debug',line:'What Worldlet is doing right now, for the team.',
+     controls:[action('Open Debug',async()=>{try{close();await call('showDebug');}catch{said.textContent='Could not open Debug.';}},{id:'debug'})]}),
+    said,subhead('Activity records'),note('Every event Worldlet recorded on this computer, newest first.'),records.records);
+   records.showRecords();
   }},
  ];
  // The version at a glance under the list (owner request 2026-10-04): 2026.MMDD.BUILD and the update channel.
@@ -450,8 +405,12 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
  }
  // Only while the line shows: an update event must not become an extra request in the background; open() reads it again.
  window.addEventListener('worldlet:app-update',()=>{if(version.offsetParent)void showVersion();});
+ // Five clicks on it in a row, each within two seconds of the last, open the team's page.
+ let clicks=0,last=0;
+ version.addEventListener('click',()=>{const now=Date.now();clicks=now-last<2000?clicks+1:1;last=now;if(clicks>=5){clicks=0;void show('team');}});
  // The three areas, then a line, then the rest in smaller type.
  for(const item of items){
+  if(item.hidden)continue;
   if(item.minor&&!list.querySelector('.companion-settings-minor'))list.append(el('div','companion-settings-minor'));
   const b=el('button','companion-settings-item has-icon'+(item.minor?' is-minor':'')) as HTMLButtonElement;b.type='button';b.dataset.setting=item.id;
   const words=el('div','companion-settings-item-words');words.append(el('strong','',item.label),el('span','',item.hint));
