@@ -8,16 +8,25 @@ import {settingsIcon} from './settings-rows.ts';
 type Status={enabled:boolean;connected:boolean;address?:string;connectors:{id:string;name:string;token?:true}[]};
 /** Remote access was turned on or off, or has a new address: the other part of the page that shows it draws again. */
 const CHANGED='worldlet:remote-access';
-function follow(draw:()=>Promise<void>,current:()=>boolean){
+export function followRemoteAccess(draw:()=>Promise<void>,current:()=>boolean){
  const changed=()=>{if(!current()){removeEventListener(CHANGED,changed);return;}void draw();};
  addEventListener(CHANGED,changed);
 }
-const changed=()=>dispatchEvent(new Event(CHANGED));
+const follow=followRemoteAccess;
+export const remoteAccessChanged=()=>dispatchEvent(new Event(CHANGED));
+const changed=remoteAccessChanged;
+/** The host connects, and makes the World's address, in the background: while something is still on its way, a part
+ * looks again every few seconds instead of showing what it saw when the page opened. */
+export function lookAgain(draw:()=>Promise<void>,current:()=>boolean){
+ let timer:ReturnType<typeof setTimeout>|null=null;
+ return (waiting:boolean)=>{if(timer)clearTimeout(timer);timer=waiting?setTimeout(()=>{timer=null;if(current())void draw();},5000):null;};
+}
 
 export async function showRemoteAccess(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){
  const box=el('div','companion-settings-approvals companion-settings-remote'),said=el('p','companion-settings-status');said.setAttribute('role','status');
  box.dataset.remoteAccess='';target.append(box,said);
  let copied=false,tokensOpen=false,made:{token:string;name:string}|null=null;
+ const again=lookAgain(()=>draw(),current);
  async function run(operation:'enable'|'disable'|'renew',done:string){
   said.textContent='';
   try{await call('remoteMcp',{operation});copied=false;changed();await draw();said.textContent=done;}
@@ -30,6 +39,7 @@ export async function showRemoteAccess(target:HTMLElement,call:(action:string,bo
   const row=el('div','companion-settings-row'),words=el('div');row.append(words);box.append(row);
   words.append(el('strong','','Remote access'));
   if('error' in status){words.append(el('span','',status.error));return;}
+  again(status.enabled&&!status.connected);
   if(!status.enabled){
    words.append(el('span','','Let Agents in the cloud reach this World: a ChatGPT, Claude or Cursor connector, or an Agent session running elsewhere. Each one asks you first, on a card in Attention.'));
    row.append(button('Turn on','remote-access-on',()=>run('enable','Remote access is on. Copy the address into your connector.'),true));
@@ -81,11 +91,13 @@ export async function showUseInClaude(target:HTMLElement,call:(action:string,bod
  const box=el('section','companion-settings-use-in-claude'),said=el('p','companion-settings-status');said.setAttribute('role','status');
  box.dataset.useInClaude='';
  let copied=false,stepsOpen=false;
+ const again=lookAgain(()=>draw(),current);
  async function draw(){
   const status:Status|null=await call('remoteMcp',{operation:'status'}).catch(()=>null);
   if(!current())return;
   box.replaceChildren();
   if(!status||typeof status.enabled!=='boolean'){box.hidden=true;return;}
+  again(status.enabled&&!status.connected);
   box.hidden=false;
   // One row (owner request 2026-10-21): what to do in a sentence and Copy address; the steps fold under How?.
   const words=el('div'),row=el('div','companion-settings-row has-icon');

@@ -4,6 +4,7 @@
  * a browser of their own (on a card in Attention) or share their board. Below the address: the browsers that can open
  * the World, what is shared and with whom, each with a way to end it. Plain words: no passkeys, tokens or rooms. */
 import {agentButton as button,agentDay,agentEl as el} from './agent-change.ts';
+import {followRemoteAccess,lookAgain,remoteAccessChanged} from './remote-access.ts';
 type Status={name:string|null;address?:string;chosen:boolean;defaultName:string|null;mcp?:string;reachable:boolean;remote:boolean;error?:string;
  devices:{id:string;name:string;addedAt:string;usedAt?:string}[];
  visitors:{id:string;name:string;sees:string[];seenAt?:string}[];
@@ -12,7 +13,8 @@ type Status={name:string|null;address?:string;chosen:boolean;defaultName:string|
 export async function showWorldAddress(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){
  const box=el('div','companion-settings-approvals companion-settings-world-address'),said=el('p','companion-settings-status');said.setAttribute('role','status');
  box.dataset.worldAddress='';target.append(box,said);
- let changing=false,copied='';
+ let changing=false,copied='',reached=false;
+ const again=lookAgain(()=>draw(),current);
  const day=(iso?:string)=>iso?agentDay(Date.parse(iso)):'';
  async function act(body:Record<string,unknown>,done:string){
   said.textContent='';
@@ -47,11 +49,13 @@ export async function showWorldAddress(target:HTMLElement,call:(action:string,bo
   const row=el('div','companion-settings-row'),words=el('div');row.append(words);box.append(row);
   words.append(el('strong','','Your World\'s address'));
   if(!('devices' in status)){words.append(el('span','',status.error||'Not available here.'));return;}
+  // The host makes the default name and confirms it in the background: look again until the address answers. Once it
+  // does, the address to copy for Claude and ChatGPT is the World's own, so that part draws again too.
+  again(status.remote&&!status.reachable);
+  if(status.reachable!==reached){reached=status.reachable;if(reached)remoteAccessChanged();}
   if(!status.name){
    words.append(el('span','',!status.remote?'Turn on remote access above, and your World gets its own web address, like w-7k3m9p2x.worldlet.ai.'
     :status.error?`Your World could not get its web address yet: ${status.error} Worldlet keeps trying.`:'Your World gets its own web address in a moment.'));
-   // The host makes the default name in the background: look again until it is there.
-   if(status.remote)setTimeout(()=>{if(current())void draw();},5000);
    return;
   }
   if(changing){
@@ -110,5 +114,6 @@ export async function showWorldAddress(target:HTMLElement,call:(action:string,bo
    box.append(people);
   }
  }
+ followRemoteAccess(draw,current);
  await draw();
 }

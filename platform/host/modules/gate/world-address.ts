@@ -86,7 +86,7 @@ export function createWorldAddressHost({vault,remote,ledger,changed,worldLink,re
  }
  /** Makes the World's default name the first time remote access is on, and confirms its names with the website now
   * and then, so they are not given up as unused. */
- let confirming:Promise<void>|null=null;
+ let confirming:Promise<void>|null=null,tried=0;
  const confirm=()=>confirming??=confirmNames().finally(()=>{confirming=null;changed();});
  async function confirmNames(){
   try{
@@ -126,8 +126,9 @@ export function createWorldAddressHost({vault,remote,ledger,changed,worldLink,re
  const iso=(at?:number)=>at===undefined?undefined:new Date(at).toISOString();
  async function status():Promise<WorldAddressStatus>{
   const state=load(),remoteStatus=await remote.status().catch(()=>null);
-  // Remote access was turned on since: the default name is made now.
-  if(!state.defaultName&&remoteStatus?.enabled)void confirm();
+  // Remote access was turned on since, or the website did not confirm the name yet: try now. Settings asks every few
+  // seconds while it waits, so a try is repeated at most once a minute.
+  if((!state.defaultName||confirmed!==state.name)&&remoteStatus?.enabled&&now()-tried>60_000){tried=now();void confirm();}
   const base=state.name?origin(state.name):'',mcp=mcpAddress();
   return {
    name:state.name,...state.name?{address:base}:{},chosen:!!state.name&&state.name!==state.defaultName,defaultName:state.defaultName,...mcp?{mcp}:{},
