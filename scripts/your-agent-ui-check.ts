@@ -10,7 +10,7 @@ import {pageErrors,worldUrl,waitForWorld,SETTINGS_BUTTON} from './browser-test.t
 const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try{
  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'}),errors=pageErrors(page);
- await page.addInitScript(()=>{const w=window as any;w.calls=[];w.source={source:'own',ready:true,name:'claude-sonnet',provider:'anthropic'};
+ await page.addInitScript(()=>{const w=window as any;w.calls=[];w.copied=[];Object.defineProperty(navigator,'clipboard',{value:{writeText:async(text:string)=>{w.copied.push(text);}}});w.source={source:'own',ready:true,name:'claude-sonnet',provider:'anthropic'};
   // Settings › Agents (agent/gate/GRANTS.md): one Agent with its default Grants and newest decisions.
   w.access=[{id:'hermes',name:'Hermes Agent',harness:'hermes',kind:'local',createdAt:'2026-10-01T09:00:00.000Z',lastSeenAt:'2026-10-14T18:30:00.000Z',
    grants:[{id:'hermes-channel-read',agentId:'hermes',targets:['items/query','history/query','companion/recall','meetings/decisions','gmail/draft','gmail/read','google-calendar/read','apple-notes/read','todoist/read','applet:mail/read'],access:'read',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'},
@@ -87,9 +87,9 @@ try{
   // Your World's address (agent/gate/WORLD-ADDRESS.md): the page sends a name, a share choice or an ID, nothing else.
   if(b.action==='worldAddress'){
    const a=w.address??={name:'w-7k3m9p2x',defaultName:'w-7k3m9p2x',chosen:false,reachable:true,remote:true,devices:[],visitors:[],shares:[]};
-   const out=()=>({...a,...a.name?{address:'https://'+a.name+'.worldlet.ai'}:{},shares:a.shares.map(s=>({...s,...a.name?{link:'https://'+a.name+'.worldlet.ai/s/'+s.id}:{}}))});
+   const out=()=>({...a,...a.name?{address:'https://'+a.name+'.worldlet.ai',mcp:'https://'+a.name+'.worldlet.ai/mcp'}:{},shares:a.shares.map(s=>({...s,...a.name?{link:'https://'+a.name+'.worldlet.ai/s/'+s.id}:{}}))});
    if(b.operation==='check')return {name:String(b.name).trim().toLowerCase(),valid:/^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/.test(String(b.name).trim().toLowerCase()),available:String(b.name).trim()!=='taken'};
-   if(b.operation==='claim'){a.name=String(b.name).trim().toLowerCase();a.chosen=true;a.reachable=true;a.devices=[{id:'pk1',name:'Chrome on Mac',addedAt:'2026-10-18T12:00:00.000Z'}];a.visitors=[{id:'v1',name:'Sam',sees:['Board'],seenAt:'2026-10-18T13:00:00.000Z'}];return out();}
+   if(b.operation==='claim'){a.name=String(b.name).trim().toLowerCase();a.chosen=true;a.reachable=true;a.devices=[{id:'pk1',name:'Chrome on Mac',addedAt:'2026-10-18T12:00:00.000Z'}];a.visitors=[{id:'v1',name:'Sam',sees:['Board'],seenAt:'2026-10-18T13:00:00.000Z'}];a.shares=[{id:'share0AAAAAAAAAAAAAAA',title:'Board',open:true,people:0}];return out();}
    if(b.operation==='share'){a.shares.push({id:'share'+a.shares.length+'AAAAAAAAAAAAAAA',title:'Board',open:b.open===true,people:0});return out();}
    if(b.operation==='unshare'){a.shares=a.shares.filter(s=>s.id!==b.id);return out();}
    if(b.operation==='remove'){a.devices=a.devices.filter(d=>d.id!==b.id);a.visitors=a.visitors.filter(v=>v.id!==b.id);return out();}
@@ -347,7 +347,7 @@ try{
  // Agents' list: each Agent with its last use, what it may do in one line, its newest decisions and Revoke after asking;
  // its Grants and switches folded under Change what it may do.
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'access'}})));
- const accessPart=local.locator('[data-part=access]'),advancedPart=local.locator('details[data-part=advanced]'),hermesAccess=accessPart.locator('[data-access-agent=hermes]');
+ const accessPart=local.locator('[data-part=access]'),hermesAccess=accessPart.locator('[data-access-agent=hermes]');
  await hermesAccess.getByText(/^Hermes Agent/).first().waitFor();
  await hermesAccess.getByText(/^On this computer\. Last used .*2026\.$/).waitFor();
  await hermesAccess.getByText('It may look at and change things in your World, read PostHog, take work, see your board, report its work, read what Agents saved and update Issues in example/app without asking.',{exact:true}).waitFor();
@@ -437,53 +437,46 @@ try{
  await accessPart.getByText('Hermes Agent can now see what your other Agents are doing.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Reports$/.test(c.operation))),
   [{action:'agentAccess',operation:'grantReports',id:'hermes',kind:'list'}],'only the Agent and which, never targets');
- // "Add an Agent for a script" (agent/gate/GRANTS.md#agents-for-scripts), under Advanced: only the name goes to the host.
- await advancedPart.locator('> summary').click();
- await advancedPart.locator('[data-script-agents]').getByRole('button',{name:'Add',exact:true}).click();
- await accessPart.getByText(/^Could not add it: Give it a name/).waitFor();
- await advancedPart.getByRole('textbox',{name:'Name of the script'}).fill('Nightly build');
- await advancedPart.locator('[data-script-agents]').getByRole('button',{name:'Add',exact:true}).click();
- await accessPart.getByText('Nightly build can now reach your World from a script on this computer. Its key is in /Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json. Allow what it may do below.',{exact:true}).waitFor();
- await accessPart.locator('[data-access-agent=nightly-build] [data-access-more] > summary').click();
- await accessPart.locator('[data-access-agent=nightly-build]').getByText('For a script. Its key is in /Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json.',{exact:true}).waitFor();
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='addScript')),
-  [{action:'agentAccess',operation:'addScript',name:''},{action:'agentAccess',operation:'addScript',name:'Nightly build'}],'only the name');
- // Your World's address (agent/gate/WORLD-ADDRESS.md): a name, the browsers allowed, the board shared and the people
- // who see it, each with its own way to end it; only names, share choices and IDs go to the host.
+ // Settings has no Advanced (owner request 2026-10-22): no "Add an Agent for a script" and no "Give new work to".
+ assert.equal(await local.locator('details[data-part=advanced]').count(),0,'no Advanced');
+ assert.equal(await local.locator('[data-script-agents]').count(),0,'no script Agents here');
+ assert.equal(await local.getByRole('combobox',{name:'Give new work to',exact:true}).count(),0,'no work routing here');
+ // Your World's address (agent/gate/WORLD-ADDRESS.md): one card with the address, Copy for Claude or ChatGPT and Choose a
+ // name; who can open it is listed only when there is someone, each with its own way to end it; only names and IDs go
+ // to the host.
  const addressRoot=local.locator('[data-part=world-address]'),addressPart=addressRoot.locator('[data-world-address]');
  // Every World has a default address from the start; the person may choose a name once, and it then stays.
- await addressPart.locator('[data-world-address-link]').getByText('https://w-7k3m9p2x.worldlet.ai',{exact:true}).waitFor();
+ await addressPart.locator('[data-world-address-link]').getByText('w-7k3m9p2x.worldlet.ai',{exact:true}).waitFor();
+ assert.equal(await addressPart.locator('[data-world-address-who]').count(),0,'nobody listed yet');
+ await addressPart.getByRole('button',{name:'Copy for Claude or ChatGPT',exact:true}).click();
+ await addressRoot.getByText('Copied. Paste it in Claude or ChatGPT as a connector.',{exact:true}).waitFor();
  await addressPart.getByRole('button',{name:'Choose a name',exact:true}).click();
- await addressPart.getByText(/^Choose a name for your World, like alex\.worldlet\.ai\. You choose it once and it stays/).waitFor();
+ await addressPart.getByText(/^Choose a name, like alex\.worldlet\.ai\. You choose it once and it stays/).waitFor();
  await addressPart.getByRole('textbox',{name:'Name for your World\'s address'}).fill('taken');
  await addressPart.getByRole('button',{name:'Choose',exact:true}).click();
  await addressRoot.getByText('taken.worldlet.ai is taken. Try another name.',{exact:true}).waitFor();
  await addressPart.getByRole('textbox',{name:'Name for your World\'s address'}).fill('Alex');
  await addressPart.getByText('Your address: https://alex.worldlet.ai',{exact:true}).waitFor();
  await addressPart.getByRole('button',{name:'Choose',exact:true}).click();
- await addressPart.locator('[data-world-address-link]').getByText('https://alex.worldlet.ai',{exact:true}).waitFor();
+ await addressPart.locator('[data-world-address-link]').getByText('alex.worldlet.ai',{exact:true}).waitFor();
  assert.equal(await addressPart.getByRole('button',{name:'Choose a name',exact:true}).count(),0,'a chosen name stays');
- await addressPart.getByRole('button',{name:'Give up this name',exact:true}).waitFor();
- await addressPart.locator('[data-world-address-browsers]').getByText(/^Chrome on Mac · added /).waitFor();
- await addressPart.getByRole('button',{name:'Share board with anyone who has the link',exact:true}).click();
- await addressRoot.getByText('Anyone with the link can now see your board, read only. Stop sharing whenever you like.',{exact:true}).waitFor();
- await addressPart.locator('[data-world-address-shares]').getByText('Board · anyone with the link',{exact:true}).waitFor();
- await addressPart.locator('[data-world-address-people]').getByText(/^Sam · sees Board · last looked /).waitFor();
- await addressPart.locator('[data-world-address-people]').getByRole('button',{name:'Remove',exact:true}).click();
+ assert.equal(await addressPart.getByRole('button',{name:'Give up this name',exact:true}).count(),0,'nothing advanced');
+ const who=addressPart.locator('[data-world-address-who]');
+ await who.getByText(/^Chrome on Mac · your browser · added /).waitFor();
+ await who.getByText('Board · shared with anyone with the link',{exact:true}).waitFor();
+ await who.getByText(/^Sam · sees Board · last looked /).waitFor();
+ await who.locator('.companion-settings-row',{hasText:'Sam'}).getByRole('button',{name:'Remove',exact:true}).click();
  await addressRoot.getByText('Sam can no longer see anything here.',{exact:true}).waitFor();
- await addressPart.locator('[data-world-address-browsers]').getByRole('button',{name:'Sign out',exact:true}).click();
- await addressRoot.getByText(/^Chrome on Mac is signed out\./).waitFor();
+ await who.getByRole('button',{name:'Sign out',exact:true}).click();
+ await addressRoot.getByText('Chrome on Mac is signed out.',{exact:true}).waitFor();
+ await who.getByRole('button',{name:'Stop sharing',exact:true}).click();
+ await addressRoot.getByText('Board is no longer shared.',{exact:true}).waitFor();
+ assert.equal(await addressPart.locator('[data-world-address-who]').count(),0,'nobody left to list');
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='worldAddress'&&c.operation!=='status')),
   [{action:'worldAddress',operation:'check',name:'taken'},{action:'worldAddress',operation:'check',name:'Alex'},{action:'worldAddress',operation:'claim',name:'Alex'},
-   {action:'worldAddress',operation:'share',open:true},{action:'worldAddress',operation:'remove',id:'v1'},{action:'worldAddress',operation:'remove',id:'pk1'}],'only names, choices and IDs');
- // "Give new work to" and each Agent's wake command (agent/gate/GRANTS.md#orders-and-waking-an-agent): the page sends
- // the Agent, and the command as a list of words, one per line as typed; the host's refusal shows in plain words.
- const target=advancedPart.getByRole('combobox',{name:'Give new work to',exact:true});
- assert.equal(await target.inputValue(),'');
- assert.deepEqual(await target.locator('option').allTextContents(),['No Agent in particular','Hermes Agent','Nightly build']);
- await target.selectOption('hermes');
- await accessPart.getByText('New work now goes to Hermes Agent.',{exact:true}).waitFor();
- assert.equal(await advancedPart.getByRole('combobox',{name:'Give new work to',exact:true}).inputValue(),'hermes');
+   {action:'worldAddress',operation:'remove',id:'v1'},{action:'worldAddress',operation:'remove',id:'pk1'},{action:'worldAddress',operation:'unshare',id:'share0AAAAAAAAAAAAAAA'}],'only names and IDs');
+ // Each Agent's wake command (agent/gate/GRANTS.md#orders-and-waking-an-agent): the page sends the Agent, and the
+ // command as a list of words, one per line as typed; the host's refusal shows in plain words.
  const wakePart=hermesAccess.locator('[data-wake=hermes]'),wakeBox=wakePart.getByRole('textbox',{name:'Wake command for Hermes Agent',exact:true});
  await wakePart.getByText(/^When work is given to Hermes Agent, Worldlet runs this program on this computer/).waitFor();
  assert.equal(await wakePart.getByRole('button',{name:'Remove',exact:true}).count(),0,'nothing to remove yet');
@@ -497,12 +490,9 @@ try{
  await hermesAccess.locator('.companion-settings-access-audit li').first().getByText(/Waking it for new work · You set it$/).waitFor();
  await hermesAccess.locator('[data-wake=hermes]').getByRole('button',{name:'Remove',exact:true}).click();
  await accessPart.getByText('Hermes Agent will no longer be woken for new work.',{exact:true}).waitFor();
- await target.selectOption('');
- await accessPart.getByText('New work no longer goes to one Agent.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/^set(OrderTarget|Wake)$/.test(c.operation))),
-  [{action:'agentAccess',operation:'setOrderTarget',id:'hermes'},{action:'agentAccess',operation:'setWake',id:'hermes',command:['bin/wake-agent','{askId}']},
-   {action:'agentAccess',operation:'setWake',id:'hermes',command:['/Users/alex/bin/wake-agent','--work','{askId}']},{action:'agentAccess',operation:'setWake',id:'hermes',command:[]},
-   {action:'agentAccess',operation:'setOrderTarget',id:''}],'the Agent and a list of words, never a shell line');
+  [{action:'agentAccess',operation:'setWake',id:'hermes',command:['bin/wake-agent','{askId}']},
+   {action:'agentAccess',operation:'setWake',id:'hermes',command:['/Users/alex/bin/wake-agent','--work','{askId}']},{action:'agentAccess',operation:'setWake',id:'hermes',command:[]}],'the Agent and a list of words, never a shell line');
  assert.doesNotMatch(await hermesAccess.innerText(),/\bMCP\b|token|endpoint|shell/i,'plain words only');
  // "Can draft PostHog changes" (agent/gate/GRANTS.md#posthog-and-notion-drafts): only for a connected Service, naming
  // only the Agent and the Service. Notion is not connected here, so it has no checkbox.

@@ -333,7 +333,6 @@
 .companion-settings-access-more[open]{display:flex;flex-direction:column;gap:2px}
 .companion-settings-own-head{display:flex;align-items:center;gap:12px;align-self:stretch}
 .companion-settings-own-title{margin:0;font-size:15px;color:#354132}
-.companion-settings-remote-access{border-top:1px solid #d9cbae80;padding-top:6px}
 /* Context: each kind with how much it holds. */
 .companion-settings-context{display:flex;flex-direction:column;gap:10px;align-self:stretch}
 .companion-settings-context .companion-settings-row{flex-wrap:wrap}
