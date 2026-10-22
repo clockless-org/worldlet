@@ -1,5 +1,5 @@
 import {THEME_PACKAGES} from '../theme-packages/index.ts';
-import {applyThemeSurfaces,type BuiltSurfaces} from './theme-surfaces.ts';
+import {applyThemeSurfaces,prepareThemeFontFiles,type BuiltSurfaces} from './theme-surfaces.ts';
 import {BUILD_THEME_CONTRACT_VERSION,parseBuildThemeManifest,parseThemePresentation,type BuildThemeManifest,type ThemePresentation,type ThemeSceneMaterialName,type ThemeSceneRegistration} from './build-theme-contract.ts';
 /** One bundled theme package, validated against the contract when the bundle loads. A theme is static: its manifest,
  * its presentation, the assets they name and any other JSON it ships (`data`, by package path). */
@@ -32,11 +32,15 @@ export function themeAppletIcon(key:string):string|undefined{
  const art=(globalThis as any).__WORLDLET_25D_ASSETS__?.devices?.[key],src=typeof art==='string'?art:art?.src;
  return typeof src==='string'&&src?src:undefined;
 }
+/** Condition pictures never supply forecast values or change weather classification. */
+export function themeWeatherIcon(code:number|null):string|undefined{
+ const file=active.package.presentation.weatherIcons?.[String(code)];return file?themeAssetURL(active.id,file):undefined;
+}
 const sceneRegistration=(r:ThemeSceneRegistration):ThemeSceneRegistration=>({...r,...r.webFrame?{webFrame:{...r.webFrame,mask:themeAssetURL(active.id,r.webFrame.mask)}}:{}});
 /** A registered background for a specific Applet; reusable theme presets are returned separately. */
 export function themeAppletScene(key:string){
  const scene=active.package.presentation.appletScenes?.[key];
- return scene?{...scene,background:themeAssetURL(active.id,scene.background),registration:sceneRegistration(scene.registration)}:undefined;
+ return scene?{...scene,...scene.mailDelivery?{mailDelivery:{...scene.mailDelivery,video:themeAssetURL(active.id,scene.mailDelivery.video)}}:{},background:themeAssetURL(active.id,scene.background),registration:sceneRegistration(scene.registration),...scene.sprites?{sprites:Object.fromEntries(Object.entries(scene.sprites).map(([role,sprite])=>[role,{...sprite,image:themeAssetURL(active.id,sprite.image)}]))}:{}}:undefined;
 }
 /** How Applet content looks on one scene material (presentation.json `sceneMaterials`), every role filled: a role the
  * theme leaves out comes from its tokens. The shared Applet scene renderer (ui/applets/scene) is its one reader. */
@@ -61,6 +65,11 @@ export function themeArtifact(){
   materials:(a.materials??[]).map(m=>({...m,url:url(m.image)})),
   colors:{...a.colors}};
 }
+const fontFamily=(font:ThemePresentation['fonts'][number])=>font.family?.trim()||font.file.split('/').at(-1)!.replace(/\.[^.]+$/,'');
+/** Load the active static package's fonts without depending on the World asset environment. */
+export async function prepareBuildThemeFonts(theme:InstalledTheme=active):Promise<void>{
+ await prepareThemeFontFiles(theme.package.presentation.fonts.map(font=>({family:fontFamily(font),src:themeAssetURL(theme.id,font.file)})));
+}
 /**
  * The HUD material and sounds a package declares (presentation.json `hud`, `sound`) replace the shared ones in the
  * surfaces the HUD already reads. Anything a package leaves out keeps the shared one, and a package with neither (the
@@ -68,14 +77,20 @@ export function themeArtifact(){
  */
 function applyPresentation(theme:InstalledTheme){
  const g=globalThis as any,builtIn=g.__WORLDLET_ENV_ASSETS__,p=theme.package.presentation;
+ // The fallback stack paints immediately; the registered face takes over when its local file is ready.
+ void prepareBuildThemeFonts(theme).catch(()=>{});
  // The theme's Artifact colours colour the host's card too (ui/attention/CARD-SYSTEM.md): one look in both modes.
+ if(g.document)g.document.documentElement.dataset.worldTheme=theme.id;
  const style=g.document?.documentElement?.style;
  if(style)for(const [role,hex] of Object.entries(p.artifact?.colors??{}))style.setProperty('--artifact-'+role,hex);
  if(!builtIn)return;
- if(!(p.hud||p.sound)){applyThemeSurfaces();return;}
+ if(!(p.hud||p.sound||p.fonts.length)){applyThemeSurfaces();return;}
  const url=(path:string)=>themeAssetURL(theme.id,path);
  const shared:BuiltSurfaces=builtIn.surfaces||{tokens:{},fonts:{},skin:{},sounds:{events:{},ambient:{}},attention:[],transitions:{area:'shared',room:'shared',ms:0}};
- g.__WORLDLET_ENV_ASSETS__={...builtIn,surfaces:{...shared,
+ const displayFamily=p.tokens.displayFont.split(',')[0].trim().replace(/^['"]|['"]$/g,''),display=p.fonts.find(font=>fontFamily(font)===displayFamily);
+ const displayFace=display?{family:displayFamily,src:url(display.file)}:undefined;
+ g.__WORLDLET_ENV_ASSETS__={...builtIn,surfaces:{...shared,...p.hud?{hud:p.tokens}:{},
+  fonts:displayFace?{...shared.fonts,display:displayFace,label:displayFace}:shared.fonts,
   skin:p.hud?Object.fromEntries(Object.entries(p.hud.skin).map(([part,piece])=>[part,{image:url(piece.image),slice:[...piece.slice],width:piece.width}])):shared.skin,
   sounds:p.sound?{events:Object.fromEntries(Object.entries(p.sound.events).map(([event,file])=>[event,url(file)])),ambient:{}}:shared.sounds}};
  applyThemeSurfaces();

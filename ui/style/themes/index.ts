@@ -1,5 +1,5 @@
 /** Public Theme Pack interface: the registry, the contract and its presentation helpers. */
-export {ACTIVE_THEME,DEFAULT_THEME_ID,theme,themeAppletArt,type AppletArt,type RegisteredTheme} from './theme-registry.ts';
+export {villageThemeData,ACTIVE_THEME,DEFAULT_THEME_ID,theme,themeAppletArt,type AppletArt,type RegisteredTheme} from './theme-registry.ts';
 export {THEME_EVENTS,THEME_SKIN_PARTS,companionPerformance,parseThemePack,themePath,type ThemeEvent,type ThemePack,type ThemeSkinPart} from './theme-pack.ts';
 export {createThemeEvents,type ThemeCue,type ThemeOccurrence} from './theme-events.ts';
 export {PINS_THEME,selectThemePins,storedThemePins,switchThemePins,type ThemePins,type ThemePlacementLayout} from './theme-placements.ts';
@@ -14,7 +14,7 @@ export {themeAmbientTrack} from './theme-audio.ts';
 export * from './build-theme-contract.ts';
 
 // The one Theme contract: the bundled static package.
-export {activeBuildTheme,themeArtifact,themeAssetURL,themeData,themeAppletIcon,themeAppletPresets,themeAppletScene,themeSceneMaterial,BUILD_THEMES,DEFAULT_BUILD_THEME_ID,type InstalledTheme,type ThemePackage} from './build-theme.ts';
+export {activeBuildTheme,prepareBuildThemeFonts,themeWeatherIcon,themeArtifact,themeAssetURL,themeData,themeAppletIcon,themeAppletPresets,themeAppletScene,themeSceneMaterial,BUILD_THEMES,DEFAULT_BUILD_THEME_ID,type InstalledTheme,type ThemePackage} from './build-theme.ts';
 
 export {fitThemeScene} from './scene-registration.ts';
 export {mountSceneFrame} from './scene-frame.ts';

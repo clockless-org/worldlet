@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {newSnakeState,steerSnake,stepSnake,pauseSnake,type SnakeState,type SnakePoint} from '../context/store/index.ts';
+const ready=newSnakeState('wide');assert.equal(ready.columns,16);assert.equal(ready.rows,12);assert.equal(ready.body.length,7);assert.deepEqual(ready.food,[11,6]);assert.equal(stepSnake(ready),ready);
+assert.equal(steerSnake(ready,[-1,0]),ready,'reversing into the neck cannot start');assert.equal(steerSnake(ready,[.5,.5]),ready);assert.equal(steerSnake(ready,[1,1]),ready);
+let state=steerSnake(ready,[1,0]);for(let i=0;i<4;i++)state=stepSnake(state);state=stepSnake(steerSnake(state,[0,-1]),()=>0);
+assert.equal(state.score,1);assert.equal(state.body.length,8);assert.deepEqual(state.body[0],[11,6]);assert.equal(ready.body.length,7,'old snapshots stay unchanged');assert.ok(!state.body.some(p=>p[0]===state.food![0]&&p[1]===state.food![1]));
+const paused=pauseSnake(state);assert.equal(paused.status,'paused');assert.equal(stepSnake(paused),paused);assert.equal(steerSnake(paused,[1,0]).status,'playing');
+let queue=steerSnake(ready,[0,-1]);queue=steerSnake(queue,[-1,0]);queue=steerSnake(queue,[0,1]);assert.equal(queue.queued.length,2,'input queue is bounded');assert.deepEqual(stepSnake(queue).direction,[0,-1]);assert.deepEqual(stepSnake(stepSnake(queue)).direction,[-1,0]);
+let crash=steerSnake(ready,[1,0]);for(let i=0;i<20;i++)crash=stepSnake(crash);assert.equal(crash.status,'over');assert.equal(stepSnake(crash),crash);assert.equal(steerSnake(crash,[0,-1]),crash);
+const tail:SnakeState={...ready,columns:4,rows:4,body:[[1,1],[1,2],[0,2],[0,1]],direction:[0,-1],queued:[],food:[3,3],status:'playing'};
+assert.equal(stepSnake(steerSnake(tail,[-1,0])).status,'playing','the departing tail square is free');
+const self={...tail,body:[[1,1],[1,2],[0,2],[0,1],[0,0]] as SnakePoint[]};assert.equal(stepSnake(steerSnake(self,[-1,0])).status,'over');
+const filled:SnakeState={...tail,columns:2,rows:2,body:[[0,0],[0,1],[1,1]],direction:[1,0],food:[1,0],score:0};const win=stepSnake(filled);assert.equal(win.status,'won');assert.equal(win.food,null);assert.equal(win.body.length,4);assert.equal(stepSnake(win),win);
+console.log('PASS Snake: immutable wide/classic starts, movement, bounded turns, reverse rejection, food/growth, pause, wall/self collision, departing tail and full-board win');

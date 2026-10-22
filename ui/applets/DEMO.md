@@ -183,3 +183,5 @@ the saved comparison exists; a tool invocation alone is not success. Reset the
 sample world to repeat. Website availability and live model latency are external
 dependencies; the deterministic browser-driver fixture separately verifies the
 multi-page control path.
+
+Practice checklist visibility lives in the bundled `ui/frame/notion.css`, rather than an injected style element. The sample World follows the same Content Security Policy as personal Worlds.

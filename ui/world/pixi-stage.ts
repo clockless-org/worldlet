@@ -1,6 +1,6 @@
-import {renderHomeOpen,type HomeOpenState} from '../applets/index.ts';
+import {renderHomeOpen,selectNotebookItem,type HomeOpenState} from '../applets/index.ts';
 import {HOME_NATIVE,HOME_RECORDS,CODING_SESSIONS,ORIGINAL_READERS} from '../../context/applets/index.ts';
-import {renderMailOpen,renderMeetingsOpen,renderSceneList,mountAppletScene,appletSceneKey,type AppletScene} from '../applets/index.ts';
+import {renderMailOpen,renderMeetingsOpen,renderSceneList,renderWorkSession,selectWorkSession,renderVaultScene,mountAppletScene,appletSceneKey,type AppletScene} from '../applets/index.ts';
 import {weatherGlyph} from './environment/weather-forecast.ts';
 import {attentionIcon} from '../attention/index.ts';
 import {calendarDay} from './applet-content.ts';
@@ -12,7 +12,7 @@ export function createAppletStage(host,onPick){
  // An Applet the active theme paints a scene for, its own or its family's (ui/applets/scene/scene-family.ts), draws
  // through the shared scene renderer: switching themes changes which pictures there are, never this code. Mail's scene
  // stays while a letter is read, so its reader sits on the same painted paper; the others' items open in the shared reader.
- const SCENE_READERS=new Set(['gmail']);let scene:AppletScene|null=null;
+ const SCENE_READERS=new Set(['gmail','apple-notes']);let scene:AppletScene|null=null;
  const homeState:HomeOpenState={mode:'week',offset:0};
  // Attention opens Calendar on the day of one of the person's events.
  let calendarShow:string|null=null;
@@ -20,21 +20,25 @@ export function createAppletStage(host,onPick){
  window.addEventListener('worldlet:calendar-show',showCalendar);
  const hidden=(element:HTMLElement,value:boolean)=>{if(element.hidden!==value)element.hidden=value;};
  const data=(element:HTMLElement,key:string,value:string)=>{if(element.dataset[key]!==value)element.dataset[key]=value;};
- let signature='',focusSignature='',shownItems=[],allItems=[],selected=null,page=0,owner='';
+ let latestRender:Parameters<typeof render>|null=null;
+ const resize=new ResizeObserver(()=>{scene?.layout();if(latestRender)render(...latestRender);});resize.observe(panel);
+ let motion=true;let signature='',focusSignature='',shownItems=[],allItems=[],selected=null,page=0,owner='';
  // The theme's small secondary regions (Calendar's wall date) show today's date.
  const sceneToday=(scene:AppletScene,value)=>{const day=new Date(value?.now||Date.now());for(const region of scene.regions.filter(r=>r.role==='secondary')){const small=document.createElement('small'),strong=document.createElement('strong');small.className='scene-meta';small.textContent=day.toLocaleDateString(undefined,{weekday:'short',month:'short'});strong.className='scene-title';strong.textContent=String(day.getDate());region.element.replaceChildren(small,strong);}};
  function render(room,value,visible,focused=false,_showDevice=false){
-  if(owner!==room.moduleId){owner=room.moduleId;page=0;selected=null;homeState.mode='week';homeState.offset=0;homeState.editing=null;homeState.scroll=null;homeState.undo=null;}
+  latestRender=[room,value,visible,focused,_showDevice];
+  if(owner!==room.moduleId){owner=room.moduleId;page=0;selected=null;homeState.mode='week';homeState.offset=0;homeState.editing=null;homeState.scroll=null;homeState.undo=null;homeState.selected=null;homeState.scrollX=null;}
   if(calendarShow&&room.key==='google-calendar'){const today=new Date(value?.now||Date.now());today.setHours(12,0,0,0);homeState.mode='day';homeState.offset=Math.round((+new Date(calendarShow+'T12:00:00')-+today)/86400000);homeState.editing=null;homeState.scroll=null;calendarShow=null;}
   allItems=(value?.items||[]).filter(i=>!['done','dismissed'].includes(i.status));
   hidden(mailNav,!(focused&&selected&&room.key==='gmail'));hidden(focus,!(focused&&selected)||room.key==='gmail');data(focus,'applet',room.key||'');
   const f=JSON.stringify([room.key,selected,allItems.map(i=>i.id)]);if(f!==focusSignature){focusSignature=f;focus.replaceChildren();mailNav.replaceChildren();if(selected){const label=document.createElement('small');label.textContent=selected.curated?'Fox summary':'Selected item';const title=document.createElement('strong');title.textContent=selected.title;const context=document.createElement('p');context.textContent=[selected.when,selected.context].filter(Boolean).join(' · ');focus.append(label,title,context);
    const at=allItems.findIndex(i=>i.id===selected.id),nav=document.createElement('nav');nav.className='pixi-focus-switch';nav.setAttribute('aria-label','Browse selected items');
    for(const [text,step] of [['Previous item',-1],['Next item',1]] as const){const b=document.createElement('button');b.type='button';b.textContent=step<0?'‹':'›';b.setAttribute('aria-label',text);b.disabled=at<0||at+step<0||at+step>=allItems.length;b.hidden=b.disabled;b.onclick=e=>{e.stopPropagation();const next=allItems[at+step];if(next){selected=next;onPick({action:'applet-item',id:next.id});}};if(room.key==='gmail'){b.textContent=step<0?'◀':'▶';b.setAttribute('aria-label',step<0?'Previous email':'Next email');mailNav.append(b);}else nav.append(b);}if(room.key!=='gmail')focus.append(nav);}}
-  const sceneOpen=!!room.key&&!!appletSceneKey(room.key)&&(visible||focused&&SCENE_READERS.has(room.key));
+  const sceneOpen=!!room.key&&!!appletSceneKey(room.key)&&(visible||focused&&(SCENE_READERS.has(room.key)||CODING_SESSIONS.includes(room.key)&&!!scene?.regions.some(r=>r.id==='sessions')));
   if(scene&&(!sceneOpen||scene.element.dataset.applet!==room.key)){scene.destroy();scene=null;delete panel.dataset.scene;delete panel.dataset.reading;}
   if(sceneOpen&&!scene){panel.replaceChildren();scene=mountAppletScene(panel,room.key,{shell:(host.closest('#notionWorld') as HTMLElement|null)||host});panel.dataset.scene=room.key;signature='';}
-  if(scene)data(panel,'reading',String(!visible));
+  scene?.setMotion(motion&&visible);
+  if(scene){data(panel,'reading',String(!visible));scene.element.inert=!visible&&(room.key==='apple-notes'||CODING_SESSIONS.includes(room.key));}
   hidden(panel,!visible&&!sceneOpen);data(panel,'applet',room.key||'');data(panel,'animatedDevice',String(!!(globalThis as any).__WORLDLET_25D_ASSETS__?.motion?.[room.key]));if(!visible){signature='';return;}
   const cards=['github',...CODING_SESSIONS,...ORIGINAL_READERS,'meetings','voice-memos','messages'].includes(room.key);
   const local=cards||HOME_NATIVE.includes(room.key),calendar=room.key==='google-calendar';
@@ -44,12 +48,18 @@ export function createAppletStage(host,onPick){
   // Nothing in the panel pages (owner Order 2026-10-07): every item is shown, and the item area scrolls when they
   // do not fit. Only the calendar moves by week, which changes the dates rather than paging.
   else shownItems=items;
-  const next=JSON.stringify([room.moduleId,items,value?.connected,value?.accountLabel,value?.loaded,value?.reading,value?.error,value?.weather,value?.scope,!!value?.loadMore,page,calendar?calendarDay(value?.now):null]);if(next===signature){shownItems=previousShown;return;}signature=next;
+  scene?.layout();
+  const next=JSON.stringify([room.moduleId,scene?.metrics.compact,items,value?.sample,value?.connected,value?.accountLabel,value?.loaded,value?.reading,value?.error,value?.weather,value?.scope,!!value?.loadMore,page,calendar||room.key==='apple-reminders'?calendarDay(value?.now):null]);if(next===signature){shownItems=previousShown;return;}signature=next;
   if(scene){const pick=item=>{selected=item;onPick({action:'applet-item',id:item.id});};
-   if(room.key==='gmail')shownItems=renderMailOpen(scene.primary.element,items,value,pick);
+   if(room.key==='gmail')shownItems=renderMailOpen(scene.primary.element,items,value,pick,scene.regions);
    else if(room.key==='meetings'){scene.primary.element.replaceChildren();shownItems=renderMeetingsOpen(scene.primary.element,room,items,value,pick);}
+   else if(room.key==='obsidian')shownItems=renderVaultScene(scene.primary.element,room,items,value,scene.regions)||renderSceneList(scene.primary.element,room,items,value,pick);
+   else if(CODING_SESSIONS.includes(room.key))shownItems=renderWorkSession(scene.primary.element,room,items,value,pick,scene.regions)||renderSceneList(scene.primary.element,room,items,value,pick);
    else if(!HOME_RECORDS.includes(room.key))shownItems=renderSceneList(scene.primary.element,room,items,value,pick,room.key==='weather'?item=>weatherGlyph(item.weatherCode):undefined);
-   else{scene.primary.element.replaceChildren();shownItems=renderHomeOpen(scene.primary.element,room,items,value,homeState,pick,()=>{signature='';render(room,value,true);});sceneToday(scene,value);}
+   else{const active=document.activeElement as HTMLElement|null,calendarFocus=calendar&&active&&scene.element.contains(active)?{id:active.dataset.itemId,label:active.getAttribute('aria-label'),mode:active.closest('.home-calendar-modes')?active.textContent:null}:null;
+    if(!['apple-reminders','apple-notes'].includes(room.key))scene.primary.element.replaceChildren();shownItems=renderHomeOpen(scene.primary.element,room,items,value,homeState,pick,()=>{signature='';render(room,value,true);},scene.regions);if(calendar&&scene.primary.element.dataset.calendarDistributed!=='true')sceneToday(scene,value);
+    if(calendarFocus&&document.activeElement===document.body){const restored=[...scene.element.querySelectorAll<HTMLElement>('button,input')].find(e=>calendarFocus.id?e.dataset.itemId===calendarFocus.id:calendarFocus.label?e.getAttribute('aria-label')===calendarFocus.label:calendarFocus.mode&&e.closest('.home-calendar-modes')&&e.textContent===calendarFocus.mode);restored?.focus({preventScroll:true});}
+   }
    scene.layout();return;}
   panel.replaceChildren();panel.dataset.installation=String(local);panel.dataset.work=String(cards);
   panel.classList.remove('home-open','meetings-open');
@@ -80,5 +90,5 @@ export function createAppletStage(host,onPick){
    if(calendar)footer.append(move('Previous',-1));footer.append(label);if(calendar)footer.append(move('Next',1));panel.append(footer);
   }
  }
- return {render,setMotion(_value:boolean){},setSelected(room,item){owner=room.moduleId;selected=item;},select(id){selected=allItems.find(i=>i.id===id)||null;return selected;},get metrics(){return panel.hidden?null:{items:shownItems.length,shown:true,preview:false,selected:selected?.id||null,scene:scene?.metrics||null};},destroy(){window.removeEventListener('worldlet:calendar-show',showCalendar);scene?.destroy();panel.remove();focus.remove();mailNav.remove();}};
+ return {render,setMotion(value:boolean){motion=value;scene?.setMotion(value&&!panel.hidden&&panel.dataset.reading==='false');},deliverMail(){return panel.dataset.applet==='gmail'&&!panel.hidden&&panel.dataset.reading==='false'&&(scene?.deliverMail()||false);},setSelected(room,item){owner=room.moduleId;selected=item;if(scene&&CODING_SESSIONS.includes(room.key)&&item)selectWorkSession(scene.primary.element,item.id);if(room.key==='apple-notes'&&item){selectNotebookItem(homeState,item.id);for(const row of scene?.element.querySelectorAll<HTMLElement>('.notes-row')||[])row.setAttribute('aria-pressed',String(row.dataset.itemId===item.id));}},select(id){selected=allItems.find(i=>i.id===id)||null;return selected;},get metrics(){return panel.hidden?null:{items:shownItems.length,shown:true,preview:false,selected:selected?.id||null,scene:scene?.metrics||null};},destroy(){latestRender=null;resize.disconnect();window.removeEventListener('worldlet:calendar-show',showCalendar);scene?.destroy();panel.remove();focus.remove();mailNav.remove();}};
 }

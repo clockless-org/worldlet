@@ -27,6 +27,10 @@ try{
  // The host lays out the World and Applet pages; a presentation that places them is refused.
  assert.throws(()=>parseThemePresentation({...presentation,world:{}}),/presentation fields/);
  assert.throws(()=>parseThemePresentation({...presentation,tokens:{...presentation.tokens,bodySize:9}}),/readable/);
+ // Font aliases are optional; old filename-only declarations remain valid.
+ assert.doesNotThrow(()=>parseThemePresentation({...presentation,fonts:[{file:'assets/Display.woff2',license:'assets/LICENSE.txt'}]}));
+ assert.doesNotThrow(()=>parseThemePresentation({...presentation,fonts:[{file:'assets/title.woff2',license:'assets/LICENSE.txt',family:'Package Display'}]}));
+ for(const family of ['',null,42,'Name, serif','url(remote)'])assert.throws(()=>parseThemePresentation({...presentation,fonts:[{file:'assets/title.woff2',license:'assets/LICENSE.txt',family}]}),/font family/);
  // HUD material and sound are optional; a malformed one fails before it is shown. The companion is not a theme's.
  assert.doesNotThrow(()=>parseThemePresentation({...presentation,hud:{skin:{log:{image:'assets/p.svg',slice:[4,4,4,4],width:4}}},sound:{events:{'mail.received':'assets/m.wav'}}}));
  assert.throws(()=>parseThemePresentation({...presentation,hud:{skin:{bubble:{image:'assets/p.svg',slice:[4,4,4,4],width:4}}}}),/hud skin/);
@@ -36,6 +40,9 @@ try{
  assert.doesNotThrow(()=>parseThemePresentation({...presentation,icons:{gmail:'assets/gmail.png'}}));
  assert.throws(()=>parseThemePresentation({...presentation,icons:{Gmail:'assets/gmail.png'}}),/applet icons/);
  assert.throws(()=>parseThemePresentation({...presentation,icons:{gmail:'assets/gmail.txt'}}),/applet icons/);
+ // Forecast artwork uses WMO codes and local images; omitted conditions keep shared artwork.
+ assert.doesNotThrow(()=>parseThemePresentation({...presentation,weatherIcons:{'3':'assets/cloud.png','61':'assets/rain.webp'}}));
+ for(const weatherIcons of [{'03':'assets/cloud.png'},{sun:'assets/cloud.png'},{'3':'assets/weather.html'},{'3':'https://example.com/cloud.png'}])assert.throws(()=>parseThemePresentation({...presentation,weatherIcons}),/Invalid build theme/);
  // Presets are optional reusable art, with stable unique ids and package-local images, never page code or layout.
  const preset={id:'reading',title:'Reading',description:'A place for books',category:'Learning',icon:'assets/plate.svg',background:'assets/plate.svg'};
  assert.doesNotThrow(()=>parseThemePresentation({...presentation,appletPresets:[]}));
@@ -48,9 +55,26 @@ try{
  await fs.writeFile(path.join(source,'assets/plate.svg'),'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"/>');
  // Image registrations describe multiple physical surfaces, not executable page layout.
  const plate=await fs.readFile(path.join(source,'assets/plate.svg'));
+ const worldMap={background:'assets/plate.svg',imageSize:[16,16],sha256:createHash('sha256').update(plate).digest('hex'),areas:{home:{anchor:[.5,.4],title:'Home',map:'assets/plate.svg'}}};
+ assert.doesNotThrow(()=>parseThemePresentation({...presentation,worldMap}));
+ for(const invalid of [{...worldMap,renderer:'custom.js'},{...worldMap,background:'https://example.com/map.png'},{...worldMap,areas:{home:{anchor:[1.2,.5]}}},{...worldMap,areas:{home:{anchor:[.2,.3],action:'send'}}},{...worldMap,imageSize:[0,16]},{...worldMap,sha256:'stale'}])assert.throws(()=>parseThemePresentation({...presentation,worldMap:invalid}),/Invalid build theme/);
+ await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify({...presentation,worldMap}));await validateBuildTheme(source);
+ await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify({...presentation,worldMap:{...worldMap,imageSize:[17,16]}}));await assert.rejects(validateBuildTheme(source),/World map registration is stale/);
+ await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(presentation));
  const registration:ThemeSceneRegistration={imageSize:[16,16],sha256:createHash('sha256').update(plate).digest('hex'),regions:[{id:'main',role:'primary',rect:[.05,.1,.55,.8],material:'paper'},{id:'date',role:'secondary',rect:[.7,.1,.2,.2],material:'paper'}],companion:[.7,.5,.25,.45]};
  const registered=(r:unknown)=>({...presentation,appletScenes:{gmail:{background:'assets/plate.svg',registration:r}}});
  assert.doesNotThrow(()=>parseThemePresentation(registered(registration)));
+ const withSprites=(sprites:unknown)=>({...presentation,appletScenes:{'game-2048':{background:'assets/plate.svg',registration,sprites}}});
+ assert.doesNotThrow(()=>parseThemePresentation(withSprites({'empty-cell':{image:'assets/plate.svg',source:[0,.1,.8,.7]},tile:{image:'assets/plate.svg',source:[0,0,1,1]},food:{image:'assets/plate.svg',source:[0,0,1,1]}})));
+ for(const sprites of [{run:'code.js'},{tile:{image:'https://example.com/tile.png',source:[0,0,1,1]}},{tile:{image:'assets/plate.svg',source:[0,0,0,1]}},{tile:{image:'assets/plate.svg',source:[.5,0,1,1]}},{tile:{image:'assets/plate.svg',source:[0,0,1,1],onclick:'run()'}}])assert.throws(()=>parseThemePresentation(withSprites(sprites)),/Invalid build theme/);
+ await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(withSprites({tile:{image:'assets/missing-tile.png',source:[0,0,1,1]}})));await assert.rejects(validateBuildTheme(source),/Missing declared asset/);
+ await fs.writeFile(path.join(source,'presentation.json'),JSON.stringify(presentation));
+
+ const projected={...registration,regions:[{...registration.regions[0],quad:[[0,0],[.9,.02],[1,1],[.1,.98]]},registration.regions[1]]};
+ assert.doesNotThrow(()=>parseThemePresentation(registered(projected)));
+ for(const quad of [[[0,0],[1,1],[1,0],[0,1]],[[0,0],[0,1],[1,1],[1,0]],[[0,0],[1,0],[.2,.2],[0,1]],[[0,0],[2,0],[1,1],[0,1]],[[0,0],[1,0],[1,1]]])assert.throws(()=>parseThemePresentation(registered({...projected,regions:[{...registration.regions[0],quad}]})),/quadrilateral/);
+ assert.throws(()=>parseThemePresentation(registered({...projected,webEdge:{top:[0,0],right:[0,0],bottom:[0,0],left:[0,0]}})),/native browser/);
+
  for(const bad of [{...registration,imageSize:[0,16]},{...registration,sha256:'wrong'},{...registration,regions:[]},{...registration,regions:[registration.regions[1]]},{...registration,regions:[registration.regions[0],registration.regions[0]]},{...registration,regions:[{...registration.regions[0],rect:[.1,.1,1,.5]}]},{...registration,companion:[.2,.2,.5,.5]}])assert.throws(()=>parseThemePresentation(registered(bad)),/Invalid build theme/);
  for(const [width,height] of [[160,160],[320,160],[160,320]]){
   const fit=fitThemeScene(registration,width,height);

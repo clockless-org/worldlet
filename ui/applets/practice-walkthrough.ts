@@ -7,7 +7,6 @@ export function createPracticeWalkthrough({root,scene,home,storage,show}){
  // Saving is best effort: full or blocked storage keeps the practice running from memory.
  const save=()=>{try{storage.setItem(key,JSON.stringify(state));}catch{}};
  const make=(tag,text='',css='')=>{const e=document.createElement(tag);e.textContent=text;e.style.cssText=css;return e;};
- const style=make('style',"[data-depth]:not([data-depth='overview']) .practice-local-device,[data-depth]:not([data-depth='overview']) .practice-local-panel{display:none!important}");root.append(style);
  function report(text){show({source:'practice-workflow',text,takeover:true});}
  async function wait(ms,signal){if(signal?.aborted)throw Error('Stopped');await new Promise<void>((resolve,reject)=>{const cancel=()=>{clearTimeout(timer);reject(Error('Stopped'))};const timer=setTimeout(()=>{signal?.removeEventListener('abort',cancel);resolve()},ms);signal?.addEventListener('abort',cancel,{once:true});});}
  async function flight(id,inbound,label,signal){

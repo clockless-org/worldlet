@@ -3,10 +3,13 @@
 // theme-surfaces.css keys on, fonts through the FontFace API, the room transition and the theme's sounds.
 // A surface left 'shared' sets nothing, so the shared look stays. Data only: no theme code runs.
 import type {ThemeEvent,ThemeSkinPart} from './theme-pack.ts';
+import type {ThemeTokens} from './build-theme-contract.ts';
 
 /** The built form of a theme's surfaces (scripts/build-world-assets.ts): file paths replaced by bundled URLs. */
 export type BuiltSurfaces={
  tokens:Record<string,string>;
+ /** Static packages that declare a HUD use their existing type and material tokens for shared chrome. */
+ hud?:ThemeTokens;
  fonts:Partial<Record<'display'|'label',{family:string;src:string}>>;
  skin:Partial<Record<ThemeSkinPart,{image:string;slice:number[];width:number}>>;
  startup?:string;
@@ -22,10 +25,11 @@ const environment=():{surfaces?:BuiltSurfaces}|undefined=>(globalThis as any).__
 /** The active theme's built surfaces, or none for a theme (or a build) without them. */
 export function themeSurfaces():BuiltSurfaces|null{return environment()?.surfaces||null;}
 
-/** Resolve the authored lettering before a live switch; failed files can be retried. */
-export async function prepareThemeFonts(surfaces:BuiltSurfaces|null){
+/** Register bundled faces once per family/URL, for static packages and legacy surface declarations alike.
+ * Loading is independent of the built World environment; failed files leave the cache so a later request can retry. */
+export async function prepareThemeFontFiles(fonts:readonly {family:string;src:string}[]){
  if(typeof document==='undefined'||typeof FontFace==='undefined')return;
- await Promise.all(Object.values(surfaces?.fonts||{}).map(font=>{
+ await Promise.all(fonts.map(font=>{
   const key=font.family+'\u0000'+font.src;
   let pending=loadedFonts.get(key);
   if(!pending){
@@ -37,16 +41,26 @@ export async function prepareThemeFonts(surfaces:BuiltSurfaces|null){
  }));
 }
 
+/** Resolve the authored surface lettering; failed files can be retried. */
+export async function prepareThemeFonts(surfaces:BuiltSurfaces|null){
+ await prepareThemeFontFiles(Object.values(surfaces?.fonts||{}));
+}
+
 /** Sets the active theme's surfaces on the document, clearing the previous theme's first. */
 export function applyThemeSurfaces(surfaces:BuiltSurfaces|null=themeSurfaces()){
  if(typeof document==='undefined')return;
  const root=document.documentElement,style=root.style;
  for(const name of applied)style.removeProperty(name);applied=[];
  const set=(name:string,value:string)=>{style.setProperty(name,value);applied.push(name);};
- for(const key of ['themeSkin','themeFonts','themeRoomTransition'])delete root.dataset[key];
+ for(const key of ['themeSkin','themeFonts','themeHud','themeRoomTransition'])delete root.dataset[key];
  stopThemeSounds();
  if(!surfaces)return;
  for(const [name,value] of Object.entries(surfaces.tokens||{}))set(name,value);
+ if(surfaces.hud){
+  root.dataset.themeHud='custom';
+  set('--theme-hud-radius',surfaces.hud.radius+'px');
+  for(const [role,key] of [['body-font','bodyFont'],['display-font','displayFont'],['ink','ink'],['paper','paper'],['accent','accent'],['focus','focus']] as const)set('--theme-hud-'+role,surfaces.hud[key]);
+ }
  const pieces=Object.entries(surfaces.skin||{});
  for(const [part,piece] of pieces){
   set('--theme-skin-'+part,'url("'+encodeURI(piece.image)+'")');

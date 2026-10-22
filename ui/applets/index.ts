@@ -13,6 +13,7 @@ export {BOARD_READ_EVENT} from './board/panel.ts';
 export {createGameApplet} from './games.ts';
 
 export {appHudIcon,appLogoSource,AGENT_ICONS} from './visuals.ts';
+export {sampleWeatherForecast} from './weather/sample.ts';
 export {createWeatherPanel} from './weather/panel.ts';
 export {momentLine} from './moment/panel.ts';
 
@@ -27,11 +28,16 @@ export {renderTranscript,transcriptBar} from './meetings/transcript.ts';
 export {curatedOriginal,renderCuratedTable} from './_shared/curated-source-applet.ts';
 export {loadMoney,readMoneyItem} from './_shared/money-applets.ts';
 export {quietSourceReader} from './_shared/quiet-source-reader.ts';
-export {WORK_APPLETS,renderWorkDetail,sampleWork,sampleWorkDetail,workError,workItems} from './_shared/work-applets.ts';
+export {WORK_APPLETS,codexWorkDetail,renderWorkDetail,sampleWork,sampleWorkDetail,workError,workItems} from './_shared/work-applets.ts';
+export {selectNotebookItem} from './apple-notes/open.ts';
 export {searchNotes} from './apple-notes/note-search.ts';
 export {createClaudeSession} from './claude-code/claude-session.ts';
 export {createCodexApplet} from './codex/codex-applet.ts';
 export {createVoiceMemoReader} from './voice-memos/voice-memos.ts';
+
+export {renderWorkSession,selectWorkSession} from './_shared/work-session.ts';
+
+export {renderVaultScene} from './obsidian/open.ts';
 // What was the browser folder (#714).
 export {inspectBrowserOutcome} from './action-outcome.ts';
 export {createBrowserPanel} from './browser-device.ts';

@@ -1,74 +1,28 @@
-import {gameLoop,onSwipe,type GameHost} from './core.ts';
-
-const COLS=18,ROWS=18,CELL=22,STEP=120;
-const DIRS={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1],a:[-1,0],d:[1,0],w:[0,-1],s:[0,1]};
-
-/** Snake on a garden bed. The loop runs only while the snake is moving and the board is on screen. */
-export function createSnake(host:GameHost){
- const board=document.createElement('div');board.className='game-board snake-board';board.tabIndex=0;
- board.setAttribute('aria-label','Snake. Use the arrow keys or swipe to steer.');
- const canvas=document.createElement('canvas');canvas.width=COLS*CELL;canvas.height=ROWS*CELL;board.append(canvas);
- const overlay=document.createElement('p');overlay.className='game-overlay';board.append(overlay);
- const ctx=canvas.getContext('2d');
- let snake:number[][]=[],dir=[1,0],queued:number[][]=[],food:number[]|null=[0,0],score=0,acc=0,state:'ready'|'playing'|'paused'|'over'='ready';
- const loop=gameLoop(board,dt=>{
-  if(state!=='playing'){draw();return false;}
-  acc+=dt;while(acc>=STEP&&state==='playing'){acc-=STEP;advance();}
-  draw();return state==='playing';
- });
- function placeFood(){
-  const free:number[][]=[];for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++)if(!snake.some(p=>p[0]===x&&p[1]===y))free.push([x,y]);
-  // A snake that fills the whole bed has nowhere left to grow: no apple is laid on it, and the game ends.
-  if(!free.length){food=null;state='over';return;}
-  food=free[Math.floor(Math.random()*free.length)];
- }
- function advance(){
-  const next=queued.shift();if(next)dir=next;
-  const head=[snake[0][0]+dir[0],snake[0][1]+dir[1]];
-  const eats=!!food&&head[0]===food[0]&&head[1]===food[1];
-  const body=eats?snake:snake.slice(0,-1);
-  if(head[0]<0||head[1]<0||head[0]>=COLS||head[1]>=ROWS||body.some(p=>p[0]===head[0]&&p[1]===head[1])){state='over';status();return;}
-  snake=[head,...body];
-  if(eats){score++;placeFood();status();}
- }
+import {SNAKE_STEP_MS,newSnakeState,steerSnake,pauseSnake,stepSnake,type SnakeField,type SnakePoint} from '../../context/store/index.ts';
+import {gameLoop,onSwipe,type GameHost,type Game} from './core.ts';
+import {gameSymbol} from './symbols.ts';
+import {snakeView} from './snake-view.ts';
+const DIRS:Record<string,SnakePoint>={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1],a:[-1,0],d:[1,0],w:[0,-1],s:[0,1]};
+/** Input, focus and painting only. Core owns movement, collision, food and score. */
+export function createSnake(host:GameHost,field:SnakeField='classic'):Game{
+ const board=document.createElement('div');board.className='game-board snake-board';board.tabIndex=0;board.setAttribute('aria-label','Snake. Use arrow keys or swipe to steer. Space pauses or resumes.');
+ const draw=snakeView(board),overlay=document.createElement('p');overlay.className='game-overlay';board.append(overlay);
+ const actions=document.createElement('nav');actions.className='game-actions';actions.setAttribute('aria-label','Game actions');const toggle=document.createElement('button');toggle.type='button';actions.append(toggle);
+ let state=newSnakeState(field),acc=0,disposed=false;const memory={value:0},best=field==='classic'?host.best:host.best.scope?.('wide')||{get:()=>memory.value,set:(n:number)=>{memory.value=n;}};
  function status(){
-  if(score>host.best.get())host.best.set(score);
-  const best=host.best.get();
-  host.status(state==='over'?`Game over · Apples ${score} · Best ${best}`:`Apples ${score} · Best ${best}`);
-  overlay.textContent=state==='ready'?'Press an arrow key or swipe to start':state==='paused'?'Paused. Press an arrow key to go on':state==='over'?'Game over. Press New game':'';
-  overlay.hidden=state==='playing';board.dataset.state=state;
+  if(state.score>best.get())best.set(state.score);const record=best.get(),notice=state.status==='ready'?'Arrow keys to move · Space to pause':state.status==='paused'?'Paused · Space or an arrow to resume':state.status==='over'?'Game over · Start a new game':state.status==='won'?'Board complete! · Start a new game':'';
+  host.status((state.status==='over'?'Game over · ':state.status==='won'?'Board complete · ':'')+`Apples ${state.score} · Best ${record}`);host.metrics?.([{label:'Score',value:state.score},{label:'Best',value:record}],notice);
+  overlay.textContent=notice;overlay.hidden=state.status==='playing';board.dataset.state=state.status;
+  const label=state.status==='playing'?'Pause':state.status==='ready'?'Start game':'Resume';toggle.setAttribute('aria-label',label);toggle.title=label;toggle.disabled=state.status==='over'||state.status==='won';toggle.textContent='';toggle.append(gameSymbol(state.status==='playing'?'pause':'play'));
  }
- function roundRect(x:number,y:number,w:number,h:number,r:number){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
- function draw(){
-  for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++){ctx.fillStyle=(x+y)%2?'#b9cf9a':'#c3d7a4';ctx.fillRect(x*CELL,y*CELL,CELL,CELL);}
-  if(food){
-   ctx.fillStyle='#c8553d';roundRect(food[0]*CELL+4,food[1]*CELL+4,CELL-8,CELL-8,7);
-   ctx.fillStyle='#5f8a3a';ctx.fillRect(food[0]*CELL+CELL/2-1,food[1]*CELL+1,3,5);
-  }
-  snake.forEach((p,i)=>{ctx.fillStyle=i?(i%2?'#3f6f4f':'#477a57'):'#2f5a40';roundRect(p[0]*CELL+2,p[1]*CELL+2,CELL-4,CELL-4,i?6:8);});
-  const h=snake[0];if(h){
-   // Two eyes looking where the snake is going.
-   const cx=h[0]*CELL+CELL/2,cy=h[1]*CELL+CELL/2,px=-dir[1],py=dir[0];ctx.fillStyle='#f4f0e5';
-   for(const side of [-1,1])ctx.fillRect(cx+dir[0]*4+px*side*4-1.5,cy+dir[1]*4+py*side*4-1.5,3,3);
-  }
- }
- function steer(d:number[]){
-  if(state==='over')return;
-  const last=queued[queued.length-1]||dir;
-  if(d[0]===-last[0]&&d[1]===-last[1])return;
-  if(queued.length<2&&!(d[0]===last[0]&&d[1]===last[1]))queued.push(d);
-  if(state!=='playing'){state='playing';acc=0;status();}
-  loop.start();
- }
- function restart(){loop.stop();snake=[[6,9],[5,9],[4,9]];dir=[1,0];queued=[];score=0;acc=0;state='ready';placeFood();status();draw();}
- board.addEventListener('keydown',e=>{
-  const d=DIRS[e.key];
-  if(d){e.preventDefault();steer(d);return;}
-  if(e.key===' '&&state==='playing'){e.preventDefault();state='paused';status();}
- });
- // Leaving the board (another window, closing the game) pauses rather than racing on unseen.
- board.addEventListener('blur',()=>{if(state==='playing'){state='paused';status();}});
- onSwipe(board,20,(dx,dy)=>steer([dx,dy]));
- restart();
- return {element:board,restart,hint:'Arrow keys or swipe. Space pauses.'};
+ const loop=gameLoop(board,dt=>{if(disposed||state.status!=='playing')return false;acc+=dt;let changed=false;while(acc>=SNAKE_STEP_MS&&state.status==='playing'){acc-=SNAKE_STEP_MS;const previous=state;state=stepSnake(state);changed=true;if(previous.score!==state.score||previous.status!==state.status)status();}if(changed)draw(state);return state.status==='playing';});
+ function steer(direction:SnakePoint){if(disposed)return;const previous=state;state=steerSnake(state,direction);if(state===previous)return;if(previous.status!=='playing')acc=0;status();loop.start();}
+ function pause(){if(disposed)return;const next=pauseSnake(state);if(next===state)return;state=next;loop.stop();status();}
+ function togglePause(){if(state.status==='playing')pause();else steer(state.direction);}
+ function restart(){if(disposed)return;loop.stop();acc=0;state=newSnakeState(field);status();draw(state);}
+ board.addEventListener('keydown',event=>{const direction=DIRS[event.key];if(direction){event.preventDefault();steer(direction);}else if(event.key===' '){event.preventDefault();togglePause();}});
+ board.addEventListener('blur',pause);const hidden=()=>{if(document.hidden)pause();};document.addEventListener('visibilitychange',hidden);
+ toggle.addEventListener('pointerdown',event=>event.preventDefault());toggle.addEventListener('click',()=>{board.focus({preventScroll:true});togglePause();});
+ onSwipe(board,20,(dx,dy)=>steer([dx,dy]));restart();
+ return {element:board,restart,actions,directions:([{direction:'up',icon:'arrow-up',run:()=>steer([0,-1])},{direction:'down',icon:'arrow-down',run:()=>steer([0,1])},{direction:'left',icon:'arrow-left',run:()=>steer([-1,0])},{direction:'right',icon:'arrow-right',run:()=>steer([1,0])}]),hint:'Arrow keys to move · Space to pause',dispose(){disposed=true;loop.stop();document.removeEventListener('visibilitychange',hidden);}};
 }

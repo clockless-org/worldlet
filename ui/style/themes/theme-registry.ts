@@ -40,3 +40,9 @@ export function themeAppletArt(entry:RegisteredTheme,key:string):AppletArt&{fall
  if(!Object.hasOwn(applets,generic))throw Error('Theme '+entry.pack.id+' has no generic Applet room');
  return {...applets[generic],fallback:true};
 }
+
+/** Static data used only by the built-in Village renderer, even when another presentation is selected at build time. */
+export function villageThemeData<T=unknown>(path:string):T{
+ if(!Object.hasOwn(village!.data,path))throw Error('Village data is missing: '+path);
+ return (village!.data as Record<string,unknown>)[path] as T;
+}

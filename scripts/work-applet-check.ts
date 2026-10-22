@@ -6,7 +6,7 @@ import path from 'node:path';
 assert.equal(localPathName('C:\\Projects\\worldlet'), 'worldlet');
 assert.equal(localPathName('/Users/fixture/worldlet/'), 'worldlet');
 await withBrowser(fileAccess,async browser=>{
- const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'}),errors=pageErrors(page);
+ const page=await browser.newPage({viewport:{width:1500,height:844},reducedMotion:'reduce'}),errors=pageErrors(page);
  await page.addInitScript(()=>{
   window.calls=[];window.fixture={workspaceId:'work-applets',revision:0,activityRevision:0,sources:[],knowledge:[],connections:[],worldItems:[],onboarding:{completed:true},sampleEnabled:false,cloudConsent:true};
   const sessions=provider=>Array.from({length:6},(_,i)=>({id:provider+':'+i,sessionId:'00000000-0000-4000-8000-00000000000'+i,provider,title:['Refine the village','Review navigation','Repair the calendar','Improve the mail tray','Write release notes','Polish the dock'][i],cwd:'C:\\sample\\worldlet',status:i===0?'Running':'Saved'}));

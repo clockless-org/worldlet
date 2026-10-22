@@ -20,7 +20,7 @@
 .applet-scene .scene-head{flex:none;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 16px;padding-bottom:clamp(4px,1.5cqh,10px);border-bottom:1px solid var(--scene-line)}
 .applet-scene .scene-title{margin:0;min-width:0;font:600 clamp(18px,4.6cqi,var(--scene-title-size))/1.15 var(--scene-display-font);color:var(--scene-ink);overflow-wrap:anywhere}
 .applet-scene .scene-meta{margin:0;font-size:.82em;color:var(--scene-muted)}
-.applet-scene .scene-list{display:grid;gap:0;align-content:start;min-height:0}
+.applet-scene .scene-list{flex:none;display:grid;gap:0;align-content:start;min-height:0}
 .applet-scene .scene-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:clamp(8px,2cqi,16px);width:100%;min-height:var(--scene-control-height);box-sizing:border-box;
  padding:clamp(6px,1.6cqh,12px) clamp(4px,1cqi,10px);border:0;border-bottom:1px solid var(--scene-line);border-radius:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
 .applet-scene .scene-item:hover{background:color-mix(in srgb,var(--scene-accent) 9%,transparent)}
@@ -76,18 +76,18 @@
 /* A registered frame and Fox use the same theme geometry, rather than reserving a second fixed third.
    Narrow windows retain the shell's stacked layout. The image and native foreground keep one scale. */
 @media(min-width:801px){
- #notionWorld.native-console[data-applet-frame][data-applet-scene]{--reader-companion-lane:calc(100% - var(--applet-scene-companion-left))}
- #notionWorld.native-console[data-applet-frame][data-applet-scene] .notion-hud{
+ #notionWorld.native-console[data-applet-frame][data-applet-scene]:not([data-applet-companion-bar=true]){--reader-companion-lane:calc(100% - var(--applet-scene-companion-left))}
+ #notionWorld.native-console[data-applet-frame][data-applet-scene]:not([data-applet-companion-bar=true]) .notion-hud{
   left:calc(var(--applet-scene-companion-left) + var(--applet-scene-companion-width) / 2);
   width:calc(var(--applet-scene-companion-width) - 8px);transform:translateX(-50%);
  }
  /* The Applet shelf (ui/world/applet-shelf.ts) spans Fox's column, centered over Fox. */
- #notionWorld.native-console[data-applet-frame][data-applet-scene]>.applet-shelf{left:var(--applet-scene-companion-left);width:var(--applet-scene-companion-width)}
- #notionWorld.native-console.fox-first-console[data-applet-frame][data-applet-scene] .companion-dialogue{
+ #notionWorld.native-console[data-applet-frame][data-applet-scene]:not([data-applet-companion-bar=true])>.applet-shelf{left:var(--applet-scene-companion-left);width:var(--applet-scene-companion-width)}
+ #notionWorld.native-console.fox-first-console[data-applet-frame][data-applet-scene]:not([data-applet-companion-bar=true]) .companion-dialogue{
   width:min(460px,calc(var(--applet-scene-companion-width) - 24px));
   max-width:calc(var(--applet-scene-companion-width) - 24px);min-width:0;
  }
- #notionWorld.native-console.fox-first-console[data-applet-frame][data-applet-scene] .companion-action-bar{min-width:0}
+ #notionWorld.native-console.fox-first-console[data-applet-frame][data-applet-scene]:not([data-applet-companion-bar=true]) .companion-action-bar{min-width:0}
 }
 /* In the smaller companion lane, stack the icon over the label instead of truncating it. */
 @media(min-width:801px) and (max-width:1400px){
@@ -107,4 +107,149 @@
 }
 #notionWorld[data-applet-frame][data-applet-scene][data-panel-scene]>.notion-content[data-template=browser] .browser-viewport{
  border-radius:0;box-shadow:none;background:transparent;
+}
+
+/* A measured strip below the Applet papers keeps the real composer clear of their content.
+   The host owns this layout; the theme only provides the quiet rectangle. */
+@media(min-width:801px){
+ #notionWorld.native-console[data-applet-companion-bar=true] .notion-hud{left:var(--applet-scene-companion-left);top:var(--applet-scene-companion-top);bottom:auto;width:var(--applet-scene-companion-width);height:var(--applet-scene-companion-height);min-height:0;transform:none}
+ #notionWorld.native-console[data-applet-companion-bar=true] .companion-pet{left:0;bottom:0;transform:scale(.4);transform-origin:bottom left}
+ #notionWorld.native-console[data-applet-companion-bar=true] .companion-text-entry{left:calc(50% + 28px);bottom:4px;max-width:calc(100% - 64px);width:calc(100% - 64px);--companion-bar-width:calc(var(--applet-scene-companion-width) - 64px);--companion-bar-open:calc(var(--applet-scene-companion-width) - 64px)}
+ #notionWorld.native-console[data-applet-companion-bar=true] .companion-dialogue{bottom:calc(var(--applet-scene-companion-height) + 12px);width:min(460px,calc(100vw - 48px));max-width:min(460px,calc(100vw - 48px))}
+ #notionWorld.native-console[data-applet-companion-bar=true]:not([data-entry-expanded=true]) .companion-dialogue[data-ambient=true]{display:none}
+}
+
+/* Measured game regions override ordinary panel controls and material skins. */
+.applet-scene .applet-scene-region.game-region[data-role=secondary]{padding:0;overflow:visible;display:block;color:var(--scene-ink);text-align:left}
+.applet-scene .game-region .game-header{width:100%;height:100%;display:flex;align-items:center;gap:5cqi;margin:0;padding:0;background:none;border:0;box-shadow:none;color:var(--scene-ink)}
+.applet-scene .game-region .game-title{flex:none;margin:0;font:400 clamp(32px,12.4cqi,72px)/1 var(--scene-body-font);color:var(--scene-ink);text-shadow:0 -1px 0 color-mix(in srgb,var(--scene-ink) 60%,white),0 1px 0 var(--scene-accent),0 2px 1px var(--scene-control),0 4px 5px #0009}
+.applet-scene .game-region .game-metrics{display:flex;gap:2.5cqi;flex:1;min-width:0;height:72%;font-family:var(--scene-body-font);font-variant-numeric:tabular-nums}
+.applet-scene .game-region .game-metric{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;min-width:0;border:1px solid var(--scene-accent);border-radius:9px;box-shadow:inset 0 1px 0 color-mix(in srgb,var(--scene-ink) 25%,transparent),inset 0 0 0 2px #0005,0 2px 4px #0008;background:linear-gradient(155deg,color-mix(in srgb,var(--scene-accent) 12%,transparent),transparent 55%),color-mix(in srgb,var(--scene-control) 70%,#000);text-shadow:0 1px 1px #0009}
+.applet-scene .game-region .game-metric span{font-size:clamp(12px,3.3cqi,20px);line-height:1.15}
+.applet-scene .game-region .game-metric strong{font-size:clamp(16px,4.5cqi,28px);line-height:1.1;font-weight:400}
+.applet-scene .game-region .game-header>.ui-caption{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.applet-scene .game-region .game-reset,.applet-scene .game-region .game-directions button{border:1px solid var(--scene-accent);border-image:none;border-radius:14px;background:linear-gradient(165deg,color-mix(in srgb,var(--scene-accent) 19%,transparent),transparent 58%),color-mix(in srgb,var(--scene-control) 70%,#000);color:var(--scene-ink);box-shadow:inset 0 1px 1px color-mix(in srgb,var(--scene-ink) 50%,transparent),inset 0 -2px 3px #0009,0 1px 0 color-mix(in srgb,var(--scene-accent) 70%,transparent),0 3px 5px #0008;text-shadow:0 1px 1px #000b;cursor:pointer}
+.applet-scene .game-region .game-reset{flex:none;min-height:60%;width:29%;padding:0 10px;font:400 clamp(16px,4.5cqi,28px)/1 var(--scene-body-font);border-radius:30px}
+.applet-scene .game-region .game-reset:hover,.applet-scene .game-region .game-directions button:hover{filter:brightness(1.2)}
+/* A framed control has a lit rim and a shallow pressed edge; paper and painted controls below keep their own material. */
+.applet-scene .game-region[data-material=board] :is(.game-header:not([data-separate-metrics=true]) .game-reset,.game-toolbar .game-reset,.game-directions button:not([data-symbol=true])):active{box-shadow:inset 0 2px 4px #000b,inset 0 0 0 1px var(--scene-accent);filter:brightness(.95)}
+.applet-scene .game-region .game-footer{display:flex;width:100%;height:100%;flex-direction:column;justify-content:space-between;align-items:center;gap:7px;margin:0;padding:0;background:none;border:0;color:var(--scene-ink)}
+.applet-scene .game-region .game-footer>.ui-caption{font:400 clamp(12px,5cqi,22px)/1.2 var(--scene-body-font);color:inherit;text-align:center;text-shadow:0 2px 3px #000}
+.applet-scene .game-region .game-directions{height:64%;min-height:0;width:80%;justify-content:space-between;gap:0}
+.applet-scene .game-region .game-directions button{height:100%;width:19%;min-height:0;min-width:0;padding:0}
+.game-panel[data-distributed=true]{height:100%;padding:0!important}
+.game-panel[data-distributed=true] .game-body{height:100%;width:100%}
+#notionWorld[data-panel-scene]>.notion-content[data-template=game]:has(.game-panel[data-distributed=true]){--weather-shell-padding:0px;padding:0;transform:var(--applet-scene-primary-transform);transform-origin:0 0;border-radius:0}
+#notionWorld[data-panel-scene]>.notion-content[data-template=game] .game-panel[data-distributed=true] .g2048-board{width:100%;height:100%;max-width:none;max-height:none;aspect-ratio:auto;padding:0;gap:1.3cqi;background:none;border-radius:0;box-shadow:none}
+.game-panel[data-sprites=true] .g2048-cell{background-color:transparent;background-image:var(--game-empty-cell-image);background-size:var(--game-empty-cell-size);background-position:var(--game-empty-cell-position);background-repeat:no-repeat;border-radius:4px;color:var(--scene-accent-ink);font:700 clamp(24px,14cqi,68px)/1 var(--scene-body-font);text-shadow:0 1px 0 #fff8,0 -1px 1px #4d2e2566;font-variant-numeric:tabular-nums}
+.game-panel[data-sprites=true] .g2048-cell:not([data-value=""]){background-image:var(--game-tile-image);background-size:var(--game-tile-size);background-position:var(--game-tile-position)}
+.game-panel[data-sprites=true] .g2048-cell[data-value]:not([data-value=""]):not([data-value="2"]):not([data-value="4"]):not([data-value="8"]){font-size:clamp(22px,11cqi,52px)}
+.game-panel[data-sprites=true] .g2048-cell:is([data-value="1024"],[data-value="2048"],[data-value="4096"]){font-size:clamp(18px,8cqi,40px)}
+.applet-scene .game-region .game-reset>span,.applet-scene .game-region .game-metric>*{font-family:var(--scene-body-font)}
+.applet-scene .game-region .game-directions svg{width:30px;height:30px;flex:none}
+
+.game-panel[data-distributed=true] .game-board:focus-visible{outline:2px solid var(--scene-focus);outline-offset:3px}
+/* A separate toolbar leaves a long game title and board-size control above the board. */
+.applet-scene .game-region .game-header[data-toolbar=true]{flex-direction:column;justify-content:center;gap:5px;text-align:center}
+.applet-scene .game-region .game-header[data-toolbar=true] .game-title{font:400 clamp(26px,10.5cqi,44px)/1.1 var(--scene-body-font);white-space:nowrap;letter-spacing:.01em}
+.applet-scene .game-region .game-settings{margin:0;padding:0 6px;text-align:center;text-align-last:center;font:400 clamp(15px,5cqi,20px)/1.2 var(--scene-body-font);border:0;background:transparent;color:var(--scene-ink);text-shadow:0 2px 3px #000}
+.applet-scene .game-region .game-settings option{background:var(--scene-control);color:var(--scene-ink);text-shadow:none}
+.applet-scene .game-region .game-toolbar{width:100%;height:100%;display:flex;align-items:stretch;gap:0;border:1px solid var(--scene-accent);border-radius:21px;box-sizing:border-box;background:color-mix(in srgb,var(--scene-control) 65%,#090b0c88);box-shadow:inset 0 0 0 1px #efd19733,0 3px 8px #0008}
+.applet-scene .game-region .game-toolbar .game-metrics{height:100%;gap:0;flex:1}
+.applet-scene .game-region .game-toolbar .game-metric{flex-direction:row;gap:12px;border:0;border-radius:0;background:none;box-shadow:none;position:relative}
+.applet-scene .game-region .game-toolbar .game-metric strong{font-size:clamp(20px,5cqi,29px)}
+.applet-scene .game-region .game-metric.has-icon .game-metric-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.applet-scene .game-region .game-toolbar .game-symbol{font-size:25px;color:var(--scene-accent);filter:drop-shadow(0 1px 1px #000)}
+.applet-scene .game-region .game-toolbar .game-reset{height:100%;width:34%;border-radius:18px;gap:10px;background:linear-gradient(#d2a63c33,#16120b55),var(--scene-control);font-size:clamp(20px,4.5cqi,27px)}
+.applet-scene .game-region .game-modes{width:72%;height:52px;flex:none;gap:16px}
+.applet-scene .game-region .game-modes button{height:100%;flex:1;min-width:0;border-radius:18px;border:1px solid var(--scene-accent);background:color-mix(in srgb,var(--scene-control) 65%,#0b1014aa);color:var(--scene-muted);font:400 clamp(18px,5cqi,26px)/1 var(--scene-body-font);box-shadow:inset 0 0 0 2px #0005,0 3px 9px #0009;text-shadow:0 2px 2px #000}
+.applet-scene .game-region .game-modes button[aria-pressed=true]{color:var(--scene-ink);border-color:var(--scene-ink);background:linear-gradient(#d99e3222,#34251088);box-shadow:inset 0 0 9px #fbd67477,0 0 12px #e4b75788,0 3px 9px #0009}
+.applet-scene .game-region .game-footer:has(.game-modes){justify-content:flex-start;gap:8px}
+.applet-scene .game-region .game-footer:has(.game-modes) .game-hint{font-size:20px;margin-top:4px}
+.applet-scene .game-region .game-footer:has(.game-modes) .game-help{font-size:15px;color:var(--scene-muted)}
+#notionWorld[data-panel-scene]>.notion-content[data-template=game] .game-panel[data-distributed=true] .mines-board{width:100%;height:100%;max-width:none;max-height:none;aspect-ratio:auto;padding:0;gap:0;background:none;border-radius:0;box-shadow:none}
+.game-panel[data-sprites=true] .mines-cell{border:0;border-radius:0;box-shadow:none;background-color:transparent;background-image:var(--game-empty-cell-image);background-size:var(--game-empty-cell-size);background-position:var(--game-empty-cell-position);background-repeat:no-repeat;font:700 clamp(18px,8cqi,47px)/1 var(--scene-body-font);text-shadow:0 1px 1px #fff8,0 2px 2px #0005;color:#364534}
+.game-panel[data-sprites=true] .mines-cell[data-state=open],.game-panel[data-sprites=true] .mines-cell[data-state=mine]{background-image:var(--game-tile-image);background-size:var(--game-tile-size);background-position:var(--game-tile-position)}
+.game-panel[data-sprites=true] .mines-cell[data-state=flag]{color:#9e342b}
+.game-panel[data-sprites=true] .mines-cell.is-boom{box-shadow:inset 0 0 25px #b02c23;background-color:#a3272360}
+.game-panel[data-sprites=true] .mines-cell[data-count="1"]{color:#355e72}.game-panel[data-sprites=true] .mines-cell[data-count="2"]{color:#426240}.game-panel[data-sprites=true] .mines-cell[data-count="3"]{color:#973d2e}.game-panel[data-sprites=true] .mines-cell[data-count="4"]{color:#514269}
+.game-panel[data-sprites=true] .mines-cell .game-symbol{font-size:.7em;filter:drop-shadow(0 1px 1px #efdaad88)}
+.game-panel[data-sprites=true] .mines-cell:focus-visible,.applet-scene .game-region :is(.game-settings,.game-modes button):focus-visible{outline:2px solid var(--scene-focus);outline-offset:2px}
+
+.applet-scene .game-region .game-header[data-toolbar=true] .game-title>.game-symbol{font-size:1.3em;color:var(--scene-accent);filter:drop-shadow(0 1px 0 #fff1ad) drop-shadow(0 2px 3px #0008)}
+.applet-scene .game-region .game-symbol svg{width:100%;height:100%}
+.applet-scene .game-region .game-toolbar .game-metric:first-child:after{content:"";position:absolute;right:0;height:45%;border-right:1px solid var(--scene-accent)}
+/* Independently measured metrics and command frames surround a live board. */
+.applet-scene .game-region .game-header[data-separate-metrics=true]{justify-content:center}
+.applet-scene .game-region .game-header[data-separate-metrics=true] .game-title{font:700 clamp(30px,23cqi,52px)/1.1 var(--scene-body-font);letter-spacing:-.02em}
+.applet-scene .game-region .game-header[data-separate-metrics=true] .game-metrics{display:none}
+.applet-scene .game-region[data-region^=metric-] .game-metric{width:100%;height:100%;border:0;border-radius:0;background:none;box-shadow:none;font-family:var(--scene-body-font)}
+.applet-scene .game-region[data-region^=metric-] .game-metric span{font-size:20px;line-height:1.2}
+.applet-scene .game-region[data-region^=metric-] .game-metric strong{font-size:30px;font-weight:600;line-height:1.15}
+.applet-scene .game-region .game-command-bar{display:flex;justify-content:space-between;align-items:stretch;width:100%;height:100%;gap:12px}
+.applet-scene .game-region .game-command-bar .game-actions{width:44%;height:100%}
+.applet-scene .game-region .game-command-bar :is(button,.game-reset){width:100%;height:100%;min-height:0;min-width:0;padding:0;display:flex;align-items:center;justify-content:center;border:0;border-radius:8px;border-image:none;background:transparent;box-shadow:none;color:var(--scene-ink);font-size:30px;cursor:pointer}
+.applet-scene .game-region .game-command-bar .game-reset{width:44%}
+.applet-scene .game-region .game-command-bar .game-reset>span:not(.game-symbol){position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.applet-scene .game-region .game-command-bar .game-symbol{width:30px;height:30px;filter:drop-shadow(0 2px 2px #0009)}
+.applet-scene .game-region .game-command-bar button:hover{background:#fff2}
+.applet-scene .game-region .game-footer:has([data-symbol=true]) .game-directions{height:70px;width:94%;flex:none}
+.applet-scene .game-region .game-footer:has([data-symbol=true]) .game-directions button{width:21.5%;border:0;border-image:none;border-radius:13px;background:transparent;box-shadow:none;color:var(--scene-ink);font-size:35px}
+.applet-scene .game-region .game-directions [data-symbol=true] svg{width:100%;height:100%;transform:none;filter:drop-shadow(0 2px 2px #0009)}
+.applet-scene .game-region .game-footer:has([data-symbol=true])>.game-hint{font-size:16px;white-space:nowrap}
+#notionWorld[data-panel-scene]>.notion-content[data-template=game] .game-panel[data-distributed=true] .snake-board{width:100%;height:100%;max-width:none;max-height:none;aspect-ratio:auto;border-radius:0;background:transparent;box-shadow:none}
+.game-panel[data-sprites=true] .snake-board>canvas,.game-panel[data-sprites=true] .snake-board>.game-overlay{display:none}
+.game-panel[data-sprites=true] .snake-pieces{display:block;border:1px solid var(--scene-accent);box-sizing:border-box;background-image:linear-gradient(to right,var(--scene-accent) 1px,transparent 1px),linear-gradient(to bottom,var(--scene-accent) 1px,transparent 1px);background-size:calc(100% / var(--snake-cols)) calc(100% / var(--snake-rows))}
+.snake-piece{position:absolute;width:calc(100% / var(--snake-cols));height:calc(100% / var(--snake-rows));filter:drop-shadow(0 3px 2px #0008)}
+.snake-piece:before{content:"";position:absolute;inset:0;background-image:var(--game-tile-image);background-size:var(--game-tile-size);background-position:var(--game-tile-position);background-repeat:no-repeat}
+.snake-food:before{background-image:var(--game-food-image);background-size:var(--game-food-size);background-position:var(--game-food-position)}
+.snake-head:after{content:"";position:absolute;left:var(--eye-x);top:var(--eye-y);width:18%;height:18%;border-radius:50%;background:#171208;transform:translate(-50%,-50%)}
+/* Host action buttons otherwise reserve an 18 px flex basis for all descendant icons. */
+.applet-scene .game-region .game-symbol svg{flex:0 0 100%}
+#notionWorld[data-panel-scene]>.notion-content[data-template=game]:has(.game-panel[data-distributed=true])::after{display:none}
+/* A paper puzzle distributes its keypad and tools onto the facing page. */
+.applet-scene .game-region[data-material=paper] .game-title{font:500 clamp(32px,22cqi,54px)/1.1 var(--scene-display-font)!important;color:var(--scene-ink);text-shadow:none;letter-spacing:-.02em}
+.applet-scene .game-region[data-material=paper][data-region=subtitle]{display:grid;place-items:center}
+.applet-scene .game-region .game-subtitle{margin:0;font:400 19px/1 var(--scene-display-font)}
+.applet-scene .game-region[data-material=paper] .game-metric.has-icon{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:10px;color:var(--scene-ink);text-shadow:none}
+.applet-scene .game-region[data-material=paper] .game-metric.has-icon strong{font:400 25px/1.1 var(--scene-display-font)}
+.applet-scene .game-region[data-material=paper] .game-metric .game-symbol{width:25px;height:25px}
+.applet-scene .game-region[data-region=restart] .game-reset{width:100%;height:100%;padding:0;min-height:0;border:0;border-image:none;border-radius:8px;background:transparent;box-shadow:none;color:#f8eac6;font:400 23px/1 var(--scene-display-font);text-shadow:0 1px 2px #000}
+.applet-scene .game-region[data-region=restart] .game-reset>span{font:inherit}
+.applet-scene .game-region .sudoku-pad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:7px 10px;width:100%;height:100%}
+.applet-scene .game-region .sudoku-key{width:100%;height:100%;min-height:0;border:0;border-radius:5px;background:none;box-shadow:none;color:var(--scene-ink);font:400 30px/1 var(--scene-display-font)}
+.applet-scene .game-region .sudoku-key:hover{background:color-mix(in srgb,var(--scene-accent) 12%,transparent)}
+.applet-scene .game-region .sudoku-tools{display:grid;grid-template-columns:1fr 1fr 1.12fr;gap:12px;width:100%;height:100%}
+.applet-scene .game-region .sudoku-tools button{width:100%;height:100%;min-height:0;padding:0;gap:9px;border:0;border-radius:4px;background:transparent;box-shadow:none;color:var(--scene-ink);font:400 18px/1 var(--scene-display-font)}
+.applet-scene .game-region .sudoku-tools .game-symbol{width:22px;height:22px}
+.applet-scene .game-region .sudoku-tools button[aria-pressed=true]{background:#819da344;box-shadow:inset 0 0 0 2px #4d6c76}
+.applet-scene .game-region .sudoku-legend{width:100%;height:100%;align-items:center;gap:38px;font:400 16px/1.2 var(--scene-display-font);color:var(--scene-ink)}
+.applet-scene .game-region[data-material=paper] .game-footer>.game-hint{font:400 17px/1.15 var(--scene-display-font);color:var(--scene-ink);text-shadow:none}
+#notionWorld[data-panel-scene]>.notion-content[data-template=game] .game-panel[data-distributed=true] .sudoku-game{width:100%;height:100%;max-width:none;gap:0}
+#notionWorld[data-panel-scene]>.notion-content[data-template=game] .game-panel[data-distributed=true] .sudoku-board{width:100%;height:100%;max-width:none;max-height:none;aspect-ratio:auto;padding:0;gap:0;border:2px solid var(--scene-ink);border-radius:0;background:transparent;box-shadow:none}
+.game-panel[data-distributed=true] .sudoku-cell{margin:0!important;padding:0;min-width:0;min-height:0;border:0;border-right:1px solid color-mix(in srgb,var(--scene-ink) 45%,transparent);border-bottom:1px solid color-mix(in srgb,var(--scene-ink) 45%,transparent);border-radius:0;background:transparent;color:#2869bd;box-shadow:none;font:400 clamp(20px,7cqi,33px)/1 var(--scene-display-font);text-shadow:0 1px #efd9a860}
+.game-panel[data-distributed=true] .sudoku-cell[data-given=true]{color:var(--scene-ink);background:transparent;font-weight:600}
+.game-panel[data-distributed=true] .sudoku-cell[data-col="2"],.game-panel[data-distributed=true] .sudoku-cell[data-col="5"]{border-right:2px solid var(--scene-ink)}
+.game-panel[data-distributed=true] .sudoku-cell[data-row="2"],.game-panel[data-distributed=true] .sudoku-cell[data-row="5"]{border-bottom:2px solid var(--scene-ink)}
+.game-panel[data-distributed=true] .sudoku-cell[data-col="8"]{border-right:0}.game-panel[data-distributed=true] .sudoku-cell[data-row="8"]{border-bottom:0}
+.game-panel[data-distributed=true] .sudoku-cell.is-related{background:#b7cbd50d}.game-panel[data-distributed=true] .sudoku-cell.is-same{background:#b7cbd52b}
+.game-panel[data-distributed=true] .sudoku-cell.is-selected{background:#94b9dc66;box-shadow:inset 0 0 0 1px #2c6cac99}
+.game-panel[data-distributed=true] .sudoku-cell.is-wrong{color:#a82d24}
+.game-panel[data-distributed=true] .sudoku-pencil{font:400 clamp(8px,2.6cqi,13px)/1 var(--scene-body-font);color:#2869bd}
+
+.applet-scene .game-region .sudoku-legend span{font:inherit;color:inherit}
+.applet-scene .game-region .sudoku-legend-entry:before{background:#2869bd}
+
+/* A bottom composer is not a side column. Keep navigation outside the live page and its native rim. */
+@media(min-width:801px){
+ #notionWorld.native-console[data-applet-frame][data-applet-companion-bar=true]>.applet-shelf{left:16px;width:max(280px,calc(var(--applet-scene-primary-left) - 32px))}
+ #notionWorld.native-console[data-applet-companion-bar=true] .companion-dock{position:static;inset:auto;height:0;min-height:0}
+ #notionWorld.native-console[data-applet-companion-bar=true] .notion-shortcuts{position:absolute;inset:0;width:100%;height:100%;min-height:0;max-width:none}
+ #notionWorld.native-console[data-applet-companion-bar=true] .fox-action-side{height:40px;min-height:0;flex-direction:row;align-items:center;justify-content:flex-start;transform:none}
+ #notionWorld.native-console[data-applet-companion-bar=true] .world-actions{position:absolute;left:0;right:auto;top:-48px;bottom:auto;display:flex;justify-content:flex-start;width:100%;height:40px;gap:8px}
+ #notionWorld.native-console[data-applet-companion-bar=true] .world-actions .world-capsule{height:40px;min-height:40px;margin:0;padding:8px 12px}
+}
+
+@media(min-width:801px){
+ #notionWorld.native-console[data-applet-navigation-inline=true] .world-actions{left:auto;right:calc(100% + 12px);top:0;bottom:auto;width:max-content}
 }

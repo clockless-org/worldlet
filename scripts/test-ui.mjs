@@ -22,6 +22,7 @@ const available=files=>files.filter(file=>existsSync(path.join(root,file)));
 export const parallelChecks=available([
  'scripts/oauth-callback-ui-check.ts','scripts/connectors-ui-check.ts','scripts/settings-areas-ui-check.ts',
  'scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts',
+ 'scripts/game-scene-check.ts','scripts/minesweeper-scene-check.ts','scripts/snake-scene-check.ts','scripts/sudoku-scene-check.ts','scripts/framed-footer-check.ts',
  // The slowest first (Mac RC 2026.1005.2887 times), so no lane is left running one alone at the end. The Attention Center's browser checks moved here from npm test (test:attention), where they ran one by one.
  'scripts/attention-no-refill-check.ts','scripts/attention-actions-check.ts',
  'scripts/applet-focus-check.ts','scripts/startup-setup-check.ts','scripts/world-tour-check.ts',
@@ -38,11 +39,11 @@ export const parallelChecks=available([
  'scripts/applet-resume-check.ts','scripts/applet-task-pip-check.ts',
  'scripts/fox-reader-controls-check.ts',
  'scripts/fox-chat-fold-check.ts','scripts/fox-browse-ui-check.ts','scripts/fox-card-ui-check.ts','scripts/fox-artifact-size-check.ts','scripts/artifacts-ui-check.ts','scripts/daily-plan-ui-check.ts','scripts/prepared-reply-ui-check.ts','scripts/task-panel-ui-check.ts','scripts/artifact-follow-up-ui-check.ts',
- 'scripts/applet-stage-check.ts','scripts/calendar-events-ui-check.ts','scripts/calendar-attention-ui-check.ts','scripts/fox-tap-greeting-check.ts','scripts/work-applet-check.ts',
+ 'scripts/applet-stage-check.ts','scripts/calendar-events-ui-check.ts','scripts/calendar-attention-ui-check.ts','scripts/fox-tap-greeting-check.ts','scripts/work-applet-check.ts','scripts/work-session-scene-check.ts','scripts/vault-scene-check.ts',
  'scripts/world-refresh-check.ts','scripts/world-scene-check.ts','scripts/feedback-ui-check.ts',
  'scripts/applet-preview-check.ts','scripts/world-audio-check.ts','scripts/local-music-check.ts',
  'scripts/browser-history-check.ts','scripts/browser-tabs-ui-check.ts','scripts/browser-sign-in-check.ts','scripts/voice-memos-check.ts','scripts/messages-check.ts','scripts/attention-later-check.ts','scripts/applet-first-entry-check.ts',
- 'scripts/demo-site-check.ts','scripts/mail-open-check.ts','scripts/applet-scene-check.ts','scripts/weather-location-check.ts',
+ 'scripts/demo-site-check.ts','scripts/mail-open-check.ts','scripts/applet-scene-check.ts','scripts/scene-list-layout-check.ts','scripts/reminders-regions-check.ts','scripts/mail-regions-check.ts','scripts/mail-delivery-check.ts','scripts/calendar-plane-check.ts','scripts/world-map-check.ts','scripts/theme-fonts-check.ts','scripts/weather-location-check.ts',
  'scripts/mail-focus-check.ts','scripts/retired-mail-tour-check.ts','scripts/core-applet-content-check.ts',
  'scripts/sample-persona-check.ts','scripts/work-signal-check.py',
  'scripts/attention-level-check.ts','scripts/attention-brief-markdown-check.ts','scripts/village-camera-check.ts','scripts/fox-visible-text-check.ts',
@@ -128,6 +129,7 @@ export const quickChecks=available([
  'scripts/fox-chat-fold-check.ts','scripts/fox-execution-check.ts','scripts/companion-entry-check.ts','scripts/onboarding-first-value-check.ts',
  'scripts/google-connection-check.ts','scripts/mail-open-check.ts','scripts/applet-scene-check.ts','scripts/browser-applet-check.ts','scripts/world-history-ui-check.ts',
  'scripts/artifacts-ui-check.ts','scripts/sample-persona-check.ts','scripts/web-record-check.ts',
+ 'scripts/game-scene-check.ts','scripts/minesweeper-scene-check.ts','scripts/snake-scene-check.ts','scripts/sudoku-scene-check.ts','scripts/framed-footer-check.ts','scripts/work-session-scene-check.ts','scripts/vault-scene-check.ts','scripts/scene-list-layout-check.ts','scripts/reminders-regions-check.ts','scripts/mail-regions-check.ts','scripts/mail-delivery-check.ts','scripts/calendar-plane-check.ts','scripts/world-map-check.ts','scripts/theme-fonts-check.ts',
  'scripts/phone-pairing-ui-check.ts','scripts/meetings-check.ts','scripts/web-open-check.ts',
 ]);
 // The pull request set (`npm run test:ui:pr`, owner decision 2026-10-10: PR CI runs quick checks within five minutes):
@@ -138,8 +140,9 @@ export const quickChecks=available([
 export const prChecks=quickChecks.filter(c=>[
  'scripts/oauth-callback-ui-check.ts','scripts/connectors-ui-check.ts','scripts/settings-areas-ui-check.ts','scripts/board-ui-check.ts',
  'scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts',
+ 'scripts/game-scene-check.ts','scripts/minesweeper-scene-check.ts','scripts/snake-scene-check.ts','scripts/sudoku-scene-check.ts','scripts/framed-footer-check.ts',
  'scripts/startup-check.ts','scripts/applet-first-entry-check.ts','scripts/onboarding-first-value-check.ts',
- 'scripts/browser-applet-check.ts','scripts/mail-open-check.ts','scripts/applet-scene-check.ts','scripts/web-record-check.ts',
+ 'scripts/browser-applet-check.ts','scripts/mail-open-check.ts','scripts/applet-scene-check.ts','scripts/scene-list-layout-check.ts','scripts/reminders-regions-check.ts','scripts/mail-regions-check.ts','scripts/mail-delivery-check.ts','scripts/calendar-plane-check.ts','scripts/world-map-check.ts','scripts/theme-fonts-check.ts','scripts/web-record-check.ts',
  'scripts/core-applet-content-check.ts','scripts/attention-brief-markdown-check.ts','scripts/sample-persona-check.ts',
  'scripts/meetings-check.ts','scripts/web-open-check.ts',
 ].includes(c));

@@ -9,7 +9,7 @@ flowchart LR
   T[theme.json and presentation.json] --> R[Host registry]
   A[assets: pictures, sounds, fonts] --> R
   J[Other JSON: art index, lamp positions] --> R
-  R --> W[Host World renderer ui/world/village]
+  R --> W[Host World renderer: Village or measured map]
   R --> H[Host HUD, sounds and Applet pictures]
 ```
 
@@ -18,12 +18,12 @@ flowchart LR
 ```text
 package/
   theme.json          # contractVersion: 3, id, title, assets, presentation, optional updatedAt
-  presentation.json   # tokens, fonts, optional hud, sound, icons, artifact, appletPresets, appletScenes and sceneMaterials
+  presentation.json   # tokens, fonts, optional worldMap, hud, sound, icons, weatherIcons, artifact, appletPresets, appletScenes and sceneMaterials
   assets/             # every picture, sound, font and licence the JSON names
   *.json              # other data the host's World code reads (the Village's lamps.json, assets/art.json)
 ```
 
-`theme.json` fixes `assets: "assets"` and `presentation: "presentation.json"`; any other field is refused. `presentation.json` holds only `tokens`, `fonts`, `hud`, `sound`, `icons`, `artifact`, `appletPresets`, `appletScenes` and `sceneMaterials`. Image registration records painted surface bounds; executable layouts, viewport CSS and placement of host controls remain the host’s responsibility.
+`theme.json` fixes `assets: "assets"` and `presentation: "presentation.json"`; any other field is refused. `presentation.json` holds only `tokens`, `fonts`, `worldMap`, `hud`, `sound`, `icons`, `weatherIcons`, `artifact`, `appletPresets`, `appletScenes` and `sceneMaterials`. Image registration records painted surface bounds; executable layouts, viewport CSS and placement of host controls remain the host’s responsibility.
 
 Themes do not have release version numbers. Optional `updatedAt` records the last source modification as a UTC timestamp (for example, `2026-10-10T07:10:00Z`); it is informational. `contractVersion` alone controls compatibility; source hashes identify the copied contents.
 
@@ -34,7 +34,7 @@ The importer accepts only static files (`json`, `png`, `webp`, `jpg`, `svg`, fon
 | Field | What the host does with it |
 | --- | --- |
 | `tokens` | The theme's type and colours: `bodyFont`, `displayFont`, `bodySize` (at least 12), `titleSize`, `ink`, `paper`, `accent`, `focus`, `radius`, `controlHeight` (at least 32). |
-| `fonts` | Bundled font files, each with its `license` file. Shared fonts use an empty list. |
+| `fonts` | Bundled font files, each with its `license` file and optional `family` name. Family defaults to the filename without its extension. Shared fonts use an empty list. |
 | `hud.skin` (optional) | Nine-slice pictures for the shared HUD pieces `attention`, `note`, `back`, `log`, `button`, `card` and `frame`: `image` (`png`, `webp` or `svg`), `slice` insets in image pixels and drawn `width` in CSS pixels (at most 64). |
 | `sound.events` (optional) | An audio file per business event: `applet.arrived`, `mail.received`, `task.working`, `task.succeeded`, `task.failed`, `task.cancelled`. |
 | `icons` (optional) | The theme's picture of an Applet by Applet key (`png`, `webp` or `svg`). The host shows it everywhere it pictures that Applet: the World, lists, history, the world log and the first-use gathering. |
@@ -45,11 +45,25 @@ The importer accepts only static files (`json`, `png`, `webp`, `jpg`, `svg`, fon
 
 Anything left out keeps the shared look, sounds and pictures.
 
+Declaring `hud` also opts the shared World chrome into the package’s existing token palette and type. Floating controls, the composer and area navigation use `paper`, `ink`, `accent` and `focus`; action controls use the token `radius`; action and place labels use `displayFont`, while the composer and Attention summaries use `bodyFont`. Original source readers keep their own typography. Packages without `hud` retain the shared chrome. No extra CSS or executable configuration is needed.
+
+### Bundled fonts
+
+The host registers each bundled font with the browser as the declared `family`, or the filename without its extension when omitted (`assets/fonts/Display.woff2` becomes `Display`). Reference that name in `tokens.bodyFont`, `tokens.displayFont` or a scene material's font stack. Family names use letters, digits, spaces, underscores, periods or hyphens; omit CSS quotes and fallback names from `family` itself.
+
+Fonts load from published package URLs, even before the built World environment exists. The system fallback paints during loading. Repeated requests share one face per family/URL; a failed request can be retried through `prepareBuildThemeFonts()`. If the first family in `tokens.displayFont` names a bundled face, the host also assigns that face to its shared display and label roles. Packages without bundled fonts retain the shared HUD font declarations.
+
 ### Custom Applet art presets
 
 The host reads `themeAppletPresets()` from `ui/style/themes/index.ts`. It returns the active theme's entries with `icon` and `background` resolved to published URLs; a theme without presets returns an empty list. IDs are stable within the theme. Presets are art choices, not Applet keys: they neither register providers nor create Applets, authorize actions or connect user data. The host owns selection, responsive layout and live HTML content.
 
 The Village bundles 16 pairs under `assets/applet-presets/`, declared in `presentation.json`. The [source catalog](../styles/builtin/presets/personal-scenes/README.md) contains the full visual gallery and research. An Applet creation picker is not connected yet. For example, host code can read `themeAppletPresets().find(p => p.id === 'meal-planner')` and use its image URLs.
+
+### Measured World maps
+
+Optional `worldMap` in `presentation.json` supplies one background, its encoded `imageSize` and `sha256`, and an `areas` record keyed by existing host area IDs. Each entry has a normalized `anchor: [x,y]`, optional display `title` and `description`, and optional local `map` artwork for the area view. Import validates the World image bytes and dimensions. It never registers Applets, capabilities or navigation actions.
+
+The shared `ui/world/world-map.ts` renderer applies one contain transform and publishes area anchors to the host's accessible buttons. Area views retain the real catalog and navigation. The shared HUD offers real Attention categories in a collapsible rail so entrances remain clear; Escape closes the rail and restores focus. Packages without `worldMap` keep the Village renderer. Selecting an imported package remains a private build-time choice; importing alone does not change the public default. Village-specific fallback data is explicitly read from the bundled Village package, independently of selected presentation data.
 
 ### Registered backgrounds and live HTML
 
@@ -59,10 +73,12 @@ The Village bundles 16 pairs under `assets/applet-presets/`, declared in `presen
 | --- | --- |
 | `imageSize` | Final encoded image width and height in pixels. |
 | `sha256` | SHA-256 of those exact encoded background bytes. Import rejects a stale hash or size. |
-| `regions` | Nonoverlapping painted blank surfaces. Each has a unique `id`, `role` (`primary` or `secondary`), normalized `rect: [x,y,width,height]`, and `material` (`paper`, `board`, `screen`). Exactly one primary is required. |
+| `regions` | Nonoverlapping painted blank surfaces. Each has a unique `id`, `role` (`primary` or `secondary`), normalized `rect: [x,y,width,height]`, and `material` (`paper`, `board`, `screen`). Exactly one primary is required. Optional `quad` projects HTML onto a measured paper plane. |
 | `webFrame` (optional) | Extracted alpha asset (`mask`) and normalized `source` / `target` bounds. The host takes its alpha only, sampling colours from the original scene. A click-through foreground covers the website seam with the complete painted frame. |
 | `webEdge` (optional) | Clockwise `top`, `right`, `bottom`, `left` sample arrays (2–64 values per side, 0–3 source pixels). Original background pixels overlap the outer edge of a live website; the host scales them down with the scene and caps enlargement. No input capture or website styling. |
-| `companion` | A separate normalized rectangle describing quiet painted clearance. This does not position or style Fox. |
+| `companion` | A separate normalized rectangle describing quiet painted clearance. The shared host chooses the companion layout from this clearance; it grants no theme control over Fox behavior or artwork. |
+
+A region's optional `quad` contains four clockwise points (top-left, top-right, bottom-right, bottom-left), normalized within that region's bounding `rect`. Points must form a strictly convex quadrilateral. The shared host projects live HTML with a homography, including pointer hit testing; text remains selectable and controls remain accessible. This does not authorize native website transforms: registrations combining `quad` with `webFrame` or `webEdge` are rejected. Compact fallback removes the projection. A full Mail original uses the same primary-plane geometry as its inline preview.
 
 Coordinates start at the image's upper-left and stay within 0–1. They are measured from the finished picture, not guessed from a generation prompt. `fitThemeScene(registration, width, height)` applies one centered, uniform contain transform to the painting, every region and companion clearance. Do not crop the background independently. The host chooses its responsive presentation and may switch to a normal readable page on narrow viewports instead of shrinking interactive text.
 
@@ -74,7 +90,7 @@ Desktop Applet artwork and layout should target these usable dimensions (design 
 | Usable content width | About 70% of the Applet viewport width |
 | Remaining right-hand space | Place Fox and its conversation here, aligned with the scene; avoid an unused gap between the Applet and companion |
 
-Measure the live HTML or website area after navigation, padding and decorative frame insets, not the outer painted board. Keep the main content on the left. Arrange frames and props around this area rather than reducing it; preserve irregular paper edges as foreground detail without covering usable controls. Check the complete composition with the actual companion and reply visible. These are approximate desktop targets; retain readable responsive fallbacks on narrow windows. Existing scenes may need revision to meet them.
+Measure the live HTML or website area after navigation, padding and decorative frame insets, not the outer painted board. Keep the main content on the left. Arrange frames and props around this area rather than reducing it; preserve irregular paper edges as foreground detail without covering usable controls. For an existing scene with a short clearance below its paper, the host can use a compact composer strip: Fox remains clickable, local introductory copy appears on input focus, and real replies, notices and actions remain visible. Check the complete composition with the actual companion and reply visible. These are approximate desktop targets; retain readable responsive fallbacks on narrow windows. Existing scenes may need revision to meet them.
 
 Keep dates, messages, task state and controls out of the bitmap. The host supplies real HTML and trusted data inside those surfaces. A Calendar can have a main event surface and a separate small date surface. Regions grant no capabilities, execute no code and bind no provider data themselves. Embedded external websites still require the host's browser surface and cannot acquire this appearance from artwork alone.
 
@@ -142,3 +158,63 @@ An additive, optional change passes; refresh the snapshot in the same PR with `n
 Contract v2 let a package ship code (`renderWorld`, `renderApplet`) and a stylesheet. It was retired on 2026-10-10 when themes became static; no package uses it.
 
 The old data-only `ThemePack` (`ui/style/themes/theme-pack.ts`) only describes the Village's source art and companion; it is not a theme API.
+
+### Weather condition pictures
+
+`presentation.weatherIcons` optionally maps WMO condition codes (decimal keys such as `3` or `61`) to package-local PNG, WebP or SVG pictures. The shared Weather panel uses these for both current conditions and forecast days. Missing conditions, or an image that fails to load, keep the shared weather artwork. These pictures never supply forecast values or change condition labels. The supported keys are `THEME_WEATHER_CODES` in the contract.
+
+
+### Painted game materials
+
+An Applet scene may declare `sprites`, with optional `empty-cell`, `tile` and `food` roles.
+Each is a package-local `image` and a normalized `[x, y, width, height]` `source`
+rectangle. The importer rejects unknown roles, invalid crops, remote paths and
+missing files. The host crops these pictures with CSS; values, scoring, input
+and motion remain in the shared game. `food` supplies a collectible material, such as a Snake apple; it cannot set the food position or gameplay. Existing packages can omit sprites.
+
+A game scene with visible secondary `heading` and `controls` regions places its
+live title, metrics and reset above the primary board, and directional controls
+and instructions below it. A convex `quad` on the primary region projects the
+HTML board. Without both regions, the ordinary game panel remains available.
+
+
+### Saved session regions
+
+A coding Applet scene may add secondary `sessions` and `session-actions` regions.
+The host puts its searchable local-session index in `sessions`, the saved-message
+and file-change preview in the primary region, and explicit continuation in
+`session-actions`. Selecting or filtering previews only reads history; continuing
+opens the existing session reader, and execution still requires a separate Fox
+message. Errors offer retry, stale reads cannot replace a later selection, and
+missing regions retain the ordinary session list. These are measured static
+regions, not theme-provided code or account records.
+
+An optional secondary `session-heading` region moves the Applet title and local
+session caption above the columns. The index then starts with its Sessions label;
+search, selection and continuation keep the same host-owned behavior.
+
+### Markdown vault regions
+
+An Obsidian scene can place its folder index, linked-note list, title and vault
+connection controls in secondary `vault-index`, `vault-links`, `vault-heading`
+and `vault-toolbar` regions. The primary region reads Markdown using the existing
+read-only vault adapter. Search and folder expansion remain within the index;
+local links resolve only against its listed notes. Missing or ambiguous links
+remain unresolved. Without these regions the ordinary list and reader remain.
+
+
+### Mail arrival clips
+
+A registered `gmail` scene may declare `mailDelivery: {video, bounds, duration}`.
+`video` names a package-local transparent, silent WebM; `bounds` is a normalized
+rectangle on the registered painting; `duration` is greater than zero and at most
+20 seconds. Its whole rectangle must clear every live content region and the
+companion clearance. The host fits it with the same transform as the painting.
+
+Only the existing deduplicated new-mail event plays the clip. Opening Mail,
+reading history and repeated updates never replay it. Playback is decorative,
+muted and pointer-transparent; it never creates a letter or changes a record.
+Leaving the scene, opening its reader, disabling motion, reduced motion, a hidden
+window or app inactivity stops it. A later active state does not resume an old
+receipt. Missing or undecodable clips leave Mail usable. Packages without this
+optional field keep their existing arrival behavior.

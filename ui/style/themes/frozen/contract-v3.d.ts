@@ -71,6 +71,7 @@ export interface ThemeSceneRegistration {
         role: 'primary' | 'secondary';
         rect: readonly [number, number, number, number];
         material: 'paper' | 'board' | 'screen';
+        quad?: readonly [readonly [number, number], readonly [number, number], readonly [number, number], readonly [number, number]];
     }[];
     /** Quiet painted space the host can reserve for its companion. */
     companion: readonly [number, number, number, number];
@@ -95,10 +96,24 @@ export interface ThemeSceneMaterial {
     bodyFont?: string;
     displayFont?: string;
 }
+/** A measured crop of a static material image, in normalized source coordinates. */
+export interface ThemeSceneSprite {
+    image: string;
+    source: readonly [number, number, number, number];
+}
+/** A transparent, silent decorative clip played only for a host mail-arrival event. */
+export interface ThemeSceneDelivery {
+    video: string;
+    bounds: readonly [number, number, number, number];
+    duration: number;
+}
 /** A background tied to one Applet key. Its live records and controls are supplied by the host. */
 export interface ThemeAppletScene {
     background: string;
     registration: ThemeSceneRegistration;
+    mailDelivery?: ThemeSceneDelivery;
+    /** Crops of painted game materials. The host owns cells, values, input and motion. */
+    sprites?: Partial<Record<'empty-cell' | 'tile' | 'food', ThemeSceneSprite>>;
 }
 /** A reusable picture pair for a custom Applet, not a provider registration or a page layout. */
 export interface ThemeAppletPreset {
@@ -111,6 +126,20 @@ export interface ThemeAppletPreset {
     background: string;
     registration?: ThemeSceneRegistration;
 }
+/** A measured overview with live, host-owned area entrances. Keys are stable host area IDs. */
+export interface ThemeWorldMap {
+    background: string;
+    imageSize: readonly [number, number];
+    sha256: string;
+    areas: Readonly<Record<string, {
+        anchor: readonly [number, number];
+        title?: string;
+        description?: string;
+        map?: string;
+    }>>;
+}
+/** WMO forecast condition codes for optional static illustrations. */
+export declare const THEME_WEATHER_CODES: readonly [0, 1, 2, 3, 45, 48, 51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 71, 73, 75, 77, 80, 81, 82, 85, 86, 95, 96, 99];
 /** The theme's type and colours. */
 export interface ThemeTokens {
     bodyFont: string;
@@ -126,9 +155,15 @@ export interface ThemeTokens {
 }
 export interface ThemePresentation {
     tokens: ThemeTokens;
+    /** Optional painted overview and area backgrounds. No executable renderer is supplied by the theme. */
+    worldMap?: ThemeWorldMap;
+    /** Optional condition illustrations by WMO code; omitted codes keep the shared weather artwork. */
+    weatherIcons?: Readonly<Record<string, string>>;
+    /** Bundled faces. Family defaults to the filename without its extension; use it in the token/material font stacks. */
     fonts: readonly {
         file: string;
         license: string;
+        family?: string;
     }[];
     hud?: ThemeHud;
     sound?: ThemeSound;

@@ -1,4 +1,5 @@
 import {node,uiIcon} from '../../style/index.ts';
+import type {AppletSceneRegion} from '../scene/applet-scene.ts';
 
 /** Notes owns only the notebook interaction. The host supplies saved originals and its safe Markdown renderer. */
 export interface NotesActions {
@@ -9,27 +10,37 @@ export interface NotesActions {
 }
 type NotebookState={query:string;folder:string;selected:string};
 const notebooks=new WeakMap<object,NotebookState>();
+/** Keep the notebook's selection in step with its explicit original reader. */
+export function selectNotebookItem(owner:object,id:string){const state=notebooks.get(owner);if(state)state.selected=id;}
 const folderOf=item=>String(item.record?.folder||item.record?.list||'Notes');
 const plain=value=>String(value||'').replace(/[#*_`>]/g,'').replace(/\s+/g,' ').trim();
 function dateOf(item){const value=item.record?.modifiedAt||item.record?.updatedAt;if(!value)return '';const date=new Date(/^\d{4}-\d{2}-\d{2}$/.test(String(value))?value+'T12:00:00':value);return Number.isNaN(+date)?'':date.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});}
 function icon(name:string){const span=node('span','notes-glyph');span.innerHTML=uiIcon(name);return span;}
 function control(label:string,action:()=>void,glyph?:string){const b=node('button','notes-control');b.type='button';b.title=label;b.setAttribute('aria-label',label);if(glyph)b.append(icon(glyph));else b.textContent=label;b.onclick=action;return b;}
 
-export function renderNotesOpen(panel:HTMLElement,items:any[],value:any,owner:object,pick:(item:any)=>void){
+export function renderNotesOpen(panel:HTMLElement,items:any[],value:any,owner:object,pick:(item:any)=>void,regions:readonly AppletSceneRegion[]=[]){
+ const active=document.activeElement as HTMLInputElement|null,ownsFocus=!!active&&(panel.contains(active)||regions.some(r=>r.element.contains(active)));
+ const focus=ownsFocus?{id:active.dataset.itemId,label:active.getAttribute('aria-label'),start:active.selectionStart,end:active.selectionEnd}:null;
+ const slots=Object.fromEntries(regions.map(r=>[r.id,r.element])),distributed=['heading','index','status'].every(id=>slots[id])&&panel.closest<HTMLElement>('.applet-scene')?.dataset.compact!=='true';
+ panel.replaceChildren();for(const r of regions){r.element.classList.toggle('notes-region',distributed);if(r.role==='secondary')r.element.replaceChildren();}
  const state=notebooks.get(owner)||{query:'',folder:'',selected:''};notebooks.set(owner,state);
  const actions:NotesActions|undefined=value?.notes;
  if(panel.classList.contains('applet-scene-region'))panel.classList.add('notes-host');
  const book=node('section','notes-notebook');book.setAttribute('aria-label','Notes notebook');
- const header=node('header','notes-header'),heading=node('h2','','Notes');heading.prepend(icon('book'));
+ const header=node('header','notes-header'),heading=node('h2','','Notes');if(distributed&&value?.sample)heading.append(node('span','notes-demo',' · Demo'));if(!distributed)heading.prepend(icon('book'));
  const search=node('input','notes-search') as HTMLInputElement;search.type='search';search.placeholder='Search notes…';search.setAttribute('aria-label','Search notes');search.value=state.query;
  const searchBox=node('label','notes-searchbox');searchBox.append(icon('search'),search);
  header.append(heading,searchBox);if(actions?.create)header.append(control('New note with Fox',()=>actions.create(),'plus'));
  const pages=node('div','notes-pages'),left=node('aside','notes-index'),tabs=node('nav','notes-folders'),list=node('div','notes-list');
  tabs.setAttribute('aria-label','Note folders');list.setAttribute('aria-label','Notes');left.append(tabs,list);
  const right=node('section','notes-page');right.setAttribute('aria-label','Selected note');pages.append(left,right);book.append(header,pages);panel.append(book);
+ if(distributed){
+  const mount=(id:string,child:HTMLElement)=>{const wrap=node('div','notes-notebook notes-distributed');wrap.append(child);slots[id].append(wrap);};
+  book.classList.add('notes-distributed');mount('heading',header);mount('index',left);pages.remove();book.append(right);
+ }
  let serial=0,filtered:any[]=[];
  const folders=[...new Set(items.map(folderOf))];if(state.folder&&!folders.includes(state.folder))state.folder='';
- function paintTabs(){tabs.replaceChildren();for(const folder of ['',...folders]){const tab=control(folder||'All',()=>{state.folder=folder;paintTabs();paintList();});tab.setAttribute('aria-pressed',String(state.folder===folder));tabs.append(tab);}}
+ function paintTabs(){tabs.replaceChildren();if(distributed&&folders.length<=1)return;for(const folder of ['',...folders]){const tab=control(folder||'All',()=>{state.folder=folder;paintTabs();paintList();});tab.setAttribute('aria-pressed',String(state.folder===folder));tabs.append(tab);}}
  function paintList(explicit=false){
   const query=state.query.toLocaleLowerCase().trim();filtered=items.filter(item=>(!state.folder||folderOf(item)===state.folder)&&(!query||[item.title,item.summary,item.context,item.record?.text,folderOf(item)].some(v=>String(v||'').toLocaleLowerCase().includes(query))));
   list.replaceChildren();if(!filtered.some(item=>item.id===state.selected))state.selected=filtered[0]?.id||'';
@@ -42,14 +53,14 @@ export function renderNotesOpen(panel:HTMLElement,items:any[],value:any,owner:ob
   void paintPage(filtered.find(item=>item.id===state.selected),explicit);
  }
  async function paintPage(item,explicit=false){
-  const request=++serial;right.replaceChildren();right.dataset.open=String(!!item);
-  if(!item){right.append(node('p','notes-empty',value?.error||(items.length?'Try another folder or search.':'Select a note to read it here.')));return;}
+  const request=++serial;right.replaceChildren();right.dataset.open=String(!!item);if(distributed)slots.status.replaceChildren();
+  if(!item){if(distributed)status();right.append(node('p','notes-empty',value?.error||(items.length?'Try another folder or search.':'Select a note to read it here.')));return;}
   const back=control('All notes',()=>{right.dataset.open='false';book.dataset.reading='false';},'back');back.classList.add('notes-back');
   const meta=node('div','notes-page-meta');meta.append(back,node('time','',dateOf(item)));
   const title=node('h3','notes-title',item.record?.title||item.title),body=node('div','notes-prose');body.setAttribute('aria-live','polite');
   const footer=node('footer','notes-footer'),tools=node('div','notes-tools'),copy=control('Copy note',()=>{},'file');copy.disabled=true;
   const open=control('Open original',()=>pick(item),'book');open.append(node('span','','Original'));copy.append(node('span','','Copy'));tools.append(open,copy);footer.append(tools,node('span','notes-folder-tag',folderOf(item)));
-  right.append(meta,title,body,footer);
+  if(distributed){right.append(title,node('p','notes-source',value?.sample?'Demo notes · Read-only':'Notes · Read-only'),body);status(footer);}else right.append(meta,title,body,footer);
   body.append(node('p','notes-status','Reading note…'));
   try{
    const original=actions?.read?await actions.read(item):{text:item.record?.text||item.summary||item.context||'',title:item.title};
@@ -60,6 +71,8 @@ export function renderNotesOpen(panel:HTMLElement,items:any[],value:any,owner:ob
    if(right.getClientRects().length)actions?.selected?.(item,original,explicit);
   }catch(error){if(request!==serial||!book.isConnected)return;body.replaceChildren(node('p','notes-status',error.message||'Could not read this note.'),control('Try again',()=>void paintPage(item,explicit)));}
  }
+ function status(footer?:HTMLElement){const wrap=node('div','notes-notebook notes-distributed');if(footer)wrap.append(footer);wrap.append(node('p','notes-scope',value?.scope||'Up to 50 notes · Locked notes and attachments excluded'),node('p','notes-connection',value?.error||(value?.sample?'Demo content · No notes connected':value?.reading?'Reading notes…':value?.connected?'Connected notes · Read-only':'No notes connected')));slots.status.append(wrap);}
  search.oninput=()=>{state.query=search.value;paintList();};paintTabs();paintList();
+ if(focus){const controls=[panel,...regions.map(r=>r.element)].flatMap(r=>[...r.querySelectorAll<HTMLElement>('button,input')]);const replacement=controls.find(e=>focus.id?e.dataset.itemId===focus.id:focus.label&&e.getAttribute('aria-label')===focus.label);replacement?.focus({preventScroll:true});if(replacement instanceof HTMLInputElement&&focus.start!=null)replacement.setSelectionRange(focus.start,focus.end);}
  return items;
 }

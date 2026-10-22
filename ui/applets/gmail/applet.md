@@ -32,3 +32,5 @@ Source extraction instructions live in `prompts/extract.md`. Deterministic prepr
 The original uses the existing safe [Mail reader](focus.ts), including quoted messages and source images. Selecting a letter updates Fox's reading context; automatic first selection does not acknowledge attention. Late reads cannot replace a newer selection. Reply and Compose prepare requests in Fox for review, never send mail automatically. Original opens the full existing reader. Narrow layouts switch between list and letter.
 
 Preview: build the native UI, run `node scripts/core-paper-preview.ts`, serve the repository root and open `/output/core-paper-applets/?applet=gmail`. All preview records are fictional.
+
+When an envelope has no sender metadata, a successfully opened original can supply its explicit sender header to that envelope and local search. Existing source metadata takes precedence; summaries never supply identity. The resolved header belongs to the current rendered desk and does not write back to the source. Measured multi-surface desks use their board control material for Compose, Reply and Original, with a restrained bevel.

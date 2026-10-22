@@ -23,6 +23,7 @@ export function create2048(host:GameHost){
   grid.forEach((v,i)=>{const c=cells[i];c.textContent=v?String(v):'';c.dataset.value=v?String(Math.min(v,4096)):'';c.classList.toggle('is-new',i===fresh);c.classList.toggle('is-merged',merged.has(i));c.setAttribute('aria-label',v?String(v):'empty');});
   const stored=host.best.get(),best=Math.max(score,stored);if(score>stored)host.best.set(score);
   host.status(over?`No moves left · Score ${score} · Best ${best}`:won?`2048! Keep going · Score ${score}`:`Score ${score} · Best ${best}`);
+  host.metrics?.([{label:'Score',value:score},{label:'Best',value:best}],over?'No moves left':won?'2048! Keep going':'');
   board.dataset.state=over?'over':'playing';
  }
  function move(dr:number,dc:number){
@@ -53,5 +54,5 @@ export function create2048(host:GameHost){
  board.addEventListener('keydown',e=>{const d=KEYS[e.key];if(!d)return;e.preventDefault();move(d[0],d[1]);});
  onSwipe(board,24,(dx,dy)=>move(dy,dx));
  restart();
- return {element:board,restart,hint:'Arrow keys or swipe. Equal tiles merge.'};
+ return {element:board,restart,hint:'Arrow keys or swipe. Equal tiles merge.',directions:([{direction:'up',run:()=>move(-1,0)},{direction:'left',run:()=>move(0,-1)},{direction:'down',run:()=>move(1,0)},{direction:'right',run:()=>move(0,1)}] as const)};
 }

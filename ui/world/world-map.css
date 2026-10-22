@@ -1,0 +1,19 @@
+/* The same accessible area buttons on a measured map, with the selected package's ink and material. */
+#notionWorld[data-world-renderer=map] .notion-pin[data-kind=region-more]{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:auto;min-width:140px;max-width:240px;height:auto;min-height:48px;padding:9px 16px;border:1px solid var(--world-map-accent);border-radius:10px;background:color-mix(in srgb,var(--world-map-paper) 94%,transparent);color:var(--world-map-ink);box-shadow:0 2px 8px #0007;text-shadow:0 1px 2px #0008}
+#notionWorld[data-world-renderer=map] .notion-pin[data-kind=region-more]::before,#notionWorld[data-world-renderer=map] .region-edit-hint{display:none}
+#notionWorld[data-world-renderer=map] .notion-pin[data-kind=region-more] strong{font:400 20px/1.15 var(--world-map-bodyFont);letter-spacing:0}
+#notionWorld[data-world-renderer=map] .notion-pin[data-kind=region-more] small{font:400 15px/1.2 var(--world-map-bodyFont);color:inherit;opacity:.85}
+#notionWorld[data-world-renderer=map] .notion-pin[data-kind=region-more]:is(:hover,:focus-visible){background:color-mix(in srgb,var(--world-map-paper) 85%,var(--world-map-accent));outline:2px solid var(--world-map-accent);outline-offset:3px}
+#notionWorld[data-world-renderer=map] .map-attention-rail{position:absolute;left:0;top:100px;width:76px;display:grid;z-index:25;border:1px solid var(--world-map-accent);border-left:0;border-radius:0 12px 12px 0;overflow:hidden;background:color-mix(in srgb,var(--world-map-paper) 94%,transparent)}
+#notionWorld[data-world-renderer=map] .map-attention-rail button{padding:18px 7px;border:0;border-bottom:1px solid var(--world-map-accent);background:none;color:var(--world-map-ink);font:400 14px/1.35 var(--world-map-bodyFont);cursor:pointer}
+#notionWorld[data-world-renderer=map] .map-attention-rail button[aria-expanded=true]{background:color-mix(in srgb,var(--world-map-accent) 30%,transparent)}
+#notionWorld[data-world-renderer=map] .map-today{position:absolute;top:18px;right:24px;left:auto;z-index:24;max-width:300px;color:var(--world-map-ink)}
+#notionWorld[data-world-renderer=map] .world-task-tracker{position:absolute;z-index:24;left:90px;top:100px;bottom:100px;width:360px;max-width:calc(100% - 120px);justify-content:flex-start;overflow:auto;background:color-mix(in srgb,var(--world-map-paper) 96%,transparent);padding:18px;box-sizing:border-box;border:1px solid var(--world-map-accent);border-radius:10px;pointer-events:auto}
+#notionWorld[data-world-renderer=map]:not([data-map-attention]) .world-task-tracker{display:none}
+#notionWorld[data-world-renderer=map][data-map-attention] .world-task-list{border:0;background:none;overflow:visible;max-height:none}
+#notionWorld[data-world-renderer=map][data-map-attention=event] .world-task-group:not([data-group=event]),#notionWorld[data-world-renderer=map][data-map-attention=needsAction] .world-task-group:not([data-group=needsAction]),#notionWorld[data-world-renderer=map][data-map-attention=unseen] .world-task-group:not([data-group=unseen]){display:none}
+#notionWorld[data-world-renderer=map][data-map-attention] .world-task-group{margin:0}
+#notionWorld[data-world-renderer=map][data-area-view] :is(.map-attention-rail,.map-today){display:none}
+#notionWorld[data-world-renderer=map][data-depth=object] :is(.map-attention-rail,.map-today){display:none}
+
+#notionWorld[data-world-renderer=map] .map-today{padding:8px 12px;border-radius:10px;background:color-mix(in srgb,var(--world-map-paper) 88%,transparent);text-shadow:0 1px 2px #0008}

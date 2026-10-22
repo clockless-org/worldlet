@@ -31,3 +31,17 @@ The [selected visual reference](../../../resources/styles/builtin/references/reg
 is implemented by `open.ts` and `open.css`. After `npm run build:native-ui`, run
 `node scripts/notes-notebook-preview.ts`, serve the repository root, and open
 `/output/notes-notebook/` for the production view with fictional records.
+
+A theme can declare separate `heading`, `index` and `status` regions around the
+primary reading page. The same notebook puts its search, folders and title list
+on the left leaf, original content on the right, and source actions/status below.
+The host projects each region onto its measured paper plane. A distributed book
+uses the scene renderer's smaller reading-width threshold, rather than expanding
+one narrow leaf across the entire window. Search and selected-note focus survive
+record refresh; late reads cannot replace a different or detached notebook.
+
+The explicit original route keeps the painted notebook behind its shared text
+reader. Its existing reading body remains the scroll owner; previous/next source
+controls sit below the page. The index is inert during original reading so a
+preview action cannot change behind that route. Previous/next source navigation
+updates the index selection, and Back restores that same note in the live notebook.

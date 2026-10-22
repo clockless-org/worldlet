@@ -4,7 +4,7 @@
 export function shellInteraction(host:HTMLElement){
  const shell=host.closest('.notion-world') as HTMLElement|null;
  return {locked:shell?.getAttribute('data-onboarding-locked')==='true',
-  covered:!!document.querySelector('.tour-spotlight:not([hidden])')||shell?.dataset.attentionPreview==='true'||!!shell?.querySelector('dialog[open]'),
+  covered:!!shell?.dataset.mapAttention||!!document.querySelector('.tour-spotlight:not([hidden])')||shell?.dataset.attentionPreview==='true'||!!shell?.querySelector('dialog[open]'),
   detailOpen:shell?.getAttribute('data-detail-open')==='true',
   website:!!shell?.querySelector('#notionContent[data-template=browser]:not([hidden])')};
 }

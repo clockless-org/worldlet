@@ -1,0 +1,71 @@
+.weather-panel[data-layout=board]{--weather-unit:min(1cqi,1.248cqh)}
+/* The shared forecast board fits the theme's measured glass or paper region. All paint comes from its material. */
+.weather-panel[data-layout=board]{container-type:size;height:100%;min-height:0;display:flex;flex-direction:column;gap:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:var(--scene-ink);font:400 clamp(14px,calc(2.48 * var(--weather-unit)),22px)/1.35 var(--scene-body-font);--control-ink:var(--scene-ink);--control-muted:var(--scene-muted);--control-line:var(--scene-line)}
+.weather-panel[data-layout=board] :is(h2,h3,p){margin:0;color:inherit}
+.weather-panel[data-layout=board]>.ui-applet-header{position:relative;display:block;flex:none;height:calc(11.43 * var(--weather-unit));min-height:82px;margin:0;padding:0;border:0}
+.weather-panel[data-layout=board] .ui-applet-header .ui-title{font:400 calc(5.22 * var(--weather-unit))/1.2 var(--scene-body-font);letter-spacing:0}
+.weather-panel[data-layout=board] .ui-applet-header .ui-caption{margin-top:5px;font:inherit;color:var(--scene-muted);max-width:75%}
+.weather-panel[data-layout=board] .weather-refresh{position:absolute;right:0;bottom:calc(1 * var(--weather-unit));min-height:36px;padding:6px 18px;border:1px solid var(--scene-line);border-radius:16px;background:var(--scene-control);color:var(--scene-control-ink);font:inherit;cursor:pointer}
+.weather-panel[data-layout=board]>.ui-applet-body{display:block;flex:1;min-height:0;overflow:auto;padding:0;container-type:normal}
+.weather-panel[data-layout=board] .weather-current{display:grid;position:relative;grid-template-columns:22.73% 1fr;grid-template-rows:calc(8.7 * var(--weather-unit)) calc(4.35 * var(--weather-unit)) calc(3 * var(--weather-unit));gap:0;align-content:center;align-items:center;box-sizing:border-box;height:calc(19.5 * var(--weather-unit));padding:0;border-top:1px solid var(--scene-line);border-bottom:0}
+.weather-panel[data-layout=board] .weather-current>.weather-panel-icon{grid-column:1;grid-row:1/4;width:calc(21.74 * var(--weather-unit));height:calc(13.66 * var(--weather-unit));transform:translateX(-calc(1.86 * var(--weather-unit)))}
+.weather-panel[data-layout=board] .weather-temperature{font:400 calc(8.7 * var(--weather-unit))/1 var(--scene-body-font);letter-spacing:0}
+.weather-panel[data-layout=board] .weather-condition{font-size:calc(3.48 * var(--weather-unit))}
+.weather-panel[data-layout=board] .weather-current-meta{display:block;margin:0;grid-column:2;font-size:calc(2.36 * var(--weather-unit));color:var(--scene-muted)}
+.weather-panel[data-layout=board] .weather-current-meta>span:first-child{display:none}
+.weather-panel[data-layout=board] .weather-forecast-heading{box-sizing:border-box;height:calc(6.21 * var(--weather-unit));padding:calc(1.24 * var(--weather-unit)) 0 calc(1 * var(--weather-unit));border-top:1px solid var(--scene-line);font:400 calc(2.86 * var(--weather-unit))/1.3 var(--scene-body-font)}
+.weather-panel[data-layout=board] .weather-forecast-list{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.weather-panel[data-layout=board] .weather-forecast-row{position:relative;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:calc(3.5 * var(--weather-unit)) calc(7.95 * var(--weather-unit)) calc(3.5 * var(--weather-unit));align-content:center;gap:0;padding:calc(.6 * var(--weather-unit)) calc(.35 * var(--weather-unit));min-width:0;height:calc(17.64 * var(--weather-unit));min-height:116px;border:1px solid var(--scene-line);border-radius:12px;color:var(--scene-ink);background:color-mix(in srgb,var(--scene-control) 28%,transparent);text-align:center;font:inherit}
+.weather-panel[data-layout=board] .weather-forecast-row[aria-pressed=true]{border-color:var(--scene-focus);box-shadow:inset 0 0 0 1px var(--scene-focus),inset 0 0 7px color-mix(in srgb,var(--scene-focus) 35%,transparent)}
+.weather-panel[data-layout=board] .weather-forecast-row:hover{background:color-mix(in srgb,var(--scene-control) 50%,transparent)}
+.weather-panel[data-layout=board] .weather-weekday{grid-column:1/3;font-weight:400}
+.weather-panel[data-layout=board] .weather-forecast-row>.weather-panel-icon{grid-column:1/3;grid-row:2;justify-self:center;width:calc(8.7 * var(--weather-unit));height:calc(6.46 * var(--weather-unit))}
+.weather-panel[data-layout=board] .weather-high{grid-column:1;grid-row:3;justify-self:end;font-weight:400}
+.weather-panel[data-layout=board] .weather-high::after{content:' / ';white-space:pre}
+.weather-panel[data-layout=board] .weather-low{grid-column:2;grid-row:3;justify-self:start;color:inherit}
+.weather-panel[data-layout=board] :is(.weather-range,.weather-rain,.weather-row-condition){display:none}
+.weather-panel[data-layout=board] .weather-selected-day{position:relative;box-sizing:border-box;min-height:calc(17.14 * var(--weather-unit));margin-top:calc(2.73 * var(--weather-unit));padding-top:calc(1.49 * var(--weather-unit));border-color:var(--scene-line)}
+.weather-panel[data-layout=board] .weather-selected-day h3{font:400 calc(3.48 * var(--weather-unit))/1.3 var(--scene-body-font);max-width:48%}
+.weather-panel[data-layout=board] .weather-day-summary{position:relative;margin-top:calc(1.5 * var(--weather-unit));width:43%;padding-left:calc(13.5 * var(--weather-unit));box-sizing:border-box}
+.weather-panel[data-layout=board] .weather-day-summary>.weather-panel-icon{position:absolute;left:0;top:0;width:calc(11.8 * var(--weather-unit));height:calc(8 * var(--weather-unit))}
+.weather-panel[data-layout=board] .weather-day-condition{font-size:calc(3.23 * var(--weather-unit))}
+.weather-panel[data-layout=board] .weather-day-range{font-size:calc(2.48 * var(--weather-unit));color:var(--scene-muted)}
+.weather-panel[data-layout=board] .weather-selected-day .ui-facts{position:absolute;top:calc(3.35 * var(--weather-unit));left:44%;right:0;display:grid;grid-template-columns:1fr;gap:calc(.8 * var(--weather-unit));border-left:1px solid var(--scene-line);padding-left:calc(14 * var(--weather-unit))}
+.weather-panel[data-layout=board] .weather-selected-day .ui-facts>div{display:grid;grid-template-columns:1fr calc(18 * var(--weather-unit));gap:0;align-items:baseline}
+.weather-panel[data-layout=board] .weather-selected-day :is(dt,dd){font:inherit;margin:0}
+.weather-panel[data-layout=board]>.ui-applet-footer{flex:none;margin:calc(1.24 * var(--weather-unit)) 0 0;padding:0;border:0;color:var(--scene-muted);font-size:calc(1.86 * var(--weather-unit))}
+.weather-panel[data-layout=board] :focus-visible{outline:2px solid var(--scene-focus);outline-offset:3px}
+.weather-panel-icon img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
+.weather-day-summary>.weather-panel-icon{float:left;margin-right:12px}
+@layer components{#notionWorld.native-console[data-panel-scene=weather]>#notionContent[data-template=weather]{position:absolute!important;left:var(--applet-scene-primary-left)!important;top:var(--applet-scene-primary-top)!important;width:var(--applet-scene-primary-width)!important;height:var(--applet-scene-primary-height)!important;right:auto!important;bottom:auto!important;max-width:none!important;max-height:none!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;transform:none!important;overflow:hidden!important;container-type:size}}
+#notionWorld[data-panel-scene=weather]>.notion-content[data-template=weather]>.notion-reader-head{display:none}
+#notionWorld[data-panel-scene=weather] .weather-panel{height:100%;min-height:0;max-height:none;overflow:hidden}
+
+.weather-panel[data-layout=board] .weather-panel-icon img{object-fit:cover}
+
+.weather-panel[data-layout=board] .weather-refresh{display:inline-flex;align-items:center;gap:12px;font-size:calc(2.24 * var(--weather-unit))}
+.weather-refresh>svg,.weather-fact-icon>svg{display:block;width:22px;height:22px;flex:none}
+.weather-panel[data-layout=board] .ui-facts dt{position:relative}
+.weather-fact-icon{position:absolute;left:-34px;top:2px}
+
+#notionWorld[data-panel-scene=weather] #notionContent::before,#notionWorld[data-panel-scene=weather] #notionContent::after,#notionWorld[data-panel-scene=weather] .weather-panel>.ui-applet-header::after{display:none}
+/* Extracted frame rims overlap their measured opening; keep live letters clear of that physical edge. */
+#notionWorld[data-applet-frame][data-panel-scene=weather] .weather-panel{padding:16px 22px;box-sizing:border-box}
+
+.weather-panel[data-layout=board] .weather-location{display:inline-block;padding:0;min-height:0;border:0;border-radius:0;background:none;box-shadow:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.weather-panel[data-layout=board] .weather-location:disabled{opacity:1;cursor:default}
+.weather-panel[data-layout=board]{backdrop-filter:none;-webkit-backdrop-filter:none}
+.weather-panel[data-layout=board] :where(button,p,span,strong,small,time,div,section,nav,header,footer,h2,h3,dt,dd){font-family:inherit}
+.weather-panel[data-layout=board] .weather-current-meta>.ui-caption,.weather-panel[data-layout=board]>.ui-applet-footer>.ui-caption{font:inherit}
+
+.weather-panel[data-layout=board] .ui-applet-header :is(.ui-title,.ui-caption){margin-left:calc(1.86 * var(--weather-unit))}
+.weather-panel[data-layout=board] .weather-location{display:inline-flex;align-items:center;gap:12px}
+.weather-location>svg{width:22px;height:22px;flex:none}
+.weather-panel[data-layout=board]>.ui-applet-footer{margin-bottom:calc(1.74 * var(--weather-unit))}
+
+/* The painting already supplies a frame. Generic card skins and display headings
+   must not add a second rim or replace the measured board's reading face. */
+#notionWorld .weather-panel[data-layout=board]{border:0;border-image:none}
+#notionWorld .weather-panel[data-layout=board] .ui-applet-header .ui-title{font-family:var(--scene-body-font)}
+.weather-panel[data-layout=board] .weather-forecast-row:focus-visible{outline-offset:-4px}
+.weather-panel[data-layout=board] .weather-selected-day .ui-facts{font-size:calc(2.36 * var(--weather-unit));line-height:1.15}

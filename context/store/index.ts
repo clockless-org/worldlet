@@ -35,6 +35,9 @@ export {GAME_MAKING_OPEN,GAME_FACTORY_APPLET,MADE_GAME_LIMITS,SANDBOX_POLICY,MAD
 export type {MadeGame} from './factory.ts';
 export {BATTLE_REVIEW,GAME_REVIEW_APPLET,battleWatch,battleSite,observeBattleMessage,finishedBattles,battleReviewDue,battlesReviewed,battleSummaryDue,battlesSummarized,battleReviewTask,battleNow} from './battle-review.ts';
 export type {FinishedBattle} from './battle-review.ts';
+export {MINE_FIELDS,newMineState,mineNeighbours,nearbyMines,elapsedMineSeconds,actOnMine,type MineFieldKey,type MineField,type MineState} from './minesweeper.ts';
+export {SNAKE_STEP_MS,newSnakeState,steerSnake,pauseSnake,stepSnake,type SnakeState,type SnakeField,type SnakePoint} from './snake.ts';
+export {makeSudoku,newSudokuState,editSudoku,sudokuPeers,sudokuRemaining,sudokuConflict,elapsedSudokuSeconds,countSudokuSolutions,solveSudokuPuzzle,type SudokuPuzzle,type SudokuState,type SudokuAction} from './sudoku.ts';
 // The one way in to Context (#676): the envelope, the read and write entries and one search across the four kinds.
 export {CONTEXT_KINDS,CONTEXT_DOMAINS,CONTEXT_REFUSALS,ContextRefused,agentContext,contextEnvelope,contextTime,contextReader,contextWriter,syncedWriter} from './context.ts';
 export type {ContextOrigin,ContextDomainId,ContextChange,ContextDomainStore,ContextStorage,ContextWriter,ContextCall,ContextGuard,AgentContext} from './context.ts';

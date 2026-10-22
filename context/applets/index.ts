@@ -36,7 +36,8 @@ export {SITE_APPLET_LIMITS,readSiteApplet,siteApplet,siteAppletFor,siteAppletId,
 export {MESSAGES_LIMITS,messagesConversation,messagesConversationTitle,messagesLine,messagesOutgoingText,messagesRecipient,messagesSendFailure,messagesSnippet,validSentMessageId,type MessagesConversation,type MessagesLine,type SentMessageRecord} from './messages.ts';
 export {LOCAL_MUSIC_LIMITS,MEDIA_REMOTE_COMMANDS,localMusicCommand,localMusicQuery,localPlayerName,nowPlayingLine,readNowPlaying,worldletPlayer,readPlaylists,readTracks,type LocalMusicState,type NowPlaying} from './local-music.ts';
 
-export {LOCAL_CALENDAR_LIMITS,LOCAL_CALENDAR_NAME,LOCAL_EVENT_TITLE,validCalendarEventId,calendarEventId,readCalendarEvent,mergeCalendarEvent,orderCalendarEvents,localDay,calendarOccurrences,upcomingCalendarEvents,occurrenceStart,alertAt,calendarAlerts,CALENDAR_REPEATS,CALENDAR_ALERT_MINUTES,type LocalCalendarEvent,type CalendarOccurrence} from './calendar-events.ts';
+export {LOCAL_CALENDAR_LIMITS,LOCAL_CALENDAR_NAME,LOCAL_EVENT_TITLE,validCalendarEventId,calendarEventId,readCalendarEvent,mergeCalendarEvent,orderCalendarEvents,eventStart,localDay,calendarOccurrences,upcomingCalendarEvents,occurrenceStart,alertAt,calendarAlerts,CALENDAR_REPEATS,CALENDAR_ALERT_MINUTES,type LocalCalendarEvent,type CalendarRepeat,type CalendarOccurrence} from './calendar-events.ts';
+export {resolveVaultNote,vaultWikiLinks} from './vault-links.ts';
 // Repair guidance for rejected source evidence, and the evidence identity Applet analysis attaches (moved from Attention, #681).
 export {sourceEvidenceIssues,sourceEvidenceContext} from './evidence-issues.ts';
 export * from './activity.ts';

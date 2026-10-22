@@ -26,6 +26,8 @@ export function renderWorkDetail(host,key,value,renderMarkdown,onMore){
   }
  }else{
   for(const m of value.messages||[]){const article=el('article','','codex-message');article.append(el('h3',m.role==='user'?'You':key==='codex'?'Codex':'Claude Code'));article.append(renderMarkdown(m.text,{title:'Session message',path:'session.md'}));host.append(article);}
+  for(const change of value.changes||[]){const detail=el('details','','work-session-change');detail.open=true;const code=el('pre');for(const line of String(change.diff||'No text diff included.').split('\n')){const row=el('span',line+'\n');if(line.startsWith('+')&&!line.startsWith('+++'))row.dataset.change='add';else if(line.startsWith('-')&&!line.startsWith('---'))row.dataset.change='remove';code.append(row);}detail.append(el('summary',change.path),code);host.append(detail);}
+  for(const command of value.commands||[]){const detail=el('details','','work-session-change');detail.append(el('summary','Command · '+(command.status||'Saved')),el('pre',[command.command,command.output].filter(Boolean).join('\n\n')));host.append(detail);}
   if(!value.messages?.length)host.append(el('p','No saved text messages on this page.','ui-caption'));
  }
  if(value.scope)host.append(el('p',value.scope,'ui-caption'));
@@ -37,3 +39,16 @@ export function sampleWork(key,state: any={}){
  return {usage:key==='codex'?{placeholder:true}:null,sessions:[...(key==='codex'?(state.jobs||[]).map(practiceJobSession):[]),{id:'sample:'+key+':1',sessionId:'sample-'+key+'-1',title:'Polish the village',cwd:'/worldlet',status:state[key+':1']?'Completed':'Running',provider:key==='codex'?'codex':'claude'},{id:'sample:'+key+':2',sessionId:'sample-'+key+'-2',title:'Review navigation',cwd:'/worldlet',status:state[key+':2']?'Completed':'Waiting for you',provider:key==='codex'?'codex':'claude'}]};
 }
 export function sampleWorkDetail(item){if(item.session?.practiceJob)return practiceJobDetail(item.session.practiceJob);return item.repo?{repository:{name:item.repo.title,description:item.repo.description,branch:'main'},pullRequests:[{number:12,title:'Softer afternoon light',author:'Worldlet'}],issues:[{number:7,title:'Keep the path clear',author:'Worldlet'}],scope:'Fictional repository.'}:{messages:[{role:'user',text:'Please review this part of the village.'},{role:'assistant',text:item.session.status==='Completed'?'Prepared result: the view returns to its entry context, the selected Thing stays visible, and navigation checks pass in this authored example.':item.session.status==='Running'?'Checking the village layout and the path back from Focus. This is a prepared execution state for the walkthrough.':'The navigation change is ready for review. Ask Fox to show the prepared result.'}],scope:'Fictional conversation. No coding tool is running.'};}
+
+/** Read-only presentation of saved Codex turns; this never selects or resumes a thread. */
+export function codexWorkDetail(value){
+ const messages=[],changes=[],commands=[];
+ for(const turn of [...(value.turns||[])].reverse()){for(const item of turn.items||[]){
+  if(item.type==='userMessage'||item.type==='agentMessage'){const text=item.type==='agentMessage'?item.text:(item.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('\n');if(text)messages.push({role:item.type==='userMessage'?'user':'assistant',text});}
+  if(item.type==='fileChange')for(const change of item.changes||[])changes.push({path:change.path,diff:String(change.diff||'').slice(0,20000)});
+  if(item.type==='commandExecution')commands.push({status:item.status,command:item.command,output:String(item.aggregatedOutput||'').slice(0,20000)});
+ }
+  if(turn.error?.message)messages.push({role:'assistant',text:turn.error.message});
+ }
+ return {messages,changes,commands,error:value.error,scope:value.scope||'Saved conversation · Reading does not start work',nextOffset:value.nextCursor};
+}

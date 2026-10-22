@@ -1,0 +1,33 @@
+/** Real decoder, scene registration and lifecycle at the review viewport. */
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {bundleScript,withBrowser,pageErrors} from './browser-test.ts';
+import {parseThemePresentation} from '../ui/style/themes/build-theme-contract.ts';
+const presentation=JSON.parse(await readFile('ui/style/theme-packages/village/presentation.json','utf8'));
+const registration={imageSize:[1500,844],sha256:'0'.repeat(64),regions:[{id:'main',role:'primary',rect:[.05,.55,.7,.25],material:'paper'}],companion:[.05,.85,.7,.1]};
+const delivery={video:'assets/delivery.webm',bounds:[.3,.05,.4,.4],duration:1};
+const spec=(d:any)=>({...presentation,appletScenes:{gmail:{background:'assets/room.png',registration,mailDelivery:d}}});
+assert.doesNotThrow(()=>parseThemePresentation(spec(delivery)));
+for(const d of [{...delivery,video:'https://example.com/a.webm'},{...delivery,duration:21},{...delivery,bounds:[0,.6,1,.3]},{...delivery,loop:true}])assert.throws(()=>parseThemePresentation(spec(d)));
+const script=await bundleScript({stdin:{contents:"export {mountAppletScene} from './ui/applets/scene/applet-scene.ts';",resolveDir:process.cwd(),loader:'ts'},globalName:'Scene'});
+const arrivalScript=await bundleScript({stdin:{contents:"export {createMailArrival} from './ui/world/mail-arrival.ts';",resolveDir:process.cwd(),loader:'ts'},globalName:'Arrival',plugins:[{name:'static-mail-declaration',setup(b){b.onLoad({filter:/ui\/style\/themes\/index\.ts$/},()=>({contents:"export {createThemeEvents} from './theme-events.ts';export const ACTIVE_THEME={pack:{motion:{events:{},sound:{events:{}}}}};export const activeBuildTheme=()=>({package:{presentation:{appletScenes:{gmail:{mailDelivery:{}}}}}});export const playThemeSound=()=>{globalThis.soundCount=(globalThis.soundCount||0)+1;};",loader:'ts',resolveDir:process.cwd()+'/ui/style/themes'}));}}]});
+await withBrowser(async browser=>{
+ const page=await browser.newPage({viewport:{width:1500,height:844}}),errors=pageErrors(page);
+ await page.setContent('<title>Mail delivery lifecycle</title><main id="host" style="position:fixed;inset:0"></main>');await page.addStyleTag({content:await readFile('ui/applets/scene/applet-scene.css','utf8')});await page.addScriptTag({content:script});
+ await page.addScriptTag({content:arrivalScript});await page.evaluate(()=>{const w=window as any;w.receipts=0;w.arrival=w.Arrival.createMailArrival(()=>{w.receipts++;return true;});w.arrival.arrive('first');w.arrival.arrive('first');});assert.equal(await page.evaluate(()=>(window as any).receipts),1,'a static delivery declaration works without a legacy theme cue and deduplicates receipts');await page.emulateMedia({reducedMotion:'reduce'});await page.evaluate(()=>(window as any).arrival.arrive('reduced'));assert.equal(await page.evaluate(()=>(window as any).receipts),1);await page.emulateMedia({reducedMotion:'no-preference'});await page.evaluate(()=>(window as any).arrival.destroy());
+ // A local generated clip exercises the browser decoder without committing a product-specific animation.
+ const url=await page.evaluate(async()=>{const canvas=document.createElement('canvas');canvas.width=160;canvas.height=90;const ctx=canvas.getContext('2d')!,stream=canvas.captureStream(30),recorder=new MediaRecorder(stream,{mimeType:'video/webm;codecs=vp9'}),parts:Blob[]=[];recorder.ondataavailable=e=>parts.push(e.data);const done=new Promise<string>(resolve=>recorder.onstop=()=>resolve(URL.createObjectURL(new Blob(parts,{type:'video/webm'}))));recorder.start();let n=0;const paint=setInterval(()=>{ctx.clearRect(0,0,160,90);ctx.fillStyle='#c99b55';ctx.fillRect(n++%100,25,40,40);},30);await new Promise(r=>setTimeout(r,1300));clearInterval(paint);recorder.stop();stream.getTracks().forEach(t=>t.stop());return done;});
+ await page.evaluate(({registration,delivery,url})=>{const w=window as any;w.scene=w.Scene.mountAppletScene(document.getElementById('host'),'gmail',{source:{registration,mailDelivery:{...delivery,video:url}}});},{registration,delivery,url});
+ assert.equal(await page.title(),'Mail delivery lifecycle');assert.equal(await page.locator('video').getAttribute('src'),null,'entering the room does not load or play a delivery');
+ const play=()=>page.evaluate(()=>(window as any).scene.deliverMail());
+ assert.equal(await play(),true);await page.waitForFunction(()=>(window as any).scene.metrics.delivery.state==='playing');
+ const metrics=await page.locator('video').evaluate((v:HTMLVideoElement)=>({box:v.getBoundingClientRect().toJSON(),muted:v.muted,controls:v.controls,pointer:getComputedStyle(v).pointerEvents}));assert.equal(metrics.box.x,450);assert.equal(metrics.box.y,42.1875);assert.equal(metrics.muted,true);assert.equal(metrics.controls,false);assert.equal(metrics.pointer,'none');
+ await page.waitForFunction(()=>document.querySelector('video')!.currentTime>.15);await play();assert.equal(await page.evaluate(()=>(window as any).scene.metrics.delivery.plays),1,'an active clip is not restarted');
+ await page.waitForFunction(()=>(window as any).scene.metrics.delivery.state==='idle');assert.equal(await page.locator('video').isVisible(),false);
+ await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await play(),false);await page.emulateMedia({reducedMotion:'no-preference'});
+ await play();await page.waitForFunction(()=>(window as any).scene.metrics.delivery.state==='playing');await page.evaluate(()=>window.dispatchEvent(new Event('worldlet:app-inactive')));assert.equal(await play(),false);assert.equal(await page.locator('video').isVisible(),false);
+ await page.evaluate(()=>window.dispatchEvent(new Event('worldlet:app-active')));await play();await page.waitForFunction(()=>(window as any).scene.metrics.delivery.state==='playing');await page.evaluate(()=>(window as any).scene.setMotion(false));assert.equal(await play(),false);
+ await page.evaluate(()=>{const w=window as any;w.scene.setMotion(true);w.scene.deliverMail();window.dispatchEvent(new Event('worldlet:app-inactive'));window.dispatchEvent(new Event('worldlet:app-active'));w.scene.deliverMail();});await page.waitForFunction(()=>document.querySelector('video')!.currentTime>.15&&!document.querySelector('video')!.paused);
+ await page.evaluate(()=>{const w=window as any;w.scene.setMotion(false);w.scene.setMotion(true);w.scene.deliverMail();w.scene.destroy();});await page.waitForTimeout(100);assert.equal(await page.locator('video').count(),0);assert.deepEqual(errors,[]);await page.evaluate(url=>URL.revokeObjectURL(url),url);
+ console.log('PASS Mail delivery: static contract, real decoding, measured bounds, no entry autoplay, once while active, completion, reduced motion, inactivity, motion toggle and disposal at 1500 × 844');
+});

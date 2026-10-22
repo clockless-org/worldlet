@@ -26,7 +26,7 @@ import {artifactFollowUpSent,artifactFitProblem,artifactId,attentionArtifactId,f
 
 import {applyRegionLayout,readRegionLayout,parseRegionLayout,moveRegionApplet,pinRegionApplet,pinnedPlace,recordAppletUse,regionId,recentlyUsedFirst,storedRegionLayout} from '../world/index.ts';
 import {resolvePlacements,lampLabels,lampNeeds} from '../world/index.ts';
-import {WORLD_LAYOUT,THEME_SCENE,themeAreaMap} from '../world/index.ts';
+import {WORLD_LAYOUT,THEME_SCENE,themeAreaMap,themeAreaTitle} from '../world/index.ts';
 import {createLocationWriter} from './navigation-history.ts';
 import {renderMailFocus} from '../applets/index.ts';
 
@@ -43,11 +43,11 @@ import {tennisDemo} from '../applets/index.ts';
 import {tennisCard} from '../applets/index.ts';
 import {createClaudeSession} from '../applets/index.ts';
 import {forecastStage,weatherGlyph} from '../world/index.ts';
-import {createWeatherPanel} from '../applets/index.ts';
+import {createWeatherPanel,sampleWeatherForecast} from '../applets/index.ts';
 import {createGameApplet} from '../applets/index.ts';
 
 import {loadMoney,readMoneyItem} from '../applets/index.ts';
-import {WORK_APPLETS,workItems,workError,renderWorkDetail,sampleWork,sampleWorkDetail} from '../applets/index.ts';
+import {WORK_APPLETS,codexWorkDetail,workItems,workError,renderWorkDetail,sampleWork,sampleWorkDetail} from '../applets/index.ts';
 
 import {coreAppletItems} from '../world/index.ts';
 import {localCalendarItems} from '../applets/index.ts';
@@ -109,7 +109,7 @@ export function mountNotionWorld(data: World, native: any) {
   if(top.length===1&&top[0].children.length)top=top[0].children.map(id=>pages.get(id));
   const sections: any[]=data.spaces?.length?data.spaces.map(s=>({...s,virtual:true,kind:'space',parent:null,paths:[],text:'',markdown:''})):top.map(p=>({...p,theme:themes(p.title)}));
   const areas=data.areas||[];
-  const buildings=data.buildings||[],composites=data.viewObjects||[];
+  const buildings:(NonNullable<typeof data.buildings>[number]&{visualTheme?:string})[]=(data.buildings||[]).map(b=>({...b,title:themeAreaTitle(regionId(b.id),b.title)})),composites=data.viewObjects||[];
   const buildingFor=id=>buildings.find(b=>b.id===id||b.rooms.includes(id));
   const objectsFor=room=>roomObjects(room,pages,composites);
   const objectFor=id=>{id=data.navigationAliases?.[id]||id;return sections.flatMap(objectsFor).find(o=>o.id===id||o.roomId===id||o.pageIds.includes(id));};
@@ -135,7 +135,7 @@ export function mountNotionWorld(data: World, native: any) {
     <dialog id="notionDialog" class="notion-dialog ui-theme-dialog" aria-labelledby="notionDialogTitle"><button id="notionDialogClose" class="notion-close" aria-label="Close">×</button><div id="notionDialogBody"></div></dialog>`;
   const $=id=>root.querySelector('#'+id),content=$('notionContent'),hud=$('notionHUD'),pins={};
   // A game's board sits in its theme scene's board region (ui/applets/scene), the painting framing it.
-  const gameScene=createPanelScene(content);let gameKey='';
+  const gameScene=createPanelScene(content);let gameKey='',gamePanel:ReturnType<typeof createGameApplet>=null;
   if(native)installTextReaderHUD(content);
   if(native)observeWorldActivity(root,()=>!data.sample);
   let recordedLocation='';
@@ -397,7 +397,7 @@ export function mountNotionWorld(data: World, native: any) {
   }
   function refreshRegions(){
    for(const room of sections){const id=regionId(regionLayout.assignments[room.moduleId]||room.region||room.buildingId||'home');room.region=id;room.buildingId='building-'+id;}
-   for(const b of buildings){const id=regionId(b.id);b.title=regionLayout.names[id]||WORLD_LAYOUT.regions[id]?.title||b.title;b.visualTheme=regionLayout.themes[id]||id;b.rooms=sections.filter(r=>r.buildingId===b.id).map(r=>r.id);}
+   for(const b of buildings){const id=regionId(b.id);b.title=regionLayout.names[id]||themeAreaTitle(id,WORLD_LAYOUT.regions[id]?.title||b.title);b.visualTheme=regionLayout.themes[id]||id;b.rooms=sections.filter(r=>r.buildingId===b.id).map(r=>r.id);}
    scene?.refreshRegions();saveRegions();root.dispatchEvent(new CustomEvent('worldlet:applet-layout'));
   }
   function moveApplet(id,region,index?){
@@ -751,8 +751,8 @@ export function mountNotionWorld(data: World, native: any) {
   const observeMail=(world)=>{const connection=world.moduleConnections?.find(c=>c.provider==='gmail');if(!connection?.records)return;deliverMail(connection.records);};
   const deliverMail=(records)=>{const arrivals=mailArrivals(records);if(arrivals.length)arrival.arrive(arrivals.join('|'));};
   observeMail(data);
-  // The sample's weather Open shows its sample records; a late environment load must not replace them.
-  environmentController=mountWorldEnvironment({root,dialog,recording:!!data.sample,close:()=>$('notionDialog').close(),onOpenWeather:()=>visitObject('app-weather'),onChange:(value,actual)=>{scene?.setEnvironment(value);if(current==='app-weather'){if(weatherPanel?.element.isConnected)weatherPanel.update(actual);else if(!data.sample)scene?.setAppStage?.(current,forecastStage(actual));}},...(native?.weather?{adapter:native.weather}:{})});
+  // The sample Weather board is illustrative; a late personal environment load must not replace it.
+  environmentController=mountWorldEnvironment({root,dialog,recording:!!data.sample,close:()=>$('notionDialog').close(),onOpenWeather:()=>visitObject('app-weather'),onChange:(value,actual)=>{scene?.setEnvironment(value);if(current==='app-weather'){if(weatherPanel?.element.isConnected&&!data.sample)weatherPanel.update(actual);else if(!data.sample)scene?.setAppStage?.(current,forecastStage(actual));}},...(native?.weather?{adapter:native.weather}:{})});
   Object.defineProperty(root,'sceneMetrics',{get:()=>scene?.metrics});
   if(!scene){root.classList.add('notion-no-webgl');for(const section of buildings.length?buildings:areas.length?areas:sections){const b=button(section.title,()=>buildings.length?visitBuilding(section.id):areas.length?visitArea(section.id):visitSpace(section.id,'shelf'),'notion-pin');$('notionPins').append(b)}}
   function breadcrumbs(){
@@ -785,7 +785,7 @@ export function mountNotionWorld(data: World, native: any) {
   function syncSoundScene(){root.dataset.soundTrack=themeAmbientTrack(ACTIVE_THEME.pack,depth,current||'');}
   // An area panel belongs to the place it was opened in: entering an Applet by any path, or moving to another
   // place (as after Back reopens it, #2054), closes it, so it never covers what comes next.
-  function sceneState(){gameScene.sync(!content.hidden&&content.dataset.template==='game'&&appletSceneKey(gameKey)?gameKey:'');syncSoundScene();recordLocationActivity();if(regionShelf&&(insideApplet()||regionShelfPlace!==depth+':'+current))closeRegionShelf();if(areaView&&depth!=='overview')closeAreaView();if(regionsReorder&&depth==='overview'){regionsReorder=false;scene?.refreshRegions();}if(attentionPage&&!restoringWorld)closeAttentionPreview(false);if(memoReader&&(content.hidden||current!=='app-voice-memos'||content.dataset.template!=='app-source')){memoReader.dispose();memoReader=null;}if(messagesReader&&(content.hidden||current!=='app-messages'||content.dataset.template!=='app-source')){messagesReader.dispose();messagesReader=null;}if(root.dataset.onboarding!=='true'&&foregroundGuide&&(depth!=='object'||current!==foregroundGuide||!content.hidden)){foregroundGuide=null;voice?.setGuide?.(null,{forget:true});}if(depth!=='object'||!sections.some(r=>r.moduleId===current&&r.entity==='app'))deviceInventory?.hide();const place=describe(sections.find(s=>s.id===currentSpace)?.theme);root.dataset.depth=depth;appletShelf?.sync(depth==='object'?current:null);root.dataset.viewLevel=data.matterCatalog?({overview:'world',building:'region',room:'matter',object:sections.find(r=>r.id===currentSpace)?.entity||'matter',note:'detail'}[depth]||depth):data.moduleCatalog?({overview:'world',building:'region',room:'module',object:'module',note:'detail'}[depth]||depth):data.personal?({overview:'world',room:'region',object:'object',note:'detail'}[depth]||depth):depth;root.dataset.page=current||'';if(native)$('notionStage').inert=depth==='note'||depth==='search';$('notionBack').hidden=depth==='overview';$('notionNext').textContent=({overview:'Go home →',place:place.enter+' →',room:place.browse+' →',shelf:'Read a book →',note:'Next book →',search:'Back to my world →'})[depth];breadcrumbs();syncAppletMode();writeLocation();voice?.sync();updateCapsule();travelExperiment?.sync()}
+  function sceneState(){gameScene.sync(!content.hidden?(content.dataset.template==='weather'&&appletSceneKey('weather')?'weather':content.dataset.template==='game'&&appletSceneKey(gameKey)?gameKey:''):'');gamePanel?.setScene(gameScene.scene);if(content.hidden||content.dataset.template!=='game'){gamePanel?.dispose();gamePanel=null;}syncSoundScene();recordLocationActivity();if(regionShelf&&(insideApplet()||regionShelfPlace!==depth+':'+current))closeRegionShelf();if(areaView&&depth!=='overview')closeAreaView();if(regionsReorder&&depth==='overview'){regionsReorder=false;scene?.refreshRegions();}if(attentionPage&&!restoringWorld)closeAttentionPreview(false);if(memoReader&&(content.hidden||current!=='app-voice-memos'||content.dataset.template!=='app-source')){memoReader.dispose();memoReader=null;}if(messagesReader&&(content.hidden||current!=='app-messages'||content.dataset.template!=='app-source')){messagesReader.dispose();messagesReader=null;}if(root.dataset.onboarding!=='true'&&foregroundGuide&&(depth!=='object'||current!==foregroundGuide||!content.hidden)){foregroundGuide=null;voice?.setGuide?.(null,{forget:true});}if(depth!=='object'||!sections.some(r=>r.moduleId===current&&r.entity==='app'))deviceInventory?.hide();const place=describe(sections.find(s=>s.id===currentSpace)?.theme);root.dataset.depth=depth;appletShelf?.sync(depth==='object'?current:null);root.dataset.viewLevel=data.matterCatalog?({overview:'world',building:'region',room:'matter',object:sections.find(r=>r.id===currentSpace)?.entity||'matter',note:'detail'}[depth]||depth):data.moduleCatalog?({overview:'world',building:'region',room:'module',object:'module',note:'detail'}[depth]||depth):data.personal?({overview:'world',room:'region',object:'object',note:'detail'}[depth]||depth):depth;root.dataset.page=current||'';if(native)$('notionStage').inert=depth==='note'||depth==='search';$('notionBack').hidden=depth==='overview';$('notionNext').textContent=({overview:'Go home →',place:place.enter+' →',room:place.browse+' →',shelf:'Read a book →',note:'Next book →',search:'Back to my world →'})[depth];breadcrumbs();syncAppletMode();writeLocation();voice?.sync();updateCapsule();travelExperiment?.sync()}
   function home(){closeAreaView();focusEntryReturn=null;pageLayer=null;$('notionDialog').close();if(!restoringWorld)dismissFox();readerReturns=[];current=null;currentSpace=null;depth='overview';searching=false;history=[];content.hidden=true;hud.classList.remove('is-reading');$('notionWorldTitle').hidden=false;$('notionWorldTitle').textContent='This is your little world.';$('notionWorldMeta').textContent='Come home, read, and do what you love';scene?.focus('overview');sceneState();if(data.sample){$('notionWorldTitle').textContent='A place for everything in your life.';$('notionWorldMeta').textContent='Explore or type “show my mail”'}}
   function visitArea(id){
     const area=areas.find(a=>a.id===id);if(!area)return;if(buildings.length&&areas.length===1){home();return;}readerReturns=[];current=id;currentSpace=id;depth='area';searching=false;content.hidden=true;hud.classList.remove('is-reading');scene?.focus(id,'area');sceneState();
@@ -1439,7 +1439,11 @@ export function mountNotionWorld(data: World, native: any) {
   window.addEventListener('pagehide',()=>clearInterval(workPoll),{once:true});
   function publishWork(r,value){
     const items=workItems(r.key,value),error=workError(r.key,value);scene?.setAppActivity?.(r.moduleId,{sessions:items.map(i=>i.session).filter(Boolean),usage:value.usage});
-    scene?.setAppStage?.(r.moduleId,{items,connected:true,error,scope:value.scope||'',loadMore:value.nextOffset!=null?()=>loadWork(r,value.nextOffset):value.cursor?()=>codexApplet?.refresh(true):null});
+    scene?.setAppStage?.(r.moduleId,{items,connected:true,error,scope:value.scope||'',loadMore:value.nextOffset!=null?()=>loadWork(r,value.nextOffset):value.cursor?()=>codexApplet?.refresh(true):null,sample:!!data.sample,renderMarkdown,refresh:()=>r.key==='codex'&&!data.sample?ensureCodexApplet().refresh():!data.sample?loadWork(r):undefined,readSession:async(item,offset=0)=>{
+     if(data.sample)return sampleWorkDetail(item);
+     if(r.key==='codex')return codexWorkDetail(await native.codexSession({operation:'read',threadId:item.session.sessionId,...offset?{cursor:offset}:{}}));
+     return native.developmentSessions('claude',{operation:'read',id:item.session.sessionId,offset});
+    }});
   }
   async function loadWork(r,offset=0){
     try{const value=await native.developmentSessions(r.key==='claude-code'?'claude':r.key,{offset});
@@ -1526,14 +1530,15 @@ export function mountNotionWorld(data: World, native: any) {
     const request=++vaultRead;
     content.hidden=true;hud.classList.remove('is-reading');appReader=null;
     scene?.setAppStage?.(r.moduleId,appletStageData(r,sampleStageRecords(r)));sceneState();
-    if(data.sample)return;
+    if(data.sample){const records=sampleStageRecords(r);scene?.setAppStage?.(r.moduleId,{...appletStageData(r,records),connected:true,scope:'Fictional vault · Read-only',vault:{pages:records,renderMarkdown,read:async id=>{const record=records.find(n=>n.id===id),note=pages.get(record?.noteId||id);return {title:record?.title,text:note?.markdown||note?.text||record?.text||''};}}});return;}
     try{
       const value=await native.obsidianContent({operation});
       if(request!==vaultRead||current!==r.moduleId)return;
       localStageRecords.set(r.key,value.pages||[]);
       if(current!==r.moduleId)return;
-      scene?.setAppStage?.(r.moduleId,{...appletStageData(r,value.pages||[]),connected:value.connected,scope:value.scope});
+      scene?.setAppStage?.(r.moduleId,{...appletStageData(r,value.pages||[]),connected:value.connected,scope:value.scope,vault:{pages:value.pages||[],read:id=>native.obsidianContent({operation:'read',id}),renderMarkdown,choose:()=>showObsidian(r,'choose'),disconnect:()=>showObsidian(r,'disconnect'),selected:(note,original)=>{libraryReadContext='Read-only vault note: '+note.id+'\n'+String(original.markdown??original.text??'').slice(0,8000);}}});
       const actions=element('div','fox-app-options');
+      if(root.querySelector('[data-vault-reader=true]')){if(foregroundGuide===r.moduleId){foregroundGuide=null;voice?.setGuide?.(null,{only:'applet:'+r.moduleId,forget:true});}return;}
       actions.append(button(value.connected?'Change vault':'Choose vault',()=>showObsidian(r,'choose'),'module-connect'));
       if(value.connected)actions.append(button('Disconnect vault',()=>showObsidian(r,'disconnect'),'module-connect'));
       foregroundActions(r,actions,value.connected?'Pick a note. I read Markdown files without changing them.':'Choose the folder you use as your Obsidian vault.');
@@ -1650,10 +1655,17 @@ export function mountNotionWorld(data: World, native: any) {
   }
   function showAppPanel(r){
     if(r.key==='meetings'){showMeetings(r);return;}
-    if(r.key==='weather'&&data.sample){content.hidden=true;hud.classList.remove('is-reading');appReader=null;scene?.setAppStage?.(r.moduleId,appletStageData(r,sampleStageRecords(r)));sceneState();return;}
-    if(r.key==='weather'){header('Weather',undefined,{applet:true});content.dataset.template='weather';appReader=null;scene?.setAppStage?.(r.moduleId,{connected:true,items:[]});weatherPanel=createWeatherPanel({refresh:()=>environmentController.refresh(),locate:()=>environmentController.requestLocation()});weatherPanel.update(environmentController.weatherState);content.append(weatherPanel.element);sceneState();return;}
+    if(r.key==='weather'){
+      header('Weather',undefined,{applet:true});content.dataset.template='weather';appReader=null;
+      scene?.setAppStage?.(r.moduleId,{connected:true,items:[]});
+      const sample=data.sample?sampleWeatherForecast():null;
+      weatherPanel=createWeatherPanel({layout:appletSceneKey('weather')?'board':'list',demo:!!sample,
+        refresh:async()=>{if(sample){weatherPanel.update(sample);return;}return environmentController.refresh();},
+        locate:()=>environmentController.requestLocation()});
+      weatherPanel.update(sample||environmentController.weatherState);content.append(weatherPanel.element);sceneState();return;
+    }
     // A game is built fresh on every open and is gone with the panel: nothing of it runs while closed.
-    if(r.fullView?.kind==='game'){const game=createGameApplet(r.key,r.title);if(game){header(r.title,undefined,{applet:true});content.dataset.template='game';gameKey=r.key;appReader=null;scene?.setAppStage?.(r.moduleId,{connected:true,items:[]});content.append(game.element);sceneState();return;}}
+    if(r.fullView?.kind==='game'){const game=createGameApplet(r.key,r.title);if(game){header(r.title,undefined,{applet:true});content.dataset.template='game';gamePanel?.dispose();gamePanel=game;gameKey=r.key;appReader=null;scene?.setAppStage?.(r.moduleId,{connected:true,items:[]});content.append(game.element);sceneState();return;}}
     const show=new Map<string,(r:any)=>void>([...WORK_APPLETS.map(key=>[key,showWork] as const),['voice-memos',r=>showVoiceMemos(r)],['messages',r=>showMessages(r)],['obsidian',r=>showObsidian(r)],...CURATED_READERS.map(key=>[key,r=>showCuratedSource(r)] as const),...MONEY_READERS.map(key=>[key,r=>showMoney(r)] as const)]).get(r.key);if(show&&r.fullView?.kind!=='web'){show(r);return;}
 
     const panelContext={native,content,notify,call:!data.sample&&native?.doorDash,ask:(text,options)=>voice?.ask(text,options),onChange:()=>scene?.refreshContent(),
@@ -1781,14 +1793,14 @@ export function mountNotionWorld(data: World, native: any) {
   function pageLink(p){const row=button('',()=>open(p.id),'notion-page-link');row.append(...(data.matterCatalog?[]:[element('span','notion-page-glyph',p.table?'▦':'▤')]),element('span','',p.title),element('small','',p.table?p.table.rows.length+' rows':p.children.length?p.children.length+' subpages':'↗'));row.dataset.target=p.id;return row}
   function resolve(raw,page){if(raw.startsWith('#note=')&&pages.has(raw.slice(6)))return {page:raw.slice(6)};const href=raw;if(/^https?:\/\//i.test(href)){const match=href.match(/([a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})/i);if(/https?:\/\/(?:www\.|app\.)?notion\.(so|com)\//i.test(href)&&match&&pages.has(match[1].replaceAll('-','')))return {page:match[1].replaceAll('-','')};return {external:raw};}if(/^[a-z][a-z\d+.-]*:/i.test(href)||href.startsWith('//'))return {};const decoded=new URL(href,'https://local/'+page.path.split('/').map(encodeURIComponent).join('/')).pathname.slice(1);let path;try{path=decodeURIComponent(decoded)}catch{path=decoded}const id=byPath.get(path);if(id)return {page:id};if(assetPaths.has(path))return {asset:'/local-source/files/'+path.split('/').map(encodeURIComponent).join('/')};return {missing:raw,excluded:excludedPaths.has(path)};}
   // `p` names the page the Markdown belongs to: its title (a matching leading H1 is dropped) and path (relative links resolve against it).
-  function renderMarkdown(markdown,p?:{title?:string;path?:string;localArchive?:boolean}){p={...p,title:p?.title||'',path:p?.path||'page.md'};const article=element('article','notion-prose');
+  function renderMarkdown(markdown,p?:{title?:string;path?:string;localArchive?:boolean;localLink?:(href:string)=>(()=>void)|null}){p={...p,title:p?.title||'',path:p?.path||'page.md'};const article=element('article','notion-prose');
     const lines=markdown.split('\n');let start=lines[0]?.startsWith('# ')?1:0;while(lines[start]==='')start++;let end=start;while(/^[^:\n]{1,48}: .+/.test(lines[end]||''))end++;
     if(end>start&&lines.slice(start,end).some(l=>/^(Created time|Last edited time|AI summary):/.test(l))){const details=element('details','notion-properties');details.append(element('summary','','Original properties'));const dl=element('dl');for(const line of lines.slice(start,end)){const split=line.indexOf(':');dl.append(element('dt','',line.slice(0,split)),element('dd','',line.slice(split+1).trim()))}details.append(dl);article.append(details);lines.splice(start,end-start);markdown=lines.join('\n')}
-    markdown=markdown.replace(/\[\[([^\]\n]+)\]\]/g,(full,title)=>{const matches=[...pages.values()].filter(p=>p.title.toLocaleLowerCase()===title.toLocaleLowerCase());return matches.length===1?'['+title+'](#note='+matches[0].id+')':full;});
+    if(!p.localLink)markdown=markdown.replace(/\[\[([^\]\n]+)\]\]/g,(full,title)=>{const matches=[...pages.values()].filter(p=>p.title.toLocaleLowerCase()===title.toLocaleLowerCase());return matches.length===1?'['+title+'](#note='+matches[0].id+')':full;});
     const clean=DOMPurify.sanitize(marked.parse(markdown) as string,{ALLOWED_TAGS:['p','h1','h2','h3','h4','h5','h6','ul','ol','li','strong','em','del','s','a','img','blockquote','pre','code','hr','br','table','thead','tbody','tr','th','td','details','summary','input','figure','figcaption','span','div'],ALLOWED_ATTR:['href','src','alt','title','type','checked','disabled','start','colspan','rowspan'],RETURN_DOM_FRAGMENT:true});
     // Resolve resources before inserting anything into the live document.
     for(const img of clean.querySelectorAll('img')){const resolved=resolve(img.getAttribute('src')||'',p);if(resolved.asset){img.src=resolved.asset;img.loading='lazy';img.referrerPolicy='no-referrer';img.onerror=()=>img.replaceWith(element('p','notion-attachment-missing','Attachment unavailable: '+(img.alt||'')))}else{img.replaceWith(element('span','notion-attachment-missing',resolved.excluded?'This image exceeds the preview size limit. View it in Notion.':resolved.external?'External image (not included in export)':p.localArchive?'This attachment is in the local export but is not loaded in this view.':'Attachment not included in export'))}}
-    for(const a of clean.querySelectorAll('a')){const resolved=resolve(a.getAttribute('href')||'',p);a.removeAttribute('href');if(resolved.page){a.href='#note='+resolved.page;a.onclick=e=>{e.preventDefault();open(resolved.page)}}else if(resolved.asset){a.href=resolved.asset;a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('download','');if(/\.(mp4|webm|mov|mp3|m4a|ogg|wav)$/i.test(resolved.asset)){const media=element(/\.(mp4|webm|mov)$/i.test(resolved.asset)?'video':'audio');media.controls=true;media.preload='none';media.src=resolved.asset;media.setAttribute('aria-label',a.textContent);a.before(media)}}else if(resolved.external){a.href=resolved.external;a.target='_blank';a.rel='noopener noreferrer'}else{a.className='notion-attachment-missing';a.title=resolved.excluded?'This attachment exceeds the preview size limit. View it in Notion.':'This link target is not included in the local export.';if(resolved.excluded)a.append(element('small','',' · Not loaded'))}}
+    for(const a of clean.querySelectorAll('a')){const href=a.getAttribute('href')||'',local=p.localLink?.(href);if(local){a.onclick=e=>{e.preventDefault();local();};continue;}const resolved:{page?:string;asset?:string;external?:string;missing?:string;excluded?:boolean}=p.localLink?(/^https?:\/\//i.test(href)?{external:href}:{missing:href}):resolve(href,p);a.removeAttribute('href');if(resolved.page){a.href='#note='+resolved.page;a.onclick=e=>{e.preventDefault();open(resolved.page)}}else if(resolved.asset){a.href=resolved.asset;a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('download','');if(/\.(mp4|webm|mov|mp3|m4a|ogg|wav)$/i.test(resolved.asset)){const media=element(/\.(mp4|webm|mov)$/i.test(resolved.asset)?'video':'audio');media.controls=true;media.preload='none';media.src=resolved.asset;media.setAttribute('aria-label',a.textContent);a.before(media)}}else if(resolved.external){a.href=resolved.external;a.target='_blank';a.rel='noopener noreferrer'}else{a.className='notion-attachment-missing';a.title=resolved.excluded?'This attachment exceeds the preview size limit. View it in Notion.':'This link target is not included in the local export.';if(resolved.excluded)a.append(element('small','',' · Not loaded'))}}
     for(const input of clean.querySelectorAll('input')){input.type='checkbox';input.disabled=true;input.closest('li')?.classList.add('notion-check-item');input.setAttribute('aria-label',input.closest('li')?.textContent?.trim()||'Checklist item');}
     for(const table of clean.querySelectorAll('table')){const scroll=element('div','reader-table');scroll.tabIndex=0;scroll.setAttribute('role','region');scroll.setAttribute('aria-label','Table · Scroll horizontally');table.before(scroll);scroll.append(table);}
     // Page title is already rendered by the persistent reader header.
@@ -1980,7 +1992,7 @@ export function mountNotionWorld(data: World, native: any) {
     if(sourceIdentity(data,'gmail')!==sourceIdentity(next,'gmail')){mailIdentityRevision++;mailIdentityReads.clear();mailIdentities.clear();localStageRecords.delete('gmail');}
     const changedReaders=CURATED_READERS.filter(key=>sourceIdentity(data,key)!==sourceIdentity(next,key));
     for(const key of changedReaders)invalidateCurated(key,true);
-    observeMail(next);data=next;askForPictures();buildings.splice(0,buildings.length,...(data.buildings||[]));areas.splice(0,areas.length,...(data.areas||[]));composites.splice(0,composites.length,...(data.viewObjects||[]));const nextSections=data.spaces.map(s=>({...s,virtual:true,kind:'space',parent:null,paths:[],text:'',markdown:''}));
+    observeMail(next);data=next;askForPictures();buildings.splice(0,buildings.length,...(data.buildings||[]).map(b=>({...b,title:themeAreaTitle(regionId(b.id),b.title)})));areas.splice(0,areas.length,...(data.areas||[]));composites.splice(0,composites.length,...(data.viewObjects||[]));const nextSections=data.spaces.map(s=>({...s,virtual:true,kind:'space',parent:null,paths:[],text:'',markdown:''}));
     contentStore.replaceBase(data.pages,nextSections,true);memberOf.clear();for(const section of sections)for(const child of section.children)memberOf.set(child,section.id);
     byPath.clear();for(const p of pages.values())for(const path of p.paths||[])byPath.set(path,p.id);
     if(rebuild){$('notionPins').replaceChildren();for(const k of Object.keys(pins))delete pins[k];}loadSampleLayout();if(rebuild)buildScene();showBoardFigure();if(!rebuild){scene?.setConnections?.(data.moduleConnections||[]);scene?.setAppletLayout?.(data.hiddenApplets,data.appletPositions);scene?.setUnlockedApplets?.(data.unlockedApplets);scene?.refreshContent();}saveRegions();

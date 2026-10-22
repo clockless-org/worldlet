@@ -55,3 +55,6 @@ html:has(.notion-world),body:has(.notion-world){overflow:hidden;overscroll-behav
 .practice-timer>strong{display:block;font-size:clamp(56px,8vw,100px);font-weight:450;font-variant-numeric:tabular-nums;letter-spacing:-.04em;color:var(--ink,#234638);line-height:1.4}
 
 .notion-content[data-template="coding-prototype"] .notion-close{display:none}
+
+/* Practice artifacts stay at World overview. Bundled CSS keeps this rule inside the World's style policy. */
+[data-depth]:not([data-depth='overview']) .practice-local-device,[data-depth]:not([data-depth='overview']) .practice-local-panel{display:none!important}

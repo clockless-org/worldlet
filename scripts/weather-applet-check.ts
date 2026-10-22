@@ -9,15 +9,24 @@ const raw={timezone:'America/Los_Angeles',current:{time:Math.floor(now/1000),tem
 const weather=normalizeWeather(raw,now),place={name:'Test city',latitude:37,longitude:-122};
 assert.equal(forecastParams(place).forecast_days,7);assert.equal(forecastStage(environmentAt(now,weather,place)).items.length,7);assert.equal(forecastStage(environmentAt(now+3*3600000,weather,place)).items.length,0);
 await withBrowser(fileAccess,async browser=>{
- const page=await browser.newPage({viewport:{width:1440,height:1000},reducedMotion:'reduce'}),errors=pageErrors(page,{console:true});
+ const page=await browser.newPage({viewport:{width:1500,height:844},reducedMotion:'reduce'}),errors=pageErrors(page,{console:true});
  await page.addInitScript(({weather,place,raw})=>{
   window.calls=[];(window as any).offline=false;
-  window.webkit={messageHandlers:{worldlet:{async postMessage(b){calls.push(b);if(b.action==='snapshot')return {workspaceId:'weather-test',revision:0,sources:[],knowledge:[],worldItems:[],connections:[],onboarding:{completed:true,unlockedApplets:['app-gmail'],hiddenApplets:['app-weather']},cloudConsent:false,sampleEnabled:false};if(b.action==='weatherLoad')return location.search.includes('fresh')?null:{weather,place};if(b.action==='weatherLocate')return place;if(b.action==='weatherRequest'){if((window as any).offline)throw Error('Offline');return raw;}if(b.action==='modelStatus')return {available:true};return {ok:true};}}}};
+  window.webkit={messageHandlers:{worldlet:{async postMessage(b){calls.push(b);if(b.action==='snapshot')return {workspaceId:'weather-test',revision:0,sources:[],knowledge:[],worldItems:[],connections:[],onboarding:{completed:true,unlockedApplets:['app-gmail'],hiddenApplets:['app-weather']},cloudConsent:false,sampleEnabled:location.search.includes('sample')};if(b.action==='weatherLoad')return location.search.includes('fresh')?null:{weather,place};if(b.action==='weatherLocate')return place;if(b.action==='weatherRequest'){if((window as any).offline)throw Error('Offline');return raw;}if(b.action==='modelStatus')return {available:true};return {ok:true};}}}};
  },{weather,place,raw});
  const url=worldUrl();
  async function readerClear(){
+  const material=await page.evaluate(()=>{
+   const root=document.documentElement,fonts=root.dataset.themeFonts,skins=root.dataset.themeSkin,style=root.style.cssText;
+   root.dataset.themeFonts='display';root.dataset.themeSkin='card';root.style.setProperty('--theme-font-display','monospace');root.style.setProperty('--theme-skin-card-width','8px');
+   const panel=getComputedStyle(document.querySelector('.weather-panel')!),heading=getComputedStyle(document.querySelector('.weather-panel .ui-title')!);const result={panelFont:panel.fontFamily,titleFont:heading.fontFamily,border:panel.borderTopWidth};
+   if(fonts===undefined)delete root.dataset.themeFonts;else root.dataset.themeFonts=fonts;if(skins===undefined)delete root.dataset.themeSkin;else root.dataset.themeSkin=skins;root.style.cssText=style;return result;
+  });assert.equal(material.titleFont,material.panelFont,'the measured board retains its material font under shared display typography');assert.equal(material.border,'0px','shared card skins do not insert another rim inside the measured board');
   const reader=await page.locator('.weather-panel').boundingBox();
-  const viewport=page.viewportSize();if(viewport.width>800)assert(Math.abs(reader.x-64)<2&&Math.abs(reader.y-64)<2&&Math.abs(viewport.height-reader.y-reader.height-64)<2,'Weather equal top/left/bottom Focus gutters: '+JSON.stringify({reader,viewport}));
+  const detail=await page.locator('.weather-selected-day').boundingBox(),footer=await page.locator('.weather-panel .ui-applet-footer').boundingBox();assert(detail&&footer&&detail.y+detail.height<=footer.y+1,'Selected forecast details remain visible above footer');
+  const factRows=await page.locator('.weather-selected-day .ui-facts>div').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));assert.ok(factRows.every(r=>r.bottom<=footer.y+1),'all forecast fact rows clear the footer');for(let i=1;i<factRows.length;i++)assert.ok(factRows[i].top-factRows[i-1].bottom>=3,'forecast facts have visible line spacing');
+  assert(await page.locator('.weather-temperature').evaluate(e=>parseFloat(getComputedStyle(e).fontSize)>48),'Current temperature keeps its visual hierarchy');
+  const viewport=page.viewportSize();assert(reader.x>=0&&reader.y>=0&&reader.x+reader.width<=viewport.width&&reader.y+reader.height<=viewport.height,'Weather fits its painted scene');assert.equal(await page.locator('#notionWorld').getAttribute('data-panel-scene'),'weather');
   for(const selector of ['.companion-dialogue','.companion-avatar','.world-actions .world-capsule','.applet-bar-side button','.companion-text-entry']){
    for(const control of await page.locator(selector).all()){
     if(!await control.isVisible())continue;
@@ -48,28 +57,23 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await page.evaluate(()=>calls.filter(c=>c.action==='weatherLocate').length),1,'opening forecast does not request location again');
  assert.equal(await page.evaluate(()=>document.querySelector<any>('#notionWorld').sceneMetrics.active),'app-weather','forecast opens without ground installation');
  await page.locator('.weather-forecast-row').nth(2).click();assert.match(await page.locator('.weather-selected-day').innerText(),/80%/);
- assert.equal(await page.locator('.weather-forecast-list').count(),0);await page.getByRole('button',{name:'Back to forecast',exact:true}).click();
+ assert.equal(await page.locator('.weather-forecast-row').count(),7);assert.equal(await page.locator('.weather-forecast-row').nth(2).getAttribute('aria-pressed'),'true');
  await page.evaluate(()=>window.worldletExecute('set_scene_lighting',{lighting:'day'}));await page.waitForTimeout(2600);await page.screenshot({path:'/tmp/weather-village-day.png'});
  await page.evaluate(()=>window.worldletExecute('set_scene_weather',{weather:'snow'}));assert.match(await page.locator('.weather-current').innerText(),/Clear/,'visual weather does not replace real forecast');
  await page.evaluate(()=>window.worldletExecute('set_scene_lighting',{lighting:'night'}));await page.waitForTimeout(2600);await page.screenshot({path:'/tmp/weather-village-night.png'});
  await readerClear();
- await page.setViewportSize({width:900,height:650});
- const footerBefore=await page.locator('.weather-panel .ui-applet-footer').boundingBox();
- await page.locator('.weather-forecast-row').last().scrollIntoViewIfNeeded();
- const footerAfter=await page.locator('.weather-panel .ui-applet-footer').boundingBox();assert(Math.abs(footerBefore.y-footerAfter.y)<1,'Refresh stays fixed while forecast scrolls');
- assert(await page.locator('.weather-panel .ui-applet-body').evaluate(e=>e.scrollTop>0));
- assert(await page.locator('#notionContent').evaluate(e=>e.scrollTop===0&&e.scrollHeight<=e.clientHeight+1),'No outer weather scroll');
- const readingPosition=await page.locator('.weather-panel .ui-applet-body').evaluate(e=>e.scrollTop);
- await page.locator('.weather-forecast-row').last().click();await page.getByRole('button',{name:'Back to forecast',exact:true}).click();
- assert(Math.abs(await page.locator('.weather-panel .ui-applet-body').evaluate(e=>e.scrollTop)-readingPosition)<2,'Returning from details preserves reading position');
- await page.screenshot({path:'/tmp/weather-scroll-compact.png'});
- await readerClear();
- await page.setViewportSize({width:390,height:844});const bounds=await page.locator('.weather-panel').boundingBox();assert(bounds.x>=0&&bounds.x+bounds.width<=391);assert.equal(await page.locator('.weather-forecast-row').count(),7);await page.screenshot({path:'/tmp/weather-village-narrow.png'});
- await readerClear();
- await page.locator('.weather-forecast-row').last().click();await page.getByRole('button',{name:'Back to forecast',exact:true}).click();
+ await page.locator('.weather-forecast-row').last().focus();await page.keyboard.press('Enter');assert.equal(await page.locator('.weather-forecast-row').last().getAttribute('aria-pressed'),'true');
+ for(const index of [0,6]){const card=page.locator('.weather-forecast-row').nth(index);await card.focus();await page.keyboard.press('Enter');const focus=await card.evaluate(e=>{const r=e.getBoundingClientRect(),clip=e.closest('.ui-applet-body')!.getBoundingClientRect(),c=getComputedStyle(e),outset=Math.max(0,parseFloat(c.outlineWidth)+parseFloat(c.outlineOffset));return {left:r.left-outset,right:r.right+outset,clipLeft:clip.left,clipRight:clip.right,visible:e.matches(':focus-visible')};});assert.ok(focus.visible&&focus.left>=focus.clipLeft-1&&focus.right<=focus.clipRight+1,'first and last forecast focus rings stay inside the scrolling surface');}
+
  await page.evaluate(()=>(window as any).offline=true);await page.getByRole('button',{name:'Refresh',exact:true}).click();await page.getByRole('alert').filter({hasText:'Offline'}).waitFor();
  await page.locator('#notionBack').click();
  await page.waitForFunction(()=>document.querySelector('#notionWorld')?.getAttribute('data-depth')!=='object');
  assert.equal(await page.locator('.browser-viewport').count(),0);assert.deepEqual(errors,[]);
- console.log('PASS first-click location, next-click Weather without ground installation, seven days, selection, real/scene separation, night/narrow and refresh failure. Fixture only.');
+ await page.goto(url+'?sample#object=app-weather');await waitForWorld(page);await page.locator('.weather-panel[data-layout=board]').waitFor();
+ assert.match(await page.locator('.weather-panel').innerText(),/Demo weather · Not a live forecast/);
+ assert.equal(await page.locator('.weather-forecast-row').count(),7);await page.locator('.weather-forecast-row').nth(2).click();assert.match(await page.locator('.weather-selected-day').innerText(),/80%/);
+ assert.equal(await page.evaluate(()=>calls.filter(c=>c.action==='weatherLocate'||c.action==='weatherRequest').length),0,'Sample panel never queries personal weather');
+ await page.getByRole('button',{name:'Refresh',exact:true}).click();assert.equal(await page.evaluate(()=>calls.filter(c=>c.action==='weatherLocate'||c.action==='weatherRequest').length),0);
+ await page.screenshot({path:'/tmp/weather-sample-board.png'});assert.deepEqual(errors,[]);
+ console.log('PASS first-click location, next-click Weather without ground installation, seven days, persistent selection, real/scene separation, day/night and refresh failure at 1500 × 844. Fixture only.');
 });

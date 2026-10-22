@@ -64,3 +64,52 @@
 /* World typography sets fonts directly on descendants; keep that from flattening Notes typography. */
 .notes-notebook :where(button,input,p,span,strong,small,time,div,section,article,nav,header,h1,h2,h3,li,td,th,a,label){font-family:inherit}
 .notes-notebook .notes-prose p{font-size:inherit}
+
+/* Separate, measured notebook leaves keep the original reader and search controls live. */
+.applet-scene .notes-region{padding:0;gap:0;background:none;border:0;border-radius:0;overflow:hidden;container-type:normal;backdrop-filter:none}
+.notes-region .notes-distributed{font:400 18px/1.45 var(--scene-body-font,Arial,sans-serif)}
+.notes-region .notes-distributed :where(button,input,p,span,strong,small,time,div,section,article,nav,header,h1,h2,h3,li,td,th,a,label){font-family:inherit}
+.notes-region .notes-header{height:100%;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto 34px;gap:10px;padding:0}
+.notes-region .notes-header h2{font:600 26px/1.2 var(--scene-body-font,Arial,sans-serif);margin:0;grid-column:1}
+.notes-region .notes-header>.notes-control{grid-column:2;grid-row:1;font-size:16px;padding:3px;min-height:28px;background:none;border:0;box-shadow:none}
+.notes-region .notes-searchbox{grid-column:1/-1;grid-row:2;width:auto;padding:4px 10px;border-radius:7px;background:color-mix(in srgb,var(--scene-control) 40%,transparent);box-shadow:none;font-size:16px}
+.notes-region .notes-index{height:100%;padding:0;gap:7px}
+.notes-region .notes-folders:empty{display:none}
+.notes-region .notes-folders{padding:0;font-size:13px}
+.notes-region .notes-list{padding:0;flex:1}
+.notes-region .notes-row{min-height:44px;padding:10px 12px;border-bottom:1px solid color-mix(in srgb,var(--scene-line) 45%,transparent)}
+.notes-region .notes-row[aria-pressed=true]{border:0;border-left:3px solid var(--scene-accent);border-radius:4px;background:color-mix(in srgb,var(--scene-accent) 17%,transparent);box-shadow:none;padding-left:9px}
+.notes-region .notes-note-stamp,.notes-region .notes-snippet,.notes-region .notes-note-copy small{display:none}
+.notes-region .notes-note-copy strong{font-weight:400}.notes-region .notes-row[aria-pressed=true] strong{font-weight:600}
+.notes-region .notes-page{display:flex;padding:0;height:100%;flex:1}
+.notes-region .notes-title{font:700 32px/1.2 var(--scene-body-font,Arial,sans-serif);margin:0 0 4px;max-height:2.4em}
+.notes-region .notes-source{font-size:15px;margin:0 0 22px;color:var(--scene-muted)}
+.notes-region .notes-prose{font-size:18px;padding:0 8px 0 0}
+.notes-region .notes-prose :is(p,ul,ol){line-height:1.5;margin:.3em 0 1.1em}
+.notes-region .notes-footer{margin:0 0 7px;gap:10px;font-size:13px}
+.notes-region .notes-tools{gap:8px}.notes-region .notes-folder-tag{display:none}
+.notes-region .notes-tools .notes-control{border:0;border-radius:0;padding:2px;background:none;box-shadow:none;text-decoration:underline;text-underline-offset:3px}
+.notes-region[data-region=status]{border-top:1px solid color-mix(in srgb,var(--scene-line) 50%,transparent);padding-top:8px}
+.notes-region .notes-scope,.notes-region .notes-connection{font-size:13px;line-height:1.45;margin:0 0 7px;color:var(--scene-muted)}
+.applet-scene .applet-scene-region.notes-region[data-region]{align-items:stretch;justify-content:flex-start;text-align:left;padding:0;gap:0}
+.notes-region .notes-distributed{width:100%}
+.notes-region .notes-demo{font-weight:400}
+.notes-region .notes-prose li{margin:0;line-height:1.5}
+.notes-region .notes-prose p:has(+ul),.notes-region .notes-prose p:has(+ol){margin-bottom:4px}
+.notes-region .notes-prose :is(ul,ol){margin-top:0;padding-left:25px}
+.applet-scene .applet-scene-region.notes-region[data-region=status]{padding-top:8px}
+/* The explicit source route retains the notebook and uses the same live reading plane. */
+#notionWorld[data-applet-scene=apple-notes] #notionContent[data-applet=apple-notes]{left:var(--applet-scene-primary-left);top:var(--applet-scene-primary-top);width:var(--applet-scene-primary-width);height:var(--applet-scene-primary-height);right:auto;bottom:auto;max-width:none;max-height:none;min-height:0;margin:0;padding:0;scrollbar-gutter:auto;background:none;border:0;border-radius:0;box-shadow:none;backdrop-filter:none;transform:var(--applet-scene-primary-transform,none);transform-origin:0 0;color:var(--scene-ink);font-family:var(--scene-body-font);overflow:auto}
+#notionWorld[data-applet-scene=apple-notes] #notionContent[data-applet=apple-notes] :is(.notion-reader-head,.app-source-body){width:100%;max-width:none;margin:0;padding:0}
+#notionWorld[data-applet-scene=apple-notes] #notionContent[data-applet=apple-notes] .notion-reader-head{border:0;margin-bottom:18px}
+#notionWorld[data-applet-scene=apple-notes] #notionContent[data-applet=apple-notes] .notion-reader-head h1{font:700 30px/1.2 var(--scene-body-font);text-wrap:wrap;letter-spacing:normal}
+#notionWorld[data-applet-scene=apple-notes] #notionContent[data-applet=apple-notes] .notion-prose{font:400 18px/1.5 var(--scene-body-font);color:var(--scene-ink)}
+#notionWorld[data-applet-scene=apple-notes] #notionContent[data-applet=apple-notes] .notion-prose :is(h1,h2,h3,h4,h5,h6){font-family:var(--scene-body-font);color:inherit}
+#notionWorld[data-applet-scene=apple-notes] #notionContent[data-applet=apple-notes] .notion-eyebrow{font:400 13px/1.4 var(--scene-body-font);color:var(--scene-muted);margin:0 0 5px}
+#notionWorld[data-applet-scene=apple-notes] .pixi-selected-item[data-applet=apple-notes]{left:var(--applet-scene-primary-left);top:calc(var(--applet-scene-primary-top) + var(--applet-scene-primary-height) + 20px);width:var(--applet-scene-primary-width);height:32px;max-height:32px;margin:0;padding:0;background:none;border:0;box-shadow:none;transform:none;color:var(--scene-ink)}
+#notionWorld[data-applet-scene=apple-notes] .pixi-selected-item[data-applet=apple-notes]>:not(nav){display:none}
+#notionWorld[data-applet-scene=apple-notes] .pixi-selected-item .pixi-focus-switch{position:static;display:flex;justify-content:flex-end;gap:8px;margin:0}
+#notionWorld[data-applet-scene=apple-notes] .pixi-selected-item .pixi-focus-switch button{position:static;transform:none;width:32px;height:32px;padding:0;font-size:24px;border-radius:4px;background:var(--scene-control);color:var(--scene-ink);box-shadow:none}
+#notionWorld .pixi-applet-stage[data-scene=apple-notes][data-reading=true] :is(.notes-searchbox,.notes-header>.notes-control,.notes-folders,.notes-region[data-region=status]){visibility:hidden}
+#notionWorld[data-applet-scene=apple-notes] #notionContent[data-applet=apple-notes] .notion-reader-head h1{color:var(--scene-ink)}
+#notionWorld[data-applet-scene=apple-notes] #notionContent[data-applet=apple-notes] .notion-prose li::marker{color:var(--scene-muted)}

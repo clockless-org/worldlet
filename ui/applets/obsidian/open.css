@@ -1,0 +1,26 @@
+#notionWorld .applet-scene .vault-region{padding:0;gap:10px;align-items:stretch;justify-content:flex-start;text-align:left;overflow:auto;font:16px/1.5 var(--scene-body-font);color:var(--scene-ink)}
+#notionWorld .vault-region :is(h1,h2,h3,p){margin:0;color:var(--scene-ink)}
+#notionWorld .vault-region h1{font:700 30px/1.2 var(--scene-body-font)}
+#notionWorld .vault-region h2{font:600 28px/1.2 var(--scene-display-font)}
+#notionWorld .vault-region h3{font:600 20px/1.3 var(--scene-body-font)}
+#notionWorld .applet-scene .vault-region[data-region=vault-heading]{display:flex;flex-direction:row;align-items:center;gap:16px;overflow:hidden}
+#notionWorld .vault-logo{display:flex;width:32px;height:36px;flex:none}
+#notionWorld .vault-logo :is(svg,img){width:100%;height:100%;object-fit:contain}
+#notionWorld .vault-caption,#notionWorld .vault-path{font:14px/1.4 var(--scene-body-font);color:var(--scene-muted)}
+#notionWorld .applet-scene .vault-region[data-region=vault-toolbar]{display:flex;flex-direction:row;align-items:center;gap:12px;overflow:hidden}
+#notionWorld .vault-region[data-region=vault-toolbar] .vault-caption{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#notionWorld .vault-region[data-region=vault-toolbar] button{flex:none}
+#notionWorld .vault-region input{width:100%;box-sizing:border-box;min-height:34px;padding:6px 10px;border:1px solid var(--scene-line);border-radius:5px;background:color-mix(in srgb,var(--scene-control) 50%,transparent);color:var(--scene-ink);font:inherit}
+#notionWorld .vault-tree,#notionWorld .vault-body{min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+#notionWorld .vault-folder{padding:0;margin:4px 0 4px 10px;border:0;background:none;box-shadow:none}
+#notionWorld .vault-folder summary{padding:4px 0;cursor:pointer;color:var(--scene-ink);font:600 15px/1.4 var(--scene-body-font)}
+#notionWorld .applet-scene .vault-note{display:block;width:100%;height:auto;min-height:36px;margin:4px 0;padding:6px 10px;border:1px solid transparent;border-radius:5px;background:none;color:var(--scene-ink);text-align:left;white-space:normal;overflow-wrap:anywhere;font:14px/1.4 var(--scene-body-font);cursor:pointer}
+#notionWorld .applet-scene .vault-note[aria-pressed=true]{background:color-mix(in srgb,var(--scene-accent) 18%,transparent);border-color:var(--scene-line)}
+#notionWorld .vault-related{display:grid;gap:10px;align-content:start;overflow:auto}
+#notionWorld .applet-scene .vault-linked-note{display:grid;gap:4px;width:100%;height:auto;min-height:56px;padding:10px 12px;border:1px solid var(--scene-line);border-radius:6px;background:color-mix(in srgb,var(--scene-control) 35%,transparent);text-align:left;color:var(--scene-ink);font:600 16px/1.4 var(--scene-body-font);cursor:pointer}
+#notionWorld .vault-linked-note small{font:12px/1.4 var(--scene-body-font);color:var(--scene-muted);overflow-wrap:anywhere}
+#notionWorld .vault-body .notion-prose{font:16px/1.65 var(--scene-body-font);color:var(--scene-ink)}
+#notionWorld .vault-body .notion-prose :is(h2,h3){font:600 23px/1.3 var(--scene-body-font);margin:22px 0 12px}
+#notionWorld .vault-body .notion-prose p{margin:0 0 14px}
+#notionWorld .vault-body .notion-prose a{color:var(--scene-accent);text-decoration:underline;cursor:pointer}
+#notionWorld.native-console[data-applet-companion-bar=true]:has(.vault-region)>.applet-shelf{left:16px;width:clamp(80px,calc(var(--applet-scene-content-left) - 32px),280px)}

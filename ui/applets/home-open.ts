@@ -1,7 +1,9 @@
+import type {AppletSceneRegion} from './scene/applet-scene.ts';
 import {renderRemindersOpen} from './apple-reminders/open.ts';
 import {renderNotesOpen} from './apple-notes/open.ts';
 import {attentionIcon} from '../attention/index.ts';
 import {node} from '../style/index.ts';
+import {calendarRegions} from './google-calendar/regions.ts';
 import {renderCalendar,type CalendarState} from './google-calendar/grid.ts';
 export {localCalendarItems} from './google-calendar/grid.ts';
 export type HomeOpenState=CalendarState;
@@ -12,9 +14,10 @@ export function calendarWindow(now:number,mode:HomeOpenState['mode'],offset:numb
  const count=mode==='month'?new Date(start.getFullYear(),start.getMonth()+1,0).getDate():mode==='week'?7:1;
  return Array.from({length:count},(_,i)=>{const d=new Date(start);d.setDate(d.getDate()+i);return d;});
 }
-export function renderHomeOpen(panel,room,items,value,state:HomeOpenState,pick,redraw){
- if(room.key==='apple-reminders')return renderRemindersOpen(panel,items,value,state,pick);
- if(room.key==='apple-notes')return renderNotesOpen(panel,items,value,state,pick);
+export function renderHomeOpen(panel,room,items,value,state:HomeOpenState,pick,redraw,regions:readonly AppletSceneRegion[]=[]){
+ if(room.key==='apple-reminders')return renderRemindersOpen(panel,items,value,state,pick,regions);
+ if(room.key==='apple-notes')return renderNotesOpen(panel,items,value,state,pick,regions);
+ const slots=room.key==='google-calendar'?calendarRegions(panel,regions):null;
  const calendar=room.key==='google-calendar',notes=room.key==='apple-notes';panel.classList.add('home-open');
  panel.dataset.homeKind=calendar?'calendar':notes?'notes':'reminders';panel.dataset.calendarMode=state.mode;
  const sheet=node('section','home-open-sheet'),header=node('header','home-open-header'),title=node('h2','',room.title);panel.append(sheet);sheet.append(header);header.append(title);
@@ -26,18 +29,24 @@ export function renderHomeOpen(panel,room,items,value,state:HomeOpenState,pick,r
   if(!calendar&&!notes)button.append(node('span','home-task-check','○'));
   const text=node('span','home-leaf-text');text.append(node('strong','',item.title));
   const meta=calendar?(item.allDay?'All day':item.start?new Date(item.start).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}):'Time not set'):[item.record?.folder||item.record?.list,item.when].filter(Boolean).join(' · ');
-  if(meta)text.append(node('small','',meta));
+  const end=slots&&item.end&&!item.allDay?new Date(item.end):null;
+  if(meta)text.append(node('small','',meta+(end&&!Number.isNaN(+end)?' – '+end.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}):'')));
   if(notes&&(item.summary||item.context))text.append(node('p','',item.summary||item.context));
   button.append(text);button.onclick=()=>pick(item);shown.push(item);return button;
  }
  if(calendar){
   const modes=node('nav','home-calendar-modes');modes.setAttribute('aria-label','Calendar view');
-  for(const mode of ['day','week','month'] as const){const b=node('button','',mode[0].toUpperCase()+mode.slice(1));b.type='button';b.setAttribute('aria-pressed',String(state.mode===mode));b.onclick=()=>{state.mode=mode;state.offset=0;state.editing=null;redraw();};modes.append(b);}header.append(modes);
+  for(const mode of ['day','week','month'] as const){const b=node('button','',mode[0].toUpperCase()+mode.slice(1));b.type='button';b.setAttribute('aria-pressed',String(state.mode===mode));b.onclick=()=>{state.mode=mode;state.offset=0;state.editing=null;state.scrollX=null;redraw();};modes.append(b);}header.append(modes);
   const days=calendarWindow(value?.now||Date.now(),state.mode,state.offset),nav=node('nav','home-calendar-navigation');nav.setAttribute('aria-label','Calendar dates');
-  for(const [label,delta] of [['Previous',-1],['Next',1]] as const){const b=node('button','',delta<0?'‹':'›');b.type='button';b.setAttribute('aria-label',label+' '+state.mode);b.onclick=()=>{state.offset+=delta;state.editing=null;redraw();};nav.append(b);}
+  for(const [label,delta] of [['Previous',-1],['Next',1]] as const){const b=node('button','',delta<0?'‹':'›');b.type='button';b.setAttribute('aria-label',label+' '+state.mode);b.onclick=()=>{state.offset+=delta;state.editing=null;state.scrollX=null;redraw();};nav.append(b);}
   title.textContent=days[0].toLocaleDateString(undefined,{month:'long',year:'numeric'});
   const period=node('strong','',state.mode==='month'?days[0].toLocaleDateString(undefined,{month:'long',year:'numeric'}):days[0].toLocaleDateString(undefined,{month:'short',day:'numeric'})+(state.mode==='week'?' – '+days[6].toLocaleDateString(undefined,{month:'short',day:'numeric'}):''));nav.insertBefore(period,nav.lastChild);sheet.insertBefore(nav,body);
-  renderCalendar({sheet,nav,body,items,value,state,days,itemButton,redraw});
+  if(slots){
+   const label=node('strong','calendar-book-label',value?.sample?'Calendar · Demo':'Calendar');header.prepend(label);header.removeChild(modes);slots.heading.append(header);slots.toolbar.append(nav,modes);nav.querySelector('strong')?.remove();
+  }
+  renderCalendar({sheet,nav,body,items,value,state,days,itemButton,redraw,details:slots?.details,status:slots?.status});
+  if(slots){const add=nav.querySelector('.home-calendar-add');if(add)slots.toolbar.append(add);}
+
  }else{
   const ordered=[...items].sort((a,b)=>Number(!!b.attention)-Number(!!a.attention));for(const item of ordered)body.append(itemButton(item));
  }

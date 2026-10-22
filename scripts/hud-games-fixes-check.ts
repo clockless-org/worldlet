@@ -41,6 +41,7 @@ let frames:((now:number)=>void)[]=[];
 g.requestAnimationFrame=(fn:(now:number)=>void)=>{frames.push(fn);return frames.length;};
 g.cancelAnimationFrame=()=>{frames=[];};
 const doc=new FakeEl('document') as any;doc.hidden=false;doc.documentElement=new FakeEl('html');doc.documentElement.style.removeProperty=()=>{};
+doc.createTextNode=(text:string)=>({textContent:text});
 doc.createElement=(tag:string)=>{const e=new FakeEl(tag) as any;if(tag==='canvas')e.getContext=()=>ctx;return e;};
 g.document=doc;
 const win=new FakeEl('window');g.window=Object.assign(win,{setTimeout:g.setTimeout,clearTimeout:g.clearTimeout,dispatchEvent(){}});
@@ -79,6 +80,7 @@ const win=new FakeEl('window');g.window=Object.assign(win,{setTimeout:g.setTimeo
  assert.equal(b.dataset.state,'flag');
  board.fire('click',{target:b});
  assert.equal(b.dataset.state,'flag','the click that ends a long press is still swallowed');
+ game.dispose?.();assert.equal(doc.count('visibilitychange'),0,'leaving Minesweeper removes its clock listener');
 }
 
 // 3. Snake: filling the whole bed ends the game with no apple drawn on the snake.
@@ -103,16 +105,17 @@ const win=new FakeEl('window');g.window=Object.assign(win,{setTimeout:g.setTimeo
   if(rects.filter(r=>r.r===6||r.r===8).length===N*N){
    // The frame in which the snake first fills the bed: the game has ended and no apple is drawn on it.
    full=true;
-   assert.equal(board.dataset.state,'over','a full bed ends the game at once');
+   assert.equal(board.dataset.state,'won','a full bed wins at once');
    assert.equal(rects.filter(r=>r.fill==='#c8553d').length,0,'no apple is drawn on the full snake');
    break;
   }
   if(board.dataset.state!=='playing')break;
+  if(!rects.length)continue;
   const d=want(head());if(d[0]!==dir[0]||d[1]!==dir[1]){dir=d;board.fire('keydown',{key:key(d)});}
  }
  Math.random=random;
  assert.ok(full,'the snake fills the whole bed');
- assert.match(statusLine,/^Game over · Apples 321 /,'every free cell was eaten and the end is told');
+ assert.match(statusLine,/^Board complete · Apples 321 /,'every free cell was eaten and the end is told');game.dispose?.();
 }
 
 // 4. Practice walkthrough: blocked storage and a missing stage do not throw.

@@ -47,6 +47,18 @@ try{
   assert.equal(got.letters,1);
  }
  await page.setViewportSize({width:1920,height:1080});
+ // A layout while the host is part-way through an entrance zoom must not freeze that visual offset.
+ await mount('gmail',source);
+ const moving=await page.evaluate(()=>{
+  const host=document.getElementById('host')!;host.style.left='24px';host.style.top='12px';
+  const a=host.animate([{scale:'.6',transformOrigin:'1700px 950px'},{scale:'1',transformOrigin:'1700px 950px'}],{duration:1000,fill:'both'});
+  a.pause();a.currentTime=400;(window as any).scene.layout();
+  const shell=document.getElementById('shell')!,metrics=(window as any).scene.metrics;
+  const actual={x:parseFloat(shell.style.getPropertyValue('--applet-scene-primary-left')),y:parseFloat(shell.style.getPropertyValue('--applet-scene-primary-top'))};
+  a.cancel();host.style.left='0px';host.style.top='0px';
+  return {actual,expected:{x:24+metrics.primary.x,y:12+metrics.primary.y}};
+ });
+ assert.ok(Math.abs(moving.actual.x-moving.expected.x)<=1&&Math.abs(moving.actual.y-moving.expected.y)<=1,'Layout during a zoom keeps shell content aligned: '+JSON.stringify(moving));
  // The same Mail on another painting: only the theme's data changed.
  const browserScene=village.appletScenes.browser;
  await mount('gmail',{background:browserScene.background,registration:browserScene.registration});
