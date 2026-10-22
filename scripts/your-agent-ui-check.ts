@@ -10,7 +10,7 @@ import {pageErrors,worldUrl,waitForWorld,SETTINGS_BUTTON} from './browser-test.t
 const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try{
  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'}),errors=pageErrors(page);
- await page.addInitScript(()=>{const w=window as any;w.calls=[];w.source={source:'own',ready:true,name:'claude-sonnet',provider:'anthropic'};
+ await page.addInitScript(()=>{const w=window as any;w.calls=[];w.copied=[];Object.defineProperty(navigator,'clipboard',{value:{writeText:async(text:string)=>{w.copied.push(text);}}});w.source={source:'own',ready:true,name:'claude-sonnet',provider:'anthropic'};
   // Settings › Agents (agent/gate/GRANTS.md): one Agent with its default Grants and newest decisions.
   w.access=[{id:'hermes',name:'Hermes Agent',harness:'hermes',kind:'local',createdAt:'2026-10-01T09:00:00.000Z',lastSeenAt:'2026-10-14T18:30:00.000Z',
    grants:[{id:'hermes-channel-read',agentId:'hermes',targets:['items/query','history/query','companion/recall','meetings/decisions','gmail/draft','gmail/read','google-calendar/read','apple-notes/read','todoist/read','applet:mail/read'],access:'read',duration:'standing',grantedAt:'2026-10-01T09:00:00.000Z'},
@@ -87,9 +87,9 @@ try{
   // Your World's address (agent/gate/WORLD-ADDRESS.md): the page sends a name, a share choice or an ID, nothing else.
   if(b.action==='worldAddress'){
    const a=w.address??={name:'w-7k3m9p2x',defaultName:'w-7k3m9p2x',chosen:false,reachable:true,remote:true,devices:[],visitors:[],shares:[]};
-   const out=()=>({...a,...a.name?{address:'https://'+a.name+'.worldlet.ai'}:{},shares:a.shares.map(s=>({...s,...a.name?{link:'https://'+a.name+'.worldlet.ai/s/'+s.id}:{}}))});
+   const out=()=>({...a,...a.name?{address:'https://'+a.name+'.worldlet.ai',mcp:'https://'+a.name+'.worldlet.ai/mcp'}:{},shares:a.shares.map(s=>({...s,...a.name?{link:'https://'+a.name+'.worldlet.ai/s/'+s.id}:{}}))});
    if(b.operation==='check')return {name:String(b.name).trim().toLowerCase(),valid:/^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/.test(String(b.name).trim().toLowerCase()),available:String(b.name).trim()!=='taken'};
-   if(b.operation==='claim'){a.name=String(b.name).trim().toLowerCase();a.chosen=true;a.reachable=true;a.devices=[{id:'pk1',name:'Chrome on Mac',addedAt:'2026-10-18T12:00:00.000Z'}];a.visitors=[{id:'v1',name:'Sam',sees:['Board'],seenAt:'2026-10-18T13:00:00.000Z'}];return out();}
+   if(b.operation==='claim'){a.name=String(b.name).trim().toLowerCase();a.chosen=true;a.reachable=true;a.devices=[{id:'pk1',name:'Chrome on Mac',addedAt:'2026-10-18T12:00:00.000Z'}];a.visitors=[{id:'v1',name:'Sam',sees:['Board'],seenAt:'2026-10-18T13:00:00.000Z'}];a.shares=[{id:'share0AAAAAAAAAAAAAAA',title:'Board',open:true,people:0}];return out();}
    if(b.operation==='share'){a.shares.push({id:'share'+a.shares.length+'AAAAAAAAAAAAAAA',title:'Board',open:b.open===true,people:0});return out();}
    if(b.operation==='unshare'){a.shares=a.shares.filter(s=>s.id!==b.id);return out();}
    if(b.operation==='remove'){a.devices=a.devices.filter(d=>d.id!==b.id);a.visitors=a.visitors.filter(v=>v.id!==b.id);return out();}
@@ -129,21 +129,21 @@ try{
  assert.equal(await settingsPage.locator('[data-setting=agents]').getAttribute('aria-current'),'true','Settings opens on Agents');
  assert.equal(await page.locator('#companionInfo [data-section=Energy]').count(),0,'no Energy page');
  const local=settingsPage.locator('.companion-settings-detail');
- // Your own Agent is first on the list; Open shows its own page.
+ // Your own Agent is first on the list; Manage shows its own page.
  await local.locator('[data-part=access] [data-access-agent]').first().waitFor();
  assert.equal(await local.locator('[data-part=access] [data-access-agent]').first().getAttribute('data-access-agent'),'hermes','your own Agent first');
  await local.locator('[data-access-agent=hermes]').getByRole('button',{name:'Manage',exact:true}).click();
  await local.locator('[data-view=own-agent]').waitFor();
- await local.locator('details[data-own-advanced] > summary').click();
  await local.getByText('Fox’s model is connected',{exact:true}).waitFor();
+ assert.equal(await local.locator('details').count(),0,'nothing folded');
  // The Accounts section is part of this page now: Settings lists no section of its own for it.
  assert.equal(await settingsPage.locator('[data-setting=integrations]').count(),0,'no Accounts section');
- const permissions=local.locator('[data-part=permissions]'),accounts=local.locator('[data-part=accounts]');
- // Five named parts in the owner's order (2026-10-11 and 2026-10-21, issue #674), each a heading and one plain line.
- assert.deepEqual(await local.locator('[data-part]').evaluateAll(parts=>parts.map(p=>(p as HTMLElement).dataset.part)),['model','routines','skills','permissions','accounts'],'Status, Scheduled, then Skills, Permissions and Connections under Advanced');
- assert.deepEqual(await local.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Status','Scheduled','Skills','Permissions','Connections']);
+ const permissions=local.locator('[data-part=permissions]'),mayPart=local.locator('[data-part=may]');
+ // Four named parts in the owner's order (2026-10-11, 2026-10-21 and 2026-10-22, issue #674), each a heading and one plain line.
+ assert.deepEqual(await local.locator('[data-part]').evaluateAll(parts=>parts.map(p=>(p as HTMLElement).dataset.part)),['model','routines','permissions','may'],'Status, Scheduled, Does without asking, What it may do');
+ assert.deepEqual(await local.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Status','Scheduled','Does without asking','What it may do']);
  for(const line of await local.locator('[data-part] > .companion-settings-partnote').allTextContents())assert.ok(line.length>20&&line.length<160&&!line.includes('\n'),'one plain line: '+line);
- assert.equal(await local.locator('[data-part] > .companion-settings-partnote').count(),5,'each part has its line');
+ assert.equal(await local.locator('[data-part] > .companion-settings-partnote').count(),4,'each part has its line');
  // Memory, in Context: what each Agent remembers, About you first, the first few with Show all; read only.
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'memory'}})));
  await settingsPage.locator('[data-setting=context][aria-current=true]').waitFor();
@@ -163,36 +163,14 @@ try{
  await ccMemory.getByText('Worldlet only shows this. To have Claude Code forget something, ask it in its own chat.',{exact:true}).waitFor();
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'model'}})));
  await local.locator('[data-view=own-agent]').waitFor();
- await local.locator('details[data-own-advanced] > summary').click();
- // Claude Code: its skills, rules and tools shown read-only, each with where to change them.
- const ccSkills=local.locator('[data-part=skills] [data-harness=claude-code]');
- await ccSkills.getByText('release-notes').waitFor();
- assert.equal(await ccSkills.getByRole('button').count(),0,'read only');
- await ccSkills.getByText('Claude Code keeps these in the skills folder of its home (~/.claude/skills). Change them there.',{exact:true}).waitFor();
+ // Claude Code: its rules shown read-only, with where to change them.
  const ccRules=local.locator('[data-part=permissions] [data-harness=claude-code]');
  await ccRules.getByText('pnpm test',{exact:true}).waitFor();
  assert.equal(await ccRules.getByRole('button',{name:'Revoke'}).count(),0,'never revoked from Worldlet');
  await ccRules.getByText(/Change them with \/permissions in Claude Code/).waitFor();
- const ccTools=local.locator('[data-part=accounts] [data-harness=claude-code]');
- await ccTools.getByText('linear',{exact:true}).waitFor();
- assert.equal(await ccTools.getByRole('button').count(),0,'read only');
- await ccTools.getByText('Claude Code keeps these in its own settings. Change them in Claude Code itself.',{exact:true}).waitFor();
  await local.locator('[data-part=routines]').getByText(/The same tasks are in the Task panel/).waitFor();
- await permissions.getByRole('heading',{name:'Permissions',exact:true}).waitFor();
- await accounts.getByRole('heading',{name:'Connections',exact:true}).waitFor();
- // Skills: the Agent's own, with when each last ran and an Off mark; Turn off asks first, then runs its own command.
- const skillsPart=local.locator('[data-part=skills]'),routinesPart=local.locator('[data-part=routines]');
- const seed=skillsPart.locator('[data-skill=seed-swap]');
- await seed.getByText('Ran 3 days ago',{exact:true}).waitFor();
- await skillsPart.locator('[data-skill=k8s]').getByText('Off',{exact:true}).waitFor();
- assert.equal(await seed.getByRole('button',{name:'Remove',exact:true}).count(),0,'no Remove where the Agent has no command for it');
- await seed.getByRole('button',{name:'Turn off',exact:true}).click();
- await seed.getByText('Hermes Agent will stop using “seed-swap” until you turn it on again. It stays in its skills.',{exact:true}).waitFor();
- assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='harnessSkills'&&c.operation==='change').length),0,'Turn off asks first');
- assert.doesNotMatch(await seed.innerText(),/hermes config|skills\.disabled/,'the command itself is never shown');
- await seed.locator('[data-action=confirm-change]').click();
- await skillsPart.getByText('Hermes Agent no longer uses “seed-swap”. It takes effect in its next conversation.',{exact:true}).waitFor();
- await skillsPart.locator('[data-skill=seed-swap]').getByText('Off',{exact:true}).waitFor();
+ await permissions.getByRole('heading',{name:'Does without asking',exact:true}).waitFor();
+ const routinesPart=local.locator('[data-part=routines]');
  // Worldlet's own two default Routines come first: Today's prep at 7 AM and Wrap up today at 6 PM, paused and resumed
  // as Worldlet's own setting (no Agent command, nothing to confirm).
  const prep=routinesPart.locator('[data-harness=worldlet] [data-job="worldlet:plan"]'),wrap=routinesPart.locator('[data-harness=worldlet] [data-job="worldlet:summary"]');
@@ -229,7 +207,7 @@ try{
  await routinesPart.locator('[data-job=job-2]').getByText('Hermes Agent will remove “Plant check”. This can’t be undone; ask Fox to set it up again if you need it.',{exact:true}).waitFor();
  await routinesPart.locator('[data-job=job-2]').getByRole('button',{name:'Cancel',exact:true}).click();
  await routinesPart.getByText('Nothing was changed.',{exact:true}).waitFor();
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>['harnessSchedule','harnessSkills'].includes(c.action)&&c.operation==='change').map(c=>c.confirm)),['s|disable|seed-swap','c|pause|job-1'],'only what the person confirmed ran');
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>['harnessSchedule','harnessSkills'].includes(c.action)&&c.operation==='change').map(c=>c.confirm)),['c|pause|job-1'],'only what the person confirmed ran');
  // Change time and New routine (owner request 2026-10-11: more control): a small form, one more ask, the Agent's own command.
  await routinesPart.locator('[data-job=job-1]').getByRole('button',{name:'Change time',exact:true}).click();
  await routinesPart.locator('[data-job=job-1] [data-form=reschedule] input[type=time]').fill('09:30');
@@ -248,11 +226,8 @@ try{
  await routinesPart.locator('[data-job=job-9]').getByText(/^Every 3 hours · /).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='harnessSchedule'&&c.operation==='preview'&&['reschedule','create'].includes(c.change)).map(c=>[c.change,c.schedule??c.job])),
   [['reschedule',{daily:{hour:9,minute:30}}],['create',{name:'Plant water',prompt:'Remind me to water the plants.',schedule:{everyHours:3}}]],'what the person chose is what the Agent is asked');
- assert.doesNotMatch(await skillsPart.locator('[data-harness=hermes]').innerText()+'\n'+await routinesPart.innerText(),/\bcron\b|\bMCP\b|config\.yaml/i,'plain words; no commands');
- await accounts.locator('[data-connection=conn-00000000000000c1]').getByText(/^Tool( · |$)/).waitFor();
- // The services themselves moved to Settings › Services: Google is a tile there (connectors-ui-check.ts covers the tiles).
- await accounts.getByText('Services such as Google, Notion and GitHub are in Settings › Services.',{exact:true}).waitFor();
- assert.equal(await accounts.locator('[data-account=gmail]').count(),0,'Google is not listed twice');
+ assert.doesNotMatch(await routinesPart.innerText(),/\bcron\b|\bMCP\b|config\.yaml/i,'plain words; no commands');
+ // The services are in Settings › Services: Google is a tile there (connectors-ui-check.ts covers the tiles).
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'connectors'}})));
  await settingsPage.locator('[data-setting=connectors][aria-current=true]').waitFor();
  const google=settingsPage.locator('[data-connector=google]');
@@ -262,13 +237,13 @@ try{
  assert.equal(await settingsPage.locator('[data-advanced], input[type=password]').count(),0,'no Advanced and no key field in Services');
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'model'}})));
  await settingsPage.locator('[data-setting=agents][aria-current=true]').waitFor();
- await local.locator('[data-view=own-agent]').waitFor();await local.locator('details[data-own-advanced] > summary').click();
+ await local.locator('[data-view=own-agent]').waitFor();
  const rule=permissions.locator('[data-rule=rule-00000000000000a1]');
  await rule.getByText('npm test',{exact:true}).waitFor();
  await rule.getByText(/^Allowed .*2026, in Fox’s main conversation\.$/).waitFor();
  await permissions.locator('[data-rule=rule-00000000000000a2]').getByText('Use the tool github › search_issues').waitFor();
  // Plain words: tools and things it may do, never MCP, allowlist or cron.
- assert.doesNotMatch(await permissions.innerText()+'\n'+await accounts.innerText(),/\bMCP\b|allowlist|cron/i,'plain words only');
+ assert.doesNotMatch(await permissions.innerText(),/\bMCP\b|allowlist|cron/i,'plain words only');
  // Revoke asks once more in the page, says what happens, and only then the Agent forgets it.
  await rule.getByRole('button',{name:'Revoke',exact:true}).click();
  await rule.getByText('Hermes Agent will ask you again before it does this. It takes effect the next time it starts; Worldlet restarts it for you.',{exact:true}).waitFor();
@@ -279,175 +254,99 @@ try{
  await rule.waitFor({state:'detached'});
  await permissions.getByText(/^Hermes Agent will ask again before: npm test/).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='harnessApprovalRules'&&c.operation==='revoke').map(c=>[c.harness,c.id])),[['hermes','rule-00000000000000a1']]);
- // Agents' list: each Agent with its last use, what it may do in one line, its newest decisions and Revoke after asking;
- // its Grants and switches folded under Change what it may do.
+ // Agents' list: each Agent with its last use, what it may do in one line, what it last reported, Manage and Remove;
+ // nothing folded and no switches on the list (owner request 2026-10-22).
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'access'}})));
- const accessPart=local.locator('[data-part=access]'),advancedPart=local.locator('details[data-part=advanced]'),hermesAccess=accessPart.locator('[data-access-agent=hermes]');
+ const accessPart=local.locator('[data-part=access]'),hermesAccess=accessPart.locator('[data-access-agent=hermes]');
  await hermesAccess.getByText(/^Hermes Agent/).first().waitFor();
  await hermesAccess.getByText(/^On this computer\. Last used .*2026\.$/).waitFor();
  await hermesAccess.getByText('It may look at and change things in your World, read PostHog, take work, see your board, report its work, read what Agents saved and update Issues in example/app without asking.',{exact:true}).waitFor();
- await hermesAccess.locator('[data-access-more] > summary').click();
- await hermesAccess.getByText('Read: items, history, companion, meetings, gmail, google-calendar and 2 more.',{exact:true}).waitFor();
- await hermesAccess.getByText('Read and change: world (link).',{exact:true}).waitFor();
- assert.equal(await hermesAccess.locator('.companion-settings-access-audit li').count(),3);
- await hermesAccess.locator('.companion-settings-access-audit li').nth(1).getByText(/Changed GitHub without asking · Written$/).waitFor();
- await hermesAccess.locator('.companion-settings-access-audit li').first().getByText(/items update · Refused$/).waitFor();
- assert.doesNotMatch(await accessPart.innerText(),/\bMCP\b|token|endpoint/i,'plain words only');
- // "Can read <Service>" for each connected Service: on and off at once, the page sending only the Agent and the Service.
- const github=hermesAccess.getByRole('checkbox',{name:'Can read GitHub',exact:true}),posthog=hermesAccess.getByRole('checkbox',{name:'Can read PostHog',exact:true});
- assert.equal(await hermesAccess.getByRole('checkbox',{name:'Can read Search Console',exact:true}).isChecked(),false);
- assert.deepEqual([await github.isChecked(),await posthog.isChecked()],[false,true]);
- await github.click();
- await accessPart.getByText('Hermes Agent can now read GitHub.',{exact:true}).waitFor();
- assert.equal(await github.isChecked(),true);
- await posthog.click();
- await accessPart.getByText('Hermes Agent can no longer read PostHog.',{exact:true}).waitFor();
- assert.equal(await posthog.isChecked(),false);
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Service$/.test(c.operation))),
-  [{action:'agentAccess',operation:'grantService',id:'hermes',provider:'github'},{action:'agentAccess',operation:'ungrantService',id:'hermes',provider:'posthog'}],'only the Agent and the Service, never targets');
- // "Can ask you" and "Can take work" (Agent asks): the page sends only the Agent and which one, never targets.
- const asking=hermesAccess.getByRole('checkbox',{name:'Can ask you',exact:true}),working=hermesAccess.getByRole('checkbox',{name:'Can take work',exact:true});
- assert.deepEqual([await asking.isChecked(),await working.isChecked()],[false,true]);
- await asking.click();
- await accessPart.getByText('Hermes Agent can now ask you things in Attention.',{exact:true}).waitFor();
- await working.click();
- await accessPart.getByText('Hermes Agent can no longer take work.',{exact:true}).waitFor();
- assert.deepEqual([await asking.isChecked(),await working.isChecked()],[true,false]);
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Asks$/.test(c.operation))),
-  [{action:'agentAccess',operation:'grantAsks',id:'hermes',kind:'ask'},{action:'agentAccess',operation:'ungrantAsks',id:'hermes',kind:'work'}],'only the Agent and which, never targets');
- // "Can see your board" and "Can set up your board" (context/connectors/BOARD.md): the same way.
- const seeing=hermesAccess.getByRole('checkbox',{name:'Can see your board',exact:true}),defining=hermesAccess.getByRole('checkbox',{name:'Can set up your board',exact:true});
- assert.deepEqual([await seeing.isChecked(),await defining.isChecked()],[true,false]);
- await defining.click();
- await accessPart.getByText('Hermes Agent can now set up your board.',{exact:true}).waitFor();
- await seeing.click();
- await accessPart.getByText('Hermes Agent can no longer see your board.',{exact:true}).waitFor();
- assert.deepEqual([await seeing.isChecked(),await defining.isChecked()],[false,true]);
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Board$/.test(c.operation))),
-  [{action:'agentAccess',operation:'grantBoard',id:'hermes',kind:'define'},{action:'agentAccess',operation:'ungrantBoard',id:'hermes',kind:'read'}],'only the Agent and which, never targets');
- // "Can save to your Journal" and "Can read Agents' Journal artifacts" (agent/gate/GRANTS.md#agent-artifacts): the same way.
- const savingJournal=hermesAccess.getByRole('checkbox',{name:'Can save to your Journal',exact:true}),readingJournal=hermesAccess.getByRole('checkbox',{name:'Can read Agents\' Journal artifacts',exact:true});
- assert.deepEqual([await savingJournal.isChecked(),await readingJournal.isChecked()],[false,true]);
- await savingJournal.click();
- await accessPart.getByText('Hermes Agent can now save to your Journal.',{exact:true}).waitFor();
- await readingJournal.click();
- await accessPart.getByText('Hermes Agent can no longer read what other Agents saved to your Journal.',{exact:true}).waitFor();
- assert.deepEqual([await savingJournal.isChecked(),await readingJournal.isChecked()],[true,false]);
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Artifacts$/.test(c.operation))),
-  [{action:'agentAccess',operation:'grantArtifacts',id:'hermes',kind:'save'},{action:'agentAccess',operation:'ungrantArtifacts',id:'hermes',kind:'read'}],'only the Agent and which, never targets');
- // "Can draft GitHub changes" (agent/gate/GRANTS.md#github-drafts): the same way, naming only the Agent.
- const drafting=hermesAccess.getByRole('checkbox',{name:'Can draft GitHub changes',exact:true});
- assert.equal(await drafting.isChecked(),false);
- await drafting.click();
- await accessPart.getByText('Hermes Agent can now draft GitHub changes for you to approve.',{exact:true}).waitFor();
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/GithubDrafts$/.test(c.operation))),
-  [{action:'agentAccess',operation:'grantGithubDrafts',id:'hermes'}],'only the Agent, never targets');
- // "Can update Issues in <repo> without asking" (agent/gate/GRANTS.md#standing-github-writes): each one with its
- // repository and Remove, listed once (not again among the Grants), and Allow for another, the page sending the Agent,
- // the repository and a choice with its label prefix, never targets.
- const writesPart=hermesAccess.locator('[data-github-writes=hermes]');
- await writesPart.getByText('Can update Issues in example/app without asking: comment and change “state:” labels.',{exact:true}).waitFor();
- assert.equal(await hermesAccess.getByText(/^Can update Issues in /).count(),1,'listed once, not again among the Grants');
- await writesPart.getByLabel('Repository',{exact:true}).fill('example/tools');
- await writesPart.getByLabel('What it may do',{exact:true}).selectOption('labels');
- assert.equal(await writesPart.getByLabel('Labels starting with',{exact:true}).inputValue(),'state:');
- await writesPart.getByRole('button',{name:'Allow',exact:true}).click();
- await accessPart.getByText('Hermes Agent can now update example/tools without asking.',{exact:true}).waitFor();
- await writesPart.getByText('Can update Issues in example/tools without asking: change “state:” labels.',{exact:true}).waitFor();
- await writesPart.getByLabel('Repository',{exact:true}).fill('not a repo');
- await writesPart.getByRole('button',{name:'Allow',exact:true}).click();
- await accessPart.getByText(/^Could not change that: Could not allow that\./).waitFor();
- await writesPart.locator('[data-repo="example/app"]').getByRole('button',{name:'Remove',exact:true}).click();
- await accessPart.getByText('Hermes Agent can no longer update example/app without asking.',{exact:true}).waitFor();
- assert.equal(await writesPart.locator('[data-repo="example/app"]').count(),0);
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/GithubWrites$/.test(c.operation))),
-  [{action:'agentAccess',operation:'grantGithubWrites',id:'hermes',repo:'example/tools',choice:'labels',labelPrefix:'state:'},
-   {action:'agentAccess',operation:'grantGithubWrites',id:'hermes',repo:'not a repo',choice:'comment-labels',labelPrefix:'state:'},
-   {action:'agentAccess',operation:'ungrantGithubWrites',id:'hermes',repo:'example/app'}],'the Agent, the repository and a choice, never targets');
- // What it last reported (agent/gate/GRANTS.md#agent-reports), and "Can report its work" and "Can see other Agents".
  await hermesAccess.getByText(/^Quiet: Building the installer · Fix the build · reported \d+ min ago\.$/).waitFor();
- const reporting=hermesAccess.getByRole('checkbox',{name:'Can report its work',exact:true}),listing=hermesAccess.getByRole('checkbox',{name:'Can see other Agents',exact:true});
- assert.deepEqual([await reporting.isChecked(),await listing.isChecked()],[true,false]);
- await listing.click();
- await accessPart.getByText('Hermes Agent can now see what your other Agents are doing.',{exact:true}).waitFor();
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Reports$/.test(c.operation))),
-  [{action:'agentAccess',operation:'grantReports',id:'hermes',kind:'list'}],'only the Agent and which, never targets');
- // "Add an Agent for a script" (agent/gate/GRANTS.md#agents-for-scripts), under Advanced: only the name goes to the host.
- await advancedPart.locator('> summary').click();
- await advancedPart.locator('[data-script-agents]').getByRole('button',{name:'Add',exact:true}).click();
- await accessPart.getByText(/^Could not add it: Give it a name/).waitFor();
- await advancedPart.getByRole('textbox',{name:'Name of the script'}).fill('Nightly build');
- await advancedPart.locator('[data-script-agents]').getByRole('button',{name:'Add',exact:true}).click();
- await accessPart.getByText('Nightly build can now reach your World from a script on this computer. Its key is in /Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json. Allow what it may do below.',{exact:true}).waitFor();
- await accessPart.locator('[data-access-agent=nightly-build] [data-access-more] > summary').click();
- await accessPart.locator('[data-access-agent=nightly-build]').getByText('For a script. Its key is in /Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json.',{exact:true}).waitFor();
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='addScript')),
-  [{action:'agentAccess',operation:'addScript',name:''},{action:'agentAccess',operation:'addScript',name:'Nightly build'}],'only the name');
- // Your World's address (agent/gate/WORLD-ADDRESS.md): a name, the browsers allowed, the board shared and the people
- // who see it, each with its own way to end it; only names, share choices and IDs go to the host.
+ assert.equal(await accessPart.locator('details,input,textarea,select').count(),0,'nothing folded and nothing to type');
+ assert.doesNotMatch(await accessPart.innerText(),/\bMCP\b|token|endpoint/i,'plain words only');
+ // Settings has no Advanced (owner request 2026-10-22): no "Add an Agent for a script", no "Give new work to", no wake command.
+ assert.equal(await local.locator('details[data-part=advanced]').count(),0,'no Advanced');
+ assert.equal(await local.locator('[data-script-agents],[data-wake],[data-github-writes]').count(),0,'no script Agents, wake commands or standing writes here');
+ assert.equal(await local.getByRole('combobox',{name:'Give new work to',exact:true}).count(),0,'no work routing here');
+ // Your World's address (agent/gate/WORLD-ADDRESS.md): one card with the address, Copy for Claude or ChatGPT and Choose a
+ // name; who can open it is listed only when there is someone, each with its own way to end it; only names and IDs go
+ // to the host.
  const addressRoot=local.locator('[data-part=world-address]'),addressPart=addressRoot.locator('[data-world-address]');
  // Every World has a default address from the start; the person may choose a name once, and it then stays.
- await addressPart.locator('[data-world-address-link]').getByText('https://w-7k3m9p2x.worldlet.ai',{exact:true}).waitFor();
+ await addressPart.locator('[data-world-address-link]').getByText('w-7k3m9p2x.worldlet.ai',{exact:true}).waitFor();
+ assert.equal(await addressPart.locator('[data-world-address-who]').count(),0,'nobody listed yet');
+ await addressPart.getByRole('button',{name:'Copy for Claude or ChatGPT',exact:true}).click();
+ await addressRoot.getByText('Copied. Paste it in Claude or ChatGPT as a connector.',{exact:true}).waitFor();
  await addressPart.getByRole('button',{name:'Choose a name',exact:true}).click();
- await addressPart.getByText(/^Choose a name for your World, like alex\.worldlet\.ai\. You choose it once and it stays/).waitFor();
+ await addressPart.getByText(/^Choose a name, like alex\.worldlet\.ai\. You choose it once and it stays/).waitFor();
  await addressPart.getByRole('textbox',{name:'Name for your World\'s address'}).fill('taken');
  await addressPart.getByRole('button',{name:'Choose',exact:true}).click();
  await addressRoot.getByText('taken.worldlet.ai is taken. Try another name.',{exact:true}).waitFor();
  await addressPart.getByRole('textbox',{name:'Name for your World\'s address'}).fill('Alex');
  await addressPart.getByText('Your address: https://alex.worldlet.ai',{exact:true}).waitFor();
  await addressPart.getByRole('button',{name:'Choose',exact:true}).click();
- await addressPart.locator('[data-world-address-link]').getByText('https://alex.worldlet.ai',{exact:true}).waitFor();
+ await addressPart.locator('[data-world-address-link]').getByText('alex.worldlet.ai',{exact:true}).waitFor();
  assert.equal(await addressPart.getByRole('button',{name:'Choose a name',exact:true}).count(),0,'a chosen name stays');
- await addressPart.getByRole('button',{name:'Give up this name',exact:true}).waitFor();
- await addressPart.locator('[data-world-address-browsers]').getByText(/^Chrome on Mac · added /).waitFor();
- await addressPart.getByRole('button',{name:'Share board with anyone who has the link',exact:true}).click();
- await addressRoot.getByText('Anyone with the link can now see your board, read only. Stop sharing whenever you like.',{exact:true}).waitFor();
- await addressPart.locator('[data-world-address-shares]').getByText('Board · anyone with the link',{exact:true}).waitFor();
- await addressPart.locator('[data-world-address-people]').getByText(/^Sam · sees Board · last looked /).waitFor();
- await addressPart.locator('[data-world-address-people]').getByRole('button',{name:'Remove',exact:true}).click();
+ assert.equal(await addressPart.getByRole('button',{name:'Give up this name',exact:true}).count(),0,'nothing advanced');
+ const who=addressPart.locator('[data-world-address-who]');
+ await who.getByText(/^Chrome on Mac · your browser · added /).waitFor();
+ await who.getByText('Board · shared with anyone with the link',{exact:true}).waitFor();
+ await who.getByText(/^Sam · sees Board · last looked /).waitFor();
+ await who.locator('.companion-settings-row',{hasText:'Sam'}).getByRole('button',{name:'Remove',exact:true}).click();
  await addressRoot.getByText('Sam can no longer see anything here.',{exact:true}).waitFor();
- await addressPart.locator('[data-world-address-browsers]').getByRole('button',{name:'Sign out',exact:true}).click();
- await addressRoot.getByText(/^Chrome on Mac is signed out\./).waitFor();
+ await who.getByRole('button',{name:'Sign out',exact:true}).click();
+ await addressRoot.getByText('Chrome on Mac is signed out.',{exact:true}).waitFor();
+ await who.getByRole('button',{name:'Stop sharing',exact:true}).click();
+ await addressRoot.getByText('Board is no longer shared.',{exact:true}).waitFor();
+ assert.equal(await addressPart.locator('[data-world-address-who]').count(),0,'nobody left to list');
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='worldAddress'&&c.operation!=='status')),
   [{action:'worldAddress',operation:'check',name:'taken'},{action:'worldAddress',operation:'check',name:'Alex'},{action:'worldAddress',operation:'claim',name:'Alex'},
-   {action:'worldAddress',operation:'share',open:true},{action:'worldAddress',operation:'remove',id:'v1'},{action:'worldAddress',operation:'remove',id:'pk1'}],'only names, choices and IDs');
- // "Give new work to" and each Agent's wake command (agent/gate/GRANTS.md#orders-and-waking-an-agent): the page sends
- // the Agent, and the command as a list of words, one per line as typed; the host's refusal shows in plain words.
- const target=advancedPart.getByRole('combobox',{name:'Give new work to',exact:true});
- assert.equal(await target.inputValue(),'');
- assert.deepEqual(await target.locator('option').allTextContents(),['No Agent in particular','Hermes Agent','Nightly build']);
- await target.selectOption('hermes');
- await accessPart.getByText('New work now goes to Hermes Agent.',{exact:true}).waitFor();
- assert.equal(await advancedPart.getByRole('combobox',{name:'Give new work to',exact:true}).inputValue(),'hermes');
- const wakePart=hermesAccess.locator('[data-wake=hermes]'),wakeBox=wakePart.getByRole('textbox',{name:'Wake command for Hermes Agent',exact:true});
- await wakePart.getByText(/^When work is given to Hermes Agent, Worldlet runs this program on this computer/).waitFor();
- assert.equal(await wakePart.getByRole('button',{name:'Remove',exact:true}).count(),0,'nothing to remove yet');
- await wakeBox.fill('bin/wake-agent\n{askId}');
- await wakePart.getByRole('button',{name:'Save',exact:true}).click();
- await accessPart.getByText('Could not change that: A wake command starts with the full path of a program, like /usr/local/bin/wake-agent.',{exact:true}).waitFor();
- await wakeBox.fill('/Users/alex/bin/wake-agent\n--work\n\n{askId}\n');
- await wakePart.getByRole('button',{name:'Save',exact:true}).click();
- await accessPart.getByText('Worldlet will run this program on this computer when work is given to Hermes Agent.',{exact:true}).waitFor();
- assert.equal(await hermesAccess.getByRole('textbox',{name:'Wake command for Hermes Agent',exact:true}).inputValue(),'/Users/alex/bin/wake-agent\n--work\n{askId}');
- await hermesAccess.locator('.companion-settings-access-audit li').first().getByText(/Waking it for new work · You set it$/).waitFor();
- await hermesAccess.locator('[data-wake=hermes]').getByRole('button',{name:'Remove',exact:true}).click();
- await accessPart.getByText('Hermes Agent will no longer be woken for new work.',{exact:true}).waitFor();
- await target.selectOption('');
- await accessPart.getByText('New work no longer goes to one Agent.',{exact:true}).waitFor();
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/^set(OrderTarget|Wake)$/.test(c.operation))),
-  [{action:'agentAccess',operation:'setOrderTarget',id:'hermes'},{action:'agentAccess',operation:'setWake',id:'hermes',command:['bin/wake-agent','{askId}']},
-   {action:'agentAccess',operation:'setWake',id:'hermes',command:['/Users/alex/bin/wake-agent','--work','{askId}']},{action:'agentAccess',operation:'setWake',id:'hermes',command:[]},
-   {action:'agentAccess',operation:'setOrderTarget',id:''}],'the Agent and a list of words, never a shell line');
- assert.doesNotMatch(await hermesAccess.innerText(),/\bMCP\b|token|endpoint|shell/i,'plain words only');
- // "Can draft PostHog changes" (agent/gate/GRANTS.md#posthog-and-notion-drafts): only for a connected Service, naming
- // only the Agent and the Service. Notion is not connected here, so it has no checkbox.
- assert.equal(await hermesAccess.getByRole('checkbox',{name:'Can draft Notion changes',exact:true}).count(),0);
- const posthogDrafting=hermesAccess.getByRole('checkbox',{name:'Can draft PostHog changes',exact:true});
- assert.equal(await posthogDrafting.isChecked(),false);
- await posthogDrafting.click();
- await accessPart.getByText('Hermes Agent can now draft PostHog changes for you to approve.',{exact:true}).waitFor();
+   {action:'worldAddress',operation:'remove',id:'v1'},{action:'worldAddress',operation:'remove',id:'pk1'},{action:'worldAddress',operation:'unshare',id:'share0AAAAAAAAAAAAAAA'}],'only names and IDs');
+ // What your own Agent may do: switches on its page, each sending only the Agent and which, never targets.
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'model'}})));
+ await local.locator('[data-view=own-agent]').waitFor();
+ const isOn=async(name:string)=>(await mayPart.getByRole('switch',{name,exact:true}).getAttribute('aria-checked'))==='true';
+ const flip=async(name:string,said:string)=>{await mayPart.getByRole('switch',{name,exact:true}).click();await mayPart.getByText(said,{exact:true}).waitFor();};
+ await mayPart.getByRole('switch',{name:'Can read GitHub',exact:true}).waitFor();
+ assert.equal(await isOn('Can read Search Console'),false);
+ assert.deepEqual([await isOn('Can read GitHub'),await isOn('Can read PostHog')],[false,true]);
+ await flip('Can read GitHub','Hermes Agent can now read GitHub.');
+ await flip('Can read PostHog','Hermes Agent can no longer read PostHog.');
+ assert.deepEqual([await isOn('Can read GitHub'),await isOn('Can read PostHog')],[true,false]);
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Service$/.test(c.operation))),
+  [{action:'agentAccess',operation:'grantService',id:'hermes',provider:'github'},{action:'agentAccess',operation:'ungrantService',id:'hermes',provider:'posthog'}],'only the Agent and the Service, never targets');
+ assert.deepEqual([await isOn('Can ask you'),await isOn('Can take work')],[false,true]);
+ await flip('Can ask you','Hermes Agent can now ask you things in Attention.');
+ await flip('Can take work','Hermes Agent can no longer take work.');
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Asks$/.test(c.operation))),
+  [{action:'agentAccess',operation:'grantAsks',id:'hermes',kind:'ask'},{action:'agentAccess',operation:'ungrantAsks',id:'hermes',kind:'work'}],'only the Agent and which, never targets');
+ assert.deepEqual([await isOn('Can see your board'),await isOn('Can set up your board')],[true,false]);
+ await flip('Can set up your board','Hermes Agent can now set up your board.');
+ await flip('Can see your board','Hermes Agent can no longer see your board.');
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Board$/.test(c.operation))),
+  [{action:'agentAccess',operation:'grantBoard',id:'hermes',kind:'define'},{action:'agentAccess',operation:'ungrantBoard',id:'hermes',kind:'read'}],'only the Agent and which, never targets');
+ assert.deepEqual([await isOn('Can save to your Journal'),await isOn('Can read Agents\' Journal artifacts')],[false,true]);
+ await flip('Can save to your Journal','Hermes Agent can now save to your Journal.');
+ await flip('Can read Agents\' Journal artifacts','Hermes Agent can no longer read what other Agents saved to your Journal.');
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Artifacts$/.test(c.operation))),
+  [{action:'agentAccess',operation:'grantArtifacts',id:'hermes',kind:'save'},{action:'agentAccess',operation:'ungrantArtifacts',id:'hermes',kind:'read'}],'only the Agent and which, never targets');
+ assert.equal(await isOn('Can draft GitHub changes'),false);
+ await flip('Can draft GitHub changes','Hermes Agent can now draft GitHub changes for you to approve.');
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/GithubDrafts$/.test(c.operation))),
+  [{action:'agentAccess',operation:'grantGithubDrafts',id:'hermes'}],'only the Agent, never targets');
+ assert.deepEqual([await isOn('Can report its work'),await isOn('Can see other Agents')],[true,false]);
+ await flip('Can see other Agents','Hermes Agent can now see what your other Agents are doing.');
+ assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Reports$/.test(c.operation))),
+  [{action:'agentAccess',operation:'grantReports',id:'hermes',kind:'list'}],'only the Agent and which, never targets');
+ // "Can draft PostHog changes" only for a connected Service; Notion is not connected here, so it has no switch.
+ assert.equal(await mayPart.getByRole('switch',{name:'Can draft Notion changes',exact:true}).count(),0);
+ assert.equal(await isOn('Can draft PostHog changes'),false);
+ await flip('Can draft PostHog changes','Hermes Agent can now draft PostHog changes for you to approve.');
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/ServiceDrafts$/.test(c.operation))),
   [{action:'agentAccess',operation:'grantServiceDrafts',id:'hermes',provider:'posthog'}],'only the Agent and the Service, never targets');
+ assert.doesNotMatch(await mayPart.innerText(),/\bMCP\b|token|endpoint/i,'plain words only');
+ // Remove on the list asks once more, then the Agent can no longer reach the World.
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'access'}})));
  await hermesAccess.locator('[data-action=revoke-agent]').click();
  await hermesAccess.getByText(/^Hermes Agent will no longer reach your World's tools/).waitFor();
  assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='revoke').length),0,'Revoke asks first');
@@ -457,12 +356,10 @@ try{
  await accessPart.getByText('Hermes Agent can no longer reach your World.',{exact:true}).waitFor();
  await hermesAccess.getByText(/^On this computer\. Revoked .*2026\.$/).waitFor();
  assert.equal(await hermesAccess.locator('[data-action=revoke-agent]').count(),0,'nothing left to remove');
- assert.equal(await hermesAccess.getByRole('checkbox').count(),0,'a revoked Agent has no Service to read');
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='revoke').map(c=>c.id)),['hermes']);
- // Revoked, it is no longer your Agent's row on the list: your Agent has a row of its own, with Open.
+ // Revoked, it is no longer your Agent's row on the list: your Agent has a row of its own, with Manage.
  await accessPart.locator('[data-own-agent]').getByRole('button',{name:'Manage',exact:true}).click();
  await local.locator('[data-view=own-agent]').waitFor();
- await local.locator('details[data-choose-agent] > summary').click();
  await local.locator('[data-agent=claude-code]').getByRole('button',{name:'Use',exact:true}).click();
  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='localAgent'&&c.operation==='adopt'&&c.id==='claude-code'));
  await local.getByText('Claude Code on this computer answers for Fox.').waitFor();
@@ -484,39 +381,20 @@ try{
  await broken.waitFor({state:'detached'});
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&['install-hermes','select'].includes(c.operation)).slice(-2).map(c=>c.operation+(c.id?':'+c.id:''))),['install-hermes','select:hermes']);
  await page.evaluate(()=>{(window as any).agentInUse=null;});
- // An Agent on another computer (platform/web/README.md#another-computers-agent): its code pairs, Settings says where Fox
- // runs, and Stop using ends the pairing.
- // Both are folded under Other ways to connect, few people need them (owner request 2026-10-10).
- await local.getByText('Other ways to connect',{exact:true}).click();
- const remote=local.locator('[data-agent=remote]');
- await remote.getByLabel('Code from Worldlet on your other computer').fill('worldlet://agent?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Mac+mini');
- await remote.getByRole('button',{name:'Pair',exact:true}).click();
- await local.getByText('Fox uses your Agent on Mac mini',{exact:true}).waitFor();
- await remote.getByText('Agent on Mac mini · In use').waitFor();
+ // An Agent on another computer (platform/web/README.md#another-computers-agent) is paired in Phone: its code pairs,
+ // Phone says where Fox runs, and Stop using ends the pairing. Your Agent's page has no Gateway or other ways to connect.
+ assert.equal(await local.locator('[data-agent=remote],[data-agent=gateway]').count(),0,'nothing else to connect here');
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'phone'}})));
+ const computers=settingsPage.locator('.companion-phone-computers');
+ await computers.getByLabel('Code from Worldlet on your other computer').fill('worldlet://agent?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Mac+mini');
+ await computers.getByRole('button',{name:'Pair',exact:true}).click();
+ await computers.getByText(/^Fox uses the Agent on Mac mini\./).waitFor();
  await page.screenshot({path:'/tmp/your-agent-remote.png'});
- await remote.getByRole('button',{name:'Stop using',exact:true}).click();
- await remote.getByRole('button',{name:'Pair',exact:true}).waitFor();
+ await computers.getByRole('button',{name:'Stop using',exact:true}).click();
+ await computers.getByRole('button',{name:'Pair',exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&['pair','clear'].includes(c.operation)).map(c=>c.operation)),['clear','pair','clear']);
- // An OpenClaw Gateway on another computer, reached directly (platform/web/README.md#an-agent-gateway-on-another-computer):
- // its address and token connect, Settings says it is reached directly, Stop using keeps it to Use again without the
- // token, and Forget removes it.
- const gateway=local.locator('[data-agent=gateway]');
- await gateway.getByLabel('Gateway address').fill('https://mini.tail1.ts.net');
- await gateway.getByLabel('Gateway token').fill('claw-secret');
- assert.equal(await gateway.getByLabel('Gateway token').getAttribute('type'),'password','the token is not shown as it is typed');
- await gateway.getByRole('button',{name:'Connect',exact:true}).click();
- await gateway.getByText('OpenClaw at mini.tail1.ts.net · In use').waitFor();
- await local.getByText('Fox uses your Agent on mini.tail1.ts.net',{exact:true}).waitFor();
- await local.getByText(/reached directly at its address/).waitFor();
- await gateway.getByRole('button',{name:'Stop using',exact:true}).click();
- await gateway.getByRole('button',{name:'Use',exact:true}).waitFor();
- assert.equal(await gateway.getByLabel('Gateway address').inputValue(),'https://mini.tail1.ts.net');
- assert.equal(await gateway.getByLabel('Gateway token').inputValue(),'','the saved token never comes back to the page');
- await gateway.getByRole('button',{name:'Use',exact:true}).click();
- await gateway.getByText('OpenClaw at mini.tail1.ts.net · In use').waitFor();
- await gateway.getByRole('button',{name:'Forget',exact:true}).click();
- await gateway.getByRole('button',{name:'Connect',exact:true}).waitFor();
- assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&['gateway','clear','forget-gateway'].includes(c.operation)).slice(-4).map(c=>[c.operation,c.token??null])),[['gateway','claw-secret'],['clear',null],['gateway',''],['forget-gateway',null]]);
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'model'}})));
+ await local.locator('[data-view=own-agent]').waitFor();
  // The last reply's problem in plain words, with its fix (Kelvin's 2026-10-06 timeouts).
  await page.evaluate(()=>{(window as any).lastReply={ok:false,at:Date.now(),error:'Hermes timed out. You can try again.'};});
  await local.getByRole('button',{name:'Check connection',exact:true}).click();
@@ -547,22 +425,9 @@ try{
  await model.locator('[data-agent=claude-code]').getByRole('button',{name:'Use',exact:true}).click();
  await model.locator('[data-agent=claude-code]').getByRole('button',{name:'Stop using',exact:true}).waitFor();
  await model.getByText('Claude Code on this computer answers for Fox.').waitFor();
- // Only a provider is chosen, never a model (owner decisions 2026-10-10); one not signed in yet signs in in the Agent.
- await model.locator('[data-provider=own]').getByText('Hermes Agent’s own setting · In use',{exact:true}).waitFor();
- const anthropic=model.locator('[data-provider=anthropic]');
- await anthropic.getByText('Not signed in to it in Hermes Agent yet.',{exact:true}).waitFor();
- assert.equal(await anthropic.getByRole('button',{name:'Use',exact:true}).count(),0,'a provider not signed in cannot be used yet');
- await anthropic.getByRole('button',{name:'Sign in',exact:true}).click();
- await model.getByText('Hermes Agent opens in Terminal to sign in to Anthropic. When it is done, choose Check connection.',{exact:true}).waitFor();
- assert.ok(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='agentHarness'&&c.operation==='provider-sign-in'&&c.id==='anthropic')));
- await model.locator('[data-provider=opencode-go]').getByRole('button',{name:'Use',exact:true}).click();
- await model.locator('[data-provider=opencode-go]').getByText('OpenCode Go · In use',{exact:true}).waitFor();
- await model.getByText('Fox now answers with OpenCode Go.',{exact:true}).waitFor();
+ // While it works there is no provider to choose: the Agent answers with its own setting (owner request 2026-10-22).
+ assert.equal(await model.locator('[data-provider]').count(),0,'no provider list while it works');
  assert.equal(await model.getByText(/gpt-|claude-|glm-|S\/M\/L/).count(),0,'no model names are shown');
- await model.locator('[data-provider=own]').scrollIntoViewIfNeeded();await model.locator('[data-provider=opencode-go]').evaluate(e=>e.scrollIntoView({block:'end'}));
- await page.screenshot({path:'/tmp/your-agent-providers.png'});
- await model.locator('[data-provider=own]').getByRole('button',{name:'Use',exact:true}).click();
- await model.locator('[data-provider=own]').getByText('Hermes Agent’s own setting · In use',{exact:true}).waitFor();
  // Ask it to forget: one tap closes Settings and asks the Agent in Fox's conversation, in plain words.
  const settingsNow=page.locator('#companionInfo [data-section=Settings]');
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'memory'}})));
@@ -583,5 +448,5 @@ try{
  await settings.locator('.companion-settings-detail [data-connectors=page]').waitFor();
  await page.screenshot({path:'/tmp/your-agent-accounts.png'});
  assert.deepEqual(errors,[]);
- console.log('PASS Agents: no energy or battery anywhere; the list starts with your own Agent, whose page\'s Model switches Agents and shows the last reply\'s problem with its fix and chooses the Agent\'s provider, signed in or not; with no model, Fox points to Settings, Model; five named parts (Model, Skills, Routines, Permissions, Connections) with one plain line each; Context › Memory shows what each Agent remembers, read only, with one-tap Ask it to forget for the Agent in use; Claude Code’s skills, rules and tools read-only with where to change them; pi has no routines; the Agent\'s skills and routines change only after a plain-words ask, and a routine change refreshes the Task panel; Permissions lists the Agent\'s standing rules in plain words and revokes one after asking again; the list of Agents shows each with its last use, what it may do in one line and newest decisions, its Grants folded, gives or takes back each connected Service\'s read Grant at once and revokes it after asking; Connections is the page\'s last part; the services are in Services, with no key, App or address to type, where old Accounts entry points land');
+ console.log('PASS Agents: no energy or battery anywhere; the list starts with your own Agent, whose page switches Agents on this computer and shows the last reply\'s problem with its fix, with no provider list while it works; with no model, Fox points to Settings, Model; four named parts (Status, Scheduled, Does without asking, What it may do) with one plain line each, nothing folded; Your data › Memory shows what each Agent remembers, read only, with one-tap Ask it to forget for the Agent in use; Claude Code’s rules read-only with where to change them; pi has no routines; routines change only after a plain-words ask, and a routine change refreshes the Task panel; Does without asking lists the Agent\'s standing rules in plain words and revokes one after asking again; the list of Agents shows each with its last use, what it may do in one line and what it reported, nothing folded, and revokes after asking; What it may do gives or takes back each Grant at once with a switch; the Agent on another computer pairs in Phone; the services are in Services, with no key, App or address to type, where old Accounts entry points land');
 }finally{await browser.close();}

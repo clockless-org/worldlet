@@ -1,6 +1,6 @@
 /** Fox's offer on the Profile page's “What Fox knows” (agent/gate/PORTABILITY.md#the-agents-skills-in-the-world) to save
  * a task it keeps repeating, as a card the person confirms (Save as a skill) or turns down (Not now). The Agent's own
- * skills are listed in Settings › Agents (agent-skills.ts). */
+ * skills live in the Agent; Settings does not list them (owner request 2026-10-22). */
 import type {SkillProposal,WorldSkill} from '../../agent/gate/index.ts';
 
 export type FoxSkills={skills:WorldSkill[];proposals:SkillProposal[];saves:'agent'|'world';agent:string|null};
