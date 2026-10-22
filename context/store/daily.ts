@@ -1,7 +1,7 @@
 /** The day's two artifacts (owner request 2026-10-06): a plan in the morning and a summary of what was done in
  * the evening, each one card at most (owner Order 2026-10-07). They are the two default Routines every install gets
  * (owner decision 2026-10-11): **Today’s prep** at 7 AM and **Wrap up today** at 6 PM, on unless the person turned
- * them off at setup or paused one in Settings › Agents › Your Agent › Routines (`DailyRoutines`, kept by the host). They are
+ * them off at setup or paused one in Settings › Agents › Your Agent › Scheduled (`DailyRoutines`, kept by the host). They are
  * Worldlet's own: the World asks the person's Agent at that time, and nothing is written into the Agent's scheduler. The World asks Fox for each once a day, like a meeting's summary; Fox reads the
  * World with its own tools and model and shows one large artifact, which keeps it in `world.sqlite`.
  * The plan is the morning brief: made at 6 AM by itself, before the person sits down (owner Order 2026-10-07), with
@@ -32,7 +32,7 @@ export function firstPrepRequest(day:string){
 /** The evening summary (Wrap up today) is made from this hour, local time, or at the first use the next day (6 PM
  * since owner decision 2026-10-11). */
 export const DAILY_SUMMARY_HOUR=18;
-/** What the person sees each routine called: the Task panel, Settings › Agents › Your Agent › Routines, its Attention card. */
+/** What the person sees each routine called: the Task panel, Settings › Agents › Your Agent › Scheduled, its Attention card. */
 export const DAILY_ROUTINE_NAMES={plan:'Today’s prep',summary:'Wrap up today'} as const;
 /** Which of the two run: both on by default; setup's one row turns both off, and Settings pauses either. */
 export type DailyRoutines={plan:boolean;summary:boolean};

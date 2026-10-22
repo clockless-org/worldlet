@@ -1184,7 +1184,7 @@ export function mountNotionWorld(data: World, native: any) {
       if(!result?.ok)throw Error(result?.error||'Could not do that.');
       await settleAttention(page,result.status==='allowed'?'done':'dismissed',null,{advance:true,hosted:true});
       // A browser or a person at the World's own address (agent/gate/WORLD-ADDRESS.md).
-      if(consent.asks){notify(result.status!=='allowed'?'Declined. Nothing was shared.':consent.asks==='owner'?`${consent.client} can now open your World. Sign it out in Settings › Agent › Access.`:`${consent.client} can now see your ${consent.share||'board'}. Remove them in Settings › Agent › Access.`);return;}
+      if(consent.asks){notify(result.status!=='allowed'?'Declined. Nothing was shared.':consent.asks==='owner'?`${consent.client} can now open your World. Sign it out in Settings › Agents.`:`${consent.client} can now see your ${consent.share||'board'}. Remove them in Settings › Agents.`);return;}
       notify(result.status!=='allowed'?'Declined. Nothing was connected.'
        :operation==='allow'&&named?`${consent.client} can now reach your World and read your ${named}. Change what it may do in Settings › Agents.`
        :`${consent.client} can now reach your World. Choose what it may do in Settings › Agents.`);

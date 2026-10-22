@@ -949,7 +949,7 @@ export function installFox(host:Host){
     return {ok:true,morningBrief:brief};
    }else if(setting==='daily_routines'&&(typeof value==='boolean'||value&&typeof value==='object')){
     // The two default Routines, Today's prep and Wrap up today (context/store/daily.ts): on unless turned off here,
-    // from setup's one row (a boolean, both) or Settings › Agents › Your Agent › Routines (one of them). Worldlet's own setting;
+    // from setup's one row (a boolean, both) or Settings › Agents › Your Agent › Scheduled (one of them). Worldlet's own setting;
     // nothing is written into the Agent.
     const next=typeof value==='boolean'?{plan:value,summary:value}:{...dailyRoutines(),...readDailyRoutinesChange(value)};
     for(const [kind,key] of DAILY_ROUTINE_PREFS)if(next[kind])preferences.remove(key);else preferences.set(key,false);
@@ -1102,7 +1102,7 @@ export function installFox(host:Host){
   /** Settings › Agents › Your Agent › Connections: the MCP servers and chat accounts in each Agent here (`list`), the exact command a change
    * would run with its confirmation (`preview`), or that confirmed change run (`change`). */
   harnessConnections:async request=>request.operation==='preview'?agentConnections.preview(request.harness,request):request.operation==='change'?settingChanged('account',await agentConnections.change(request.confirm)):agentConnections.list(),
-  /** Settings › Agents › Your Agent › Routines and Skills: each Agent's own jobs or skills here (`list`), the exact command
+  /** Settings › Agents › Your Agent › Scheduled and Skills: each Agent's own jobs or skills here (`list`), the exact command
    * a change would run with its confirmation (`preview`), or that confirmed change run (`change`). */
   harnessSchedule:async request=>request.operation==='change'?settingChanged('routine',await agentControls.scheduleRequest(request)):agentControls.scheduleRequest(request),
   harnessSkills:async request=>request.operation==='change'?settingChanged('skill',await agentControls.skillRequest(request)):agentControls.skillRequest(request),

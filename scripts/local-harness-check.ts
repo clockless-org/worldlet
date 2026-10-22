@@ -172,8 +172,8 @@ assert.equal(claudeCodeSignInExpired('Rate limited'),null);
 assert.equal(claudeCodeSignInExpired('Not logged in · Please run /login'),'Claude Code isn’t signed in yet. Sign in in the browser page that opened.');
 assert.deepEqual(read('claude-code',[{type:'result',subtype:'success',is_error:true,result:'Invalid API key · Please run /login'}],1).outcome,{error:claudeCodeSignInExpired('Invalid API key')});
 // Once the page has opened this launch, the line points to Settings instead (Mac Beta 4508, 2026-10-20).
-assert.equal(claudeCodeSignInElsewhere(CLAUDE_CODE_NOT_SIGNED_IN),'Claude Code isn’t signed in yet. Sign in to it in Settings › Agents, under Provider.');
-assert.equal(claudeCodeSignInElsewhere(CLAUDE_CODE_SIGN_IN_EXPIRED),'Claude Code’s sign-in has expired. Sign in to it in Settings › Agents, under Provider.');
+assert.equal(claudeCodeSignInElsewhere(CLAUDE_CODE_NOT_SIGNED_IN),'Claude Code isn’t signed in yet. Sign in to it in Settings › Agents: Manage on your Agent, then Sign in under Provider.');
+assert.equal(claudeCodeSignInElsewhere(CLAUDE_CODE_SIGN_IN_EXPIRED),'Claude Code’s sign-in has expired. Sign in to it in Settings › Agents: Manage on your Agent, then Sign in under Provider.');
 assert.match(claudeCodeSignInElsewhere(CLAUDE_CODE_NOT_SIGNED_IN),/sign-in has expired|isn’t signed in/,'setup still shows its Sign in button');
 assert.deepEqual(read('claude-code',['not json','{"type":"other"}'],1,'boom\nError: connect ECONNREFUSED\n').outcome,{error:'Claude Code could not answer: Error: connect ECONNREFUSED'},'banners are not Fox’s words; stderr explains a failure');
 // A turn with no answer and nothing on stderr says what happened, not "sign in" (Mac Beta 4261, 2026-10-11: Codex was
@@ -198,7 +198,7 @@ assert.match(String((read('codex',[],1).outcome as {error:string}).error),/stopp
 }
 // Codex's sign-in and usage limit are told apart from its other failures.
 assert.equal(codexProblem('stream error: unexpected status 401 Unauthorized'),'Codex is not signed in. Open Terminal, run codex login, then try again.');
-assert.deepEqual(read('codex',[{type:'turn.failed',error:{message:'You\'ve hit your usage limit. Try again in 2 hours.'}}],1).outcome,{error:'Codex has reached its usage limit. Try again later, or switch its model in Settings › Agents.'});
+assert.deepEqual(read('codex',[{type:'turn.failed',error:{message:'You\'ve hit your usage limit. Try again in 2 hours.'}}],1).outcome,{error:'Codex has reached its usage limit. Try again later, or use another Agent in Settings › Agents.'});
 assert.deepEqual(read('codex',[],1,'Error: Not logged in. Run codex login.').outcome,{error:codexProblem('not logged in')});
 assert.equal(codexProblem('stream disconnected before completion'),null);
 // A required World tool server that never started: Codex's own reason, not the last line of its stack trace.
@@ -209,7 +209,7 @@ assert.equal(codexWorldToolsFailed('Error: Not logged in. Run codex login.'),nul
 // A model busy for everyone is told apart from the person's own limits: the turn is worth another try (#416).
 assert.equal(modelAtCapacity('Selected model is at capacity. Please try a different model.'),true);
 assert.equal(modelAtCapacity('Claude Code could not answer: API Error: 529 {"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}'),true);
-assert.equal(modelAtCapacity('Codex has reached its usage limit. Try again later, or switch its model in Settings › Agents.'),false);
+assert.equal(modelAtCapacity('Codex has reached its usage limit. Try again later, or use another Agent in Settings › Agents.'),false);
 assert.equal(modelAtCapacity('Codex is not signed in. Open Terminal, run codex login, then try again.'),false);
 
 // Host detection ----------------------------------------------------------------------------------
@@ -514,7 +514,7 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
    forgetNotStarting(found[0].command);
    script(path.join(bin,'claude'),runs+`cat > "$PWD/stdin.txt"\ncat "${fixture}"\n`);
    assert.equal((await new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi'},agentHome,async()=>null)).message,'Hello from Claude Code','chosen again, it is tried again');
-   assert.match(new AgentNotStarting({id:'hermes',title:'Hermes Agent'}).message,/Settings › Agents and choose Install again/);
+   assert.match(new AgentNotStarting({id:'hermes',title:'Hermes Agent'}).message,/Settings › Agents, choose Manage on your Agent, then Install again/);
   }
 
   // Hermes Agent over ACP, end to end: the session gets Worldlet's MCP server, the fixture Agent starts it and calls a

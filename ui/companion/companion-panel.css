@@ -224,7 +224,7 @@
 .companion-settings-agent-routines code{font-size:12px;overflow-wrap:anywhere}
 .companion-settings-row>.companion-settings-actions{flex:0 0 auto;flex-direction:row;align-items:center;justify-content:flex-end}
 .companion-settings-row>.companion-settings-confirm{flex:1 1 100%;flex-direction:row}
-/* Settings › Agents › Your Agent › Routines: Change time and New routine open a small form in place. */
+/* Settings › Agents › Your Agent › Scheduled: Change time and New routine open a small form in place. */
 .companion-settings-form{display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:1 1 100%;margin-top:6px}
 .companion-settings-form>textarea.companion-settings-input{flex:1 1 100%;resize:vertical;font:inherit}
 .companion-settings-form>input.companion-settings-input{flex:1 1 100%}

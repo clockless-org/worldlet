@@ -254,7 +254,7 @@ body.ui-gallery:has([data-theme=night]){background:#233c34}
 :is(#notionWorld.native-console,body) .fox-side-button[hidden]{display:none}
 /* The Tutorial switch while a tour runs (owner Order 2026-10-07, ui/frame/tour-lock.ts): a bulb, the word and a
    small switch, on, in the window's bottom-right on the body, above the spotlight and the lock. Once the tour is over
-   it goes; Settings › Help shows the tour again (owner request 2026-10-11). */
+   it goes; Settings › General shows the tour again (owner request 2026-10-11). */
 :is(#notionWorld .world-environment,body) .tutorial-switch{order:10;justify-self:end;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:flex-end;gap:8px;height:28px;min-height:28px;margin:0;padding:0;border:0;border-radius:8px;appearance:none;background:none;box-shadow:none;color:inherit;font:500 var(--ui-text-label,13px)/1.5 var(--ui-font-ui,system-ui);text-shadow:inherit;white-space:nowrap;cursor:pointer;pointer-events:auto}
 :is(#notionWorld .world-environment,body) .tutorial-switch[hidden]{display:none}
 :is(#notionWorld .world-environment,body) .tutorial-switch svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;filter:var(--ui-hud-glyph-shadow,none)}

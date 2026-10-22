@@ -4,7 +4,7 @@
 
 Please report security problems privately through GitHub: open the repository's **Security** tab and choose **Report a vulnerability**. Do not open a public Issue, pull request or discussion for a suspected vulnerability.
 
-Include what you found, how to reproduce it, the affected version (Settings › About shows it) and the operating system. We acknowledge reports and keep you informed while a fix is prepared.
+Include what you found, how to reproduce it, the affected version (the version line under the list in Settings shows it) and the operating system. We acknowledge reports and keep you informed while a fix is prepared.
 
 ## Scope
 
