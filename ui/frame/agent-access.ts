@@ -14,6 +14,8 @@
  * (agent/gate/GRANTS.md#orders-and-waking-an-agent). Plain words: the page names
  * places in the World and what was allowed, never tokens, endpoints or MCP. */
 import {agentButton as button,agentEl as el} from './agent-change.ts';
+import {AGENT_ICONS,appLogoSource} from '../applets/index.ts';
+import {settingsIcon,type SettingsIcon} from './settings-rows.ts';
 /** The Agent Fox works through (companion-settings.ts): first in the list, with Open for its own page. `harness` names
  * the listed Agent that is it, when it reaches the World too; `line` says how it is doing. */
 export type OwnAgent={harness:string|null;title:string;line:string;open:()=>void};
@@ -95,6 +97,12 @@ export function mayLine(agent:Agent):string {
  for(const scope of agent.githubWrites?.grants??[])may.push(`update Issues in ${scope.repo} without asking`);
  return may.length?`It may ${words(may)}.`:'It may not do anything in your World yet.';
 }
+/** An Agent's picture on its row: its own logo when Worldlet has one (Claude, ChatGPT, Codex, Hermes…), else its first letter. */
+export function agentIcon(harness:string,name:string):SettingsIcon {
+ const key=harness==='claude-ai'?'claude':harness;
+ const logo=AGENT_ICONS[key]||appLogoSource({key});
+ return logo?{logo}:{letter:name||'?'};
+}
 const words=(list:string[])=>list.length<2?list.join(''):list.slice(0,-1).join(', ')+' and '+list[list.length-1];
 const DECISION:Record<Audit['decision'],string>={allowed:'Allowed',denied:'Refused',asked:'Asked you'};
 export function auditLine(entry:Audit):string {
@@ -127,12 +135,14 @@ export function auditLine(entry:Audit):string {
  return `${time(entry.at)} · ${entry.target} ${entry.action} · ${DECISION[entry.decision]??entry.decision}`;
 }
 
-export async function showAgentAccess(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean,{own}:{own?:OwnAgent}={}){
+/** `advanced`: where "Give new work to" and "Add an Agent for a script" go, folded under the page's Advanced (owner
+ * request 2026-10-21: the list shows each Agent with Manage and Remove, nothing more). */
+export async function showAgentAccess(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean,{own,advanced=target}:{own?:OwnAgent;advanced?:HTMLElement}={}){
  const box=el('div','companion-settings-approvals companion-settings-access'),said=el('p','companion-settings-status');said.setAttribute('role','status');
  // Each Agent whose switches are open (they stay open as the list is drawn again).
  const opened=new Set<string>();
  // A daemon or scheduled job on this computer that reaches the World as an Agent of its own, folded away.
- const scripts=el('details','companion-settings-elsewhere') as HTMLDetailsElement;scripts.dataset.scriptAgents='';
+ const scripts=el('div','companion-settings-script-agents');scripts.dataset.scriptAgents='';
  const adder=el('div','companion-settings-access-add'),name=document.createElement('input');
  name.type='text';name.maxLength=60;name.placeholder='Name, like Nightly build';name.setAttribute('aria-label','Name of the script');
  adder.append(el('span','','Add an Agent for a script'),name,button('Add','add-script-agent',async()=>{
@@ -143,16 +153,18 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
    said.textContent=`${added.name} can now reach your World from a script on this computer. Its key is in ${added.endpointFile}. Allow what it may do below.`;
   }catch(e){said.textContent='Could not add it: '+((e as Error).message||'try again.');}
  }));
- scripts.append(el('summary','','Add an Agent for a script'),adder);
- target.append(box,said,scripts);
+ scripts.append(adder);
+ // "Give new work to": the Agent work goes to when whoever posts it names none (drawn with the list).
+ const order=el('label','companion-settings-access-order');order.hidden=true;
+ target.append(box,said);advanced.append(order,scripts);
  function confirmRevoke(row:HTMLElement,agent:Agent){
   for(const open of box.querySelectorAll?.('.companion-settings-confirm')??[])open.remove();
   said.textContent='';
   const ask=el('div','companion-settings-confirm');ask.setAttribute('role','group');ask.dataset.confirm=agent.id;
   ask.append(el('span','',`${agent.name} will no longer reach your World's tools from any chat, Fox's conversations with it included. This cannot be undone here.`),
-   button('Revoke','confirm-revoke-agent',async()=>{
+   button('Remove','confirm-revoke-agent',async()=>{
     try{await call('agentAccess',{operation:'revoke',id:agent.id});await draw();said.textContent=`${agent.name} can no longer reach your World.`;}
-    catch(e){said.textContent='Could not revoke: '+((e as Error).message||'try again.');}
+    catch(e){said.textContent='Could not remove it: '+((e as Error).message||'try again.');}
    },true),
    button('Keep','keep-agent',()=>{ask.remove();said.textContent='Nothing was changed.';}));
   row.append(ask);
@@ -167,15 +179,14 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
   const mine=own?.harness?all.find(a=>a.harness===own.harness&&a.kind==='local'&&!a.revokedAt):undefined;
   const agents=mine?[mine,...all.filter(a=>a!==mine)]:all;
   const ownRow=()=>{
-   const row=el('div','companion-settings-row is-own'),words=el('div');row.dataset.ownAgent='';
+   const row=el('div','companion-settings-row has-icon is-own'),words=el('div');row.dataset.ownAgent='';
    const name=el('strong','',own!.title);name.append(' ',el('span','companion-settings-tag','Your Agent'));
    words.append(name,el('span','',own!.line));
-   row.append(words,button('Open','open-own-agent',()=>own!.open()));
+   row.append(settingsIcon(agentIcon(own!.harness??'',own!.title)),words,button('Manage','open-own-agent',()=>own!.open()));
    return row;
   };
-  if(!agents.length){box.append(...own?[ownRow()]:[],el('p','companion-info-note','No other Agent has reached your World yet.'));return;}
-  // "Give new work to": the Agent work goes to when whoever posts it names none.
-  const order=el('label','companion-settings-access-order'),target=document.createElement('select'),chosen=typeof listed?.orders?.defaultFor==='string'?listed.orders.defaultFor:'';
+  if(!agents.length){order.hidden=true;box.append(...own?[ownRow()]:[],el('p','companion-info-note','No other Agent has reached your World yet.'));return;}
+  const target=document.createElement('select'),chosen=typeof listed?.orders?.defaultFor==='string'?listed.orders.defaultFor:'';
   target.className='companion-settings-select';target.setAttribute('aria-label','Give new work to');target.dataset.orderTarget='';
   target.append(Object.assign(document.createElement('option'),{value:'',textContent:'No Agent in particular'}));
   for(const agent of agents.filter(a=>!a.revokedAt))target.append(Object.assign(document.createElement('option'),{value:agent.id,textContent:agent.name}));
@@ -185,11 +196,11 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
    try{await call('agentAccess',{operation:'setOrderTarget',id});await draw();said.textContent=named?`New work now goes to ${named}.`:'New work no longer goes to one Agent.';}
    catch(e){target.value=chosen;target.disabled=false;said.textContent='Could not change that: '+((e as Error).message||'try again.');}
   };
-  order.append(el('span','','Give new work to:'),target);box.append(order);
+  order.replaceChildren(el('span','','Give new work to:'),target);order.hidden=false;
   const rows=el('div','companion-settings-rows');box.append(rows);
   if(own&&!mine)rows.append(ownRow());
   for(const agent of agents){
-   const row=el('div','companion-settings-row'+(agent===mine?' is-own':'')),words=el('div');row.dataset.accessAgent=agent.id;
+   const row=el('div','companion-settings-row has-icon'+(agent===mine?' is-own':'')),words=el('div');row.dataset.accessAgent=agent.id;
    const name=el('strong','',agent.name);
    if(agent===mine)name.append(' ',el('span','companion-settings-tag','Your Agent'));
    words.append(name,...agent===mine?[el('span','',own!.line)]:[],el('span','',accessLine(agent)));
@@ -197,19 +208,19 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
    if(reported){const line=el('span','companion-settings-access-report',reported);line.dataset.liveness=agent.liveness??'offline';words.append(line);}
    const may=mayLine(agent);
    if(may)words.append(el('span','companion-settings-access-may',may));
-   const recent=agent.audit.slice(0,SHOWN_AUDIT);
-   if(recent.length){
-    const log=el('ul','companion-settings-quiet companion-settings-access-audit');log.setAttribute('aria-label',`What ${agent.name} last asked for`);
-    for(const entry of recent)log.append(el('li','',auditLine(entry)));
-    words.append(log);
-   }
-   // Its Grants, switches, standing GitHub writes and wake command: folded under Change what it may do.
+   // What it did lately, its Grants, switches, standing GitHub writes and wake command: folded under Change what it may do.
    const more=el('details','companion-settings-access-more') as HTMLDetailsElement;more.dataset.accessMore=agent.id;more.open=opened.has(agent.id);
    more.ontoggle=()=>{if(more.open)opened.add(agent.id);else opened.delete(agent.id);};
    more.append(el('summary','','Change what it may do'));
    const outer=words;
    {
    const words=more;
+   const recent=agent.audit.slice(0,SHOWN_AUDIT);
+   if(recent.length){
+    const log=el('ul','companion-settings-quiet companion-settings-access-audit');log.setAttribute('aria-label',`What ${agent.name} last asked for`);
+    for(const entry of recent)log.append(el('li','',auditLine(entry)));
+    words.append(log);
+   }
    if(agent.endpointFile)words.append(el('span','companion-settings-quiet',`For a script. Its key is in ${agent.endpointFile}.`));
    // Standing GitHub writes are listed below with their Remove.
    for(const grant of agent.grants.filter(g=>!g.revokedAt&&!g.github))words.append(el('span','companion-settings-quiet',grantLine(grant)));
@@ -304,9 +315,9 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
    }
    }
    if(!agent.revokedAt&&more.childElementCount>1)outer.append(more);
-   row.append(outer);
-   if(agent===mine)row.append(button('Open','open-own-agent',()=>own!.open()));
-   if(!agent.revokedAt)row.append(button('Revoke','revoke-agent',()=>confirmRevoke(row,agent)));
+   row.append(settingsIcon(agentIcon(agent.harness,agent.name)),outer);
+   if(agent===mine)row.append(button('Manage','open-own-agent',()=>own!.open()));
+   if(!agent.revokedAt)row.append(button('Remove','revoke-agent',()=>confirmRevoke(row,agent)));
    rows.append(row);
   }
  }

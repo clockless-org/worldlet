@@ -4,6 +4,7 @@
  * Turn off stops the address answering; New address ends every connection. The address is the one thing here the
  * person copies into a connector; nothing else about it (tokens, MCP) is shown. */
 import {agentButton as button,agentEl as el} from './agent-change.ts';
+import {settingsIcon} from './settings-rows.ts';
 type Status={enabled:boolean;connected:boolean;address?:string;connectors:{id:string;name:string;token?:true}[]};
 /** Remote access was turned on or off, or has a new address: the other part of the page that shows it draws again. */
 const CHANGED='worldlet:remote-access';
@@ -79,35 +80,41 @@ export async function showRemoteAccess(target:HTMLElement,call:(action:string,bo
 export async function showUseInClaude(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean){
  const box=el('section','companion-settings-use-in-claude'),said=el('p','companion-settings-status');said.setAttribute('role','status');
  box.dataset.useInClaude='';
- let copied=false;
+ let copied=false,stepsOpen=false;
  async function draw(){
   const status:Status|null=await call('remoteMcp',{operation:'status'}).catch(()=>null);
   if(!current())return;
   box.replaceChildren();
   if(!status||typeof status.enabled!=='boolean'){box.hidden=true;return;}
   box.hidden=false;
-  box.append(el('h5','companion-settings-subhead','Use your World in Claude or ChatGPT'),
-   el('p','companion-info-note','Claude and ChatGPT can look at your World and help with it, on any computer or phone. Copy your World\'s address, then add it there:'));
+  // One row (owner request 2026-10-21): what to do in a sentence and Copy address; the steps fold under How?.
+  const words=el('div'),row=el('div','companion-settings-row has-icon');
+  words.append(el('strong','','Add Worldlet to Claude or ChatGPT'),
+   el('span','','Claude and ChatGPT can then look at your World and help with it, on any computer or phone. Copy the address and paste it there, then choose Allow on the card here.'));
   const steps=el('ol','companion-settings-steps');
   steps.append(el('li','','In Claude: Settings › Connectors › Add custom connector. Name it Worldlet and paste the address.'),
    el('li','','In ChatGPT: Settings › Apps & Connectors › Create. Name it Worldlet and paste the address. If there is no Create, turn on Developer mode under Advanced settings first.'),
    el('li','','A card then appears in your Attention Center with a four-digit code. Choose Allow if it matches the code Claude or ChatGPT shows.'));
-  box.append(steps);
-  const row=el('div','companion-settings-actions');
+  const how=el('details','companion-settings-how') as HTMLDetailsElement;how.dataset.useInClaudeSteps='';how.open=stepsOpen;
+  how.ontoggle=()=>{stepsOpen=how.open;};
+  how.append(el('summary','','How?'),steps);
+  const controls:HTMLElement[]=[];
   if(!status.enabled){
-   box.append(el('p','companion-info-note','This is turned off, so Claude and ChatGPT cannot reach your World.'));
-   row.append(button('Turn on','use-in-claude-on',async()=>{said.textContent='';try{await call('remoteMcp',{operation:'enable'});changed();await draw();}catch{said.textContent='Could not turn it on. Try again.';}},true));
+   words.append(el('span','companion-settings-quiet','This is turned off, so Claude and ChatGPT cannot reach your World.'));
+   controls.push(button('Turn on','use-in-claude-on',async()=>{said.textContent='';try{await call('remoteMcp',{operation:'enable'});changed();await draw();}catch{said.textContent='Could not turn it on. Try again.';}},true));
   }else{
    const names=status.connectors.filter(c=>!c.token).map(c=>c.name);
-   box.append(el('p','companion-info-note',[
-    names.length?`Connected: ${names.join(', ')}. Each is listed above, with what it may do.`:'',
-    status.connected?'It works while this computer is on and Worldlet is running.':'This computer cannot reach the internet right now. Worldlet keeps trying.'].filter(Boolean).join(' ')));
-   if(status.address)row.append(button(copied?'Address copied':'Copy address','use-in-claude-copy',async()=>{
+   const note=[names.length?`Connected: ${names.join(', ')}. Each is listed above, with what it may do.`:'',
+    status.connected?'It works while this computer is on and Worldlet is running.':'This computer cannot reach the internet right now. Worldlet keeps trying.'].filter(Boolean).join(' ');
+   words.append(el('span','companion-settings-quiet',note));
+   if(status.address)controls.push(button(copied?'Address copied':'Copy address','use-in-claude-copy',async()=>{
     try{await navigator.clipboard.writeText(status.address!);copied=true;await draw();said.textContent='Copied. Now paste it in Claude or ChatGPT.';}
     catch{said.textContent='Could not copy. Try again.';}
    },true));
   }
-  box.append(row);
+  words.append(how);
+  row.append(settingsIcon({icon:'link'}),words,...controls);
+  box.append(el('h5','companion-settings-subhead','Use your World in Claude or ChatGPT'),row);
  }
  target.append(box,said);
  follow(draw,current);

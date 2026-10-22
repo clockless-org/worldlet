@@ -86,7 +86,8 @@ await withBrowser(async browser=>{
  const [big,small]=await Promise.all([list.locator('[data-setting=agents] strong').evaluate(e=>parseFloat(getComputedStyle(e).fontSize)),list.locator('[data-setting=help] strong').evaluate(e=>parseFloat(getComputedStyle(e).fontSize))]);
  assert.ok(small<big,'the rest is smaller');
 
- // Agents: your own Agent first, then the others, each with what it may do, what it did lately and Revoke.
+ // Agents: your own Agent first, then the others, each with its picture, what it may do and Remove; what it did lately is
+ // folded with its switches (owner request 2026-10-21).
  await open('agents');
  await list.locator('[data-setting=agents][aria-current=true]').waitFor();
  const rows=detail.locator('[data-part=access] [data-access-agent]');
@@ -98,17 +99,22 @@ await withBrowser(async browser=>{
  await hermes.getByText('It may look at and change things in your World and see your board.',{exact:true}).waitFor();
  await claude.getByText(/^On another computer\. Last used .*2026\.$/).waitFor();
  await claude.getByText('It may look at your World, read GitHub and ask you things.',{exact:true}).waitFor();
- await claude.locator('.companion-settings-access-audit li').getByText(/items query · Allowed$/).waitFor();
- assert.equal(await claude.getByRole('button',{name:'Revoke',exact:true}).count(),1);
- assert.equal(await claude.getByRole('button',{name:'Open',exact:true}).count(),0,'Open only for your own Agent');
+ assert.equal(await rows.locator('.companion-settings-icon').count(),2,'each Agent has its picture');
+ assert.equal(await claude.locator('.companion-settings-icon img').count(),1,'Claude wears its logo');
+ assert.equal(await claude.getByRole('button',{name:'Remove',exact:true}).count(),1);
+ assert.equal(await claude.getByRole('button',{name:'Manage',exact:true}).count(),0,'Manage only for your own Agent');
+ assert.equal(await detail.getByText('Give new work to:',{exact:true}).isVisible(),false,'who gets new work is under Advanced');
  // Its Grants and switches are folded under Change what it may do.
  assert.equal(await claude.getByRole('checkbox',{name:'Can read GitHub',exact:true}).isVisible(),false,'switches folded');
  await claude.locator('[data-access-more] > summary').click();
  assert.equal(await claude.getByRole('checkbox',{name:'Can read GitHub',exact:true}).isChecked(),true);
- // Use your World in Claude or ChatGPT: the steps in plain words, Turn on when it is off, then Copy address; the address
- // itself is never shown on the page.
+ await claude.locator('.companion-settings-access-audit li').getByText(/items query · Allowed$/).waitFor();
+ // Use your World in Claude or ChatGPT: one row, Turn on when it is off, then Copy address; the steps in plain words
+ // fold under How?, and the address itself is never shown on the page.
  const useIn=detail.locator('[data-use-in-claude]');
  await useIn.getByText('Use your World in Claude or ChatGPT',{exact:true}).waitFor();
+ assert.doesNotMatch(await useIn.innerText(),/Add custom connector/,'the steps start folded');
+ await useIn.locator('details[data-use-in-claude-steps] > summary').click();
  assert.match(await useIn.innerText(),/In Claude: Settings › Connectors › Add custom connector\. Name it Worldlet and paste the address\./);
  assert.match(await useIn.innerText(),/In ChatGPT: Settings › Apps & Connectors › Create\./);
  assert.match(await useIn.innerText(),/four-digit code\. Choose Allow if it matches/);
@@ -117,27 +123,34 @@ await withBrowser(async browser=>{
  await useIn.getByRole('button',{name:'Copy address',exact:true}).click();
  await page.getByText('Copied. Now paste it in Claude or ChatGPT.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).copied),['https://mcp.worldlet.ai/'+'0'.repeat(32)]);
- // Remote access (the address, Turn off, tokens) is here, folded.
- const remote=detail.locator('details[data-part=remote]');
+ // Remote access (the address, Turn off, tokens) is under Advanced, folded.
+ const advanced=detail.locator('details[data-part=advanced]'),remote=detail.locator('details[data-part=remote]');
+ assert.equal(await advanced.evaluate(n=>(n as HTMLDetailsElement).open),false,'Advanced starts folded');
  assert.equal(await remote.evaluate(n=>(n as HTMLDetailsElement).open),false,'Remote access starts folded');
  await claude.locator('[data-access-more] > summary').click();
  assert.doesNotMatch(await detail.innerText(),/mcp\.worldlet\.ai/,'the address is copied, not shown');
  await plain('Agents');
  if(screenshot)await page.screenshot({path:screenshot,fullPage:true});
+ await advanced.locator('> summary').click();
+ await advanced.getByText('Give new work to:',{exact:true}).waitFor();
+ await advanced.locator('[data-script-agents]').getByText('Add an Agent for a script',{exact:true}).waitFor();
  await remote.locator('> summary').click();
  await remote.getByRole('button',{name:'Turn off',exact:true}).waitFor();
  await remote.locator('[data-remote-address]').getByText(/^https:\/\/mcp\.worldlet\.ai\//).waitFor();
  await remote.locator('details[data-remote-tokens]').waitFor();
- // Revoke asks once more, then the Agent can no longer reach the World.
- await claude.getByRole('button',{name:'Revoke',exact:true}).click();
+ // Remove asks once more, then the Agent can no longer reach the World.
+ await claude.getByRole('button',{name:'Remove',exact:true}).click();
  await claude.locator('[data-action=confirm-revoke-agent]').click();
  await detail.getByText('Claude can no longer reach your World.',{exact:true}).waitFor();
- // Open: your own Agent's page, its five parts in order, and back to every Agent.
- await hermes.getByRole('button',{name:'Open',exact:true}).click();
+ // Manage: your own Agent's page, its status and Scheduled first, Skills, Permissions and Connections folded under
+ // Advanced (owner request 2026-10-21), and back to every Agent.
+ await hermes.getByRole('button',{name:'Manage',exact:true}).click();
  const own=detail.locator('[data-view=own-agent]');
  await own.getByText('Hermes Agent',{exact:true}).waitFor();
- assert.deepEqual(await detail.locator('[data-part]').evaluateAll(n=>n.map(p=>(p as HTMLElement).dataset.part)),['model','skills','routines','permissions','accounts']);
- assert.deepEqual(await detail.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Model','Skills','Scheduled','Permissions','Connections']);
+ assert.deepEqual(await detail.locator('[data-part]').evaluateAll(n=>n.map(p=>(p as HTMLElement).dataset.part)),['model','routines','skills','permissions','accounts']);
+ assert.deepEqual(await detail.locator('[data-part] > .companion-settings-parthead').allTextContents(),['Status','Scheduled','Skills','Permissions','Connections']);
+ assert.equal(await detail.locator('details[data-own-advanced]').evaluate(n=>(n as HTMLDetailsElement).open),false,'Advanced starts folded');
+ assert.equal(await detail.locator('details[data-choose-agent]').evaluate(n=>(n as HTMLDetailsElement).open),false,'other Agents and providers start folded while it works');
  assert.equal(await detail.locator('[data-part=memory],[data-part=access]').count(),0,'memory is in Context and the Agents are on the list');
  await detail.getByText('Fox’s model is connected',{exact:true}).waitFor();
  assert.equal(await detail.getByText(/claude-|gpt-/).count(),0,'no model names');
@@ -151,6 +164,7 @@ await withBrowser(async browser=>{
   await detail.locator(`[data-view=own-agent]`).waitFor();
   await detail.locator(`[data-part=${part}]`).waitFor();
  }
+ assert.equal(await detail.locator('details[data-own-advanced]').evaluate(n=>(n as HTMLDetailsElement).open),true,'a part named from outside opens the fold it is in');
  await open('access');
  await detail.locator('[data-part=access] [data-access-agent]').first().waitFor();
 
@@ -192,4 +206,4 @@ await withBrowser(async browser=>{
  if(screenshot)await page.screenshot({path:screenshot.replace(/\.png$/,'-narrow.png'),fullPage:true});
  assert.deepEqual(errors,[]);
 });
-console.log('PASS Settings in three areas: Connectors, Agents and Context first and the rest smaller; Agents lists your own Agent first with Open for its page (Model, Skills, Scheduled, Permissions, Connections) and Back, what each may do in one line, what it did lately and Revoke, switches folded, using the World in Claude or ChatGPT and Remote access folded; Context shows how much each kind holds (only past conversations counted), the memory, Save a copy and deletes that ask first; old entry points land in their area; no technical word on the default path; narrow layout');
+console.log('PASS Settings in three areas: Services, Agents and Your data first, each with an icon, and the rest smaller; Agents lists your own Agent first with Manage for its page (Status and Scheduled, then Skills, Permissions and Connections under Advanced) and Back, what each may do in one line, what it did lately and Revoke, switches folded, using the World in Claude or ChatGPT and Remote access folded; Context shows how much each kind holds (only past conversations counted), the memory, Save a copy and deletes that ask first; old entry points land in their area; no technical word on the default path; narrow layout');
