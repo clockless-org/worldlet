@@ -4,7 +4,6 @@ import {createPanelGuide} from './panel-guide.ts';
 import {modelHealthView,type ModelFix} from './model-health.ts';
 import {showAgentPermissions} from './agent-permissions.ts';
 import {agentIcon,showAgentAccess,type OwnAgent} from './agent-access.ts';
-import {showRemoteAccess,showUseInClaude} from './remote-access.ts';
 import {showWorldAddress} from './world-address.ts';
 import {showWorldContext} from './world-context-page.ts';
 import {showAgentRoutines} from './agent-routines.ts';
@@ -353,25 +352,17 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
    line:view.state==='ok'?'Fox works through it. It may do what you ask Fox, and asks you before it changes anything.':view.title+'.'};
  }
  // Agents (issue #674): every Agent that reaches this World in one list, your own Agent first with Manage for its page;
- // then using the World in Claude or ChatGPT as one row with Copy address. Everything else is folded under Advanced
- // (owner request 2026-10-21): who gets new work, Agents for scripts, Your World's address and Remote access.
+ // then Your World's address, one card (owner request 2026-10-22: no Advanced).
  async function agentsSetting(target:HTMLElement,at:string){
   if(OWN_PARTS.includes(at))return ownAgentPage(target);
   const turn=ticket,live=()=>turn===ticket&&target.isConnected;
   const list=el('section','companion-settings-part companion-settings-agents');list.dataset.part='access';
   list.append(el('p','companion-info-note','The AI helpers that work in your World. Remove one any time.'));
-  const claude=el('div');claude.dataset.part='use-in-claude';
-  const advanced=el('details','companion-settings-elsewhere companion-settings-agents-advanced') as HTMLDetailsElement;advanced.dataset.part='advanced';
-  advanced.append(el('summary','','Advanced'));
-  const work=el('div');
-  // Your World's address (agent/gate/WORLD-ADDRESS.md): its own web page, the browsers allowed there and what is shared.
-  const address=el('div');address.dataset.part='world-address';
-  const remote=el('details','companion-settings-elsewhere companion-settings-remote-access') as HTMLDetailsElement;remote.dataset.part='remote';
-  remote.append(el('summary','','Remote access'));
-  advanced.append(work,subhead('Your World’s web address'),address,remote);
-  target.append(list,claude,advanced);
+  // Your World's address (agent/gate/WORLD-ADDRESS.md): open the World anywhere, and use it in Claude or ChatGPT.
+  const address=el('section');address.dataset.part='world-address';
+  target.append(list,address);
   const own=await ownAgent();if(!live())return;
-  await Promise.all([showAgentAccess(list,call,live,{own:{...own,open:()=>void show('agents','model')},advanced:work}),showUseInClaude(claude,call,live),showWorldAddress(address,call,live),showRemoteAccess(remote,call,live)]);
+  await Promise.all([showAgentAccess(list,call,live,{own:{...own,open:()=>void show('agents','model')},advanced:null}),showWorldAddress(address,call,live)]);
  }
  // One list, in the order a person looks for things (owner request 2026-10-10: no tabs, nothing technical): the three
  // areas first (issue #674), connectors on one side, Agents on the other, and everything the World keeps in one place;

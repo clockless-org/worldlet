@@ -38,6 +38,8 @@ await withBrowser(async browser=>{
    if(action==='agentAccess'&&body.operation==='revoke'){w.access=w.access.map((a:any)=>a.id===body.id?{...a,revokedAt:'2026-10-18T09:00:00.000Z'}:a);return {ok:true};}
    if(action==='remoteMcp'&&body.operation==='status')return structuredClone(w.remote);
    if(action==='remoteMcp'&&body.operation==='enable'){w.remote.enabled=true;return {ok:true};}
+   if(action==='worldAddress'&&body.operation==='status')return w.remote.enabled?{name:'w-7k3m9p2x',address:'https://w-7k3m9p2x.worldlet.ai',mcp:'https://w-7k3m9p2x.worldlet.ai/mcp',chosen:false,defaultName:'w-7k3m9p2x',reachable:true,remote:true,devices:[],visitors:[],shares:[]}
+    :{name:null,chosen:false,defaultName:null,reachable:false,remote:false,devices:[],visitors:[],shares:[]};
    if(action==='harnessSkills'||action==='harnessSchedule'||action==='harnessApprovalRules'||action==='harnessConnections')return {current:{harness:'hermes',title:'Hermes Agent'},harnesses:[]};
    if(action==='foxPreferences')return {ok:true,dailyRoutines:{plan:true,summary:true}};
    if(action==='snapshot')return {connections:[]};
@@ -103,41 +105,28 @@ await withBrowser(async browser=>{
  assert.equal(await claude.locator('.companion-settings-icon img').count(),1,'Claude wears its logo');
  assert.equal(await claude.getByRole('button',{name:'Remove',exact:true}).count(),1);
  assert.equal(await claude.getByRole('button',{name:'Manage',exact:true}).count(),0,'Manage only for your own Agent');
- assert.equal(await detail.getByText('Give new work to:',{exact:true}).isVisible(),false,'who gets new work is under Advanced');
  // Its Grants and switches are folded under Change what it may do.
  assert.equal(await claude.getByRole('checkbox',{name:'Can read GitHub',exact:true}).isVisible(),false,'switches folded');
  await claude.locator('[data-access-more] > summary').click();
  assert.equal(await claude.getByRole('checkbox',{name:'Can read GitHub',exact:true}).isChecked(),true);
  await claude.locator('.companion-settings-access-audit li').getByText(/items query · Allowed$/).waitFor();
- // Use your World in Claude or ChatGPT: one row, Turn on when it is off, then Copy address; the steps in plain words
- // fold under How?, and the address itself is never shown on the page.
- const useIn=detail.locator('[data-use-in-claude]');
- await useIn.getByText('Use your World in Claude or ChatGPT',{exact:true}).waitFor();
- assert.doesNotMatch(await useIn.innerText(),/Add custom connector/,'the steps start folded');
- await useIn.locator('details[data-use-in-claude-steps] > summary').click();
- assert.match(await useIn.innerText(),/In Claude: Settings › Connectors › Add custom connector\. Name it Worldlet and paste the address\./);
- assert.match(await useIn.innerText(),/In ChatGPT: Settings › Apps & Connectors › Create\./);
- assert.match(await useIn.innerText(),/four-digit code\. Choose Allow if it matches/);
- assert.equal(await useIn.getByRole('button',{name:'Copy address',exact:true}).count(),0,'nothing to copy while it is off');
- await useIn.getByRole('button',{name:'Turn on',exact:true}).click();
- await useIn.getByRole('button',{name:'Copy address',exact:true}).click();
- await page.getByText('Copied. Now paste it in Claude or ChatGPT.',{exact:true}).waitFor();
- assert.deepEqual(await page.evaluate(()=>(window as any).copied),['https://mcp.worldlet.ai/'+'0'.repeat(32)]);
- // Remote access (the address, Turn off, tokens) is under Advanced, folded.
- const advanced=detail.locator('details[data-part=advanced]'),remote=detail.locator('details[data-part=remote]');
- assert.equal(await advanced.evaluate(n=>(n as HTMLDetailsElement).open),false,'Advanced starts folded');
- assert.equal(await remote.evaluate(n=>(n as HTMLDetailsElement).open),false,'Remote access starts folded');
- await claude.locator('[data-access-more] > summary').click();
- assert.doesNotMatch(await detail.innerText(),/mcp\.worldlet\.ai/,'the address is copied, not shown');
+ // Your World's address: one card (owner request 2026-10-22: no Advanced). Turn on when it is off, then the address,
+ // Copy for Claude or ChatGPT and Choose a name; no remote access controls, tokens, script Agents or work routing.
+ const card=detail.locator('[data-world-address]');
+ await detail.getByText('Use your World anywhere',{exact:true}).waitFor();
+ assert.equal(await card.getByRole('button',{name:'Copy for Claude or ChatGPT',exact:true}).count(),0,'nothing to copy while it is off');
+ await card.getByRole('button',{name:'Turn on',exact:true}).click();
+ await card.locator('[data-world-address-link]').getByText('w-7k3m9p2x.worldlet.ai',{exact:true}).waitFor();
+ await card.getByRole('button',{name:'Copy for Claude or ChatGPT',exact:true}).click();
+ await page.getByText('Copied. Paste it in Claude or ChatGPT as a connector.',{exact:true}).waitFor();
+ assert.deepEqual(await page.evaluate(()=>(window as any).copied),['https://w-7k3m9p2x.worldlet.ai/mcp']);
+ await card.getByRole('button',{name:'Choose a name',exact:true}).waitFor();
+ for(const gone of ['details[data-part=advanced]','details[data-part=remote]','[data-use-in-claude]','[data-script-agents]','details[data-remote-tokens]'])
+  assert.equal(await detail.locator(gone).count(),0,gone+' is gone');
+ for(const word of ['Advanced','Turn off','New address','Give new work to:','Add an Agent for a script'])
+  assert.equal(await detail.getByText(word,{exact:true}).count(),0,word+' is gone');
  await plain('Agents');
  if(screenshot)await page.screenshot({path:screenshot,fullPage:true});
- await advanced.locator('> summary').click();
- await advanced.getByText('Give new work to:',{exact:true}).waitFor();
- await advanced.locator('[data-script-agents]').getByText('Add an Agent for a script',{exact:true}).waitFor();
- await remote.locator('> summary').click();
- await remote.getByRole('button',{name:'Turn off',exact:true}).waitFor();
- await remote.locator('[data-remote-address]').getByText(/^https:\/\/mcp\.worldlet\.ai\//).waitFor();
- await remote.locator('details[data-remote-tokens]').waitFor();
  // Remove asks once more, then the Agent can no longer reach the World.
  await claude.getByRole('button',{name:'Remove',exact:true}).click();
  await claude.locator('[data-action=confirm-revoke-agent]').click();
@@ -213,4 +202,4 @@ await withBrowser(async browser=>{
  if(screenshot)await page.screenshot({path:screenshot.replace(/\.png$/,'-narrow.png'),fullPage:true});
  assert.deepEqual(errors,[]);
 });
-console.log('PASS Settings in three areas: Services, Agents and Your data first, each with an icon, and the rest smaller; Agents lists your own Agent first with Manage for its page (Status and Scheduled, then Skills, Permissions and Connections under Advanced) and Back, what each may do in one line, what it did lately and Remove, switches folded, using the World in Claude or ChatGPT and Remote access folded; Your data shows how much each kind holds (only past conversations counted), Save a copy, the memory under Show and a Delete on each kind that asks first, nothing folded; old entry points land in their area; no technical word on the default path; narrow layout');
+console.log('PASS Settings in three areas: Services, Agents and Your data first, each with an icon, and the rest smaller; Agents lists your own Agent first with Manage for its page (Status and Scheduled, then Skills, Permissions and Connections under Advanced) and Back, what each may do in one line, what it did lately and Remove, switches folded, Your World’s address as one card (Turn on, Copy for Claude or ChatGPT, Choose a name) and no Advanced; Your data shows how much each kind holds (only past conversations counted), Save a copy, the memory under Show and a Delete on each kind that asks first, nothing folded; old entry points land in their area; no technical word on the default path; narrow layout');

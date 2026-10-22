@@ -135,9 +135,9 @@ export function auditLine(entry:Audit):string {
  return `${time(entry.at)} · ${entry.target} ${entry.action} · ${DECISION[entry.decision]??entry.decision}`;
 }
 
-/** `advanced`: where "Give new work to" and "Add an Agent for a script" go, folded under the page's Advanced (owner
- * request 2026-10-21: the list shows each Agent with Manage and Remove, nothing more). */
-export async function showAgentAccess(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean,{own,advanced=target}:{own?:OwnAgent;advanced?:HTMLElement}={}){
+/** `advanced`: where "Give new work to" and "Add an Agent for a script" go; `null` leaves them out (owner requests
+ * 2026-10-21 and 2026-10-22: the list shows each Agent with Manage and Remove, nothing more, and Settings has no Advanced). */
+export async function showAgentAccess(target:HTMLElement,call:(action:string,body?:any)=>Promise<any>,current:()=>boolean,{own,advanced=target}:{own?:OwnAgent;advanced?:HTMLElement|null}={}){
  const box=el('div','companion-settings-approvals companion-settings-access'),said=el('p','companion-settings-status');said.setAttribute('role','status');
  // Each Agent whose switches are open (they stay open as the list is drawn again).
  const opened=new Set<string>();
@@ -156,7 +156,7 @@ export async function showAgentAccess(target:HTMLElement,call:(action:string,bod
  scripts.append(adder);
  // "Give new work to": the Agent work goes to when whoever posts it names none (drawn with the list).
  const order=el('label','companion-settings-access-order');order.hidden=true;
- target.append(box,said);advanced.append(order,scripts);
+ target.append(box,said);advanced?.append(order,scripts);
  function confirmRevoke(row:HTMLElement,agent:Agent){
   for(const open of box.querySelectorAll?.('.companion-settings-confirm')??[])open.remove();
   said.textContent='';
