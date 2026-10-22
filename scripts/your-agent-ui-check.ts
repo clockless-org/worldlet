@@ -132,7 +132,7 @@ try{
  // Your own Agent is first on the list; Open shows its own page.
  await local.locator('[data-part=access] [data-access-agent]').first().waitFor();
  assert.equal(await local.locator('[data-part=access] [data-access-agent]').first().getAttribute('data-access-agent'),'hermes','your own Agent first');
- await local.locator('[data-access-agent=hermes]').getByRole('button',{name:'Open',exact:true}).click();
+ await local.locator('[data-access-agent=hermes]').getByRole('button',{name:'Manage',exact:true}).click();
  await local.locator('[data-view=own-agent]').waitFor();
  await local.getByText('Fox’s model is connected',{exact:true}).waitFor();
  // The Accounts section is part of this page now: Settings lists no section of its own for it.
@@ -344,7 +344,7 @@ try{
  // Agents' list: each Agent with its last use, what it may do in one line, its newest decisions and Revoke after asking;
  // its Grants and switches folded under Change what it may do.
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'access'}})));
- const accessPart=local.locator('[data-part=access]'),hermesAccess=accessPart.locator('[data-access-agent=hermes]');
+ const accessPart=local.locator('[data-part=access]'),advancedPart=local.locator('details[data-part=advanced]'),hermesAccess=accessPart.locator('[data-access-agent=hermes]');
  await hermesAccess.getByText(/^Hermes Agent/).first().waitFor();
  await hermesAccess.getByText(/^On this computer\. Last used .*2026\.$/).waitFor();
  await hermesAccess.getByText('It may look at and change things in your World, read PostHog, take work, see your board, report its work, read what Agents saved and update Issues in example/app without asking.',{exact:true}).waitFor();
@@ -434,12 +434,12 @@ try{
  await accessPart.getByText('Hermes Agent can now see what your other Agents are doing.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/Reports$/.test(c.operation))),
   [{action:'agentAccess',operation:'grantReports',id:'hermes',kind:'list'}],'only the Agent and which, never targets');
- // "Add an Agent for a script" (agent/gate/GRANTS.md#agents-for-scripts), folded: only the name goes to the host.
- await accessPart.locator('[data-script-agents] > summary').click();
- await accessPart.getByRole('button',{name:'Add',exact:true}).click();
+ // "Add an Agent for a script" (agent/gate/GRANTS.md#agents-for-scripts), under Advanced: only the name goes to the host.
+ await advancedPart.locator('> summary').click();
+ await advancedPart.locator('[data-script-agents]').getByRole('button',{name:'Add',exact:true}).click();
  await accessPart.getByText(/^Could not add it: Give it a name/).waitFor();
- await accessPart.getByRole('textbox',{name:'Name of the script'}).fill('Nightly build');
- await accessPart.getByRole('button',{name:'Add',exact:true}).click();
+ await advancedPart.getByRole('textbox',{name:'Name of the script'}).fill('Nightly build');
+ await advancedPart.locator('[data-script-agents]').getByRole('button',{name:'Add',exact:true}).click();
  await accessPart.getByText('Nightly build can now reach your World from a script on this computer. Its key is in /Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json. Allow what it may do below.',{exact:true}).waitFor();
  await accessPart.locator('[data-access-agent=nightly-build] [data-access-more] > summary').click();
  await accessPart.locator('[data-access-agent=nightly-build]').getByText('For a script. Its key is in /Users/alex/.worldlet/mcp/worldlet-mcp-endpoint.nightly-build.json.',{exact:true}).waitFor();
@@ -475,12 +475,12 @@ try{
    {action:'worldAddress',operation:'share',open:true},{action:'worldAddress',operation:'remove',id:'v1'},{action:'worldAddress',operation:'remove',id:'pk1'}],'only names, choices and IDs');
  // "Give new work to" and each Agent's wake command (agent/gate/GRANTS.md#orders-and-waking-an-agent): the page sends
  // the Agent, and the command as a list of words, one per line as typed; the host's refusal shows in plain words.
- const target=accessPart.getByRole('combobox',{name:'Give new work to',exact:true});
+ const target=advancedPart.getByRole('combobox',{name:'Give new work to',exact:true});
  assert.equal(await target.inputValue(),'');
  assert.deepEqual(await target.locator('option').allTextContents(),['No Agent in particular','Hermes Agent','Nightly build']);
  await target.selectOption('hermes');
  await accessPart.getByText('New work now goes to Hermes Agent.',{exact:true}).waitFor();
- assert.equal(await accessPart.getByRole('combobox',{name:'Give new work to',exact:true}).inputValue(),'hermes');
+ assert.equal(await advancedPart.getByRole('combobox',{name:'Give new work to',exact:true}).inputValue(),'hermes');
  const wakePart=hermesAccess.locator('[data-wake=hermes]'),wakeBox=wakePart.getByRole('textbox',{name:'Wake command for Hermes Agent',exact:true});
  await wakePart.getByText(/^When work is given to Hermes Agent, Worldlet runs this program on this computer/).waitFor();
  assert.equal(await wakePart.getByRole('button',{name:'Remove',exact:true}).count(),0,'nothing to remove yet');
@@ -510,7 +510,7 @@ try{
  await accessPart.getByText('Hermes Agent can now draft PostHog changes for you to approve.',{exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&/ServiceDrafts$/.test(c.operation))),
   [{action:'agentAccess',operation:'grantServiceDrafts',id:'hermes',provider:'posthog'}],'only the Agent and the Service, never targets');
- await hermesAccess.getByRole('button',{name:'Revoke',exact:true}).click();
+ await hermesAccess.locator('[data-action=revoke-agent]').click();
  await hermesAccess.getByText(/^Hermes Agent will no longer reach your World's tools/).waitFor();
  assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='revoke').length),0,'Revoke asks first');
  await accessPart.scrollIntoViewIfNeeded();
@@ -518,11 +518,11 @@ try{
  await hermesAccess.locator('[data-action=confirm-revoke-agent]').click();
  await accessPart.getByText('Hermes Agent can no longer reach your World.',{exact:true}).waitFor();
  await hermesAccess.getByText(/^On this computer\. Revoked .*2026\.$/).waitFor();
- assert.equal(await hermesAccess.getByRole('button',{name:'Revoke'}).count(),0,'nothing left to revoke');
+ assert.equal(await hermesAccess.locator('[data-action=revoke-agent]').count(),0,'nothing left to remove');
  assert.equal(await hermesAccess.getByRole('checkbox').count(),0,'a revoked Agent has no Service to read');
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='revoke').map(c=>c.id)),['hermes']);
  // Revoked, it is no longer your Agent's row on the list: your Agent has a row of its own, with Open.
- await accessPart.locator('[data-own-agent]').getByRole('button',{name:'Open',exact:true}).click();
+ await accessPart.locator('[data-own-agent]').getByRole('button',{name:'Manage',exact:true}).click();
  await local.locator('[data-view=own-agent]').waitFor();
  await local.locator('[data-agent=claude-code]').getByRole('button',{name:'Use',exact:true}).click();
  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='localAgent'&&c.operation==='adopt'&&c.id==='claude-code'));

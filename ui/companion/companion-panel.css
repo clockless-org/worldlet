@@ -353,3 +353,8 @@
 
 .companion-settings-service-collection .companion-settings-row{flex-wrap:wrap}
 .companion-settings-service-collection .companion-settings-row>div{flex:1 1 240px}
+/* Agents (owner request 2026-10-21): the steps for Claude and ChatGPT fold under How? in the row. */
+.companion-settings-how{margin-top:4px;font-size:12px;color:#656651}
+.companion-settings-how>summary{cursor:pointer;color:#5a6b4f;text-decoration:underline}
+.companion-settings-how .companion-settings-steps{margin:6px 0 0;padding-left:18px}
+.companion-settings-agents{display:flex;flex-direction:column;gap:8px;align-self:stretch}
