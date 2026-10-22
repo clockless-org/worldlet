@@ -10,7 +10,12 @@ export function createCompanionFeedback({call,onVoice=(_phase:string)=>{}}){
  actions.append(mic,send);
  const status=el('p');status.setAttribute('role','status');status.className='companion-feedback-status';
  const disclosure=el('p','Only your message and the app version go to the Worldlet team.');disclosure.className='companion-info-note';
- section.append(text,actions,status,disclosure);
+ // Diagnostics are offered here, where something being wrong gets said (owner request 2026-10-22: no row of its own in
+ // Settings). The file is saved on this computer; nothing is uploaded.
+ const diagnostics=el('button','Save a diagnostics file');diagnostics.type='button';diagnostics.className='companion-info-action';diagnostics.dataset.action='diagnostics';
+ const diagnosticsNote=el('p','Something wrong? Save a diagnostics file on this computer, to send if the team asks for it. Nothing is uploaded.');diagnosticsNote.className='companion-info-note';
+ diagnostics.onclick=async()=>{diagnostics.disabled=true;try{await call('exportDiagnostics');}catch(e){status.textContent=e.message||'Could not save diagnostics.';}finally{diagnostics.disabled=false;}};
+ section.append(text,actions,status,disclosure,diagnosticsNote,diagnostics);
  let id=crypto.randomUUID(),sending=false,voice:'idle'|'starting'|'listening'|'processing'='idle',ticket=0,finishPending=false;
  function update(){
   const draft=text.value.trim();send.disabled=!draft||sending||voice!=='idle';text.disabled=sending||voice!=='idle';mic.disabled=sending||voice==='processing';

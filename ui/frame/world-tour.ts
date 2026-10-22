@@ -24,7 +24,7 @@ import {phoneApps} from './phone-release.ts';
  * the tour runs; turning it off skips (owner requests 2026-10-04 and 2026-10-05) and ends the first run at
  * any step: the journey finishes, the World is free, and the switch goes.
  *
- * Replay (#1327): once the first run is over, Show the tutorial in Settings › Help (owner request 2026-10-11:
+ * Replay (#1327): once the first run is over, Show the tutorial in Settings › General (owner request 2026-10-11:
  * Tutorial and Feedback go back into Settings; it asks with `worldlet:tutorial-replay` on the World) shows the
  * same steps again on demand. A replay only tells: it never moves the journey stage and never connects or pairs
  * anything; turning the switch off (and Esc) end it. While Fox is working it waits and says so, and starts once Fox is
@@ -175,7 +175,7 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false,conn
   root.dispatchEvent(new CustomEvent('worldlet:world-tour-replay-done'));
   lock.refresh();// The tour's switch goes at once, not at the lock's next frame.
  }
- // Show the tutorial in Settings › Help replays, one tour at a time and never over the first run or Fox's work; the
+ // Show the tutorial in Settings › General replays, one tour at a time and never over the first run or Fox's work; the
  // tour's switch (tour-lock.ts), turned off, skips. Fox's notes about it point at Settings beside Fox.
  const coach=createCoachMark();
  const settingsEntry=()=>root.querySelector('.companion-side .companion-panel-button') as HTMLElement|null;
@@ -193,7 +193,7 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false,conn
   lock.refresh();// The tour's switch, on, shows with the first step, not at the lock's next poll.
  }
  const idle=()=>{if(deferred&&!view.busy){deferred=false;coach.hide();replay();}};
- // The switch turned off: the first run ends where it is; Settings › Help shows the tour again.
+ // The switch turned off: the first run ends where it is; Settings › General shows the tour again.
  const overview=()=>!view.current||view.current==='overview';
  const lock=createTourLock(root,{
   locked:()=>!destroyed&&overview()&&root.dataset.onboarding!=='true'&&(replaying||tourInProgress(state.onboarding)),
@@ -215,7 +215,7 @@ export function mountWorldTour({root,view,call,state:initial,arriving=false,conn
   lock.refresh();
   void call('onboarding',{operation:'journey',stage:'finish'}).catch(()=>{});
   // Settings is where the tour can be shown again; say so once, beside it.
-  requestAnimationFrame(()=>{const entry=settingsEntry();if(!entry||destroyed)return;coach.show(entry,'Turn the tutorial back on in Settings › Help any time.');setTimeout(()=>{if(coach.target===entry&&!deferred)coach.hide();},5000);});
+  requestAnimationFrame(()=>{const entry=settingsEntry();if(!entry||destroyed)return;coach.show(entry,'Turn the tutorial back on in Settings › General any time.');setTimeout(()=>{if(coach.target===entry&&!deferred)coach.hide();},5000);});
  }
  window.addEventListener('worldlet:fox-idle',idle);
  root.addEventListener('worldlet:tutorial-replay',replay);

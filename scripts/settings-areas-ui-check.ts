@@ -1,5 +1,5 @@
 // Settings in three areas (issue #674, ui/frame/companion-settings.ts) against a fake host: Connectors, Agents and
-// Context first, then Fox, Phone, General and Help smaller below a line. Agents lists every Agent that reaches the World,
+// Context first, then Fox, Phone and General (Help joined it) smaller below a line. Agents lists every Agent that reaches the World,
 // your own Agent first with Manage for its page (Status, Scheduled, Does without asking) and Back, each other Agent with
 // what it may do in one line, Manage for its page of switches and Remove; then Your World's address as one card. Nothing
 // is folded (owner request 2026-10-22: no Advanced). Context shows each kind of
@@ -83,10 +83,10 @@ await withBrowser(async browser=>{
 
  // The three areas, then the rest smaller under a line.
  await open('');
- assert.deepEqual(await list.locator('[data-setting] strong').allTextContents(),['Services','Agents','Your data','Fox','Phone','General','Help']);
+ assert.deepEqual(await list.locator('[data-setting] strong').allTextContents(),['Services','Agents','Your data','Fox','Phone','General']);
  assert.deepEqual(await list.locator('.companion-settings-item:not(.is-minor)').evaluateAll(n=>n.map(b=>(b as HTMLElement).dataset.setting)),['connectors','agents','context']);
  assert.equal(await list.locator('.companion-settings-minor').count(),1,'one line between the areas and the rest');
- const [big,small]=await Promise.all([list.locator('[data-setting=agents] strong').evaluate(e=>parseFloat(getComputedStyle(e).fontSize)),list.locator('[data-setting=help] strong').evaluate(e=>parseFloat(getComputedStyle(e).fontSize))]);
+ const [big,small]=await Promise.all([list.locator('[data-setting=agents] strong').evaluate(e=>parseFloat(getComputedStyle(e).fontSize)),list.locator('[data-setting=general] strong').evaluate(e=>parseFloat(getComputedStyle(e).fontSize))]);
  assert.ok(small<big,'the rest is smaller');
 
  // Agents: your own Agent first, then the others, each with its picture, what it may do, Manage and Remove; nothing folded.

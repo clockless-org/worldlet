@@ -2,8 +2,8 @@ import {uiIcon} from '../style/index.ts';
 import {companionStill,themeAppletIcon} from '../style/index.ts';
 import {WORLD_APPS} from '../../context/applets/index.ts';
 import {journalPayload} from '../../context/store/index.ts';
-/** Every event Worldlet recorded on this computer, newest first, for the Worldlet team (Settings › Help, folded under
- * For the Worldlet team). There is no History page any more (owner request 2026-10-10). Polling runs only while the
+/** Every event Worldlet recorded on this computer, newest first, for the Worldlet team (Settings, on the page
+ * the version line opens after five clicks). There is no History page any more (owner request 2026-10-10). Polling runs only while the
  * panel is open and the records show. */
 export function createActivityRecords({call}:{call:any}){
  const el=(tag,text='')=>Object.assign(document.createElement(tag),{textContent:text});
@@ -85,6 +85,6 @@ export function createActivityRecords({call}:{call:any}){
  function stop(){active=false;version++;loading=false;clearInterval(timer);}
  draw();
  return {records,start,stop,
-  /** Settings › Help shows the records: read the latest page now. */
+  /** The team's page in Settings shows the records: read the latest page now. */
   showRecords(){if(active)void refresh('latest');}};
 }

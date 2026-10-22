@@ -63,7 +63,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  // The buttons beside Fox stand in one column on its left, each its icon, its name opening on hover in the World (owner requests
  // 2026-10-05 and 2026-10-11, controls.css). Agent opens Settings directly, on its Agent section, whose one word it now carries (owner Order
  // 2026-10-07; renamed 2026-10-11: "Your Agent 换个名字？一个词的，companion旁边的settigns按钮也改成这个词"; Feedback and
- // the tutorial are in Settings › Help); Phone, under it, opens Settings › Phone (owner request 2026-10-11: "Phone也作为
+ // the tutorial are in Settings › General); Phone, under it, opens Settings › Phone (owner request 2026-10-11: "Phone也作为
  // 一个常驻action到companion左边"). Fox itself is a way to talk, like the message bar (owner feedback 2026-10-04).
  const side=make('div','companion-side');
  // The Journal is today's date in the World's top-left corner, the Attention Center's header (owner requests 2026-10-08 and
@@ -130,7 +130,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  for(const button of [voiceCancel,voiceStop])button.addEventListener('pointerdown',e=>e.stopPropagation());
  // The bug at the bar's left end reports a problem (owner request 2026-10-22, after Orders left with their bug on
  // 2026-10-18): a click opens Feedback over the World. Only the Dev, Alpha and Beta apps show it; Production keeps
- // Feedback in Settings › Help.
+ // Feedback in Settings › General.
  const bugButton=make('button','companion-bug-button');bugButton.type='button';bugButton.innerHTML=uiIcon('bug');
  bugButton.title='Report a bug to the Worldlet team';bugButton.setAttribute('aria-label','Report a bug');bugButton.hidden=true;
  bugButton.addEventListener('pointerdown',e=>e.stopPropagation());

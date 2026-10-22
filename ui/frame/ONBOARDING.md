@@ -72,7 +72,7 @@ World, its corner controls and Fox's input from taking clicks, focus or typing, 
 still works. The **Tutorial** switch, in the window's bottom-right corner while a tour runs, is on throughout,
 above the spotlight, and is the one way out (owner Order 2026-10-07). Turning it off finishes the journey at
 once (`journeyStage=finish`), frees the World, and the switch goes; a note beside Settings says the tutorial can be
-turned back on in Settings › Help (owner request 2026-10-11: Tutorial and Feedback go back into Settings). Agent and Phone beside Fox step aside while the tour runs, except on its last step, which points at them; otherwise Agent opens
+turned back on in Settings › General (owner request 2026-10-11: Tutorial and Feedback go back into Settings). Agent and Phone beside Fox step aside while the tour runs, except on its last step, which points at them; otherwise Agent opens
 Settings directly, on Agent, with no menu between, and Phone opens Settings › Phone. Esc does nothing in the first run. The World dims, with soft,
 feathered edges, around two lit areas: one around Fox, its ears, its bubble and the bubble's name
 tag together, and one around what Fox explains. Every choice is made at Fox, so
@@ -120,7 +120,7 @@ way lifts the spotlight until the person is back in the overview. The last choic
 `first-value` at once. Existing completed profiles and retired Mail-tour checkpoints do not restart it.
 
 **Replay on demand** (#1327). Once the first run is behind the person (the profile is completed and
-the journey is past first value), **Show the tutorial** in Settings › Help replays the tour (owner request
+the journey is past first value), **Show the tutorial** in Settings › General replays the tour (owner request
 2026-10-11; from 2026-10-07 it was a switch in the World's corner). It shows steps 1–5 again with the same spotlight,
 and only tells: no Connect Mail, and the last step only says where pairing lives, with no codes; the journey
 stage, setup, accounts and Applets are left as they are; the last Continue just ends it. Turning
@@ -187,7 +187,7 @@ usable while normal background Applet jobs continue. For rehearsal without OAuth
 
 `world-tour-check.ts` walks every step in the bundled World (Connect Mail with Mail not connected, the phone's two codes, nothing
 after the first win, and with nothing connected the tour moving on without a wait) and replays the tour from
-Show the tutorial in Settings › Help (keyboard and pointer, one tour at a time, turned off, Esc, wide and narrow
+Show the tutorial in Settings › General (keyboard and pointer, one tour at a time, turned off, Esc, wide and narrow
 windows), checks the lock between steps, the card's own Done under the spotlight, and the switch, on, in
 the bottom-right corner during the first run and gone after it.
 
