@@ -10,8 +10,10 @@ export function mountMailDelivery(host:HTMLElement,spec:ThemeSceneDelivery){
  const tick=()=>{if(!allowed()||video.currentTime>=spec.duration){stop();return;}video.style.opacity=String(Math.min(1,video.currentTime/.2,Math.max(0,(spec.duration-video.currentTime)/.6)));frame=requestAnimationFrame(tick);};
  const fail=()=>{stop();state='failed';};
  const inactive=()=>{foreground=false;stop();},active=()=>{foreground=true;},visibility=()=>{if(document.hidden)stop();};
+ // Media query changes arrive at the next rendering update, possibly after a newer play(): only turning reduced motion on stops a clip.
+ const motionPreference=()=>{if(reduced.matches)stop();};
  video.addEventListener('ended',stop);video.addEventListener('error',fail);
- document.addEventListener('visibilitychange',visibility);window.addEventListener('worldlet:app-inactive',inactive);window.addEventListener('blur',inactive);window.addEventListener('worldlet:app-active',active);window.addEventListener('focus',active);reduced.addEventListener('change',stop);
+ document.addEventListener('visibilitychange',visibility);window.addEventListener('worldlet:app-inactive',inactive);window.addEventListener('blur',inactive);window.addEventListener('worldlet:app-active',active);window.addEventListener('focus',active);reduced.addEventListener('change',motionPreference);
  return {
   play(){
    if(!allowed()||state==='failed')return false;if(state==='playing'||state==='loading')return true;
@@ -21,6 +23,6 @@ export function mountMailDelivery(host:HTMLElement,spec:ThemeSceneDelivery){
   enable(value:boolean){enabled=value;if(!value)stop();},
   layout(image:{x:number;y:number;width:number;height:number}){const [x,y,w,h]=spec.bounds;Object.assign(video.style,{left:image.x+x*image.width+'px',top:image.y+y*image.height+'px',width:w*image.width+'px',height:h*image.height+'px'});},
   get metrics(){return {state,time:video.currentTime,plays,visible:!video.hidden};},
-  destroy(){closed=true;stop();document.removeEventListener('visibilitychange',visibility);window.removeEventListener('worldlet:app-inactive',inactive);window.removeEventListener('blur',inactive);window.removeEventListener('worldlet:app-active',active);window.removeEventListener('focus',active);reduced.removeEventListener('change',stop);video.removeEventListener('ended',stop);video.removeEventListener('error',fail);video.removeAttribute('src');video.load();video.remove();}
+  destroy(){closed=true;stop();document.removeEventListener('visibilitychange',visibility);window.removeEventListener('worldlet:app-inactive',inactive);window.removeEventListener('blur',inactive);window.removeEventListener('worldlet:app-active',active);window.removeEventListener('focus',active);reduced.removeEventListener('change',motionPreference);video.removeEventListener('ended',stop);video.removeEventListener('error',fail);video.removeAttribute('src');video.load();video.remove();}
  };
 }
