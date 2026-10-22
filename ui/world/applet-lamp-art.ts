@@ -1,4 +1,4 @@
-import {ACTIVE_THEME,themeAppletArt,villageThemeData,activeBuildTheme,type ThemeDeviceFeature} from '../themes/index.ts';
+import {ACTIVE_THEME,themeAppletArt,villageThemeData,activeBuildTheme,type ThemeDeviceFeature} from '../style/index.ts';
 /** Where each device's lamp sits in the Village art (the theme package's lamps.json). */
 const registry=villageThemeData<{applets:Record<string,ThemeDeviceFeature>}>('lamps.json');
 export {lampColors,lampOpacity,type LampState} from './applet-lamp.ts';

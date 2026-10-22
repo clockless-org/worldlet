@@ -1,0 +1,23 @@
+import type {Host} from '../types.ts';
+import {installWorld} from './world/world.ts';
+import {installFox} from './companion/index.ts';
+import {installAttention} from './attention/index.ts';
+import {installAgentRuntime} from './companion/agent/index.ts';
+import {installShell} from './app/index.ts';
+import {installSources} from './connectors/index.ts';
+import {installMedia,installMediaClose} from './app/media.ts';
+import {installWorldAudio} from './world/world-audio.ts';
+import {installVoice} from './companion/voice.ts';
+import {installAppletTools} from './applets/applet-tools.ts';
+import {installBrowser} from './applets/browser.ts';
+import {installPhone} from './windows/phone.ts';
+import {installGames} from './applets/games.ts';
+import {installWidgets} from './attention/widgets.ts';
+import {installOngoing} from './tasks/index.ts';
+import {installArtifacts} from './attention/artifacts.ts';
+import {installArtifactPages} from './attention/artifact-pages.ts';
+import {installSiteApplets} from './applets/site-applets.ts';
+import {installCalendar} from './applets/calendar.ts';
+import {installAppletArt} from './applets/applet-art.ts';
+/** Every host domain, installed in order. Each registers its own actions and services. */
+export const modules:((host:Host)=>void)[]=[installWorld,installFox,installAttention,installAgentRuntime,installShell,installSources,installMedia,installWorldAudio,installVoice,installAppletTools,installMediaClose,installBrowser,installPhone,installGames,installWidgets,installOngoing,installArtifacts,installArtifactPages,installSiteApplets,installCalendar,installAppletArt];

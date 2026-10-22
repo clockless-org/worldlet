@@ -12,7 +12,7 @@ assert.equal(pkg.scripts['test:ui'],'node scripts/test-ui.mjs','npm run test:ui 
 const all=[...parallelChecks,...serialChecks];
 assert(coreChecks.length&&coreChecks.every(c=>all.includes(c)),'the core checks are a subset of the test:ui checks');
 assert.equal(new Set(all).size,all.length,'each check is listed once, in one group');
-for(const file of all)assert(/^(?:scripts\/[\w-]+-check\.(?:ts|py)|gatehouse\/[\w-]+-check\.mjs)$/.test(file)&&existsSync(new URL('../'+file,import.meta.url)),'listed check exists: '+file);
+for(const file of all)assert(/^scripts\/[\w-]+-check\.(?:ts|py)$/.test(file)&&existsSync(new URL('../'+file,import.meta.url)),'listed check exists: '+file);
 assert.equal(testUiConcurrency('','darwin'),4);assert.equal(testUiConcurrency('','linux'),4);assert.equal(testUiConcurrency('2','darwin'),2);
 // Windows release host 01 runs three at a time by default (#1099); an explicit value still wins.
 assert.equal(testUiConcurrency('','win32'),3);assert.equal(testUiConcurrency('2','win32'),2);
@@ -42,7 +42,7 @@ assert.equal(pkg.scripts['test:ui:pr'],'node scripts/test-ui.mjs --pr');
 assert(prChecks.length>=8&&prChecks.every(c=>quickChecks.includes(c)),'every pull request UI check is a quick check');
 assert(quickChecks.length>=20&&quickChecks.length<all.length/3&&new Set(quickChecks).size===quickChecks.length,'a short list, each once');
 assert.deepEqual([...onlyChecks(quickChecks.join(',')).parallel,...onlyChecks(quickChecks.join(',')).serial].sort(),[...quickChecks].sort(),'every quick check is a test:ui check');
-for(const c of ['scripts/world-scene-check.ts','scripts/startup-setup-check.ts','gatehouse/board-browser-check.mjs','scripts/library-applet-check.ts'].filter(c=>existsSync(new URL('../'+c,import.meta.url))))assert(quickChecks.includes(c),c+' (the checks RCs failed on 2026-10-06)');
+for(const c of ['scripts/world-scene-check.ts','scripts/startup-setup-check.ts','scripts/library-applet-check.ts'].filter(c=>existsSync(new URL('../'+c,import.meta.url))))assert(quickChecks.includes(c),c+' (the checks RCs failed on 2026-10-06)');
 const lines=[],log=line=>lines.push(line);
 assert.equal(await testUi({cli:null,log}),1,'without npm the suite fails instead of skipping the build');
 

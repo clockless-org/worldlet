@@ -11,7 +11,7 @@ Companion, panels and the desktop pet. It uses generated paper material and
 clean interior windows into the button atlas. The [design masters](drafts/hud-v1/README.md)
 retain their provenance; their raw alpha gutters are not displayed in production.
 
-The pack's descriptions live in the Village theme package with the rest of the Village's: [`style.json`](../../../ui/theme-packages/village/style.json) (stable ID, references and explicit resource inventory) and [`tokens.json`](../../../ui/theme-packages/village/tokens.json) (World colors, HUD/dialogue/reading/typography/motion values). This folder keeps the painted sources they name.
+The pack's descriptions live in the Village theme package with the rest of the Village's: [`style.json`](../../../ui/style/theme-packages/village/style.json) (stable ID, references and explicit resource inventory) and [`tokens.json`](../../../ui/style/theme-packages/village/tokens.json) (World colors, HUD/dialogue/reading/typography/motion values). This folder keeps the painted sources they name.
 
 ```text
 builtin/
@@ -24,7 +24,7 @@ builtin/
     brand/           Product mark master and generated exports
 ```
 
-`../../../ui/components/style.ts` freezes the pack and resolves an Applet's presentation. Native/web asset builders use the same inventory; native additionally loads Open, Focus and companion art. Missing assets fail explicitly rather than guessing filenames. Brand helpers/native icon exporters read the pack's existing mark master.
+`../../../ui/style/style.ts` freezes the pack and resolves an Applet's presentation. Native/web asset builders use the same inventory; native additionally loads Open, Focus and companion art. Missing assets fail explicitly rather than guessing filenames. Brand helpers/native icon exporters read the pack's existing mark master.
 
 World-specific painted plates belong in `resources/worlds/<id>/`; their description (style dependency, coordinates and provenance) is the theme package's `world.json`. They are not new styles. The live inventory explicitly selects the Village 1.7 day/night plates (`day-six-regions-sunburst-4k.png` and `night-six-regions-sunburst-4k.png`). Applet, Fox and HUD resources are unchanged. The manifest references the World Pack's canonical images without duplicating them.
 

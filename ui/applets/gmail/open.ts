@@ -1,5 +1,5 @@
-import {themeAppletIcon} from '../../themes/index.ts';
-import {uiIcon} from '../../components/index.ts';
+import {themeAppletIcon} from '../../style/index.ts';
+import {uiIcon} from '../../style/index.ts';
 import {turnMailPage} from './page-turn.ts';
 import type {AppletSceneRegion} from '../scene/applet-scene.ts';
 import {mailMetadata} from './metadata.ts';

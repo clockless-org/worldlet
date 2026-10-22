@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {readFoxHostRequest} from '../core/companion/index.ts';
-import {invoke} from '../core/index.ts';
+import {readFoxHostRequest} from '../agent/companion/index.ts';
+import {invoke} from '../agent/index.ts';
 import {callHost} from '../platform/bridge/host.ts';
 const id='00000000-0000-4000-8000-000000000001';
 const chat={action:'agentChat',id,text:'Hello 世界',context:{thread:'fox-main'},history:[{role:'user',text:'Hi'}],sample:false,allowActions:false};

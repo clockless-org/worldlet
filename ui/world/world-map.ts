@@ -1,4 +1,4 @@
-import type {ThemeWorldMap} from '../themes/index.ts';
+import type {ThemeWorldMap} from '../style/index.ts';
 import type {WorldContext,WorldMark,WorldMount,WorldState} from './world-renderer.ts';
 /** The shared painted-map renderer. Area names and buttons are host overlays, never baked into the picture. */
 export function renderWorldMap(context:WorldContext,map:ThemeWorldMap):WorldMount{

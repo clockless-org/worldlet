@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
 import {AGENT_ASK_LIMITS,AGENT_ASK_PROVIDER,type AgentAsk} from '../contracts/agent-asks.ts';
-import {ASK_REASONS,answerAsk,askAttentionItem,askClaimable,askItemId,claimAsks,postAsk,readAskPost,readAsks,readStoredAsk,resolveAsk} from '../core/agent/asks.ts';
-import {validateWorldItem} from '../core/items/world-item-validation.ts';
+import {ASK_REASONS,askApprovesDrafts,answerAsk,askAttachmentIsImage,askAttachmentName,askAttentionItem,askClaimable,askItemId,claimAsks,postAsk,readAskAttachment,readAskPost,readAsks,readStoredAsk,resolveAsk} from '../agent/gate/asks.ts';
+import {validateWorldItem} from '../context/store/world-item-validation.ts';
+import {ORDER_REASONS,askWakes,orderAuditEntry,readOrders,readWakeCommand,wakeArgv,wakeAuditEntry,wakeDelay} from '../agent/gate/orders.ts';
+import {AGENT_WAKE_LIMITS} from '../contracts/agent-asks.ts';
 
-// Agent asks (contracts/agent-asks.ts, core/agent/asks.ts): validation, the open cap, claims and their lease, resolve
+// Agent asks (contracts/agent-asks.ts, agent/gate/asks.ts): validation, the open cap, claims and their lease, resolve
 // with a stale revision refused, the person's answer and the Attention item the host writes.
 const now='2026-10-15T12:00:00.000Z',soon='2026-10-15T12:30:00.000Z',later='2026-10-15T13:00:01.000Z';
 const id=(n:number)=>'ask-'+String(n).padStart(8,'0');
@@ -119,4 +121,175 @@ assert.equal(askAttentionItem({...posted,status:'skipped'},'x').status,'dismisse
 assert.equal(askAttentionItem(claimed,'x').status,'open');
 assert.equal(askAttentionItem(posted,'bad\u0007name').agentName,'claude-code','a name that is not clean falls back to the ID');
 
-console.log('PASS Agent asks: validation, open cap, claims and leases, resolve, answers and Attention items.');
+// An ask that carries GitHub drafts: up to 10 draft IDs, a question (not work), always offering Approve; its Approve answer
+// is what approves them, and the IDs travel with the ask and its Attention item.
+{
+ const at='2026-10-15T12:00:00.000Z',ids=['d0000001','d0000002'];
+ const carrying=postAsk([],'codex',{title:'Ship these?',draftIds:ids},'ask-d0000001',at);
+ assert.deepEqual([carrying.choices,carrying.draftIds],[['Approve','Not now'],ids]);
+ assert.deepEqual(postAsk([],'codex',{title:'Ship?',choices:['Approve','Later'],draftIds:ids},'ask-d0000002',at).choices,['Approve','Later']);
+ assert.throws(()=>readAskPost({title:'Ship?',choices:['Yes'],draftIds:ids}),{message:ASK_REASONS.approve});
+ assert.throws(()=>readAskPost({title:'Ship?',kind:'input',draftIds:ids}),{message:ASK_REASONS.invalid},'work left for Agents carries no drafts');
+ assert.throws(()=>readAskPost({title:'Ship?',draftIds:['NOT AN ID']}),{message:ASK_REASONS.invalid});
+ assert.throws(()=>readAskPost({title:'Ship?',draftIds:Array.from({length:11},(_,i)=>'d000000'+String(i).padStart(2,'0'))}),{message:ASK_REASONS.invalid});
+ assert.equal(askApprovesDrafts(carrying,{outcome:'answered',choice:'Approve'}),true);
+ assert.equal(askApprovesDrafts(carrying,{outcome:'answered',choice:'Not now'}),false);
+ assert.equal(askApprovesDrafts(carrying,{outcome:'done'}),false);
+ assert.equal(askApprovesDrafts(postAsk([],'codex',{title:'Plain',choices:['Approve']},'ask-d0000003',at),{outcome:'answered',choice:'Approve'}),false,'no drafts, nothing to approve');
+ assert.deepEqual(readStoredAsk(JSON.parse(JSON.stringify(carrying)))!.draftIds,ids);
+ assert.deepEqual(askAttentionItem(carrying,'Codex').askDraftIds,ids);
+}
+// Attachments: pictures and other files of allowed types, within count and size limits, names made safe, first bytes
+// matching the type, kept as metadata only (the host's SHA-256), read back only by the poster or the claimer.
+{
+ const at='2026-10-15T12:00:00.000Z',b64=(...bytes:number[])=>Buffer.from(bytes).toString('base64'),text=(value:string)=>Buffer.from(value).toString('base64');
+ const png=b64(0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a,1,2,3,4),jpeg=b64(0xff,0xd8,0xff,0xe0,0,0x10),gif=text('GIF89a....'),webp=text('RIFF\0\0\0\0WEBPVP8 ');
+ const zip=b64(0x50,0x4b,3,4,0,0),gzip=b64(0x1f,0x8b,8,0),log=text('2026-10-15 12:00 ERROR token=sk-'+'z'.repeat(30)+'\n');
+ const digest='a'.repeat(64);
+ const post=readAskPost({title:'App feedback',attachments:[{name:'Screen Shot.png',type:'image/png',data:png},{name:'C:\\Users\\alex\\app.log',type:'text/plain',data:log}]});
+ assert.deepEqual(post.attachments!.map(({name,type,size})=>[name,type,size]),[['Screen Shot.png','image/png',12],['app.log','text/plain',Buffer.from(log,'base64').length]],
+  'names lose their folders; a log that looks like it holds a token is kept as data');
+ const carrying=postAsk([],'codex',{kind:'input',title:'Crash on save',attachments:[{name:'shot.png',type:'image/png',data:png},{name:'trace.json',type:'application/json',data:text('{}')}]},'ask-f0000001',at,[digest,'b'.repeat(64)]);
+ assert.deepEqual(carrying.attachments,[{id:'att-1',name:'shot.png',type:'image/png',size:12,sha256:digest},{id:'att-2',name:'trace.json',type:'application/json',size:2,sha256:'b'.repeat(64)}]);
+ assert.ok(!JSON.stringify(carrying).includes(png),'the ask keeps no bytes');
+ refused(()=>postAsk([],'codex',{title:'t',attachments:[{name:'a.png',type:'image/png',data:png}]},'ask-f0000002',at),ASK_REASONS.invalid);
+ refused(()=>postAsk([],'codex',{title:'t',attachments:[{name:'a.png',type:'image/png',data:png}]},'ask-f0000002',at,['NOT A HASH']),ASK_REASONS.invalid);
+ refused(()=>postAsk([],'codex',{title:'t'},'ask-f0000002',at,[digest]),ASK_REASONS.invalid);
+ for(const [type,data] of [['image/png',png],['image/jpeg',jpeg],['image/gif',gif],['image/webp',webp],['application/zip',zip],['application/gzip',gzip],['text/csv',text('a,b\n')],['application/json',text('[]')],['text/plain',text('x')]])
+  assert.equal(readAskPost({title:'t',attachments:[{name:'f',type,data}]}).attachments![0].type,type,type);
+ assert.equal(readAskPost({title:'t',attachments:[{name:'f',type:' IMAGE/PNG ',data:png}]}).attachments![0].type,'image/png');
+ // Types: nothing that runs or renders as markup; a picture, ZIP or gzip whose first bytes are not its type's.
+ for(const type of ['image/svg+xml','text/html','application/javascript','application/x-msdownload','application/octet-stream','application/x-sh',''])
+  refused(()=>readAskPost({title:'t',attachments:[{name:'f',type,data:png}]}),ASK_REASONS.attachmentType);
+ refused(()=>readAskPost({title:'t',attachments:[{name:'f.png',type:'image/png',data:text('<svg onload=alert(1)>')}]}),ASK_REASONS.attachmentKind);
+ refused(()=>readAskPost({title:'t',attachments:[{name:'f.jpg',type:'image/jpeg',data:png}]}),ASK_REASONS.attachmentKind);
+ refused(()=>readAskPost({title:'t',attachments:[{name:'f.zip',type:'application/zip',data:text('MZ program')}]}),ASK_REASONS.attachmentKind);
+ // Data: base64 only, not empty; only name, type and data.
+ for(const data of ['','not base64!','abc','YWJj=a=='])refused(()=>readAskPost({title:'t',attachments:[{name:'f',type:'text/plain',data}]}),ASK_REASONS.attachment);
+ refused(()=>readAskPost({title:'t',attachments:[{name:'f',type:'text/plain',data:text('x'),url:'https://example.com'}]}),ASK_REASONS.invalid);
+ refused(()=>readAskPost({title:'t',attachments:{name:'f'}}),ASK_REASONS.attachment);
+ // Counts: 8 pictures and 12 other files.
+ const pictures=(n:number)=>Array.from({length:n},(_,i)=>({name:'p'+i+'.png',type:'image/png',data:png}));
+ const files=(n:number)=>Array.from({length:n},(_,i)=>({name:'f'+i+'.log',type:'text/plain',data:text('line '+i)}));
+ assert.equal(readAskPost({title:'t',attachments:[...pictures(8),...files(12)]}).attachments!.length,20);
+ refused(()=>readAskPost({title:'t',attachments:pictures(9)}),ASK_REASONS.attachmentCount);
+ refused(()=>readAskPost({title:'t',attachments:files(13)}),ASK_REASONS.attachmentCount);
+ refused(()=>readAskPost({title:'t',attachments:[...pictures(8),...files(13)]}),ASK_REASONS.attachmentCount);
+ // Sizes: 5 MB a picture, 2 MB another file, 20 MB in all (counted from the base64, nothing decoded).
+ const sized=(header:string,bytes:number)=>{const raw=Buffer.alloc(bytes);Buffer.from(header,'base64').copy(raw);return raw.toString('base64');};
+ assert.equal(readAskPost({title:'t',attachments:[{name:'big.png',type:'image/png',data:sized(png,AGENT_ASK_LIMITS.imageBytes)}]}).attachments![0].size,AGENT_ASK_LIMITS.imageBytes);
+ refused(()=>readAskPost({title:'t',attachments:[{name:'big.png',type:'image/png',data:sized(png,AGENT_ASK_LIMITS.imageBytes+1)}]}),ASK_REASONS.attachmentSize);
+ refused(()=>readAskPost({title:'t',attachments:[{name:'big.log',type:'text/plain',data:sized('',AGENT_ASK_LIMITS.fileBytes+1)}]}),ASK_REASONS.attachmentSize);
+ const four=Array.from({length:4},(_,i)=>({name:i+'.png',type:'image/png',data:sized(png,AGENT_ASK_LIMITS.imageBytes)}));
+ assert.equal(readAskPost({title:'t',attachments:four}).attachments!.length,4,'20 MB in all fits');
+ refused(()=>readAskPost({title:'t',attachments:[...four,{name:'one.log',type:'text/plain',data:text('x')}]}),ASK_REASONS.attachmentSize);
+ // Names: folders dropped, unsafe characters replaced, no leading dot, the type's own extension, at most 120 characters.
+ const name=(value:unknown,type='text/plain')=>askAttachmentName(value,type);
+ assert.equal(name('../../etc/passwd'),'passwd.txt');
+ assert.equal(name('run.exe'),'run.exe.txt','an executable name is not kept as one');
+ assert.equal(name('setup.sh','application/gzip'),'setup.sh.gz');
+ assert.equal(name('.bashrc'),'bashrc.txt');
+ assert.equal(name('a<b>:c|d?e*.log'),'a_b__c_d_e_.log');
+ assert.equal(name('bell\u0007‮gnp.exe','image/png'),'bell__gnp.exe.png');
+ assert.equal(name('CON.txt'),'_CON.txt');
+ assert.equal(name('PHOTO.JPEG','image/jpeg'),'PHOTO.JPEG');
+ assert.equal(name('',  'image/png'),'attachment.png');
+ assert.equal([...name('x'.repeat(300)+'.log')].length,AGENT_ASK_LIMITS.attachmentName);
+ refused(()=>name('ghp_'+'a'.repeat(36)+'.txt'),ASK_REASONS.secret);
+ refused(()=>name(42),ASK_REASONS.attachment);
+ // Reading: only the poster or the claimer, a known attachment, from an offset, at most AGENT_ASK_LIMITS.attachmentRead.
+ const big={...carrying,attachments:[{...carrying.attachments![0],size:200_000}]};
+ assert.deepEqual(readAskAttachment([big],'codex',{id:'ask-f0000001',attachment:'att-1'}).length,AGENT_ASK_LIMITS.attachmentRead);
+ const last=readAskAttachment([big],'codex',{id:'ask-f0000001',attachment:'att-1',offset:2*AGENT_ASK_LIMITS.attachmentRead});
+ assert.equal(last.length,200_000-2*AGENT_ASK_LIMITS.attachmentRead);
+ refused(()=>readAskAttachment([big],'codex',{id:'ask-f0000001',attachment:'att-1',offset:200_001}),ASK_REASONS.invalid);
+ refused(()=>readAskAttachment([big],'codex',{id:'ask-f0000001',attachment:'att-1',offset:-1}),ASK_REASONS.invalid);
+ refused(()=>readAskAttachment([big],'codex',{id:'ask-f0000001',attachment:'att-9'}),ASK_REASONS.noAttachment);
+ refused(()=>readAskAttachment([big],'codex',{id:'ask-f0000001',attachment:'../x'}),ASK_REASONS.noAttachment);
+ refused(()=>readAskAttachment([big],'hermes',{id:'ask-f0000001',attachment:'att-1'}),ASK_REASONS.missing,);
+ refused(()=>readAskAttachment([big],'codex',{id:'ask-f0000001',attachment:'att-1',agentId:'hermes'}),ASK_REASONS.invalid);
+ const [taken]=claimAsks([carrying],'hermes',{},at);
+ assert.equal(readAskAttachment([taken],'hermes',{id:'ask-f0000001',attachment:'att-2'}).length,2,'the claimer reads them');
+ assert.equal(readAskAttachment([taken],'codex',{id:'ask-f0000001',attachment:'att-2'}).length,2,'and the poster still does');
+ refused(()=>readAskAttachment([taken],'claude-code',{id:'ask-f0000001',attachment:'att-2'}),ASK_REASONS.missing);
+ // Kept when settled, read back from storage, and listed (never their bytes) on the Attention item.
+ const settled=answerAsk(carrying,{id:'ask-f0000001',outcome:'done'},at);
+ assert.deepEqual(settled.attachments,carrying.attachments);
+ assert.deepEqual(readStoredAsk(JSON.parse(JSON.stringify(settled)))!.attachments,carrying.attachments);
+ assert.deepEqual(readStoredAsk({...carrying,attachments:[{id:'att-1',name:'x.exe',type:'application/x-msdownload',size:1,sha256:digest},{id:'bad',name:'a',type:'text/plain',size:1,sha256:digest}]})!.attachments,undefined);
+ const item=askAttentionItem(carrying,'Codex');
+ assert.deepEqual(item.askAttachments,[{id:'att-1',name:'shot.png',type:'image/png',size:12},{id:'att-2',name:'trace.json',type:'application/json',size:2}]);
+ validateWorldItem(item as any,{start:null,end:null});
+ assert.equal(askAttachmentIsImage('image/webp'),true);assert.equal(askAttachmentIsImage('application/zip'),false);
+}
+
+// Orders (agent/gate/GRANTS.md#orders-and-waking-an-agent): work may name the Agent it is for, one of the World's
+// Agents not revoked; work naming none is for the World's order target; that Agent reads it, claims it first and is
+// the one woken. A question for the person names no Agent.
+{
+ const agents=['hermes','codex','claude-code'],t0='2026-10-15T12:00:00.000Z',t10='2026-10-15T12:10:00.000Z',t16='2026-10-15T12:16:00.000Z';
+ const order=postAsk([],'hermes',{kind:'input',title:'Ship the fix',for:'codex',tags:['order']},id(700),t0,[],{agents});
+ assert.deepEqual([order.for,order.tags],['codex',['order']]);
+ refused(()=>postAsk([],'hermes',{kind:'input',title:'x',for:'nobody'},id(701),t0,[],{agents}),ASK_REASONS.forUnknown);
+ refused(()=>postAsk([],'hermes',{kind:'input',title:'x',for:'codex'},id(701),t0),ASK_REASONS.forUnknown);
+ refused(()=>readAskPost({title:'x',for:'codex'}),ASK_REASONS.forKind);
+ refused(()=>readAskPost({kind:'input',title:'x',for:'Not An Agent'}),ASK_REASONS.forUnknown);
+ refused(()=>readAskPost({kind:'input',title:'x',for:7}),ASK_REASONS.forUnknown);
+ // The order target: applied to work naming no Agent, never to a question, never to the poster itself, never to a
+ // revoked or unknown Agent.
+ assert.equal(postAsk([],'hermes',{kind:'input',title:'x'},id(702),t0,[],{agents,defaultFor:'claude-code'}).for,'claude-code');
+ assert.equal(postAsk([],'hermes',{kind:'input',title:'x',for:'codex'},id(702),t0,[],{agents,defaultFor:'claude-code'}).for,'codex','a named Agent wins');
+ assert.equal(postAsk([],'hermes',{title:'x'},id(702),t0,[],{agents,defaultFor:'claude-code'}).for,undefined);
+ assert.equal(postAsk([],'claude-code',{kind:'input',title:'x'},id(702),t0,[],{agents,defaultFor:'claude-code'}).for,undefined);
+ assert.equal(postAsk([],'hermes',{kind:'input',title:'x'},id(702),t0,[],{agents:['hermes'],defaultFor:'claude-code'}).for,undefined);
+ // Reading: the Agent it is for reads it, and its attachments; any other Agent does not.
+ assert.deepEqual(readAsks([order],'codex').map(ask=>ask.id),[id(700)]);
+ assert.deepEqual(readAsks([order],'claude-code'),[]);
+ // Claiming: the named Agent at once, first among its claims; another only after AGENT_ASK_LIMITS.forMinutes.
+ const plain=postAsk([],'hermes',{kind:'input',title:'Older work'},id(703),'2026-10-15T11:00:00.000Z');
+ assert.equal(askClaimable(order,t10,'claude-code'),false);assert.equal(askClaimable(order,t10,'codex'),true);
+ assert.equal(askClaimable(order,t16,'claude-code'),true,'it waited long enough');assert.equal(askClaimable(order,t10),false);
+ assert.deepEqual(claimAsks([plain,order],'claude-code',{},t10).map(ask=>ask.id),[id(703)]);
+ assert.deepEqual(claimAsks([plain,order],'claude-code',{ids:[id(700)]},t10),[],'naming it does not jump the wait');
+ assert.deepEqual(claimAsks([plain,order],'codex',{},t10).map(ask=>ask.id),[id(700),id(703)],'work for it first, then the oldest');
+ assert.equal(AGENT_ASK_LIMITS.forMinutes,15);
+ const [held]=claimAsks([order],'codex',{},t0);
+ assert.deepEqual(claimAsks([held],'claude-code',{},'2026-10-15T13:00:01.000Z').map(ask=>ask.claimedBy),['claude-code'],'a stale lease is anyone\'s');
+ // Kept and shown: the stored ask keeps it; the card says whom the work is for.
+ assert.equal(readStoredAsk(order)!.for,'codex');
+ assert.equal(readStoredAsk({...posted,for:'codex'})!.for,undefined,'a question is for no Agent');
+ const card=askAttentionItem(order,'Hermes Agent','Codex');
+ assert.deepEqual([card.reason,(card as any).askFor],['Hermes Agent left work for Codex','codex']);
+ validateWorldItem(card as any,{start:null,end:null});
+ // Waking: only work for another Agent, still open.
+ assert.equal(askWakes(order),'codex');
+ assert.equal(askWakes({...order,for:'hermes'}),null,'an Agent\'s own work for itself wakes nothing');
+ assert.equal(askWakes(plain),null);assert.equal(askWakes({...posted,for:'codex'}),null);assert.equal(askWakes(held),null);
+ // A wake command: the program's absolute path, then at most 16 arguments of at most 500 characters, no control
+ // characters, no credentials; the placeholder only as a whole argument, never the program.
+ assert.deepEqual(readWakeCommand(['/usr/local/bin/wake-agent','--work','{askId}']),['/usr/local/bin/wake-agent','--work','{askId}']);
+ assert.deepEqual(readWakeCommand(['C:\\Tools\\wake.exe']),['C:\\Tools\\wake.exe']);
+ assert.equal(readWakeCommand([]),null,'an empty list clears it');
+ refused(()=>readWakeCommand('/bin/wake --now'),ORDER_REASONS.invalid);
+ refused(()=>readWakeCommand(['/bin/wake',3]),ORDER_REASONS.invalid);
+ for(const program of ['wake','./wake','~/wake','//server/wake','{askId}','/bin/{askId}',''])refused(()=>readWakeCommand([program]),ORDER_REASONS.program);
+ refused(()=>readWakeCommand(['/bin/wake',...Array(AGENT_WAKE_LIMITS.args+1).fill('a')]),ORDER_REASONS.args);
+ assert.equal(readWakeCommand(['/bin/wake',...Array(AGENT_WAKE_LIMITS.args).fill('a')])!.length,17);
+ refused(()=>readWakeCommand(['/bin/wake','x'.repeat(501)]),ORDER_REASONS.args);
+ for(const word of ['a\nb','tab\t','bell\u0007','‮flip'])refused(()=>readWakeCommand(['/bin/wake',word]),ORDER_REASONS.control);
+ refused(()=>readWakeCommand(['/bin/wake','sk-'+'a'.repeat(30)]),ORDER_REASONS.secret);
+ // Only a whole-argument placeholder is replaced; nothing else is read into the arguments.
+ assert.deepEqual(wakeArgv(['/bin/wake','{askId}','id={askId}','$HOME','; rm -rf /'],id(700)),{program:'/bin/wake',args:[id(700),'id={askId}','$HOME','; rm -rf /']});
+ // The setting: what is not valid is dropped.
+ assert.deepEqual(readOrders({defaultFor:'codex',wake:{codex:['/bin/wake'],hermes:['wake'],'Bad Id':['/bin/wake']}}),{defaultFor:'codex',wake:{codex:['/bin/wake']}});
+ assert.deepEqual(readOrders(null),{wake:{}});assert.deepEqual(readOrders({defaultFor:'Not One',wake:[]}),{wake:{}});
+ // At most once a minute per Agent.
+ assert.equal(wakeDelay(undefined,1000),0);assert.equal(wakeDelay(0,30_000),30_000);assert.equal(wakeDelay(0,60_000),0);
+ // The audit: a short line of how it ended, no output.
+ assert.deepEqual(wakeAuditEntry('codex',id(700),{code:0},t0),{at:t0,agentId:'codex',target:'asks',action:'wake',decision:'allowed',reason:`Woken for work ${id(700)}: exited with 0.`});
+ assert.equal(wakeAuditEntry('codex',id(700),{code:2},t0).decision,'denied');
+ assert.match(wakeAuditEntry('codex',id(700),{timedOut:true},t0).reason!,/stopped after 5 minutes\.$/);
+ assert.match(wakeAuditEntry('codex',id(700),{error:'spawn ENOENT'},t0).reason!,/could not start: spawn ENOENT\.$/);
+ assert.equal(orderAuditEntry('codex','set-wake',t0).action,'set-wake');
+}
+console.log('PASS Agent asks: validation, open cap, claims and leases, resolve, answers, Attention items, asks carrying GitHub drafts and attachments, orders: work for one Agent, the order target, claiming first, wake commands.');

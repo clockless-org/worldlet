@@ -5,13 +5,13 @@ how they move. It never owns data. Mail keeps its ID, accounts, messages and bac
 room shows it; the person's area names, Applet membership and last use are the same in every theme.
 
 **Themes are static packages of the one [Theme contract](CONTRACT.md).** Worldlet bundles one, the Village
-(`ui/theme-packages/village/`); there is no theme picker. A theme is pictures, sounds, fonts and JSON
+(`ui/style/theme-packages/village/`); there is no theme picker. A theme is pictures, sounds, fonts and JSON
 ([What the theme declares](CONTRACT.md#what-the-theme-declares)); the host draws the World and the Applet pages.
 The companion and the loading and first-use pages are not part of a theme.
 
 The data-only ThemePack described below is the host's own look: Village's shared assets (companion rig, HUD
 material, sounds, world declarations) that every theme draws over. It is not a theme API:
-`ui/themes/theme-registry.ts` holds the one pack.
+`ui/style/themes/theme-registry.ts` holds the one pack.
 
 ## The parts
 
@@ -39,9 +39,9 @@ podcast or ambience choice. Automatic theme ambience suspends when its scene is
 hidden or inactive. Short event sounds follow that channel's mute and gain. See
 [audio ownership](../audio/README.md#theme-ambience).
 
-Any surface may be `shared`, which leaves the shared look (Village's) in place. `ui/themes/theme-surfaces.ts`
+Any surface may be `shared`, which leaves the shared look (Village's) in place. `ui/style/themes/theme-surfaces.ts`
 applies the rest: tokens and pieces become `--theme-*` properties with `data-theme-skin`, `data-theme-fonts` and
-`data-theme-room-transition` on `<html>`, which `ui/themes/theme-surfaces.css` keys on; fonts load through
+`data-theme-room-transition` on `<html>`, which `ui/style/themes/theme-surfaces.css` keys on; fonts load through
 `FontFace`; the loading picture is set before the World starts; sounds play only while World sounds are on
 (asking Fox turns them on or off). Attention pictures and Mail parts come from the theme's Style Pack; the build ships a theme's
 own Attention pictures under `attention/<theme>/`. A preview with no theme-specific scene uses its
@@ -57,13 +57,13 @@ so an IP collaboration and an original theme can be told apart.
   rename or hide data.
 - **Business events are separate from animations.** Core reports what happened (`applet.arrived`,
   `mail.received`, `task.working`, `task.succeeded`, `task.failed`, `task.cancelled`); the theme picks the
-  cue. A cue plays once per real event (`ui/themes/theme-events.ts`): reading old mail or re-entering a
+  cue. A cue plays once per real event (`ui/style/themes/theme-events.ts`): reading old mail or re-entering a
   room never replays it. A failure or cancel stops the work where it is and never plays the success cue;
   the validator rejects a pack that maps either to it.
 - **Slot placement is stored per theme.** Pinned places are indices into one theme's slots, so they are
-  kept per theme (`ui/themes/theme-placements.ts`). Village keeps them in the layout's `pins`, as before
+  kept per theme (`ui/style/themes/theme-placements.ts`). Village keeps them in the layout's `pins`, as before
   themes existed; another theme's wait in `themePins`.
-- **Data only.** A pack is JSON validated by `ui/themes/theme-pack.ts`; paths stay inside the repository.
+- **Data only.** A pack is JSON validated by `ui/style/themes/theme-pack.ts`; paths stay inside the repository.
   The renderer half (camera, light, ambient motion) is trusted code registered per theme in
   `ui/world/theme-scene.ts`.
 

@@ -7,25 +7,26 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | You want to | Read |
 | --- | --- |
 | Install with one command, or let your Agent install it | [One-line installers](../platform/install/README.md) · [the `worldlet` skill for Agents](../harness/skills/worldlet/SKILL.md) |
-| Connect the Agent you already run (OpenClaw, Hermes Agent, Claude Code, Codex, pi) | [Portable Agent architecture](../core/agent/PORTABILITY.md) · [Harness independence and data ownership](AGENT-PORTABILITY.md) |
+| Connect the Agent you already run (OpenClaw, Hermes Agent, Claude Code, Codex, pi) | [Portable Agent architecture](../agent/gate/PORTABILITY.md) · [Harness independence and data ownership](AGENT-PORTABILITY.md) |
 | Know what Fox does and how far it goes on its own | [Fox: conversation and assistance](FOX-AGENT.md) |
 | Know why something shows up in the Attention Center | [Attention Center](ATTENTION-CENTER.md) |
-| Pair your phone | [iPhone](../ios/README.md) · [Android](../android/README.md) |
-| Know what is stored on your computer and what is reported | [World data and lifecycle](WORLD-STORAGE.md) · [Analytics](../core/diagnostics/ANALYTICS.md) |
+| Pair your phone | [iPhone](../platform/ios/README.md) · [Android](../platform/android/README.md) |
+| Know what is stored on your computer and what is reported | [World data and lifecycle](WORLD-STORAGE.md) · [Analytics](../agent/app/ANALYTICS.md) |
 
 ## How it works
 
 | Topic | Read |
 | --- | --- |
 | The principles everything is designed by | [Charter](CHARTER.md) |
-| The stack in computer terms, as a picture | [Stack diagram](stack-in-computer-terms.svg) ([Chinese](stack-in-computer-terms.zh.svg)) · [interactive architecture diagram](architecture.html) |
-| Five runtime layers: UI, Core, Platform, Harness, Models | [Five-layer architecture](UI-CORE-PLATFORM.md) · [shared UI, pure Core, thin Platform](../contracts/COMPONENTS.md) |
+| The stack in computer terms, as a picture | [Stack diagram](stack-in-computer-terms.svg) ([Chinese](stack-in-computer-terms.zh.svg)) · [the four layers and their components](four-layers.svg) · [one person, one World](one-world.svg) ([Chinese](one-world.zh.svg)) |
+| Four layers and 20 components: UI, Agent, Context, Platform | [Architecture](UI-CORE-PLATFORM.md) · [shared UI, pure Agent and Context, thin Platform](../contracts/COMPONENTS.md) |
 | How Worldlet talks to an Agent, and an Agent to the World | [Platform–Harness contract](../contracts/HARNESS.md) · [Agent adapters](../harness/README.md) |
-| What each Agent may do in the World, and what it did | [Agent identity, Grants and audit](../core/agent/GRANTS.md) |
+| What each Agent may do in the World, and what it did | [Agent identity, Grants and audit](../agent/gate/GRANTS.md) |
+| Let a ChatGPT, Claude or Cursor connector, or a cloud Agent, use the World | [Remote MCP](../agent/gate/REMOTE-MCP.md) |
 | Interaction, HUD and Applet states | [Product interaction design](DESIGN.md) |
 | How the World is composed | [World and environment design](WORLD-LAYOUT.md) |
-| Applet lifecycle and execution | [Applet runtime](APPLET-RUNTIME.md) · [Core runtime](../core/applets/RUNTIME.md) |
-| The desktop host and its browser | [Electron host](../platform/electron/README.md) · [browser](../platform/browser/README.md) |
+| Applet lifecycle and execution | [Applet runtime](APPLET-RUNTIME.md) · [Applet runtime rules](../context/applets/RUNTIME.md) |
+| The desktop host and its browser | [Electron host](../platform/desktop/README.md) · [browser](../platform/browser/README.md) |
 
 ## Building Applets and Worlds
 
@@ -33,9 +34,9 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | --- | --- |
 | Where Applet code lives | [Worldlet Applets](../ui/applets/README.md) |
 | How an Applet should look and behave | [Applet design guide](../ui/applets/DESIGN-GUIDE.md) · [motion](../ui/applets/MOTION.md) |
-| How to build one | [Applet implementation guide](../ui/applets/IMPLEMENTATION-GUIDE.md) · [integrations](../core/applets/INTEGRATIONS.md) |
-| A board of Service numbers: tabs, funnels, trends | [The board](../core/board/README.md) |
-| Cards Fox makes | [Card system](../ui/artifacts/CARD-SYSTEM.md) |
+| How to build one | [Applet implementation guide](../ui/applets/IMPLEMENTATION-GUIDE.md) · [integrations](../context/applets/INTEGRATIONS.md) |
+| A board of Service numbers: tabs, funnels, trends | [The board](../context/connectors/BOARD.md) |
+| Cards Fox makes | [Card system](../ui/attention/CARD-SYSTEM.md) |
 | Worlds, styles and artwork | [Resources](../resources/README.md) · [Village world](../resources/worlds/village/README.md) |
 
 ## Contributing and releasing
@@ -44,7 +45,7 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | --- | --- |
 | Rules for every change | [Contributing](../CONTRIBUTING.md) · [Working in this repository](../AGENTS.md) |
 | Building, checks and tests | [Development workflow](DEVELOPMENT.md) · [development and release scripts](../scripts/DEVELOPMENT.md) |
-| Dev, Alpha, Beta and GA builds | [Releasing from GitHub Actions](RELEASING.md) · [desktop distribution](../platform/electron/DISTRIBUTION.md) |
+| Dev, Alpha, Beta and GA builds | [Releasing from GitHub Actions](RELEASING.md) · [desktop distribution](../platform/desktop/DISTRIBUTION.md) |
 | Security reports | [Security](../SECURITY.md) |
 
 The README's screenshots come from the sample world, which holds only fictional records and needs no model or account: `npm run build:native-ui`, then `node scripts/readme-screenshots.ts` (set `CHROMIUM_PATH` when Playwright's own browser is not installed) rewrites [docs/assets/readme](assets/readme).
@@ -55,18 +56,18 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **281 Markdown documents** and **745 supporting documentation files**.
+Indexed: **286 Markdown documents** and **750 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
 | Root entry points | 6 |
 | Product, architecture and operations guides | 16 |
-| Applet runtime descriptions | 119 |
+| Applet runtime descriptions | 120 |
 | UI and Applet authoring references | 30 |
 | Resource and artwork records | 74 |
-| Module and service documentation | 36 |
+| Module and service documentation | 40 |
 | Website documentation and articles | 0 |
-| Documentation diagrams, previews and evidence | 745 |
+| Documentation diagrams, previews and evidence | 750 |
 
 <details><summary>Root entry points (6)</summary>
 
@@ -100,7 +101,7 @@ Indexed: **281 Markdown documents** and **745 supporting documentation files**.
 
 </details>
 
-<details><summary>Applet runtime descriptions (119)</summary>
+<details><summary>Applet runtime descriptions (120)</summary>
 
 - [ui/applets/acrobat/applet.md](../ui/applets/acrobat/applet.md)
 - [ui/applets/agar-io/applet.md](../ui/applets/agar-io/applet.md)
@@ -113,6 +114,7 @@ Indexed: **281 Markdown documents** and **745 supporting documentation files**.
 - [ui/applets/apple-reminders/applet.md](../ui/applets/apple-reminders/applet.md)
 - [ui/applets/baidu-netdisk/applet.md](../ui/applets/baidu-netdisk/applet.md)
 - [ui/applets/bilibili/applet.md](../ui/applets/bilibili/applet.md)
+- [ui/applets/board/applet.md](../ui/applets/board/applet.md)
 - [ui/applets/booking/applet.md](../ui/applets/booking/applet.md)
 - [ui/applets/browser/applet.md](../ui/applets/browser/applet.md)
 - [ui/applets/canva/applet.md](../ui/applets/canva/applet.md)
@@ -229,6 +231,7 @@ Indexed: **281 Markdown documents** and **745 supporting documentation files**.
 - [ui/DESIGN-STANDARDS.md](../ui/DESIGN-STANDARDS.md)
 - [ui/README.md](../ui/README.md)
 - [ui/applets/BRAND-ASSETS.md](../ui/applets/BRAND-ASSETS.md)
+- [ui/applets/DEMO.md](../ui/applets/DEMO.md)
 - [ui/applets/DESIGN-GUIDE.md](../ui/applets/DESIGN-GUIDE.md)
 - [ui/applets/IMPLEMENTATION-GUIDE.md](../ui/applets/IMPLEMENTATION-GUIDE.md)
 - [ui/applets/MOTION.md](../ui/applets/MOTION.md)
@@ -240,19 +243,18 @@ Indexed: **281 Markdown documents** and **745 supporting documentation files**.
 - [ui/applets/messages/README.md](../ui/applets/messages/README.md)
 - [ui/applets/scene/README.md](../ui/applets/scene/README.md)
 - [ui/applets/voice-memos/README.md](../ui/applets/voice-memos/README.md)
-- [ui/artifacts/CARD-SYSTEM.md](../ui/artifacts/CARD-SYSTEM.md)
-- [ui/artifacts/README.md](../ui/artifacts/README.md)
+- [ui/attention/ARTIFACTS.md](../ui/attention/ARTIFACTS.md)
+- [ui/attention/CARD-SYSTEM.md](../ui/attention/CARD-SYSTEM.md)
 - [ui/companion/ANIMATION.md](../ui/companion/ANIMATION.md)
 - [ui/companion/CONVERSATION.md](../ui/companion/CONVERSATION.md)
-- [ui/components/INTERACTION.md](../ui/components/INTERACTION.md)
-- [ui/onboarding/DISCOVERY.md](../ui/onboarding/DISCOVERY.md)
-- [ui/onboarding/README.md](../ui/onboarding/README.md)
-- [ui/practice/DEMO.md](../ui/practice/DEMO.md)
-- [ui/shell/README.md](../ui/shell/README.md)
-- [ui/theme-packages/village/assets/README.md](../ui/theme-packages/village/assets/README.md)
-- [ui/theme-packages/village/assets/artifact/HOST-PROMPT.md](../ui/theme-packages/village/assets/artifact/HOST-PROMPT.md)
-- [ui/theme-packages/village/assets/artifact/README.md](../ui/theme-packages/village/assets/artifact/README.md)
-- [ui/theme-packages/village/assets/artifact/STYLE.md](../ui/theme-packages/village/assets/artifact/STYLE.md)
+- [ui/frame/DISCOVERY.md](../ui/frame/DISCOVERY.md)
+- [ui/frame/ONBOARDING.md](../ui/frame/ONBOARDING.md)
+- [ui/frame/SHELL.md](../ui/frame/SHELL.md)
+- [ui/style/INTERACTION.md](../ui/style/INTERACTION.md)
+- [ui/style/theme-packages/village/assets/README.md](../ui/style/theme-packages/village/assets/README.md)
+- [ui/style/theme-packages/village/assets/artifact/HOST-PROMPT.md](../ui/style/theme-packages/village/assets/artifact/HOST-PROMPT.md)
+- [ui/style/theme-packages/village/assets/artifact/README.md](../ui/style/theme-packages/village/assets/artifact/README.md)
+- [ui/style/theme-packages/village/assets/artifact/STYLE.md](../ui/style/theme-packages/village/assets/artifact/STYLE.md)
 - [ui/world/COMPOSITION.md](../ui/world/COMPOSITION.md)
 - [ui/world/ENVIRONMENT.md](../ui/world/ENVIRONMENT.md)
 - [ui/world/README.md](../ui/world/README.md)
@@ -338,43 +340,47 @@ Indexed: **281 Markdown documents** and **745 supporting documentation files**.
 
 </details>
 
-<details><summary>Module and service documentation (36)</summary>
+<details><summary>Module and service documentation (40)</summary>
 
-- [android/README.md](../android/README.md)
+- [agent/README.md](../agent/README.md)
+- [agent/app/ANALYTICS.md](../agent/app/ANALYTICS.md)
+- [agent/attention/README.md](../agent/attention/README.md)
+- [agent/gate/GRANTS.md](../agent/gate/GRANTS.md)
+- [agent/gate/PORTABILITY.md](../agent/gate/PORTABILITY.md)
+- [agent/gate/REMOTE-MCP.md](../agent/gate/REMOTE-MCP.md)
+- [agent/gate/WORLD-ADDRESS.md](../agent/gate/WORLD-ADDRESS.md)
+- [agent/tasks/README.md](../agent/tasks/README.md)
+- [api/README.md](../api/README.md)
+- [context/README.md](../context/README.md)
+- [context/applets/INTEGRATIONS.md](../context/applets/INTEGRATIONS.md)
+- [context/applets/MY-APPLETS.md](../context/applets/MY-APPLETS.md)
+- [context/applets/RUNTIME.md](../context/applets/RUNTIME.md)
+- [context/connectors/BOARD.md](../context/connectors/BOARD.md)
+- [context/store/ARTIFACTS.md](../context/store/ARTIFACTS.md)
+- [context/store/GAMES.md](../context/store/GAMES.md)
+- [context/store/STORAGE.md](../context/store/STORAGE.md)
 - [contracts/COMPONENTS.md](../contracts/COMPONENTS.md)
 - [contracts/HARNESS.md](../contracts/HARNESS.md)
 - [contracts/README.md](../contracts/README.md)
-- [core/README.md](../core/README.md)
-- [core/agent/GRANTS.md](../core/agent/GRANTS.md)
-- [core/agent/PORTABILITY.md](../core/agent/PORTABILITY.md)
-- [core/applets/INTEGRATIONS.md](../core/applets/INTEGRATIONS.md)
-- [core/applets/MY-APPLETS.md](../core/applets/MY-APPLETS.md)
-- [core/applets/RUNTIME.md](../core/applets/RUNTIME.md)
-- [core/artifacts/README.md](../core/artifacts/README.md)
-- [core/attention/README.md](../core/attention/README.md)
-- [core/board/README.md](../core/board/README.md)
-- [core/diagnostics/ANALYTICS.md](../core/diagnostics/ANALYTICS.md)
-- [core/games/README.md](../core/games/README.md)
-- [core/items/STORAGE.md](../core/items/STORAGE.md)
-- [core/phone/README.md](../core/phone/README.md)
-- [core/tasks/README.md](../core/tasks/README.md)
 - [harness/README.md](../harness/README.md)
 - [harness/example/README.md](../harness/example/README.md)
 - [harness/skills/README.md](../harness/skills/README.md)
 - [harness/skills/worldlet/SKILL.md](../harness/skills/worldlet/SKILL.md)
-- [ios/README.md](../ios/README.md)
 - [platform/README.md](../platform/README.md)
 - [platform/STEAM.md](../platform/STEAM.md)
+- [platform/android/README.md](../platform/android/README.md)
 - [platform/browser/INTEGRATION.md](../platform/browser/INTEGRATION.md)
 - [platform/browser/README.md](../platform/browser/README.md)
-- [platform/electron/COMPANION.md](../platform/electron/COMPANION.md)
-- [platform/electron/DISTRIBUTION.md](../platform/electron/DISTRIBUTION.md)
-- [platform/electron/README.md](../platform/electron/README.md)
+- [platform/desktop/COMPANION.md](../platform/desktop/COMPANION.md)
+- [platform/desktop/DISTRIBUTION.md](../platform/desktop/DISTRIBUTION.md)
+- [platform/desktop/README.md](../platform/desktop/README.md)
 - [platform/install/README.md](../platform/install/README.md)
 - [platform/install/agent.md](../platform/install/agent.md)
+- [platform/ios/README.md](../platform/ios/README.md)
 - [platform/local-tools/README.md](../platform/local-tools/README.md)
-- [platform/node/README.md](../platform/node/README.md)
+- [platform/server/README.md](../platform/server/README.md)
 - [platform/web-engine/README.md](../platform/web-engine/README.md)
+- [platform/web/README.md](../platform/web/README.md)
 - [scripts/DEVELOPMENT.md](../scripts/DEVELOPMENT.md)
 
 </details>
@@ -384,14 +390,19 @@ Indexed: **281 Markdown documents** and **745 supporting documentation files**.
 
 </details>
 
-<details><summary>Documentation diagrams, previews and evidence (745)</summary>
+<details><summary>Documentation diagrams, previews and evidence (750)</summary>
 
-- [core/diagnostics/analytics-insights.json](../core/diagnostics/analytics-insights.json)
-- [docs/architecture.html](architecture.html)
+- [agent/app/analytics-insights.json](../agent/app/analytics-insights.json)
 - [docs/assets/readme/applet-notes.jpg](assets/readme/applet-notes.jpg)
 - [docs/assets/readme/attention.jpg](assets/readme/attention.jpg)
 - [docs/assets/readme/plan.jpg](assets/readme/plan.jpg)
 - [docs/assets/readme/world.jpg](assets/readme/world.jpg)
+- [docs/four-layers.svg](four-layers.svg)
+- [docs/four-layers.zh.svg](four-layers.zh.svg)
+- [docs/layers-and-components.svg](layers-and-components.svg)
+- [docs/layers-and-components.zh.svg](layers-and-components.zh.svg)
+- [docs/one-world.svg](one-world.svg)
+- [docs/one-world.zh.svg](one-world.zh.svg)
 - [docs/stack-in-computer-terms.svg](stack-in-computer-terms.svg)
 - [docs/stack-in-computer-terms.zh.svg](stack-in-computer-terms.zh.svg)
 - [platform/distribution/index.html](../platform/distribution/index.html)

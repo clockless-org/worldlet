@@ -1,6 +1,6 @@
-/** The board (core/board/README.md): tabs of blocks, each showing one Service preset (contracts/service-presets.ts) as
- * a number, a funnel, a list or a trend. A definition names presets and fields only, never a Service's key or a raw
- * read; Core resolves a definition and the presets' Service reads into the values a board shows, with no model and a
+/** The board (context/connectors/BOARD.md): tabs of blocks, each showing one Service preset (contracts/service-presets.ts),
+ * a Service's read or the World's own Agent reports (`agents`), as a number, a funnel, a list or a trend. A definition
+ * names presets and fields only, never a Service's key or a raw read; Core resolves a definition and the presets' Service reads into the values a board shows, with no model and a
  * plain error for each block that cannot be shown. Everything stays on the device: the only network reads are the
  * presets' own Service reads, made by the host under the Service's rules. */
 
@@ -10,7 +10,9 @@
 export type BoardBlockKind='number'|'funnel'|'list'|'trend';
 export const BOARD_BLOCK_KINDS:readonly BoardBlockKind[]=Object.freeze(['number','funnel','list','trend']);
 
-export interface BoardFunnelStep {field:string;label:string}
+/** A funnel step: its field and label, and optionally when its rate (this step over the one before it, 0 to 1) is good.
+ * The first step has no rate, so it takes no threshold. */
+export interface BoardFunnelStep {field:string;label:string;goodAtLeast?:number}
 export interface BoardBlock {
  /** Unique on the board: lowercase letters, digits and `-`. */
  id:string;
@@ -39,7 +41,7 @@ export interface BoardDefinition {title:string;tabs:BoardTab[]}
 export const BOARD_LIMITS=Object.freeze({
  tabs:8,blocksPerTab:16,blocks:48,
  /** Distinct presets one board reads. */
- presets:20,
+ presets:32,
  id:40,title:80,field:64,steps:8,fields:4,list:20,listDefault:10,points:200,
  /** Characters of a Service's error a block shows. */
  error:300,
@@ -48,7 +50,9 @@ export const BOARD_LIMITS=Object.freeze({
 export type BoardTone='good'|'bad';
 export interface BoardFunnelStepView {label:string;count:number;
  /** This step over the one before it, 0 to 1 (three decimals); null for the first step or after a step of 0. */
- rate:number|null}
+ rate:number|null;
+ /** With the step's `goodAtLeast` and a rate: good at or above it, bad below. */
+ tone?:BoardTone}
 export interface BoardListItem {title:string;url:string;fields:Record<string,string|number|boolean>}
 export interface BoardPoint {x:string;y:number}
 /** One block as the board shows it: its value, or why it cannot be shown. Service text in it is data, never
@@ -80,7 +84,7 @@ export interface BoardView {title:string;tabs:BoardTabView[];
  resolvedAt:string}
 
 /** The World gateway targets (`board/<action>`), each its own Grant target. Only an Agent's own "Can see your board"
- * and "Can set up your board" Grants name them; a Fox turn's Grant never does (core/agent/GRANTS.md#the-board). */
+ * and "Can set up your board" Grants name them; a Fox turn's Grant never does (agent/gate/GRANTS.md#the-board). */
 export const BOARD_TARGET='board';
 export const BOARD_ACTIONS=Object.freeze({read:'board/read',define:'board/define'} as const);
 /** The board as the World keeps it (`state.board` in world.sqlite): its definition, a revision each define raises by
@@ -91,4 +95,4 @@ export interface BoardReadArgs {tab?:string}
 /** `board/define`: the whole new definition, any presets to save with it (contracts/service-presets.ts), and the
  * revision it was read at (0 when there is no board yet); a stale revision is refused. */
 export interface BoardDefineArgs {definition:BoardDefinition;presets?:unknown[];expectedRevision:number}
-export const BOARD_DEFINE_PRESETS=20;
+export const BOARD_DEFINE_PRESETS=32;

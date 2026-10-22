@@ -1,12 +1,12 @@
-// The Game Factory's rules (core/games/README.md) without a host: what a made game may contain, the page
+// The Game Factory's rules (context/store/GAMES.md) without a host: what a made game may contain, the page
 // it runs as, what the host reads back, the model it needs, and that making stays closed for now.
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {widgetDocument,WIDGET_POLICY} from '../core/artifacts/index.ts';
-import {checkMadeGameSource,madeGameDocument,readMadeGameReport,madeGameRecord,readMadeGame,orderMadeGames,madeGameTrialProblems,gameFactoryModel,madeGameId,validMadeGameId,madeGameTask,betterBest,GAME_MAKING_OPEN,MADE_GAME_POLICY,SANDBOX_POLICY,MADE_GAME_REPORT,GAME_FACTORY_APPLET} from '../core/games/index.ts';
+import {widgetDocument,WIDGET_POLICY} from '../context/store/index.ts';
+import {checkMadeGameSource,madeGameDocument,readMadeGameReport,madeGameRecord,readMadeGame,orderMadeGames,madeGameTrialProblems,gameFactoryModel,madeGameId,validMadeGameId,madeGameTask,betterBest,GAME_MAKING_OPEN,MADE_GAME_POLICY,SANDBOX_POLICY,MADE_GAME_REPORT,GAME_FACTORY_APPLET} from '../context/store/index.ts';
 import {createWorldToolRuntime} from '../platform/bridge/world-tool-runtime.ts';
-import {worldActions,listWorldTools} from '../core/tools/index.ts';
-import {APP_DEFINITIONS} from '../core/applets/index.ts';
+import {worldActions,listWorldTools} from '../agent/gate/index.ts';
+import {APP_DEFINITIONS} from '../context/applets/index.ts';
 
 // A plain canvas game passes; SVG namespaces, `rect.top`, `node.parent` and location.reload are not network use.
 const good=`<!doctype html><html><head><title>Fox run</title><style>body{margin:0}</style></head><body><canvas id="c"></canvas><script>
@@ -67,10 +67,10 @@ assert.equal(APP_DEFINITIONS.some(app=>app.id===GAME_FACTORY_APPLET),false,'the 
 // The host side: every made game's and Moment Applet's contents (trial, Game Factory and Widgets players) is
 // locked the same way, including WebRTC, whose UDP never passes the session's request filter.
 {
- const read=(file:string)=>readFileSync(new URL('../platform/electron/src/modules/'+file,import.meta.url),'utf8');
- const trial=read('games/trial.ts'),lock=trial.slice(trial.indexOf('export function lockGameContents'),trial.indexOf('export function placeGameView'));
+ const read=(file:string)=>readFileSync(new URL('../platform/host/modules/'+file,import.meta.url),'utf8');
+ const trial=read('applets/trial.ts'),lock=trial.slice(trial.indexOf('export function lockGameContents'),trial.indexOf('export function placeGameView'));
  assert.match(lock,/setWebRTCIPHandlingPolicy\('disable_non_proxied_udp'\)/);assert.match(lock,/action:'deny'/);assert.match(lock,/will-navigate/);assert.match(lock,/will-redirect/);
  assert.match(trial.slice(trial.indexOf('export async function tryMadeGame')),/lockGameContents\(contents\)/,'the trial');
- for(const player of ['games/player.ts','artifacts/widget-player.ts'])assert.match(read(player),/lockGameContents\(contents\)/,player);
+ for(const player of ['applets/player.ts','attention/widget-player.ts'])assert.match(read(player),/lockGameContents\(contents\)/,player);
 }
 console.log('PASS Game Factory: offline-only pages, sandbox prelude and reports, records, own-model rule; making is coming soon and Fox is offered no game tools.');

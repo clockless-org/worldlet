@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import {appletForWebsite} from '../ui/browser/applet-match.ts';
+import {appletForWebsite} from '../ui/applets/applet-match.ts';
 import {bundleScript,withBrowser} from './browser-test.ts';
 for(const [url,key] of [['https://github.com/a/b','github'],['https://mail.google.com/mail/u/0','gmail'],['https://calendar.google.com','google-calendar'],['https://www.youtube.com/watch?v=1','youtube'],['https://team.notion.site/test','notion'],['https://worldlet.ai/games/play/snake/','random-game'],['https://www.nytimes.com/games/wordle/index.html','wordle']])assert.equal(appletForWebsite(url)?.key,key);
 for(const url of ['https://youtube.com.evil.test','https://example.com/?url=https://github.com','https://accounts.google.com','https://evil.test/youtube.com','file:///github.com','https://worldlet.ai/','https://www.nytimes.com/2026/10/05/world/news.html','https://poki.com/'])assert.equal(appletForWebsite(url),null);
-const bundle=await bundleScript({entryPoints:['ui/browser/browser-device.ts'],globalName:'BrowserPanel'});
+const bundle=await bundleScript({entryPoints:['ui/applets/browser-device.ts'],globalName:'BrowserPanel'});
 await withBrowser(async browser=>{
  const page=await browser.newPage();await page.setContent('<main><dialog id="notionDialog"></dialog><section style="width:700px;height:600px"></section></main>');await page.addScriptTag({content:bundle});
  await page.evaluate(()=>{const root:any=document.querySelector('main'),content=document.querySelector('section');(window as any).installed=new Set();(window as any).opened=[];root.appletLayout={available:()=>true,has:id=>(window as any).installed.has(id),add:async id=>(window as any).installed.add(id)};(window as any).panel=(window as any).BrowserPanel.createBrowserPanel({root,content,native:{browser:{call:async()=>({})}},notify:()=>{},openApplet:id=>(window as any).opened.push(id)});(window as any).panel.mount('browser',{url:'https://github.com/test',platform:'web'});});
@@ -16,7 +16,7 @@ await withBrowser(async browser=>{
  await page.evaluate(()=>(window as any).panel.mount('gmail',{url:'https://mail.google.com',platform:'web'}));
  assert.equal(await page.locator('.browser-applet-offer:not(.browser-sign-in-offer)').isVisible(),false,'only generic Browser offers the switch');
  console.log('PASS website matching, one-click add/open, no duplicates, navigation clears offer.');
- // Make Applet at the top of the Browser (core/applets/site-applet.ts): any public site becomes an Applet; a made one opens.
+ // Make Applet at the top of the Browser (context/applets/site-applet.ts): any public site becomes an Applet; a made one opens.
  const made=await browser.newPage();await made.setContent('<main><dialog id="notionDialog"></dialog><section style="width:700px;height:600px"></section></main>');await made.addScriptTag({content:bundle});
  await made.evaluate(()=>{const w=window as any,root:any=document.querySelector('main'),content=document.querySelector('section');w.opened=[];w.made=[];w.notes=[];root.appletLayout={available:()=>true,has:()=>false,add:async()=>{}};
   w.panel=w.BrowserPanel.createBrowserPanel({root,content,native:{browser:{call:async()=>({})}},notify:m=>w.notes.push(m),openApplet:id=>w.opened.push(id),

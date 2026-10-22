@@ -2,15 +2,15 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {bundleScript,withBrowser,pageErrors} from './browser-test.ts';
-import {parseThemePresentation} from '../ui/themes/build-theme-contract.ts';
-const presentation=JSON.parse(await readFile('ui/theme-packages/village/presentation.json','utf8'));
+import {parseThemePresentation} from '../ui/style/themes/build-theme-contract.ts';
+const presentation=JSON.parse(await readFile('ui/style/theme-packages/village/presentation.json','utf8'));
 const registration={imageSize:[1500,844],sha256:'0'.repeat(64),regions:[{id:'main',role:'primary',rect:[.05,.55,.7,.25],material:'paper'}],companion:[.05,.85,.7,.1]};
 const delivery={video:'assets/delivery.webm',bounds:[.3,.05,.4,.4],duration:1};
 const spec=(d:any)=>({...presentation,appletScenes:{gmail:{background:'assets/room.png',registration,mailDelivery:d}}});
 assert.doesNotThrow(()=>parseThemePresentation(spec(delivery)));
 for(const d of [{...delivery,video:'https://example.com/a.webm'},{...delivery,duration:21},{...delivery,bounds:[0,.6,1,.3]},{...delivery,loop:true}])assert.throws(()=>parseThemePresentation(spec(d)));
 const script=await bundleScript({stdin:{contents:"export {mountAppletScene} from './ui/applets/scene/applet-scene.ts';",resolveDir:process.cwd(),loader:'ts'},globalName:'Scene'});
-const arrivalScript=await bundleScript({stdin:{contents:"export {createMailArrival} from './ui/world/mail-arrival.ts';",resolveDir:process.cwd(),loader:'ts'},globalName:'Arrival',plugins:[{name:'static-mail-declaration',setup(b){b.onLoad({filter:/ui\/themes\/index\.ts$/},()=>({contents:"export {createThemeEvents} from './theme-events.ts';export const ACTIVE_THEME={pack:{motion:{events:{},sound:{events:{}}}}};export const activeBuildTheme=()=>({package:{presentation:{appletScenes:{gmail:{mailDelivery:{}}}}}});export const playThemeSound=()=>{globalThis.soundCount=(globalThis.soundCount||0)+1;};",loader:'ts',resolveDir:process.cwd()+'/ui/themes'}));}}]});
+const arrivalScript=await bundleScript({stdin:{contents:"export {createMailArrival} from './ui/world/mail-arrival.ts';",resolveDir:process.cwd(),loader:'ts'},globalName:'Arrival',plugins:[{name:'static-mail-declaration',setup(b){b.onLoad({filter:/ui\/style\/themes\/index\.ts$/},()=>({contents:"export {createThemeEvents} from './theme-events.ts';export const ACTIVE_THEME={pack:{motion:{events:{},sound:{events:{}}}}};export const activeBuildTheme=()=>({package:{presentation:{appletScenes:{gmail:{mailDelivery:{}}}}}});export const playThemeSound=()=>{globalThis.soundCount=(globalThis.soundCount||0)+1;};",loader:'ts',resolveDir:process.cwd()+'/ui/style/themes'}));}}]});
 await withBrowser(async browser=>{
  const page=await browser.newPage({viewport:{width:1500,height:844}}),errors=pageErrors(page);
  await page.setContent('<title>Mail delivery lifecycle</title><main id="host" style="position:fixed;inset:0"></main>');await page.addStyleTag({content:await readFile('ui/applets/scene/applet-scene.css','utf8')});await page.addScriptTag({content:script});

@@ -6,11 +6,11 @@
   "purpose": "Image-generated visual target based on the current large-surface background; not a runtime screenshot.",
   "generatedAt": "2026-10-13T04:36:00.972Z",
   "sourceBackground": {
-    "path": "ui/theme-packages/village/assets/applet-presets/fitness/background.webp",
+    "path": "ui/style/theme-packages/village/assets/applet-presets/fitness/background.webp",
     "sha256": "bcde6802ebf759bce579380ae9c830584216b703a991e02b98c4bb0c006e3583"
   },
   "sourceFrame": {
-    "path": "ui/theme-packages/village/assets/applet-presets/fitness/frame-mask.png",
+    "path": "ui/style/theme-packages/village/assets/applet-presets/fitness/frame-mask.png",
     "sha256": "132a4b2ffe7e95b71bb4911a0599d8ecb106afb1ae0cf2a6a733df93a43a10bb"
   },
   "sourceImageSha256": "c8d30224013d014bd22baf8978c6f32b928b050f775a81e82f7bc6b5629fb63f",

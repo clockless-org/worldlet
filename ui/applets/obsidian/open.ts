@@ -1,4 +1,4 @@
-import {resolveVaultNote,vaultWikiLinks} from '../../../core/applets/index.ts';
+import {resolveVaultNote,vaultWikiLinks} from '../../../context/applets/index.ts';
 import type {AppletSceneRegion} from '../scene/applet-scene.ts';
 import logo from './logo.ts';
 const states=new WeakMap<HTMLElement,{selected:string;query:string;closed:Set<string>}>();

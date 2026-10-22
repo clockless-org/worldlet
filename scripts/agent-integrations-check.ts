@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {codexMcpServers,hermesMcpServers,mcpServersFrom,planIntegration,planIntegrations} from '../core/agent/index.ts';
-import {agentIntegrationPlans} from '../platform/electron/src/modules/agent-runtime/agent-integrations.ts';
+import {codexMcpServers,hermesMcpServers,mcpServersFrom,planIntegration,planIntegrations} from '../agent/gate/index.ts';
+import {agentIntegrationPlans} from '../platform/host/modules/companion/agent/agent-integrations.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Integrations a brought Agent already had (owner request 2026-10-04): each Agent's MCP settings are

@@ -1,4 +1,4 @@
-import {node,uiIcon,facts} from '../../components/index.ts';
+import {node,uiIcon,facts} from '../../style/index.ts';
 import type {AppletSceneRegion} from '../scene/applet-scene.ts';
 import {reminderView,visibleReminders,reminderCompleted,reminderList,reminderDate} from './view-state.ts';
 /** The host assigns semantic surfaces; the package only measures the paper they sit on. */

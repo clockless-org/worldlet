@@ -1,4 +1,4 @@
-import {GAME_BOARDS} from '../games/index.ts';
+import {GAME_BOARDS} from './game-boards.ts';
 import {createGamePanel} from './_shared/game-panel.ts';
 
 // The Games area's boards (catalog fullView.kind 'game'; the Random game is a website). Each one is our own code,

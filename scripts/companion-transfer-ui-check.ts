@@ -18,7 +18,7 @@ await page.addInitScript(()=>{window.calls=[];window.webkit={messageHandlers:{wo
  await page.screenshot({path:'/tmp/companion-profile-tab.png'});
  // One list of sections on the left, the chosen one's details on the right, no tabs (owner request 2026-10-10).
  assert.equal(await panel.getByRole('tab').count(),0,'no tabs');
- assert.deepEqual(await list.locator('[data-setting] strong').allTextContents(),['Fox','Agent','Phone','General','Help'],'Fox first, no Energy, Journal, Accounts, Approvals, History, Sounds, Privacy or Feedback');
+ assert.deepEqual(await list.locator('[data-setting] strong').allTextContents(),['Services','Agents','Your data','Fox','Phone','General'],'the three areas first, then Fox; no Energy, Journal, Accounts, Approvals, History, Sounds, Privacy or Feedback');
  const wheel=()=>detail.dispatchEvent('wheel',{deltaY:120,bubbles:true,cancelable:true});
  await wheel();await page.waitForTimeout(260);await wheel();assert.equal(await panel.getAttribute('data-section'),'Profile','the wheel never turns the page');
  assert.equal(await panel.getByRole('button',{name:/^(Import|Export)$/}).count(),0);
@@ -26,14 +26,14 @@ await page.addInitScript(()=>{window.calls=[];window.webkit={messageHandlers:{wo
  const viewport=page.viewportSize();assert(Math.abs(box.x+box.width/2-viewport.width/2)<2&&Math.abs(box.y+box.height/2-viewport.height/2)<2,'Panel is independent and centered');
  assert.equal(await panel.evaluate(e=>getComputedStyle(e,'::after').display),'none','Panel has no Fox connector');
  // Every section opens beside the list, which stays where it is.
- for(const id of ['fox','model','phone','general','help']){
+ for(const id of ['connectors','agents','context','fox','phone','general']){
   await list.locator(`[data-setting="${id}"]`).click();await list.locator(`[data-setting="${id}"][aria-current=true]`).waitFor();
   const d=await detail.boundingBox(),l=await list.boundingBox();assert(d&&l&&l.x+l.width<=d.x,id+' opens right of the list');
   assert(await panel.evaluate(e=>e.scrollHeight<=e.clientHeight+1),id+' fits the panel');
  }
  const after=await list.boundingBox();assert.equal(after.y,initial.y,'Navigation stays fixed');
  await list.locator('[data-setting=fox]').click();
- // Fox's page is who Fox is: no example cards, and what it knows is in Agent › Memory (owner request 2026-10-11).
+ // Fox's page is who Fox is: no example cards, and what it knows is in Context › Memory (owner request 2026-10-11).
  await panel.locator('.companion-profile-page .companion-info-profile').waitFor();
  assert.equal(await panel.locator('.companion-info-card').count(),0,'no example cards');
  assert.equal(await panel.locator('.companion-profile-page .companion-profile-knowledge').count(),0,'what Fox knows is not on its page');
@@ -43,11 +43,11 @@ await page.addInitScript(()=>{window.calls=[];window.webkit={messageHandlers:{wo
   await page.waitForFunction(()=>{const p=document.querySelector('#companionInfo').getBoundingClientRect();return p.right<=innerWidth&&p.bottom<=innerHeight;});
   const box=await panel.boundingBox();assert(box.x>=0&&box.y>=0&&box.x+box.width<=viewport.width&&box.y+box.height<=viewport.height);
   assert(await detail.evaluate(e=>e.clientHeight>70&&e.scrollWidth<=e.clientWidth+1),'Content fits and remains scrollable');
-  await list.locator('[data-setting=model]').click();
+  await list.locator('[data-setting=agents]').click();
   assert(await list.isVisible());assert(await list.evaluate(e=>e.scrollWidth<=e.clientWidth+1),'the list wraps rather than scrolls sideways');
  }
  await page.setViewportSize({width:375,height:812});await page.screenshot({path:'/tmp/companion-panel-small.png'});
  await page.keyboard.press('Escape');assert.equal(await panel.isVisible(),false);
  assert.equal(await page.evaluate(()=>calls.some(c=>c.action==='companionArchive')),false);
- console.log('PASS companion panel: larger layout, one list of five sections and no tabs, pages that fit, no transfer controls, fixed section list, responsive scroll and Escape');
+ console.log('PASS companion panel: larger layout, one list of six sections, the three areas first, and no tabs, pages that fit, no transfer controls, fixed section list, responsive scroll and Escape');
 });

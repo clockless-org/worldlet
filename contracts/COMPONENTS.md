@@ -3,7 +3,7 @@
 Chapters:
 - [Repository layers and components](#repository-layers)
 - [Component interfaces](#component-interfaces)
-- [Five-layer architecture audit](#architecture-audit)
+- [Architecture audit](#architecture-audit)
 
 
 Current migration status: layer boundaries are enforced, but behavioral parity is **not complete**. Current gaps are the [parity ratchet](README.md#parity-vectors): Core operations the retired native hosts invoked that the Electron host does not yet route through Core (`electronPending` in [`host-core-usage.json`](fixtures/parity/host-core-usage.json)). Earlier acceptance evidence is historical and remains in Git and PR #161.
@@ -16,9 +16,9 @@ runtime stack remains **UI → Core → Platform → Harness → Models/Services
 
 | Layer | Components / directories | Public interface | Must not own |
 | --- | --- | --- | --- |
-| UI | `ui/world`, `ui/applets`, `ui/companion`, `ui/attention`, `ui/shell` | Versioned semantic World actions in `contracts/ui.ts`; component functions; host transport | OS branches, provider protocols, independent scheduling policy |
-| Core | `core/agent`, `core/applets`, `core/attention`, `core/tasks`, `core/companion`, `core/context`, `core/items`, `core/browser`, `core/tools`, `core/diagnostics`, `core/onboarding` | Each component's `index.ts`; serialized native entry in `core/index.ts` | DOM, filesystem, clocks, sockets, Electron/Node types, platform conditions |
-| Platform | `platform/bridge`, `platform/electron`, `platform/browser`, `platform/local-tools` | `contracts/platform.ts`; shared Core requests/results; negotiated Harness contract | A second copy of onboarding, source processing, retry/priority or model-selection rules |
+| UI | `ui/world`, `ui/applets`, `ui/companion`, `ui/attention`, `ui/frame` | Versioned semantic World actions in `contracts/ui.ts`; component functions; host transport | OS branches, provider protocols, independent scheduling policy |
+| Agent and Context | `agent/gate`, `context/applets`, `agent/attention`, `agent/tasks`, `agent/companion`, `context/connectors`, `context/store`, `agent/applets`, `agent/gate`, `agent/app`, `agent/companion` | Each component's `index.ts`; serialized native entry in `agent/index.ts` | DOM, filesystem, clocks, sockets, Electron/Node types, platform conditions |
+| Platform | `platform/bridge`, `platform/desktop`, `platform/browser`, `platform/local-tools` | `contracts/platform.ts`; shared Core requests/results; negotiated Harness contract | A second copy of onboarding, source processing, retry/priority or model-selection rules |
 | Harness | `harness/hermes` or an external adapter | `contracts/harness.ts`, capability discovery, tasks/events/cancellation | World UI implementation or ownership of portable user records |
 | Models/Services | `models` and provider APIs | Harness/provider protocols | UI navigation and OS permissions |
 
@@ -32,12 +32,12 @@ five synchronous calls for every operation.
 - **Chromium** renders HTML, CSS, JavaScript and the Pixi world.
 - **Electron** embeds Chromium on Mac, Windows and Linux. The trusted World and each
   website are separate `WebContentsView`s in one `BaseWindow`
-  ([Electron host](../platform/electron/README.md)).
+  ([Electron host](../platform/desktop/README.md)).
 - **CDP** observes and controls a selected browser target. It is a protocol, not
   a renderer or a replacement for normal UI ↔ Core messages.
 
 Do not expose a public debugging port: the host strips `--remote-debugging-*` launch
-switches (`platform/electron/src/main.ts`). The browser driver attaches through
+switches (`platform/desktop/src/main.ts`). The browser driver attaches through
 `webContents.debugger` to the host-selected page only. Connecting an Agent does not grant
 access to every tab, cookies, host methods or arbitrary local files.
 
@@ -89,8 +89,8 @@ Use the [architecture audit checklist](../docs/UI-CORE-PLATFORM.md#architecture-
 
 World/HUD, website and restricted media surfaces are Electron `WebContentsView`s on
 every OS. The same trusted live World view moves into the desktop Companion window
-(`modules/shell/companion.ts`), preserving its conversation and draft. Shared Core
-runs in-process (`platform/electron/src/core.ts`); it is not a UI renderer. OS input,
+(`modules/companion/window.ts`), preserving its conversation and draft. Shared Core
+runs in-process (`platform/host/core.ts`); it is not a UI renderer. OS input,
 composition, focus and pixel presentation are IO; World rendering and interaction
 decisions stay in shared UI.
 
@@ -106,7 +106,7 @@ See the migration status at the [top of this catalog](#shared-ui-pure-core-thin-
 
 Current [component interfaces and browser/runtime audit](COMPONENTS.md#component-interfaces).
 
-The [architecture diagram](../docs/architecture.html) follows the source tree. Runtime layers have explicit owning directories; the independently deployed model API lives at the repository root. Shared contracts and resources are explicit supporting modules, not a catch-all `shared/` folder.
+The [architecture diagram](../docs/four-layers.svg) follows the source tree. Runtime layers have explicit owning directories; the independently deployed model API lives at the repository root. Shared contracts and resources are explicit supporting modules, not a catch-all `shared/` folder.
 
 Directory ownership follows the [component table](#components-and-interfaces). Each runtime layer has one root; host modules and subdirectories do not create additional layers.
 
@@ -123,39 +123,39 @@ Directory ownership follows the [component table](#components-and-interfaces). E
 
 ### One component, one owner
 
-- **Applet definitions:** `core/applets/catalog.ts` and `core/applets/definitions/<key>.ts` own identity, capabilities and declared states. `ui/applets/<key>/` owns rendering, panels and logo presentation. Model context and tools can read the catalog without importing UI.
-- **Companion:** `core/companion/` owns portable records, validation, recall and prompt rules; `ui/companion/` owns dialogue and animation. Host storage and credential operations remain in the Electron host (`modules/fox/companion.ts`, `src/vault.ts`).
-- **Schedules:** `core/tasks/` owns Worldlet source-check rules and settings policy. The platform supplies consent, app lifecycle and an awake clock. `harness/hermes/routines.py` claims due jobs, runs them and saves results. External backends must advertise and implement equivalent services.
-- **Host persistence:** `platform/electron/src/store/world-store.ts`, `store/ledger.ts` and the companion records in `modules/fox/companion.ts` belong to layer 3. Layer 2 owns the rules they apply. They are not listed as a second implementation in `core/`.
+- **Applet definitions:** `context/applets/catalog.ts` and `context/applets/definitions/<key>.ts` own identity, capabilities and declared states. `ui/applets/<key>/` owns rendering, panels and logo presentation. Model context and tools can read the catalog without importing UI.
+- **Companion:** `agent/companion/` owns portable records, validation, recall and prompt rules; `ui/companion/` owns dialogue and animation. Host storage and credential operations remain in the Electron host (`modules/companion/companion.ts`, `platform/host/vault.ts`).
+- **Schedules:** `agent/tasks/` owns Worldlet source-check rules and settings policy. The platform supplies consent, app lifecycle and an awake clock. `harness/hermes/routines.py` claims due jobs, runs them and saves results. External backends must advertise and implement equivalent services.
+- **Host persistence:** `platform/host/store/world-store.ts`, `store/ledger.ts` (split into one file per component beside it) and the companion records in `modules/companion/companion.ts` belong to layer 3. Layer 2 owns the rules they apply. They are not listed as a second implementation in `core/`.
 - **Local execution:** `platform/local-tools/` supplies speech and coding CLI helpers independently of the selected Harness.
 - **Connectors:** Hermes-bound readers/authentication remain in `harness/hermes/`. There is no empty generic connectors folder or claim that these modules are independent. Do not put source connectors in `models/`; that directory owns only the hosted model API.
 
 ### Dependency rules
 
-1. `contracts/` depends only on itself. `core/` depends only on core/contracts; no DOM, OS/host APIs or runtime libraries.
+1. `contracts/` depends only on itself. `context/` depends only on context/contracts and `agent/` only on agent/context/contracts; no DOM, OS/host APIs or runtime libraries.
 2. `ui/` consumes core, contracts and resources. OS communication uses `platform/bridge/`; it cannot import Platform implementations or Harness internals.
 3. `platform/` owns permissions, processes, browser integration and persistence. It composes the selected Harness through the negotiated protocol.
 4. `harness/` owns backend-specific configuration and execution. Replacing it does not transfer ownership of Worldlet records or bypass host authorization.
 5. `models/` holds the independently deployed included-model API; provider configuration that requires Hermes stays with Hermes.
-6. `resources/` contains assets and declarations, not executable application logic. `ui/components/style.ts` is the read-only style lookup.
+6. `resources/` contains assets and declarations, not executable application logic. `ui/style/style.ts` is the read-only style lookup.
 
-The Electron host is one TypeScript project under `platform/electron/`, with one module per domain (`src/modules/*`); modules do not represent extra product layers. It consumes shared rules through in-process Core (`src/core.ts`) with the same JSON envelope the retired native hosts used. This does not establish complete behavioral parity: the [parity ratchet](README.md#parity-vectors) and device acceptance remain explicit audit items.
+The shared Host is one TypeScript project under `platform/host/`, run by Desktop (Electron) and Server (Node), with one module per component (`platform/host/modules/*`); modules do not represent extra product layers. It consumes shared rules through in-process Core (`platform/host/core.ts`) with the same JSON envelope the retired native hosts used. This does not establish complete behavioral parity: the [parity ratchet](README.md#parity-vectors) and device acceptance remain explicit audit items.
 
 For recurring review criteria and the current migration gaps, use [the architecture audit](../docs/UI-CORE-PLATFORM.md#architecture-audit).
 
 ### Shared-first implementation rule
 
-Business behavior is shared by default. A new condition, state transition, retry, priority, normalization, report shape or privacy allowlist belongs in `core/`; presentation belongs in `ui/`. Host modules collect OS facts, enforce actual permissions, run processes, persist data and execute shared decisions. They must not invent an alternate product flow. Keep host code small by removing duplicated decisions, not by moving code into another host module.
+Business behavior is shared by default. A new condition, state transition, retry, priority, normalization, report shape or privacy allowlist belongs in `agent/` or `context/`; presentation belongs in `ui/`. Host modules collect OS facts, enforce actual permissions, run processes, persist data and execute shared decisions. They must not invent an alternate product flow. Keep host code small by removing duplicated decisions, not by moving code into another host module.
 
 | Concern | Single rule owner | Host responsibility |
 | --- | --- | --- |
-| Source completion and retry | `core/tasks/source-checks.ts` | Clock, authorized read, persist result |
-| Queue priority, admission and preemption | `core/tasks/agent-work.ts` | Reservations, process handles, cancellation and draining |
-| Execution deadlines | `core/tasks/agent-deadline.ts` | Timers and process termination |
-| Onboarding transitions | `core/onboarding/onboarding.ts` | Account authorization and persistence |
-| Model status and product guidance | `core/companion/model-status.ts`, `conversation-guidance.ts` | Provider facts, capability facts and IO |
-| Trace/report projection and privacy | `core/diagnostics/` | OS/build facts, bounded file IO, export picker |
-| Conversation/interface state | `ui/companion/`, `core/agent/` | Harness transport and OS lifecycle |
+| Source completion and retry | `agent/tasks/source-checks.ts` | Clock, authorized read, persist result |
+| Queue priority, admission and preemption | `agent/tasks/agent-work.ts` | Reservations, process handles, cancellation and draining |
+| Execution deadlines | `agent/tasks/agent-deadline.ts` | Timers and process termination |
+| Onboarding transitions | `agent/companion/onboarding.ts` | Account authorization and persistence |
+| Model status and product guidance | `agent/companion/model-status.ts`, `conversation-guidance.ts` | Provider facts, capability facts and IO |
+| Trace/report projection and privacy | `agent/app/` | OS/build facts, bounded file IO, export picker |
+| Conversation/interface state | `ui/companion/`, `agent/gate/` | Harness transport and OS lifecycle |
 
 Exercise shared rules through Core fixtures and the golden vectors replayed by in-process Core. Do not add silent host copies as fallbacks when shared code fails. OS API differences remain legitimate. The [parity ratchet](README.md#parity-vectors) keeps the union of Core operations the two retired native hosts invoked and lists those the Electron host does not yet route; device-only limits stay in the owning Issue/PR.
 
@@ -165,13 +165,13 @@ The old `app/`, `shared/`, `adapters/`, `applets/`, `worlds/` and `services/` so
 
 Installed `WorldletWeb` resource names, Agent profile locations, bundle IDs, host callback names, storage schemas and user data do not change. This is a source-layout migration, not a user-data migration or release.
 
-The proposed open-source scope is `ui/`, `core/`, `platform/`, contracts/resources and adapter examples. Existing external Harnesses need compatible adapters; no license change or repository split is made here.
+The proposed open-source scope is `ui/`, `agent/`, `context/`, `platform/`, contracts/resources and adapter examples. Existing external Harnesses need compatible adapters; no license change or repository split is made here.
 
 Validation: `check:source`, `check:style` and `test:core` enforce dependency boundaries, retired source roots, imports, platform contracts and world assets. UI/website builds and `npm run test:electron` exercise the rewritten build paths. Device results belong to the owning Issue/PR; new changes need proportional checks.
 
 ### Autonomous service target
 
-The [World runtime target design](../core/applets/RUNTIME.md#target-design-world-runtime-and-autonomous-services) specifies the common task/claim contract, independent resource pools, durable subscriptions and Companion command operations. It is a staged implementation target, not a claim of current host parity. World-owned Core defines scheduling policy and state transitions; the selected Harness executes admitted, leased jobs. The Platform host provides the clock, permissions and transactional storage. Do not introduce a second competing scheduler or move product policy into a Harness-specific prompt.
+The [World runtime target design](../context/applets/RUNTIME.md#target-design-world-runtime-and-autonomous-services) specifies the common task/claim contract, independent resource pools, durable subscriptions and Companion command operations. It is a staged implementation target, not a claim of current host parity. World-owned Core defines scheduling policy and state transitions; the selected Harness executes admitted, leased jobs. The Platform host provides the clock, permissions and transactional storage. Do not introduce a second competing scheduler or move product policy into a Harness-specific prompt.
 
 ### Host compatibility
 
@@ -180,7 +180,7 @@ capabilities; missing v1 flags are false and unknown versions fail explicitly.
 Legacy compatibility stays in one resolver. UI flags never replace host
 permission, frame/origin or account checks. In-process Core exchanges JSON only and
 gets no host IO. Whole-world backups are one SQLite file of the library's files on every
-OS (format 2, `modules/shell/backup.ts`); the Mac `WorldBackup.Archive` JSON (format 1) still
+OS (format 2, `modules/app/backup.ts`); the Mac `WorldBackup.Archive` JSON (format 1) still
 restores. Portable companion archives are a different contract.
 Shared companion limits and timestamp/UUID policy live in
 `contracts/companion-policy.json`; the host imports it directly, and `test:core`
@@ -197,40 +197,40 @@ Shared companion limits and timestamp/UUID policy live in
 | UI Applets | Catalog-driven routes and Peek/Open/Focus | Device presentation and content selection |
 | UI Attention | Item projections and explicit item actions | Render Coming Up, Do Something, Worth Knowing |
 | UI Companion | Conversation/activity events and Host requests | Dialogue, steering, progress and action presentation |
-| Core Applets | `core/applets/index.ts` | Catalog, runtime definitions, read plans, capabilities and device state |
-| Core Scheduling | `core/tasks/index.ts` | Claims, leases, fencing, retries, pools, deliveries and operation outcomes |
-| Core Attention | `core/attention/index.ts` | Visibility, relevance inputs, suppression, synthesis budgets |
-| Core Activity | `core/activity/index.ts`, `contracts/activity.ts` | Local observation schemas, visit correlation, sampled foreground dwell, snapshot changes and redaction; no IO |
-| Core Items | `core/items/index.ts` | Identity, validation, state transitions, evidence projections; `worldHistoryQuery` and `worldHistoryPage` own shared history filtering and bounded retrieval |
-| Core Context | `core/context/index.ts` | Source context, validation, schema and layout |
-| Core Companion / Agent | `core/companion/index.ts`, `core/agent/index.ts` | Portable memory/history, guidance, model freshness and response classification |
-| Core Browser / Tools | `core/browser/index.ts`, `core/tools/index.ts` | Browser action policy and declared tools; no browser IO |
-| Core Onboarding / Diagnostics | `core/onboarding/index.ts`, `core/diagnostics/index.ts` | Setup transitions and allowlisted diagnostic projection |
+| Core Applets | `context/applets/index.ts` | Catalog, runtime definitions, read plans, capabilities and device state |
+| Core Scheduling | `agent/tasks/index.ts` | Claims, leases, fencing, retries, pools, deliveries and operation outcomes |
+| Core Attention | `agent/attention/index.ts` | Visibility, relevance inputs, suppression, synthesis budgets |
+| Core Activity | `context/applets/activity.ts`, `contracts/activity.ts` | Local observation schemas, visit correlation, sampled foreground dwell, snapshot changes and redaction; no IO |
+| Core Items | `context/store/index.ts` | Identity, validation, state transitions, evidence projections; `worldHistoryQuery` and `worldHistoryPage` own shared history filtering and bounded retrieval; `contextReader` and `contextWriter` are the one way in to every Context domain, with its envelope and one search across kinds ([one way in](../context/store/STORAGE.md#one-way-in)) |
+| Core Context | `context/connectors/index.ts` | Source context, validation, schema and layout; Service sync snapshots, the saved Service context search (`world_context`) and selected Notion pages |
+| Core Companion / Agent | `agent/companion/index.ts`, `agent/gate/index.ts` | Portable memory/history, guidance, model freshness and response classification |
+| Core Browser / Tools | `agent/applets/index.ts`, `agent/gate/index.ts` | Browser action policy and declared tools; no browser IO |
+| Core Onboarding / Diagnostics | `agent/companion/index.ts`, `agent/app/index.ts` | Setup transitions and allowlisted diagnostic projection |
 | Platform UI bridge | `platform/bridge/host.ts`, `contracts/platform.ts` | One trusted Host transport; capability discovery |
 | Platform Store / ledger | Host-facing Store domain operations; ledger transactions stay internal to domain adapters | Authorization, atomic claims, output writes, delivery acknowledgement and persistence |
 | Platform browser | World browser gateway; `platform/browser/README.md` | Selected-page IO, consent, confirmations, cancellation and receipts |
-| Platform Agent adapter | `AgentRuntime` (`platform/electron/src/host/services.ts`) / executable protocol, `contracts/agent.ts` | Process lifecycle, protocol negotiation, cancellation and event validation |
+| Platform Agent adapter | `AgentRuntime` (`platform/host/services.ts`) / executable protocol, `contracts/agent.ts` | Process lifecycle, protocol negotiation, cancellation and event validation |
 | Harness | Agent descriptor + supported operations | Planning and backend-specific execution; no UI/private ledger access |
 | Model service | HTTP model API and access/usage operations | Inference access, quota/accounting; no World/Applet policy |
 
 ### Browser component implementation map
 
-The [component diagram](../docs/architecture.html) shows logical component groups,
+The [component diagram](../docs/four-layers.svg) shows logical component groups,
 public entry points, and browser/journal execution paths. UI and Core components
 have checked public module boundaries. Host modules below live inside the one Electron
-project, not separately packaged libraries. Paths are under `platform/electron/src/`.
+project, not separately packaged libraries. Paths are under `platform/desktop/src/`.
 
 | Component | Shared owner / interface | Electron effect adapter |
 | --- | --- | --- |
-| Page presentation | `ui/browser/index.ts`, `contracts/browser-surface.ts` | `modules/browser/device.ts` (panel, layout), `page.ts` (website `WebContentsView`), `surface.ts` (session partitions) |
-| [Page resume](../platform/browser/INTEGRATION.md#resuming-a-website-applet) | `core/browser/page-resume.ts`, `platform/bridge/media-hold.js` | `device.ts` keeps, shows and releases pages as `live` lists; kept pages are hidden, muted and media-held |
-| [Picture in picture](../platform/browser/INTEGRATION.md#picture-in-picture) | `core/browser/picture-in-picture.ts`, `ui/browser/picture-in-picture.ts`, `platform/bridge/picture-in-picture.js` | `device.ts` places the page as `browserPip` says and lays a transparent press view over it to report a press; Chromium's `AudioFocusEnforcement` (enabled in `main.ts`) keeps one page playing sound |
-| Browser action decisions | `core/browser/index.ts`, `core/tools/index.ts` | `device.ts` executes shared decisions |
-| Element interaction | Bundled upstream `agent-browser`; `platform/browser/agent_browser.py` transport | `modules/browser/agent.ts` (driver process), `page.ts` (agent CDP transport) |
+| Page presentation | `ui/applets/index.ts`, `contracts/browser-surface.ts` | `modules/applets/device.ts` (panel, layout), `page.ts` (website `WebContentsView`), `surface.ts` (session partitions) |
+| [Page resume](../platform/browser/INTEGRATION.md#resuming-a-website-applet) | `agent/applets/page-resume.ts`, `platform/bridge/media-hold.js` | `device.ts` keeps, shows and releases pages as `live` lists; kept pages are hidden, muted and media-held |
+| [Picture in picture](../platform/browser/INTEGRATION.md#picture-in-picture) | `agent/applets/picture-in-picture.ts`, `ui/applets/picture-in-picture.ts`, `platform/bridge/picture-in-picture.js` | `device.ts` places the page as `browserPip` says and lays a transparent press view over it to report a press; Chromium's `AudioFocusEnforcement` (enabled in `main.ts`) keeps one page playing sound |
+| Browser action decisions | `agent/applets/index.ts`, `agent/gate/index.ts` | `device.ts` executes shared decisions |
+| Element interaction | Bundled upstream `agent-browser`; `platform/browser/agent_browser.py` transport | `modules/applets/agent.ts` (driver process), `page.ts` (agent CDP transport) |
 | Selected-target CDP | Private commands/events; no browser-wide access | `page.ts` through `webContents.debugger`; `Target.*`/`Browser.*` refused |
 | World semantic actions | `contracts/ui.ts`, `window.worldletUI.snapshot/dispatch` | Trusted World view (`world/window.ts`) |
-| Headless Core execution | Serialized operations in `core/index.ts` | `core.ts`, in-process |
-| Durable execution | `contracts/execution.ts`, `core/items/index.ts` | `store/ledger.ts`, `modules/agent-runtime/journal.ts` |
+| Headless Core execution | Serialized operations in `agent/index.ts` | `core.ts`, in-process |
+| Durable execution | `contracts/execution.ts`, `context/store/index.ts` | `store/ledger.ts`, `modules/companion/agent/journal.ts` |
 
 Chromium paints pages; Electron embeds it. CDP controls the selected page;
 agent-browser interprets website elements and executes interactions through that
@@ -250,7 +250,7 @@ and SQLite effects belong to Platform.
 
 TypeScript production callers outside a Core component import its `index.ts`.
 Implementation modules are private to that component. The serialized composition
-root remains `core/index.ts`; the host's `core.ts` consumes its named operations
+root is `agent/index.ts`; the host's `core.ts` consumes its named operations
 through `invoke`, not Core implementation files. `contracts/`
 remains dependency-free. White-box fixtures may directly test implementation files.
 
@@ -283,13 +283,13 @@ entry is an explicit supported surface, not permission to bypass host grants.
 | `ui/applets/index.ts` | Applet views and specialized content panels |
 | `ui/companion/index.ts` | Fox conversation, history, review and companion presentation |
 | `ui/attention/index.ts` | Attention presentation, markers, copy and preview |
-| `ui/browser/index.ts` | Embedded page panel and outcome inspection UI |
-| `ui/onboarding/index.ts` | Setup, arrival and introductory presentation |
-| `ui/components/index.ts` | Visual primitives, styles, typography and reader controls |
-| `ui/hud/index.ts` | Desktop-app HUD composition |
-| `ui/shell/index.ts` | World UI assembly, audio integration and shared UI analytics hooks |
-| `ui/practice/index.ts` | Fictional demo presentation |
-| `ui/distribution/index.ts` | Download metadata and version presentation |
+| `ui/applets/index.ts` | Embedded page panel and outcome inspection UI |
+| `ui/frame/shell.ts` | Setup, arrival and introductory presentation |
+| `ui/style/index.ts` | Visual primitives, styles, typography and reader controls |
+| `ui/world/index.ts` | Desktop-app HUD composition |
+| `ui/frame/shell.ts` | World UI assembly, audio integration and shared UI analytics hooks |
+| `ui/applets/index.ts` | Fictional demo presentation |
+| `ui/frame/shell.ts` | Download metadata and version presentation |
 
 Keep exported contracts close to their owner. Host requests still use the
 Platform bridge; domain rules still use Core public entry points. Do not import
@@ -314,7 +314,7 @@ bounded projections; explicit original reads preserve full content. Shared item
 and presentation contracts reject unsupported state transitions and malformed data.
 
 <a id="architecture-audit"></a>
-## Five-layer architecture audit
+## Architecture audit
 
 <a id="architecture-audit-checklist-for-every-audit"></a>
 ### Checklist and current status
@@ -333,12 +333,12 @@ record concrete exceptions and required device checks in its issue/PR.
 
 ### Activity boundary and coverage
 
-`core/activity/index.ts` exposes `activityEvent`, `activityObserve` and
-`activityURL`. `ActivityRecorder` (`platform/electron/src/modules/browser/activity.ts`)
+`context/applets/activity.ts` exposes `activityEvent`, `activityObserve` and
+`activityURL`. `ActivityRecorder` (`platform/host/modules/applets/activity.ts`)
 is the only browser activity persistence adapter; the website panel (`device.ts`)
 supplies page/focus/clock facts, and website page views (`page.ts`) never open the
 ledger. Trusted World clicks/semantic commands use `platform/bridge/activity.ts` and
-Host `worldActivity` (`modules/world.ts`), then a Store operation (`WorldStore.recordActivity`). The window coordinator cannot write the
+Host `worldActivity` (`modules/world/world.ts`), then a Store operation (`WorldStore.recordActivity`). The window coordinator cannot write the
 ledger. Component checks enforce those call boundaries.
 
 `platform/bridge/activity-collector.js` is the shared DOM collector. The resource
@@ -386,12 +386,12 @@ they do not certify the shipped website view, real SQLite under load, real accou
 or abrupt process termination. Recording is not lossless: DOM changes immediately
 before a close can miss the three-second poll.
 
-Conversation evidence uses `core/items.conversationEntries` and the host's
-conversation journal (`platform/electron/src/modules/fox/companion.ts`). It is written at the World/Harness boundary
+Conversation evidence uses `context/store.conversationEntries` and the host's
+conversation journal (`platform/host/modules/companion/companion.ts`). It is written at the World/Harness boundary
 before request delivery and before streamed text reaches UI. The selected Harness
 cannot disable this journal. The portable Companion archive remains a view of
 completed visible messages; interrupted streams live in the World ledger.
 
 ## Theme packages
 
-`ui/theme-packages/index.ts` is the generated registry of the static packages copied by `theme:import`, one directory per theme. A package is pictures, sounds, fonts and JSON; it holds no code, host data or native IO, and the host reads it through `ui/themes/index.ts`. See the [build theme contract](../resources/themes/CONTRACT.md).
+`ui/style/theme-packages/index.ts` is the generated registry of the static packages copied by `theme:import`, one directory per theme. A package is pictures, sounds, fonts and JSON; it holds no code, host data or native IO, and the host reads it through `ui/style/themes/index.ts`. See the [build theme contract](../resources/themes/CONTRACT.md).

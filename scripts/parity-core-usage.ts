@@ -6,14 +6,14 @@ import assert from 'node:assert/strict';
 import {readdirSync,readFileSync} from 'node:fs';
 import path from 'node:path';
 const baselineFile='contracts/fixtures/parity/host-core-usage.json';
-const operations=new Set([...readFileSync('core/index.ts','utf8').matchAll(/operation==='([A-Za-z]+)'/g)].map(match=>match[1]));
+const operations=new Set([...readFileSync('agent/index.ts','utf8').matchAll(/operation==='([A-Za-z]+)'/g)].map(match=>match[1]));
 const sources=(dir:string):string[]=>readdirSync(dir,{withFileTypes:true}).flatMap(entry=>{
  const file=path.join(dir,entry.name);
  if(entry.isDirectory())return sources(file);
  return entry.name.endsWith('.ts')&&entry.name!=='check.ts'?[file]:[];
 });
 // Operation names are the string literals in the first argument of core(…)/coreEnvelope(…), ternaries included.
-const used=new Set(sources('platform/electron/src').flatMap(file=>[...readFileSync(file,'utf8').matchAll(/\b(?:core|coreEnvelope)(?:<[^>()]*>)?\(([^,)]*)/g)]
+const used=new Set(['platform/host','platform/desktop/src'].flatMap(sources).flatMap(file=>[...readFileSync(file,'utf8').matchAll(/\b(?:core|coreEnvelope)(?:<[^>()]*>)?\(([^,)]*)/g)]
  .flatMap(call=>[...call[1].matchAll(/['"`]([A-Za-z]+)['"`]/g)].map(match=>match[1]))).filter(name=>operations.has(name)));
 const baseline=JSON.parse(readFileSync(baselineFile,'utf8')) as {operations:string[];electronPending:string[];electronShared:Record<string,string>};
 assert.deepEqual(baseline.operations.filter(name=>!operations.has(name)),[],`Core no longer defines these operations; remove them from ${baselineFile}`);

@@ -1,4 +1,4 @@
-// Cloudflare as a Worldlet Service, read only (contracts/services.ts, core/accounts/services/cloudflare.ts,
+// Cloudflare as a Worldlet Service, read only (contracts/services.ts, context/connectors/services/cloudflare.ts,
 // service-source.ts, `read_service`): against a fixture of Cloudflare's API, a pasted API token is checked with one
 // GraphQL read for the account ID given before it is kept, and a refused one replaces nothing; `read` runs only the
 // fixed reports (Workers invocations and errors, requests per zone, over the last 24 hours), bounded; requests go only
@@ -8,14 +8,14 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {CLOUDFLARE_LIMITS,readCloudflare} from '../core/accounts/index.ts';
-import {channelDefaultGrants,standingActions,standingCallDecision} from '../core/agent/grants.ts';
-import {turnTrustObserve} from '../core/agent/turn-trust.ts';
-import {worldActionOf,worldActions} from '../core/tools/gateway.ts';
-import {APP_DEFINITIONS,SOURCE_PROVIDERS,TOKEN_PROVIDERS,connectSettings,connectToken} from '../core/applets/index.ts';
-import {validateAppletRuntimes} from '../core/applets/runtime.ts';
-import {ExecutionJournal} from '../platform/electron/src/modules/agent-runtime/journal.ts';
-import {ServiceSource,ServiceSourceAccess,ServiceSourceConnections} from '../platform/electron/src/modules/sources/service-source.ts';
+import {CLOUDFLARE_LIMITS,readCloudflare} from '../context/connectors/index.ts';
+import {channelDefaultGrants,standingActions,standingCallDecision} from '../agent/gate/grants.ts';
+import {turnTrustObserve} from '../agent/gate/turn-trust.ts';
+import {worldActionOf,worldActions} from '../agent/gate/gateway.ts';
+import {APP_DEFINITIONS,SOURCE_PROVIDERS,TOKEN_PROVIDERS,connectSettings,connectToken} from '../context/applets/index.ts';
+import {validateAppletRuntimes} from '../context/applets/runtime.ts';
+import {ExecutionJournal} from '../platform/host/modules/companion/agent/journal.ts';
+import {ServiceSource,ServiceSourceAccess,ServiceSourceConnections} from '../platform/host/modules/connectors/service-source.ts';
 import {withTempDir} from './test-temp.ts';
 
 const TOKEN='Fixture_'+'cf1'.repeat(11);

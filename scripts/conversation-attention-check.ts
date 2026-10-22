@@ -1,17 +1,17 @@
 // Brought conversations as Attention context, and a large Hermes Agent history brought by time (owner request
-// 2026-10-06): core/tasks/attention.ts rules, the Hermes reader's recent and older windows, the background run that
+// 2026-10-06): agent/tasks/attention.ts rules, the Hermes reader's recent and older windows, the background run that
 // brings the older part, and its World log lines. Fixture data only; no model or real account.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
-import {CONVERSATION_ATTENTION,conversationAttentionId,conversationObservation,conversationOriginal,conversationsForAttention,validConversationAttentionId} from '../core/tasks/index.ts';
-import {worldLogLines} from '../core/activity/index.ts';
-import {HERMES_OLDER,HERMES_RECENT,readOlderHermes,readOwnHermes} from '../platform/electron/src/modules/agent-runtime/agent-files.ts';
-import {createOlderHistory} from '../platform/electron/src/modules/fox/older-history.ts';
-import {broughtConversations} from '../platform/electron/src/modules/fox/migration.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {CONVERSATION_ATTENTION,conversationAttentionId,conversationObservation,conversationOriginal,conversationsForAttention,validConversationAttentionId} from '../agent/tasks/index.ts';
+import {worldLogLines} from '../context/applets/index.ts';
+import {HERMES_OLDER,HERMES_RECENT,readOlderHermes,readOwnHermes} from '../platform/host/modules/companion/agent/agent-files.ts';
+import {createOlderHistory} from '../platform/host/modules/companion/older-history.ts';
+import {broughtConversations} from '../platform/host/modules/companion/migration.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
 
 const DAY=86_400,now=Date.parse('2026-10-06T20:00:00Z')/1000;
 const ago=(days:number)=>new Date((now-days*DAY)*1000).toISOString().replace(/\.\d+Z$/,'Z');

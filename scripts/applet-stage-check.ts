@@ -1,7 +1,7 @@
 // Home’s four core Applets unfold authorized records in painted Open installations.
 import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
-import {WORLD_APPS} from '../core/applets/catalog.ts';
+import {WORLD_APPS} from '../context/applets/catalog.ts';
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'}),errors=pageErrors(page);
  page.setDefaultTimeout(20000);

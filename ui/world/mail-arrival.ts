@@ -1,4 +1,4 @@
-import {ACTIVE_THEME,activeBuildTheme,createThemeEvents,playThemeSound} from '../themes/index.ts';
+import {ACTIVE_THEME,activeBuildTheme,createThemeEvents,playThemeSound} from '../style/index.ts';
 
 /** One cue for a batch of new letters: the theme's `mail.received` event, its sound and, inside Mail, the room's delivery. Opening Mail never calls this. */
 export function createMailArrival(room:()=>boolean=()=>false){

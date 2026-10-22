@@ -1,0 +1,440 @@
+import {defaultBrowserText,displayReleaseVersion,loginItemText} from '../../agent/app/index.ts';
+import {createPanelGuide} from './panel-guide.ts';
+import {modelHealthView,type ModelFix} from './model-health.ts';
+import {showAgentPermissions} from './agent-permissions.ts';
+import {agentIcon,showAgentAccess,showOwnAgentMay,type OwnAgent} from './agent-access.ts';
+import {showWorldAddress} from './world-address.ts';
+import {showWorldContext} from './world-context-page.ts';
+import {showAgentRoutines} from './agent-routines.ts';
+import {showAgentMemory} from './agent-memory.ts';
+import {showConnectors} from './connectors-page.ts';
+import {agentEl as el} from './agent-change.ts';
+import {settingsIcon,settingsRow,settingsSwitch} from './settings-rows.ts';
+
+/** What the World view lends Settings: the sample world switch and which host features exist. */
+export type CompanionSettingsHost={toggleSample?:()=>Promise<unknown>;sample:()=>boolean;localDataDeletion:()=>boolean};
+/** The companion pages that are sections of their own in the one list: Fox's profile and Phone. */
+export type CompanionSettingsPages={fox:HTMLElement;phone:HTMLElement;/** What Fox itself knows, shown first in Context › Memory. */knows:HTMLElement};
+/** `minor`: below the three areas, smaller. `show` gets the part to open, if one was named. */
+type Item={id:string;label:string;hint:string;/** Its line icon in the list (ui/style/primitives/icons.ts). */icon:string;page?:boolean;minor?:boolean;/** Not on the list: opened another way. */hidden?:boolean;show:(detail:HTMLElement,part:string)=>void|Promise<void>};
+
+const MODEL_EVENTS=['worldlet:model-changed','worldlet:model-refresh'];
+// Settings is three areas, Connectors, Agents and Context, with Fox, Phone and General below them (issue #674; Help
+// joined General, owner request 2026-10-22).
+// Entry points that name a section or part Settings no longer has open the area that took it in, at its part: `model`
+// (what Fox runs on) and the standing rules (`approvals`, `permissions`) are parts of your own Agent's page under Agents;
+// `access` (the board's empty state opens it) is the list of Agents; `memory` is in Your data; Accounts became Services;
+// Skills went with Advanced (owner request 2026-10-22), so `skills` opens your own Agent's page.
+const MOVED:Record<string,{section:string;part:string}>={integrations:{section:'connectors',part:''},accounts:{section:'connectors',part:''},skills:{section:'agents',part:'model'},
+ model:{section:'agents',part:'model'},approvals:{section:'agents',part:'permissions'},permissions:{section:'agents',part:'permissions'},
+ access:{section:'agents',part:'access'},memory:{section:'context',part:'memory'},
+ help:{section:'general',part:''},browser:{section:'context',part:''}};
+/** The parts of your own Agent's page (Agents › Your Agent); any other part of Agents is on its list. */
+const OWN_PARTS=['model','routines','permissions','may'];
+
+/** The whole companion panel is one settings window (owner request 2026-10-10): one list of sections on the left, the
+ * chosen section's details on the right, no tabs. Everything finishes here; nothing hands off to Fox's speech bubble. */
+export function createCompanionSettings({call,host,pages,records,onShow,close,openFeedback,replayTutorial}:{call:(action:string,body?:any)=>Promise<any>;host:()=>CompanionSettingsHost|undefined;pages:CompanionSettingsPages;records:{records:HTMLElement;showRecords:()=>void};onShow:(id:string)=>void;close:()=>void;
+ /** General's Send feedback: the feedback panel over the World. */
+ openFeedback:()=>void;
+ /** General's Show the tutorial: Settings closes and the World's tour plays again. */
+ replayTutorial:()=>void}){
+ const element=el('section','companion-info-section companion-settings');element.dataset.section='Settings';
+ const list=el('nav','companion-settings-list'),detail=el('div','companion-settings-detail');
+ list.setAttribute('aria-label','Settings');detail.setAttribute('aria-live','polite');
+ // The list scrolls on short windows; the version line under it stays in view.
+ const side=el('div','companion-settings-side');side.append(list);
+ element.append(side,detail);
+ const guide=createPanelGuide();
+  let selected='',ticket=0;
+ // Run when the page on show is left, so its window listeners go with it.
+ const leaving:(()=>void)[]=[];
+ const note=(text:string)=>el('p','companion-info-note',text);
+ const subhead=(text:string)=>el('h5','companion-settings-subhead',text);
+ const modelRefresh=()=>window.dispatchEvent(new Event('worldlet:model-refresh'));
+ const status=()=>{const s=el('p','companion-settings-status');s.setAttribute('role','status');return s;};
+ function action(label:string,run:(b:HTMLButtonElement)=>Promise<unknown>|void,{primary=false,id=''}={}){
+  const b=el('button','companion-info-action'+(primary?' primary':''),label) as HTMLButtonElement;b.type='button';if(id)b.dataset.action=id;
+  b.onclick=async()=>{if(b.disabled)return;b.disabled=true;try{await run(b);}finally{if(b.isConnected)b.disabled=false;}};
+  return b;
+ }
+ const browserCommand=(operation:string,args:any={})=>call('browserCommand',{operation,args,agent:false});
+ // Saved passwords of the built-in browser (agent/applets/saved-logins.ts, owner request 2026-10-07): each site and
+ // account, never the password, with Delete. A host that keeps none (the practice world, no keychain) leaves it out.
+ async function savedLogins(target:HTMLElement){
+  const turn=ticket,command=browserCommand;
+  const box=el('div','companion-settings-logins'),said=status();
+  async function draw(){
+   const listed=await command('logins').catch(()=>null);if(turn!==ticket)return;
+   if(!listed?.available||!Array.isArray(listed.logins)){box.remove();return;}
+   const rows=el('div','companion-settings-rows');
+   for(const login of listed.logins as {site:string;username:string}[]){
+    const row=el('div','companion-settings-row'),words=el('div');row.dataset.site=login.site;
+    words.append(el('strong','',login.site),el('span','',login.username||'No username'));
+    row.append(words,action('Delete',async()=>{said.textContent='';try{await command('loginDelete',{site:login.site,username:login.username});await draw();said.textContent='Deleted the password for '+login.site+'.';}catch(e){said.textContent='Could not delete: '+((e as Error).message||'try again.');}},{id:'delete-login'}));
+    rows.append(row);
+   }
+   box.replaceChildren(subhead('Saved passwords'),
+    note(listed.logins.length?'Kept on this computer, locked with your system keychain. Fox never sees them.':'After you sign in to a website in the Browser, Worldlet offers to save the password and fills it in next time.'),rows,said);
+  }
+  target.append(box);await draw();
+ }
+ // What the built-in browser recorded (agent/applets/web-record.ts): how many sites, and deleting one
+ // site's or all of them. Each delete asks again here, in the page; nothing is deleted until confirmed.
+ // Hosts without recordings answer with an error and the section stays away.
+ async function recordings(target:HTMLElement){
+  const turn=ticket,command=browserCommand;
+  const box=el('div','companion-settings-recordings'),said=status();
+  let sites:{site:string;visits:number}[]=[];
+  const confirmRow=(question:string,label:string,run:()=>Promise<void>)=>{
+   const row=el('div','companion-settings-confirm');row.setAttribute('role','group');row.setAttribute('aria-label',question);
+   row.append(el('span','',question),action(label,async()=>{said.textContent='';try{await run();}catch(e){said.textContent='Could not delete: '+((e as Error).message||'try again.');}},{primary:true,id:'confirm-delete-recordings'}),action('Keep',()=>void draw()));
+   return row;
+  };
+  const deleted=async(args:any,where:string)=>{const result=await command('deleteRecordings',args);await draw();said.textContent=result?.deleted?'Deleted '+result.deleted+' '+(result.deleted===1?'visit':'visits')+where+'.':'Nothing was left to delete.';};
+  async function draw(stage:''|'site'|'all'=''){
+   const listed=await command('recordings').catch(()=>null);if(turn!==ticket)return;
+   if(!listed||!Array.isArray(listed.sites)){box.remove();return;}
+   sites=listed.sites;const visits=sites.reduce((sum,s)=>sum+s.visits,0);
+   const summary=el('div','companion-settings-row'),words=el('div');
+   words.append(el('strong','',sites.length?sites.length+' '+(sites.length===1?'site':'sites'):'Nothing recorded'),el('span','',sites.length?visits+' '+(visits===1?'visit':'visits'):'Pages you visit in Worldlet’s browser show up here.'));
+   summary.append(words);
+   if(sites.length&&!stage)summary.append(action('Delete for a site…',()=>void draw('site'),{id:'delete-site-recordings'}),action('Delete all',()=>void draw('all'),{id:'delete-all-recordings'}));
+   box.replaceChildren(subhead('Browsing recordings'),note('What you see and do in Worldlet’s browser is kept so Fox can find it later. Network data goes after 30 days; page text, typing and clicks stay until you delete them.'),summary);
+   if(stage==='site'&&sites.length){
+    const choose=el('select','companion-settings-select') as HTMLSelectElement;choose.setAttribute('aria-label','Site');
+    for(const s of sites)choose.append(Object.assign(document.createElement('option'),{value:s.site,textContent:s.site+' · '+s.visits+' '+(s.visits===1?'visit':'visits')}));
+    const ask=el('div');
+    const question=()=>ask.replaceChildren(confirmRow('Delete everything recorded on '+choose.value+'? This can’t be undone.','Delete',()=>deleted({site:choose.value},' from '+choose.value)));
+    choose.onchange=question;question();
+    box.append(choose,ask);
+   }
+   if(stage==='all'&&sites.length)box.append(confirmRow('Delete everything recorded on '+(sites.length===1?sites[0].site:'all '+sites.length+' sites')+'? This can’t be undone.','Delete all',()=>deleted({all:true},'')));
+  }
+  target.append(box,said);
+  await draw();
+ }
+ // Updates are one row: the version, what the updater is doing, and Check for updates. The channel follows the
+ // download (owner request 2026-10-22: nothing to switch in Settings); the version line under the list names it.
+ async function updates(box:HTMLElement){
+  const turn=ticket,said=status();
+  let state=await call('appUpdate',{operation:'status'});if(turn!==ticket)return;
+  const line=el('span',''),title=el('strong','');
+  const check=action('Check for updates',async()=>{said.textContent='Checking…';try{state=await call('appUpdate',{operation:'check'});said.textContent='';draw();}catch(e){said.textContent=(e as Error).message||'Could not check for updates.';}},{id:'check-updates'});
+  box.replaceChildren(settingsRow({icon:{icon:'download'},title,line,controls:[check],setting:'updates'}));
+  const draw=()=>{
+   const installed=state?.installed?.build?['Worldlet',displayReleaseVersion(state.installed.version||'',state.installed.build)].filter(Boolean).join(' '):'';
+   title.textContent=installed||'Updates';
+   const doing=['checking','downloading','preparing','current','available','ready','error','installing'].includes(state?.state)?(state.detail||state.label||''):'';
+   line.textContent=doing||'Worldlet updates itself.';
+  };
+  const changed=(event:Event)=>{if(turn!==ticket||!box.isConnected){window.removeEventListener('worldlet:app-update',changed);return;}state={...state,...(event as CustomEvent).detail};draw();};
+  window.addEventListener('worldlet:app-update',changed);leaving.push(()=>window.removeEventListener('worldlet:app-update',changed));
+  draw();
+  box.after(said);
+ }
+ const restartFox=async(said:HTMLElement)=>{said.textContent='Restarting Fox…';try{await call('restartFox');window.location.reload();}catch(e){said.textContent='Could not restart: '+((e as Error).message||'reopen Worldlet and try again.');}};
+ // The model Fox thinks with (owner request 2026-10-05). Worldlet provides none: it is the person's Agent, answering
+ // on its own sign-in with the provider chosen below.
+ // This is the one place to connect it and to see and fix what is wrong with it (owner request 2026-10-06):
+ // which path is in use, its model, the last reply's problem in plain words, and the fix for it.
+ async function ownAgentPage(target:HTMLElement){
+  const turn=ticket,said=status(),now=el('div','companion-settings-row has-icon companion-settings-model-now'),words=el('div'),fixes=el('span','companion-settings-actions'),agents=el('div','companion-settings-rows'),providers=el('div','companion-settings-rows');
+  // The Agents on this computer to switch to, under the status, nothing folded (owner requests 2026-10-21 and
+  // 2026-10-22); the providers only while the Agent needs signing in to one.
+  const choose=el('div','companion-settings-choose-agent');choose.dataset.chooseAgent='';choose.append(agents);
+  let needsSignIn=false;
+  let icon=settingsIcon({icon:'people'});
+  now.append(icon,words,fixes);
+  // Signing in happens in the Agent itself, from its provider list below (Worldlet sets nothing up under the Agent).
+  const fixButton=(fix:ModelFix)=>fix==='connect'?action('Sign in to a provider',async()=>{
+    if(!providers.childElementCount){said.textContent='Sign in to a provider in your Agent itself, then choose Check connection.';return;}
+    providers.scrollIntoView({block:'nearest'});(providers.querySelector('button') as HTMLButtonElement|null)?.focus();
+   },{primary:true,id:'fix-connect'})
+   :action('Restart Fox',()=>restartFox(said),{primary:true,id:'fix-restart'});
+  // The provider the Agent in use answers with (agent/gate/model-providers.ts, owner decisions 2026-10-10): only a
+  // provider is chosen, never a model; each maps to small, balanced and large models and Fox's turns use the balanced
+  // one. Every provider the Agent supports is listed, signed in or not; signing in happens in the Agent itself. Shown only
+  // while the Agent needs signing in: otherwise it answers with its own setting, and nothing is to choose.
+  const drawProviders=async()=>{
+   if(!needsSignIn){providers.replaceChildren();return;}
+   const found=await call('agentHarness',{operation:'providers'}).catch(()=>null);
+   if(turn!==ticket)return;
+   providers.replaceChildren();
+   const list=Array.isArray(found?.providers)?found.providers.filter((p:any)=>typeof p?.id==='string'&&typeof p?.name==='string'):[];
+   if(typeof found?.agent!=='string'||!list.length)return;
+   const title=typeof found.title==='string'?found.title:'your Agent',chosen=typeof found.chosen==='string'?found.chosen:null;
+   const choose=(id:string|null,name:string)=>async()=>{
+    said.textContent='';
+    try{await call('agentHarness',{operation:'provider',id});modelRefresh();said.textContent=id?`Fox now answers with ${name}.`:`Fox now answers with ${title}’s own setting.`;await drawProviders();}
+    catch(e){said.textContent=(e as Error).message||'Could not change the provider.';}
+   };
+   providers.append(subhead('Provider'));
+   const own=el('div','companion-settings-row'),ownText=el('div');own.dataset.provider='own';
+   ownText.append(el('strong','',`${title}’s own setting`+(chosen===null?' · In use':'')),el('span','',`Whatever ${title} is set to use.`));
+   own.append(ownText,...chosen===null?[]:[action('Use',choose(null,title),{id:'provider-own'})]);providers.append(own);
+   for(const p of list){
+    const row=el('div','companion-settings-row'),text=el('div'),on=chosen===p.id,signedOut=p.signedIn===false;row.dataset.provider=p.id;
+    text.append(el('strong','',p.name+(on?' · In use':'')),el('span','',signedOut?`Not signed in to it in ${title} yet.`:typeof p.account==='string'?p.account:''));
+    const button=signedOut?p.signIn===true?action('Sign in',async()=>{
+     // Claude Code signs in in the browser with Worldlet running it (`background`); the others open in Terminal.
+     said.textContent=found.agent==='claude-code'?`Approve the sign-in to ${p.name} in your browser.`:`${title} opens in Terminal to sign in to ${p.name}. When it is done, choose Check connection.`;
+     try{const result=await call('agentHarness',{operation:'provider-sign-in',id:p.id});if(result?.background){said.textContent=`${title} is signed in to ${p.name}.`;modelRefresh();await drawProviders();}}
+     catch(e){said.textContent=(e as Error).message||'Could not open the sign-in.';}
+    },{id:'sign-in-'+p.id}):null:on?null:action('Use',choose(p.id,p.name),{id:'provider-'+p.id});
+    row.append(text,...button?[button]:signedOut?[el('span','companion-settings-quiet',`Sign in to it in ${title}.`)]:[]);
+    providers.append(row);
+   }
+  };
+  // Stop using the Agent in use: Fox goes back to its own model connection.
+  const stopUsing=(working:string,id:string)=>action('Stop using',async()=>{
+   said.textContent=working;
+   try{await call('agentHarness',{operation:'clear'});modelRefresh();said.textContent='';await draw();}
+   catch(e){said.textContent=(e as Error).message||'Could not switch.';}
+  },{id});
+  const draw=async()=>{
+   const [health,found]=await Promise.all([call('modelHealth').catch(()=>null),call('agentHarness',{operation:'detect'}).catch(()=>null)]);
+   if(turn!==ticket)return;
+   const list=Array.isArray(found?.agents)?found.agents.filter((a:any)=>typeof a?.id==='string'&&typeof a?.title==='string'):[];
+   const inUse=typeof found?.selected==='string'?found.selected:null;
+   const view=modelHealthView(health,list.find((a:any)=>a.id===inUse)?.title??null);
+   now.dataset.state=view.state==='ok'?'ready':view.state;now.dataset.path=view.path;
+   needsSignIn=view.state!=='ok'&&view.fixes.includes('connect');void drawProviders();
+   words.replaceChildren(el('strong',view.state==='ok'?'companion-settings-ok':'',view.title),el('span','',view.detail),...view.problem?[el('span','companion-settings-model-problem',view.problem)]:[]);
+   fixes.replaceChildren(...view.fixes.map(fixButton),
+    action('Check connection',async()=>{said.textContent='Checking…';await draw();said.textContent='Checked just now.';},{id:'check-model'}));
+   agents.replaceChildren();
+   if(list.length)agents.append(subhead('Agents on this computer'));
+   for(const agent of list){
+    const using=inUse===agent.id,row=el('div','companion-settings-row'),text=el('div');row.dataset.agent=agent.id;
+    text.append(el('strong','',agent.title+(using?' · In use':'')),el('span','',agent.id==='codex'?(agent.model===false?'Sign in to Codex on this computer first.':'Your ChatGPT plan through Codex.'):agent.memory?.model?'Runs on its own API key.':'Answers for Fox on its own sign-in.'),
+     // What the Agent can do beyond World tools, which Fox offers in conversation (its own tools, under its own approvals).
+     ...using&&typeof agent.canAlso==='string'&&agent.canAlso?[el('span','companion-settings-quiet',agent.canAlso)]:[]);
+    // Older than Worldlet works with (agent/gate/agent-versions.ts): its own update command opens in Terminal instead of
+    // Use; Worldlet never updates it by itself. Check again reads its version afresh.
+    const version=agent.version&&typeof agent.version==='object'?agent.version:null,old=version?.outdated===true;
+    if(old)text.append(el('span','companion-settings-model-problem',`Version ${version.current} is too old. Worldlet needs ${version.minimum} or newer.`),...version.update?[]:[el('span','companion-settings-quiet',String(version.howTo||''))]);
+    const update=old&&version.update?action('Update',async()=>{
+     said.textContent=`${agent.title} opens in Terminal to update. When it is done, choose Check again.`;
+     try{await call('agentHarness',{operation:'update',id:agent.id});}catch(e){said.textContent=(e as Error).message||'Could not open the update.';}
+    },{primary:true,id:'update-'+agent.id}):null;
+    const recheck=old?action('Check again',async()=>{said.textContent='Checking…';await call('agentHarness',{operation:'detect',fresh:true}).catch(()=>null);said.textContent='';await draw();},{id:'recheck-'+agent.id}):null;
+    const b=using?stopUsing('Fox goes back to its own model connection…','stop-'+agent.id):action('Use',async()=>{
+     said.textContent='Switching to '+agent.title+'…';
+     try{
+      await call('agentHarness',{operation:'select',id:agent.id});
+      if(agent.memory)await call('localAgent',{operation:'adopt',id:agent.id});
+      await call('agentIntegrations',{operation:'port',id:agent.id}).catch(()=>null);
+      modelRefresh();said.textContent='';await draw();
+     }catch(e){said.textContent=(e as Error).message||'Could not switch.';}
+    },{id:'use-'+agent.id});
+    row.append(text,...update?[update]:[],...recheck?[recheck]:[],...using||!old?[b]:[]);agents.append(row);
+   }
+   // A Hermes Agent whose command does not start (a half-finished install) is not offered to Use; Install again runs the
+   // official installer, which repairs it, then chooses it (Windows Beta 4384, 2026-10-13: it stayed chosen, and every
+   // background turn failed on it).
+   if(found?.brokenHermes===true){
+    if(!list.length)agents.append(subhead('Agents on this computer'));
+    const row=el('div','companion-settings-row'),text=el('div');row.dataset.agent='hermes';
+    text.append(el('strong','','Hermes Agent'+(inUse==='hermes'?' · In use':'')),el('span','companion-settings-model-problem','It is on this computer but does not start. Install again sets it up the official way.'));
+    row.append(text,action('Install again',async()=>{
+     said.textContent='Installing Hermes Agent again. This takes a few minutes…';
+     try{await call('agentHarness',{operation:'install-hermes'});await call('agentHarness',{operation:'select',id:'hermes'});modelRefresh();said.textContent='';await draw();}
+     catch(e){said.textContent=(e as Error).message||'Could not install Hermes Agent.';}
+    },{primary:true,id:'reinstall-hermes'}));
+    agents.append(row);
+   }
+   // The provider of the Agent in use comes right under the Agents here.
+   agents.append(providers);
+  };
+  // The connection steps open under the buttons; a new connection redraws what Fox runs on.
+  const changed=()=>{if(turn!==ticket||!target.isConnected){for(const name of MODEL_EVENTS)window.removeEventListener(name,changed);return;}void draw();};
+  for(const name of MODEL_EVENTS)window.addEventListener(name,changed);
+  // Your Agent's page (owner decisions 2026-10-11, 2026-10-21 and 2026-10-22, issue #674): its status first (what Fox runs
+  // on, and the Agents on this computer to switch to), then Scheduled (the same jobs as the Task panel's), then what it
+  // does without asking (its standing rules, from Always on an approval card), then what it may do (its switches).
+  // Nothing is folded: Skills, Connections,
+  // providers that need nothing and the Gateway left with Advanced. What it remembers is in Your data; using the Agent on
+  // another computer is in Phone.
+  const live=()=>turn===ticket&&target.isConnected;
+  const model=part('model','Status','How the Agent Fox thinks with is doing.');
+  const routines=part('routines','Scheduled','What your Agent does on its own, on a schedule. The same tasks are in the Task panel.');
+  const permissions=part('permissions','Does without asking','What your Agent may do without asking you first, from each time you chose Always on an approval card.');
+  const may=part('may','What it may do','What your Agent may look at and do in your World. Each switch changes at once.');
+  // A request for Fox (set up or change a routine, forget something) goes to its conversation with the panel closed.
+  const ask=(text:string)=>{close();window.dispatchEvent(new CustomEvent('worldlet:fox-ask',{detail:{text}}));};
+  model.append(now,guide.element,said,choose);
+  // Back to every Agent, then the page: its name is what the header says once it is known.
+  const back=action('‹ All Agents',()=>void show('agents'),{id:'agents-back'}),title=el('h5','companion-settings-own-title','Your Agent');
+  const header=el('div','companion-settings-own-head');header.dataset.view='own-agent';header.append(back,title);
+  const known=ownAgent().then(own=>{if(live()){title.textContent=own.title;const next=settingsIcon(agentIcon(own.harness??'',own.title));icon.replaceWith(next);icon=next;}return own;});
+  target.append(header,model,routines,permissions,may);
+  await Promise.all([draw(),showAgentRoutines(routines,call,live,{ask}),showAgentPermissions(permissions,call,live),known.then(own=>live()?showOwnAgentMay(may,call,live,own.harness):undefined)]);
+ }
+ const part=(id:string,heading:string,line:string)=>{const box=el('section','companion-settings-part');box.dataset.part=id;box.append(el('h5','companion-settings-parthead',heading),el('p','companion-info-note companion-settings-partnote',line));return box;};
+ // The Agent Fox works through, as Agents' list names it (agent-access.ts OwnAgent): the one chosen on this computer,
+ // the paired computer's or Gateway's, else Fox's own Hermes Agent; with how it is doing, in plain words.
+ async function ownAgent():Promise<Omit<OwnAgent,'open'>>{
+  const [health,found]=await Promise.all([call('modelHealth').catch(()=>null),call('agentHarness',{operation:'detect'}).catch(()=>null)]);
+  const list=Array.isArray(found?.agents)?found.agents:[],selected=typeof found?.selected==='string'?found.selected:null;
+  const chosen=list.find((a:any)=>a?.id===selected),view=modelHealthView(health,typeof chosen?.title==='string'?chosen.title:null);
+  const away=health?.location?.kind==='remote'&&typeof health.location.computer==='string'?health.location.computer:null;
+  const title=typeof chosen?.title==='string'?chosen.title:away?`Your Agent on ${away}`:health?.agent==='hermes'?'Hermes Agent':'Your Agent';
+  return {harness:selected??(away?null:typeof health?.agent==='string'?health.agent:null),title,
+   line:view.state==='ok'?'Fox works through it. It may do what you ask Fox, and asks you before it changes anything.':view.title+'.'};
+ }
+ // Agents (issue #674): every Agent that reaches this World in one list, your own Agent first with Manage for its page;
+ // then Your World's address, one card (owner request 2026-10-22: no Advanced).
+ async function agentsSetting(target:HTMLElement,at:string){
+  if(OWN_PARTS.includes(at))return ownAgentPage(target);
+  const turn=ticket,live=()=>turn===ticket&&target.isConnected;
+  const list=el('section','companion-settings-part companion-settings-agents');list.dataset.part='access';
+  list.append(el('p','companion-info-note','The AI helpers that work in your World. Remove one any time.'));
+  // Your World's address (agent/gate/WORLD-ADDRESS.md): open the World anywhere, and use it in Claude or ChatGPT.
+  const address=el('section');address.dataset.part='world-address';
+  target.append(list,address);
+  const own=await ownAgent();if(!live())return;
+  await Promise.all([showAgentAccess(list,call,live,{own:{...own,open:()=>void show('agents','model')}}),showWorldAddress(address,call,live)]);
+ }
+ // One list, in the order a person looks for things (owner request 2026-10-10: no tabs, nothing technical): the three
+ // areas first (issue #674), connectors on one side, Agents on the other, and everything the World keeps in one place;
+ // then, smaller, Fox, Phone and General.
+ const items:Item[]=[
+  // The services Worldlet connects itself, one tile each (connectors-page.ts).
+  {id:'connectors',label:'Services',hint:'Apps your World can read',icon:'plug',show:async target=>{const turn=ticket;await showConnectors(target,call,()=>turn===ticket&&target.isConnected);}},
+  {id:'agents',label:'Agents',hint:'AI helpers working for you',icon:'people',show:agentsSetting},
+  // Everything the World keeps (world-context-page.ts), with what each Agent and Fox remember.
+  {id:'context',label:'Your data',hint:'What is kept on this computer',icon:'lock',show:async (target,at)=>{const turn=ticket,live=()=>turn===ticket&&target.isConnected;
+   const memory=part('memory','Memory','What Fox and your Agent remember about you and your work. Your Agent’s memory lives in your Agent; Worldlet only shows it.');
+   memory.append(pages.knows);
+   await showWorldContext(target,call,live,{memory,showMemory:at==='memory',localDeletion:()=>!!host()?.localDataDeletion(),sample:()=>!!host()?.sample(),
+    openJournal:()=>{close();window.dispatchEvent(new CustomEvent('worldlet:journal-open',{detail:{}}));}});
+   await showAgentMemory(memory,call,live,{ask:text=>{close();window.dispatchEvent(new CustomEvent('worldlet:fox-ask',{detail:{text}}));}});
+   // What the built-in browser keeps, with its deletes (owner request 2026-10-22: here, not under General's Browser).
+   if(live()){void savedLogins(target);if(!host()?.sample())await recordings(target);}
+  }},
+  {id:'fox',label:'Fox',hint:'Name, look and personality',icon:'heart',page:true,minor:true,show:target=>{target.append(pages.fox);}},
+  {id:'phone',label:'Phone',hint:'Attention and Fox on your phone',icon:'phone',page:true,minor:true,show:target=>{target.append(pages.phone);}},
+  {id:'general',label:'General',hint:'Updates, feedback, restart, start over',icon:'settings',minor:true,show:async target=>{
+   // One row each with a switch where it is on or off (owner request 2026-10-21: Settings for people who know nothing
+   // about computers). A row's slot is drawn again when what it shows changes.
+   const turn=ticket,said=status(),rows=el('div','companion-settings-rows');
+   const slot=()=>{const box=el('div','companion-settings-slot');rows.append(box);return box;};
+   const failed=(e:unknown)=>{said.textContent=(e as Error).message||'Could not change it.';return false;};
+   target.append(rows,said);
+   await updates(slot());
+   // Open at login shows what the system reports, not what was last asked for (#1229).
+   {
+    const box=slot();
+    const draw=async()=>{
+     const login=await call('loginItem').catch(()=>null);if(turn!==ticket||!login)return;
+     const on=login.status==='enabled'||login.status==='requires-approval';
+     box.replaceChildren(settingsRow({icon:{icon:'play'},title:'Open Worldlet when you log in',setting:'login-item',
+      line:login.status==='requires-approval'||login.status==='unsupported'||!login.status?loginItemText(login.status,login.platform):'',
+      controls:login.status==='unsupported'||!login.status?[]:[settingsSwitch({label:'Open Worldlet when you log in',on,id:'login-item',
+       change:async value=>{said.textContent='';try{await call('loginItem',{operation:'set',enabled:value});void draw();}catch(e){return failed(e);}}})]}));
+    };
+    await draw();
+   }
+   // Off until turned on (owner request 2026-10-12): links from other apps then open in their own Thing or the Browser.
+   {
+    const box=slot();
+    const draw=async()=>{
+     const info=await call('defaultBrowser').catch(()=>null);if(turn!==ticket||!info)return;
+     box.replaceChildren(settingsRow({icon:{icon:'compass'},title:'Use Worldlet as your default browser',setting:'default-browser',line:defaultBrowserText(info.status,info.platform),
+      controls:info.status==='unsupported'?[]:[settingsSwitch({label:'Use Worldlet as your default browser',on:info.status==='on',id:'default-browser',
+       change:async value=>{said.textContent='';try{await call('defaultBrowser',{operation:'set',enabled:value});void draw();}catch(e){return failed(e);}}})]}));
+    };
+    // The Mac's confirmation or a choice in Windows Settings lands later; the host says when the status moved.
+    const moved=()=>{if(!box.isConnected){window.removeEventListener('worldlet:default-browser',moved);return;}void draw();};
+    window.addEventListener('worldlet:default-browser',moved);
+    await draw();
+   }
+   // The one privacy choice left after the Privacy section went (owner request 2026-10-10): the website's privacy page
+   // promises that usage counts can be turned off, and off stops all reporting.
+   {
+    const box=slot();
+    const draw=async()=>{
+     const info=await call('foxPreferences').catch(()=>null);if(turn!==ticket)return;
+     const on=info?.usageAnalyticsEnabled===true;
+     box.replaceChildren(settingsRow({icon:{icon:'coins'},title:'Share anonymous usage counts',setting:'usage-analytics',
+      line:on?'Setup, connection and feature counts, never what you write, read or browse. Turning it off stops all reporting.':'Nothing about how you use Worldlet leaves this computer.',
+      controls:[settingsSwitch({label:'Share anonymous usage counts',on,id:'usage-analytics',
+       change:async value=>{said.textContent='';try{await call('foxPreferenceChange',{setting:'usage_analytics',value});void draw();}catch(e){return failed(e);}}})]}));
+    };
+    await draw();
+   }
+   // Then what Help had (owner request 2026-10-22: Help is part of General): feedback, restarting Fox, the tutorial and
+   // starting over, one row each. Diagnostics are offered with feedback; the team's tools open from the version line.
+   rows.append(
+    settingsRow({icon:{icon:'chat'},title:'Send feedback',line:'Tell the Worldlet team what works and what doesn’t. Type it, or hold Fox to say it.',
+     controls:[action('Send feedback',()=>openFeedback(),{primary:true,id:'feedback'})]}),
+    settingsRow({icon:{icon:'refresh'},title:'Restart Fox',line:'If Fox stops answering or seems stuck. Conversations, memory and connections are kept.',
+     controls:[action('Restart Fox',()=>restartFox(said),{id:'restart'})]}));
+   // The practice world has no tour.
+   if(!host()?.sample())rows.append(settingsRow({icon:{icon:'map'},title:'Tutorial',line:'Walk through the World again.',
+    controls:[action('Show the tutorial',()=>replayTutorial(),{id:'tutorial'})]}));
+   rows.append(settingsRow({icon:{icon:'alert'},title:'Start over',line:'Erases Fox’s memory, your saved items and account connections on this computer, keeps your Agent, and starts setup again. Asks you first.',
+    controls:[action('Start over',async()=>{said.textContent='';try{const result=await call('resetFox');if(result?.cancelled)return;window.location.reload();}catch(e){said.textContent='Could not start over: '+((e as Error).message||'reopen Worldlet and try again.');}},{id:'reset'})]}));
+   // Only inside the sample world, as the way back to one's own (owner request 2026-10-10: no sample switch otherwise).
+   if(host()?.sample()){
+    target.append(subhead('Sample world'));
+    const on=!!host()?.sample(),said=status();
+    const toggle=el('button','world-recovery-switch','Sample world') as HTMLButtonElement;toggle.type='button';toggle.setAttribute('role','switch');toggle.dataset.on=String(on);toggle.setAttribute('aria-checked',String(on));
+    toggle.append(el('span','world-recovery-switch-state',on?'On':'Off'));
+    toggle.onclick=async()=>{const toggleSample=host()?.toggleSample;if(!toggleSample)return;toggle.disabled=true;said.textContent='';try{await toggleSample();}catch(e){said.textContent=(e as Error).message||'Could not switch worlds.';toggle.disabled=false;}};
+    target.append(note(on?'You are in the sample world. Turn it off to return to your own world.':'Look around a made-up world with sample mail, events and tasks. Your own world and accounts stay as they are.'),toggle,said);
+   }
+  }},
+  // For the Worldlet team (owner request 2026-10-22: not in Settings' list): the Debug window and every recorded event,
+  // opened by clicking the version line under the list five times.
+  {id:'team',label:'For the Worldlet team',hint:'',icon:'settings',minor:true,hidden:true,show:target=>{
+   const said=status();
+   target.append(settingsRow({icon:{icon:'settings'},title:'Debug',line:'What Worldlet is doing right now, for the team.',
+     controls:[action('Open Debug',async()=>{try{close();await call('showDebug');}catch{said.textContent='Could not open Debug.';}},{id:'debug'})]}),
+    said,subhead('Activity records'),note('Every event Worldlet recorded on this computer, newest first.'),records.records);
+   records.showRecords();
+  }},
+ ];
+ // The version at a glance under the list (owner request 2026-10-04): 2026.MMDD.BUILD and the update channel.
+ const version=el('div','companion-settings-version');version.setAttribute('aria-label','Version');
+ async function showVersion(){
+  const state=await call('appUpdate',{operation:'status'}).catch(()=>null);
+  const installed=state?.installed,channel=(state?.channels||[]).find((c:any)=>c.id===state?.channel);
+  version.textContent=installed?.version?['Worldlet '+displayReleaseVersion(installed.version,installed.build||undefined),channel?.name].filter(Boolean).join(' · '):'';
+ }
+ // Only while the line shows: an update event must not become an extra request in the background; open() reads it again.
+ window.addEventListener('worldlet:app-update',()=>{if(version.offsetParent)void showVersion();});
+ // Five clicks on it in a row, each within two seconds of the last, open the team's page.
+ let clicks=0,last=0;
+ version.addEventListener('click',()=>{const now=Date.now();clicks=now-last<2000?clicks+1:1;last=now;if(clicks>=5){clicks=0;void show('team');}});
+ // The three areas, then a line, then the rest in smaller type.
+ for(const item of items){
+  if(item.hidden)continue;
+  if(item.minor&&!list.querySelector('.companion-settings-minor'))list.append(el('div','companion-settings-minor'));
+  const b=el('button','companion-settings-item has-icon'+(item.minor?' is-minor':'')) as HTMLButtonElement;b.type='button';b.dataset.setting=item.id;
+  const words=el('div','companion-settings-item-words');words.append(el('strong','',item.label),el('span','',item.hint));
+  b.append(settingsIcon({icon:item.icon},item.minor?16:20),words);b.onclick=()=>void show(item.id);list.append(b);
+ }
+ /** Shows section `id` (or the area an old name moved to) at `at`, one of its parts. */
+ async function show(id:string,at=''){
+  const moved=MOVED[id],part=at||moved?.part||'';
+  const item=items.find(i=>i.id===(moved?.section??id))??items[0];selected=item.id;const turn=++ticket;
+  for(const leave of leaving.splice(0))leave();
+  for(const b of list.querySelectorAll<HTMLElement>('button'))if(b.dataset.setting===selected)b.setAttribute('aria-current','true');else b.removeAttribute('aria-current');
+  guide.view.setGuide(null);onShow(item.id);
+  // A companion page brings its own heading.
+  const body=el('div','companion-settings-body');detail.replaceChildren(...item.page?[]:[el('h4','',item.label)],body);detail.classList.toggle('is-page',!!item.page);
+  try{await item.show(body,part);}catch(e){if(turn===ticket)body.append(note((e as Error).message||'This setting is unavailable right now.'));}
+  // A part folded away (under Advanced, say) opens first.
+  const named=part&&turn===ticket?body.querySelector<HTMLElement>(`[data-part="${part}"]`):null;
+  for(let fold=named?.closest('details');fold;fold=fold.parentElement?.closest('details'))fold.open=true;
+  named?.scrollIntoView({block:'start'});
+ }
+ return {element,
+  /** The panel opened: show `setting`, else the section last chosen, or the first. */
+  open(setting?:string){void show(setting||selected||items[0].id);side.append(version);void showVersion();},
+  get selected(){return selected;},
+  /** A companion page changed: show it again if it is the one open. */
+  refresh(id:string){if(selected===id)void show(id);}};
+}

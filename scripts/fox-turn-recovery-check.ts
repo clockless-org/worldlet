@@ -1,11 +1,11 @@
 // Fox's first reply must come back (owner request 2026-10-13): Core's rule for when a failed turn is tried once more by
 // itself, and what Fox says when it still fails. No model, no browser.
 import assert from 'node:assert/strict';
-import {FOX_CHOOSE_AGENT_ACTION,FOX_RETRY_ACTION,FOX_RETRY_FAST_MS,foxTurnFailureText,foxTurnRetry} from '../core/companion/index.ts';
-import {diagnosticError} from '../core/diagnostics/index.ts';
+import {FOX_CHOOSE_AGENT_ACTION,FOX_RETRY_ACTION,FOX_RETRY_FAST_MS,foxTurnFailureText,foxTurnRetry} from '../agent/companion/index.ts';
+import {diagnosticError} from '../agent/app/index.ts';
 import {replyAction} from '../ui/companion/reply-actions.ts';
 
-// The rule the UI passes, as analytics classifies it (ui/shell errorFields).
+// The rule the UI passes, as analytics classifies it (ui/frame errorFields).
 const kind=(message:string)=>{const rule=diagnosticError({message}).rule;return typeof rule==='string'&&rule!=='other'?rule:undefined;};
 
 const quick={known:null,elapsedMs:300,streamed:false,toolsRan:false,attempt:0};
@@ -18,7 +18,8 @@ assert.equal(foxTurnRetry({...quick,kind:kind('socket hang up'),elapsedMs:FOX_RE
 assert.equal(foxTurnRetry({...quick,kind:kind('socket hang up'),streamed:true}),false,'text already shown');
 assert.equal(foxTurnRetry({...quick,kind:kind('socket hang up'),toolsRan:true}),false,'a World tool already ran');
 // What the person must fix is not retried.
-for(const message of ['Hermes Agent is not signed in','Claude Code is not installed','spawn hermes ENOENT','permission denied'])
+for(const message of ['Hermes Agent is not signed in','Claude Code is not installed','spawn hermes ENOENT','permission denied',
+ 'Error code: 400 - invalid request','Error code: 400 - This model\'s maximum context length is 128000 tokens','HTTP 403 forbidden'])
  assert.equal(foxTurnRetry({...quick,kind:kind(message)}),false,message);
 for(const known of ['authentication','quota','model','rate_limit','paused'])
  assert.equal(foxTurnRetry({...quick,known}),false,known);

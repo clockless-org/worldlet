@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {buildAppletRuntime} from './build-applet-runtime.ts';
-import {APP_DEFINITIONS} from '../core/applets/catalog.ts';
-import {validateAppletRuntimes,appletReadPlan} from '../core/applets/runtime.ts';
+import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
+import {validateAppletRuntimes,appletReadPlan} from '../context/applets/runtime.ts';
 import {withTempDir} from './test-temp.ts';
 await withTempDir('worldlet-applet-package-',async output=>{
  await buildAppletRuntime(process.cwd(),output);

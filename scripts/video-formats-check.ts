@@ -1,7 +1,7 @@
-// Video formats (#1174, core/browser/video-formats.ts): when a CEF page counts as needing H.264/AAC
+// Video formats (#1174, agent/applets/video-formats.ts): when a CEF page counts as needing H.264/AAC
 // and moves to Electron's views, and what the page script (platform/bridge/video-formats.js) counts.
 import assert from 'node:assert/strict';
-import {PROPRIETARY_VIDEO,VIDEO_FORMATS,needsProprietaryVideo,readVideoFormatReport,videoFormatHost} from '../core/browser/index.ts';
+import {PROPRIETARY_VIDEO,VIDEO_FORMATS,needsProprietaryVideo,readVideoFormatReport,videoFormatHost} from '../agent/applets/index.ts';
 import {installVideoFormatWatch} from '../platform/bridge/video-formats.js';
 
 const settled=VIDEO_FORMATS.settleMs;

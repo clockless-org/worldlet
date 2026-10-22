@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {reduceAgentResponse} from '../core/agent/agent-response.ts';
+import {reduceAgentResponse} from '../agent/gate/agent-response.ts';
 import {validateAgentEvent} from '../contracts/agent.ts';
 
 // Recorded protocol phases are independent of which native host delivers them.

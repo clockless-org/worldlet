@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
 import path from 'node:path';
-import {GLOW_PAGE} from '../platform/electron/src/modules/browser/glow-page.ts';
+import {GLOW_PAGE} from '../platform/host/modules/applets/glow-page.ts';
 // Fox working on a page: the frame turns colorful and the host draws the page's one status, a card
 // listing Fox's steps (ticked as Fox moves on, then Fox's result, #1619), over the page, which keeps
 // its rect, until Fox's turn ends, through a World refresh too (#967). Hosts that cannot draw over

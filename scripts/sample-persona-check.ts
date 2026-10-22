@@ -4,8 +4,8 @@
 // item within the contract, every Applet with something to show, dates that resolve.
 import assert from 'node:assert/strict';
 import dataset from '../ui/world/sample-persona.json' with {type:'json'};
-import {WORLD_APPS} from '../core/applets/catalog.ts';
-import {GAME_APPLETS,RANDOM_GAME_URL} from '../core/applets/definitions/games.ts';
+import {WORLD_APPS} from '../context/applets/catalog.ts';
+import {GAME_APPLETS,RANDOM_GAME_URL} from '../context/applets/definitions/games.ts';
 import {WORLD_PRESETS} from '../ui/world/world-presets.ts';
 import {makeSampleWorld} from '../ui/world/sample-data.ts';
 import {sampleItems} from '../ui/world/sample-persona.ts';
@@ -85,7 +85,7 @@ assert.equal(world.pages.find(p=>p.worldItemId==='sample-item-1').activities.len
 console.log('PASS '+notes.length+' fictional English notes in '+world.matters.length+' Matters, '+items.length+' attention items within the contract and quoting their notes, every Applet with sample content and a Sample status, resolved dates, complete ownership and all related-note links');
 
 // Exercise real fixture edits across reloads; the canonical authored seed stays untouched.
-const {createContentStore}=await import('../ui/shell/content-store.ts');
+const {createContentStore}=await import('../ui/frame/content-store.ts');
 const pages=new Map(world.pages.map(p=>[p.id,p])),sections=world.spaces,values=new Map();
 const storage={getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,v)};
 let store=createContentStore({pages,sections,key:'fixture-edits',storage});

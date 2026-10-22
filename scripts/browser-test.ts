@@ -39,7 +39,7 @@ function worldPage(page:Page){
 }
 // The checks measure the default look, frosted glass included, so every page asks for full transparency whatever the
 // host says: a Mac with no graphics acceleration (CI's hosted runners) reports Reduce Transparency, which turns the
-// glass off (ui/components/hud.css) and failed every material check there.
+// glass off (ui/style/hud.css) and failed every material check there.
 export async function fullTransparency(page:Page){
  try{await (await page.context().newCDPSession(page)).send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-transparency',value:'no-preference'}]});}
  catch{/* a browser without the Chrome DevTools Protocol keeps the host's setting */}
@@ -77,10 +77,10 @@ export const worldUrl=()=>fileUrl('dist/WorldletWeb/index.html');
 export async function bundleScript(options:BuildOptions):Promise<string>{
  return (await build({bundle:true,write:false,format:'iife',...options})).outputFiles![0].text;
 }
-// Settings beside Fox opens the companion panel, one list of sections (owner request 2026-10-10), on Agent or the
+// Settings beside Fox opens the companion panel, one list of sections (owner request 2026-10-10), on Agents or the
 // section last chosen; the checks that read another page name it by its old tab name or its section id.
 export const SETTINGS_BUTTON='.companion-side .companion-panel-button';
-export const COMPANION_SECTION:Record<string,string>={Profile:'fox',Energy:'model',Mobile:'phone'};
+export const COMPANION_SECTION:Record<string,string>={Profile:'fox',Energy:'agents',Mobile:'phone'};
 export async function openCompanionPanel(page:Page,tab='Profile'){
  await page.locator(SETTINGS_BUTTON).click();
  const panel=page.locator('#companionInfo');await panel.waitFor();

@@ -1,4 +1,4 @@
-import {getApp} from '../../core/applets/index.ts';
+import {getApp} from '../../context/applets/index.ts';
 /**
  * When an Applet task Fox handed off ends (`worldlet:applet-task`), Fox says its result in a line
  * of its own, with a way to open the Applet. The line follows the person like other global guides.

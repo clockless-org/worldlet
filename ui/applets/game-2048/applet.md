@@ -2,7 +2,7 @@
 
 Slide the numbered tiles; equal ones merge. Reach 2048.
 
-A game in the Games area. The board is our own code ([ui/games/game-2048.ts](../../games/game-2048.ts)): it runs offline, needs no account and reads nothing. It is built when the Applet opens and dropped when it closes, so nothing renders or ticks while it is closed. The best score stays in this window's local storage.
+A game in the Games area. The board is our own code ([ui/applets/game-2048.ts](../game-2048.ts)): it runs offline, needs no account and reads nothing. It is built when the Applet opens and dropped when it closes, so nothing renders or ticks while it is closed. The best score stays in this window's local storage.
 
 ## Runtime
 

@@ -5,11 +5,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {MEETING_TRANSCRIPT,TranscriptWindows,pcmLevel,transcriptText} from '../core/applets/meeting-transcript.ts';
-import {webTranscript,type WebRecord} from '../core/browser/index.ts';
-import {MeetingTranscriber} from '../platform/electron/src/modules/browser/meeting-transcript.ts';
-import {WebRecorder,readRecordings} from '../platform/electron/src/modules/browser/recorder.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {MEETING_TRANSCRIPT,TranscriptWindows,pcmLevel,transcriptText} from '../context/applets/meeting-transcript.ts';
+import {webTranscript,type WebRecord} from '../agent/applets/index.ts';
+import {MeetingTranscriber} from '../platform/host/modules/applets/meeting-transcript.ts';
+import {WebRecorder,readRecordings} from '../platform/host/modules/applets/recorder.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
 import {installMeetingAudio} from '../platform/bridge/meeting-audio.js';
 import {fakeMedia,launchTestBrowser} from './browser-test.ts';
 
@@ -146,20 +146,20 @@ const silence=(seconds:number)=>new Int16Array(Math.round(seconds*RATE));
 // Wiring -------------------------------------------------------------------------------------------
 {
  const read=(file:string)=>fs.readFileSync(new URL('../'+file,import.meta.url),'utf8');
- const device=read('platform/electron/src/modules/browser/device.ts');
+ const device=read('platform/host/modules/applets/device.ts');
  assert.match(device,/if\(agent\)throw new WorldletError\('Only the person can transcribe a meeting/,'Fox can never start a transcript');
  assert.match(device,/private close\(\)\{\n  (this\.closeCopy\(\);)?this\.endTranscript\(\);/,'closing the call ends its transcript');
  assert.match(device,/private park\(live\?:string\[\]\)\{\n  (this\.closeCopy\(\);)?this\.endTranscript\(\);/,'leaving the call ends its transcript');
- const page=read('platform/electron/src/modules/browser/engine/page.ts');
+ const page=read('platform/host/modules/applets/engine/page.ts');
  // Every website page (a meeting page among them) starts blank and is loaded through load().
  assert.match(page,/const deferred=!!parsed&&publicPage\(parsed\);\n  const start='about:blank';/,'a meeting page starts blank');
  assert.match(page,/if\(deferred\)this\.load\(parsed!\.href\);/,'its first load goes through load()');
  assert.match(page,/try\{await this\.installMeetingAudio\(\);this\.meetingReady=true;\}/,'and loads after its hooks are installed');
- const world=read('ui/shell/notion-world.ts');
+ const world=read('ui/applets/meetings-host.ts')+read('ui/frame/notion-world.ts');
  assert.match(world,/'meeting:transcript:start',label:'Transcribe'/);
  // A call page that can be heard starts its transcript; Stop (or a failed start) keeps it off for that call.
  assert.match(device,/else if\(!this\.transcript&&view instanceof CefPageView&&view\.meetingAudioReady&&meetingPage\(view\.url\)&&this\.browser===view&&!view\.hidden\)this\.emit\(\{phase:'meeting-ready'\}\);/,'the host says when a call page can be heard');
- assert.match(world,/if\(value\?\.phase==='meeting-ready'\)\{if\(!data\.sample&&!transcriptDeclined&&!transcriptState\?\.active&&meetingCallOpen\(\)\)void setTranscribing\(true\);return;\}/,'the World starts it, never in the practice world or after Stop');
+ assert.match(world,/if\(value\?\.phase==='meeting-ready'\)\{if\(!data(?:\(\))?\.sample&&!transcriptDeclined&&!transcriptState\?\.active&&meetingCallOpen\(\)\)void setTranscribing\(true\);return;\}/,'the World starts it, never in the practice world or after Stop');
  assert.match(world,/async function setTranscribing\(on\)\{[^]*?if\(!on\)transcriptDeclined=true;[^]*?if\(error\)\{transcriptDeclined=true;/,'Stop and a failed start keep it off');
  assert.match(world,/openedMeeting=meeting;transcriptDeclined=false;/,'each call opened starts fresh');
  const bar=read('ui/applets/meetings/transcript.ts');

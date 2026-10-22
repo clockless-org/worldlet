@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {collectNativeActions} from '../core/attention/index.ts';
+import {collectNativeActions} from '../agent/attention/index.ts';
 const pages=new Map(['mail-a','mail-b','calendar-a','note-a'].map(id=>[id,{id,title:id}]));
 const sections=[{id:'mail',module:'mailroom',children:['mail-a','mail-b']},{id:'calendar',theme:'calendar',children:['calendar-a']},{id:'notes',theme:'library',children:['note-a']}];
 const base={pages,sections,arrivals:['mail-a','mail-b','calendar-a','deleted'],decisions:[{id:'decision',pageId:'mail-a',label:'SelectQuote'}]};

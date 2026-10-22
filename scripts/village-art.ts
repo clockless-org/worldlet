@@ -4,15 +4,15 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import sharp from 'sharp';
 import {cachedEncode} from './build-cache.ts';
-import {theme,themeAppletArt} from '../ui/themes/index.ts';
-import {themeAssetPath} from '../ui/themes/build-theme-contract.ts';
+import {theme,themeAppletArt} from '../ui/style/index.ts';
+import {themeAssetPath} from '../ui/style/themes/build-theme-contract.ts';
 import {checkVillageSceneLibrary} from './village-scene-library.ts';
 import {checkVillageRegisteredScenes} from './village-registered-scenes.ts';
 import {checkVillageAppletPresets} from './village-applet-presets.ts';
 import {paintedBox} from './painted-box.ts';
 
 /**
- * The Village's runtime art, encoded once and committed under ui/theme-packages/village/assets: World plates and
+ * The Village's runtime art, encoded once and committed under ui/style/theme-packages/village/assets: World plates and
  * landmarks, every Applet's device (its icon), open pictures, motion, logos, Mail parts and Focus rooms. The
  * build reads these files as they are; they are the Village theme package's `assets/`. The painted
  * originals stay where they are as authoring sources; `art.lock.json` ties each output to its source bytes.
@@ -20,7 +20,7 @@ import {paintedBox} from './painted-box.ts';
  *   node scripts/village-art.ts           re-encode everything (after changing a source)
  *   node scripts/village-art.ts --check   every output exists and matches its source; no encoding
  */
-export const VILLAGE_ART='ui/theme-packages/village/assets';
+export const VILLAGE_ART='ui/style/theme-packages/village/assets';
 export interface VillageArtIndex {
  world:{day:string;night:string};
  landmarks:Record<string,{day:string;night:string}>;
@@ -38,8 +38,8 @@ const ext=(file:string)=>path.extname(file).toLowerCase();
 
 export async function encodeVillageArt(root:string){
  const out=path.join(root,VILLAGE_ART),entry=theme('village'),STYLE=entry.style.manifest,lock:Lock={};
- const {WORLD_APPS}=await import('../core/applets/catalog.ts');
- const {MOMENT_ART}=await import('../core/applets/moment.ts');
+ const {WORLD_APPS}=await import('../context/applets/catalog.ts');
+ const {MOMENT_ART}=await import('../context/applets/moment.ts');
  // Only remove files this encoder owns. Artifact materials and Applet presets have separate sources and locks.
  const previous:Lock=JSON.parse(await readFile(path.join(out,'art.lock.json'),'utf8').catch(()=>'{}'));
  for(const name of Object.keys(previous)){themeAssetPath('assets/'+name);await rm(path.join(out,name),{force:true});}
@@ -64,7 +64,7 @@ export async function encodeVillageArt(root:string){
   index.areas[key]={day:`areas/${key}-day.webp`,night:`areas/${key}-night.webp`};
   await copy(index.areas[key].day,`resources/worlds/village/areas/${key}-day.webp`);await copy(index.areas[key].night,`resources/worlds/village/areas/${key}-night.webp`);
  }
- // Every catalog Applet's device, and the one every moment Applet stands on (core/artifacts/README.md).
+ // Every catalog Applet's device, and the one every moment Applet stands on (context/store/ARTIFACTS.md).
  for(const key of [...WORLD_APPS.map(a=>a.key),MOMENT_ART]){
   const src=`devices/${key}.webp`,device=await emit(src,themeAppletArt(entry,key).peek,'device:768:webp-92-100',f=>sharp(f).resize({width:768,withoutEnlargement:true}).webp({quality:92,alphaQuality:100}).toBuffer());
   index.devices[key]={src,box:await paintedBox(device)};

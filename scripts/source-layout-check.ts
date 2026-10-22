@@ -23,8 +23,8 @@ if(website)assert.equal(packageScripts['build:website'],'node scripts/build-webs
 assert.equal(packageScripts.test,'node scripts/run-steps.mjs test:core && npm run test:worktrees');
 if(website)assert.match(await readFile('scripts/build-app.ts','utf8'),/WORKERS_CI==='1'/,'Cloudflare Git builds must compile the website, not the desktop app');
 const hostWatcher=await readFile('scripts/dev-electron.ts','utf8');
-if(website)assert((await readFile('scripts/dev-website.ts','utf8')).includes("['website','ui','core','contracts','resources']"));
-assert(hostWatcher.includes("['ui','core','contracts','resources','platform/bridge','platform/electron','platform/local-tools','platform/browser','platform/web-engine','scripts']"));
+if(website)assert((await readFile('scripts/dev-website.ts','utf8')).includes("['website','ui','agent','context','contracts','resources']"));
+assert(hostWatcher.includes("['ui','agent','context','contracts','resources','platform/bridge','platform/host','platform/web','platform/desktop','platform/local-tools','platform/browser','platform/web-engine','scripts']"));
 // Ignore old local caches, but never retain executable sources in retired roots.
 const {execFileSync}=await import('node:child_process');
 const tracked=execFileSync('git',['ls-files','--cached','--others','--exclude-standard','-z'],{encoding:'utf8'}).split('\0');
@@ -41,14 +41,18 @@ async function sources(dir:string):Promise<string[]> {
  const entries=await readdir(dir,{withFileTypes:true});
  return (await Promise.all(entries.map(e=>e.isDirectory()?sources(dir+'/'+e.name):Promise.resolve(/\.(ts|js|mjs)$/.test(e.name)?[dir+'/'+e.name]:[])))).flat();
 }
-for(const file of [...await sources('core'),...await sources('contracts')]){
+// agent/, context/ and contracts/ are pure (#681).
+const {existsSync}=await import('node:fs');
+const pureRoots=['agent','context','contracts'].filter(dir=>existsSync(dir));
+const PURE=/^(agent|context|contracts)\//;
+for(const file of (await Promise.all(pureRoots.map(sources))).flat()){
  const {metafile}=await build({entryPoints:[file],bundle:true,write:false,platform:'neutral',format:'esm',metafile:true,logLevel:'silent'});
  for(const dependency of Object.keys(metafile.inputs)){
-  const allowed=file.startsWith('contracts/')?/^contracts\//:/^(core|contracts)\//;
+  const allowed=file.startsWith('contracts/')?/^contracts\//:PURE;
   assert(allowed.test(dependency),`${file} crosses its module boundary: ${dependency}`);
  }
  const source=await readFile(file,'utf8'),ast=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true);
- const walk=(node:any)=>{if((ts.isImportDeclaration(node)||ts.isExportDeclaration(node))&&node.moduleSpecifier&&ts.isStringLiteral(node.moduleSpecifier)){const target=node.moduleSpecifier.text;if(target.startsWith('.')){const resolved=path.posix.normalize(path.posix.join(path.posix.dirname(file),target));assert((file.startsWith('contracts/')?/^contracts\//:/^(core|contracts)\//).test(resolved),`${file} has a forbidden type/module dependency: ${resolved}`);}else assert(false,`${file} imports external module ${target}`);}
+ const walk=(node:any)=>{if((ts.isImportDeclaration(node)||ts.isExportDeclaration(node))&&node.moduleSpecifier&&ts.isStringLiteral(node.moduleSpecifier)){const target=node.moduleSpecifier.text;if(target.startsWith('.')){const resolved=path.posix.normalize(path.posix.join(path.posix.dirname(file),target));assert((file.startsWith('contracts/')?/^contracts\//:PURE).test(resolved),`${file} has a forbidden type/module dependency: ${resolved}`);}else assert(false,`${file} imports external module ${target}`);}
  if(ts.isIdentifier(node))assert(!['window','document','navigator','process','require'].includes(node.text),`${file} uses host global ${node.text}`);ts.forEachChild(node,walk);};walk(ast);
 }
 for(const file of await sources('ui')){
@@ -58,7 +62,7 @@ for(const file of await sources('ui')){
  assert(!/messageHandlers\s*(?:\?\.)?\s*\.?(?:worldlet|\[)|chrome\.webview/.test(source),`${file} must use platform/host, not a native transport`);
  assert(!/platform\s*={2,3}\s*['"](?:windows|macos)['"]/.test(source),`${file} must use host capabilities, not OS branches`);
 }
-console.log('PASS pure core/contracts and centralized platform transport/capability boundaries.');
+console.log('PASS pure agent/context/contracts and centralized platform transport/capability boundaries.');
 
 for(const file of await sources('resources'))assert(false,`Executable code belongs in a component, not resources: ${file}`);
 console.log('PASS direct layer roots, independent Applet catalog and non-executable resources.');
@@ -66,12 +70,12 @@ console.log('PASS direct layer roots, independent Applet catalog and non-executa
 const packaging=await readFile('scripts/package-electron.ts','utf8');
 assert(packaging.includes("run(process.execPath,['scripts/build-native-ui.ts']"),'Distribution must use the shared UI builder');
 assert(packaging.includes("run(process.execPath,['scripts/build-electron.ts']"),'Distribution must bundle the Electron host');
-await access('platform/electron/tsconfig.json');await access('platform/electron/src/main.ts');
+await access('platform/desktop/tsconfig.json');await access('platform/desktop/src/main.ts');
 
 // One World renderer: the trusted page is an isolated, sandboxed WebContentsView without Node.
-const worldWindow=await readFile('platform/electron/src/world/window.ts','utf8');
+const worldWindow=await readFile('platform/desktop/src/world/window.ts','utf8');
 assert(/contextIsolation:true,sandbox:true,nodeIntegration:false,webSecurity:true/.test(worldWindow),'the World page must stay isolated and sandboxed');
-for(const file of await sources('platform/electron/src')){
+for(const file of [...await sources('platform/host'),...await sources('platform/desktop/src')]){
  const source=await readFile(file,'utf8');
  assert(!/nodeIntegration\s*:\s*true|webviewTag\s*:\s*true|enableRemoteModule/.test(source),`${file} must not give a page Node, <webview> or remote access`);
  assert(!/getFileIcon\([^)]*size\s*:\s*['"]large['"]/.test(source),`${file} asks for a large file icon, which stops the app on macOS (Chromium's IconLoader): use 'normal' there`);

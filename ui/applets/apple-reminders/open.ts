@@ -1,5 +1,5 @@
 import {attentionIcon} from '../../attention/index.ts';
-import {node} from '../../components/index.ts';
+import {node} from '../../style/index.ts';
 import type {AppletSceneRegion} from '../scene/applet-scene.ts';
 import {reminderView,visibleReminders,reminderDate,reminderCompleted} from './view-state.ts';
 import {reminderRegions,renderReminderRegions} from './regions.ts';

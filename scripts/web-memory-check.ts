@@ -1,4 +1,4 @@
-// What the website panel manages its pages by (platform/electron/src/modules/browser/memory.ts; owner Order
+// What the website panel manages its pages by (platform/host/modules/applets/memory.ts; owner Order
 // 2026-10-07: "要把内存管理好"): macOS memory it can hand out (not only free pages), the kernel's pressure level,
 // and the website engine's whole process tree in the app's footprint. Runs the real parsers with a stubbed
 // `electron`; nothing is launched.
@@ -15,7 +15,7 @@ const stub:Plugin={name:'electron-stub',setup(b){
 
 await withTempDir('worldlet-web-memory-',async temp=>{
  const out=path.join(temp,'memory.mjs');
- await build({entryPoints:['platform/electron/src/modules/browser/memory.ts'],bundle:true,format:'esm',platform:'node',outfile:out,logLevel:'error',plugins:[stub]});
+ await build({entryPoints:['platform/host/modules/applets/memory.ts'],bundle:true,format:'esm',platform:'node',outfile:out,logLevel:'error',plugins:[stub]});
  const {processTreeKB,vmStatAvailableMB,pressureLevel,readMemory}=await import(pathToFileURL(out).href);
 
  const ps=` 1 0 100

@@ -1,13 +1,13 @@
-// The World's own Google connection as every Agent's source access (platform/electron/src/modules/sources/google-source.ts),
+// The World's own Google connection as every Agent's source access (platform/host/modules/connectors/google-source.ts),
 // on the development mock account: World service tools read Mail and Calendar through the turn's own permission and
 // receipts, a mail draft opens its review, Applet reads and refreshes answer without any Harness, other sources still
 // go to the account owner's runtime, and a mock sign-in connects Mail and Calendar under the account owner's transport.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {ExecutionJournal} from '../platform/electron/src/modules/agent-runtime/journal.ts';
-import {GoogleAccount} from '../platform/electron/src/modules/sources/google-account.ts';
-import {GoogleSource,GoogleSourceAccess,GoogleSourceConnections} from '../platform/electron/src/modules/sources/google-source.ts';
+import {ExecutionJournal} from '../platform/host/modules/companion/agent/journal.ts';
+import {GoogleAccount} from '../platform/host/modules/connectors/google-account.ts';
+import {GoogleSource,GoogleSourceAccess,GoogleSourceConnections} from '../platform/host/modules/connectors/google-source.ts';
 import {withTempDir} from './test-temp.ts';
 
 await withTempDir('worldlet-google-source-',async temp=>{

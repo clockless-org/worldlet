@@ -7,7 +7,7 @@ corner decoration, borders and spacing. Mail supplies only message anatomy.
 The original subject is the fixed header. Sender, address, To/Cc and received
 time sit above the original in one bounded scrolling body. A portrait stamp
 shows the sender's public picture, read by the host (`mailAvatar`, rules in
-`core/applets/mail-avatar.ts`): their Gravatar, else the organization's BIMI logo
+`context/applets/mail-avatar.ts`): their Gravatar, else the organization's BIMI logo
 or website icon (never for personal mail domains), else their initials on a
 fixed muted tint. Images arrive as data: URLs and stay in memory for the app
 session; the practice world and fixture domains never look one up. Previous/next email
@@ -30,7 +30,7 @@ The native adapter supplies Gmail headers and MIME attachment names/sizes when
 available. Attachments are read-only metadata, not download buttons. The
 sender's own HTML styling, remote images, CID images and attachment previews are
 not shown here; only an Attention card may show one picture from the email
-([email pictures](../../../core/attention/README.md#email-pictures)). Missing dates remain explicitly unavailable. No contact lookup or
+([email pictures](../../../agent/attention/README.md#email-pictures)). Missing dates remain explicitly unavailable. No contact lookup or
 invented profile picture is used.
 
 Open and Focus are drawn in the theme's Mail scene by the shared

@@ -1,4 +1,4 @@
-import type {ThemeSceneRegistration} from '../../themes/index.ts';
+import type {ThemeSceneRegistration} from '../../style/index.ts';
 /** Project real HTML onto a measured convex paper plane. CSS also inverse-maps pointer hit testing. */
 export function scenePlaneTransform(quad:NonNullable<ThemeSceneRegistration['regions'][number]['quad']>,width:number,height:number){
  const [[x0,y0],[x1,y1],[x2,y2],[x3,y3]]=quad.map(([x,y])=>[x*width,y*height]);

@@ -3,21 +3,21 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {validateHarnessServices} from '../contracts/harness-services.ts';
 import {HARNESS_SERVICES,approvalChanges,approvalGrantFor,approvalThreadLabel,changesAnswered,changesAsked,changesCall,harnessApprovalFeatures,hermesAllowlistWithout,hermesStandingRules,lineDiff,
- openClawApprovalsWithout,openClawChangesEvent,openClawGrantRules,openClawStandingRules,readApprovalGrants,readHarnessApprovalResult,rememberApprovalGrant,standingRuleId} from '../core/agent/index.ts';
-import {hermesStandingRulesService,openClawStandingRulesService,standingRules} from '../platform/electron/src/modules/agent-runtime/harness-approvals.ts';
-import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
-import {createHarnessApprovalRules} from '../platform/electron/src/modules/fox/harness-approvals.ts';
-import {AGENT} from '../platform/electron/src/host/services.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {permissionLine,showAgentPermissions} from '../ui/companion/agent-permissions.ts';
+ openClawApprovalsWithout,openClawChangesEvent,openClawGrantRules,openClawStandingRules,readApprovalGrants,readHarnessApprovalResult,rememberApprovalGrant,standingRuleId} from '../agent/gate/index.ts';
+import {hermesStandingRulesService,openClawStandingRulesService,standingRules} from '../platform/host/modules/companion/agent/harness-approvals.ts';
+import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/host/modules/companion/agent/local-harness.ts';
+import {createHarnessApprovalRules} from '../platform/host/modules/companion/harness-approvals.ts';
+import {AGENT} from '../platform/host/services.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
+import {permissionLine,showAgentPermissions} from '../ui/frame/agent-permissions.ts';
 import {approvalResultBody,approvalResultText} from '../ui/companion/fox-harness-approval.ts';
 import {withTempDir} from './test-temp.ts';
 
-// Standing rules and what an approval changed (core/agent/PORTABILITY.md#standing-rules-and-what-an-approval-changed):
+// Standing rules and what an approval changed (agent/gate/PORTABILITY.md#standing-rules-and-what-an-approval-changed):
 // the declared approval features, reading Hermes Agent's `command_allowlist` and OpenClaw's approvals document and
 // grants, the documents without one rule, the World's record of who said Always and where, the tracker that ties an
 // approval to its tool call, the host services against fixture `hermes` and `openclaw` commands (their own commands
-// change their files; Worldlet never writes them), the restart a revoked Hermes rule needs, Settings › Agent ›
+// change their files; Worldlet never writes them), the restart a revoked Hermes rule needs, Settings › Agents ›
 // Things it may do without asking, and the approval card's diff. scripts/harness-sessions-check.ts drives the trackers through the resident sessions.
 
 // Declarations ------------------------------------------------------------------------------------------------------
@@ -221,7 +221,7 @@ let stdin='';process.stdin.on('data',c=>stdin+=c);process.stdin.on('end',()=>{
  await assert.rejects(rules.revoke('hermes',outside.id),/your own world/);
  host.store.sampleEnabled=()=>false;
 
- // Settings › Agent › Permissions: a row per rule with its agent, when and where, and Revoke,
+ // Settings › Agents › Your Agent › Permissions: a row per rule with its agent, when and where, and Revoke,
  // which asks once more in the page before the Agent forgets it; an Agent that cannot revoke says how.
  const requests:any[]=[];
  let answer:any={harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,revoke:'restart',note:harnessApprovalFeatures('hermes').revokeNote,rules:[{id:granted.id,allows:'recursive delete',agent:'default',kind:'command',main:true,grantedAt:Date.UTC(2026,9,8,12),thread:'In the gmail Applet',inWorld:true},{id:outside.id,allows:'podman *',agent:'work',kind:'command'}]},
@@ -252,4 +252,4 @@ let stdin='';process.stdin.on('data',c=>stdin+=c);process.stdin.on('end',()=>{
 
 });
 delete (globalThis as any).document;
-console.log('PASS approval rules: declared features, Hermes Agent allowlist and OpenClaw approvals and grants read and revoked through their own commands (never written by Worldlet), the World\'s record of who said Always and where, the tracker that ties an approval to its tool call, the restart a revoked Hermes rule needs, Settings › Agent › Permissions and the approval card\'s diff');
+console.log('PASS approval rules: declared features, Hermes Agent allowlist and OpenClaw approvals and grants read and revoked through their own commands (never written by Worldlet), the World\'s record of who said Always and where, the tracker that ties an approval to its tool call, the restart a revoked Hermes rule needs, Settings › Agents › Your Agent › Permissions and the approval card\'s diff');

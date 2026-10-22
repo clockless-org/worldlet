@@ -4,12 +4,12 @@ import {existsSync} from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
 
-// Native/Python bridges consume core/index.ts. Production TypeScript consumers
-// enter other Core/UI components through their explicit public APIs.
+// Native/Python bridges consume agent/index.ts. Production TypeScript consumers
+// enter other Agent, Context and UI components through their explicit public APIs.
 export function assertComponentImport(file:string,specifier:string) {
  if(!specifier.startsWith('.'))return;
  const target=path.posix.normalize(path.posix.join(path.posix.dirname(file),specifier));
- const match=/^(core|ui)\/([^/]+)\/(.+)$/.exec(target);
+ const match=/^(ui|agent|context)\/([^/]+)\/(.+)$/.exec(target);
  if(!match||file.startsWith(`${match[1]}/${match[2]}/`))return;
  assert.equal(match[3],'index.ts',`${file} bypasses ${match[1]}/${match[2]}'s public API: ${target}`);
 }
@@ -31,21 +31,21 @@ async function scan(dir:string):Promise<void>{
   visit(ast);
  }
 }
-assert.throws(()=>assertComponentImport('ui/hud/example.ts','../../core/tasks/runtime-tasks.ts'),/bypasses/);
-assert.throws(()=>assertComponentImport('core/attention/example.ts','../tasks/runtime-tasks.ts'),/bypasses/);
-assertComponentImport('core/tasks/example.ts','./runtime-tasks.ts');
-assertComponentImport('ui/hud/example.ts','../../core/tasks/index.ts');
+assert.throws(()=>assertComponentImport('ui/world/example.ts','../../agent/tasks/runtime-tasks.ts'),/bypasses/);
+assert.throws(()=>assertComponentImport('agent/attention/example.ts','../tasks/runtime-tasks.ts'),/bypasses/);
+assertComponentImport('agent/tasks/example.ts','./runtime-tasks.ts');
+assertComponentImport('ui/world/example.ts','../../agent/tasks/index.ts');
 assert.throws(()=>assertComponentImport('ui/companion/example.ts','../browser/browser-device.ts'),/bypasses/);
-assert.throws(()=>assertComponentImport('website/main.ts','../ui/shell/notion-world.ts'),/bypasses/);
+assert.throws(()=>assertComponentImport('website/main.ts','../ui/frame/notion-world.ts'),/bypasses/);
 assertComponentImport('ui/companion/example.ts','../browser/index.ts');
-assertComponentImport('ui/browser/example.ts','./browser-device.ts');
+assertComponentImport('ui/applets/example.ts','./browser-device.ts');
 // The open-source export leaves out the hosted services (website, models, worker).
-for(const root of ['ui','core','platform/bridge','website','models','worker'])if(existsSync(root))await scan(root);
+for(const root of ['ui','agent','context','platform/bridge','website','models','worker'])if(existsSync(root))await scan(root);
 console.log('PASS Core/UI public component entry points, including type and dynamic imports; internal access stays within its owner.');
 
 // The Electron window coordinators dispatch domain operations; the World store owns persistence.
 const ledgerAccess=/\bWorldLedger\b|\.ledger\s*\(|node:sqlite/;
-for(const file of ['platform/electron/src/main.ts','platform/electron/src/world/window.ts']){
+for(const file of ['platform/desktop/src/main.ts','platform/desktop/src/world/window.ts']){
  const source=await readFile(file,'utf8');
  assert(!ledgerAccess.test(source),`${file} must use Store domain operations, not open the ledger`);
  assert(!/store\.state(?:\.\w+)*\s*=(?!=)|store\.state\.\w+\.(?:push|splice|pop|shift|unshift)\s*\(|store\.(?:persist|changed)\s*\(/.test(source),`${file} must mutate domain state through Store operations`);
@@ -53,7 +53,7 @@ for(const file of ['platform/electron/src/main.ts','platform/electron/src/world/
 console.log('PASS Electron window coordinators use Store operations and never replace, mutate or persist Store state directly.');
 
 // Website pages report activity through the recorder; observation cannot mutate storage directly.
-for(const file of ['platform/electron/src/modules/browser/page.ts','platform/electron/src/modules/browser/youtube.ts']){
+for(const file of ['platform/host/modules/applets/page.ts','platform/host/modules/applets/youtube.ts']){
  const source=await readFile(file,'utf8');
  assert(!ledgerAccess.test(source),`${file} must delegate activity persistence`);
 }

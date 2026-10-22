@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {createWorldUI} from '../ui/shell/public-interface.ts';
+import {createWorldUI} from '../ui/frame/public-interface.ts';
 import type {UISnapshot} from '../contracts/ui.ts';
 let state:UISnapshot={version:1,context:{id:'overview',title:'World',depth:'world'},targets:[{id:'app-mail',label:'Mail',kind:'applet'}]};
 const calls:unknown[]=[];
@@ -19,7 +19,7 @@ console.log('PASS versioned UI actions, stale target rejection, closed command s
 // Public UI imports must not mount controls, register global handlers or require
 // a live document. Startup belongs to explicit mount functions and entry files.
 assert.equal(typeof globalThis.document,'undefined');
-for(const component of ['components','attention','world','shell','browser','onboarding','companion','distribution','applets','practice','hud']){
+for(const component of ['style','attention','world','frame','companion','applets']){
  const api=await import(`../ui/${component}/index.ts`);
  assert(Object.keys(api).length>0,`${component} has no public API`);
 }

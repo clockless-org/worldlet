@@ -12,22 +12,23 @@ import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
-// The open-source export (scripts/oss-export.mjs) leaves out the hosted services, so their browser checks (gatehouse/)
-// are listed only where they exist.
-const available=files=>existsSync(path.join(root,'gatehouse'))?files:files.filter(file=>existsSync(path.join(root,file)));
+// A check is listed only where it exists.
+const available=files=>files.filter(file=>existsSync(path.join(root,file)));
 // Independent of one another: each builds its fixtures in memory, drives its own headless browser
 // (no OS window, focus or user defaults) over dist/WorldletWeb read-only or an ephemeral port, and
 // writes only a private temp directory or screenshot names no other check uses. The Python checks
 // keep their state in a private temp HERMES_HOME or CLAUDE_CONFIG_DIR. Longest first, so the pool's
 // lanes finish together.
 export const parallelChecks=available([
- 'scripts/game-scene-check.ts','scripts/minesweeper-scene-check.ts','scripts/snake-scene-check.ts','scripts/sudoku-scene-check.ts','scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts','scripts/framed-footer-check.ts',
+ 'scripts/oauth-callback-ui-check.ts','scripts/connectors-ui-check.ts','scripts/settings-areas-ui-check.ts',
+ 'scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts',
+ 'scripts/game-scene-check.ts','scripts/minesweeper-scene-check.ts','scripts/snake-scene-check.ts','scripts/sudoku-scene-check.ts','scripts/framed-footer-check.ts',
  // The slowest first (Mac RC 2026.1005.2887 times), so no lane is left running one alone at the end. The Attention Center's browser checks moved here from npm test (test:attention), where they ran one by one.
  'scripts/attention-no-refill-check.ts','scripts/attention-actions-check.ts',
- 'scripts/applet-focus-check.ts','gatehouse/board-browser-check.mjs','scripts/startup-setup-check.ts','scripts/world-tour-check.ts',
+ 'scripts/applet-focus-check.ts','scripts/startup-setup-check.ts','scripts/world-tour-check.ts',
  'scripts/attention-idle-check.ts','scripts/world-log-check.ts','scripts/your-agent-ui-check.ts','scripts/world-history-ui-check.ts','scripts/startup-check.ts','scripts/curated-source-applet-check.ts','scripts/browser-fox-glow-check.ts','scripts/demo-walkthrough-check.ts','scripts/applet-top-bar-check.ts','scripts/applet-shelf-ui-check.ts','scripts/text-reader-hud-check.ts',
  'scripts/world-readability-check.ts','scripts/feature-audit-check.ts','scripts/ongoing-ui-check.ts','scripts/phone-pairing-ui-check.ts','scripts/web-open-check.ts','scripts/desktop-companion-ui-check.ts','scripts/fox-mac-controls-check.ts','scripts/sample-world-check.ts','scripts/widgets-ui-check.ts',
- 'scripts/order-ui-check.ts','scripts/companion-entry-check.ts','scripts/attention-group-identity-check.ts','scripts/fox-name-tag-check.ts',
+ 'scripts/companion-entry-check.ts','scripts/attention-group-identity-check.ts','scripts/fox-name-tag-check.ts',
  // Entering and leaving an Applet zooms, and Back from an area's Applet returns to its panel (owner Order 2026-10-07).
  'scripts/world-level-zoom-check.ts',
  // Long checks from suites no net ran (test:applets, test:browser, test:world, test:render, test:companion, test:demo).
@@ -77,7 +78,7 @@ export const parallelChecks=available([
  'scripts/memory-edits-check.ts','scripts/applet-pipeline-check.ts','scripts/browser-outcome-check.ts',
  'scripts/slot-placement-check.ts','scripts/todoist-write-check.ts','scripts/world-layout-check.ts','scripts/browser-receipt-check.ts',
  'scripts/mail-review-recovery-check.ts','scripts/navigation-history-check.ts','scripts/google-oauth-windows-check.ts','scripts/agent-browser-policy-check.ts',
- 'scripts/applet-scale-check.ts','scripts/applet-lamp-check.ts','scripts/snapshot-inbox-check.ts','scripts/task-review-ui-check.ts','scripts/attention-task-review-check.ts','scripts/agent-ask-ui-check.ts',
+ 'scripts/applet-scale-check.ts','scripts/applet-lamp-check.ts','scripts/snapshot-inbox-check.ts','scripts/task-review-ui-check.ts','scripts/attention-task-review-check.ts','scripts/agent-ask-ui-check.ts','scripts/github-draft-ui-check.ts','scripts/service-draft-ui-check.ts','scripts/service-request-ui-check.ts','scripts/board-ui-check.ts','scripts/board-world-ui-check.ts',
  'scripts/website-matching-check.ts','scripts/tennis-demo-check.ts',
  // Browser checks no net ran until check-reach looked past scripts/*-check.{ts,mjs,py} (2026-10-04).
  'scripts/dev-build-ui-check.ts',
@@ -119,21 +120,27 @@ export const coreChecks=[
 // The RC in the two hours before each release slot runs the whole suite, and a release ships only a commit that passed
 // it (scripts/machine-candidate.mjs rcMode, scripts/release-verified.mjs).
 export const quickChecks=available([
- 'scripts/game-scene-check.ts','scripts/minesweeper-scene-check.ts','scripts/snake-scene-check.ts','scripts/sudoku-scene-check.ts','scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts','scripts/framed-footer-check.ts',
+ 'scripts/oauth-callback-ui-check.ts','scripts/connectors-ui-check.ts','scripts/settings-areas-ui-check.ts','scripts/board-ui-check.ts',
+ 'scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts',
  'scripts/startup-check.ts','scripts/startup-setup-check.ts','scripts/world-scene-check.ts','scripts/sample-world-check.ts',
  'scripts/world-tour-check.ts','scripts/feature-audit-check.ts','scripts/core-applet-content-check.ts','scripts/applet-focus-check.ts',
- 'scripts/applet-first-entry-check.ts','scripts/library-applet-check.ts','scripts/work-applet-check.ts','scripts/work-session-scene-check.ts','scripts/vault-scene-check.ts','scripts/immersive-background-check.ts',
- 'gatehouse/board-browser-check.mjs','scripts/attention-actions-check.ts','scripts/attention-no-refill-check.ts','scripts/attention-brief-markdown-check.ts',
+ 'scripts/applet-first-entry-check.ts','scripts/library-applet-check.ts','scripts/work-applet-check.ts','scripts/immersive-background-check.ts',
+ 'scripts/attention-actions-check.ts','scripts/attention-no-refill-check.ts','scripts/attention-brief-markdown-check.ts',
  'scripts/fox-chat-fold-check.ts','scripts/fox-execution-check.ts','scripts/companion-entry-check.ts','scripts/onboarding-first-value-check.ts',
- 'scripts/google-connection-check.ts','scripts/mail-open-check.ts','scripts/applet-scene-check.ts','scripts/scene-list-layout-check.ts','scripts/reminders-regions-check.ts','scripts/mail-regions-check.ts','scripts/mail-delivery-check.ts','scripts/calendar-plane-check.ts','scripts/world-map-check.ts','scripts/theme-fonts-check.ts','scripts/browser-applet-check.ts','scripts/world-history-ui-check.ts',
- 'scripts/artifacts-ui-check.ts','scripts/order-ui-check.ts','scripts/sample-persona-check.ts','scripts/web-record-check.ts',
+ 'scripts/google-connection-check.ts','scripts/mail-open-check.ts','scripts/applet-scene-check.ts','scripts/browser-applet-check.ts','scripts/world-history-ui-check.ts',
+ 'scripts/artifacts-ui-check.ts','scripts/sample-persona-check.ts','scripts/web-record-check.ts',
+ 'scripts/game-scene-check.ts','scripts/minesweeper-scene-check.ts','scripts/snake-scene-check.ts','scripts/sudoku-scene-check.ts','scripts/framed-footer-check.ts','scripts/work-session-scene-check.ts','scripts/vault-scene-check.ts','scripts/scene-list-layout-check.ts','scripts/reminders-regions-check.ts','scripts/mail-regions-check.ts','scripts/mail-delivery-check.ts','scripts/calendar-plane-check.ts','scripts/world-map-check.ts','scripts/theme-fonts-check.ts',
  'scripts/phone-pairing-ui-check.ts','scripts/meetings-check.ts','scripts/web-open-check.ts',
 ]);
 // The pull request set (`npm run test:ui:pr`, owner decision 2026-10-10: PR CI runs quick checks within five minutes):
 // the quick checks that finish in seconds on a GitHub Linux runner. Those that draw the World took 2 to 8 minutes there
 // on software WebGL, four at a time, and timed out clicking it (PR #125's first run), so they stay in Alpha.
+// github-draft-ui-check is one of those: its Attention card needs the whole World started (about 45 s locally, where
+// board-ui-check mounts its panel alone in 2 s), so it runs with the full suite only.
 export const prChecks=quickChecks.filter(c=>[
- 'scripts/game-scene-check.ts','scripts/minesweeper-scene-check.ts','scripts/snake-scene-check.ts','scripts/sudoku-scene-check.ts','scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts','scripts/framed-footer-check.ts',
+ 'scripts/oauth-callback-ui-check.ts','scripts/connectors-ui-check.ts','scripts/settings-areas-ui-check.ts','scripts/board-ui-check.ts',
+ 'scripts/notes-notebook-check.ts','scripts/core-paper-check.ts','scripts/paper-edge-check.ts',
+ 'scripts/game-scene-check.ts','scripts/minesweeper-scene-check.ts','scripts/snake-scene-check.ts','scripts/sudoku-scene-check.ts','scripts/framed-footer-check.ts',
  'scripts/startup-check.ts','scripts/applet-first-entry-check.ts','scripts/onboarding-first-value-check.ts',
  'scripts/browser-applet-check.ts','scripts/mail-open-check.ts','scripts/applet-scene-check.ts','scripts/scene-list-layout-check.ts','scripts/reminders-regions-check.ts','scripts/mail-regions-check.ts','scripts/mail-delivery-check.ts','scripts/calendar-plane-check.ts','scripts/world-map-check.ts','scripts/theme-fonts-check.ts','scripts/web-record-check.ts',
  'scripts/core-applet-content-check.ts','scripts/attention-brief-markdown-check.ts','scripts/sample-persona-check.ts',

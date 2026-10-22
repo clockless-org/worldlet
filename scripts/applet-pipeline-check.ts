@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {appletAnalysisInput,appletAnalysisRefresh,appletAnalysisCommit,appletAnalysisPending} from '../core/applets/index.ts';
-import {attentionBatchInput,sourceEvidenceContext,observeAttention,planAttention,attentionCurrent} from '../core/attention/index.ts';
+import {appletAnalysisInput,appletAnalysisRefresh,appletAnalysisCommit,appletAnalysisPending} from '../context/applets/index.ts';
+import {attentionBatchInput,sourceEvidenceContext,observeAttention,planAttention,attentionCurrent} from '../agent/attention/index.ts';
 const now=Date.parse('2026-09-28T12:00:00Z')/1000;
 const records=[{id:'promo',text:'Your subscription renews tomorrow for $20.',labelIds:['CATEGORY_PROMOTIONS']},{id:'spam',text:'Known spam',allMessagesExcluded:true},{id:'partial',text:'Incomplete mixed thread',allMessagesExcluded:true,partial:true}];
 const snapshot=appletAnalysisInput('gmail',records,[],now);
@@ -31,7 +31,7 @@ assert.equal(compact.context[1].text,'09:30–10:30');
 assert.equal(raw.context[0].text,long);
 assert.ok(JSON.stringify(compact).length<JSON.stringify(raw).length/5);
 // Related (non-pending) records are context: the Center sees their opening, marked partial; pending seeds stay whole.
-const {RELATED_CONTEXT_CHARACTERS}=await import('../core/attention/batch-input.ts');
+const {RELATED_CONTEXT_CHARACTERS}=await import('../agent/attention/batch-input.ts');
 const thread='Thread opening with the real request. '+'Older quoted history. '.repeat(600);
 const neighbourhood=attentionBatchInput({pendingContextIds:['seed'],context:sourceEvidenceContext([
  {id:'seed',provider:'gmail',sourceId:'new',text:thread,keys:['thread','opening'],fingerprint:'f',changedAt:1},
@@ -67,12 +67,12 @@ const wider=attentionBatchInput({pendingContextIds:['cal'],context:sourceEvidenc
  appletCandidates:[{title:'Standup moved',sources:[{provider:'google-calendar',id:'standup',quote:'Standup 09:30'},{provider:'gmail',id:'older-thread',quote:'Moved standup'}]}]});
 assert.deepEqual(wider.items[0].sources,[{provider:'google-calendar',id:'standup',quote:'Standup'}]);
 assert.deepEqual(wider.appletCandidates[0].sources,[{provider:'google-calendar',id:'standup',quote:'Standup 09:30'}]);
-const {attentionExecution}=await import('../core/attention/attention-execution.ts');
+const {attentionExecution}=await import('../agent/attention/attention-execution.ts');
 assert.match(attentionExecution('synthesis').prompt!,/Output only new findings and existing items whose content this context changes\. An item marked unchanged/);
 console.log('PASS script → S checkpoints → M evidence projection: promotions preserved, deterministic skips, times, revision gating, withdrawals, compact cross-Applet evidence, in-context citations only and unchanged-item marking');
 
 // S staging must not enforce M's final-card typography.
-const {appletCandidateContent,canonicalSourceQuotes}=await import('../core/applets/index.ts');
+const {appletCandidateContent,canonicalSourceQuotes}=await import('../context/applets/index.ts');
 const candidate={provider:'gmail',kind:'task',title:'A long source-derived title that exceeds the forty character card limit',reason:'Review this useful source before the upcoming renewal deadline',summary:'Check the renewal terms.',location:'123 Example Avenue',sources:[{provider:'gmail',id:'thread:test',quote:'Renewal   deadline'}]};
 const staged=appletCandidateContent(candidate);
 assert.equal(staged.location,'123 Example Avenue');
@@ -99,7 +99,7 @@ console.log('PASS S candidate copy independent of card limits; unique whitespace
 const unicodeMail='😀'.repeat(6000)+'a'.repeat(6000);
 assert.equal(observeAttention([],reg,[{id:'unicode',text:unicodeMail}],now)[0].text,unicodeMail);
 assert.throws(()=>observeAttention([],reg,[{id:'unicode',text:unicodeMail+'x'}],now));
-const {attentionOwnerAllowed}=await import('../core/attention/attention-content.ts');
+const {attentionOwnerAllowed}=await import('../agent/attention/attention-content.ts');
 assert.equal(attentionOwnerAllowed('apple-reminders',[{provider:'apple-reminders'}],['gmail'],[{provider:'apple-reminders'}]),true);
 assert.equal(attentionOwnerAllowed('invented',[{provider:'invented'}],['gmail'],[{provider:'apple-reminders'}]),false);
 assert.equal(attentionOwnerAllowed('apple-reminders',[{provider:'gmail'}],['gmail'],[{provider:'apple-reminders'}]),false);

@@ -2745,6 +2745,22 @@
       }
     },
     {
+      "key": "board",
+      "title": "Board",
+      "description": "The numbers you track from GitHub, PostHog and Cloudflare, on one board: a north-star number, a funnel, a list and a trend.",
+      "kind": "panel",
+      "peek": "resources/styles/builtin/assets/applets/board/peek-logo-v1.png",
+      "focus": "resources/styles/builtin/assets/applets/board/immersive.webp",
+      "generation": "interim",
+      "integration": "complete",
+      "visual": "pending",
+      "interaction": "pending",
+      "approvedSample": false,
+      "reusedFunctionalScene": false,
+      "setting": "indoor",
+      "brief": "A cork board with pinned cards on a warm plaster wall, in the right third. Interim drawn art (not generated or painted); fitted like the painted scenes (subjectLeft .69) until a painted scene is made and reviewed."
+    },
+    {
       "key": "doordash",
       "title": "DoorDash",
       "description": "Your delivery scooter by the bridge. Ask Fox to find food, prepare a cart and open DoorDash checkout.",

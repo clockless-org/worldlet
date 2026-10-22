@@ -4,7 +4,7 @@ const bundle=await build({stdin:{contents:"export {mountAppletScene} from './ui/
 const browser=await launchTestBrowser();try{
  const page=await browser.newPage({viewport:{width:1500,height:844},reducedMotion:'reduce'}),errors=pageErrors(page,{console:true});
  await page.setContent('<!doctype html><title>Calendar paper geometry</title><main id="notionWorld" class="native-console" style="position:fixed;inset:0"><div id="host" class="pixi-applet-stage" data-scene="google-calendar" data-applet="google-calendar" style="position:absolute;inset:0"></div></main>');
- await page.addStyleTag({content:(await Promise.all(['dist/WorldletWeb/worldlet-ui.css','ui/shell/pixi-world.css','ui/applets/scene/applet-scene.css','ui/applets/google-calendar/open.css'].map(p=>readFile(p,'utf8')))).join('\n')});await page.addScriptTag({content:bundle.outputFiles[0].text});
+ await page.addStyleTag({content:(await Promise.all(['dist/WorldletWeb/worldlet-ui.css','ui/frame/pixi-world.css','ui/applets/scene/applet-scene.css','ui/applets/google-calendar/open.css'].map(p=>readFile(p,'utf8')))).join('\n')});await page.addScriptTag({content:bundle.outputFiles[0].text});
  await page.evaluate(()=>{
   const w=window as any;w.now=+new Date(2026,9,8,12);w.state={mode:'week',offset:0};w.picks=[];w.saved=[];
   w.events=[{id:'read',title:'Reading',start:new Date(2026,9,8,10).toISOString(),end:new Date(2026,9,8,11).toISOString(),allDay:false,repeat:'none',skip:[],alert:10,location:'',notes:'',createdAt:w.now/1000,updatedAt:w.now/1000}];

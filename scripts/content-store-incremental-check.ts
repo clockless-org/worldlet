@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {createContentStore} from '../ui/shell/content-store.ts';
+import {createContentStore} from '../ui/frame/content-store.ts';
 const originals=Array.from({length:2000},(_,i)=>({id:'p'+i,title:'Page '+i,markdown:'Original '+i,text:'Original '+i,children:[],paths:['p'+i+'.md'],revision:'r1'}));
 const input=structuredClone(originals),pages=new Map<string,any>(input.map(p=>[p.id,p])),sections=[{id:'room',virtual:true,children:input.map(p=>p.id)}];
 let saved:string|null=null;const storage={getItem:()=>saved,setItem:(_key,value)=>{saved=value;}};

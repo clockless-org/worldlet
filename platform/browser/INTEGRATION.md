@@ -2,16 +2,16 @@
 
 Entertainment holds the TikTok browsing Applet and the YouTube Applet; Social holds the X and Discord browsing Applets. Website Applets fill the left two-thirds panel; the Applet model and Fox stay on the right. Navigation uses the website or Fox; World returns to the world. There is no permanent Worldlet toolbar over the page. A blocked sign-in shows a short explanation and an explicit external-browser action above the page.
 
-YouTube opens youtube.com in this panel; its player and queue are Fox's tooling, see [YouTube Applet](../../core/applets/INTEGRATIONS.md#youtube-applet). The [Google sign-in refusal](#google-sign-in-refusal) below applies to YouTube and any other website panel. Discord specifics are in [Discord Applet](INTEGRATION.md#discord).
+YouTube opens youtube.com in this panel; its player and queue are Fox's tooling, see [YouTube Applet](../../context/applets/INTEGRATIONS.md#youtube-applet). The [Google sign-in refusal](#google-sign-in-refusal) below applies to YouTube and any other website panel. Discord specifics are in [Discord Applet](INTEGRATION.md#discord).
 
 <a id="native-browser"></a>
 ## Website views
 
-Website panels run on the [CEF website engine](../web-engine/README.md) (#1170). It is a separate process with Chrome's own layer, which Google's sign-in accepts where it refuses Electron's views (#1089). Each page renders windowless; the host draws its frames in a trusted surface view placed over the World view, at the rect the World page reserves. Input goes back to the engine (`platform/electron/src/modules/browser/device.ts`, `engine/`). Where the engine is not built, or with `WORLDLET_WEB_ENGINE=electron`, the panels are sibling `WebContentsView`s instead (`page.ts`), sandboxed with no preload or host bridge. Both engines keep one page contract, so every rule below holds on either. The panel follows the DOM-measured viewport; it does not launch an external browser window.
+Website panels run on the [CEF website engine](../web-engine/README.md) (#1170). It is a separate process with Chrome's own layer, which Google's sign-in accepts where it refuses Electron's views (#1089). Each page renders windowless; the host draws its frames in a trusted surface view placed over the World view, at the rect the World page reserves. Input goes back to the engine (`platform/host/modules/applets/device.ts`, `engine/`). Where the engine is not built, or with `WORLDLET_WEB_ENGINE=electron`, the panels are sibling `WebContentsView`s instead (`page.ts`), sandboxed with no preload or host bridge. Both engines keep one page contract, so every rule below holds on either. The panel follows the DOM-measured viewport; it does not launch an external browser window.
 
 On the CEF engine, website state lives in request contexts under `<library>/Browser/CEF`: `Website` for the personal world and `Practice` for the practice world. On Electron's views it lives in session partitions, `persist:website` for the personal world and `persist:website-practice` for the practice world, under `<library>/Browser/Electron/Partitions`. The two keep the same cookies, so a sign-in on one holds on the other (owner report 2026-10-08, [cookies](../web-engine/README.md#cookies)); other browser storage stays per engine. Release, main Dev and linked-worktree libraries stay separate. Sign-ins from the retired CEF profile (`Browser/Chromium/Default`) and earlier WebKit cookies/passwords are not carried over; people sign in again. Worldlet's API connector grants, sources and conversations are unchanged. The dedicated YouTube player is its own `WebContentsView` in the same website partition, independent of generic website panels.
 
-The YouTube Applet's official player and queue (`platform/electron/src/modules/browser/youtube.ts`, Fox's tooling) are not a website panel, and they stay on Electron.
+The YouTube Applet's official player and queue (`platform/host/modules/applets/youtube.ts`, Fox's tooling) are not a website panel, and they stay on Electron.
 - **Why.** The Applet holds no YouTube account (`ui/applets/youtube/panel.ts`, [Google OAuth review](../../docs/GOOGLE-OAUTH-REVIEW.md)), so the player is an Electron view in its own account-less session and plays only public links. The CEF engine's signed-in contexts would give it the person's account.
 - **youtube.com itself** runs in the panel on the engine, signed in once the person signs in there.
 
@@ -19,19 +19,19 @@ Popups share their opener's session and stack over it inside the same panel. Bac
 
 **A slow or stalled engine (owner Orders 2026-10-07 on 3084).** The engine ignores every message for a page it has not made yet, so the host sends a page's load, place and visibility once the engine reports it `created`, however long that takes on a busy computer; before, a load sent during a slow start was dropped and the page stayed blank. A shown page that has drawn nothing for 12 seconds (`ENGINE_STALL` in `engine/page.ts`) means the engine stalled: the host ends it, a new one starts and the page loads its address again, at most once every two minutes. A page still blank after that says it could not load instead of staying white, and a kept page whose engine ended reopens when it comes back. Diagnostics record a `webEngineStall` row with the outcome only.
 
-**Video formats (#950, #973, #1174).** Website panels run the standard CEF build, which has no proprietary codecs: H.264/AAC-only video (X's, and HLS) does not play there, while YouTube's VP9/Opus does. The owner decided not to build Worldlet's own CEF with H.264/AAC (2026-10-02, and again 2026-10-06); the build script stays ([Worldlet's own CEF build](../web-engine/README.md#worldlets-own-cef-build-h264aac)). Electron's own views (the fallback, and the YouTube player) play H.264 and AAC, so **the X Applet's pages run on Electron's views** even where CEF is built (owner decision 2026-10-06, `ELECTRON_VIEW_APPLETS`, `pageEngine` in `engine/process.ts`). The Douyin Applet does too: its videos are H.264, and in the CEF panel its security check left the page blank or on "浏览器版本过低" (owner Order 2026-10-06 on 2915); people sign in to Douyin there (its QR code works). The Twitch Applet does too: its streams are H.264/AAC only, and in the CEF panel the player said "This video is either unavailable or not supported in this browser (Error #4000)" (owner Order 2026-10-07 on 3039). Every other site moves by itself (owner Order 2026-10-07, 越自动越好): each CEF page's main world gets a document-start script before its first load (`platform/bridge/video-formats.js`; the page starts blank and Back never returns there) that only counts what the page was told about H.264/AAC/HLS, what video it set up or played, and video that failed for want of a playable stream (a sound that fails, such as a game's music, does not count: Pokémon Showdown moved for it and lost its sign-in, owner report 2026-10-07). When `core/browser/video-formats.ts` says the page needs those formats (nothing played, and either a stream failed or the page was refused one at least five seconds ago while showing a video the size a person watches; YouTube's VP9 fallback never counts), the panel reopens the page at the same address on Electron's views and the World remembers the site (`video-formats-v2` records, up to 200; the first version's records, which included sites moved for a sound, were dropped on 2026-10-07), so it opens there at once next time. The host's log notes the move; it is not reported as an error. The same trade-offs as X apply to a moved site: its sign-in is separate and Google sign-in is refused there. Its sign-in lives in the Electron partition (`persist:website`), so people sign in to X once more; Google refuses its sign-in there (#1089), so X's "Sign in with Google" does not work in the Applet (a password or Sign in with Apple does). The task picture in picture's scaled display and Fox's page beside the desktop Companion are CEF features, so X's pages are shown unscaled and stop when the World window leaves. x.com opened in the Browser Applet stays on CEF.
+**Video formats (#950, #973, #1174).** Website panels run the standard CEF build, which has no proprietary codecs: H.264/AAC-only video (X's, and HLS) does not play there, while YouTube's VP9/Opus does. The owner decided not to build Worldlet's own CEF with H.264/AAC (2026-10-02, and again 2026-10-06); the build script stays ([Worldlet's own CEF build](../web-engine/README.md#worldlets-own-cef-build-h264aac)). Electron's own views (the fallback, and the YouTube player) play H.264 and AAC, so **the X Applet's pages run on Electron's views** even where CEF is built (owner decision 2026-10-06, `ELECTRON_VIEW_APPLETS`, `pageEngine` in `engine/process.ts`). The Douyin Applet does too: its videos are H.264, and in the CEF panel its security check left the page blank or on "浏览器版本过低" (owner Order 2026-10-06 on 2915); people sign in to Douyin there (its QR code works). The Twitch Applet does too: its streams are H.264/AAC only, and in the CEF panel the player said "This video is either unavailable or not supported in this browser (Error #4000)" (owner Order 2026-10-07 on 3039). Every other site moves by itself (owner Order 2026-10-07, 越自动越好): each CEF page's main world gets a document-start script before its first load (`platform/bridge/video-formats.js`; the page starts blank and Back never returns there) that only counts what the page was told about H.264/AAC/HLS, what video it set up or played, and video that failed for want of a playable stream (a sound that fails, such as a game's music, does not count: Pokémon Showdown moved for it and lost its sign-in, owner report 2026-10-07). When `agent/applets/video-formats.ts` says the page needs those formats (nothing played, and either a stream failed or the page was refused one at least five seconds ago while showing a video the size a person watches; YouTube's VP9 fallback never counts), the panel reopens the page at the same address on Electron's views and the World remembers the site (`video-formats-v2` records, up to 200; the first version's records, which included sites moved for a sound, were dropped on 2026-10-07), so it opens there at once next time. The host's log notes the move; it is not reported as an error. The same trade-offs as X apply to a moved site: its sign-in is separate and Google sign-in is refused there. Its sign-in lives in the Electron partition (`persist:website`), so people sign in to X once more; Google refuses its sign-in there (#1089), so X's "Sign in with Google" does not work in the Applet (a password or Sign in with Apple does). The task picture in picture's scaled display and Fox's page beside the desktop Companion are CEF features, so X's pages are shown unscaled and stop when the World window leaves. x.com opened in the Browser Applet stays on CEF.
 
 Location requests are answered only for Google Maps pages; Chromium's location provider then answers after the OS grants it. Meeting websites (Google Meet, Zoom, Teams) get camera/microphone with no question from Worldlet (owner request 2026-10-07); Worldlet asks the OS for that device (macOS asks the person once; Windows' privacy switch is read) and, when it is off, says where to turn it on. On the CEF engine the site's Permissions API then reads the device as granted. Other permission and desktop capture requests are denied (`surface.ts`, `device.ts`, `media-access.ts`). These paths need real-device permission acceptance on Electron.
 
 Fox uses the Worldlet gateway and private-context gate. The host calls
-`browserDriverStart` / `browserDriverNext` in `core/browser/driver-flow.ts`, then
+`browserDriverStart` / `browserDriverNext` in `agent/applets/driver-flow.ts`, then
 executes the returned commands through the pinned agent-browser runtime and
-`platform/browser/agent_browser.py` (`modules/browser/agent.ts`). Its DevTools IO
+`platform/browser/agent_browser.py` (`modules/applets/agent.ts`). Its DevTools IO
 attaches through `webContents.debugger` to the selected page only (`page.ts`). The
 host owns no second browser command policy.
 
 The driver transport is local, authenticated and restricted to the selected page;
-it is not a general remote-debugging endpoint. `platform/electron/src/main.ts` removes
+it is not a general remote-debugging endpoint. `platform/desktop/src/main.ts` removes
 `--remote-debugging-port`, `--remote-debugging-pipe`, `--remote-debugging-address` and
 `--remote-allow-origins` from the launch command line in release and Dev alike, so no
 debugging port exists. The visible website view runs with background throttling off: Fox
@@ -49,10 +49,10 @@ established by the engine change.
 
 Opening a website Applet again (YouTube, X, TikTok, Netflix, Browser, the Web view of a
 scene Applet and every other Applet with a website) shows the page the person left, not
-its start page. The rule is shared: `core/browser/page-resume.ts` decides, the Browser
-panel (`ui/browser/browser-device.ts`) applies it, and the host only keeps, shows and
+its start page. The rule is shared: `agent/applets/page-resume.ts` decides, the Browser
+panel (`ui/applets/browser-device.ts`) applies it, and the host only keeps, shows and
 releases pages as the `browserShow`/`browserHide` requests say (`contracts/browser-surface.ts`;
-`platform/electron/src/modules/browser/device.ts`).
+`platform/host/modules/applets/device.ts`).
 
 - **Live page.** Leaving (Back to the World, another Applet, a dialog over the panel)
   keeps the page hidden with its media paused and muted. The most recently left Applets keep
@@ -65,8 +65,8 @@ releases pages as the `browserShow`/`browserHide` requests say (`contracts/brows
   the World page's local storage on this device, never in analytics or anything Fox receives
   (the World backup does not include browser storage).
 - **Memory pressure.** Electron has no memory-pressure event, so while a page is kept the
-  host samples memory every 30 seconds (`PAGE_MEMORY` in `core/browser/page-resume.ts`,
-  read by `platform/electron/src/modules/browser/memory.ts`): memory the system can hand out
+  host samples memory every 30 seconds (`PAGE_MEMORY` in `agent/applets/page-resume.ts`,
+  read by `platform/host/modules/applets/memory.ts`): memory the system can hand out
   and the app's footprint, the working sets of `app.getAppMetrics()` plus the CEF engine's
   whole process tree (from `ps`; Electron's metrics leave it out). On macOS available memory
   comes from `vm_stat` (free, inactive, speculative and purgeable pages; Electron's free
@@ -100,18 +100,18 @@ releases pages as the `browserShow`/`browserHide` requests say (`contracts/brows
 
 Checks: `node scripts/page-resume-check.ts` (rule, bounds, parity vectors) and
 `node scripts/applet-resume-check.ts` (World UI with a faked bridge, and the media hold in
-Chromium); `npm run test:electron -- modules/browser` drives the memory-pressure release
+Chromium); `npm run test:electron -- modules/applets` drives the memory-pressure release
 with injected readings (order, protected pages, diagnostics). The real-page kept-page check of the retired Mac host (kept, returned, held,
 released, practice isolation) is not yet ported to Electron; device acceptance of kept
 pages on Electron is pending.
 
 ## Focus
 
-Every website page opens in Focus (owner request 2026-10-05). The rule is shared: `core/browser/page-focus.ts`
+Every website page opens in Focus (owner request 2026-10-05). The rule is shared: `agent/applets/page-focus.ts`
 decides what Focus does on a page (`pageFocusPlan`), the host applies it on each page load
-(`platform/electron/src/modules/browser/device.ts`) by evaluating `browser/page-focus.js`
+(`platform/host/modules/applets/device.ts`) by evaluating `browser/page-focus.js`
 (`platform/bridge/page-focus.ts`, bundled with Readability by the native UI build) in the page's isolated world, and
-the Browser panel shows the switch after Back (`ui/browser/browser-device.ts`).
+the Browser panel shows the switch after Back (`ui/applets/browser-device.ts`).
 
 - **Articles.** Off app-style sites and sites people work in, a page that Readability finds readable and whose article
   has at least 900 characters shows only that article: a reader page over the site's page, in a closed shadow root,
@@ -144,15 +144,15 @@ the Browser panel shows the switch after Back (`ui/browser/browser-device.ts`).
 ## Picture in picture
 
 While a website Applet's page plays a video, **Picture in picture** (#919) appears in
-the Applet's [top bar](../../ui/components/INTERACTION.md#top-bar), right of the title, as the
+the Applet's [top bar](../../ui/style/INTERACTION.md#top-bar), right of the title, as the
 same kind of control as Back (#951). Choosing it goes back as Back does, but the page is not
 hidden: it keeps playing, with its sound, as a window in the World's right third that shows
 only the video (#950). Leaving any other way (Back, World, another Applet) works as before.
-The rule is shared: `core/browser/picture-in-picture.ts` decides which Applets offer it, where the window shows,
-its size and where it may go; the Browser panel (`ui/browser/browser-device.ts`, with the offer
-and the window's frame in `ui/browser/picture-in-picture.ts`) applies it; the host only places,
+The rule is shared: `agent/applets/picture-in-picture.ts` decides which Applets offer it, where the window shows,
+its size and where it may go; the Browser panel (`ui/applets/browser-device.ts`, with the offer
+and the window's frame in `ui/applets/picture-in-picture.ts`) applies it; the host only places,
 shows and hides the page as `browserPip` says (`contracts/browser-surface.ts`;
-`platform/electron/src/modules/browser/device.ts`) and runs the shared page script.
+`platform/host/modules/applets/device.ts`) and runs the shared page script.
 
 - **Offer.** Applets whose own view is their website (`fullView.kind: 'web'`: YouTube, TikTok,
   X, Netflix, Twitch, Browser and the rest), while the host reports a playing video: the
@@ -174,7 +174,7 @@ shows and hides the page as `browserPip` says (`contracts/browser-surface.ts`;
 - **One sound at a time.** When a page starts audible media (the person plays a video in X, for
   example), the page playing before it pauses, so the window never talks over the Applet the
   person opened. Chromium does this itself: the host enables its audio focus
-  (`AudioFocusEnforcement`, `platform/electron/src/main.ts`). Muted autoplay, short
+  (`AudioFocusEnforcement`, `platform/desktop/src/main.ts`). Muted autoplay, short
   sounds (which only lower the others) and WebAudio cues such as the World's take no part.
 - **One window.** Choosing it on another page, for example X's video while YouTube is in the
   window, moves the window to that page; the previous page is left like any page the person
@@ -210,7 +210,7 @@ pausing the window's sound and the return at full size still need Electron devic
 
 Several website pages can be alive and shown together (#1176). On the CEF engine each page renders and takes
 input on its own, and Fox's agent-browser relay is per page.
-- **Budget** (`core/browser/budget.ts`, `browserBudget`). The host reads its memory and sends the budget with
+- **Budget** (`agent/applets/budget.ts`, `browserBudget`). The host reads its memory and sends the budget with
   its capabilities (`browserBudget`). The panel keeps pages live by it (`livePagePlan`).
   - Live pages, the kept pages and the picture-in-picture window: two below 16 GB of memory, four from
     16 GB, six from 32 GB. Never more than free memory holds at 350 MB each, and never fewer than one.
@@ -221,7 +221,7 @@ input on its own, and Fox's agent-browser relay is per page.
 - **One sound at a time.** Pages share audio focus (the engine enables Chromium's `AudioFocusEnforcement`):
   a page that starts playing pauses the one that was playing.
 - **Tabs in the Browser** (owner request 2026-10-07: booking flights and hotels needs several pages;
-  `core/browser/browser-tabs.ts`, `ui/browser/browser-device.ts`). Only the generic Browser has them; website
+  `agent/applets/browser-tabs.ts`, `ui/applets/browser-device.ts`). Only the generic Browser has them; website
   Applets keep one page. Each tab is its own kept page under an Applet-like key (`browser`, `browser--2`…), sent
   as `applet` in `browserShow` and listed in `live`, so the budget above decides which tabs stay alive: picking a
   live tab shows its page as it was, a released one opens again at its last address (`hold`). Up to eight tabs;
@@ -248,7 +248,7 @@ Checks:
   tab, remembered addresses and labels, stored tabs revalidated. `node scripts/browser-tabs-ui-check.ts` (in
   `test:ui`) drives the strip and the menu's keys through the World UI with a faked host.
 - `node scripts/applet-task-pip-check.ts`: Fox works on a copy of the page in the panel's corner, and its page goes out of sight with a badge when the person leaves.
-- The engine check (`npm run test:electron -- modules/browser/engine`):
+- The engine check (`npm run test:electron -- modules/applets/engine`):
   - two pages render and take typing each on its own;
   - two Fox drivers run at once on separate pages, each answered by its own page;
   - the second page's sound pauses the first's.
@@ -258,11 +258,11 @@ Checks:
 Fox's pages stay in their Applet (owner feedback 2026-10-02, replacing the window of #1175). Picture in
 picture at the World's bottom-right is for videos only. Hosts that declare `browserTaskPictureInPicture` (the CEF website engine, which draws
 a page as a texture at any size) keep Fox's page working when the person leaves; elsewhere leaving
-hides the page as before. The Browser panel (`ui/browser/browser-device.ts`) applies it.
+hides the page as before. The Browser panel (`ui/applets/browser-device.ts`) applies it.
 
 - **Fox's copy (owner request 2026-10-09).** When Fox starts working on the page in view, it gets a copy
   of that page in the panel's top-right corner, and the person keeps their own page and goes on using
-  it (`FOX_COPY`, `foxCopyPlacement` in `core/browser/picture-in-picture.ts`).
+  it (`FOX_COPY`, `foxCopyPlacement` in `agent/applets/picture-in-picture.ts`).
   - The host opens the copy at the page's address on the same CEF engine, so it has the same cookies
     and sign-in, and plays it muted.
   - The copy keeps the panel's size as its layout size and is drawn smaller, about a third of the
@@ -278,7 +278,7 @@ hides the page as before. The Browser panel (`ui/browser/browser-device.ts`) app
 
 - **Still Fox's, over its device.** If the person leaves the Applet while Fox works, Fox's page (its
   copy, which takes the person's page's place) is never hidden. A small live screen sits over that Applet's device in the World, with a tail pointing
-  down at it (owner decision 2026-10-02, `ui/browser/applet-task-screen.ts`), and the panel sends
+  down at it (owner decision 2026-10-02, `ui/applets/applet-task-screen.ts`), and the panel sends
   `browserLayout` with the screen's slot as `rect`, the panel's size as `page` and `press`. The page
   keeps its layout size, so Fox's references stay valid, and its next steps reach it; the engine
   draws it smaller at about 15 frames a second (`pageFrameRate`, [web engine](../web-engine/README.md)).
@@ -298,17 +298,17 @@ hides the page as before. The Browser panel (`ui/browser/browser-device.ts`) app
   device until the person opens the Applet (pressing the mark opens it). An exclamation over a device
   means something needs fixing, never done.
 - **Only browser work gets a screen.** Work without a page (reading mail, syncing) shows on the
-  device's lamp and in the History page ([Applet runtime](../../core/applets/RUNTIME.md)).
+  device's lamp and in the History page ([Applet runtime](../../context/applets/RUNTIME.md)).
 - **Fox's page, wherever the person is.** Fox's view guard refuses relative actions once the person
   changes views (`ui/companion/companion-ai.ts`). Fox's steps on its held page are exempt: the page
   out of sight, or the one the person took back into the panel during the turn (`foxPageHeld`).
   Moving around the World therefore does not stop Fox. Opening another website Applet does: that
   Applet's page is the person's.
 - **Beside the desktop Companion.** Closing or minimizing the World window stops website pages
-  ([desktop Companion](../electron/COMPANION.md)), except Fox's own page: one out of sight, or one
+  ([desktop Companion](../desktop/COMPANION.md)), except Fox's own page: one out of sight, or one
   Fox is driving in the panel.
   - That page moves into a window of its own beside the Companion's window, placed by
-    `desktopTaskPictureInPicturePlacement` (`platform/electron/src/modules/browser/task-window.ts`).
+    `desktopTaskPictureInPicturePlacement` (`platform/host/modules/applets/task-window.ts`).
     It keeps its size there, and Fox keeps working.
   - While the World is away, the panel's layouts only tell the host whether Fox is working; Fox's
     steps card follows the page.
@@ -329,13 +329,13 @@ Checks:
   beside the Companion.
 - `npm run test:onboarding` on the CEF engine: Fox's first task with real Fox, finished in the
   Applet's panel.
-- The engine check (`npm run test:electron -- modules/browser/engine`):
+- The engine check (`npm run test:electron -- modules/applets/engine`):
   - shown smaller, the page keeps its size and reports presses instead of taking clicks;
   - Fox's driver clicks a page element at the page's own coordinates;
   - the frame rate follows `pageFrameRate`;
   - through the panel's own device and real windows, Fox's page moves beside the Companion and back
     with its press and close.
-- `npm run test:electron -- modules/shell`: the Companion tells the panel when it is out and back.
+- `npm run test:electron -- modules/app`: the Companion tells the panel when it is out and back.
 - The browser surface contract check.
 
 ## Saving X posts
@@ -346,12 +346,12 @@ Asking Fox to save captures the open post, or the post whose text is selected, l
 
 ## Fox tools
 
-Two browser tools are defined in `worker/companion-tools.ts`, emitted into the Hermes `tools.json` by `scripts/build-hermes.ts`, and executed in `ui/shell/notion-world.ts`:
+Two browser tools are defined in `worker/companion-tools.ts`, emitted into the Hermes `tools.json` by `scripts/build-hermes.ts`, and executed in `ui/frame/notion-world.ts`:
 
 | Tool | Scope | Operations |
 | --- | --- | --- |
-| `browse_web` | The X reading terminal (`ui/browser/browser-device.ts`) | `read`, `open` (an X post or profile URL), `scroll`, `back`, `forward`, `home`, `bookmarks`, `save`, `saved` (query local captures) |
-| `automate_browser` | Any public HTTPS page in the embedded panel (agent-browser via `core/browser/driver-flow.ts`) | `open`, `snapshot`, `do` (steps in words, each control picked by the small model tier), `click`, `fill`, `submit`, `scroll`, `back`, `forward`; actions run directly except the last step, which asks once, and consequential ones leave a receipt |
+| `browse_web` | The X reading terminal (`ui/applets/browser-device.ts`) | `read`, `open` (an X post or profile URL), `scroll`, `back`, `forward`, `home`, `bookmarks`, `save`, `saved` (query local captures) |
+| `automate_browser` | Any public HTTPS page in the embedded panel (agent-browser via `agent/applets/driver-flow.ts`) | `open`, `snapshot`, `do` (steps in words, each control picked by the small model tier), `click`, `fill`, `submit`, `scroll`, `back`, `forward`; actions run directly except the last step, which asks once, and consequential ones leave a receipt |
 
 Neither tool offers arbitrary JavaScript, posting, direct messages, likes, account settings or credential access. Real account content is never treated as sample data: any agent read requires private-context consent, even while the sample world is open. `automate_browser` limits are described in Search, browser and routines.
 
@@ -361,9 +361,9 @@ Users authenticate directly in the visible website. Safari/Chrome logins do not 
 
 **Passkeys on Electron's views** (owner report 2026-10-08: LinkedIn's passkey sign-in stopped working). Passkeys and phone (QR) passkeys work on the CEF engine, whose Chromium draws their dialogs; Electron's views draw none, so a passkey request there fails. A site moved to Electron's views for its video (LinkedIn's feed) also signed in there. Every document on Electron's views gets a small watch in its own world (`platform/bridge/passkey-watch.js`) that reports a passkey request (`navigator.credentials.get` or `create` with `publicKey`, the email field's passkey suggestion included) and lets it go on. The host then reopens the page on the engine at the same address, where the person signs in. Its video pages open on Electron's views again afterwards, signed in alike ([cookies](../web-engine/README.md#cookies)).
 
-**Google sign-in on Electron's views** (owner 2026-10-08: "先不自己编，做最佳实现"). Google refuses account sign-in in Electron's views (#1089) and accepts it on the CEF engine. When a main-frame navigation on Electron's views starts at `accounts.google.com` (`googleSignInPage`, `core/browser/sign-in.ts`), the host reopens the page on the engine before Google judges the browser. A page's own sign-in reopens at Google's address, so the return to the site finishes there. A sign-in popup (Sign in with Google on X), whose opener waits for it, reopens its opener page on the engine instead, and a notice asks the person to choose Sign in with Google again. For three minutes afterwards the page's video does not move it back to Electron's views. When it does move back, the sign-in goes along ([cookies](../web-engine/README.md#cookies)). Without a CEF build for the host, Google's refusal page and the system-browser offer stay as before.
+**Google sign-in on Electron's views** (owner 2026-10-08: "先不自己编，做最佳实现"). Google refuses account sign-in in Electron's views (#1089) and accepts it on the CEF engine. When a main-frame navigation on Electron's views starts at `accounts.google.com` (`googleSignInPage`, `agent/applets/sign-in.ts`), the host reopens the page on the engine before Google judges the browser. A page's own sign-in reopens at Google's address, so the return to the site finishes there. A sign-in popup (Sign in with Google on X), whose opener waits for it, reopens its opener page on the engine instead, and a notice asks the person to choose Sign in with Google again. For three minutes afterwards the page's video does not move it back to Electron's views. When it does move back, the sign-in goes along ([cookies](../web-engine/README.md#cookies)). Without a CEF build for the host, Google's refusal page and the system-browser offer stay as before.
 
-**Saved sign-ins** (owner request 2026-10-07; `core/browser/saved-logins.ts`, `platform/bridge/login-watch.js`, `platform/electron/src/modules/browser/logins.ts`). Chrome's password manager and autofill belong to its `//chrome` layer, which the windowless CEF panel does not draw, so the World keeps sign-ins itself. Every website page's isolated world gets a small watch, the built-in browser's own. It reports three things: that the page shows a sign-in form, an account typed on its own step (an email page before the password page, kept by the host for five minutes), and the account and password when the person signs in. A sign-in is a trusted submit, Enter, or a press on a form's submit button or a button named like Log in, Sign in, Next or 登录, with a password typed. A form-less dialog such as Pokémon Showdown's counts; a show-password eye and one-time codes do not. A sign-in is saved without asking (owner 2026-10-08: "password 不用问 自动存"), and a changed password replaces the saved one; a short notice says **Password saved for AshK on play.pokemonshowdown.com**. On a site's sign-in form, a button per saved account (**Fill in AshK**) fills it in, as typing would. Passwords are encrypted with the system keychain's key (Electron `safeStorage`) into the World's `saved-logins` records. Only the host decrypts them, to fill a page or compare a new sign-in. They never reach the World UI, Fox (every `login*` browser command refuses an agent caller) or the recordings. Account sign-in hosts (`SIGN_IN_HOSTS`) stay uninspected, and the practice world keeps none. Settings › General lists each saved site and account, without the password, with **Delete**. A record another computer's keychain made cannot be opened, and filling it says to delete it. Worldlet's system-browser OAuth grant for Mail/Calendar is independent. See [website sign-in](INTEGRATION.md#sign-in-acceptance).
+**Saved sign-ins** (owner request 2026-10-07; `agent/applets/saved-logins.ts`, `platform/bridge/login-watch.js`, `platform/host/modules/applets/logins.ts`). Chrome's password manager and autofill belong to its `//chrome` layer, which the windowless CEF panel does not draw, so the World keeps sign-ins itself. Every website page's isolated world gets a small watch, the built-in browser's own. It reports three things: that the page shows a sign-in form, an account typed on its own step (an email page before the password page, kept by the host for five minutes), and the account and password when the person signs in. A sign-in is a trusted submit, Enter, or a press on a form's submit button or a button named like Log in, Sign in, Next or 登录, with a password typed. A form-less dialog such as Pokémon Showdown's counts; a show-password eye and one-time codes do not. A sign-in is saved without asking (owner 2026-10-08: "password 不用问 自动存"), and a changed password replaces the saved one; a short notice says **Password saved for AshK on play.pokemonshowdown.com**. On a site's sign-in form, a button per saved account (**Fill in AshK**) fills it in, as typing would. Passwords are encrypted with the system keychain's key (Electron `safeStorage`) into the World's `saved-logins` records. Only the host decrypts them, to fill a page or compare a new sign-in. They never reach the World UI, Fox (every `login*` browser command refuses an agent caller) or the recordings. Account sign-in hosts (`SIGN_IN_HOSTS`) stay uninspected, and the practice world keeps none. Settings › General lists each saved site and account, without the password, with **Delete**. A record another computer's keychain made cannot be opened, and filling it says to delete it. Worldlet's system-browser OAuth grant for Mail/Calendar is independent. See [website sign-in](INTEGRATION.md#sign-in-acceptance).
 
 ## Verification
 
@@ -433,7 +433,7 @@ Google can refuse account sign-in in a website panel. After the account name it 
 - Electron's user agent names Electron, the app and the full Chromium version (`Chrome/152.0.7977.130`). Chromium's own user agent, which the CEF host used unchanged, has no embedder token and a reduced version (`Chrome/152.0.0.0`).
 - The panel attached DevTools and ran `Runtime.enable` and its isolated observers on every loaded page, including Google's sign-in pages. The CEF host attached DevTools too, so this alone is not an established cause.
 
-Website sessions now present the engine consistently (`core/browser/client-hints.ts`, `surface.ts`): Chromium's reduced user agent, and the three default hint headers on HTTPS (and loopback) requests, built from the same brands, mobile flag and platform the page's JavaScript reports. Headers the engine sends itself are left alone. High-entropy hints (full version list, platform version, architecture) are not sent as headers; pages still read them from JavaScript. Account sign-in pages (`accounts.google.com`, `appleid.apple.com`) are never inspected: as the main frame starts there the page's DevTools session detaches, so no `Runtime` domain, isolated observer, activity capture or agent runs on them, and the next ordinary page is inspected again (`page.ts`).
+Website sessions now present the engine consistently (`agent/applets/client-hints.ts`, `surface.ts`): Chromium's reduced user agent, and the three default hint headers on HTTPS (and loopback) requests, built from the same brands, mobile flag and platform the page's JavaScript reports. Headers the engine sends itself are left alone. High-entropy hints (full version list, platform version, architecture) are not sent as headers; pages still read them from JavaScript. Account sign-in pages (`accounts.google.com`, `appleid.apple.com`) are never inspected: as the main frame starts there the page's DevTools session detaches, so no `Runtime` domain, isolated observer, activity capture or agent runs on them, and the next ordinary page is inspected again (`page.ts`).
 
 Whether these differences are what Google judges is a hypothesis: it is not established which signal triggered the reported refusal, and nothing here was checked against Google. The owner's real-account sign-in on Mac Dev 65112c9, which includes these changes, still ended on the refusal page.
 
@@ -456,13 +456,13 @@ Whether these differences are what Google judges is a hypothesis: it is not esta
 
 Which of these Google weighs is not published. The `//chrome` layer is the one difference that separates Electron from both the former host and Chromium, and it cannot be closed truthfully inside Electron.
 
-Worldlet still does not block Google up front. It recognizes the refusal page (`core/browser/sign-in.ts`). The page stays visible. Fox says Google doesn't allow signing in from the built-in browser and that YouTube videos still play signed out. One explicit **Open YouTube in your browser ↗** action (the Applet's title) sits beside the page. Nothing opens by itself. The action opens the Applet's site in the system browser, never Google's sign-in page, and it leaves with the next page or when the person leaves the Applet; a later refusal shows it again. Diagnostics record `google-sign-in-rejected` without the URL. A step of an account sign-in page that fails to load (for example a form page Google will not resubmit, or a stopped engine) gets its own message instead of the generic “ask Fox to retry”: start the sign-in again, or sign in in the browser, with the same browser action. Every load failure records its network error code and host, never the path, as `unavailable net <code> <host>` (owner report 2026-10-02, where the cause could not be read back).
+Worldlet still does not block Google up front. It recognizes the refusal page (`agent/applets/sign-in.ts`). The page stays visible. Fox says Google doesn't allow signing in from the built-in browser and that YouTube videos still play signed out. One explicit **Open YouTube in your browser ↗** action (the Applet's title) sits beside the page. Nothing opens by itself. The action opens the Applet's site in the system browser, never Google's sign-in page, and it leaves with the next page or when the person leaves the Applet; a later refusal shows it again. Diagnostics record `google-sign-in-rejected` without the URL. A step of an account sign-in page that fails to load (for example a form page Google will not resubmit, or a stopped engine) gets its own message instead of the generic “ask Fox to retry”: start the sign-in again, or sign in in the browser, with the same browser action. Every load failure records its network error code and host, never the path, as `unavailable net <code> <host>` (owner report 2026-10-02, where the cause could not be read back).
 
 Signing in through the system browser does not sign the panel in. The panel's session stays signed out, so signed-in YouTube (subscriptions, history, Watch later, comments) works only in the system browser.
 
 Checks:
 - `node scripts/browser-sign-in-check.ts`: the rule and the World UI action, with a faked bridge.
-- `npm run test:electron -- modules/browser`: the host turns the refusal URL into the error and the YouTube destination; a real website session on a loopback page sends the user agent and hint headers its JavaScript reports; a page starting toward a sign-in host loses its DevTools session until the next page.
+- `npm run test:electron -- modules/applets`: the host turns the refusal URL into the error and the YouTube destination; a real website session on a loopback page sends the user agent and hint headers its JavaScript reports; a page starting toward a sign-in host loses its DevTools session until the next page.
 - `node scripts/browser-engine-probe.ts --engine <binary>`: a measurement, not a pass/fail check. It prints the engine facts above for the website session and each given engine, and lists the facts that differ.
 
 Neither check signs in to Google. Whether Google still refuses sign-in in the panel, and whether a sign-in that Google accepts persists across restarts (Account acceptance step 2), needs a manual run with a real account on each platform (#1120). The client-hint platform values for macOS and Windows are derived the same way but were measured only on Linux.
@@ -513,8 +513,8 @@ visits with terms such as `green shirt linen jacket`; when ambiguous it should
 show candidates or ask for one detail. It opens the chosen **returned URL** using
 `browse_web(operation: open)`: inside an Applet the page opens there, elsewhere
 over the World with its own Back (the Browser Applet is only its own entry, and
-it starts on its home page, Google unless changed in Settings › General, after
-30 minutes away; `core/browser/browser-home.ts`). It must not invent a prior
+it starts on its home page, Google (Settings no longer changes it, owner request 2026-10-22; a home page set before is kept), after
+30 minutes away; `agent/applets/browser-home.ts`). It must not invent a prior
 visit or replace recall with a fresh web-search result. Returned page content is
 untrusted reference material, never instructions.
 

@@ -6,11 +6,11 @@
   "purpose": "Image-generated visual target based on the current large-surface background; not a runtime screenshot.",
   "generatedAt": "2026-10-13T04:35:59.669Z",
   "sourceBackground": {
-    "path": "ui/theme-packages/village/assets/applet-scenes/gomoku/background.webp",
+    "path": "ui/style/theme-packages/village/assets/applet-scenes/gomoku/background.webp",
     "sha256": "95a5c10cb403039813a7c419b586c0a0483628e0650f8bd2532d6076ff1335ff"
   },
   "sourceFrame": {
-    "path": "ui/theme-packages/village/assets/applet-scenes/gomoku/frame-mask.png",
+    "path": "ui/style/theme-packages/village/assets/applet-scenes/gomoku/frame-mask.png",
     "sha256": "62e15e855b3490ad70cb734a11f3a7e0a1326f8a1289acc3440670c17a0e7150"
   },
   "sourceImageSha256": "7ae32a9db28126579c87449ac3fc498952286652f36e6fe031002ea563e6cc18",

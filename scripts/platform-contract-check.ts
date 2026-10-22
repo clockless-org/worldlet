@@ -1,14 +1,14 @@
 import './source-snapshot-check.ts';
 import {readCompanionProfile} from '../contracts/companion.ts';
-import {appletSupport} from '../core/applets/applet-support.ts';
+import {appletSupport} from '../context/applets/applet-support.ts';
 import assert from 'node:assert/strict';
 import {resolveHost} from '../platform/bridge/host.ts';
 import {hostFeatures,googleSignInStart} from '../platform/bridge/features.ts';
 import {GOOGLE_SIGN_IN_EVENT,googleSignInStage} from '../contracts/platform.ts';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
-import {sourceContextRows} from '../core/context/source-context.ts';
-import {googleAuthorizationUrl} from '../core/agent/auth-handoff.ts';
+import {sourceContextRows} from '../context/connectors/source-context.ts';
+import {googleAuthorizationUrl} from '../agent/gate/auth-handoff.ts';
 const requests:any[]=[];
 const mac=resolveHost({webkit:{messageHandlers:{worldlet:{postMessage:async r=>{requests.push(r);return {ok:true};}}}}});
 const win=resolveHost({worldletHost:{version:1,platform:'windows',request:async r=>{requests.push(r);return {ok:true};}}});
@@ -61,14 +61,14 @@ assert.equal(googleSignInStage({stage:'browser',url:consent}),'browser');
 assert.deepEqual([consent,'http://accounts.google.com/o/oauth2/auth','https://accounts.google.com.evil.test/o/oauth2/auth','https://evil.test/o/oauth2/auth',consent+'&a='+'a'.repeat(8192),{}].map(googleAuthorizationUrl),[consent,undefined,undefined,undefined,undefined,undefined]);
 {
  const source=(file:string)=>readFileSync(new URL('../'+file,import.meta.url),'utf8');
- assert.match(source('platform/electron/src/capabilities.ts'),/\bgoogleSignInStages:true\b/,'the Electron host declares sign-in stages');
- const connections=source('platform/electron/src/modules/sources/connections.ts');
+ assert.match(source('platform/host/capabilities.ts'),/\bgoogleSignInStages:true\b/,'the Electron host declares sign-in stages');
+ const connections=source('platform/host/modules/connectors/connections.ts');
  assert.ok(/onStage:\(stage,url\)=>host\.page\.event\('([^']+)',url\?\{stage,url\}:stage\)/.exec(connections)?.[1]===GOOGLE_SIGN_IN_EVENT,'the Electron host relays sign-in stages to the World page');
- assert.match(source('platform/electron/src/host/page.ts'),/new CustomEvent\(/,'page events carry their detail');
+ assert.match(source('platform/host/page.ts'),/new CustomEvent\(/,'page events carry their detail');
  // The host emits only stages the page understands, and `browser` among them.
- const emitted=[...source('platform/electron/src/modules/sources/google-source.ts').matchAll(/onStage\('(\w+)'[,)]/g)].map(match=>match[1]);
+ const emitted=[...source('platform/host/modules/connectors/google-source.ts').matchAll(/onStage\('(\w+)'[,)]/g)].map(match=>match[1]);
  assert.ok(emitted.includes('browser')&&emitted.every(stage=>googleSignInStage(stage)),'unknown host sign-in stage: '+emitted);
- assert.match(source('platform/electron/src/modules/sources/google-source.ts'),/onStage\('browser',handoff\.url\)/,'the browser stage carries the consent address the host validated and opened');
+ assert.match(source('platform/host/modules/connectors/google-source.ts'),/onStage\('browser',handoff\.url\)/,'the browser stage carries the consent address the host validated and opened');
 }
 console.log('PASS Google sign-in stages: the Electron host declares and relays them, neutral until consent opens, legacy hosts keep the browser steps');
 
@@ -91,7 +91,7 @@ assert.throws(()=>readCompanionProfile({createdAt:''}),/name/);
 
 // Execute the exact EventKit read helper with a fake EventKit whose request completion never runs,
 // as on macOS 14+ under osascript: the decision must come from the re-read TCC status (#1205).
-const appleSource=readFileSync('platform/electron/src/modules/sources/apple.ts','utf8').replace(/\r\n/g,'\n');
+const appleSource=readFileSync('platform/host/modules/connectors/apple.ts','utf8').replace(/\r\n/g,'\n');
 const eventKitRead=['PRELUDE','READ'].map(name=>appleSource.match(new RegExp(`const ${name}=(?:PRELUDE\\+)?String\\.raw\`\\n([\\s\\S]*?)\\n\`;`))![1]).join('\n');
 const readWith=(statuses:number[],authorize=true)=>{
  let clock=0,polls=0,requests=0;

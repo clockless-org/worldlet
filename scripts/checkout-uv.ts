@@ -1,4 +1,4 @@
-// uv for Worldlet's own tools Python (platform/electron/src/modules/media/tools-python.ts) when the app runs from a
+// uv for Worldlet's own tools Python (platform/host/modules/app/tools-python.ts) when the app runs from a
 // checkout: a packaged app bundles it, Dev and the checks that start the app pass the checkout's `.local/bootstrap` one
 // as WORLDLET_UV, installed here when missing. Without it every local tool fails, the browser driver among them (Mac
 // Alpha 4096: Fox's browser task got "Fox is preparing the local runtime" on every step once #109 removed the Hermes

@@ -1,4 +1,4 @@
-import {node,uiIcon} from '../../components/index.ts';
+import {node,uiIcon} from '../../style/index.ts';
 import type {AppletSceneRegion} from '../scene/applet-scene.ts';
 /** Optional separate book surfaces; Calendar still owns all dates, records and actions. */
 export function calendarRegions(panel:HTMLElement,regions:readonly AppletSceneRegion[]){

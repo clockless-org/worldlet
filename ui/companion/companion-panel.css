@@ -132,6 +132,11 @@
 .companion-settings-item:hover{background:#e6dbc438}
 .companion-settings-item[aria-current]{background:#efc77f60}
 .companion-settings-item:focus-visible{outline:2px solid #a38048;outline-offset:-2px}
+/* The three areas come first; Fox, Phone, General and Help sit under a line, smaller (issue #674). */
+.companion-settings-minor{margin:8px 12px 6px;border-top:1px solid #d9cbae80}
+.companion-info-panel .companion-settings-item.is-minor{padding:4px 12px}
+.companion-settings-item.is-minor strong{font-size:12px;font-weight:600;color:#56604f}
+.companion-settings-item.is-minor span{display:none}
 .companion-settings-side{display:flex;flex-direction:column;min-height:0}
 .companion-info-panel .companion-settings-version{margin:0;flex:none;border-right:1px solid #d9cbae80;padding:10px 12px 2px;font-size:11px;color:#77745e;user-select:text;font-variant-numeric:tabular-nums}
 .companion-settings-version:empty{display:none}
@@ -162,10 +167,24 @@
 .companion-settings-approvals,.companion-settings-worldlet-accounts{display:flex;flex-direction:column;align-items:flex-start;gap:8px;align-self:stretch}
 .companion-settings-approvals .companion-settings-row{flex-wrap:wrap}
 .companion-settings-access-audit{margin:4px 0 0;padding-left:16px}
+.companion-settings-access-report{display:block;margin-top:2px;font-size:13px;color:#2f5d34}
+.companion-settings-access-report[data-liveness="stale"]{color:#8a6a1f}
+.companion-settings-access-report[data-liveness="offline"]{color:#6b7368}
+.companion-settings-access-add{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:10px;font-size:13px;color:#354132}
+.companion-settings-access-add input{flex:1 1 180px;min-width:0}
 .companion-settings-access-services{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:4px}
 .companion-settings-access-service{display:inline-flex;align-items:center;gap:6px;margin:0;font-size:13px;color:#354132;white-space:nowrap;cursor:pointer}
 .companion-settings-access-service input{flex:0 0 auto;width:auto;min-height:0;margin:0;padding:0}
+.companion-settings-access-writes{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:6px}
+.companion-settings-access-write{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;font-size:13px;color:#354132}
+.companion-settings-access-write .companion-settings-input{width:auto;min-width:160px;margin:0}
+.companion-settings-access-write .companion-settings-select{width:auto;min-height:0;font:inherit;font-size:13px;padding:4px 8px;border:1px solid #d9cbae;border-radius:8px;background:#fffaf0;color:#354132}
+.companion-settings-access-order{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin:0 0 10px;font-size:13px;color:#354132}
+.companion-settings-access-order .companion-settings-select{width:auto;min-height:0;font:inherit;font-size:13px;padding:4px 8px;border:1px solid #d9cbae;border-radius:8px;background:#fffaf0;color:#354132}
+.companion-settings-access-wake{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:6px;font-size:13px;color:#354132}
+.companion-settings-access-wake textarea.companion-settings-input{width:100%;max-width:420px;margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;resize:vertical}
 .companion-settings-approvals code{font-size:12px;font-weight:400;overflow-wrap:anywhere}
+.companion-settings-remote-address{margin:4px 0;user-select:all}
 .companion-settings-command{flex:1 1 100%;font-size:12px;color:#656651}
 .companion-settings-command summary{cursor:pointer;min-height:0;line-height:1.4}
 .companion-settings-command:not([open]) code{display:none}
@@ -175,16 +194,37 @@
 .companion-settings-agent-skills,.companion-settings-agent-routines,.companion-settings-agent-memory{display:flex;flex-direction:column;align-items:flex-start;gap:8px;align-self:stretch}
 .companion-settings-agent-skills .companion-settings-row,.companion-settings-agent-routines .companion-settings-row,.companion-settings-agent-memory .companion-settings-row{flex-wrap:wrap}
 .companion-settings-memory{display:flex;flex-direction:column;align-items:flex-start;gap:10px;align-self:stretch}
+.companion-settings-memory[hidden]{display:none}
 .companion-settings-memory-group{font-size:13px;color:#354132}
 .companion-settings-memory-text{white-space:pre-line;overflow-wrap:anywhere;font-size:13px;color:#354132}
 .companion-settings-agent-memory .companion-settings-row>div{flex:1 1 260px;min-width:0}
 .companion-settings-memory .companion-settings-rows>button{align-self:flex-start}
 .companion-settings-memory .companion-settings-rows>.companion-settings-quiet{font-size:12px;color:#656651}
 .companion-settings-row .companion-settings-tag{display:inline-block;margin-left:2px;padding:0 6px;border-radius:8px;background:#d9cbae80;font-size:11px;font-weight:500;color:#5b5440;vertical-align:1px}
+/* Icons make Settings clear at a glance (owner request 2026-10-21, ui/frame/settings-rows.ts): one on each list item
+   and on the left of each row; services wear their logo, an Agent without one its first letter. */
+.companion-settings-icon{flex:none;display:grid;place-items:center;width:34px;height:34px;border:1px solid #e3d6bb;border-radius:10px;background:#fffaf0;color:#5a6b4f}
+.companion-settings-icon img{width:22px;height:22px;object-fit:contain}
+.companion-settings-icon.is-letter{background:#f6e3c2;color:#7a4e1f;font-size:14px;font-weight:700}
+.companion-settings-item .companion-settings-icon{width:auto;height:auto;border:0;background:none;color:#6b7a5d}
+.companion-settings-item[aria-current] .companion-settings-icon{color:#8a5a1c}
+.companion-info-panel .companion-settings-item.has-icon{flex-direction:row;align-items:flex-start;gap:10px}
+.companion-settings-item.is-minor span.companion-settings-icon{display:grid}
+.companion-settings-item.has-icon>.companion-settings-item-words{display:flex;flex-direction:column;min-width:0}
+.companion-settings-row.has-icon{align-self:stretch}
+.companion-settings-slot{display:contents}
+.companion-settings-rows>.companion-settings-status:empty{display:none}
+.companion-settings-switch{all:unset;box-sizing:border-box;flex:none;position:relative;width:38px;height:22px;border-radius:11px;background:#cfc6b3;cursor:pointer;transition:background .15s}
+.companion-settings-switch::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0003;transition:left .15s}
+.companion-settings-switch[aria-checked=true]{background:#4f9a5a}
+.companion-settings-switch[aria-checked=true]::after{left:18px}
+.companion-settings-switch:focus-visible{outline:2px solid #a38048;outline-offset:2px}
+.companion-settings-switch:disabled{opacity:.6;cursor:default}
+.companion-settings-ok::before{content:"";display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;background:#3c9a4c}
 .companion-settings-agent-routines code{font-size:12px;overflow-wrap:anywhere}
 .companion-settings-row>.companion-settings-actions{flex:0 0 auto;flex-direction:row;align-items:center;justify-content:flex-end}
 .companion-settings-row>.companion-settings-confirm{flex:1 1 100%;flex-direction:row}
-/* Settings › Agent › Routines: Change time and New routine open a small form in place. */
+/* Settings › Agents › Your Agent › Routines: Change time and New routine open a small form in place. */
 .companion-settings-form{display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:1 1 100%;margin-top:6px}
 .companion-settings-form>textarea.companion-settings-input{flex:1 1 100%;resize:vertical;font:inherit}
 .companion-settings-form>input.companion-settings-input{flex:1 1 100%}
@@ -252,14 +292,71 @@
 .companion-settings-detail.is-page>.companion-settings-body>*{flex:1 1 auto;min-height:0;margin:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .companion-settings-detail.is-page .companion-profile-page{display:block;max-width:420px;overflow-y:auto}
 @media(max-width:700px){.companion-settings-detail.is-page .companion-profile-page{display:block;overflow-y:auto}}
+/* Settings › Connectors: one tile per service (connectors-page.ts). */
+.companion-settings-connectors{display:flex;flex-direction:column;gap:10px;align-self:stretch}
+.companion-settings-connector-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.companion-settings-connector{display:flex;flex-direction:column;gap:8px;min-width:0;padding:10px 12px;border:1px solid #d9cbae80;border-radius:12px;background:#e6dbc438}
+.companion-settings-connector[data-state="connected"]{background:#dfe6cf5c}
+.companion-settings-connector[data-state="needs-you"]{border-color:#c98a5a99}
+.companion-settings-connector-words{display:flex;flex-direction:column;gap:2px;min-width:0}
+.companion-settings-connector-words strong{font-size:13px;color:#354132}
+.companion-settings-connector-words span{font-size:12px;color:#656651;overflow-wrap:anywhere}
+.companion-settings-connector[data-state="needs-you"] .companion-settings-connector-words span{color:#8a4b22}
+.companion-settings-connector-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+.companion-settings-sign-in-code{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.companion-settings-sign-in-code-value{font:600 28px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;user-select:all}
+.companion-settings-connector>.companion-settings-confirm{gap:6px;font-size:12px}
+.companion-settings-connector>.companion-settings-confirm>span{flex:1 1 100%}
+.companion-settings-connector-pick{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;color:#354132}
+.companion-settings-connector-pick>span{flex:1 1 100%}
+.companion-settings-connector-pick>select{flex:1 1 140px;min-width:0}
+.companion-settings-connector-who{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#354132}
+.companion-settings-connector-reader{display:flex;align-items:flex-start;gap:6px;cursor:pointer}
+.companion-settings-connector-reader>input{margin:2px 0 0;flex:none}
+.companion-settings-connector-others{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.companion-settings-connector-others>span{flex:1 1 140px;color:#656651}
+.companion-settings-connector-sync{font-size:12px;color:#354132}
+.companion-settings-connector-sync>summary{cursor:pointer;color:#656651;padding:2px 0}
+.companion-settings-connector-sync>label{margin-top:4px}
+.companion-settings-connector-agents{display:flex;flex-direction:column;gap:4px;padding-left:4px}
+.companion-settings-advanced .companion-settings-row{flex-wrap:wrap}
+.companion-settings-advanced .companion-settings-row>div{flex:1 1 240px;gap:4px}
 .companion-settings-elsewhere{align-self:stretch;margin-top:6px}
 .companion-settings-elsewhere>summary{cursor:pointer;font-size:13px;font-weight:600;color:#354132;padding:6px 0}
 .companion-settings-elsewhere[open]>summary{margin-bottom:8px}
 .companion-settings-elsewhere>.companion-settings-row+.companion-settings-row{margin-top:8px}
-/* Feedback: a small panel of its own over the World's bottom-right, opened from Settings › Help (owner request
+.companion-settings-use-in-claude{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+/* Agents: your own Agent first, what each may do in one line, its switches folded; your Agent's page has a way back. */
+.companion-settings-row.is-own{border-color:#c9a86a;background:#efc77f30}
+.companion-settings-row .companion-settings-access-may{margin-top:2px;color:#354132}
+.companion-settings-access-more{margin-top:6px}
+.companion-settings-access-more>summary{cursor:pointer;font-size:12px;font-weight:600;color:#56604f}
+.companion-settings-access-more[open]{display:flex;flex-direction:column;gap:2px}
+.companion-settings-own-head{display:flex;align-items:center;gap:12px;align-self:stretch}
+.companion-settings-own-title{margin:0;font-size:15px;color:#354132}
+/* Context: each kind with how much it holds. */
+.companion-settings-context{display:flex;flex-direction:column;gap:10px;align-self:stretch}
+.companion-settings-context .companion-settings-row{flex-wrap:wrap}
+.companion-settings-row .companion-settings-context-amount{font-weight:600;color:#354132}
+.companion-settings-context-services{margin:6px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+.companion-settings-context-services>li{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px}
+.companion-settings-use-in-claude .companion-info-note{margin:0}
+.companion-settings-steps{margin:0;padding-left:20px;font-size:13px;line-height:1.45}
+.companion-settings-steps>li+li{margin-top:4px}
+/* Feedback: a small panel of its own over the World's bottom-right, opened from Settings › General (owner request
    2026-10-11), with Fox left in view to dictate into it. */
 .native-console .companion-feedback-panel{position:fixed;inset:auto 24px 24px auto;margin:0;width:min(420px,calc(100vw - 32px));max-height:calc(100dvh - 110px);box-sizing:border-box;padding:24px;z-index:91;overflow:auto;box-shadow:0 18px 50px #1f2b2240}
 .native-console .companion-feedback-panel:not([open]){display:none}
 .companion-feedback-panel .companion-feedback{margin:0;min-height:0;padding-top:0}
 .companion-feedback-panel .companion-info-close{position:absolute;right:10px;top:8px;width:32px;height:32px;border:0;background:none;font-size:24px;color:#78694f;cursor:pointer}
 @media(max-width:600px){.native-console .companion-feedback-panel{inset:auto 16px 16px 16px;width:auto}}
+
+.companion-settings-service-collection .companion-settings-row{flex-wrap:wrap}
+.companion-settings-service-collection .companion-settings-row>div{flex:1 1 240px}
+/* Agents (owner request 2026-10-21): the steps for Claude and ChatGPT fold under How? in the row. */
+.companion-settings-how{margin-top:4px;font-size:12px;color:#656651}
+.companion-settings-how>summary{cursor:pointer;color:#5a6b4f;text-decoration:underline}
+.companion-settings-how .companion-settings-steps{margin:6px 0 0;padding-left:18px}
+.companion-settings-agents{display:flex;flex-direction:column;gap:8px;align-self:stretch}
+.companion-settings-connector-head{display:flex;align-items:center;gap:10px}
+.companion-settings-connector .companion-settings-connector-head strong{flex:1}

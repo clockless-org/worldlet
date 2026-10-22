@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {modelStatusFresh,changesModelStatus} from '../core/companion/model-status.ts';
+import {modelStatusFresh,changesModelStatus} from '../agent/companion/model-status.ts';
 import {createModelStatusReader} from '../platform/bridge/model-status.ts';
 assert.equal(modelStatusFresh({ready:true,ageMs:29999,sameScope:true}),true);
 for(const input of [{ready:true,ageMs:30000,sameScope:true},{ready:true,ageMs:-1,sameScope:true},{ready:false,ageMs:0,sameScope:true},{ready:true,ageMs:0,sameScope:false}])assert.equal(modelStatusFresh(input),false);
@@ -34,7 +34,7 @@ await assert.rejects(callHost('restartFox'),/configuration failed/);assert.equal
 delete (globalThis as any).window;
 console.log('PASS bridge invalidates before and after scope/model changes, including failed configuration.');
 
-const {conversationGuidance}=await import('../core/companion/conversation-guidance.ts');
+const {conversationGuidance}=await import('../agent/companion/conversation-guidance.ts');
 assert.equal(conversationGuidance({scope:'setup',connectedSources:['gmail'],routines:true}), '');
 assert.equal(conversationGuidance({scope:'sample',localOriginals:true}), '');
 const local=conversationGuidance({scope:'private',localOriginals:true,connectedSources:['gmail','gmail','untrusted-instruction'],backgroundSources:[],routines:false});
@@ -43,11 +43,11 @@ const native=conversationGuidance({scope:'private',connectedSources:['apple-note
 assert.match(native,/apple-notes/);assert.match(native,/manage_routines/);assert.doesNotMatch(native,/source-/);
 console.log('PASS shared conversation guidance: setup/sample isolation, supported capability filtering and local-original differences.');
 
-const {agentRequestDeadline}=await import('../core/tasks/agent-deadline.ts');
+const {agentRequestDeadline}=await import('../agent/tasks/agent-deadline.ts');
 for(const [request,seconds] of [[{action:'status'},20],[{action:'chat'},120],[{action:'chat',mode:'context_analysis'},600],[{action:'modelLogin'},960],[{action:'google',operation:'connect'},360],[{action:'google',operation:'send_email'},45],[{action:'mcp',operation:'remove'},25],[{action:'attention_tick'},600],[{action:'routine_tick'},600],[{action:'modelRepair'},120],[{action:'modelConfigure'},25],[{action:'notion'},145]] as const)assert.equal(agentRequestDeadline(request),seconds);
 console.log('PASS shared execution deadlines for foreground, setup, authorization and background work.');
 
-const {nextAgentWork,agentWorkPriority,admitBackgroundWork}=await import('../core/tasks/agent-work.ts');
+const {nextAgentWork,agentWorkPriority,admitBackgroundWork}=await import('../agent/tasks/agent-work.ts');
 const jobs=[{id:'sync',body:{action:'chat',_background:true}},{id:'status',body:{action:'status'}},{id:'first',body:{action:'chat'}},{id:'second',body:{action:'chat'}}];
 assert.equal(agentWorkPriority({action:'warmup',_background:true}),-1);
 assert.equal(nextAgentWork({queued:jobs,busy:false,foregroundPending:true}),'first');
@@ -59,7 +59,7 @@ const facts={supported:true,privateScope:true,consent:true,busy:false,foreground
 assert.equal(admitBackgroundWork(facts),true);
 for(const changed of [{supported:false},{privateScope:false},{consent:false},{busy:true},{foregroundPending:true}])assert.equal(admitBackgroundWork({...facts,...changed}),false);
 // Idle installations send no background model work (#1650); a missing activity fact counts as active.
-const {userIdle,BACKGROUND_IDLE_SECONDS}=await import('../core/tasks/agent-work.ts');
+const {userIdle,BACKGROUND_IDLE_SECONDS}=await import('../agent/tasks/agent-work.ts');
 assert.equal(BACKGROUND_IDLE_SECONDS,900);
 for(const idleSeconds of [undefined,0,899,Number.NaN])assert.equal(userIdle({idleSeconds}),false,String(idleSeconds));
 for(const idleSeconds of [900,7200])assert.equal(userIdle({idleSeconds}),true,String(idleSeconds));
@@ -68,19 +68,19 @@ assert.equal(admitBackgroundWork({...facts,idleSeconds:900}),false,'15 idle minu
 assert.equal(admitBackgroundWork({...facts,foregroundPending:true,independentLane:true,idleSeconds:3600}),false,'an independent lane is still idle-gated');
 assert.deepEqual(jobs.map(job=>job.id),['sync','status','first','second']);
 console.log('PASS foreground priority, stable FIFO, running-task exclusion, background deferral/resumption and admission facts.');
-const {preemptAgentWork,foregroundAgentWork}=await import('../core/tasks/agent-work.ts');
+const {preemptAgentWork,foregroundAgentWork}=await import('../agent/tasks/agent-work.ts');
 assert.equal(foregroundAgentWork({action:'status'}),false);
 assert.equal(foregroundAgentWork({action:'chat'}),true);
 assert.equal(preemptAgentWork({body:{action:'chat',_background:true},foregroundPending:true}),true);
 assert.equal(preemptAgentWork({body:{action:'warmup',_background:true},foregroundPending:true}),false);
 assert.equal(preemptAgentWork({body:{action:'chat'},foregroundPending:true}),false);
-const {finishAttentionBudget}=await import('../core/attention/attention-center.ts');
+const {finishAttentionBudget}=await import('../agent/attention/attention-center.ts');
 const budget={failures:2,attempts:3,seen:{a:'r'},nextAt:900};
 const interrupted=finishAttentionBudget(budget as any,{} as any,100,false,[],true);
 assert.equal(interrupted.nextAt,160);assert.equal(interrupted.failures,2);assert.deepEqual(interrupted.seen,{a:'r'});assert.equal(interrupted.attempts,3);
 console.log('PASS selective foreground preemption and cancelled synthesis retains evidence/budget without failure escalation.');
 
-const {agentDeadlineRemaining}=await import('../core/tasks/agent-deadline.ts');
+const {agentDeadlineRemaining}=await import('../agent/tasks/agent-deadline.ts');
 assert.equal(agentDeadlineRemaining({action:'chat',monitor:true},0,599,600),0,'Continuous model output cannot extend a background run');
 assert.equal(agentDeadlineRemaining({action:'chat'},0,599,600),119,'Foreground retains its idle timeout');
 assert.equal(agentDeadlineRemaining({action:'world_tool',_background:true},0,230,240),0);

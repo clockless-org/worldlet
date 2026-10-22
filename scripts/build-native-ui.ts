@@ -1,4 +1,4 @@
-import {ACTIVE_THEME} from '../ui/themes/index.ts';
+import {ACTIVE_THEME} from '../ui/style/index.ts';
 import {installActivityCollector} from '../platform/bridge/activity-collector.js';
 import {holdMedia} from '../platform/bridge/media-hold.js';
 import {pictureInPicture} from '../platform/bridge/picture-in-picture.js';
@@ -8,10 +8,10 @@ import {installLoginWatch} from '../platform/bridge/login-watch.js';
 import {installPasskeyWatch} from '../platform/bridge/passkey-watch.js';
 import {installMeetingAudio} from '../platform/bridge/meeting-audio.js';
 import {buildAppletRuntime} from './build-applet-runtime.ts';
-import {APP_DEFINITIONS} from '../core/applets/catalog.ts';
-import {validateAttentionRegistrations} from '../core/attention/attention-center.ts';
+import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
+import {validateAttentionRegistrations} from '../agent/attention/attention-center.ts';
 import {buildWorldAssets} from './build-world-assets.ts';
-import {BUILTIN_STYLE} from '../ui/components/style.ts';
+import {BUILTIN_STYLE} from '../ui/style/style.ts';
 import {buildBrand} from './build-brand.ts';
 import {buildUI} from './build-ui.ts';
 import {buildWebOpen} from './build-web-open.ts';
@@ -24,7 +24,7 @@ import path from 'node:path';
 import {existsSync,renameSync} from 'node:fs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const defines=buildDefines({channel:process.env.WORLDLET_BUILD_CHANNEL||(process.env.WORLDLET_RELEASE_MANIFEST?'release':'dev')});
-const startup=await readFile(path.join(root,'ui/shell/world-startup.html'),'utf8');
+const startup=await readFile(path.join(root,'ui/frame/world-startup.html'),'utf8');
 const resourceVersion=String(Date.now());
 // Keep the running app usable if a rebuild is interrupted or fails.
 // A Dev watcher may prepare an isolated candidate; the default remains the normal build output.
@@ -35,7 +35,7 @@ process.env.WORLDLET_UI_BUILD_OUTPUT=output;
 await writeFile(path.join(output,'attention-applets.json'),JSON.stringify(validateAttentionRegistrations(APP_DEFINITIONS.flatMap(app=>app.attention?[app.attention]:[]))));
 await buildAppletRuntime(root,output);
 await buildBrand(pathToFileURL(path.join(output,'brand/')));
-for(const name of ['pixi-world.css','world-startup.css'])await copyFile(path.join(root,'ui/shell',name),path.join(output,name));
+for(const name of ['pixi-world.css','world-startup.css'])await copyFile(path.join(root,'ui/frame',name),path.join(output,name));
 await copyFile(path.join(root,'ui/applets/scene/applet-scene.css'),path.join(output,'applet-scene.css'));
 await copyFile(path.join(root,'ui/applets/gmail/focus.css'),path.join(output,'mail-focus.css'));
 // Draft Fox anatomy performances ship only with the dev resource pack (build-companion-presentation.ts),
@@ -48,9 +48,9 @@ const projectionWorker=await build({entryPoints:[path.join(root,'ui/world/world-
 await writeFile(path.join(output,'world-projection-worker.js'),projectionWorker.outputFiles[0].text);
 // Plain scripts the page and the native browser load by name: written in TypeScript, emitted as the files those loaders expect.
 // The bundles are independent, so they build together; dev-electron reruns this for every candidate.
-const bundles=[build({entryPoints:[path.join(root,'ui/browser/paper-edge.ts')],outfile:path.join(output,'paper-edge.js'),bundle:true,format:'iife',minify:true}),build({entryPoints:[path.join(root,'core/index.ts')],outfile:path.join(output,'shared-core.js'),bundle:true,format:'iife',globalName:'WorldletCore',target:'es2022'}),// PostHog's web client (ui/shell/posthog-web.ts), loaded by the page only in a release app with sharing on.
- build({entryPoints:[path.join(root,'ui/shell/posthog-web.ts')],outfile:path.join(output,'posthog-web.js'),bundle:true,format:'iife',minify:true,target:'es2022'}),
- ...['world-startup','browser-observer','pcm-worklet'].map(name=>build({entryPoints:[path.join(root,name==='browser-observer'?'platform/bridge':'ui/shell',name+'.ts')],outfile:path.join(output,name+'.js'),bundle:true,format:'iife',minify:true})),
+const bundles=[build({entryPoints:[path.join(root,'ui/applets/paper-edge.ts')],outfile:path.join(output,'paper-edge.js'),bundle:true,format:'iife',minify:true}),build({entryPoints:[path.join(root,'agent/index.ts')],outfile:path.join(output,'shared-core.js'),bundle:true,format:'iife',globalName:'WorldletCore',target:'es2022'}),// PostHog's web client (ui/frame/posthog-web.ts), loaded by the page only in a release app with sharing on.
+ build({entryPoints:[path.join(root,'ui/frame/posthog-web.ts')],outfile:path.join(output,'posthog-web.js'),bundle:true,format:'iife',minify:true,target:'es2022'}),
+ ...['world-startup','browser-observer','pcm-worklet'].map(name=>build({entryPoints:[path.join(root,name==='browser-observer'?'platform/bridge':'ui/frame',name+'.ts')],outfile:path.join(output,name+'.js'),bundle:true,format:'iife',minify:true})),
  build({entryPoints:[path.join(root,'ui/index.ts')],outfile:path.join(output,'worldlet.js'),define:{...defines,__WORLDLET_PROJECTION_WORKER__:JSON.stringify(projectionWorker.outputFiles[0].text)},bundle:true,format:'iife',minify:true,plugins:devChannel?[]:[draftAnatomy]})];
 await writeFile(path.join(output,'native-applet-launchers.json'),JSON.stringify(APP_DEFINITIONS.filter(a=>a.nativeBundleIds?.length).map(a=>({key:a.key,bundleIds:a.nativeBundleIds}))));
 await mkdir(path.join(output,'assets'),{recursive:true});
@@ -60,7 +60,7 @@ await copyFile(path.join(root,BUILTIN_STYLE.companion.portrait),path.join(output
 await copyFile(path.join(root,'resources/common/ASTRONOMY-LICENSE.txt'),path.join(output,'ASTRONOMY-LICENSE.txt'));
 await copyFile(path.join(root,'node_modules/typebox/license'),path.join(output,'TYPEBOX-LICENSE.txt'));
 await buildWorldAssets(root,output,JSON.parse(defines.__WORLDLET_CHANNEL__));
-// Worldlet in a browser on this computer (core/phone/README.md#web): the app serves this page itself on 127.0.0.1.
+// Worldlet in a browser on this computer (platform/web/README.md#web): the app serves this page itself on 127.0.0.1.
 await buildWebOpen(root,path.join(output,'open'),JSON.parse(defines.__WORLDLET_BUILD__).version);
 await Promise.all(bundles);
 await writeFile(path.join(output,'index.html'),`<!doctype html><html lang="en-US" data-bundle-version="${resourceVersion}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="${WORLD_PAGE_CSP}"><title>Worldlet</title><link rel="icon" href="brand/worldlet-app-icon.svg" type="image/svg+xml"><link rel="stylesheet" href="brand/brand.css"><link rel="stylesheet" href="world-startup.css"><link rel="preload" href="worldlet.js" as="script"><link rel="stylesheet" href="worldlet-ui.css"><link rel="stylesheet" href="native.css"><link rel="stylesheet" href="pixi-world.css"><link rel="stylesheet" href="applet-scene.css"><link rel="stylesheet" href="mail-focus.css"></head><body>${startup}<main id="app" hidden></main><main id="contextSpace" hidden></main><p id="nativeNotice" role="status"></p><script src="environment-assets.js?v=${resourceVersion}"></script><script src="world-startup.js?v=${resourceVersion}"></script></body></html>`);
@@ -80,18 +80,18 @@ await copyFile(path.join(root,'platform/browser/agent_browser.py'),path.join(out
 await cp(path.join(root,'platform/browser/demo'),path.join(output,'demo'),{recursive:true});
 await writeFile(path.join(output,'browser/activity-observer.js'),'('+installActivityCollector.toString()+')().read()');
 await writeFile(path.join(output,'browser/media-hold.js'),'('+holdMedia.toString()+')()');
-// What the built-in browser records of a page (core/browser/web-record.ts), installed in its isolated world.
+// What the built-in browser records of a page (agent/applets/web-record.ts), installed in its isolated world.
 await writeFile(path.join(output,'browser/web-record.js'),'('+installWebRecorder.toString()+')()');
-// Saved sign-ins (core/browser/saved-logins.ts): every website page's isolated world, the built-in browser's own.
+// Saved sign-ins (agent/applets/saved-logins.ts): every website page's isolated world, the built-in browser's own.
 await writeFile(path.join(output,'browser/login-watch.js'),'('+installLoginWatch.toString()+')()');
 await writeFile(path.join(output,'browser/passkey-watch.js'),'('+installPasskeyWatch.toString()+')()');
 // Meetings pages' call-audio hooks, a function of the binding's name (engine/page.ts calls it with one).
 await writeFile(path.join(output,'browser/meeting-audio.js'),'('+installMeetingAudio.toString()+')');
 // A function of its mode ('probe', 'enter', 'leave'); the host calls it with one.
 await writeFile(path.join(output,'browser/picture-in-picture.js'),'('+pictureInPicture.toString()+')');
-// Every CEF website page's video-format counts (core/browser/video-formats.ts), a function of the formats' pattern.
+// Every CEF website page's video-format counts (agent/applets/video-formats.ts), a function of the formats' pattern.
 await writeFile(path.join(output,'browser/video-formats.js'),'('+installVideoFormatWatch.toString()+')');
-// Focus on website pages (core/browser/page-focus.ts): its rules with Readability, run in the page's isolated world.
+// Focus on website pages (agent/applets/page-focus.ts): its rules with Readability, run in the page's isolated world.
 await build({entryPoints:[path.join(root,'platform/bridge/page-focus.ts')],outfile:path.join(output,'browser/page-focus.js'),bundle:true,format:'iife',minify:true,target:'es2022'});
 await copyFile(path.join(root,'node_modules/@mozilla/readability/LICENSE.md'),path.join(output,'READABILITY-LICENSE.txt'));
 // The development app polls this marker. Writing it here means any rebuild reloads it,
@@ -121,7 +121,7 @@ await writeFile(path.join(output,'audio/theme-tracks.json'),JSON.stringify(theme
 
 
 await copyFile(path.join(root,'ui/applets/youtube/player.html'),path.join(output,'youtube-player.html'));
-await copyFile(path.join(root,'ui/browser/paper-edge.html'),path.join(output,'paper-edge.html'));
+await copyFile(path.join(root,'ui/applets/paper-edge.html'),path.join(output,'paper-edge.html'));
 
 // Publish only after every runtime helper and asset has been staged.
 const previous=published+`.previous-${process.pid}`;

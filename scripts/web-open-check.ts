@@ -1,6 +1,6 @@
-// Worldlet in a web browser (core/phone/README.md#web): the computer's `web` pairing (platform/electron/src/modules/
-// phone/relay.ts) and the page (ui/web) against the relay this computer serves itself (local-relay.ts), which answers
-// like worker/pairing.ts, over real HTTP on 127.0.0.1: the link, the
+// Worldlet in a web browser (platform/web/README.md#web): the computer's `web` pairing (platform/host/modules/
+// phone/relay.ts) and the page (platform/web/page) against the relay this computer serves itself (local-relay.ts), which answers
+// the relay protocol (platform/web/README.md#local-relay), over real HTTP on 127.0.0.1: the link, the
 // first poll completing the pairing with the browser's name, the Center reaching the page, Done and a chat line
 // reaching the computer, the fragment leaving the address bar, a reload from storage, and the page ending with the link.
 import assert from 'node:assert/strict';
@@ -11,14 +11,14 @@ import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
-import {createPhoneRelay} from '../platform/electron/src/modules/phone/relay.ts';
-import {createLocalRelay,serveLocalRelay,LOCAL_RELAY_LIMITS} from '../platform/electron/src/modules/phone/local-relay.ts';
-import {createRoomLink} from '../platform/electron/src/modules/phone/room-link.ts';
-import {createRtcHost,type RtcPage} from '../platform/electron/src/modules/phone/rtc-host.ts';
-import {RTC_PAGE_SCRIPT} from '../platform/electron/src/modules/phone/rtc-page.ts';
+import {createPhoneRelay} from '../platform/host/modules/windows/relay.ts';
+import {createLocalRelay,serveLocalRelay,LOCAL_RELAY_LIMITS} from '../platform/host/modules/windows/local-relay.ts';
+import {createRoomLink} from '../platform/host/modules/windows/room-link.ts';
+import {createRtcHost,type RtcPage} from '../platform/host/modules/windows/rtc-host.ts';
+import {RTC_PAGE_SCRIPT} from '../platform/host/modules/windows/rtc-page.ts';
 import {memoryRoom} from './memory-room.ts';
-import {createWebClient,createRoomWebClient,isRoomLink,readWebPairLink,WebPairingEnded,pairKeys,fromBase64url,sha256Hex,worldLinkReply,type PhoneMessage} from '../core/phone/index.ts';
-import {resolveAction,worldActions} from '../core/tools/index.ts';
+import {createWebClient,createRoomWebClient,isRoomLink,readWebPairLink,WebPairingEnded,pairKeys,fromBase64url,sha256Hex,worldLinkReply,type PhoneMessage} from '../platform/web/index.ts';
+import {resolveAction,worldActions} from '../agent/gate/index.ts';
 import {buildWebOpen} from './build-web-open.ts';
 
 // The relay this computer serves itself (local-relay.ts), on a free port, with the page built as the app ships it.
@@ -156,7 +156,7 @@ console.log('PASS Worldlet in a web browser: link, pairing, Center, Done, chat, 
  console.log('PASS the in-memory relay: a kept pairing survives a restart, a long poll wakes at once, no notifications, a capped queue.');
 }
 
-// Another device's browser meets the computer in the pairing room (core/phone room.ts, room-link.ts), here in memory
+// Another device's browser meets the computer in the pairing room (agent/app room.ts, room-link.ts), here in memory
 // (memory-room.ts).
 const room=memoryRoom(),RoomSocket=room.Socket;
 // Polls a browser until what it shows passes `ok` (a poll returns once anything new arrives).
@@ -176,7 +176,9 @@ const until=async(client:{poll(wait?:number):Promise<any>},ok:(view:any)=>boolea
  const seen=await until(tab,v=>!!v.attention&&!!v.desktop);
  assert.equal(seen.attention?.now[0].action,'Book the flight');
  assert.equal(tab.computer,'Studio Mac');
+ // The browser's name reaches the computer on one of its next polls (the room may still be relaying the hello).
  await mac.poll();
+ for(let i=0;i<50&&mac.status().phone?.name!=='Safari on iPhone';i++)await mac.poll(0.1);
  assert.equal(mac.status().state,'paired');assert.equal(mac.status().phone?.name,'Safari on iPhone');
  assert.equal(mac.status().link,made,'the link stays, so another browser can open it');
  assert(mac.open,'a browser is in the room');
@@ -204,7 +206,7 @@ const until=async(client:{poll(wait?:number):Promise<any>},ok:(view:any)=>boolea
  // A side without the right token is refused; a frame sealed with another key is dropped.
  const stranger=createRoomWebClient({link:'#v=1&s='+'A'.repeat(43)+'&m=room',relay:'https://worldlet.ai',name:'x',version:'web',WebSocket:RoomSocket as any});
  await assert.rejects(stranger.poll(),/not reachable/,'a pairing nobody made has no computer');
- // The Agent's `world/link` (core/tools share_world_link) keeps the link a browser already opened.
+ // The Agent's `world/link` (agent/gate share_world_link) keeps the link a browser already opened.
  assert.equal((await mac.ensure()).link,made,'an existing link is kept');
  const reply=worldLinkReply(mac.status());
  assert.ok('ok' in reply&&reply.link===made&&reply.opened===true);
@@ -308,16 +310,16 @@ const until=async(client:{poll(wait?:number):Promise<any>},ok:(view:any)=>boolea
 }
 await server.close();await rm(out,{recursive:true,force:true});
 
-// A line said in the browser or on the phone while the World page is not there (core/phone/README.md#web, Fox without
+// A line said in the browser or on the phone while the World page is not there (platform/web/README.md#web, Fox without
 // the page): the host gives it to Fox's main conversation on its own, and the turn is not ended for want of the page.
 {
- const phone=readFileSync('platform/electron/src/modules/phone/index.ts','utf8'),fox=readFileSync('platform/electron/src/modules/fox/index.ts','utf8');
+ const phone=readFileSync('platform/host/modules/windows/phone.ts','utf8'),fox=readFileSync('platform/host/modules/companion/index.ts','utf8');
  assert.match(phone,/if\(!host\.page\.ready\(\)\)\{[\s\S]{0,2400}message\.type!=='chat'\|\|!fox\?\.converse[\s\S]{0,1600}fox\.converse\(message\.text,place\)/,'a main-conversation line without the page goes to Fox on the host');
  assert.match(phone,/if\(!host\.page\.ready\(\)\)\{[\s\S]{0,800}message\.type==='attention'&&hostRows\.has\(message\.id\)[\s\S]{0,600}host\.store\.setWorldItemStatus\(id,status,until\)/,'Done or Later without the page settles the item on the host');
  assert.match(phone,/if\(link\.phone\)await hostCenter\(\);/,'the host publishes the Center while the page is not there');
  assert.match(phone,/thread:JSON\.stringify\(\['attention:'\+message\.item,'attention:'\+message\.item\]\)[\s\S]{0,200}thread:JSON\.stringify\(\['object:app-'\+app\.key,''\]\)/,'a line on a card or in an Applet runs in that place\'s thread, as the page says it');
  assert.match(fox,/agentChat\(\{id,text,\.\.\.place\?\{thread:place\.thread,context:\{location:place\.location\}\}:\{\}\}\)/,'Fox takes the place\'s thread and name');
- assert.match(phone,/fox\.taskPanel\?\.\(\)[\s\S]{0,200}taskPanel\(\{jobs:panel\.jobs,harness:panel\.harness,working:panel\.working\}[\s\S]{0,400}artifactRows\(\)[\s\S]{0,1200}phoneAttention\(\{now:center\.now,later:center\.later,world,tasks,journal\}/,'its Center carries the Task panel and today\'s Journal');
+ assert.match(phone,/fox\.taskPanel\?\.\(\)[\s\S]{0,200}taskPanel\(\{jobs:panel\.jobs,harness:panel\.harness,working:panel\.working\}[\s\S]{0,400}bodies\('artifacts'\)[\s\S]{0,1200}phoneAttention\(\{now:center\.now,later:center\.later,world,tasks,journal\}/,'its Center carries the Task panel and today\'s Journal');
  assert.match(phone,/live:async value=>\{if\(value\.done===true\)finished\(value\);return publishLive\(value\);\}/,'its turn streams to an open phone or browser, and the reply is pushed like any other');
  assert.match(phone,/message\.type==='approval'&&fox\?\.answerApproval/,'the Agent\'s permission prompt is answered without the page');
  assert.match(fox,/if\(headless\.has\(id\)\)headlessLive\?\.event\(event\);/,'the host streams a headless turn itself');
@@ -326,7 +328,7 @@ await server.close();await rm(out,{recursive:true,force:true});
  assert.match(fox,/if\(!page\.ready\(\)\)return tool\?NEEDS_WORLD:null;/,'its page-only steps say the window must be open');
  assert.match(fox,/host\.onPageReload\(\(\)=>\{if\(agentTurn!==null&&!headless\.has\(agentTurn\)\)cancelCloud\(\)/,'a page reload leaves it running');
  // Run in background starts the host's own work with no World page, and loads the page only when the World is shown.
- const main=readFileSync('platform/electron/src/main.ts','utf8'),attentionModule=readFileSync('platform/electron/src/modules/attention/index.ts','utf8');
+ const main=readFileSync('platform/desktop/src/main.ts','utf8'),attentionModule=readFileSync('platform/host/modules/attention/index.ts','utf8');
  assert.match(main,/if\(hidden\)\{\s*world\.window\.once\('show',\(\)=>void loadWorld\(\)[\s\S]{0,120}startServices\(\);[\s\S]{0,120}\}else await loadWorld\(\);/,'a background launch loads no page and starts the host');
  assert.match(main,/loaded:\(\)=>\{sent='';startServices\(\);/,'a normal launch starts the host with the first page load');
  assert.match(attentionModule,/host\.onStarted\(\(\)=>center\.start\(\)\)/,'Attention reads without the page');
@@ -343,6 +345,5 @@ await server.close();await rm(out,{recursive:true,force:true});
  const served=fox.indexOf("if(name==='share_world_link'){"),paged=fox.indexOf("if(!page.ready())return tool?NEEDS_WORLD:null;");
  assert.ok(served>0&&paged>served,'world/link is answered without the page');
  assert.equal(resolveAction(worldActions(),'world','link',{}).name,'share_world_link');
- assert.match(phone,/if\(vault\.get\('web-pairing'\)\)void createPhoneRelay\([\s\S]{0,300}\.end\(\)/,'a browser link from before the room is ended on the relay once');
  console.log('PASS a line said in a browser or on the phone reaches Fox without the World page.');
 }

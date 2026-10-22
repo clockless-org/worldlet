@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
-import {boxPlace,pairKeys,readPairLink,sealBox} from '../core/phone/index.ts';
-import {createLocalRelay} from '../platform/electron/src/modules/phone/local-relay.ts';
-import {createPhoneRelay} from '../platform/electron/src/modules/phone/relay.ts';
+import {boxPlace,pairKeys,readPairLink,sealBox} from '../platform/web/index.ts';
+import {createLocalRelay} from '../platform/host/modules/windows/local-relay.ts';
+import {createPhoneRelay} from '../platform/host/modules/windows/relay.ts';
 
 // A phone's message the computer cannot take yet (the World page not there, say) is kept on the computer and offered
 // again, while the relay's cursor moves on: a message left on the relay came back at once on every long poll, about four
 // requests a second, for as long as the computer could not take it (owner's traffic report 2026-10-14). The relay here
-// is the in-memory one (local-relay.ts), which answers like worker/pairing.ts.
+// is the in-memory one (local-relay.ts), the only one that still speaks the relay protocol.
 const local=createLocalRelay();
 let requests=0;
 const fetch=(async(input:string|URL|Request,init?:RequestInit)=>{requests++;return local.fetch(new Request(input,init));}) as typeof globalThis.fetch;

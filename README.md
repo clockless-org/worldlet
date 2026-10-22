@@ -37,13 +37,13 @@ Worldlet provides no model of its own. It talks through your Agent and borrows i
 | --- | --- | --- |
 | CPU | Model | Your model provider (your own sign-in or API key) |
 | Kernel | Harness: Hermes Agent, OpenClaw, Claude Code, Codex, pi | Your choice, replaceable |
-| Drivers and keychain | MCP servers, connectors and their tokens | Your Harness; Worldlet borrows them |
+| Drivers and keychain | MCP servers, connectors and their tokens | Your Harness; Worldlet borrows them, and keeps the services you connect in Settings › Services on your computer |
 | Terminal | Chat apps and command lines | Where Agents live today |
 | Graphical system | Worldlet: World, Things, Fox, Attention Center | This project |
 | System API | World tools, served to the Agent over the `worldlet` MCP server | This project |
 | Disk | `world.sqlite` and World storage, on your computer | This project |
 
-Worldlet on your own Harness is a desktop environment, like GNOME; with the Hermes Agent it installs, it is a distribution, like Ubuntu. World → Agent tools go over MCP; Agent → World goes through one adapter per Harness ([Harness contract](contracts/HARNESS.md), [interactive architecture diagram](docs/architecture.html)).
+Worldlet on your own Harness is a desktop environment, like GNOME; with the Hermes Agent it installs, it is a distribution, like Ubuntu. World → Agent tools go over MCP; Agent → World goes through one adapter per Harness ([Harness contract](contracts/HARNESS.md), [interactive architecture diagram](docs/four-layers.svg)).
 
 ## Install
 
@@ -73,7 +73,7 @@ Prefer a regular installer? [Download from worldlet.ai](https://worldlet.ai/down
 
 **Let your Agent do it**: tell it 「Install Worldlet: follow https://worldlet.ai/agent.md」. [agent.md](platform/install/agent.md) has any Agent run the installer with its own name, register Worldlet in itself and reply with the link and QR code; the [`worldlet` skill](harness/skills/worldlet/SKILL.md) says the same. Details: [one-line installers](platform/install/README.md).
 
-No account is needed. If you have no Agent yet, setup installs the standard [Hermes Agent](core/agent/PORTABILITY.md#stock-hermes-agent-for-people-with-no-agent) the official way, to its usual location; one you already have is used as it is.
+No account is needed. If you have no Agent yet, setup installs the standard [Hermes Agent](agent/gate/PORTABILITY.md#stock-hermes-agent-for-people-with-no-agent) the official way, to its usual location; one you already have is used as it is.
 
 ## Features
 
@@ -124,11 +124,16 @@ Mail, Calendar, Notes, GitHub, Notion, Linear and the other Applets that connect
 
 **Also in the box:**
 
-- **[Phone companions](ios/README.md)**: the Attention Center and Fox on iPhone and [Android](android/README.md), paired by QR code through an end-to-end encrypted relay.
-- **[Journal](ui/artifacts/CARD-SYSTEM.md)**: the cards Fox makes are kept, day by day.
-- **[Scheduled](core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**: ask once ("every morning at 8, tell me the weather and my first meeting") and Fox keeps doing it; your Agent's scheduled jobs come along. Two come with every install, on unless you turn them off: [Today’s prep at 7 AM and Wrap up today at 6 PM](core/artifacts/README.md#the-days-plan-and-summary), each one Attention card.
-- **[Your Agent on another computer](core/agent/PORTABILITY.md#an-agent-on-another-computer)**: pair with the always-on machine where your Agent runs, and talk to it from this World.
+- **[Phone companions](platform/ios/README.md)**: the Attention Center and Fox on iPhone and [Android](platform/android/README.md), paired by QR code through an end-to-end encrypted relay.
+- **[Journal](ui/attention/CARD-SYSTEM.md)**: the cards Fox makes are kept, day by day.
+- **[Scheduled](agent/gate/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)**: ask once ("every morning at 8, tell me the weather and my first meeting") and Fox keeps doing it; your Agent's scheduled jobs come along. Two come with every install, on unless you turn them off: [Today’s prep at 7 AM and Wrap up today at 6 PM](context/store/ARTIFACTS.md#the-days-plan-and-summary), each one Attention card.
+- **[Services](context/applets/INTEGRATIONS.md#settings--services)**: Settings › Services connects Google, Notion, Linear, PostHog, Cloudflare and more with their own sign-in, Search Console with your Google sign-in, and GitHub with a short code you paste on GitHub's own page (no key, no secret). A connected service's latest context is kept up to date in your World every hour (turn it off on its tile), and the Agents you allow can search it all in one place. Fox and its Agent can read a connected service, other Agents only if you choose them, and any change asks you first: an Agent's GitHub Issue or comment is written as you, with a "Drafted by" line, only after you approve it.
+- **[Board](context/connectors/BOARD.md)**: a Thing for the numbers you track, such as a north-star number, a funnel or a release, read from GitHub, PostHog, Cloudflare, a JSON endpoint or your Agents' reports.
+- **[Cloud Agents](agent/gate/REMOTE-MCP.md)**: Settings › Agents › Your World's address › **Copy for Claude or ChatGPT** copies your World's address (on by default); a ChatGPT, Claude or Cursor connector, or an Agent in the cloud, uses your World through it; you allow each connection on this computer, and Allow also lets it read the services you connected (or choose Allow without them).
+- **[Your World's address](agent/gate/WORLD-ADDRESS.md)**: give your World its own web address, like `alex.worldlet.ai`, in Settings › Agents › Your World's address, and open it from any device. A new browser asks first, and you allow it on a card in Attention; after that a passkey signs it in. Nobody sees anything else, and the World stays on your computer.
+- **[Your Agent on another computer](agent/gate/PORTABILITY.md#an-agent-on-another-computer)**: pair with the always-on machine where your Agent runs, and talk to it from this World.
 - **[Local first](docs/WORLD-STORAGE.md)**: your records stay in `world.sqlite` on your computer.
+- **[Settings](agent/gate/GRANTS.md#settings--agents)** in three parts, each item and row with an icon: **Services** (the services your World reads), **Agents** (every Agent that uses your World, your own first, each with what it may do, what it did lately, Manage and Remove; nothing folded) and **Your data** (everything your World keeps, how much each holds, Save a copy and a Delete on each). Fox, Phone and General sit below them.
 
 ## Your World on another device
 
@@ -136,11 +141,11 @@ Open your whole World, not only the Attention Center and Fox, in a web browser o
 
 - It works while your computer is on and Worldlet runs there: the World, your records and Fox all stay on your computer, and the browser only shows them. **Run in background** keeps Worldlet running with no window open.
 - The page comes from worldlet.ai, one copy per Worldlet version, and holds none of your data. What your computer and the browser say to each other is end-to-end encrypted and passes through a relay that only forwards it and stores nothing.
-- Keep the link private: anyone who has it can see and act in your World. **Turn off** ends it. Settings, connections and pairing stay on your computer. [How it works](core/phone/README.md#the-world-on-another-device)
+- Keep the link private: anyone who has it can see and act in your World. **Turn off** ends it. Settings, connections and pairing stay on your computer. [How it works](platform/web/README.md#the-world-on-another-device)
 
 ## Privacy
 
-There is no Worldlet account, and your records stay on your computer. Official builds report basic usage analytics (setup, connection and core-operation outcomes, never message content, connected content or browsing history), and you can turn them off in Settings › General › Usage counts; see [analytics](core/diagnostics/ANALYTICS.md). Builds you make yourself report nothing unless you configure a PostHog project.
+There is no Worldlet account, and your records stay on your computer. Official builds report basic usage analytics (setup, connection and core-operation outcomes, never message content, connected content or browsing history), and you can turn them off in Settings › General › Usage counts; see [analytics](agent/app/ANALYTICS.md). Builds you make yourself report nothing unless you configure a PostHog project.
 
 ## Build from source
 
@@ -158,12 +163,13 @@ No account, secret or hosted service is needed to build. Checks: `npm run check:
 | Directory | Responsibility |
 | --- | --- |
 | `ui/` | Shared rendering and interaction: World, Applets, Fox, Attention Center |
-| `core/` | Platform-independent product rules and data |
-| `platform/` | The Electron host and the Node host (no display): OS integration, browser engine, controlled execution |
+| `agent/` | Who does the work: Fox, Tasks, Agents and the Gate (platform-independent rules) |
+| `context/` | Everything the World knows: records, storage and Connectors (platform-independent rules) |
+| `platform/` | Where the World runs: the shared Host, Desktop (Electron), Server (Node, no display), Web (the browser page and pairing) and the phone companions (`platform/ios/`, `platform/android/`): OS integration, browser engine, controlled execution |
 | `harness/` | Agent backends and the reference Harness adapter |
 | `contracts/` | Shared Host/Agent interfaces and data shapes |
 | `resources/` | Worlds, styles, artwork, fonts and media |
-| `ios/`, `android/` | Phone companions |
+| `api/` | The public entry points the operations repository uses |
 | `scripts/`, `docs/` | Build, validation and contributor guidance |
 
 Worldlet has one theme, the Village. A theme is static pictures, sounds and JSON ([Theme contract](resources/themes/CONTRACT.md)); Worldlet draws the animated World from it. There is no theme picker.

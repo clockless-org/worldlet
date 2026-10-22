@@ -1,9 +1,9 @@
-// The host's Attention Center for a phone or a browser without the World page (core/attention hostAttention,
-// core/phone/README.md#web): the same rows, in the same groups, as the desktop builds from the same World items.
+// The host's Attention Center for a phone or a browser without the World page (agent/attention hostAttention,
+// platform/web/README.md#web): the same rows, in the same groups, as the desktop builds from the same World items.
 import assert from 'node:assert/strict';
-import {hostAttention,collectMatters,collectNativeActions,upcomingEvents} from '../core/attention/index.ts';
+import {hostAttention,collectMatters,collectNativeActions,upcomingEvents} from '../agent/attention/index.ts';
 import {projectNativeWorld} from '../ui/world/world-projection.ts';
-import {hostAppletPlaces,threadPairs,phoneAttention} from '../core/phone/index.ts';
+import {hostAppletPlaces,threadPairs,phoneAttention} from '../platform/web/index.ts';
 
 // The World page reads the clock itself, so the items are placed around the real now.
 const now=Date.now(),hour=3600_000;
@@ -25,7 +25,7 @@ assert(host.now.every(r=>Number.isInteger(r.level)&&r.actionTitle&&r.context),'e
 assert(Array.isArray(host.saved.ids),'the focus state comes back for the next call');
 assert.deepEqual(hostAttention(items,{now,saved:host.saved}).now.map(r=>r.worldItemId),host.now.map(r=>r.worldItemId),'steady between calls');
 
-// The desktop's rows for the same items (the World page's projection and ui/hud/native-hud.ts matterItems).
+// The desktop's rows for the same items (the World page's projection and ui/world/native-hud.ts matterItems).
 const world:any=projectNativeWorld({workspaceId:'host-attention-check',revision:1,sources:[],knowledge:[],onboarding:{completed:true},ongoing:[],worldItems:items,momentApplets:[],siteApplets:[]});
 const pages=new Map<string,any>(world.pages.map((p:any)=>[p.id,p])),sections=world.spaces;
 const desktop=collectMatters({sections,pages,activities:collectNativeActions({pages,sections}).activities,events:upcomingEvents({pages,sections,limit:Infinity}),current:null,currentSpace:null,depth:'overview',now}).filter((m:any)=>m.signalCount);

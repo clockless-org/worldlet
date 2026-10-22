@@ -3,7 +3,7 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
 import {cachedEncode} from './build-cache.ts';
-import {ACTIVE_THEME,theme,themeAppletArt,type RegisteredTheme} from '../ui/themes/index.ts';
+import {ACTIVE_THEME,theme,themeAppletArt,type RegisteredTheme} from '../ui/style/index.ts';
 import type {WorldPack} from '../ui/world/world-pack.ts';
 import {buildCompanionPresentation} from './build-companion-presentation.ts';
 import {readVillageArt} from './village-art.ts';
@@ -21,7 +21,7 @@ const IMAGE_TYPES:Record<string,string>={'image/png':'png','image/webp':'webp','
 const FILE_TYPES:Record<string,string>=Object.fromEntries(Object.entries(IMAGE_TYPES).map(([type,ext])=>[ext,type]));
 /** A theme's file as a data URI, which externalizeImages turns into a content-named file beside the payload. */
 async function dataFile(file:string){const type=FILE_TYPES[path.extname(file).slice(1).toLowerCase()];if(!type)throw Error('Unsupported theme file: '+file);return 'data:'+type+';base64,'+(await readFile(file)).toString('base64');}
-// A theme's surfaces in built form (ui/themes/theme-surfaces.ts BuiltSurfaces): its HUD pieces, fonts, loading
+// A theme's surfaces in built form (ui/style/themes/theme-surfaces.ts BuiltSurfaces): its HUD pieces, fonts, loading
 // picture and sounds as bundled files, and the Attention pictures it ships under attention/<theme>/.
 async function buildSurfaces(root:string,output:string,entry:RegisteredTheme){
  const {pack}=entry,s=pack.surfaces,reference=theme('village').style.manifest.attention as Record<string,string>,own=entry.style.manifest.attention as Record<string,string>;
@@ -58,7 +58,7 @@ export async function externalizeImages(payloads:object[],output:string){
  for(const payload of payloads)await visit(payload);
  return written.size;
 }
-// The Village payload: its committed art (ui/theme-packages/village/assets), its world package and the companion.
+// The Village payload: its committed art (ui/style/theme-packages/village/assets), its world package and the companion.
 export async function buildWorldAssets(root:string,output:string,channel='release'){
 const entry=ACTIVE_THEME;
 await mkdir(path.join(output,'assets'),{recursive:true});
@@ -75,7 +75,7 @@ for(const area of (entry.world as WorldPack).areas){if(!area.closeView)continue;
  spritePayload.areaViews[area.legacyIds[0]||area.id]={...spec,image:await plate(path.join(base,spec.src)),devices,deviceBoxes,deviceEffects};
 }
 // The host's own Applet pages, the loading page and host surfaces draw the Village package's art where the package
-// publishes it (theme-assets/village/, ui/theme-packages/village/assets/art.json); the Village World reads it itself.
+// publishes it (theme-assets/village/, ui/style/theme-packages/village/assets/art.json); the Village World reads it itself.
 const art=await readVillageArt(root),file=(name:string)=>'theme-assets/village/'+name;
 spritePayload.surroundings=file(art.world.day);
 for(const [key,device] of Object.entries(art.devices)){spritePayload.devices[key]=file(device.src);spritePayload.deviceBoxes[key]=[...device.box];spritePayload.deviceEffects[key]={};}

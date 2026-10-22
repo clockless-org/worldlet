@@ -1,4 +1,4 @@
-// PostHog as a Worldlet Service (contracts/services.ts, core/accounts/services/posthog.ts, service-source.ts,
+// PostHog as a Worldlet Service (contracts/services.ts, context/connectors/services/posthog.ts, service-source.ts,
 // `read_service`): against a fixture of PostHog's API, a pasted personal API key is checked with one read at the address
 // and project the person gave before it is kept, and a refused one replaces nothing; `query` runs only one read-only
 // HogQL SELECT and returns at most 200 rows; `read` pages insights, dashboards, feature flags and annotations; requests
@@ -9,15 +9,15 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {POSTHOG_LIMITS,hogqlSelect,posthogHost} from '../core/accounts/index.ts';
-import {channelDefaultGrants,standingActions,standingCallDecision} from '../core/agent/grants.ts';
-import {hermesChannelToolAllowed} from '../core/agent/hermes-server.ts';
-import {turnTrustObserve} from '../core/agent/turn-trust.ts';
-import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
-import {APP_DEFINITIONS,SOURCE_PROVIDERS,connectSettings,connectToken} from '../core/applets/index.ts';
-import {validateAppletRuntimes} from '../core/applets/runtime.ts';
-import {ExecutionJournal} from '../platform/electron/src/modules/agent-runtime/journal.ts';
-import {ServiceSource,ServiceSourceAccess,ServiceSourceConnections} from '../platform/electron/src/modules/sources/service-source.ts';
+import {POSTHOG_LIMITS,hogqlSelect,posthogHost} from '../context/connectors/index.ts';
+import {channelDefaultGrants,standingActions,standingCallDecision} from '../agent/gate/grants.ts';
+import {hermesChannelToolAllowed} from '../agent/gate/hermes-server.ts';
+import {turnTrustObserve} from '../agent/gate/turn-trust.ts';
+import {resolveAction,worldActionOf,worldActions} from '../agent/gate/gateway.ts';
+import {APP_DEFINITIONS,SOURCE_PROVIDERS,connectSettings,connectToken} from '../context/applets/index.ts';
+import {validateAppletRuntimes} from '../context/applets/runtime.ts';
+import {ExecutionJournal} from '../platform/host/modules/companion/agent/journal.ts';
+import {ServiceSource,ServiceSourceAccess,ServiceSourceConnections} from '../platform/host/modules/connectors/service-source.ts';
 import {withTempDir} from './test-temp.ts';
 
 const KEY='phx_'+'Fixture1'.repeat(5);
@@ -45,6 +45,10 @@ await withTempDir('worldlet-posthog-service-',async temp=>{
   const route=url.pathname.slice(('/api/projects/'+PROJECT).length);
   if(route==='/query/'){
    const query=JSON.parse(init.body).query.query as string;
+   if(query.includes("event = '$exception'"))return json({columns:['issue','types','message','occurrences','people','first_seen','last_seen'],results:[
+    ['0190-aaaa','["TypeError"]','["Cannot read x of undefined in /Users/alex/app.js for alex@example.com"]',42,'5',new Date(Date.now()-3600_000).toISOString(),new Date().toISOString()],
+    ['0190-bbbb','["Error"]','["Error (timeout)"]',1,1,'2026-01-01T00:00:00Z','2026-01-02T00:00:00Z'],
+    ['fp:client-made','["Error"]','["spoofed"]',999,1,'2026-01-01T00:00:00Z','2026-01-02T00:00:00Z']]});
    if(query.includes('missing_field'))return json({type:'validation_error',detail:'Unable to resolve field: missing_field'},400);
    if(query.includes('narrow'))return json({columns:['event'],results:Array.from({length:rows},(_,i)=>[`event_${i}`])});
    if(huge)return new Response('{"results":['+'"x",'.repeat(700_000)+'"x"]}',{headers:{'content-type':'application/json'}});
@@ -106,7 +110,11 @@ await withTempDir('worldlet-posthog-service-',async temp=>{
  assert.equal(connectToken('posthog','  '+KEY+' '),KEY);
  assert.match((()=>{try{connectToken('posthog','phc_'+'a'.repeat(30));return '';}catch(e){return (e as Error).message;}})(),/project API key.*starts with phx_/);
  assert.deepEqual(connectSettings('posthog',{host:' eu.posthog.com ',project:'12345'}),{host:'eu.posthog.com',project:'12345'});
- assert.throws(()=>connectSettings('posthog',{host:HOST}),/Enter the Project ID/);
+ assert.throws(()=>connectSettings('posthog',{host:HOST},KEY),/Enter the Project ID/);
+ // With no key PostHog signs in: only a choice made after signing in is taken.
+ assert.equal(connectToken('posthog',''),'');
+ assert.deepEqual(connectSettings('posthog',{project:'2'}),{project:'2'});
+ assert.deepEqual(connectSettings('posthog',undefined),{});
  assert.throws(()=>connectSettings('posthog',{host:HOST,project:'1',extra:'x'}),/does not take these settings/);
  assert.throws(()=>connectSettings('github',{host:HOST}),/does not take these settings/);
  assert.deepEqual(connectSettings('github',undefined),{});
@@ -169,9 +177,17 @@ await withTempDir('worldlet-posthog-service-',async temp=>{
  assert.equal((await read({provider:'posthog',operation:'read',id:'dashboards'})).records[0].url,HOST+'/project/12345/dashboard/3');
  const notes=await read({provider:'posthog',operation:'read',id:'annotations'});
  assert.deepEqual(notes.records[0].fields,{kind:'annotation',date:'2026-10-01T00:00:00Z',scope:'project'});
+ // Errors: one fixed read; PostHog's own groups only, the loudest first, personal text in error messages replaced.
+ const errorsRead=await read({provider:'posthog',operation:'read',id:'errors'});
+ assert.match((calls.at(-1)!.body as any).query.query,/^SELECT toString\(properties\.\$exception_issue_id\)/);
+ assert.deepEqual(errorsRead.records.map((r:any)=>[r.id,r.fields.occurrences,r.fields.people,r.fields.new]),[['error/0190-aaaa',42,5,true],['error/0190-bbbb',1,1,false]],'a client fingerprint is never a group');
+ assert.equal(errorsRead.records[0].title,'Cannot read x of undefined in /Users/[name]/app.js for [email]');
+ assert.equal(errorsRead.records[0].url,HOST+'/project/12345/error_tracking/0190-aaaa');
+ assert.equal(errorsRead.records[0].fields.type,'TypeError');
+ await failing(read({provider:'posthog',operation:'read',id:'errors',query:'timeout'}),/take no filter or cursor/);
  for(const page of [insights,flags,notes])assert.ok(!JSON.stringify(page).includes('alex@example.com'),'who made it is left out');
  calls.length=0;
- await failing(read({provider:'posthog',operation:'read',id:'persons'}),/Read one PostHog list: insights, dashboards, feature-flags, annotations/);
+ await failing(read({provider:'posthog',operation:'read',id:'persons'}),/Read one PostHog list: insights, dashboards, feature-flags, annotations, errors/);
  await failing(read({provider:'posthog',operation:'read',id:'insights',cursor:'6'}),/Invalid PostHog cursor/);
  await failing(read({provider:'posthog',operation:'read',id:'insights',query:'q'.repeat(101)}),/name of up to 100/);
  assert.equal(calls.length,0);
@@ -239,4 +255,4 @@ assert.equal(posthog.attention,undefined);assert.equal(posthog.fullView?.kind,'w
 const [runtime]=validateAppletRuntimes([JSON.parse(fs.readFileSync(new URL('../ui/applets/posthog/runtime.json',import.meta.url),'utf8'))]);
 assert.equal(runtime.mode,'on-demand');assert.equal(runtime.publishAttention,false);assert.equal(runtime.intervalMinutes,0);
 
-console.log('PASS PostHog Service: a personal API key is checked with one read at the address and project given before it is kept and a refused one replaces nothing; query runs one read-only HogQL SELECT, at most 200 rows, and refuses anything else; read pages insights, dashboards, feature flags and annotations; only the address given, no redirect, bounded size; refused turn and expired key stop the read; posthog/query and posthog/read enforced and in no default Grant; the key is in no event, journal entry, receipt or message');
+console.log('PASS PostHog Service: a personal API key is checked with one read at the address and project given before it is kept and a refused one replaces nothing; query runs one read-only HogQL SELECT, at most 200 rows, and refuses anything else; read pages insights, dashboards, feature flags and annotations and reads the error groups; only the address given, no redirect, bounded size; refused turn and expired key stop the read; posthog/query and posthog/read enforced and in no default Grant; the key is in no event, journal entry, receipt or message');

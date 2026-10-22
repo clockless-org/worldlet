@@ -1,5 +1,5 @@
 import logo from './logo-source.ts';
-import {node,textButton as button} from '../../components/index.ts';
+import {node,textButton as button} from '../../style/index.ts';
 export function videoID(input){
  const value=String(input||'').trim();if(/^[\w-]{11}$/.test(value))return value;
  try{const u=new URL(value);if(u.protocol!=='https:'||u.username||u.password||u.port)return null;const p=u.pathname.split('/').filter(Boolean);let id;if(u.hostname==='youtu.be'&&p.length===1)id=p[0];if(['youtube.com','www.youtube.com','m.youtube.com','music.youtube.com'].includes(u.hostname)){if(u.pathname==='/watch'&&u.searchParams.getAll('v').length===1)id=u.searchParams.get('v');if(p.length===2&&['shorts','embed','live'].includes(p[0]))id=p[1];}return /^[\w-]{11}$/.test(id||'')?id:null;}catch{return null;}

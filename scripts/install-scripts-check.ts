@@ -19,7 +19,7 @@ function posixShell(){
 const shell=posixShell();
 if(shell){const parsed=spawnSync(shell,['-n','platform/install/install.sh'],{encoding:'utf8'});assert.equal(parsed.status,0,'install.sh parses: '+(parsed.error?.message||parsed.stderr));}
 const ids=['openclaw','hermes','pi','claude-code','codex'];
-const local=readFileSync('core/agent/local-harness.ts','utf8');
+const local=readFileSync('agent/gate/local-harness.ts','utf8');
 for(const id of ids)assert.match(local,new RegExp(`['"]${id}['"]`),`${id} is a setup Agent id`);
 assert.ok(sh.includes(`""|${ids.join('|')})`),'install.sh accepts exactly the setup Agent ids');
 assert.ok(ps.includes(`ValidateSet('', ${ids.map(id=>`'${id}'`).join(', ')})`),'install.ps1 accepts exactly the setup Agent ids');
@@ -46,12 +46,12 @@ for(const part of ['loginctl enable-linger','nohup "$node" "$program"','qrencode
 // agent.md (served at https://worldlet.ai/agent.md) and the Worldlet skill give an Agent the same commands, and those
 // commands exist.
 const agentPage=readFileSync('platform/install/agent.md','utf8'),skillText=readFileSync('harness/skills/worldlet/SKILL.md','utf8');
-const shared=['curl -fsSL https://worldlet.ai/install.sh | sh -s -- --agent <name>','& ([scriptblock]::Create((irm https://worldlet.ai/install.ps1))) -Agent <name>','worldlet setup --agent <name>','worldlet register --agent <name>','worldlet link --qr','~/.local/bin/worldlet','share_world_link','call_world_tool','ssh -L','https://worldlet.ai/download/','`openclaw`','`hermes`','`claude-code`','`codex`'];
+const shared=['curl -fsSL https://worldlet.ai/install.sh | sh -s -- --agent <name>','& ([scriptblock]::Create((irm https://worldlet.ai/install.ps1))) -Agent <name>','worldlet setup --agent <name>','worldlet register --agent <name>','worldlet link --qr','~/.local/bin/worldlet','share_world_link','call_world_tool','ssh -L','https://worldlet.ai/download/','`openclaw`','`hermes`','`claude-code`','`codex`','`pi`'];
 for(const text of shared){assert.ok(agentPage.includes(text),'agent.md says '+text);assert.ok(skillText.includes(text),'SKILL.md says '+text);}
 assert.ok(skillText.includes('https://worldlet.ai/agent.md'),'the skill points at agent.md');
 assert.match(sh,/--agent\) AGENT=/);assert.match(ps,/\[string\]\$Agent/);
-const control=readFileSync('platform/node/src/control.ts','utf8');
-assert.match(control,/CONTROL_COMMANDS=\['setup','link','status','register'\]/,'the commands agent.md names exist');
+const control=readFileSync('platform/server/src/control.ts','utf8');
+assert.match(control,/CONTROL_COMMANDS=\['setup','link','status','register','remote'\]/,'the commands agent.md names exist');
 assert.ok(control.includes("rest.includes('--qr')"),'and link --qr');
 assert.ok(!/password|token|api key/i.test(agentPage.replace(/needs no password, token or API key|never pass it one|paste a key, password or token/gi,'')),'agent.md never asks for a secret');
 const acceptance=readFileSync('platform/install/install-acceptance.ps1','utf8');

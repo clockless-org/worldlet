@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import {withTempDir} from './test-temp.ts';
 import {SERVICE_PRESET_LIMITS} from '../contracts/service-presets.ts';
-import {PRESET_REASONS,readServicePresetRead,readStoredServicePreset,removeServicePreset,saveServicePreset,servicePresetRead} from '../core/accounts/index.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {createServicePresets,loadServicePresets} from '../platform/electron/src/modules/sources/service-presets.ts';
+import {PRESET_REASONS,readServicePresetRead,readStoredServicePreset,removeServicePreset,saveServicePreset,servicePresetRead} from '../context/connectors/index.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
+import {createServicePresets,loadServicePresets} from '../platform/host/modules/connectors/service-presets.ts';
 
-// Service presets (contracts/service-presets.ts, core/accounts/services/presets.ts): named, saved reads of a Worldlet
+// Service presets (contracts/service-presets.ts, context/connectors/services/presets.ts): named, saved reads of a Worldlet
 // Service, checked as the Service's own reader checks them, holding no key, kept in world.sqlite.
 const now='2026-10-15T12:00:00.000Z',later='2026-10-15T13:00:00.000Z';
 const refused=(work:()=>unknown,reason:string|RegExp)=>assert.throws(work,(error:Error)=>typeof reason==='string'?error.message===reason:reason.test(error.message));
@@ -19,6 +19,7 @@ assert.deepEqual(readServicePresetRead('github',{operation:'search',query:'repo:
 assert.deepEqual(readServicePresetRead('github',{operation:'read',id:'example/app#12'}),{operation:'read',id:'example/app#12'});
 assert.deepEqual(readServicePresetRead('github',{operation:'list'}),{operation:'list'});
 assert.deepEqual(readServicePresetRead('cloudflare',{operation:'read',id:'workers'}),{operation:'read',id:'workers'});
+assert.deepEqual(readServicePresetRead('search-console',{operation:'query',id:'https://www.example.com/',query:'{"days":7,"dimensions":["date"]}'}),{operation:'query',id:'https://www.example.com/',query:'{"days":7,"dimensions":["date"]}'});
 refused(()=>readServicePresetRead('posthog',{operation:'query',query:'DELETE FROM events'}),/read-only SELECT/);
 refused(()=>readServicePresetRead('posthog',{operation:'query',query:'SELECT 1 LIMIT 500'}),/at most 200 rows/);
 refused(()=>readServicePresetRead('posthog',{operation:'query',query:'SELECT 1',id:'dashboards'}),/takes a query/);
@@ -28,6 +29,13 @@ refused(()=>readServicePresetRead('github',{operation:'search',query:'x'.repeat(
 refused(()=>readServicePresetRead('github',{operation:'read',id:'not an id'}),/owner\/repo#123/);
 refused(()=>readServicePresetRead('github',{operation:'list',query:'is:open'}),/takes nothing else/);
 refused(()=>readServicePresetRead('cloudflare',{operation:'read',id:'graphql'}),/workers or zones/);
+refused(()=>readServicePresetRead('search-console',{operation:'query',id:'sc-domain:example.com',query:'{"dimensions":["searchAppearance"]}'}),/as JSON/);
+// HTTP JSON: an endpoint's name and a path under its address (or the read as a JSON object); its list takes nothing.
+assert.deepEqual(readServicePresetRead('http',{operation:'read',id:'status',query:'items?state=open'}),{operation:'read',id:'status',query:'items?state=open'});
+assert.deepEqual(readServicePresetRead('http',{operation:'read',id:'status'}),{operation:'read',id:'status'});
+refused(()=>readServicePresetRead('http',{operation:'read',id:'status',query:'https://evil.example.com/'}),/path under the endpoint/);
+refused(()=>readServicePresetRead('http',{operation:'read',query:'items'}),/Name the endpoint/);
+refused(()=>readServicePresetRead('http',{operation:'search',query:'items'}),/read with list or read/);
 refused(()=>readServicePresetRead('stripe',{operation:'read'}),PRESET_REASONS.service);
 refused(()=>readServicePresetRead('__proto__',{operation:'read'}),PRESET_REASONS.service);
 refused(()=>readServicePresetRead('github',{operation:'search',query:'is:open',cursor:'2'}),PRESET_REASONS.invalid);

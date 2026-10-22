@@ -1,7 +1,7 @@
-// Shared picture-in-picture rule for website Applets (#919, #950, core/browser/picture-in-picture.ts):
+// Shared picture-in-picture rule for website Applets (#919, #950, agent/applets/picture-in-picture.ts):
 // which Applets offer it, where the window shows and goes, its size and how it counts against live pages.
 import assert from 'node:assert/strict';
-import {FOX_COPY,PAGE_RESUME,PICTURE_IN_PICTURE,foxCopyPlacement,TASK_PICTURE_IN_PICTURE,desktopTaskPictureInPicturePlacement,livePagePlan,pageFrameRate,pictureInPictureApplet,pictureInPicturePlacement,pictureInPictureShare,pictureInPictureShows,taskPictureInPictureAspect} from '../core/browser/index.ts';
+import {FOX_COPY,PAGE_RESUME,PICTURE_IN_PICTURE,foxCopyPlacement,TASK_PICTURE_IN_PICTURE,desktopTaskPictureInPicturePlacement,livePagePlan,pageFrameRate,pictureInPictureApplet,pictureInPicturePlacement,pictureInPictureShare,pictureInPictureShows,taskPictureInPictureAspect} from '../agent/applets/index.ts';
 
 // Applets whose own view is their website; not local Applets, meetings or a scene Applet's Web mode.
 for(const key of ['youtube','tiktok','x','netflix','twitch','bilibili','browser','notion','github','stripe','paypal','todoist','linear','supabase','google-drive','google-docs','google-sheets','google-slides'])assert.equal(pictureInPictureApplet(key),true,key+' offers it');

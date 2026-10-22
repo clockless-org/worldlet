@@ -1,5 +1,5 @@
-import {node} from '../../components/index.ts';
-import {meetingLink} from '../../../core/applets/index.ts';
+import {node} from '../../style/index.ts';
+import {meetingLink} from '../../../context/applets/index.ts';
 /** The Meetings Open view: the next calls from Calendar (each opens its web page inside Worldlet,
  * with Fox's brief), a new call on Google Meet, Zoom or Teams, and a pasted meeting link. */
 export function renderMeetingsOpen(panel,room,items,value,pick){

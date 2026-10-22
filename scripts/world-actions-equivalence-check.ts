@@ -3,12 +3,12 @@
 // and proves the cached version returns the same values, the same internal sharing (an Applet
 // alias shares its base action's schema) and the same freedom to change a result.
 import assert from 'node:assert/strict';
-import {listWorldTools,publicWorldToolNames} from '../core/tools/catalog.ts';
-import {worldModules} from '../core/tools/modules.ts';
-import {APP_DEFINITIONS} from '../core/applets/index.ts';
-import {CALENDAR_REQUIRED} from '../core/tools/calendar.ts';
+import {listWorldTools,publicWorldToolNames} from '../agent/gate/catalog.ts';
+import {worldModules} from '../agent/gate/modules.ts';
+import {APP_DEFINITIONS} from '../context/applets/index.ts';
+import {CALENDAR_REQUIRED} from '../agent/gate/calendar.ts';
 import {SERVICE_ACTIONS,SERVICE_PROVIDERS} from '../contracts/services.ts';
-import {worldActions,describeActions,resolveAction,type WorldAction} from '../core/tools/gateway.ts';
+import {worldActions,describeActions,resolveAction,type WorldAction} from '../agent/gate/gateway.ts';
 
 const READABLE_SOURCES=APP_DEFINITIONS.flatMap(app=>app.attention&&app.attention.reader!=='observation'&&!SERVICE_PROVIDERS.includes(app.attention.provider)?[app.attention.provider]:[]);
 // The earlier worldActions, verbatim.
@@ -58,9 +58,21 @@ function oldWorldActions({sample=false}={}):WorldAction[]{
  operations('calendar','manage_calendar');
  for(const action of actions.filter(a=>a.tool==='manage_calendar'))action.parameters.required=CALENDAR_REQUIRED[action.action];
  operations('asks','agent_asks');
- for(const action of actions.filter(a=>a.tool==='agent_asks'))action.parameters.required={post:['title'],read:[],claim:[],resolve:['id','note','expectedRevision']}[action.action]??[];
+ for(const action of actions.filter(a=>a.tool==='agent_asks'))action.parameters.required={post:['title'],read:[],claim:[],resolve:['id','note','expectedRevision'],attachment:['id','attachment']}[action.action]??[];
  operations('board','world_board');
  for(const action of actions.filter(a=>a.tool==='world_board'))action.parameters.required=action.action==='define'?['definition','expectedRevision']:[];
+ operations('context','world_context');
+ for(const action of actions.filter(a=>a.tool==='world_context'))action.parameters.required=action.action==='search'?['query']:['id'];
+ operations('agents','agent_reports');
+ for(const action of actions.filter(a=>a.tool==='agent_reports'))action.parameters.required=action.action==='report'?['status']:[];
+ operations('agent-artifacts','agent_artifacts');
+ for(const action of actions.filter(a=>a.tool==='agent_artifacts'))action.parameters.required=action.action==='save'?['title','body']:[];
+ operations('github-drafts','github_drafts');
+ for(const action of actions.filter(a=>a.tool==='github_drafts'))action.parameters.required=action.action==='create'?['write','target']:[];
+ operations('github-writes','github_writes');
+ for(const action of actions.filter(a=>a.tool==='github_writes'))action.parameters.required=['write','target'];
+ for(const provider of ['posthog','notion'])for(const operation of ['create','read'])add(provider+'-drafts',operation,'service_drafts',{provider,operation});
+ for(const action of actions.filter(a=>a.tool==='service_drafts'))action.parameters.required=action.action==='create'?['write']:[];
  operations('weather','manage_weather_location');
  for(const action of actions.filter(a=>a.tool==='manage_weather_location'))action.parameters.required=action.action==='search'?['query']:action.action==='select'?['choice']:[];
  operations('music','control_background_music');operations('local-music','control_local_music');operations('youtube','use_youtube');operations('stripe','use_stripe_crm');

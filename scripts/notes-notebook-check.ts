@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {bundleScript,withBrowser,pageErrors} from './browser-test.ts';
-const css=(await Promise.all(['dist/WorldletWeb/worldlet-ui.css','ui/shell/pixi-world.css','ui/applets/scene/applet-scene.css','ui/applets/apple-notes/open.css'].map(p=>readFile(p,'utf8')))).join('\n');
+const css=(await Promise.all(['dist/WorldletWeb/worldlet-ui.css','ui/frame/pixi-world.css','ui/applets/scene/applet-scene.css','ui/applets/apple-notes/open.css'].map(p=>readFile(p,'utf8')))).join('\n');
 const script=await bundleScript({entryPoints:['scripts/fixtures/notes-notebook/main.ts']});
 await withBrowser(async browser=>{
  const page=await browser.newPage({viewport:{width:1500,height:844}}),errors=pageErrors(page);

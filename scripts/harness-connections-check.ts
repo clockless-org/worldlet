@@ -3,19 +3,19 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {HARNESS_SERVICES,worldToolsCommands,isWorldToolsRegistrar,commandLine,commandReason,commandWords,connectionId,dotenvNames,harnessService,hermesConnectionCommand,hermesConnections,hermesMcpPrefixes,isConnectionId,maskSecrets,
- openClawConnectionCommand,openClawConnections,openClawMcpPrefixes,readConnectionAdd,withLastUse} from '../core/agent/index.ts';
-import {harnessConnections,hermesConnectionsService,openClawConnectionsService} from '../platform/electron/src/modules/agent-runtime/harness-connections.ts';
-import type {HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
-import {createHarnessConnections} from '../platform/electron/src/modules/fox/harness-connections.ts';
-import {AGENT} from '../platform/electron/src/host/services.ts';
-import {connectionLine,connectionUseLine,showAgentConnections} from '../ui/companion/agent-connections.ts';
+ openClawConnectionCommand,openClawConnections,openClawMcpPrefixes,readConnectionAdd,withLastUse} from '../agent/gate/index.ts';
+import {harnessConnections,hermesConnectionsService,openClawConnectionsService} from '../platform/host/modules/companion/agent/harness-connections.ts';
+import type {HarnessEnvironment} from '../platform/host/modules/companion/agent/local-harness.ts';
+import {createHarnessConnections} from '../platform/host/modules/companion/harness-connections.ts';
+import {AGENT} from '../platform/host/services.ts';
+import {connectionLine,connectionUseLine,showAgentConnections} from '../ui/frame/agent-connections.ts';
 import {withTempDir} from './test-temp.ts';
 
-// The Agent's connections in the World (core/agent/PORTABILITY.md#the-agents-connections-in-the-world): the declared
+// The Agent's connections in the World (agent/gate/PORTABILITY.md#the-agents-connections-in-the-world): the declared
 // `connections` service, Hermes Agent's mcp_servers and chat tokens and OpenClaw's mcp status and channels read without
 // a secret, each server's last use matched from its own tool naming, the exact command of each change, the host
 // services against fixture `hermes` and `openclaw` commands that behave like their own `mcp add/remove/unset` (their
-// files changed only by them), the World's preview-then-confirm and Settings › Agent › Accounts.
+// files changed only by them), the World's preview-then-confirm and Settings › Agents › Accounts.
 
 // Declarations ------------------------------------------------------------------------------------------------------
 assert.equal(harnessService('hermes','connections'),'files');assert.equal(harnessService('openclaw','connections'),'native');
@@ -227,14 +227,14 @@ else process.exit(2);
  await assert.rejects(world.preview('hermes',{remove:'not-an-id'}),/no longer there/);
  host.store.sampleEnabled=()=>true;await assert.rejects(world.preview('hermes',{remove:docs.id}),/your own world/);host.store.sampleEnabled=()=>false;
 
- // Settings › Agent › Accounts: a row per connection with its last use; Remove and Add each say what they
+ // Settings › Agents › Accounts: a row per connection with its last use; Remove and Add each say what they
  // do in plain words (never the command itself), and run it on Confirm.
  (globalThis as any).document={createElement:()=>new Node()};
  const requests:any[]=[];
  let answer:any={harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,changes:true,connections:[{id:listed[0].id,kind:'mcp',name:'github',where:'https://api.githubcopilot.com/mcp/',enabled:true,sign:'token',agent:'default',main:true,removable:true,lastUsed:{at:Date.UTC(2026,9,8,12),tool:'search_issues',thread:'Discord · Release notes'}},
   {id:listed[4].id,kind:'account',name:'Telegram',where:'telegram',enabled:true,sign:'token',agent:'default',main:true}]},{harness:'other',title:'Other Agent',changes:false,connections:[{id:'conn-0000000000000000',kind:'mcp',name:'x',where:'y',enabled:false,removable:true}]}]};
  const call=async(action:string,args:any)=>{
-  // What Hermes Agent said about itself at setup (core/agent/agent-profile.ts); Other Agent said nothing.
+  // What Hermes Agent said about itself at setup (agent/gate/agent-profile.ts); Other Agent said nothing.
   if(action==='agentHarness')return {profile:args.id==='hermes'?{connections:[{name:'1Password vault',kind:'password_vault',usedFor:'Logs in to shopping sites'},{name:'Telegram',kind:'channel'}],channels:[{provider:'discord',place:'#groceries'}]}:null};
   requests.push([action,args]);if(args.operation==='preview')return {command:args.remove?'hermes mcp remove github':'hermes mcp add fetch --url https://f.example.com',confirm:'c-1'};
   if(args.operation==='change'){answer={harnesses:[{...answer.harnesses[0],connections:answer.harnesses[0].connections.slice(1)}]};return {ok:true};}return answer;};
@@ -271,4 +271,4 @@ else process.exit(2);
  assert.equal(connectionLine({id:'c',kind:'mcp',name:'x',where:'node s.js',enabled:false,agent:'work',sign:'needs-sign-in'}),'Tool · needs sign-in in your Agent · turned off');
  delete (globalThis as any).document;
 });
-console.log('PASS Agent connections: declared per Harness, Hermes Agent and OpenClaw MCP servers and chat accounts listed with no secret and their last use from the Agent\'s own history, added and removed only through fixture `hermes mcp add/remove` and `openclaw mcp add/unset` after a confirmed preview, Settings › Agent › Accounts');
+console.log('PASS Agent connections: declared per Harness, Hermes Agent and OpenClaw MCP servers and chat accounts listed with no secret and their last use from the Agent\'s own history, added and removed only through fixture `hermes mcp add/remove` and `openclaw mcp add/unset` after a confirmed preview, Settings › Agents › Accounts');

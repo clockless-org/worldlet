@@ -1,5 +1,5 @@
 // Engine identity probe (#1089): what a page and its server see from Worldlet's website session
-// (Electron, `websiteSession` in platform/electron/src/modules/browser/surface.ts) and from any
+// (Electron, `websiteSession` in platform/host/modules/applets/surface.ts) and from any
 // other Chromium engine given with --engine, such as the former CEF host's `cefsimple` or a stock
 // Chromium. Each engine opens one loopback page that reports its own facts back over HTTP: no
 // DevTools, no automation, no account and no external network. Prints the facts and the ones
@@ -77,7 +77,7 @@ function run(id:string,command:string,args:(url:string)=>string[]):Promise<unkno
 }
 
 // Electron: the real website session in a sandboxed view, as page.ts creates it, in a disposable profile.
-await build({entryPoints:[path.join(root,'platform/electron/src/modules/browser/surface.ts')],outfile:path.join(scratch,'surface.mjs'),bundle:true,platform:'node',format:'esm',target:'node24',external:['electron'],logLevel:'error',
+await build({entryPoints:[path.join(root,'platform/host/modules/applets/surface.ts')],outfile:path.join(scratch,'surface.mjs'),bundle:true,platform:'node',format:'esm',target:'node24',external:['electron'],logLevel:'error',
  banner:{js:"import {createRequire as __createRequire} from 'node:module';const require=__createRequire(import.meta.url);"}});
 writeFileSync(path.join(scratch,'main.mjs'),`import {app,BaseWindow,WebContentsView} from 'electron';
 import {websiteSession} from './surface.mjs';

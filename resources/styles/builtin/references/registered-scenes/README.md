@@ -10,7 +10,7 @@
 | Brand-specific products and external games | 100 | 🟢 100 | 🟢 100 |
 | Total art selections | **140** | **140** | **140** |
 
-Green means a matching icon, background and measured HTML region are supplied. It does not mean an application or data connector has been implemented. All 140 backgrounds now have measured primary regions. Each scene includes an extracted alpha foreground and a remeasured opening targeting about 70% width and 80% height. The original painting supplies the foreground colours; the extracted image supplies only alpha, avoiding repaint seams. Bindings and organic paper edges overlap the live content by a few pixels. Website Applets open the original site in the isolated native browser surface; the four core paper Applets retain their interactive HTML. Artwork availability does not imply account integration. The [SIM inventory](../../../../../ui/theme-packages/village/scene-library.json) contains all 140 selections. Regenerate it with `node scripts/village-scene-library.ts`.
+Green means a matching icon, background and measured HTML region are supplied. It does not mean an application or data connector has been implemented. All 140 backgrounds now have measured primary regions. Each scene includes an extracted alpha foreground and a remeasured opening targeting about 70% width and 80% height. The original painting supplies the foreground colours; the extracted image supplies only alpha, avoiding repaint seams. Bindings and organic paper edges overlap the live content by a few pixels. Website Applets open the original site in the isolated native browser surface; the four core paper Applets retain their interactive HTML. Artwork availability does not imply account integration. The [SIM inventory](../../../../../ui/style/theme-packages/village/scene-library.json) contains all 140 selections. Regenerate it with `node scripts/village-scene-library.ts`.
 
 ## Core applications and games
 
@@ -109,7 +109,7 @@ Prioritize Files and Clock now. Calculator and Contacts are the clearest next ca
 
 ## Local data for the planned tools
 
-Prefer the user’s existing records over a separate demo-only store. The host obtains authorized local data through native adapters, Core supplies shared records and actions, and the Applet renders live HTML in the SIM’s registered surfaces. Theme assets do not read files, hold credentials or request OS permissions. A registered background alone does not connect an account or a local application. See the [connector reference](../../../../../core/applets/INTEGRATIONS.md#local-home-adapters) for implementation and acceptance evidence.
+Prefer the user’s existing records over a separate demo-only store. The host obtains authorized local data through native adapters, Core supplies shared records and actions, and the Applet renders live HTML in the SIM’s registered surfaces. Theme assets do not read files, hold credentials or request OS permissions. A registered background alone does not connect an account or a local application. See the [connector reference](../../../../../context/applets/INTEGRATIONS.md#local-home-adapters) for implementation and acceptance evidence.
 
 - **Files:** start with explicitly selected local folders and Agent-created documents. File selection, enumeration and preview must use the host’s filesystem boundary; show the real source and open the original file. A cloud file visible locally may still need downloading. Do not imply access to every cloud provider or private application database.
 - **Clock:** start with system time, world time, stopwatch and Worldlet-owned timers/alarms. Background delivery and restart behavior need runtime implementation and validation. Synchronizing existing Apple Clock alarms is not established and is not part of the initial promise.
@@ -138,7 +138,7 @@ Use the [background + foreground contract](../../../../themes/CONTRACT.md#backgr
 1. Compose the blank content surface at about 70% viewport width and 80% height after host navigation. Match the icon, World and Applet's purpose; reserve the actual right-side Fox and reply area.
 2. Extract the final picture's frame into `frame-cutout.png` with genuine alpha. Keep wood, metal, corner pins, bindings and the narrow irregular paper edge. Clear the whole content opening and everything outside the frame. Preserve the full canvas and alignment when possible.
 3. Measure the entire transparent opening, including irregular edges, and declare the primary rectangle with **4 source pixels of overlap on every side**. The content fills that rectangle under the foreground; do not inset the content to the opening or move its top edge independently for the shelf. The Applet shelf occupies the right-hand companion lane, so the page can keep its registered top edge. Record `frameSource` and `webFrame` together in `catalog.json`; the encoder copies the mask into the declared package asset. Prefer full-canvas source and target bounds; use measured source/target registration if extraction shifted the art. Reusable preset packages use the same `registration.webFrame` structure.
-4. Encode with `node scripts/village-registered-scenes.ts`, then validate with `npm run theme:source-check -- ui/theme-packages/village`. The source lock records both assets. Keep generation/refinement instructions next to the source art.
+4. Encode with `node scripts/village-registered-scenes.ts`, then validate with `npm run theme:source-check -- ui/style/theme-packages/village`. The source lock records both assets. Keep generation/refinement instructions next to the source art.
 5. Review the real page beneath the foreground, with Fox and a reply visible. Check all four seams, corners, scrollbars and edge controls, pointer pass-through, letterboxed sizes and compact fallback. Preserve readable page text; do not shrink it to compensate for an undersized painted opening.
 
 Suggested extraction instruction: “Extract only this finished scene's physical frame, attachments and 1–3 pixel irregular inner paper lip. Keep its exact full-canvas alignment and silhouette. Make the entire content opening and all surrounding scenery truly transparent. No replacement white fill, checkerboard, new decorations, text or changed perspective.” Inspect the result: prompt wording is not proof of transparency or alignment.
@@ -164,7 +164,7 @@ Export all 40 pictures with `node scripts/applet-scene-mockups.ts`; verify saved
 
 ### Calendar
 
-<img src="../../../../../ui/theme-packages/village/assets/devices/google-calendar.webp" width="100" alt="Calendar icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/devices/google-calendar.webp" width="100" alt="Calendar icon">
 
 Primary HTML region: 54.7% of image width × 77.8% of image height; measured inside the painted surface.
 
@@ -172,7 +172,7 @@ Primary HTML region: 54.7% of image width × 77.8% of image height; measured ins
 
 ### Mail
 
-<img src="../../../../../ui/theme-packages/village/assets/devices/gmail.webp" width="100" alt="Mail icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/devices/gmail.webp" width="100" alt="Mail icon">
 
 Primary HTML region: 49.2% of image width × 79.9% of image height; measured inside the painted surface.
 
@@ -180,7 +180,7 @@ Primary HTML region: 49.2% of image width × 79.9% of image height; measured ins
 
 ### Notes
 
-<img src="../../../../../ui/theme-packages/village/assets/devices/apple-notes.webp" width="100" alt="Notes icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/devices/apple-notes.webp" width="100" alt="Notes icon">
 
 Primary HTML region: 56.2% of image width × 79.8% of image height; measured inside the painted surface.
 
@@ -188,7 +188,7 @@ Primary HTML region: 56.2% of image width × 79.8% of image height; measured ins
 
 ### Reminders
 
-<img src="../../../../../ui/theme-packages/village/assets/devices/apple-reminders.webp" width="100" alt="Reminders icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/devices/apple-reminders.webp" width="100" alt="Reminders icon">
 
 Primary HTML region: 40.1% of image width × 77.4% of image height; measured inside the painted surface.
 
@@ -196,7 +196,7 @@ Primary HTML region: 40.1% of image width × 77.4% of image height; measured ins
 
 ### Files
 
-<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/files/icon.webp" width="100" alt="Files icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/applet-scenes/files/icon.webp" width="100" alt="Files icon">
 
 Primary HTML region: 64.0% of image width × 77.0% of image height; measured inside the painted surface.
 
@@ -204,7 +204,7 @@ Primary HTML region: 64.0% of image width × 77.0% of image height; measured ins
 
 ### Weather
 
-<img src="../../../../../ui/theme-packages/village/assets/devices/weather.webp" width="100" alt="Weather icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/devices/weather.webp" width="100" alt="Weather icon">
 
 Primary HTML region: 56.0% of image width × 74.3% of image height; measured inside the painted surface.
 
@@ -212,7 +212,7 @@ Primary HTML region: 56.0% of image width × 74.3% of image height; measured ins
 
 ### Meetings
 
-<img src="../../../../../ui/theme-packages/village/assets/devices/meetings.webp" width="100" alt="Meetings icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/devices/meetings.webp" width="100" alt="Meetings icon">
 
 Primary HTML region: 55.0% of image width × 78.3% of image height; measured inside the painted surface.
 
@@ -220,7 +220,7 @@ Primary HTML region: 55.0% of image width × 78.3% of image height; measured ins
 
 ### Voice Memos
 
-<img src="../../../../../ui/theme-packages/village/assets/devices/voice-memos.webp" width="100" alt="Voice Memos icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/devices/voice-memos.webp" width="100" alt="Voice Memos icon">
 
 Primary HTML region: 52.3% of image width × 79.4% of image height; measured inside the painted surface.
 
@@ -228,7 +228,7 @@ Primary HTML region: 52.3% of image width × 79.4% of image height; measured ins
 
 ### Messages
 
-<img src="../../../../../ui/theme-packages/village/assets/devices/messages.webp" width="100" alt="Messages icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/devices/messages.webp" width="100" alt="Messages icon">
 
 Primary HTML region: 62.8% of image width × 81.6% of image height; measured inside the painted surface.
 
@@ -236,7 +236,7 @@ Primary HTML region: 62.8% of image width × 81.6% of image height; measured ins
 
 ### Browser
 
-<img src="../../../../../ui/theme-packages/village/assets/devices/browser.webp" width="100" alt="Browser icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/devices/browser.webp" width="100" alt="Browser icon">
 
 Primary HTML region: 66.7% of image width × 73.8% of image height; measured inside the painted surface.
 
@@ -244,7 +244,7 @@ Primary HTML region: 66.7% of image width × 73.8% of image height; measured ins
 
 ### Maps
 
-<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/maps/icon.webp" width="100" alt="Maps icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/applet-scenes/maps/icon.webp" width="100" alt="Maps icon">
 
 Primary HTML region: 63.3% of image width × 79.2% of image height; measured inside the painted surface.
 
@@ -252,7 +252,7 @@ Primary HTML region: 63.3% of image width × 79.2% of image height; measured ins
 
 ### Clock
 
-<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/clock/icon.webp" width="100" alt="Clock icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/applet-scenes/clock/icon.webp" width="100" alt="Clock icon">
 
 Primary HTML region: 69.7% of image width × 73.3% of image height; measured inside the painted surface.
 
@@ -260,7 +260,7 @@ Primary HTML region: 69.7% of image width × 73.3% of image height; measured ins
 
 ### Contacts
 
-<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/contacts/icon.webp" width="100" alt="Contacts icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/applet-scenes/contacts/icon.webp" width="100" alt="Contacts icon">
 
 Primary HTML region: 60.5% of image width × 75.5% of image height; measured inside the painted surface.
 
@@ -268,7 +268,7 @@ Primary HTML region: 60.5% of image width × 75.5% of image height; measured ins
 
 ### Photos
 
-<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/photos/icon.webp" width="100" alt="Photos icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/applet-scenes/photos/icon.webp" width="100" alt="Photos icon">
 
 Primary HTML region: 66.2% of image width × 79.2% of image height; measured inside the painted surface.
 
@@ -276,7 +276,7 @@ Primary HTML region: 66.2% of image width × 79.2% of image height; measured ins
 
 ### Music
 
-<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/music/icon.webp" width="100" alt="Music icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/applet-scenes/music/icon.webp" width="100" alt="Music icon">
 
 Primary HTML region: 62.1% of image width × 79.7% of image height; measured inside the painted surface.
 
@@ -284,7 +284,7 @@ Primary HTML region: 62.1% of image width × 79.7% of image height; measured ins
 
 ### News
 
-<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/news/icon.webp" width="100" alt="News icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/applet-scenes/news/icon.webp" width="100" alt="News icon">
 
 Primary HTML region: 60.9% of image width × 74.1% of image height; measured inside the painted surface.
 
@@ -292,7 +292,7 @@ Primary HTML region: 60.9% of image width × 74.1% of image height; measured ins
 
 ### Podcasts
 
-<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/podcasts/icon.webp" width="100" alt="Podcasts icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/applet-scenes/podcasts/icon.webp" width="100" alt="Podcasts icon">
 
 Primary HTML region: 57.1% of image width × 78.5% of image height; measured inside the painted surface.
 
@@ -300,7 +300,7 @@ Primary HTML region: 57.1% of image width × 78.5% of image height; measured ins
 
 ### Stocks
 
-<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/stocks/icon.webp" width="100" alt="Stocks icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/applet-scenes/stocks/icon.webp" width="100" alt="Stocks icon">
 
 Primary HTML region: 60.1% of image width × 75.1% of image height; measured inside the painted surface.
 
@@ -308,7 +308,7 @@ Primary HTML region: 60.1% of image width × 75.1% of image height; measured ins
 
 ### 2048
 
-<img src="../../../../../ui/theme-packages/village/assets/devices/game-2048.webp" width="100" alt="2048 icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/devices/game-2048.webp" width="100" alt="2048 icon">
 
 Primary HTML region: 67.2% of image width × 77.4% of image height; measured inside the painted surface.
 
@@ -316,7 +316,7 @@ Primary HTML region: 67.2% of image width × 77.4% of image height; measured ins
 
 ### Snake
 
-<img src="../../../../../ui/theme-packages/village/assets/devices/snake.webp" width="100" alt="Snake icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/devices/snake.webp" width="100" alt="Snake icon">
 
 Primary HTML region: 69.2% of image width × 71.8% of image height; measured inside the painted surface.
 
@@ -324,7 +324,7 @@ Primary HTML region: 69.2% of image width × 71.8% of image height; measured ins
 
 ### Minesweeper
 
-<img src="../../../../../ui/theme-packages/village/assets/devices/minesweeper.webp" width="100" alt="Minesweeper icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/devices/minesweeper.webp" width="100" alt="Minesweeper icon">
 
 Primary HTML region: 60.9% of image width × 75.6% of image height; measured inside the painted surface.
 
@@ -332,7 +332,7 @@ Primary HTML region: 60.9% of image width × 75.6% of image height; measured ins
 
 ### Sudoku
 
-<img src="../../../../../ui/theme-packages/village/assets/devices/sudoku.webp" width="100" alt="Sudoku icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/devices/sudoku.webp" width="100" alt="Sudoku icon">
 
 Primary HTML region: 66.6% of image width × 74.3% of image height; measured inside the painted surface.
 
@@ -340,7 +340,7 @@ Primary HTML region: 66.6% of image width × 74.3% of image height; measured ins
 
 ### Gomoku
 
-<img src="../../../../../ui/theme-packages/village/assets/applet-scenes/gomoku/icon.webp" width="100" alt="Gomoku icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/applet-scenes/gomoku/icon.webp" width="100" alt="Gomoku icon">
 
 Primary HTML region: 61.2% of image width × 75.1% of image height; measured inside the painted surface.
 
@@ -348,7 +348,7 @@ Primary HTML region: 61.2% of image width × 75.1% of image height; measured ins
 
 ### Random Game
 
-<img src="../../../../../ui/theme-packages/village/assets/devices/random-game.webp" width="100" alt="Random Game icon">
+<img src="../../../../../ui/style/theme-packages/village/assets/devices/random-game.webp" width="100" alt="Random Game icon">
 
 Primary HTML region: 52.6% of image width × 74.3% of image height; measured inside the painted surface.
 

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import * as villageLamp from '../ui/world/village/village-lamp.ts';
 import {appletLamp,appletLampContent,lampColors,lampLabels,lampNeeds,lampOpacity,lampDisplayState,LAMP_BREATH_MS} from '../ui/world/applet-lamp.ts';
-import {appletStatus} from '../core/applets/status.ts';
+import {appletStatus} from '../context/applets/status.ts';
 import {stackLampBoxes} from '../ui/world/applet-lamp-label.ts';
 assert.equal(appletLamp(),'off');
 assert.equal(appletLamp({phase:'browser'}),'off','A website is not proof of login');

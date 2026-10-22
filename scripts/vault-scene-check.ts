@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {resolveVaultNote,vaultWikiLinks} from '../core/applets/index.ts';
+import {resolveVaultNote,vaultWikiLinks} from '../context/applets/index.ts';
 import {bundleScript,withBrowser,pageErrors} from './browser-test.ts';
 const ids=['Projects/Navigation.md','Projects/Applets.md','Research/Library references.md','One/Same.md','Two/Same.md'];
 assert.equal(resolveVaultNote('Applets','Projects/Navigation.md',ids),'Projects/Applets.md');

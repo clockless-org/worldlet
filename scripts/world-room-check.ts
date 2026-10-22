@@ -1,4 +1,4 @@
-// The full World on another device (core/phone/README.md#the-world-on-another-device): a `world` pairing of its own,
+// The full World on another device (platform/web/README.md#the-world-on-another-device): a `world` pairing of its own,
 // met in the pairing room, which only forwards. 1. The link, the sealed `{w}` pieces (big frames cut, replay and
 // reordering refused) and ROOM_ALLOWED. 2. The host's side in process (world-room-link.ts, host/web-page.ts with
 // roomDenied, createPagePair's third page) against the memory room, with a page written out from core's helpers.
@@ -15,17 +15,21 @@ import {execFileSync,spawn} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import type {Duplex} from 'node:stream';
 import {withTempDir} from './test-temp.ts';
-import {worldAnswers} from '../ui/web/index.ts';
+import {worldAnswers} from '../platform/web/page/index.ts';
 import {memoryRoom} from './memory-room.ts';
 import {launchTestBrowser,pageErrors,waitForWorld} from './browser-test.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {acceptWebSocket} from '../platform/electron/src/modules/phone/web-socket.ts';
-import {resolveWorldFile} from '../platform/electron/src/world/world-file.ts';
-import {createWorldRoomLink,WORLD_ROOM_VAULT} from '../platform/electron/src/modules/phone/world-room-link.ts';
-import {createWebPage} from '../platform/electron/src/host/web-page.ts';
-import {createPagePair,NO_PAGE} from '../platform/electron/src/host/world-web.ts';
+import {createWorldBoard} from '../platform/host/modules/connectors/board.ts';
+import {BOARD_REASONS} from '../context/connectors/index.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
+import {acceptWebSocket} from '../platform/host/modules/windows/web-socket.ts';
+import {resolveWorldFile} from '../platform/host/world-file.ts';
+import {createWorldRoomLink,WORLD_ROOM_VAULT} from '../platform/host/modules/windows/world-room-link.ts';
+import {createWebPage} from '../platform/host/web-page.ts';
+import {createPagePair,NO_PAGE} from '../platform/host/world-web.ts';
 import {ROOM_ALLOWED,ROOM_DENIED_MESSAGE,WEB_DENIED_MESSAGE,WEB_PAGE_FEATURES,WEB_PAGE_UNAVAILABLE,WORLD_PAGE_CSP_META,roomDenied,worldRoomCsp} from '../contracts/web-world.ts';
-import {canRenderWorld,withWorldLink,worldLinkFromWeb,newPairSecret,openHello,pairKeys,readWorldRoomFrame,readWorldRoomLink,roomEntry,sealJoin,worldBundlePath,worldRoomLink,worldRoomNonce,worldRoomSession,WORLD_ROOM_PIECE,ROOM_PROTOCOL,isWorldRoomPage} from '../core/phone/index.ts';
+import {canRenderWorld,withWorldLink,worldLinkFromWeb,newPairSecret,openHello,pairKeys,readWorldRoomFrame,readWorldRoomLink,roomEntry,sealJoin,worldBundlePath,worldRoomLink,worldRoomNonce,worldRoomSession,WORLD_ROOM_PIECE,ROOM_PROTOCOL,isWorldRoomPage} from '../platform/web/index.ts';
+import {agentContextWrites} from '../agent/gate/grants.ts';
+import {agentContext} from '../context/store/index.ts';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 /** The room's own limit on one message (worker/room.ts in the operations repository). */
@@ -94,7 +98,15 @@ const within=<T>(promise:Promise<T>,what:string,ms=10_000)=>Promise.race([promis
  assert.equal(roomDenied({action:'phonePair',kind:'world',operation:'status'}),ROOM_DENIED_MESSAGE,'pairing, even its status');
  assert.equal(roomDenied({action:'dataBackup'}),WEB_DENIED_MESSAGE,'WEB_DENIED holds first');
  assert.equal(roomDenied({action:'browserShow'}),WEB_PAGE_UNAVAILABLE.websitePages,'and what a browser window cannot do');
- for(const action of Object.keys(ROOM_ALLOWED))assert.equal(roomDenied({action,operation:'get'}),'',action);
+ for(const [action,rule] of Object.entries(ROOM_ALLOWED)){
+  for(const operation of rule===true?['get']:rule)assert.equal(roomDenied({action,operation}),'',action);
+ }
+ for(const operation of [undefined,null,42,'','get','define','save','delete','READ'])assert.equal(roomDenied({action:'board',operation}),ROOM_DENIED_MESSAGE,'only explicit board/read is allowed');
+ for(const action of ['servicePresets','agentAccess','read_service'])assert.equal(roomDenied({action,operation:'read'}),ROOM_DENIED_MESSAGE,action+' stays with the host');
+ // An Agent's ask is answered from another device, but approving the GitHub drafts it carries writes to GitHub: only here.
+ assert.equal(roomDenied({action:'agentAsk',operation:'answer'}),'');
+ assert.equal(roomDenied({action:'agentAsk',operation:'approveDrafts'}),ROOM_DENIED_MESSAGE,'approving GitHub drafts stays on this computer');
+ for(const action of ['githubDraft','githubApp','httpJson'])assert.equal(roomDenied({action,operation:'approve'}),ROOM_DENIED_MESSAGE,action+' stays on this computer');
  // One browser link for both: the full World where the device can draw it, the Center where it cannot.
  const web='https://worldlet.ai/open/#v=1&s='+'B'.repeat(43)+'&n=Studio+Mac&m=room',both=withWorldLink(web,link);
  assert.equal(withWorldLink(web,null),web,'without a World pairing, the browser link as before');
@@ -130,11 +142,22 @@ async function roomPage(Socket:any,link:string){
 }
 
 // 2. The host's side in process.
-await (async()=>{
+await withTempDir('worldlet-room-board-',async dir=>{
+ const ledger=new WorldLedger(path.join(dir,'world'));
+ try{
+ const reads:unknown[]=[],board=createWorldBoard({ledger:()=>ledger,now:()=>'2026-10-15T12:00:00.000Z',read:async request=>{
+  reads.push(request);
+  return {provider:'posthog',operation:'query',scope:'Fixture',records:[{id:'row/1',title:'Installs',fields:{installed:120}}]};
+ }});
+ const definition={title:'Product',tabs:[{id:'growth',title:'Growth',blocks:[{id:'installs',title:'Installs',kind:'number',preset:'funnel',field:'installed'}]}]};
+ // The Agent's call as the Context entry admits it on the standing server.
+ const fixture=agentContext({decide:()=>({decision:'allowed',writes:agentContextWrites('board')}),audit(){}},{agentId:'fixture',target:'board',action:'define'});
+ assert.equal((await board.call(fixture,{operation:'define',expectedRevision:0,definition,presets:[{id:'funnel',name:'Funnel',provider:'posthog',read:{operation:'query',query:'SELECT 120 AS installed'}}]},()=>true)).ok,true);
+ const before=ledger.board();
  const room=memoryRoom(),secrets=new Map<string,string>(),vault={get:(id:string)=>secrets.get(id)??null,set:(id:string,v:string)=>void secrets.set(id,v),delete:(id:string)=>void secrets.delete(id)};
  const dispatched:Record<string,unknown>[]=[],statuses:string[]=[];
  let pages!:ReturnType<typeof createPagePair>;
- const remote=createWebPage({platform:'linux',denied:roomDenied,dispatch:async body=>{dispatched.push(body);pages.note('remote',body);return body.action==='snapshot'?{revision:3}:{ok:true};},loaded(){},gone(){}});
+ const remote=createWebPage({platform:'linux',denied:roomDenied,dispatch:async body=>{dispatched.push(body);pages.note('remote',body);return body.action==='board'?board.view(body):body.action==='snapshot'?{revision:3}:{ok:true};},loaded(){},gone(){}});
  const webCalls:string[]=[];
  const web={call:async(name:string)=>{webCalls.push(name);return 'web' as any;},event(){},documentEvent(){},ready:()=>false};
  pages=createPagePair(NO_PAGE,web,remote.page);
@@ -155,6 +178,21 @@ await (async()=>{
  await tab.send({q:3,body:{action:'phonePair',kind:'world',operation:'status'}});
  assert.equal((await within(tab.next(f=>f.a===3),'pair')).ok,false);
  assert.deepEqual(dispatched.map(b=>b.action),['snapshot'],'the router saw only what was allowed');
+ // A paired page reads the same stored board and Service reader as the host's own view.
+ await tab.send({q:10,body:{action:'board',operation:'read',tab:'growth'}});
+ const seen=await within(tab.next(f=>f.a===10),'board read');
+ assert.equal(seen.ok,true);assert.equal(seen.value.revision,1);
+ assert.deepEqual(seen.value.view.tabs[0].blocks[0].number,{value:120});
+ assert.deepEqual(reads,[{provider:'posthog',operation:'query',query:'SELECT 120 AS installed'}]);
+ assert.deepEqual(seen.value,await board.view({tab:'growth'}),'remote and local views share the resolver and cache');
+ assert.equal(reads.length,1);
+ for(const [i,body] of [{action:'board',operation:'define',definition,expectedRevision:1},{action:'board'},
+  {action:'servicePresets',operation:'save'},{action:'agentAccess',operation:'grant'}].entries()){
+  await tab.send({q:20+i,body});
+  assert.deepEqual(await within(tab.next(f=>f.a===20+i),'refused board mutation'),{a:20+i,ok:false,error:ROOM_DENIED_MESSAGE});
+ }
+ assert.deepEqual(dispatched.map(b=>b.action),['snapshot','board'],'no mutation reached the router');
+ assert.deepEqual(ledger.board(),before,'reading and refused writes leave the stored board alone');
  // A big call from the host comes through whole, and the page's answer goes back.
  const art='data:image/png;base64,'+'B'.repeat(400_000);
  const call=pages.page.call('worldletReceive',{art});
@@ -181,7 +219,8 @@ await (async()=>{
  assert.equal(secrets.has(WORLD_ROOM_VAULT),false);
  assert.deepEqual(link.status(),{state:'none'});
  console.log('PASS world room host: a `world` link of its own, a page in the room gets the same handshake as a browser here, ROOM_ALLOWED enforced before the router, a snapshot bigger than a room message whole, its Fox turn\'s tools back to it, one remote page at a time, and turning the link off ends it');
-})();
+ }finally{ledger.close();}
+});
 
 // 3. The built Node host and the built World bundle, in headless Chromium.
 const web=path.join(root,'dist/WorldletWeb');
@@ -231,6 +270,10 @@ await withTempDir('wl-room-',async temp=>{
   onboarding:{unlockedApplets:['app-gmail','app-browser'],version:1,presets:['home'],completed:true,introStep:9}});
  ledger.upsert([{kind:'task',provider:'gmail',status:'open',title,context:'Due Friday.',reason:'Due Friday.',summary:'The library wrote about the card.',attentionContentVersion:1,policyVersion:2,attentionReason:'due',
   sources:[{provider:'gmail',id:'library-mail',quote:'Your card expires Friday.'}],createdAt:1,updatedAt:2}],'world-room-check',true);
+ ledger.saveBoard({revision:1,updatedAt:'2026-10-15T12:00:00.000Z',agentId:'fixture',definition:{title:'Server board',tabs:[
+  {id:'growth',title:'Growth',blocks:[{id:'installs',title:'Installs',kind:'number',preset:'missing-preset'}]},
+  {id:'health',title:'Health',blocks:[]},
+ ]}});
  ledger.close();
  const child=spawn(process.execPath,[path.join(program,'worldlet.cjs')],{cwd:temp,env:{...process.env,WORLDLET_PROFILE_ROOT:library,WORLDLET_PAIR_RELAY:relay},stdio:['ignore','pipe','pipe',...process.platform==='win32'?['ipc' as const]:[]]});
  let out='';child.stdout.on('data',chunk=>{out+=chunk;});child.stderr.on('data',chunk=>{out+=chunk;});
@@ -263,6 +306,16 @@ await withTempDir('wl-room-',async temp=>{
    assert.deepEqual(await page.evaluate(()=>(window as any).worldletWebHost.features),{...WEB_PAGE_FEATURES},'the page hears what its window cannot do');
    const ask=(body:Record<string,unknown>)=>page.evaluate(body=>(window as any).worldletWebHost.request(body).then(()=>'',(error:Error)=>error.message),body);
    assert.equal(await ask({action:'snapshot'}),'','the World is there');
+   // No provider credentials: the real host reads SQLite and resolves a missing preset without network IO.
+   const board=await page.evaluate(()=>(window as any).worldletWebHost.request({action:'board',operation:'read',tab:'growth'}));
+   assert.equal(board.revision,1);assert.equal(board.definition.title,'Server board');
+   assert.deepEqual(board.view.tabs.map((tab:any)=>tab.id),['growth']);
+   assert.equal(board.view.tabs[0].blocks[0].status,'error');
+   assert.equal(board.view.tabs[0].blocks[0].error,'No Service preset named “missing-preset”. Save it first.');
+   assert.equal(await ask({action:'board',operation:'read',tab:'unknown'}),BOARD_REASONS.tab);
+   for(const body of [{action:'board',operation:'define'},{action:'board'},
+    {action:'servicePresets',operation:'list'},{action:'agentAccess',operation:'list'}])assert.equal(await ask(body),ROOM_DENIED_MESSAGE);
+
    assert.equal(await ask({action:'connect',provider:'gmail'}),ROOM_DENIED_MESSAGE,'connecting an account is refused');
    assert.equal(await ask({action:'phonePair',kind:'phone',operation:'start'}),WEB_DENIED_MESSAGE,'pairing is refused');
    assert.equal(await ask({action:'speechStart'}),WEB_PAGE_UNAVAILABLE.voice,'the microphone is refused');

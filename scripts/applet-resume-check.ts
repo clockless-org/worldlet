@@ -1,4 +1,4 @@
-// Website Applets resume where the person left off (core/browser/page-resume.ts), driven
+// Website Applets resume where the person left off (agent/applets/page-resume.ts), driven
 // through the real World UI with a faked native bridge: leave and re-enter returns to the
 // last page, pages survive a reload/restart, each Applet keeps its own page, Fox's pages
 // are not remembered, the practice world never reads or writes the real world's pages, and

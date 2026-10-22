@@ -1,4 +1,4 @@
-// The Node host (platform/node): builds it, runs its contract check, boots it on a temporary library and stops it with
+// The Node host (platform/server): builds it, runs its contract check, boots it on a temporary library and stops it with
 // SIGTERM. It must start with no window, write the browser link (room only), keep that link across a restart through
 // its own vault storage, and stop cleanly. Its shim and vault storage are checked on their own first. Then the World
 // in a browser on this computer (contracts/web-world.ts): on a library with one item, the link it writes opens the real
@@ -16,11 +16,11 @@ import {fileURLToPath} from 'node:url';
 import qrcode from 'qrcode-generator';
 import {withTempDir} from './test-temp.ts';
 import {launchTestBrowser,pageErrors,waitForWorld} from './browser-test.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
 import {WEB_DENIED_MESSAGE,WEB_PAGE_FEATURES,WEB_PAGE_UNAVAILABLE,WORLD_PROTOCOL,worldLinkToken,worldTokenProtocol,worldWebCsp} from '../contracts/web-world.ts';
-import {nodeVaultStorage,VAULT_KEY_FILE} from '../platform/node/src/vault-storage.ts';
-import {askControl,CONTROL_SOCKET_LIMIT,controlSocketTooLong,serveControl} from '../platform/node/src/control.ts';
-import {app,BrowserWindow,BaseWindow,DESKTOP_ONLY,dialog,Notification,shell} from '../platform/node/src/electron-shim.ts';
+import {nodeVaultStorage,VAULT_KEY_FILE} from '../platform/server/src/vault-storage.ts';
+import {askControl,readControlRequest,CONTROL_SOCKET_LIMIT,controlSocketTooLong,serveControl} from '../platform/server/src/control.ts';
+import {app,BrowserWindow,BaseWindow,DESKTOP_ONLY,dialog,Notification,shell} from '../platform/server/src/electron-shim.ts';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 const web=path.join(root,'dist/WorldletWeb');
@@ -55,6 +55,13 @@ await withTempDir('worldlet-node-vault-',dir=>{
  assert.throws(()=>nodeVaultStorage(other).decryptString(sealed));
 });
 console.log('PASS node host vault storage: sealed under an owner-only key, unreadable with another key or once changed');
+
+// Local-window selection is explicit and only valid for `link`.
+assert.deepEqual(readControlRequest({command:'link',local:true}),{command:'link',local:true});
+for(const request of [{command:'link',local:'true'},{command:'status',local:true}])assert.equal(readControlRequest(request),null);
+// An Agent for a script: only with register, never beside --agent; the host checks the name itself.
+assert.deepEqual(readControlRequest({command:'register',script:'Nightly build'}),{command:'register',script:'Nightly build'});
+for(const request of [{command:'setup',script:'x'},{command:'register',script:'x',agent:'codex'},{command:'register',script:' '},{command:'register',script:'x'.repeat(61)},{command:'register',script:1}])assert.equal(readControlRequest(request),null);
 
 // The control socket refuses a path the system would cut short (macOS binds at most 103 bytes, Linux 107) instead of
 // binding a shorter one it cannot remove on close, which left the next start with the address in use.
@@ -175,6 +182,7 @@ await withTempDir('wl-',async temp=>{
    return {output:running.output,stop:async()=>assert.equal(await running.stop(),0,'stops cleanly: '+running.output().slice(-400))};
   };
   let running=await start();
+  const localLink=fs.readFileSync(path.join(library,'world-link.txt'),'utf8').trim(),localSecret=new URL(localLink).hash;
   try{
    assert.equal(mode(socket),0o600,'the control socket is owner-only');
    const status=cli('status');
@@ -182,7 +190,8 @@ await withTempDir('wl-',async temp=>{
    assert.match(status.stdout,/^Worldlet .* is running with the library at /);
    assert.match(status.stdout,/Setup: The person has not finished setup yet/,'says setup is not done');
    assert.match(status.stdout,/registered in no Agent yet/);
-   assert.ok(!status.stdout.includes(secret),'status never prints the link');
+   assert.ok(!status.stdout.includes(secret)&&!status.stdout.includes(localSecret),'status never prints either link');
+   assert.match(status.stdout,/worldlet link --local/,'unfinished setup points to the owner window');
    // One host per library: a second start, or a mistyped command, does not start another one beside it.
    const second=cli();
    assert.equal(second.status,1,'a second host does not start: '+second.stdout.slice(-400));
@@ -196,6 +205,28 @@ await withTempDir('wl-',async temp=>{
    const printed=cli('link');
    assert.equal(printed.status,0,printed.stderr);
    assert.equal(printed.stdout.trim(),link,'link prints the browser link, the same one the library keeps');
+   const local=cli('link','--local');
+   assert.equal(local.status,0,local.stderr);
+   assert.equal(local.stdout.trim(),localLink,'owner CLI returns the existing local window link');
+   assert.equal(new URL(localLink).hostname,'127.0.0.1');
+   assert.equal(cli('link','--loacl').status,2,'a mistyped local option must not return the remote link');
+   assert.equal(cli('status','--local').status,2,'local selection is for link only');
+   // Remote access (agent/gate/REMOTE-MCP.md) is off until asked for; a wrong word is a usage error.
+   const remote=cli('remote');
+   assert.equal(remote.status,0,remote.stderr);
+   assert.match(remote.stdout,/Remote access is off/);
+   assert.equal(cli('remote','maybe').status,2);
+   assert.equal(cli('remote','token').status,2,'a token needs the Agent\'s name');
+   assert.match(cli('remote','token','Build machine').stderr,/Turn on remote access first/);
+   const bootstrap=await launchTestBrowser();
+   try{
+    const page=await bootstrap.newPage();
+    await page.goto(local.stdout.trim());await waitForWorld(page);
+    assert.deepEqual(await page.evaluate(()=>(window as any).worldletWebHost.request({action:'agentAccess',operation:'list'})),{orders:{},agents:[]},'before setup, the local window can inspect owner access without granting it');
+    assert.match(await page.evaluate(()=>(window as any).worldletWebHost.request({action:'serviceSync',operation:'list'}).then(()=>'',(error:Error)=>error.message)),/own writable World/,'unconsented setup cannot access collection');
+    assert.equal(new URL(page.url()).hash,'','the local window removes its token from the address');
+    assert.match(cli('status').stdout,/Setup: The person has not finished setup yet/,'opening the owner window does not supply consent');
+   }finally{await bootstrap.close();}
    // `link --qr` adds the link's QR code (qr.ts): read back from its half blocks, it is the code of that link, light
    // modules drawn white on black.
    const coded=cli('link','--qr');
@@ -210,7 +241,9 @@ await withTempDir('wl-',async temp=>{
    assert.equal(cli('register').status,2,'register needs --agent');
    const hermes=cli('register','--agent','hermes');
    assert.equal(hermes.status,1);assert.match(hermes.stderr,/worldlet setup --agent hermes/);
-   assert.equal(fs.existsSync(argvLog),false,'nothing ran yet');
+   // Opening setup may probe the fake CLIs for discovery, but must not register either without a command.
+   const registrations=()=>fs.existsSync(argvLog)?fs.readFileSync(argvLog,'utf8').trim().split('\n').filter(line=>/ mcp (add|remove) /.test(line)):[];
+   assert.deepEqual(registrations(),[],'opening the owner window registered no Agent');
    for(const agent of ['claude-code','codex']){
     const registered=cli('register','--agent',agent);
     assert.equal(registered.status,0,registered.stderr);
@@ -218,7 +251,7 @@ await withTempDir('wl-',async temp=>{
    }
    const endpoint=(agent:string)=>path.join(mcp,`worldlet-mcp-endpoint.${agent}.json`),shim=path.join(mcp,'worldlet-mcp-standing.cjs'),tools=path.join(mcp,'worldlet-mcp-tools.json');
    const added=(agent:string)=>`--env ELECTRON_RUN_AS_NODE=1 --env WORLDLET_MCP_ENDPOINT_FILE=${endpoint(agent)} --env WORLDLET_MCP_TOOLS_FILE=${tools} -- ${node} ${shim}`;
-   assert.deepEqual(fs.readFileSync(argvLog,'utf8').trim().split('\n'),[
+   assert.deepEqual(registrations(),[
     'claude mcp remove --scope user worldlet',`claude mcp add --scope user worldlet ${added('claude-code')}`,
     'codex mcp remove worldlet',`codex mcp add worldlet ${added('codex')}`],'each Agent registers the fixed home with its own command');
    for(const agent of ['claude-code','codex'])assert.equal(mode(endpoint(agent)),0o600,'the endpoint file is owner-only');
@@ -236,7 +269,7 @@ await withTempDir('wl-',async temp=>{
    assert.ok(!call.content[0].text.includes(secret),'the MCP server does not hand out the link before setup');
    assert.match(call.content[0].text,/not finished setting up|not ready/i,'World tools wait for setup: '+call.content[0].text);
   }finally{await running.stop();}
-  assert.ok(!running.output().includes(secret),'the service log never holds the link');
+  assert.ok(!running.output().includes(secret)&&!running.output().includes(localSecret),'the service log never holds either link');
   assert.ok(!fs.existsSync(socket),'the socket goes when the service stops');
   assert.ok(!fs.existsSync(path.join(mcp,'worldlet-mcp-endpoint.codex.json')),'and the endpoint files, so the server says Worldlet is not open');
   // A restart writes the same files again, with no new registration.
@@ -247,6 +280,7 @@ await withTempDir('wl-',async temp=>{
    while(!fs.existsSync(path.join(mcp,'worldlet-mcp-endpoint.codex.json'))&&Date.now()<deadline)await sleep(100);
    for(const agent of ['claude-code','codex'])assert.equal(mode(path.join(mcp,`worldlet-mcp-endpoint.${agent}.json`)),0o600,'the same endpoint file again, owner-only');
    assert.equal(fs.readFileSync(argvLog,'utf8'),before,'no Agent registers again');
+   assert.equal(cli('link','--local').stdout.trim(),localLink,'restart keeps the local owner window link');
   }finally{await running.stop();}
   console.log('PASS node host command line: status, link (and its QR code) and register over an owner-only control socket; one host per library, help and a mistyped command start none; Claude Code and Codex register the fixed MCP home with their own commands and get the skill; endpoint files owner-only and the same across a restart; the link never in the service log');
  }
@@ -312,6 +346,7 @@ await withTempDir('wl-',async temp=>{
    assert.equal(await refused({action:'browserCommand',operation:'navigate',args:{url:'https://example.com/'},agent:true}),WEB_PAGE_UNAVAILABLE.websitePages,'and driving one');
    assert.equal(await refused({action:'speechStart',language:'en'}),WEB_PAGE_UNAVAILABLE.voice,'the microphone is refused');
    assert.equal(await refused({action:'analyticsConfig'}),WEB_DENIED_MESSAGE,'the page gets no web capture, so it posts nothing to /ingest');
+   assert.deepEqual(await page.evaluate(()=>(window as any).worldletWebHost.request({action:'serviceSync',operation:'list'})),{jobs:[]},'the built Node host installs collection without creating jobs');
    const status=await page.evaluate(()=>(window as any).worldletWebHost.request({action:'phonePair',kind:'web',operation:'status'}));
    assert.ok(status&&typeof status.state==='string'&&!('link' in status),'a pairing status comes without its link');
    // What the page's window cannot do arrives in the handshake (web-page-features-check.ts): no YouTube in the World, no

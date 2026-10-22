@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {activityObserve,activityEvent,activityURL} from '../core/activity/index.ts';
-import {invoke} from '../core/index.ts';
+import {activityObserve,activityEvent,activityURL} from '../context/applets/index.ts';
+import {invoke} from '../agent/index.ts';
 import type {ActivityEndReason} from '../contracts/activity.ts';
 const page={url:'https://example.com/a?token=secret',title:'Page',text:'Visible text',documentId:'doc1',visible:true,truncated:false};
 const input={id:'one',surfaceId:'browser',at:100,tick:1000,active:true,page};

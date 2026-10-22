@@ -17,7 +17,7 @@ assert.deepEqual(releaseManifest(id,'a'.repeat(40)).platformBuilds,{mac:4012,win
 // The builds this repository publishes stay above every build the release hosts published before it.
 assert(BUILD_OFFSET>=3400);
 // One Build everywhere: Android's versionCode and the Dev app add the same offset to the same count.
-assert(readFileSync(new URL('../android/app/build.gradle.kts',import.meta.url),'utf8').includes(BUILD_OFFSET+' + ProcessBuilder("git", "rev-list", "--count", "HEAD")'),'Android versionCode is BUILD_OFFSET + the commit count');
+assert(readFileSync(new URL('../platform/android/app/build.gradle.kts',import.meta.url),'utf8').includes(BUILD_OFFSET+' + ProcessBuilder("git", "rev-list", "--count", "HEAD")'),'Android versionCode is BUILD_OFFSET + the commit count');
 assert(readFileSync(new URL('./build-info.ts',import.meta.url),'utf8').includes("releaseIdentity(Number(git('rev-list','--count','HEAD'))"),'the Dev app takes its Build from releaseIdentity');
 
 // Channels: live ones use the feeds installed apps read; others go to staging releases nothing reads.
@@ -28,7 +28,7 @@ assert.deepEqual(channelKeys('alpha',true),{feedTag:'channel-alpha',prefix:'alph
 assert.deepEqual(channelKeys('beta',true),{feedTag:'channel-beta',prefix:'',mac:['appcast.xml','appcast-intel.xml'],windows:'windows-preview.json',linux:'linux.json',history:true});
 assert.equal(channelKeys('beta',false).feedTag,'staging-beta');
 assert.equal(labelOf('2026.105.4001'),'2026.0105.4001');
-const committed=JSON.parse(readFileSync(new URL('../platform/electron/distribution/Channels.json',import.meta.url),'utf8'));
+const committed=JSON.parse(readFileSync(new URL('../platform/desktop/distribution/Channels.json',import.meta.url),'utf8'));
 assert(committed.live.every(c=>['dev','alpha','beta'].includes(c)));
 
 // A Sparkle item keeps its signature and points at the build's release; history keeps other builds.
@@ -174,6 +174,20 @@ assert.deepEqual(superseded.writes,[]);
  assert.equal(await gh.read('v0','appcast.xml'),'');
  assert.throws(()=>gh.upload('v1',dmg),/different bytes/);
  gh.close();
+ // A feed whose upload is lost is uploaded again; one that never reads back fails.
+ {
+  let uploads=0,stored='';
+  const feeds=(lost)=>githubStore('example/worldlet',args=>{
+   if(args[0]==='api')return {status:0,stdout:JSON.stringify({assets:stored?[{name:'appcast-alpha.xml',size:1}]:[]})};
+   if(args[1]==='upload'){uploads++;stored=uploads>lost?readFileSync(args[3],'utf8'):'';return {status:0,stdout:''};}
+   if(args[1]==='download'){writeFileSync(args[args.indexOf('--output')+1],stored);return {status:0,stdout:''};}
+   return {status:0,stdout:''};});
+  const once=feeds(1);await once.put('channel-alpha','appcast-alpha.xml','<rss/>',async()=>{});once.close();
+  assert.equal(uploads,2,'a lost feed upload is retried');
+  uploads=0;stored='';
+  const never=feeds(9);await assert.rejects(never.put('channel-alpha','appcast-alpha.xml','<rss/>',async()=>{}),/stored feed differs/);never.close();
+  assert.equal(uploads,3);
+ }
  const compare=(stdout,exists=false)=>githubStore('example/worldlet',args=>args[1].startsWith('repos/example/worldlet/releases/')?(exists?{status:0,stdout:'{}'}:{status:1,stderr:'HTTP 404'}):{status:0,stdout});
  const listing=githubStore('example/worldlet',()=>({status:0,stdout:JSON.stringify([{tag:'v2026.1009.41190',assets:[]},{tag:'v2026.1009.4119',assets:['a.dmg']},{tag:'channel-alpha',assets:[]}])}));
  assert.deepEqual(listing.findBuild(4119),{tag:'v2026.1009.4119',assets:['a.dmg']},'the Build\'s own release, not one whose number merely starts the same');

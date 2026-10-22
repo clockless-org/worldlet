@@ -8,7 +8,7 @@ Chapters:
 - [Art verification](#art-quality)
 
 
-`ui/theme-packages/village/world.json` owns region bounds, camera centers, labels and named Applet ground slots; `ui/world/world-layout.ts` projects that portable pack for rendering and navigation. Persisted region and slot IDs remain stable.
+`ui/style/theme-packages/village/world.json` owns region bounds, camera centers, labels and named Applet ground slots; `ui/world/world-layout.ts` projects that portable pack for rendering and navigation. Persisted region and slot IDs remain stable.
 
 Current defaults: Home central; Social upper-left; Life upper-right; Games right; Work lower-right; Entertainment at the left dock. Region names and assignments are customizable.
 
@@ -74,7 +74,7 @@ The five visible places hold explicitly pinned Applets in their places, and ever
 
 In Village, every region always shows only its name: no app count, ellipsis or empty-area plus. The whole region is clickable: the name, the region's ground and its landmark sprite (only its painted pixels) open the same shelf. On a window wider than 700 px it docks on the right (about half the window, at most 600 px, over Fox's right column while open) and the camera zooms that area into the World left of it, centred there as far as the plate allows, without entering the area (`frameArea` in `pixi-world.ts`; owner request 2026-10-06); closing it zooms back to the overview. While it is zoomed, every Applet keeps its overview size on screen, and the room the zoom makes holds more of the area's own Applets (owner request 2026-10-08, `extraPlacements` in `slot-placement.ts`): the five places keep their anchors, and the area's other Applets, in the shelf's Recently used order, fill extra places packed around them on the court (the ellipse inside the area's bounds) from the rear row down to just above the name, at the five's spacing divided by the zoom. They fade in with the zoom and out as it zooms back; those that do not fit stay in the shelf. Narrower windows keep the centred shelf and a still camera. Fox stays put. Hovering any of them lights the region's faint glow and underlines its name; devices standing in the region keep their own taps and open their Applets. **On the ground** always shows five places in their actual slot order, including quiet non-interactive placeholders for empty places. Pinned apps keep their places; the rest follow most recent use. Using a previously unselected app makes it eligible to fill an available place on returning to the world; there is no explicit add step.
 
-**Recently used** lists the area's own Applets, the five ground places first and then the rest by most recent use (`lastUsedAt`). An area holds only the person's own Applets (owner Order 2026-10-07): those in the World (`unlockedApplets`, minus removed ones) whose assignment, or else catalog category, is this area. **Recommended** below lists up to eight related catalog Applets not in the World yet ([area-recommend.ts](../../core/applets/area-recommend.ts)): the area's category first, then categories of Applets the person moved in; within them installed on this computer (`installedApplets` keys only, Mac), then visited in Worldlet's browser over 30 days (`visitedSites`: hosts and counts, never Fox), then catalog order; removed Applets are never recommended. Selecting one assigns it to this area and opens it; Place here assigns it without opening; All <area> Applets lists the rest of the category by name. Every own tile has a move button (top left) listing the other areas. Usage frequency (`usage`) is still counted but orders nothing. Legacy profiles without timestamps and never-used apps sort alphabetically after dated apps; do not invent timestamps from counts. Every tile opens directly, without automatically moving an app from another region. The companion Applets tab likewise lists the catalog with Open actions. Fox's public Applet tool covers the full catalog. Account connections, permissions and external desktop-software installation remain separate and may still be required on use.
+**Recently used** lists the area's own Applets, the five ground places first and then the rest by most recent use (`lastUsedAt`). An area holds only the person's own Applets (owner Order 2026-10-07): those in the World (`unlockedApplets`, minus removed ones) whose assignment, or else catalog category, is this area. **Recommended** below lists up to eight related catalog Applets not in the World yet ([area-recommend.ts](../../context/applets/area-recommend.ts)): the area's category first, then categories of Applets the person moved in; within them installed on this computer (`installedApplets` keys only, Mac), then visited in Worldlet's browser over 30 days (`visitedSites`: hosts and counts, never Fox), then catalog order; removed Applets are never recommended. Selecting one assigns it to this area and opens it; Place here assigns it without opening; All <area> Applets lists the rest of the category by name. Every own tile has a move button (top left) listing the other areas. Usage frequency (`usage`) is still counted but orders nothing. Legacy profiles without timestamps and never-used apps sort alphabetically after dated apps; do not invent timestamps from counts. Every tile opens directly, without automatically moving an app from another region. The companion Applets tab likewise lists the catalog with Open actions. Fox's public Applet tool covers the full catalog. Account connections, permissions and external desktop-software installation remain separate and may still be required on use.
 
 The shared overview Applet width is 72 logical pixels, retaining per-Applet optical corrections and aspect ratio. Shelf images use a consistent 96 × 88 maximum box instead of the previous 120px height. These are separate controls: changing shelf thumbnails does not resize world devices. Focus content and landmark scale are unchanged.
 
@@ -92,7 +92,7 @@ This revision deliberately leaves the native source schema and existing stable c
 
 ### Default Applet membership
 
-Each Applet definition's `region` (`core/applets/definitions/*.ts` and the website catalog JSON in `core/applets/`) is the canonical catalog assignment; `core/applets/regions.ts` holds only area titles and setup's selection rules. Stable storage IDs remain unchanged; custom names, assignments and pins take precedence. Onboarding selects the Applets the person uses (Mail, Calendar and the Browser, every supported app detected on this computer and the apps brought from the person's Agent), then four more in every area from `AREA_STARTERS` (owner decision 2026-10-12); the Games area gets its three starter games. Each area's panel lists every other related Applet under Recommended. Explicit unchecks are respected. Each area still shows five devices at most; additional members live in its shelf.
+Each Applet definition's `region` (`context/applets/definitions/*.ts` and the website catalog JSON in `context/applets/`) is the canonical catalog assignment; `context/applets/regions.ts` holds only area titles and setup's selection rules. Stable storage IDs remain unchanged; custom names, assignments and pins take precedence. Onboarding selects the Applets the person uses (Mail, Calendar and the Browser, every supported app detected on this computer and the apps brought from the person's Agent), then four more in every area from `AREA_STARTERS` (owner decision 2026-10-12); the Games area gets its three starter games. Each area's panel lists every other related Applet under Recommended. Explicit unchecks are respected. Each area still shows five devices at most; additional members live in its shelf.
 
 | Area | Includes |
 | --- | --- |
@@ -105,12 +105,12 @@ Each Applet definition's `region` (`core/applets/definitions/*.ts` and the websi
 
 Games (owner request 2026-10-03) replaced Tools in the same court: its AI assistants moved to Work and its storage, PDF and photo apps to Create (since 2026-10-08, Work and Home).
 
-**The 2026-10-08 regroup** (owner request: the areas follow where people spend their time online). The storage IDs stay: `library` is Social and `travel` is Entertainment. Area layouts are version 3 (`migrateAreaLayout` in `core/applets/regions.ts`, applied whenever a layout is read, in the page and in the host): an Applet the person assigned to Create (`library`) is assigned to Work, Create's pins fill Work's free places in order (in every theme's pins), and a name the person gave Create is dropped, since it named an area that no longer exists; landmark themes, other names and every other assignment are kept. Applets nobody moved follow their new catalog category. A kept Ongoing thing from before the regroup (no `regrouped` mark) reads its `library` as Work and its `travel` (a trip) as Life (`readOngoing`). Each game is its own Applet with the shared game device (`resources/styles/builtin/drafts/games/`). The four boards open in the Village HUD (`fullView.kind: 'game'`, `ui/applets/games.ts`) and run offline. The board is built on open and dropped on close; a moving game draws only while it is on screen and in play, so a closed game never renders or ticks. The fifth place is **Random game** (owner requests 2026-10-03): a website Applet that opens `https://worldlet.ai/games/random/`, which lands in one of the HTML5 games served from website/games, never the one just left; Another game on each page picks again. Breakout lives there. Worlds set up before a game existed get it once (`offerGames` in `core/onboarding/onboarding.ts`, recorded in `offeredGames`); a game the person removes stays removed, and a removed Breakout keeps the Random game away too.
+**The 2026-10-08 regroup** (owner request: the areas follow where people spend their time online). The storage IDs stay: `library` is Social and `travel` is Entertainment. Area layouts are version 3 (`migrateAreaLayout` in `context/applets/regions.ts`, applied whenever a layout is read, in the page and in the host): an Applet the person assigned to Create (`library`) is assigned to Work, Create's pins fill Work's free places in order (in every theme's pins), and a name the person gave Create is dropped, since it named an area that no longer exists; landmark themes, other names and every other assignment are kept. Applets nobody moved follow their new catalog category. A kept Ongoing thing from before the regroup (no `regrouped` mark) reads its `library` as Work and its `travel` (a trip) as Life (`readOngoing`). Each game is its own Applet with the shared game device (`resources/styles/builtin/drafts/games/`). The four boards open in the Village HUD (`fullView.kind: 'game'`, `ui/applets/games.ts`) and run offline. The board is built on open and dropped on close; a moving game draws only while it is on screen and in play, so a closed game never renders or ticks. The fifth place is **Random game** (owner requests 2026-10-03): a website Applet that opens `https://worldlet.ai/games/random/`, which lands in one of the HTML5 games served from website/games, never the one just left; Another game on each page picks again. Breakout lives there. Worlds set up before a game existed get it once (`offerGames` in `agent/companion/onboarding.ts`, recorded in `offeredGames`); a game the person removes stays removed, and a removed Breakout keeps the Random game away too.
 
 <a id="sky-and-weather"></a>
 ## Local sky and weather
 
-The desktop app and website preview share `ui/world/environment/world-environment.ts` and `ui/world/environment/celestial.ts`; the HUD binding is `ui/world/world-environment.ts`. The desktop host's location and forecast transport is `platform/electron/src/modules/applet-tools/weather.ts`: fixed Open-Meteo requests, Mac location through Chromium geolocation in the host media surface (the macOS location permission), Windows location through the system location service; on other systems location fails explicitly and the person searches for a city. No model generates astronomical positions or weather.
+The desktop app and website preview share `ui/world/environment/world-environment.ts` and `ui/world/environment/celestial.ts`; the HUD binding is `ui/world/world-environment.ts`. The desktop host's location and forecast transport is `platform/host/modules/applets/weather.ts`: fixed Open-Meteo requests, Mac location through Chromium geolocation in the host media surface (the macOS location permission), Windows location through the system location service; on other systems location fails explicitly and the person searches for a city. No model generates astronomical positions or weather.
 
 ### Location and time
 
@@ -181,7 +181,7 @@ The selected Agent forwards playback through the cancellable host audio bridge, 
 
 ### Host playback and honest state
 
-Playback runs in audio elements of the host's media surface, a hidden Chromium view that outlives World reloads and the desktop Companion (`platform/electron/src/modules/media/surface.ts`, `audio.ts`).
+Playback runs in audio elements of the host's media surface, a hidden Chromium view that outlives World reloads and the desktop Companion (`platform/host/modules/app/surface.ts`, `audio.ts`).
 
 - `RadioMusic` with `RadioDirectory` (`audio.ts`, `directory.ts`; Radio Browser directory): uses the directory's dynamic DNS entry with mirror discovery and an identifiable User-Agent; searches by tag, filters unavailable stations and unsupported streams, and only selects HTTPS URLs. After playback really starts it reports one station click as the directory requires; no chat content is reported. Up to three candidates are tried in bounded fashion. States are loading / playing / buffering / paused / stopped / error; the start receipt waits until the player is actually playing and the media is ready.
 - `BackgroundMusic`: plays the bundled CC0 ambience and the original offline tracks.
@@ -221,7 +221,7 @@ Stations change over time; one successful run does not guarantee long-term avail
 - `operation: podcast, episode: latest` is the default and always refreshes the directory/feed, bypassing old bookmarks and the already-playing shortcut. `episode: resume` keeps a verified unfinished episode; generic Resume preserves the current podcast channel. Legacy bookmarks without a verified podcast identity are not automatically resumed.
 - Normal playback attempts only the selected episode. Failure never advances silently. Explicit Next selects another dated episode from the same show. The receipt carries canonical show ID, show/publisher/episode title and publication timestamp; only real playback yields `playing`.
 
-Verification: the retired Mac host's `--radio-check` covered All-In versus LDS Living ambiguity, publisher/host qualification, unrelated search results, unsorted RSS, CDATA, future/trailer/undated exclusion, malformed feeds and latest bypassing a saved episode, and a live read of All-In's Apple entry and full feed passed. Neither is ported to Electron yet, so the Electron directory (`modules/world-audio/directory.ts`, `audio.ts`) has no recorded check; end-to-end audible content recognition was never performed.
+Verification: the retired Mac host's `--radio-check` covered All-In versus LDS Living ambiguity, publisher/host qualification, unrelated search results, unsorted RSS, CDATA, future/trailer/undated exclusion, malformed feeds and latest bypassing a saved episode, and a live read of All-In's Apple entry and full feed passed. Neither is ported to Electron yet, so the Electron directory (`modules/world/directory.ts`, `audio.ts`) has no recorded check; end-to-end audible content recognition was never performed.
 
 Identity reference: [All-In's Apple listing](https://podcasts.apple.com/ca/podcast/all-in-with-chamath-jason-sacks-friedberg/id1502871393) and the distinct [LDS Living All In listing](https://podcasts.apple.com/us/podcast/all-in/id1439975046).
 
@@ -249,7 +249,7 @@ The world is one PixiJS WebGL renderer (`ui/world/village/pixi-world.ts`) drawin
 ### Budgets
 
 UI rendering and DOM commits stay on the main thread. Complete host snapshots use
-`ui/shell/snapshot-inbox.ts`: pending snapshots are replaceable, consumption is
+`ui/frame/snapshot-inbox.ts`: pending snapshots are replaceable, consumption is
 serialized, and idle scheduling gives input/paint an opportunity before background
 refresh (250 ms timeout, timer fallback). In-flight projections check their
 generation before committing; callers of superseded snapshots await the replacement.
@@ -293,7 +293,7 @@ No whole-product GPU time, memory or energy certification is established here, a
 
 ### Startup feedback
 
-The shared boot surface and milestones are defined in [onboarding](../onboarding/README.md).
+The shared boot surface and milestones are defined in [onboarding](../frame/ONBOARDING.md).
 Do not maintain another loader design here. Startup timings are numeric diagnostic
 facts, not fabricated percentages or proof that content is ready.
 
@@ -312,7 +312,7 @@ facts, not fabricated percentages or proof that content is ready.
 ### Desktop World presentation
 
 The World page is an ordinary on-screen `WebContentsView` that fills the World
-window's content area (`platform/electron/src/world/window.ts`), with website views
+window's content area (`platform/desktop/src/world/window.ts`), with website views
 as siblings above it. Chromium composites them directly: there is no offscreen
 rendering, shared-texture copy or host-side presentation path, so the retired CEF
 host's IOSurface/Metal path and its diagnostics no longer apply. The World view runs
@@ -409,7 +409,7 @@ remain outstanding. No rendering-quality reduction is authorized.
   the former algorithm exactly; scroll-height reads fall from 980 to 136.
 - The retired Mac host's already-busy Attention Center wake checked its busy flag
   before IO (a fictional SQLite trace measured 10 → 0 record scans while busy).
-  Whether the Electron Attention Center (`platform/electron/src/modules/attention/center.ts`)
+  Whether the Electron Attention Center (`platform/host/modules/attention/center.ts`)
   keeps that saving is not measured. Core admission/retry policy and the one-second
   busy wait are unchanged.
 - Experimental batched texture uploads before world readiness did not improve

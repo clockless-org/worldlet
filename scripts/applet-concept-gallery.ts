@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 const ref='resources/styles/builtin/references/registered-scenes';
-const theme='ui/theme-packages/village';
+const theme='ui/style/theme-packages/village';
 const library=JSON.parse(readFileSync(path.join(root,theme,'scene-library.json'),'utf8'));
 const asset=(file:string)=>{const bytes=readFileSync(path.join(root,file));return {path:file,sha256:createHash('sha256').update(bytes).digest('hex')};};
 const entries=library.entries.map((entry:{id:string;title:string;collection:string;icon:string;background:string;registrationKey?:string|null})=>{

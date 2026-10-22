@@ -66,7 +66,7 @@ completion: it never hides a finding, and whether a matter is resolved stays an 
 extraction decision. A source without observed labels has unknown placement, never archived.
 The Gmail reader reports placement and unread state with each thread; they are kept on the
 Attention fact outside its revision, so archiving or reading reorders a finding at once without
-invalidating or re-analysing it. Weights live in `core/attention/attention-rank.ts`;
+invalidating or re-analysing it. Weights live in `agent/attention/attention-rank.ts`;
 `scripts/attention-mail-rank-check.ts` is the controlled synthetic-mail evaluation.
 
 ### Timeliness
@@ -114,26 +114,26 @@ thread that waits for the person's reply, Fox prepares a reply in the background
 asked, a reply card in today's Journal that only the person sends. While a draft for the item's
 thread waits, its card carries one quiet line, "Fox drafted a reply · Review", which opens the
 Journal on the draft. Which items qualify and how many is in
-[replies Fox prepares](../core/artifacts/README.md#replies-fox-prepares). Fox provides contextual help and authorized actions; content
+[replies Fox prepares](../context/store/ARTIFACTS.md#replies-fox-prepares). Fox provides contextual help and authorized actions; content
 text itself cannot grant execution rights. Keep reading and external writes distinct.
 
 ## Scheduled results
 
 What Worldlet or the person's Agent made on a schedule, while nobody watched, arrives in the Center; nothing
 opens by itself and no passing notice says it ran (owner plan 2026-10-11). One rule, in
-[core/agent/harness-schedule.ts](../core/agent/harness-schedule.ts); the host only saves what it returns, and
+[agent/gate/harness-schedule.ts](../agent/gate/harness-schedule.ts); the host only saves what it returns, and
 the same result reaches the paired phone while it is fresh (twelve hours):
 
 | Result | Becomes | Opens |
 | --- | --- | --- |
-| The morning brief and the day's summary ([the day's plan and summary](../core/artifacts/README.md#the-days-plan-and-summary)) | Worth Knowing, "Today’s prep · Oct 7" or "Wrap up today · Oct 7", owned by `worldlet`; a run that made no card is Worth Doing, saying so | Its card's line "In your Journal · Open" (and its Source) opens the Journal on that card |
+| The morning brief and the day's summary ([the day's plan and summary](../context/store/ARTIFACTS.md#the-days-plan-and-summary)) | Worth Knowing, "Today’s prep · Oct 7" or "Wrap up today · Oct 7", owned by `worldlet`; a run that made no card is Worth Doing, saying so | Its card's line "In your Journal · Open" (and its Source) opens the Journal on that card |
 | A run of Worldlet's own routine | Worth Knowing; one that did not finish, Worth Doing | Its card, with what the Agent returned when it returned text |
-| A run of a job on the person's Agent's own scheduler ([scheduled jobs](../core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)) | Worth Knowing with its output; a failed run, Worth Doing; a silent run, nothing | Its card |
+| A run of a job on the person's Agent's own scheduler ([scheduled jobs](../agent/gate/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)) | Worth Knowing with its output; a failed run, Worth Doing; a silent run, nothing | Its card |
 
 These items have no source fact behind them, so they stay current until the person settles them (Got it, Done,
 Later), and opening one keeps no second copy in the Journal when the result already is a Journal card. The Task
 panel lists the next brief and summary among its Routines; finished runs are not listed there
-([core/tasks/README.md](../core/tasks/README.md#task-panel)).
+([agent/tasks/README.md](../agent/tasks/README.md#task-panel)).
 
 ## Acceptance
 
@@ -141,10 +141,10 @@ Use real sources to assess relevance, distinct obligations, correct originals,
 no repeated nagging and state after restart. Test interruption between each pipeline
 stage. Fixtures and sample data do not establish production usefulness.
 
-[Implementation and unresolved cases](../core/attention/README.md) owns schemas,
+[Implementation and unresolved cases](../agent/attention/README.md) owns schemas,
 coverage policies and targeted acceptance. [Runtime](APPLET-RUNTIME.md) owns scheduling;
 [interaction design](DESIGN.md) owns the shared HUD.
 
 ## Brief card composition
 
-The header groups title and structured time/location in its left column. The picture is the whole card's background, showing most on the right (owner Order 2026-10-08): a paper scrim fades it out from the right edge toward the heading and down over the summary and footer, so every word keeps the card's own contrast. When the email behind the item has its own picture, that picture takes the illustration's place ([email pictures](../core/attention/README.md#email-pictures)). The model is prompted for one introductory sentence and two or three supported key points, emphasizing important phrases in bold (the same color as body text). Bold renders even right against Chinese text or punctuation (`**时间：**10月5日`), where CommonMark would leave the asterisks literal (owner report 2026-10-04): the card, Fox's replies and the phone cards share that rule ([ui/components/markdown.ts](../ui/components/markdown.ts), iOS `strongSegments`), and the card renders only inline formatting, lists and safe links, never HTML (`scripts/attention-brief-markdown-check.ts`). Existing saved prose is retained until model processing updates it. The summary expands the short reason into what happened, related messages, why it matters and the next useful step when supported, without repeating the title. Source information sits on the left of the footer, with the primary outcome, Dismiss and Later at the far right; narrow cards wrap the groups. Later saves a 24-hour deferral immediately (the explicit next-day assumption in the absence of a default setting). Shared UI owns composition and masking; shared tool guidance owns the brief format.
+The header groups title and structured time/location in its left column. The picture is the whole card's background, showing most on the right (owner Order 2026-10-08): a paper scrim fades it out from the right edge toward the heading and down over the summary and footer, so every word keeps the card's own contrast. When the email behind the item has its own picture, that picture takes the illustration's place ([email pictures](../agent/attention/README.md#email-pictures)). The model is prompted for one introductory sentence and two or three supported key points, emphasizing important phrases in bold (the same color as body text). Bold renders even right against Chinese text or punctuation (`**时间：**10月5日`), where CommonMark would leave the asterisks literal (owner report 2026-10-04): the card, Fox's replies and the phone cards share that rule ([ui/style/markdown.ts](../ui/style/markdown.ts), iOS `strongSegments`), and the card renders only inline formatting, lists and safe links, never HTML (`scripts/attention-brief-markdown-check.ts`). Existing saved prose is retained until model processing updates it. The summary expands the short reason into what happened, related messages, why it matters and the next useful step when supported, without repeating the title. Source information sits on the left of the footer, with the primary outcome, Dismiss and Later at the far right; narrow cards wrap the groups. Later saves a 24-hour deferral immediately (the explicit next-day assumption in the absence of a default setting). Shared UI owns composition and masking; shared tool guidance owns the brief format.

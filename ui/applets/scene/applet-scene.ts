@@ -1,6 +1,6 @@
 import {mountMailDelivery} from './mail-delivery.ts';
 import {scenePlaneTransform} from './scene-plane.ts';
-import {fitThemeScene,mountSceneFrame,themeAppletScene,themeSceneMaterial,type ThemeSceneRegistration,type ThemeAppletScene,type ThemeSceneMaterialName} from '../../themes/index.ts';
+import {fitThemeScene,mountSceneFrame,themeAppletScene,themeSceneMaterial,type ThemeSceneRegistration,type ThemeAppletScene,type ThemeSceneMaterialName} from '../../style/index.ts';
 import type {BrowserPaperEdge,SurfaceRect} from '../../../contracts/browser-surface.ts';
 import {appletSceneKey} from './scene-family.ts';
 /**

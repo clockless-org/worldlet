@@ -53,7 +53,7 @@ const open=devOpenArguments('/w/Worldlet Dev.app','/w/app','/w/worldlet.log',{WO
 assert.deepEqual(open,['-n','-a','/w/Worldlet Dev.app','--stdout','/w/worldlet.log','--stderr','/w/worldlet.log','--env','WORLDLET_DEV=1','--env','PATH=/usr/bin:/bin','--env','EMPTY=','--args','/w/app']);
 const launchCode=readFileSync(path.join(root,'scripts/dev-electron.ts'),'utf8');
 assert.match(launchCode,/run\('\/usr\/bin\/open',devOpenArguments\(/,'the Mac Dev app is launched by LaunchServices');
-assert.match(readFileSync(path.join(root,'platform/electron/src/main.ts'),'utf8'),/WORLDLET_DEV_PID_FILE/,'the app reports its own process id');
+assert.match(readFileSync(path.join(root,'platform/desktop/src/main.ts'),'utf8'),/WORLDLET_DEV_PID_FILE/,'the app reports its own process id');
 console.log('PASS Mac Dev app launches through LaunchServices with its environment');
 
 // Opened directly (Finder, Dock, Spotlight) the bundle starts Worldlet, not Electron's welcome page: its
@@ -111,7 +111,7 @@ for(const file of readdirSync(path.join(root,'scripts')).filter(f=>/\.(?:ts|mjs|
 // meeting 2026-09-24, fixed in e31e3562). The packaged app, its web engine and the download page all say 14.0.
 assert.match(pkg,/LSMinimumSystemVersion:'14\.0'/,'the packaged Mac app supports macOS 14');
 assert.match(readFileSync(path.join(root,'scripts/build-web-engine.ts'),'utf8'),/LSMinimumSystemVersion:'14\.0'/,'the web engine supports macOS 14');
-assert.match(readFileSync(path.join(root,'ui/distribution/mac-release.ts'),'utf8'),/\? minimum : '14\.0'/,'the download page falls back to macOS 14');
+assert.match(readFileSync(path.join(root,'ui/frame/mac-release.ts'),'utf8'),/\? minimum : '14\.0'/,'the download page falls back to macOS 14');
 console.log('PASS Dev and packaged apps share scripts/mac-app-info.ts; macOS 14 or later');
 
 // Electron fuses: the packaged app (Mac, Windows and Linux) refuses NODE_OPTIONS and --inspect, and keeps RunAsNode for
@@ -120,7 +120,7 @@ console.log('PASS Dev and packaged apps share scripts/mac-app-info.ts; macOS 14 
  const {appFuses,flipAppFuses}=await import('./electron-fuses.ts');
  const {FuseV1Options,FuseState,getCurrentFuseWire}=await import('@electron/fuses');
  assert.deepEqual(appFuses,{[FuseV1Options.RunAsNode]:true,[FuseV1Options.EnableNodeOptionsEnvironmentVariable]:false,[FuseV1Options.EnableNodeCliInspectArguments]:false});
- assert.match(readFileSync(path.join(root,'platform/electron/src/modules/agent-runtime/world-tool-bridge.ts'),'utf8'),/ELECTRON_RUN_AS_NODE:'1'/,'RunAsNode stays on while the bridge needs it');
+ assert.match(readFileSync(path.join(root,'platform/host/modules/gate/world-tool-bridge.ts'),'utf8'),/ELECTRON_RUN_AS_NODE:'1'/,'RunAsNode stays on while the bridge needs it');
  const hook=/afterCopyExtraResources:\[async\(\{buildPath,arch:target\}[^\n]*await flipAppFuses\(buildPath,platform,arch!=='universal'\);\}\]/;
  assert.match(pkg,hook,'package-electron.ts flips the fuses in afterCopyExtraResources, which packager runs before signing');
  assert.equal(pkg.match(/flipAppFuses\(/g)?.length,1);

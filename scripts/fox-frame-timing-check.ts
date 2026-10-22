@@ -1,5 +1,5 @@
-import {diagnosticReport,diagnosticError} from '../core/diagnostics/report.ts';
-import {foxTiming} from '../core/diagnostics/fox-timing.ts';
+import {diagnosticReport,diagnosticError} from '../agent/app/report.ts';
+import {foxTiming} from '../agent/app/fox-timing.ts';
 import assert from 'node:assert/strict';
 import {createFoxFrameTiming,createFoxSurfaceTiming} from '../ui/companion/fox-frame-timing.ts';
 const timing=createFoxFrameTiming(4);

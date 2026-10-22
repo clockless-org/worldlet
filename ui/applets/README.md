@@ -1,18 +1,18 @@
 # Worldlet Applets
 
-This directory owns Applet presentation and interaction. Data-only definitions, provider identity and capability declarations live in `core/applets/`. Shared artwork, approved references and visual tokens live in the [built-in Style Pack](../../resources/styles/builtin/README.md). Read the product [README](../../README.md) first; for art, read the [Sprite world contract](../world/COMPOSITION.md) and the [2.5D production contract](../../resources/styles/builtin/PRODUCTION.md).
+This directory owns Applet presentation and interaction. Data-only definitions, provider identity and capability declarations live in `context/applets/`. Shared artwork, approved references and visual tokens live in the [built-in Style Pack](../../resources/styles/builtin/README.md). Read the product [README](../../README.md) first; for art, read the [Sprite world contract](../world/COMPOSITION.md) and the [2.5D production contract](../../resources/styles/builtin/PRODUCTION.md).
 
 **Design starts with the [Applet design guide](DESIGN-GUIDE.md).** It is the canonical handbook for device concepts, Peek / Open / Focus, Fox actions, sprite production and acceptance.
 
 ## Terms and direction
 
-An Applet is an application's functions as a dimensional 2.5D installation or scene in the world. The standard states are **Peek → Open → Focus**: see the device in its Region, unfold its selectable contents, then read or work with selected content. Authored state support and routing are declared by the catalog and each Applet implementation. Scene, web, native and panel are implementation kinds; legacy `fullView` fields remain compatible. Authoring an Applet means identity, original logo, links, model or scene, state variants, Fox actions and a lifecycle contract; the full contract and current gaps are in [Applet presentation](../components/INTERACTION.md#applet-presentation).
+An Applet is an application's functions as a dimensional 2.5D installation or scene in the world. The standard states are **Peek → Open → Focus**: see the device in its Region, unfold its selectable contents, then read or work with selected content. Authored state support and routing are declared by the catalog and each Applet implementation. Scene, web, native and panel are implementation kinds; legacy `fullView` fields remain compatible. Authoring an Applet means identity, original logo, links, model or scene, state variants, Fox actions and a lifecycle contract; the full contract and current gaps are in [Applet presentation](../style/INTERACTION.md#applet-presentation).
 
 Authoring currently follows the design guide above. Use ordinary guidelines in `ui/applets/`, not a Create Applet skill. The Applet Factory workflow is deferred. Existing draft tooling remains historical developer tooling, not the design authority. The directory is `ui/applets/`; definition values, `AppContent.swift` and stored IDs stay compatible.
 
 ## Directory layout
 
-- `core/applets/catalog.ts` and `core/applets/definitions/<key>.ts`: data-only identity, connection and legacy `fullView` declarations.
+- `context/applets/catalog.ts` and `context/applets/definitions/<key>.ts`: data-only identity, connection and legacy `fullView` declarations.
 - `visuals.ts`: original logos and generic Home function icons.
 - `panels.ts`: service-specific working panels.
 - `<key>/logo.ts` and optional panel/controller files: visual presentation only.
@@ -27,7 +27,7 @@ See [production classification and order](DESIGN-GUIDE.md) before producing new 
 
 ## Current Applets and connection state
 
-The [catalog](../../core/applets/catalog.ts) is the single roster; [acceptance criteria](../components/INTERACTION.md#applet-presentation-acceptance-contract) and each Applet's owning document record verification and gaps. Catalog presence is not real-account acceptance. The [area taxonomy](../world/ENVIRONMENT.md#area-taxonomy) defines the approved future layout separately from current persisted IDs.
+The [catalog](../../context/applets/catalog.ts) is the single roster; [acceptance criteria](../style/INTERACTION.md#applet-presentation-acceptance-contract) and each Applet's owning document record verification and gaps. Catalog presence is not real-account acceptance. The [area taxonomy](../world/ENVIRONMENT.md#area-taxonomy) defines the approved future layout separately from current persisted IDs.
 
 Home's function Applets are **Mail, Calendar, Notes, Reminders** and **Weather**, with generic function icons rather than a publisher's; **Browser** is the sixth. Weather has no connector at all: the forecast already runs, and the Applet gives it a body. They currently connect Gmail, Google Calendar, macOS Notes and Reminders; authorization copy names the real service and internal IDs and existing grants are unchanged.
 
@@ -39,11 +39,11 @@ There is no hidden-definition concept: `WORLD_APPS` is `APP_DEFINITIONS`, and a 
 
 The popular-app expansion adds 30 launch-only entries. These are opt-in for existing worlds; regions page through finite slots rather than overlapping devices.
 
-The catalog offers every Applet, website Applets included (owner decision 2026-10-11; `inAppletCatalog` in `core/applets/applet-support.ts`). That rule decides an Area's Recommended and All lists, the setup guide's per-Area list and the Browser's "Add to World" offer; the Area panel also leaves out Applets this computer does not support. A site with no Applet can still become the person's own Applet with Make Applet.
+The catalog offers every Applet, website Applets included (owner decision 2026-10-11; `inAppletCatalog` in `context/applets/applet-support.ts`). That rule decides an Area's Recommended and All lists, the setup guide's per-Area list and the Browser's "Add to World" offer; the Area panel also leaves out Applets this computer does not support. A site with no Applet can still become the person's own Applet with Make Applet.
 
 ## How data reaches the scene
 
-Interaction follows [Applet presentation](../components/INTERACTION.md#applet-presentation): **Peek → Open → Focus**. Web fallback uses **Peek → Focus** directly. `appletContract(key)` summarizes resources and activity variants, which are separate from these presentation states. No extra Open button or implicit authorization; Fox guides connections.
+Interaction follows [Applet presentation](../style/INTERACTION.md#applet-presentation): **Peek → Open → Focus**. Web fallback uses **Peek → Focus** directly. `appletContract(key)` summarizes resources and activity variants, which are separate from these presentation states. No extra Open button or implicit authorization; Fox guides connections.
 
 ### Mac device rules
 
@@ -58,7 +58,7 @@ Every Applet reuses the same device state and reading flow: Applets connect to t
 | Click the model | Enter Open for unfolded sprite content or Focus for a web/native panel; unconnected capabilities go through Fox |
 | Click a record | The original opens on the left (about 2/3); closing it returns to the model |
 
-Shared interfaces: `AppContent.swift` and `ui/shell/app-device.ts`; each source provides record identity, title, original read and bounded sync. Unimplemented sync is stated, never animated. Notion's index is recent pages; Google's records are what was read locally; Notion reading uses its own native web panel while other sources read through their connector.
+Shared interfaces: `AppContent.swift` and `ui/frame/app-device.ts`; each source provides record identity, title, original read and bounded sync. Unimplemented sync is stated, never animated. Notion's index is recent pages; Google's records are what was read locally; Notion reading uses its own native web panel while other sources read through their connector.
 
 ```mermaid
 flowchart TD
@@ -76,9 +76,9 @@ flowchart TD
 
 - `harness/hermes/host.py` calls upstream MCP and Google clients. `HermesSources.swift` handles connection state; `SourceRecord.swift` converts originals and versions.
 - `ui/applets/` holds credential-free declarations; real connections live in native panels and the local Hermes profile. **Never put tokens, secrets or user originals here.**
-- Hermes keeps five source adapters (Drive hidden); Apple's two are native. Drive is metadata only; Notion is a bounded index with on-demand bodies. A successful read is not full incremental sync. Official conditions: [connector reference](../../core/applets/INTEGRATIONS.md).
+- Hermes keeps five source adapters (Drive hidden); Apple's two are native. Drive is metadata only; Notion is a bounded index with on-demand bodies. A successful read is not full incremental sync. Official conditions: [connector reference](../../context/applets/INTEGRATIONS.md).
 - An Applet's default Region is only its entry position; the same Gmail message can take part in Travel, Money or Home context.
-- All Applets are fully visible with no packaging or preview toggle. Authorization success, sync success and finished organization are different facts. Peek names have no extra logo or emoji; Open/Focus may use an existing identity icon; Fox and the opened Applet distinguish connecting, syncing, reading and needs attention (`core/applets/status.ts`).
+- All Applets are fully visible with no packaging or preview toggle. Authorization success, sync success and finished organization are different facts. Peek names have no extra logo or emoji; Open/Focus may use an existing identity icon; Fox and the opened Applet distinguish connecting, syncing, reading and needs attention (`context/applets/status.ts`).
 - Notion reads up to 20 recent pages with `notion-list-recent-pages`, bodies with `notion-fetch`, and database rows (up to 20) with read-only `notion-query-data-sources`; browsing uses the Notion website. Originals go to sources, reading cache to `app-content/notion`. No model call and no implicit private-content consent.
 
 ## Adding or finishing a connection
@@ -103,14 +103,14 @@ Branded Applets share the original-asset loader and keep ratio and color; nothin
 
 ## Entries independent of a Region
 
-DoorDash declares `region: null` and `placement.kind: 'world'`; the compiler leaves its `buildingId` null and `pixi-world.ts` puts it on its authored bridge anchor from `scripts/build-world-assets.ts`; Back returns to World. Like every Applet the delivery bicycle sprite is always visible and implies nothing about connection. The official CLI is called through the restricted `harness/hermes/doordash_cli.py`; see [DoorDash](../../core/applets/INTEGRATIONS.md#doordash).
+DoorDash declares `region: null` and `placement.kind: 'world'`; the compiler leaves its `buildingId` null and `pixi-world.ts` puts it on its authored bridge anchor from `scripts/build-world-assets.ts`; Back returns to World. Like every Applet the delivery bicycle sprite is always visible and implies nothing about connection. The official CLI is called through the restricted `harness/hermes/doordash_cli.py`; see [DoorDash](../../context/applets/INTEGRATIONS.md#doordash).
 
 ### Implementation routing (`fullView`)
 
 Branded services use their original website as the default view. Native Mail, Calendar, Notes and Reminders retain their authored paper interfaces. The Village theme supplies a background and measured content rectangle; website content remains in the host's isolated browser surface. Source-reader permissions are independent of website access.
 
 
-Every visible Applet declares `fullView.kind`. Five kinds are supported (`web` / `native` / `panel` / `scene` / `launcher`); the catalog is authoritative for each current route. A `scene` Applet may keep its account's website as `fullView.original`; it is reached by the **Native / Web** toggle right of the title in the Applet's [top bar](../components/INTERACTION.md#top-bar), inside the same Applet. Switching back restores the native selection; no separate original-link action is shown. Local-only Applets must not present a marketing website as a Web equivalent. `panel` factories come from `ui/applets/panels.ts` keyed by Applet; a `scene` Applet needs no per-Applet file. Website Applets may also keep panel factories for bounded Fox actions. The world mounts by kind and never branches on a name. Applets that authorize inside their view declare `connection.flow: 'in-applet'` so onboarding opens them directly; device-panel copy lives in `content`. Web Applets declare the home `url` and browser `platform` (`web` for ordinary sites; Notion, X, YouTube, Airbnb, Maps and TikTok keep their platform behavior). `appletContract` exposes the configuration. The connector `capability` covers authorization and tools only and never blocks a website. Plain clicks enter; only explicit Connect starts authorization. Back goes from the web page straight to the Region, exit unloads the page, and world updates keep the current page.
+Every visible Applet declares `fullView.kind`. Five kinds are supported (`web` / `native` / `panel` / `scene` / `launcher`); the catalog is authoritative for each current route. A `scene` Applet may keep its account's website as `fullView.original`; it is reached by the **Native / Web** toggle right of the title in the Applet's [top bar](../style/INTERACTION.md#top-bar), inside the same Applet. Switching back restores the native selection; no separate original-link action is shown. Local-only Applets must not present a marketing website as a Web equivalent. `panel` factories come from `ui/applets/panels.ts` keyed by Applet; a `scene` Applet needs no per-Applet file. Website Applets may also keep panel factories for bounded Fox actions. The world mounts by kind and never branches on a name. Applets that authorize inside their view declare `connection.flow: 'in-applet'` so onboarding opens them directly; device-panel copy lives in `content`. Web Applets declare the home `url` and browser `platform` (`web` for ordinary sites; Notion, X, YouTube, Airbnb, Maps and TikTok keep their platform behavior). `appletContract` exposes the configuration. The connector `capability` covers authorization and tools only and never blocks a website. Plain clicks enter; only explicit Connect starts authorization. Back goes from the web page straight to the Region, exit unloads the page, and world updates keep the current page.
 
 Discord is a Social entry on the generic `web` platform; see [Discord Applet](../../platform/browser/INTEGRATION.md#discord).
 
@@ -129,4 +129,4 @@ expansion lists are implementation history. A visible device or discovered insta
 app does not imply connected accounts, source ingestion or background execution.
 Publisher identity and generated device provenance remain separately registered.
 Region pins and finite ground slots do not limit access through the searchable shelf.
-Website/bookmark discovery is described in [setup discovery](../onboarding/DISCOVERY.md).
+Website/bookmark discovery is described in [setup discovery](../frame/DISCOVERY.md).

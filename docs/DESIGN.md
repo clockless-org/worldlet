@@ -64,6 +64,6 @@ Permission denial, cancellation, failure and retry must remain understandable.
 Keyboard focus, text enlargement, reduced motion and retained reading position are
 required. Animation cannot delay input or invent task success.
 
-[Detailed interaction contracts](../ui/components/INTERACTION.md),
-[first-use behavior](../ui/onboarding/README.md) and
+[Detailed interaction contracts](../ui/style/INTERACTION.md),
+[first-use behavior](../ui/frame/ONBOARDING.md) and
 [Applet authoring](../ui/applets/DESIGN-GUIDE.md) own component-level details.

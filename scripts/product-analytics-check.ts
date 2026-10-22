@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {withProductAnalytics,withFoxTurnAnalytics} from '../ui/shell/product-analytics.ts';
-import {foxTiming,foxTimingEvent,replyBucket,timingBucket,updateWaitBucket} from '../core/diagnostics/index.ts';
+import {withProductAnalytics,withFoxTurnAnalytics} from '../ui/frame/product-analytics.ts';
+import {foxTiming,foxTimingEvent,replyBucket,timingBucket,updateWaitBucket} from '../agent/app/index.ts';
 let enabled=true,fail=false,telemetryFails=false;
 const events:any[]=[];
 const {call,track}=withProductAnalytics(async(action:string,body:any={})=>{
@@ -58,7 +58,7 @@ const countBefore=events.length;await call('agentChat',{id:'00000000-0000-4000-8
 assert.ok(!JSON.stringify(outcomes).match(/private|unavailable|message|text/));
 console.log('PASS: visible-turn outcomes, preflight failure, cancellation, greeting/practice exclusion and no agent-call double counting');
 
-const {withToolAnalytics}=await import('../ui/shell/product-analytics.ts');
+const {withToolAnalytics}=await import('../ui/frame/product-analytics.ts');
 const toolEvents:any[]=[];
 const toolHost=async(_action,body)=>{toolEvents.push(body);};
 const execute=withToolAnalytics(async(name,args)=>name==='read_content'?{text:args.secret}:name==='automate_browser'?{error:'private URL'}:{cancelled:true},toolHost);
@@ -99,7 +99,7 @@ console.log('PASS confirmed outcomes are separate from tool success, receipt IDs
 // Trigger and real use: only the person's own trusted gesture (transient user activation) outside Fox's tool steps is
 // `user`; Fox's tools, restores and anything without a fresh gesture are `background`. user_engaged is reported only then.
 {
- const {eventTrigger,reportEngagement,asFoxAction,personGesture}=await import('../ui/shell/product-analytics.ts');
+ const {eventTrigger,reportEngagement,asFoxAction,personGesture}=await import('../ui/frame/product-analytics.ts');
  const activation={isActive:false};
  Object.defineProperty(globalThis.navigator,'userActivation',{value:activation,configurable:true});
  const page=new EventTarget(),engaged:any[]=[];
@@ -126,7 +126,7 @@ console.log('PASS confirmed outcomes are separate from tool success, receipt IDs
  console.log('PASS trigger user only after a trusted gesture and outside Fox\'s tools; user_engaged from the World page needs a fresh gesture');
 }
 
-const {exceptionReport}=await import('../core/diagnostics/index.ts');
+const {exceptionReport}=await import('../agent/app/index.ts');
 const thrown=new TypeError('Cannot read properties of undefined (reading secret@example.com)');
 thrown.stack=`TypeError: Cannot read properties of undefined (reading secret@example.com)
     at WorldStore.snapshot (/Users/alex/Applications/Worldlet.app/Contents/Resources/app.asar/out/main.js:812:19)
@@ -163,9 +163,10 @@ for(const [message,rule] of [['Applet analysis ended without a verified result.'
  assert.equal(exceptionReport({name:'Error',message,stack:'',area:'host',operation:'appletAnalysis'}).rule,rule,message);
 // A background or speak-first turn on the person's Agent says how it ended (Windows Beta 4384, 2026-10-13: six bare
 // operationFailed from LocalHarnessRuntime.attempt in ten minutes, foxBackground and foxProactive).
-for(const [message,rule] of [['Hermes Agent does not start on this computer. Open Settings › Agent and choose Install again.','notStarted'],['Hermes Agent could not start.','notStarted'],
+for(const [message,rule] of [['Hermes Agent does not start on this computer. Open Settings › Agents and choose Install again.','notStarted'],['Hermes Agent could not start.','notStarted'],
  ['Hermes Agent stopped (code 1) without saying why. Open it once in Terminal to check it is signed in, then try again.','processExit'],['Claude Code stopped before it answered. Try again.','processExit'],
- ['Hermes Agent finished without an answer. Try again.','noAnswer'],['Hermes Agent could not answer: No inference provider configured.','noModel'],['Hermes Agent could not answer: Traceback (most recent call last)','agentError']] as const)
+ ['Hermes Agent finished without an answer. Try again.','noAnswer'],['Hermes Agent could not answer: No inference provider configured.','noModel'],['Hermes Agent could not answer: Traceback (most recent call last)','agentError'],
+ ['Error code: 400 - prompt is too long','contextLength'],['Error code: 400 - invalid request','badRequest'],['HTTP 403','forbidden'],['Error code: 418','httpClient']] as const)
  for(const operation of ['foxBackground','foxProactive'])assert.equal(exceptionReport({name:'WorldletError',message,stack:'',area:'host',operation}).rule,rule,message);
 assert.equal(exceptionReport({name:'Error',message:'Kept page released under memory pressure (appFootprint).',stack:'',area:'host',operation:'keptPageRelease'}),null);
 // Fox setup failure messages still map to fixed tags.
@@ -195,9 +196,9 @@ console.log('PASS exception projection: type, failure code and sanitized frames 
  console.log('PASS Fox and startup timings leave the device only as buckets of finished, allowlisted rows');
 }
 
-// Setup with a local Agent (core/diagnostics/setup-events.ts): product IDs, coarse counts and outcomes only.
+// Setup with a local Agent (agent/app/setup-events.ts): product IDs, coarse counts and outcomes only.
 {
- const {agentBringDimensions,agentsDetectedDimensions,countBucket}=await import('../core/diagnostics/index.ts');
+ const {agentBringDimensions,agentsDetectedDimensions,countBucket}=await import('../agent/app/index.ts');
  assert.deepEqual([0,-3,NaN,'9',1,9,10,99,100,999,1000,25000].map(countBucket),['0','0','0','0','1_9','1_9','10_99','10_99','100_999','100_999','1000_plus','1000_plus']);
  assert.deepEqual(agentsDetectedDimensions([],null),{agents_found:'0',recommended_agent:'none'});
  assert.deepEqual(agentsDetectedDimensions([{id:'openclaw'},{id:'codex'},{id:'claude-code'},{id:'pi'}],'codex'),{agents_found:'3_plus',recommended_agent:'codex'});
@@ -205,7 +206,7 @@ console.log('PASS exception projection: type, failure code and sanitized frames 
  const bring=agentBringDimensions('openclaw',{conversations:412,notes:31,skills:4,routines:0,model:true,memory:true,list:[{title:'#diet-and-health'}]} as any,[{outcome:'ported'},{outcome:'reconnect'},{outcome:'stays'},{outcome:'connected'}]);
  assert.deepEqual(bring,{local_agent:'openclaw',bring_conversations:'100_999',bring_notes:'10_99',bring_skills:'1_9',bring_routines:'0',bring_model:'yes',bring_memory:'yes',integrations_came_over:'1_9',integrations_reconnect:'1_9'});
  assert.ok(!JSON.stringify(bring).includes('diet'),'Conversation titles never leave the device');
- const {hermesSetupDimensions}=await import('../core/diagnostics/index.ts');
+ const {hermesSetupDimensions}=await import('../agent/app/index.ts');
  assert.deepEqual(hermesSetupDimensions('install',0),{hermes_setup:'install',install_step:'0'});
  assert.deepEqual(hermesSetupDimensions('install',0,new Error('Hermes Agent could not be installed. Check your internet connection and try again.')),{hermes_setup:'install',install_step:'0',hermes_failure:'download'});
  assert.equal(hermesSetupDimensions('install',0,new Error('Hermes Agent could not be installed. Check your internet connection and try again. (exit 1)')).hermes_failure,'manifest');
@@ -226,7 +227,7 @@ console.log('PASS exception projection: type, failure code and sanitized frames 
  assert.ok(!JSON.stringify(failedAt("Create Python environment: Cannot find path 'C:\\Users\\alex\\x'")).includes('alex'),'Installer output never leaves the device');
  assert.deepEqual(hermesSetupDimensions('terminal',0),{hermes_setup:'terminal',install_step:'0'});
  // Choosing an Agent that cannot be used says why as a fixed rule (Windows Beta 4384, 2026-10-13).
- const {diagnosticError}=await import('../core/diagnostics/index.ts');
+ const {diagnosticError}=await import('../agent/app/index.ts');
  for(const [message,rule] of [['Hermes Agent did not start. Open it once in Terminal, then try again.','notStarted'],['Hermes Agent 0.20.6 is too old for Worldlet, which needs 0.21.4 or newer. Choose Update Hermes Agent, then try again.','outdated'],['That Agent is no longer on this computer.','missing']])
   assert.deepEqual([diagnosticError({message}).code,diagnosticError({message}).rule],['operationFailed',rule],message);
  assert.ok(!JSON.stringify(stage).includes('Users'),'Installer output never leaves the device');
@@ -243,19 +244,19 @@ console.log('PASS exception projection: type, failure code and sanitized frames 
 // Production metrics (owner 2026-10-11 20:21 PDT): a paired phone's system comes from the platform it registered for
 // notifications with, never its name; the page reports opened Attention cards and finished tasks as allowlisted kinds.
 {
- const {phonePlatform}=await import('../core/phone/index.ts');
+ const {phonePlatform}=await import('../platform/web/index.ts');
  assert.deepEqual([{platform:'apns'},{platform:'apns-dev'},{platform:'fcm'},{platform:'Alex’s iPhone'},{platform:7},null,undefined].map(push=>phonePlatform(push as any)),['ios','ios','android','unknown','unknown','unknown','unknown']);
- const {reportProductEvent}=await import('../ui/shell/product-analytics.ts');
+ const {reportProductEvent}=await import('../ui/frame/product-analytics.ts');
  const page=new EventTarget(),reported:any[]=[];
  (globalThis as any).window=page;page.addEventListener('worldlet:product-event',(e:Event)=>reported.push((e as CustomEvent).detail));
  reportProductEvent('attention_item_opened',{open_surface:'computer',item_kind:'task'});
  for(const task_kind of ['routine','fox'])reportProductEvent('task_completed',{task_kind});
  delete (globalThis as any).window;
  assert.deepEqual(reported,[{event:'attention_item_opened',dimensions:{open_surface:'computer',item_kind:'task'}},{event:'task_completed',dimensions:{task_kind:'routine'}},{event:'task_completed',dimensions:{task_kind:'fox'}}]);
- // Each new event is emitted where its decision is made (the host allowlist and its checks are in modules/shell).
+ // Each new event is emitted where its decision is made (the host allowlist and its checks are in modules/app).
  const {readFileSync}=await import('node:fs'),read=(file:string)=>readFileSync(new URL('../'+file,import.meta.url),'utf8');
- const world=read('ui/shell/notion-world.ts'),fox=read('platform/electron/src/modules/fox/index.ts'),jobs=read('platform/electron/src/modules/fox/harness-jobs.ts'),phone=read('platform/electron/src/modules/phone/index.ts'),shell=read('platform/electron/src/modules/shell/index.ts');
- assert.match(world,/if\(!advanced&&!data\.sample&&eventTrigger\(\)==='user'\)reportProductEvent\('attention_item_opened'/,'only the person\'s own opening, outside the practice world');
+ const world=read('ui/frame/notion-world.ts')+read('ui/attention/daily-cards.ts'),fox=read('platform/host/modules/companion/index.ts'),jobs=read('platform/host/modules/companion/harness-jobs.ts'),phone=read('platform/host/modules/windows/phone.ts'),shell=read('platform/host/modules/app/index.ts');
+ assert.match(world,/if\(!advanced&&!data(?:\(\))?\.sample&&eventTrigger\(\)==='user'\)reportProductEvent\('attention_item_opened'/,'only the person\'s own opening, outside the practice world');
  assert.match(world,/reportProductEvent\('task_completed',\{task_kind:'routine'\}\)/);assert.match(world,/reportProductEvent\('task_completed',\{task_kind:'fox'\}\)/);
  assert.match(fox,/'task_completed','',\{task_kind:'routine'\}/);assert.match(fox,/'task_completed','',\{task_kind:'applet'\}/);assert.match(jobs,/'task_completed','',\{task_kind:'routine'\}/);
  assert.match(phone,/usage\('phone_paired',\{phone_platform:phonePlatform\(push\)\}\)/);

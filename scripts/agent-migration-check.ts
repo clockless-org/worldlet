@@ -5,15 +5,15 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 import {DatabaseSync} from 'node:sqlite';
 import {claudeCodeConversationTitle,claudeCodeTurn,hermesConversationIncluded,hermesConversationTitle,hermesRoutine,hermesTurn,migrationMemoryNote,migrationRoutineKey,migrationSkillMarkdown,migrationSkillPath,migrationSkillsSafe,
- openClawAgentSkill,openClawChannelPrompts,openClawConversationIncluded,openClawConversationSkill,openClawConversationTitle,openClawPromptFor,openClawRoutine,openClawSkillName,openClawTurn,piTurn} from '../core/agent/index.ts';
-import {openClawAgents,parseJSON5,readOpenClaw,reportOpenClawWorkspaces,scanOpenClawWorkspaces,surveyOpenClaw} from '../platform/electron/src/modules/agent-runtime/openclaw-files.ts';
-import {surveyAgentHistory} from '../platform/electron/src/modules/agent-runtime/agent-files.ts';
-import {firstSentence,localAgentModel,openClawWorkspace,readLocalAgentMemory,summarizeLocalAgent} from '../platform/electron/src/modules/agent-runtime/local-memory.ts';
-import {bringAgent,broughtFile,placeBrought,readBrought,restoreBrought} from '../platform/electron/src/modules/fox/migration.ts';
-import {allowed as inBackup,validate as validateBackup} from '../platform/electron/src/modules/shell/backup.ts';
-import {digest} from '../platform/electron/src/files.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {journalOrigin,readArtifact} from '../core/artifacts/index.ts';
+ openClawAgentSkill,openClawChannelPrompts,openClawConversationIncluded,openClawConversationSkill,openClawConversationTitle,openClawPromptFor,openClawRoutine,openClawSkillName,openClawTurn,piTurn} from '../agent/gate/index.ts';
+import {openClawAgents,parseJSON5,readOpenClaw,reportOpenClawWorkspaces,scanOpenClawWorkspaces,surveyOpenClaw} from '../platform/host/modules/companion/agent/openclaw-files.ts';
+import {surveyAgentHistory} from '../platform/host/modules/companion/agent/agent-files.ts';
+import {firstSentence,localAgentModel,openClawWorkspace,readLocalAgentMemory,summarizeLocalAgent} from '../platform/host/modules/companion/agent/local-memory.ts';
+import {bringAgent,broughtFile,placeBrought,readBrought,restoreBrought} from '../platform/host/modules/companion/migration.ts';
+import {allowed as inBackup,validate as validateBackup} from '../platform/host/modules/app/backup.ts';
+import {digest} from '../platform/host/files.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
+import {journalOrigin,readArtifact} from '../context/store/index.ts';
 // What the World's database receives, as one list: each conversation's messages, then the notes.
 const flat=(history:any)=>[...history.conversations.flatMap((c:any)=>c.turns.map((t:any)=>({...t,session:c.session}))),...history.notes.map((n:any)=>({...n,role:'assistant',text:n.date?`Notes for ${n.date}\n\n${n.text}`:n.text}))];
 
@@ -432,7 +432,7 @@ try{
  assert.deepEqual(data.notes.map(n=>[n.agentId,n.date]),[['main','2026-10-01']]);
  assert.equal(readLocalAgentMemory('openclaw',outside,env)?.user,'Lives in LA.');
  assert.equal(openClawAgents(outside,{} as NodeJS.ProcessEnv).find(a=>a.id==='helper')?.workspace,null,'a missing variable leaves only that path unread');
- // Where its configuration leads nowhere, the folder the Agent itself reported (core/agent/agent-profile.ts workspaces)
+ // Where its configuration leads nowhere, the folder the Agent itself reported (agent/gate/agent-profile.ts workspaces)
  // is read, when it is a workspace inside the home folder; one outside it never is.
  write(path.join(outside,'elsewhere','helper','SOUL.md'),'Name: Helper\nHelps.');
  const away=fs.mkdtempSync(path.join(os.tmpdir(),'worldlet-openclaw-away-'));write(path.join(away,'SOUL.md'),'Name: Away');

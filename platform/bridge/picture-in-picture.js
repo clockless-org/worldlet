@@ -1,4 +1,4 @@
-// Injected into a website page for picture in picture (core/browser/picture-in-picture.ts; Mac:
+// Injected into a website page for picture in picture (agent/applets/picture-in-picture.ts; Mac:
 // the page's isolated world). Cosmetic only: it reads no content, sends nothing and has no host
 // bridge. 'probe' says whether the page plays a video big enough to be what the person watches;
 // 'enter' marks that video and adds a style that makes it fill the page's viewport over

@@ -15,6 +15,10 @@ is independent of artwork, installed app bundles and the selected Harness.
 | World preferences | Region names/themes, placement, appearance and user overrides |
 | Execution history | Bounded task/event metadata and outcome receipts |
 
+Every domain is Context of one of four kinds (Synced, Recorded, Made, Known) and is reached through one entry,
+`context/store/context.ts`: one envelope, one read and write path and one search across the kinds. Only Connectors write
+Synced; UI only reads. [One way in](../context/store/STORAGE.md#one-way-in) lists what goes through it today.
+
 SQLite provides durable records and transactions; configuration and approved original
 files retain their explicit formats. Schema and file paths belong to the implementation,
 not the UI. Core owns decisions; Platform performs persistence and OS protection.
@@ -36,7 +40,7 @@ one source preserves unrelated records and shared evidence. Task completion, ite
 suppression, memory deletion and whole-world reset have different scopes.
 
 Destructive changes are explicit and reviewed. Credentials stay out of Git, assets,
-portable conversation archives and diagnostics. Attached external Harness profiles
+portable conversation history and diagnostics. Attached external Harness profiles
 retain their own lifecycle; Worldlet reset must not erase an external installation.
 
 Backups and portable companion transfers are distinct. Document platform compatibility,
@@ -45,11 +49,11 @@ must preserve stable IDs, grants where supported and user decisions.
 
 ## Tool boundary and verification
 
-UI and Harness use domain operations through public contracts, never direct ledger
-mutation. Source text cannot instruct writes. External action outcomes are recorded
+UI and Harness use domain operations through public contracts and the Context entry, never
+direct ledger mutation. Source text cannot instruct writes. External action outcomes are recorded
 separately from local state changes; cancellation is not rollback.
 
-[Storage and tool implementation](../core/items/STORAGE.md) owns schemas, retention,
+[Storage and tool implementation](../context/store/STORAGE.md) owns schemas, retention,
 backup and commands. [Portability](AGENT-PORTABILITY.md) owns Harness replacement;
 [Attention](ATTENTION-CENTER.md) owns user-facing item lifecycle. Validate transactions,
 restart, failure and restoration with fictional records before real-account acceptance.

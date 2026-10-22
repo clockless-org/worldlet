@@ -1,15 +1,15 @@
-// Stock Hermes Agent for a person with no Agent (platform/electron/src/modules/agent-runtime/hermes-official.ts,
-// core/agent/hermes-setup.ts): the official installer runs stage by stage without a person (the ones that need input
+// Stock Hermes Agent for a person with no Agent (platform/host/modules/companion/agent/hermes-official.ts,
+// agent/gate/hermes-setup.ts): the official installer runs stage by stage without a person (the ones that need input
 // are Hermes' own), its steps are reported, a failed step says which, a Hermes Agent already here installs nothing and keeps its model,
 // Worldlet's old links at the standard locations are removed first and never the person's own; ChatGPT is signed in
 // with Hermes' own command, the address it prints is opened, and Hermes is set to ChatGPT with a model it lists.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {hermesChatGptModel,hermesInstallerResult,hermesInstallerStages,hermesSignInPrompt,HERMES_INSTALLERS} from '../core/agent/index.ts';
-import {HERMES_WINDOW_DONE,hermesInstallWindow,hermesStarts,installHermes,workingHermesAgent,installedHermes,ownHermesAgent,releaseStandardHermes,setAsideUnfinished,signInHermes} from '../platform/electron/src/modules/agent-runtime/hermes-official.ts';
+import {hermesChatGptModel,hermesInstallerResult,hermesInstallerStages,hermesSignInPrompt,HERMES_INSTALLERS} from '../agent/gate/index.ts';
+import {HERMES_WINDOW_DONE,hermesInstallWindow,hermesStarts,installHermes,workingHermesAgent,installedHermes,ownHermesAgent,releaseStandardHermes,setAsideUnfinished,signInHermes} from '../platform/host/modules/companion/agent/hermes-official.ts';
 import {withTempDir} from './test-temp.ts';
-import {signInScript} from '../platform/electron/src/modules/agent-runtime/provider-sign-in.ts';
+import {signInScript} from '../platform/host/modules/companion/agent/provider-sign-in.ts';
 
 // Core: the manifest, a stage's result frame, what the sign-in prints, and the model.
 const manifest='{"protocol_version":1,"stages":[{"name":"prerequisites","title":"System prerequisites","needs_user_input":false},{"name":"setup","title":"Configure API keys","needs_user_input":true},{"name":"complete","title":"Finish install","needs_user_input":false}]}';

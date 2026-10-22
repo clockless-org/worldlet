@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {buildInfo} from './build-info.ts';
 
-const info=buildInfo(),{feedURL,intelFeedURL}=JSON.parse(readFileSync('platform/electron/distribution/Updates.json','utf8'));
+const info=buildInfo(),{feedURL,intelFeedURL}=JSON.parse(readFileSync('platform/desktop/distribution/Updates.json','utf8'));
 const origin=new URL(feedURL).origin;
 async function get(url,method='GET'){
  const result=await fetch(url,{method,redirect:'follow',signal:AbortSignal.timeout(20000),headers:{'User-Agent':'WorldletMachines/1'}});

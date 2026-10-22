@@ -1,15 +1,17 @@
-// The World's MCP account connections (platform/electron/src/modules/sources/mcp-account.ts, mcp-client.ts) against a
+// The World's MCP account connections (platform/host/modules/connectors/mcp-account.ts, mcp-client.ts) against a
 // fake service: an Agent's own connection in its Hermes profile is used as it is (OAuth tokens or a `.env` token) and
 // a refreshed token is written back the way Hermes writes it; a connection made through Worldlet discovers the
 // server's authorization server, registers on a loopback address and signs in with PKCE and a resource indicator,
 // is kept in the vault and refreshed there; the client opens a session, reads JSON and event-stream answers, retries
 // once after a 401 and reopens a forgotten session.
 import assert from 'node:assert/strict';
+import {assertOAuthCallback} from './oauth-callback-fixture.ts';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import {McpAccounts} from '../platform/electron/src/modules/sources/mcp-account.ts';
-import {McpUnauthorized} from '../platform/electron/src/modules/sources/mcp-client.ts';
+import {CONNECTORS,connector,connectorScopes} from '../context/connectors/index.ts';
+import {McpAccounts} from '../platform/host/modules/connectors/mcp-account.ts';
+import {McpUnauthorized} from '../platform/host/modules/connectors/mcp-client.ts';
 import {withTempDir} from './test-temp.ts';
 
 await withTempDir('worldlet-mcp-account-',async temp=>{
@@ -37,7 +39,7 @@ await withTempDir('worldlet-mcp-account-',async temp=>{
    if(state.sse)return new Response(`event: message\ndata: {"jsonrpc":"2.0","method":"notifications/progress","params":{}}\n\nevent: message\ndata: ${JSON.stringify({jsonrpc:'2.0',id:message.id,result})}\n\n`,{status:200,headers:{'content-type':'text/event-stream'}});
    return json({jsonrpc:'2.0',id:message.id,result});
   }
-  if(url==='https://mcp.example.com/.well-known/oauth-protected-resource/mcp')return json({resource:MCP,authorization_servers:[ISSUER],scopes_supported:['read']});
+  if(url==='https://mcp.example.com/.well-known/oauth-protected-resource/mcp')return json({resource:MCP,authorization_servers:[ISSUER],scopes_supported:['read','write','data:read_write','data:delete','admin']});
   if(url===ISSUER+'/.well-known/oauth-authorization-server')return json({issuer:ISSUER,authorization_endpoint:ISSUER+'/authorize',token_endpoint:ISSUER+'/token',registration_endpoint:ISSUER+'/register',code_challenge_methods_supported:['S256']});
   if(url===ISSUER+'/register'){const body=JSON.parse(init.body);state.registered.push(body);return json({client_id:'client-'+state.registered.length,...body},201);}
   if(url===ISSUER+'/token'){
@@ -97,9 +99,10 @@ if(process.platform!=='win32')assert.equal(fs.statSync(path.join(hermes,'mcp-tok
 
  // A connection made through Worldlet: discovery, registration on the loopback address, PKCE, resource indicator.
  let opened='';
+ const callbackChecks:Promise<void>[]=[];
  const browser=async(url:string)=>{
   opened=url;const query=new URL(url).searchParams;
-  setTimeout(async()=>{await fetch(query.get('redirect_uri')+'?'+new URLSearchParams({code:'code-1',state:query.get('state')!})).catch(()=>{});},10);
+  callbackChecks.push(new Promise(resolve=>setTimeout(resolve,10)).then(()=>fetch(query.get('redirect_uri')+'?'+new URLSearchParams({code:'code-1',state:query.get('state')!}))).then(assertOAuthCallback));
  };
  const made=await accounts.connect('todoist',MCP,'',browser);
  assert.equal(made.source,'world');
@@ -108,7 +111,7 @@ if(process.platform!=='win32')assert.equal(fs.statSync(path.join(hermes,'mcp-tok
  assert.match(asked.get('redirect_uri')!,/^http:\/\/127\.0\.0\.1:\d+\/callback$/);
  assert.deepEqual(state.registered.at(-1).redirect_uris,[asked.get('redirect_uri')]);
  assert.equal(state.registered.at(-1).token_endpoint_auth_method,'none');
- assert.equal(asked.get('resource'),MCP);assert.equal(asked.get('scope'),'read');assert.equal(asked.get('code_challenge_method'),'S256');
+ assert.equal(asked.get('resource'),MCP);assert.equal(asked.get('scope'),'data:read_write','only the connector\'s own scope list, never every scope the server offers');assert.equal(asked.get('code_challenge_method'),'S256');
  const exchange=state.tokens.at(-1);
  assert.equal(exchange.grant_type,'authorization_code');assert.equal(exchange.resource,MCP);assert.equal(exchange.client_id,'client-1');
  assert.equal(crypto.createHash('sha256').update(exchange.code_verifier).digest('base64url'),asked.get('code_challenge'));
@@ -120,6 +123,23 @@ if(process.platform!=='win32')assert.equal(fs.statSync(path.join(hermes,'mcp-tok
  await accounts.session(accounts.connection('todoist')!,'Todoist').callTool('fetch',{});
  assert.equal(state.tokens.at(-1).grant_type,'refresh_token');assert.equal(state.tokens.at(-1).resource,MCP);
  assert.match(values.get('mcp:todoist')!,/"refresh_token":"refresh-\d+"/);
+ // Linear asks for reading only; a connector with no list of its own (PayPal) sends no scope, the service's default.
+ await accounts.connect('linear',MCP,'',browser);
+ assert.equal(new URL(opened).searchParams.get('scope'),'read');
+ await accounts.connect('paypal',MCP,'',browser);
+ assert.equal(new URL(opened).searchParams.has('scope'),false);
+ accounts.disconnect('linear');accounts.disconnect('paypal');
+ // The registry: each connector's short list, kept to what the service offers; an unknown one asks for nothing.
+ assert.deepEqual(connectorScopes('supabase',['organizations:read','projects:read','projects:write','database:write','secrets:read']),['organizations:read','projects:read']);
+ assert.deepEqual(connectorScopes('linear',['read','write'],{write:true}),['read','write']);
+ assert.deepEqual(connectorScopes('linear',['write']),[],'a scope the service no longer offers is not asked for');
+ assert.deepEqual(connectorScopes('notion',undefined),['default']);
+ assert.deepEqual(connectorScopes('unknown',['a','b']),[]);
+ for(const item of CONNECTORS){
+  assert.equal(connector(item.id),item);
+  assert.ok(item.scopes.read.length<=8,item.id+' asks for a short list');
+  assert.ok(!/\b(key|token|scope|MCP|OAuth|API|ID)\b/i.test(item.purpose),item.id+'\'s line is plain');
+ }
  // The World's own comes first, even where the Agent has one by that name; disconnecting forgets only the World's.
  await accounts.connect('notion',MCP,'Bearer bearer-secret',async()=>{throw Error('no browser for a token');});
  assert.equal(accounts.connection('notion')!.source,'world');
@@ -129,5 +149,6 @@ if(process.platform!=='win32')assert.equal(fs.statSync(path.join(hermes,'mcp-tok
  await assert.rejects(accounts.connect('x','http://mcp.example.com/mcp','',browser),/HTTPS/);
  await assert.rejects(accounts.connect('x','https://user:pw@mcp.example.com/mcp','',browser),/HTTPS/);
  await assert.rejects(accounts.connect('Bad Name',MCP,'',browser),/Invalid connection name/);
+ await Promise.all(callbackChecks);
 });
-console.log('PASS World MCP connections: an Agent\'s own (OAuth tokens or .env token, refreshed and written back as Hermes does), Worldlet\'s own (discovery, registration, loopback PKCE with resource indicator, vault refresh), JSON and event-stream answers, 401 retry, reopened sessions');
+console.log('PASS World MCP connections: an Agent\'s own (OAuth tokens or .env token, refreshed and written back as Hermes does), Worldlet\'s own (discovery, registration, loopback PKCE with resource indicator, each connector\'s short scope list, vault refresh), JSON and event-stream answers, 401 retry, reopened sessions');

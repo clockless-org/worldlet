@@ -1,9 +1,9 @@
 /** Live Minesweeper controls remain usable when distributed around a projected board. */
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {MINE_FIELDS,newMineState,actOnMine} from '../core/games/index.ts';
+import {MINE_FIELDS,newMineState,actOnMine} from '../context/store/index.ts';
 import {bundleScript,withBrowser,pageErrors} from './browser-test.ts';
-const script=await bundleScript({stdin:{contents:"export {createGameApplet,mountAppletScene} from './ui/applets/index.ts';export {createMinesweeper} from './ui/games/minesweeper.ts';",resolveDir:process.cwd(),loader:'ts'},globalName:'Games'});
+const script=await bundleScript({stdin:{contents:"export {createGameApplet,mountAppletScene} from './ui/applets/index.ts';export {createMinesweeper} from './ui/applets/minesweeper.ts';",resolveDir:process.cwd(),loader:'ts'},globalName:'Games'});
 const css=(await Promise.all(['dist/WorldletWeb/worldlet-ui.css','ui/applets/scene/applet-scene.css'].map(p=>readFile(p,'utf8')))).join('\n');
 const model=actOnMine(newMineState(MINE_FIELDS.compact),0,'dig',0,()=>0),mine=[...model.mines][0];
 await withBrowser(async browser=>{

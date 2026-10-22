@@ -6,11 +6,11 @@
   "purpose": "Image-generated visual target based on the current large-surface background; not a runtime screenshot.",
   "generatedAt": "2026-10-13T04:28:36.489Z",
   "sourceBackground": {
-    "path": "ui/theme-packages/village/assets/applet-scenes/gmail/background.webp",
+    "path": "ui/style/theme-packages/village/assets/applet-scenes/gmail/background.webp",
     "sha256": "b6fb61a673e1c4fcee7d8c1160b0964777de3682fdef5c49a7eddf8859b17086"
   },
   "sourceFrame": {
-    "path": "ui/theme-packages/village/assets/applet-scenes/gmail/frame-mask.png",
+    "path": "ui/style/theme-packages/village/assets/applet-scenes/gmail/frame-mask.png",
     "sha256": "09d9389378dbb41d139f34ccbdd090778333937049f25bc63f9f70c1600c6cb9"
   },
   "sourceImageSha256": "b2a942ca79b75518d0611e410331992804b8f78bc4531defc8eed7adb83d5136",

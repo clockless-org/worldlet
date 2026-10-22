@@ -1,4 +1,4 @@
-// RC onboarding paths (#1492): the first-run paths of platform/electron/src/checks/onboarding-paths.ts, one
+// RC onboarding paths (#1492): the first-run paths of platform/desktop/src/checks/onboarding-paths.ts, one
 // launch per phase on one fresh library, each ending with Quit Completely; after each launch nothing may be
 // left running with that library (the World, website engine and helper processes).
 //   npm run test:onboarding:paths                                  this checkout's development build (no RC gate)
@@ -15,7 +15,7 @@ import {createRequire} from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {RC_CHECK_MARKER} from '../platform/electron/src/rc-check.ts';
+import {RC_CHECK_MARKER} from '../platform/host/rc-check.ts';
 import {workspace} from './dev-workspace.ts';
 import {launchEnvironment,writeOpenClawFixture} from './setup-fixtures.ts';
 

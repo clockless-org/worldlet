@@ -11,7 +11,6 @@ await withBrowser(fileAccess,async browser=>{
    if(b.action==='companionProfile')return {name:'Fox'};
    if(b.action==='conversationRecall')return [];
    if(b.action==='agentChat'){await new Promise(resolve=>w.finishThinking=resolve);return {message:'I’m still here with you.'};}
-   if(b.action==='order')return w.orderReady?{available:true,ready:true}:{available:false};
    return {ok:true};
   }}}};
  });
@@ -38,7 +37,7 @@ await withBrowser(fileAccess,async browser=>{
   await ready;return {worldVisible,firstFramePending,resolved,worldDrew:frames()>=from+2};
  });
  assert.deepEqual(painted,{worldVisible:true,firstFramePending:true,resolved:true,worldDrew:true},'World restore waits beyond DOM changes until the World itself has drawn again');
- const entry=page.locator(SETTINGS_BUTTON),type=page.locator('#notionInput'),mic=page.locator('.companion-speech-button'),controls=page.locator('.companion-controls>button:visible:not(.companion-order-button,.companion-speech-button,.companion-plus-button,.companion-voice-cancel,.companion-voice-stop)'),form=page.locator('#notionCommand'),panel=page.locator('#companionInfo');
+ const entry=page.locator(SETTINGS_BUTTON),type=page.locator('#notionInput'),mic=page.locator('.companion-speech-button'),controls=page.locator('.companion-controls>button:visible:not(.companion-bug-button,.companion-speech-button,.companion-plus-button,.companion-voice-cancel,.companion-voice-stop)'),form=page.locator('#notionCommand'),panel=page.locator('#companionInfo');
  const typing=()=>page.evaluate(()=>(document.querySelector('.notion-world') as HTMLElement).dataset.entryExpanded==='true');
  // One message bar under Fox (owner decision 2026-10-04): the field and Send, the microphone on its right (2026-10-07); the settings button beside Fox opens the panel.
  assert.equal(await controls.count(),0,'No icon row in the World');assert(await form.isVisible(),'The message bar is always there');
@@ -183,23 +182,9 @@ await withBrowser(fileAccess,async browser=>{
  await page.evaluate(()=>(window as any).worldletDesktopCompanion(false));await settle();
  {const world=await form.boundingBox();await page.evaluate(()=>(window as any).worldletDesktopCompanion(true));await settle();sameLine(await form.boundingBox(),world,'The bar keeps its place on the desktop');}
  await assertDesktopRow();
- // When Orders can be sent, the bug joins the microphone inside the bar, in the World and on the desktop alike (owner
- // request 2026-10-11).
- const order=page.locator('.companion-order-button');
- await page.evaluate(()=>{(window as any).worldletDesktopCompanion(false);(window as any).orderReady=true;window.dispatchEvent(new Event('worldlet:app-update'));});
- await order.waitFor();await settle();
- {const bug=await order.boundingBox(),micBox=await mic.boundingBox(),bar=await form.boundingBox();const open=await page.locator('.companion-text-entry').getAttribute('data-send')==='true';assert(bug.width===36&&bug.x>=bar.x&&bug.x-bar.x<=(open?44:6)&&bug.x+bug.width<micBox.x,'In the World the bug sits inside the bar at its left end, after "+" while the bar is open '+JSON.stringify({bug,micBox,bar}));}
- await page.evaluate(()=>(window as any).worldletDesktopCompanion(true));await page.mouse.move(5,5);await page.waitForTimeout(400);await settle();
- {const bug=await order.boundingBox(),micBox=await mic.boundingBox(),bar=await form.boundingBox();
-  assert.equal(await order.evaluate(e=>e.parentElement===document.querySelector('.companion-speech-button').parentElement),true,'The bug and the microphone are one group on the desktop');
-  assert(bug.width===36&&bug.x>=bar.x&&bug.x-bar.x<=6&&bar.x+bar.width-(micBox.x+micBox.width)<=6&&Math.abs(bug.y-micBox.y)<1,'The bug sits inside the bar at its left end, the microphone at its right '+JSON.stringify({bug,micBox,bar}));
-  assert.equal(bar.width,232);
-  const crop=await page.evaluate(()=>(window as any).worldletCompanionGeometry());assert(crop.x<=bar.x&&crop.x+crop.width>=bar.x+bar.width);
-  await page.screenshot({path:'/tmp/worldlet-companion-desktop-order.png',omitBackground:true,clip:crop});}
- await page.evaluate(()=>(window as any).worldletDesktopCompanion(false));await settle();
- {const bug=await order.boundingBox(),bar=await form.boundingBox();assert(bug.x>=bar.x&&bug.x+bug.width<=bar.x+bar.width,'Back in the World the bug is still inside the bar');}
- await page.evaluate(()=>{(window as any).orderReady=false;window.dispatchEvent(new Event('worldlet:app-update'));});
- await page.waitForFunction(()=>document.querySelector<HTMLElement>('.companion-order-button').hidden);
+ // Orders were retired (2026-10-18); the bug that reports a problem shows only on Dev, Alpha and Beta (feedback-ui-check).
+ assert.equal(await page.locator('.companion-order-button').count(),0);assert.equal(await page.locator('.companion-bug-button').isVisible(),false);
+ await page.mouse.move(5,5);await page.waitForTimeout(400);await page.evaluate(()=>(window as any).worldletDesktopCompanion(false));await settle();
  await page.emulateMedia({reducedMotion:'no-preference'});
  // Focus and sample in one step so a slow runner cannot finish the .22s widening first. It widens from
  // the low-key resting bar (owner request 2026-10-05).
@@ -211,5 +196,5 @@ await withBrowser(fileAccess,async browser=>{
  await settle();
  await page.screenshot({path:'/tmp/worldlet-companion-desktop-bar.png',omitBackground:true,clip:await page.evaluate(()=>(window as any).worldletCompanionGeometry())});
  assert.deepEqual(errors,[]);
- console.log('PASS desktop Companion UI: Fox and its bar alone on the desktop, microphone and bug inside the bar, compact animated typing, microphone hold, reply, desktop context, native crop, responsive layouts and restoration');
+ console.log('PASS desktop Companion UI: Fox and its bar alone on the desktop, microphone inside the bar and no bug, compact animated typing, microphone hold, reply, desktop context, native crop, responsive layouts and restoration');
 });

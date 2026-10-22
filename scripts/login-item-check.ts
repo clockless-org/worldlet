@@ -3,7 +3,7 @@
 // `login` guide, and the quiet start. The packaged round trip is scripts/release-login-item-mac.mjs.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {LOGIN_ITEM_ARG,loginItemOfferDue,loginItemOn,loginItemStatus,loginItemText,openedAtLogin,releaseLaunch} from '../core/distribution/index.ts';
+import {LOGIN_ITEM_ARG,loginItemOfferDue,loginItemOn,loginItemStatus,loginItemText,openedAtLogin,releaseLaunch} from '../agent/app/index.ts';
 
 // Status: only packaged Mac and Windows builds register; the Mac reads SMAppService back.
 const release=(platform:string,settings:object|null)=>loginItemStatus({channel:'release',platform,settings});
@@ -66,7 +66,7 @@ function fixture(login:{status:string,offered:boolean,platform?:string}){
  };
  return {calls,view,call,root:new Root()};
 }
-const {mountLoginItemOffer}=await import('../ui/onboarding/login-item-offer.ts');
+const {mountLoginItemOffer}=await import('../ui/frame/login-item-offer.ts');
 const offered=(view:any)=>view.guideSource==='login-item';
 try{
  // During the journey nothing is asked; finishing it (the first win) waits for its moment.
@@ -129,7 +129,7 @@ try{
  }
 
  // The `login` guide shows the system's status and turns it on and off.
- const {createFoxPreferences}=await import('../ui/companion/fox-preferences.ts');
+ const {createFoxPreferences}=await import('../ui/frame/fox-preferences.ts');
  for(const [status,platform,pattern,label] of [
   ['requires-approval','darwin',/allow Worldlet in System Settings → General → Login Items/,'Don\'t open at login'],
   ['enabled','win32',/opens quietly in the background/,'Don\'t open at login'],
@@ -146,19 +146,19 @@ try{
 
 // Wiring that needs Electron: the guide is reachable, the policy knows the answer, the window starts quietly.
 const read=(file:string)=>fs.readFileSync(new URL('../'+file,import.meta.url),'utf8');
-assert.match(read('core/tools/controls.ts'),/'data','login'\]/,'Fox can open the login guide');
-assert.match(read('platform/electron/src/modules/fox/index.ts'),/'data','login'\]/,'The host accepts the login guide');
+assert.match(read('agent/gate/controls.ts'),/'data','login'\]/,'Fox can open the login guide');
+assert.match(read('platform/host/modules/companion/index.ts'),/'data','login'\]/,'The host accepts the login guide');
 assert.match(read('contracts/world-event-policy.json'),/"loginItem:offered"/);
-assert.match(read('platform/electron/src/world/window.ts'),/quiet[\s\S]*showInactive\(\)[\s\S]*minimize\(\)/,'A login launch never takes focus');
+assert.match(read('platform/desktop/src/world/window.ts'),/quiet[\s\S]*showInactive\(\)[\s\S]*minimize\(\)/,'A login launch never takes focus');
 // A check launch on a release host (WORLDLET_BACKGROUND_WINDOWS) never takes focus on the Mac or Windows, and on the Mac
 // its windows stay below the screen's ordinary windows, so a dashboard left open there stays in front.
-const background=read('platform/electron/src/background-launch.ts');
+const background=read('platform/host/background-launch.ts');
 assert.match(background,/process\.platform==='darwin'\|\|process\.platform==='win32'/,'Background check launches cover the Mac and Windows');
 assert.match(background,/setAlwaysOnTop\(true,'normal',-1\)[\s\S]*showInactive\(\)/,'A background window sits below ordinary windows and is shown inactive');
-assert.match(read('platform/electron/src/world/window.ts'),/backgroundLaunch\(\)\)\{showInBackground\(this\.window\)/,'The World window opens in the background');
+assert.match(read('platform/desktop/src/world/window.ts'),/backgroundLaunch\(\)\)\{showInBackground\(this\.window\)/,'The World window opens in the background');
 // Covered whole by those windows, its pages still draw: Chromium does not hide them as occluded (Mac Alpha 4378, #500).
-assert.match(read('platform/electron/src/main.ts'),/darwin'&&backgroundLaunchWanted\(profile\)\)app\.commandLine\.appendSwitch\('disable-backgrounding-occluded-windows'\)/,'A covered background World still draws on the Mac');
+assert.match(read('platform/desktop/src/main.ts'),/darwin'&&backgroundLaunchWanted\(profile\)\)app\.commandLine\.appendSwitch\('disable-backgrounding-occluded-windows'\)/,'A covered background World still draws on the Mac');
 assert.match(read('scripts/electron-checks.ts'),/darwin'\)app\.commandLine\.appendSwitch\('disable-backgrounding-occluded-windows'\)/,'A covered check window still draws on the Mac');
-assert.match(read('platform/electron/src/modules/shell/login-item.ts'),/channel==='release'/,'Only the packaged app registers');
+assert.match(read('platform/host/modules/app/login-item.ts'),/channel==='release'/,'Only the packaged app registers');
 assert.match(read('ui/index.ts'),/if\(!sample\)\{if\(!loginItemOffer\)loginItemOffer=mountLoginItemOffer/,'The practice world never offers');
 console.log('PASS open at login: status mapping, one-time offer, login guide, quiet start');

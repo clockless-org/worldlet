@@ -7,9 +7,9 @@
     "model": "tool-managed, not exposed"
   },
   "references": [
-    "ui/theme-packages/village/assets/world/day.webp",
-    "ui/theme-packages/village/assets/devices/tripit.webp",
-    "ui/theme-packages/village/assets/devices/strava.webp"
+    "ui/style/theme-packages/village/assets/world/day.webp",
+    "ui/style/theme-packages/village/assets/devices/tripit.webp",
+    "ui/style/theme-packages/village/assets/devices/strava.webp"
   ],
   "layout": {
     "coordinateSpace": "normalized image, x/y/width/height",
@@ -600,7 +600,7 @@
           ]
         }
       },
-      "identityReference": "ui/theme-packages/village/assets/applet-presets/home-care/icon.webp",
+      "identityReference": "ui/style/theme-packages/village/assets/applet-presets/home-care/icon.webp",
       "backgroundRefinement": {
         "generator": "built-in imagegen",
         "prompt": "Refine the registered scene: expand left usable opening to approximately 70% width, preserve about 80% height, retain brand scenery on the right, remove any baked-in companion."
@@ -674,7 +674,7 @@
           ]
         }
       },
-      "identityReference": "ui/theme-packages/village/assets/applet-presets/garden/icon.webp",
+      "identityReference": "ui/style/theme-packages/village/assets/applet-presets/garden/icon.webp",
       "backgroundRefinement": {
         "generator": "built-in imagegen",
         "prompt": "Refine the registered scene: expand left usable opening to approximately 70% width, preserve about 80% height, retain brand scenery on the right, remove any baked-in companion."
@@ -748,7 +748,7 @@
           ]
         }
       },
-      "identityReference": "ui/theme-packages/village/assets/applet-presets/daily-planner/icon.webp",
+      "identityReference": "ui/style/theme-packages/village/assets/applet-presets/daily-planner/icon.webp",
       "backgroundRefinement": {
         "generator": "built-in imagegen",
         "prompt": "Refine the registered scene: expand left usable opening to approximately 70% width, preserve about 80% height, retain brand scenery on the right, remove any baked-in companion."
@@ -822,7 +822,7 @@
           ]
         }
       },
-      "identityReference": "ui/theme-packages/village/assets/applet-presets/reading/icon.webp",
+      "identityReference": "ui/style/theme-packages/village/assets/applet-presets/reading/icon.webp",
       "backgroundRefinement": {
         "generator": "built-in imagegen",
         "prompt": "Refine the registered scene: expand left usable opening to approximately 70% width, preserve about 80% height, retain brand scenery on the right, remove any baked-in companion."
@@ -896,7 +896,7 @@
           ]
         }
       },
-      "identityReference": "ui/theme-packages/village/assets/applet-presets/language/icon.webp",
+      "identityReference": "ui/style/theme-packages/village/assets/applet-presets/language/icon.webp",
       "backgroundRefinement": {
         "generator": "built-in imagegen",
         "prompt": "Refine the registered scene: expand left usable opening to approximately 70% width, preserve about 80% height, retain brand scenery on the right, remove any baked-in companion."
@@ -970,7 +970,7 @@
           ]
         }
       },
-      "identityReference": "ui/theme-packages/village/assets/applet-presets/journal/icon.webp",
+      "identityReference": "ui/style/theme-packages/village/assets/applet-presets/journal/icon.webp",
       "backgroundRefinement": {
         "generator": "built-in imagegen",
         "prompt": "Enlarge the blank paper opening of this scene. Its usable width is too small and/or height too small. Keep full 1672x941 canvas, make the blank paper itself occupy x=40 through x=1240 (1200 pixels wide) and y=95 through y=865 (770 pixels tall). Thin original-material frame outside this opening. Recompose the existing recognizable scenery to its right in the remaining 25%. Retain original app identity, brand cues where present, daylight, village illustration style and materials. The blank opening must be one uninterrupted frontal rectangle, not narrowed by decorative margins. Keep any small auxiliary plaque fully on the right x>1300. No content/text in the main paper. No fox or living animals. Do not shrink back the frame to fit decorative props."
@@ -1044,7 +1044,7 @@
           ]
         }
       },
-      "identityReference": "ui/theme-packages/village/assets/applet-presets/job-search/icon.webp",
+      "identityReference": "ui/style/theme-packages/village/assets/applet-presets/job-search/icon.webp",
       "backgroundRefinement": {
         "generator": "built-in imagegen",
         "prompt": "Refine the registered scene: expand left usable opening to approximately 70% width, preserve about 80% height, retain brand scenery on the right, remove any baked-in companion."
@@ -1118,7 +1118,7 @@
           ]
         }
       },
-      "identityReference": "ui/theme-packages/village/assets/applet-presets/project-planner/icon.webp",
+      "identityReference": "ui/style/theme-packages/village/assets/applet-presets/project-planner/icon.webp",
       "backgroundRefinement": {
         "generator": "built-in imagegen",
         "prompt": "Recompose this project-planner applet scene with a MUCH WIDER usable left page. Its BLANK INNER opening must run from x=3% to75%, y=10% to94% of the landscape canvas, about72%width and84%height. Thin frame outside those bounds, no broad mat. Keep original page material, rim, distinctive scenery and sculpted storybook village style. Move meaningful project-planner props into rightmost24%, quiet clear ground at bottomright for companion. Preserve any small secondary plaque but move it upperright and reduce it to fit. Front-facing level rectangular empty surface, no perspective taper. No interface or characters. Same canvas aspect ratio."

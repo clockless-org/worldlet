@@ -13,7 +13,7 @@ import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
-const ROOTS=['ui','core','contracts','platform/bridge','platform/electron','platform/node','resources','models','worker','scripts','website'];
+const ROOTS=['api','ui','agent','context','contracts','platform/bridge','platform/host','platform/desktop','platform/server','platform/web','resources','models','worker','scripts','website'];
 const CODE=new Set(['.ts','.js','.mjs']);
 const SPECIFIER=/(\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)(['"])(\.[^'"]*?)(['"])/g;
 

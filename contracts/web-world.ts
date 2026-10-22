@@ -1,7 +1,7 @@
 // The World in a web browser (docs/UI-CORE-PLATFORM.md#the-world-in-a-web-browser): the same World page the app shows,
 // served by the host on 127.0.0.1 at /world/ and talking to it over one WebSocket at /world/socket instead of the
 // app's IPC. Both sides use this file: the page's transport (platform/bridge/web-host.ts) and the host's
-// (platform/electron/src/host/web-page.ts, platform/electron/src/modules/phone/local-relay.ts).
+// (platform/host/web-page.ts, platform/host/modules/windows/local-relay.ts).
 import type {HostFeatures} from './platform.ts';
 
 /** Where the host serves the World page and its socket. */
@@ -40,7 +40,7 @@ export function worldWebCsp(origin:string):string {
  return `default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self' ${socket}${WORLD_SOCKET_PATH}; worker-src blob:; media-src 'self' data:; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`;
 }
 
-/** The World bundle's policy where the relay hosts it for another device (core/phone/README.md#the-world-on-another-device,
+/** The World bundle's policy where the relay hosts it for another device (platform/web/README.md#the-world-on-another-device,
  * `bundle`: its folder's address, `https://worldlet.ai/world/<version>/`), sent as a header in place of the meta tag.
  * The page loads only that folder's files and talks only to them and to the pairing room on the same origin
  * (`wss://…/api/room/`): not to the rest of the site, and to no other site. No other site may frame it. */
@@ -158,7 +158,7 @@ export function webEventDetail(name:string,detail:unknown):unknown {
  return PAIRING_EVENT.test(name)?withoutLink(detail):detail;
 }
 
-/** What a World page on another device may ask for, met through the pairing room (core/phone/world-room.ts): the
+/** What a World page on another device may ask for, met through the pairing room (platform/web/world-room.ts): the
  * World, Fox, the Attention Center, artifacts and Applets, and nothing else. Settings, connections, pairing, the
  * Harness's configuration, local tools, deletion and native views stay with this computer. The host checks this before
  * the request reaches the router, after WEB_DENIED and WEB_PAGE_ACTIONS; `true` allows the action, a list allows only
@@ -174,11 +174,14 @@ export const ROOM_ALLOWED:Readonly<Record<string,true|readonly string[]>>=Object
  channelReply:true,foxPreferences:true,foxTiming:true,modelStatus:true,modelHealth:true,modelSource:true,taskPanel:true,foxProactive:true,foxProactiveShown:true,
  companionArchive:true,companionProfile:true,conversationRecall:true,appletTaskStart:true,appletTaskCancel:true,appletTasks:true,harnessApproval:true,
  // The Attention Center: mail reviews, its pictures, ongoing work, the calendar, checks and calls.
- // An Agent's ask is answered on its Attention card like any other item (worldItemStatus); its only operation is `answer`, checked against the stored ask.
- agentAsk:true,emailAction:true,attentionImage:true,mailAvatar:true,ongoing:true,calendarEvents:true,runtimeTaskControl:true,worldSourceCheck:true,harnessCall:true,
+ // An Agent's ask is answered on its Attention card like any other item (worldItemStatus), with `answer`, checked against the
+ // stored ask. Not `approveDrafts`: approving an ask's GitHub drafts writes to GitHub, so only this computer's pages may.
+ agentAsk:Object.freeze(['answer']),emailAction:true,attentionImage:true,mailAvatar:true,ongoing:true,calendarEvents:true,runtimeTaskControl:true,worldSourceCheck:true,harnessCall:true,
  // Artifacts: the Journal's cards, moment Applets and made games (not the native views that show them on this screen).
  artifacts:true,artifactPageBrief:true,artifactPageSave:true,artifactPages:Object.freeze(['get']),widgets:true,widgetStart:true,widgetSave:true,widgetSource:true,
  madeGames:true,madeGameSource:true,gameFactoryStart:true,gameFactorySave:true,
+ // The person's board through the existing World reader. Changes to definitions, presets and Agent grants stay on the host.
+ board:Object.freeze(['read']),
  // Applets: what each shows from the person's connected accounts.
  appContent:true,notionContent:true,obsidianContent:true,paypalContent:true,curatedSourceContent:true,doorDash:true,appletArt:true,siteApplets:true,
  weatherLoad:true,weatherSave:true,weatherRequest:true,weatherLocate:true,

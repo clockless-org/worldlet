@@ -8,7 +8,7 @@ import {pathToFileURL} from 'node:url';
 import {build} from 'esbuild';
 import {chromium} from 'playwright';
 import {buildCompanionPresentation} from './build-companion-presentation.ts';
-import {BUILTIN_STYLE} from '../ui/components/style.ts';
+import {BUILTIN_STYLE} from '../ui/style/style.ts';
 import {FOX_STATES,FOX_STATE_ALIASES} from '../ui/companion/animation/fox-state-catalog.ts';
 import {riveFoxState} from '../ui/companion/animation/fox-rive.ts';
 import states from '../resources/styles/builtin/assets/companion/rive/states.json' with {type:'json'};

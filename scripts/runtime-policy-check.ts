@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {runtimeFailure,analysisPlan,nextSourceWake,sourceReadProviders} from '../core/tasks/runtime-policy.ts';
+import {runtimeFailure,analysisPlan,nextSourceWake,sourceReadProviders} from '../agent/tasks/runtime-policy.ts';
 const now=1800000000;
 assert.equal(runtimeFailure({now,failures:0,message:'network offline private@example.com'}).waitReason,'network');
 assert.equal(runtimeFailure({now,failures:0,message:'401 Unauthorized'}).waitReason,'authorization');
@@ -13,8 +13,8 @@ assert.ok(!JSON.stringify(runtimeFailure({now,failures:0,message:'private@exampl
 // Applet analysis whose Agent answered with its own provider error (a model a ChatGPT account no longer accepts, every
 // 15 minutes on one Mac, 2026-10-11): the model is unavailable, so wait an hour, and the batch's records are not at fault.
 {
- const {appletAnalysisUnsubmitted,APPLET_ANALYSIS_MODEL_UNAVAILABLE}=await import('../core/applets/index.ts');
- const {diagnosticError}=await import('../core/diagnostics/index.ts');
+ const {appletAnalysisUnsubmitted,APPLET_ANALYSIS_MODEL_UNAVAILABLE}=await import('../context/applets/index.ts');
+ const {diagnosticError}=await import('../agent/app/index.ts');
  const rejected='ChatGPT or Codex Subscription rejected the request and retrying won\'t help. Pick another model with /model, or check the details in `~/.hermes/logs/agent.log`.\n\nProvider said: HTTP 400: {"detail":"The \'gpt-6-astra\' model is not supported when using Codex with a ChatGPT account."}';
  assert.equal(appletAnalysisUnsubmitted(rejected),APPLET_ANALYSIS_MODEL_UNAVAILABLE);
  for(const reply of ['Done.','',undefined,{message:1}])assert.equal(appletAnalysisUnsubmitted(reply),'Applet analysis ended without a verified result.',String(reply));
@@ -70,7 +70,7 @@ assert.equal(runtimeFailure({now,failures:0,message:'update_required'}).nextAt,n
 assert.equal(runtimeFailure({now,failures:0,message:'constructor'}).code,'operation_failed');
 assert.equal(runtimeFailure({now,failures:0,message:'model_allowance'}).code,'operation_failed','allowance reset time is not recoverable from the code');
 {
- const {claimRuntimeTask,finishRuntimeTask}=await import('../core/tasks/runtime-tasks.ts');
+ const {claimRuntimeTask,finishRuntimeTask}=await import('../agent/tasks/runtime-tasks.ts');
  const claim=claimRuntimeTask({task:undefined,taskId:'applet:gmail:analyze',ownerId:'gmail',pool:'source-analysis',generation:0,runId:'paused-1',now,leaseSeconds:660})!;
  const decided=runtimeFailure({now,failures:0,message:'worldlet_model_paused'});
  const saved=finishRuntimeTask({...claim,now,generation:0,status:'failed',nextAt:decided.nextAt,errorCode:decided.code,waitReason:decided.waitReason,failures:decided.failures})!.task;
@@ -81,7 +81,7 @@ assert.equal(runtimeFailure({now,failures:0,message:'model_allowance'}).code,'op
 }
 console.log('PASS included-model pause keeps the hourly retry through repeated failures and restart');
 
-const {claimRuntimeTask,finishRuntimeTask}=await import('../core/tasks/runtime-tasks.ts');
+const {claimRuntimeTask,finishRuntimeTask}=await import('../agent/tasks/runtime-tasks.ts');
 const fairTasks:any[]=[],order:string[]=[];
 for(let i=0;i<8;i++){
  const clock=now+i*10,provider=analysisPlan({candidates,tasks:fairTasks,now:clock,foreground:false}).provider!;
@@ -97,8 +97,8 @@ assert.ok(fairTasks.every(t=>t.lastSuccessAt===undefined),'fairness must not fak
 assert.equal(analysisPlan({candidates,tasks:[{id:'applet:gmail:analyze',lastStartedAt:now,lastSuccessAt:0},{id:'applet:notion:analyze',lastSuccessAt:now-100}],now:now+5,foreground:false}).provider,'notion','legacy success time remains a fallback');
 console.log('PASS repeated yielded slices rotate fairly without pretending successful completion');
 
-const {runtimeTaskLease,runtimeRunPrune}=await import('../core/tasks/index.ts');
-const {invoke}=await import('../core/index.ts');
+const {runtimeTaskLease,runtimeRunPrune}=await import('../agent/tasks/index.ts');
+const {invoke}=await import('../agent/index.ts');
 assert.equal(runtimeTaskLease({taskId:'applet:mail:check'}),300);
 assert.equal(runtimeTaskLease({taskId:'applet:mail:analyze'}),660);
 assert.equal(runtimeTaskLease({taskId:'attention'}),660);

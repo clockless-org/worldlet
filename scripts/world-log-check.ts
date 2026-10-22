@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import path from 'node:path';
-import {worldLogKeeps,worldLogLines,worldLogNext,worldLogNow,WORLD_LOG_KINDS} from '../core/activity/index.ts';
+import {worldLogKeeps,worldLogLines,worldLogNext,worldLogNow,WORLD_LOG_KINDS} from '../context/applets/index.ts';
 import {pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
 
 const t=1_800_000_000;

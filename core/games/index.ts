@@ -1,8 +1,0 @@
-/** Public component API. Cross-component consumers import this entry point. */
-export {GAME_MAKING_OPEN,GAME_FACTORY_APPLET,MADE_GAME_LIMITS,SANDBOX_POLICY,MADE_GAME_POLICY,MADE_GAME_REPORT,sandboxDocument,gameFactoryModel,madeGameId,validMadeGameId,madeGameRecord,readMadeGame,orderMadeGames,offlinePageProblems,checkMadeGameSource,madeGameTrialProblems,madeGameDocument,readMadeGameReport,betterBest,madeGameTask} from './factory.ts';
-export type {MadeGame,ModelSourceName} from './factory.ts';
-export {BATTLE_REVIEW,GAME_REVIEW_APPLET,battleWatch,battleUserId,battleSite,observeBattleMessage,finishedBattles,battleReviewDue,battlesReviewed,battleSummaryDue,battlesSummarized,battleReviewTask,battleNow} from './battle-review.ts';
-export type {BattleWatch,WatchedBattle,FinishedBattle,BattleResult} from './battle-review.ts';
-export {MINE_FIELDS,newMineState,mineNeighbours,nearbyMines,elapsedMineSeconds,actOnMine,type MineFieldKey,type MineField,type MineState} from './minesweeper.ts';
-export {SNAKE_STEP_MS,newSnakeState,steerSnake,pauseSnake,stepSnake,type SnakeState,type SnakeField,type SnakePoint} from './snake.ts';
-export {makeSudoku,newSudokuState,editSudoku,sudokuPeers,sudokuRemaining,sudokuConflict,elapsedSudokuSeconds,countSudokuSolutions,solveSudokuPuzzle,type SudokuPuzzle,type SudokuState,type SudokuAction} from './sudoku.ts';

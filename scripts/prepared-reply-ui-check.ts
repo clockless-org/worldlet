@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import {tmpdir} from 'node:os';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
-// A reply Fox prepares by itself (owner decision 2026-10-09, core/artifacts/replies.ts) on the World page: a new Worth
+// A reply Fox prepares by itself (owner decision 2026-10-09, context/store/replies.ts) on the World page: a new Worth
 // Doing item from a Gmail thread that waits for the person gets a background request (no card, no reply line, a label in
 // the archive) that reads that thread and prepares a draft; a card beside Fox says what Fox is doing
 // that goes when it is done, and the Journal in the top-right corner holds the draft as a reply card; the item's Attention card says Fox drafted
@@ -62,7 +62,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(sent.background,true,'a background session beside the conversation, never in it');
  assert.equal(sent.shown,'Prepared reply','the archive keeps a label, never the request in the person’s name');
  assert.ok(sent.text.includes('id "thread:18c2a1"')&&sent.text.includes('prepare_email once with threadId "18c2a1"')&&sent.text.includes('you never send it'),'it reads the item’s own thread and prepares one draft, never sending');
- // Beside Fox, on its right, a card says what Fox is doing (ui/hud/task-panel.ts; Scheduled on its left).
+ // Beside Fox, on its right, a card says what Fox is doing (ui/world/task-panel.ts; Scheduled on its left).
  const panel=page.locator('.task-panel');
  const working=panel.locator('.task-group[data-group=now] .task-card[data-task-id="fox:reply"]');
  await working.locator('.task-when',{hasText:'Drafting a reply: Answer Priya about the venue…'}).waitFor();

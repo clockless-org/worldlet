@@ -4,7 +4,7 @@
 // clicks, moving between two Applets does not zoom, and nothing zooms under reduced motion.
 import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
-import {WORLD_APPS} from '../core/applets/catalog.ts';
+import {WORLD_APPS} from '../context/applets/catalog.ts';
 
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=pageErrors(page);

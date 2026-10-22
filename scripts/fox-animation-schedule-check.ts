@@ -24,7 +24,7 @@ const browser=await chromium.launch();try{
  await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));
  page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
  await page.setContent('<title>Fox animation schedule</title><style>body{background:#eee9dd}.companion-model{width:144px;height:144px}</style><div id="fox" class="companion-avatar" data-state="idle"></div>');
- await page.addStyleTag({content:(await readFile('ui/components/components.css','utf8')).split('\n').filter(line=>line.startsWith('.fox-dev-preview')).join('\n')});
+ await page.addStyleTag({content:(await readFile('ui/style/components.css','utf8')).split('\n').filter(line=>line.startsWith('.fox-dev-preview')).join('\n')});
  await page.evaluate(p=>{(globalThis as any).__WORLDLET_ENV_ASSETS__={companionPortrait:p.companionPainted.original,...p};// This check covers the anatomy portrait; the Rive Fox has scripts/fox-rive-check.ts.
  delete (globalThis as any).__WORLDLET_ENV_ASSETS__.companionRive;},presentation);await page.addScriptTag({content:bundle.outputFiles[0].text});
  // The portrait decodes its images in real time; each wait advances the paused clock one frame, at most 4.8 s of it.

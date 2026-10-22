@@ -26,7 +26,7 @@ await withBrowser(fileAccess,async browser=>{
    if(body.action==='foxProactive'){
     const next=w.lines.shift();
     if(!next)return {started:false,reason:'day'};
-    // The host answers later with the line, as a page event (modules/fox proactiveRunTurn).
+    // The host answers later with the line, as a page event (modules/companion proactiveRunTurn).
     setTimeout(()=>window.dispatchEvent(new CustomEvent('worldlet:fox-proactive',{detail:{id:'proactive-'+w.calls.length,thread:body.thread,moment:body.moment,...next}})),10);
     return {started:true,id:'proactive-'+w.calls.length};
    }

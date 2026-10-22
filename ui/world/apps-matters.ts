@@ -1,8 +1,8 @@
 import type {World} from '../../contracts/world.ts';
 import {WORLD_PRESETS} from './world-presets.ts';
-import {appletStatus} from '../../core/applets/index.ts';
+import {appletStatus} from '../../context/applets/index.ts';
 
-import {APP_DEFINITIONS,WORLD_APPS} from '../../core/applets/index.ts';
+import {APP_DEFINITIONS,WORLD_APPS} from '../../context/applets/index.ts';
 export {WORLD_APPS};
 
 // The sample's Matters are declared beside its records, in sample-persona.json:
@@ -70,9 +70,9 @@ export function applyAppsMatters(world: World){
  // its records, its items are what it published, and its status says "Sample" so the
  // device lights up without a single account being claimed.
  const sampleLinks=[];
- // An Applet Fox made for a moment (core/artifacts/README.md) is in the World from the moment it is made, so it is
+ // An Applet Fox made for a moment (context/store/ARTIFACTS.md) is in the World from the moment it is made, so it is
  // never waiting to be unlocked or hidden, and it leaves when its moment is over.
- // So is a website the person made an Applet of from the Browser (core/applets/site-applet.ts).
+ // So is a website the person made an Applet of from the Browser (context/applets/site-applet.ts).
  const moments=catalog.filter(a=>a.moment||a.site).map(a=>a.id);
  if(moments.length&&world.unlockedApplets)world.unlockedApplets=[...new Set([...world.unlockedApplets,...moments])];
  if(moments.length&&world.hiddenApplets)world.hiddenApplets=world.hiddenApplets.filter(id=>!moments.includes(id));

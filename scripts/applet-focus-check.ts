@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 await mkdir('output/applet-layout',{recursive:true});
 import {withBrowser,fileAccess,pageErrors,worldUrl,leaveApplet} from './browser-test.ts';
-import {WORLD_APPS} from '../core/applets/catalog.ts';
-import {inAppletCatalog} from '../core/applets/applet-support.ts';
+import {WORLD_APPS} from '../context/applets/catalog.ts';
+import {inAppletCatalog} from '../context/applets/applet-support.ts';
 import {appHudIcon} from '../ui/applets/visuals.ts';
 const OPENED=['gmail','google-calendar','apple-notes','apple-reminders','weather','messages','github','notion','youtube','airbnb','browser','game-2048'];
 await withBrowser(fileAccess,async browser=>{
@@ -110,7 +110,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.match(await page.locator('.world-context').innerText(),new RegExp(app.title));
   // Pointer release schedules HUD context separately from the reduced-motion camera.
   await page.waitForFunction(title=>document.querySelector('.companion-context .companion-name')?.textContent===title,app.title);
-  // On a wide window the Applet shelf names the open Applet in the title's place (ui/hud/applet-shelf.ts); the title,
+  // On a wide window the Applet shelf names the open Applet in the title's place (ui/world/applet-shelf.ts); the title,
   // with its brand icon, names it where the shelf does not stand.
   if(await page.locator('.applet-shelf').isVisible())assert.equal(await page.locator('.applet-shelf-tab[data-current] .applet-shelf-name').innerText(),app.title,app.key+' stands in the middle of the shelf');
   else{

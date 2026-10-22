@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1015" viewBox="0 0 1000 1015" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+<rect width="1000" height="1015" rx="18" fill="#FFFFFF"/><rect x="0.5" y="0.5" width="999" height="1014" rx="18" fill="none" stroke="#D8DDE4"/>
+<text x="28" y="48" font-size="26" font-weight="700" fill="#1F2328">每个组件在各层的代码目录</text>
+<text x="28" y="78" font-size="15" fill="#57606A">每行一个组件。Platform 列的路径默认在 platform/host/ 下，写全的除外。</text>
+<rect x="233" y="107" width="244" height="838" rx="12" fill="#EEF4FF" stroke="#B6CCFE"/>
+<text x="246" y="133" font-size="17" font-weight="800" fill="#1F4BB8">UI</text>
+<text x="246" y="153" font-size="12" font-family="ui-monospace, Menlo, monospace" fill="#57606A">ui/</text>
+<rect x="483" y="107" width="244" height="838" rx="12" fill="#F1F8F3" stroke="#A9D8B8"/>
+<text x="496" y="133" font-size="17" font-weight="800" fill="#1A7F37">Agent · Context</text>
+<text x="496" y="153" font-size="12" font-family="ui-monospace, Menlo, monospace" fill="#57606A">agent/ · context/</text>
+<rect x="733" y="107" width="244" height="838" rx="12" fill="#F6F8FA" stroke="#D0D7DE"/>
+<text x="746" y="133" font-size="17" font-weight="800" fill="#57606A">Platform</text>
+<text x="746" y="153" font-size="12" font-family="ui-monospace, Menlo, monospace" fill="#57606A">platform/host/</text>
+<rect x="20" y="175" width="196" height="58" rx="10" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="34" y="200" font-size="17" font-weight="700" fill="#1F2328">World</text>
+<text x="34" y="220" font-size="12.5" fill="#57606A">区域 · HUD</text>
+<rect x="246" y="192" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#B6CCFE"/>
+<text x="355" y="208" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/world/</text>
+<text x="605" y="209.0" font-size="14" text-anchor="middle" fill="#C9D1D9">—</text>
+<rect x="746" y="192" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="855" y="208" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">modules/world/</text>
+<text x="605" y="226.0" font-size="11.5" font-style="italic" text-anchor="middle" fill="#8C959F">World 日志：context/applets/</text>
+<line x1="20" y1="243" x2="980" y2="243" stroke="#E6E8EB"/>
+<rect x="20" y="253" width="196" height="58" rx="10" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="34" y="278" font-size="17" font-weight="700" fill="#1F2328">Applets</text>
+<text x="34" y="298" font-size="12.5" fill="#57606A">数据 · 动作 · 浏览器</text>
+<rect x="246" y="270" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#B6CCFE"/>
+<text x="355" y="286" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/applets/</text>
+<rect x="496" y="255" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="605" y="271" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/applets/</text>
+<rect x="496" y="285" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="605" y="301" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/applets/</text>
+<rect x="746" y="270" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="855" y="286" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">modules/applets/</text>
+<line x1="20" y1="321" x2="980" y2="321" stroke="#E6E8EB"/>
+<rect x="20" y="331" width="196" height="58" rx="10" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="34" y="356" font-size="17" font-weight="700" fill="#1F2328">Companion</text>
+<text x="34" y="376" font-size="12.5" fill="#57606A">对话 · 语音 · 记忆</text>
+<rect x="246" y="348" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#B6CCFE"/>
+<text x="355" y="364" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/companion/</text>
+<rect x="496" y="348" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="605" y="364" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/companion/</text>
+<rect x="746" y="348" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="855" y="364" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">modules/companion/</text>
+<line x1="20" y1="399" x2="980" y2="399" stroke="#E6E8EB"/>
+<rect x="20" y="409" width="196" height="58" rx="10" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="34" y="434" font-size="17" font-weight="700" fill="#1F2328">Attention</text>
+<text x="34" y="454" font-size="12.5" fill="#57606A">要你处理的 · Journal</text>
+<rect x="246" y="426" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#B6CCFE"/>
+<text x="355" y="442" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/attention/</text>
+<rect x="496" y="426" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="605" y="442" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/attention/</text>
+<rect x="746" y="426" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="855" y="442" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">modules/attention/</text>
+<line x1="20" y1="477" x2="980" y2="477" stroke="#E6E8EB"/>
+<rect x="20" y="487" width="196" height="58" rx="10" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="34" y="512" font-size="17" font-weight="700" fill="#1F2328">Tasks</text>
+<text x="34" y="532" font-size="12.5" fill="#57606A">定时 · 检查 · 起草</text>
+<text x="355" y="521.0" font-size="14" text-anchor="middle" fill="#C9D1D9">—</text>
+<rect x="496" y="504" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="605" y="520" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/tasks/</text>
+<rect x="746" y="504" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="855" y="520" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">modules/tasks/</text>
+<text x="355" y="538.0" font-size="11.5" font-style="italic" text-anchor="middle" fill="#8C959F">UI：显示在 companion 上</text>
+<line x1="20" y1="555" x2="980" y2="555" stroke="#E6E8EB"/>
+<rect x="20" y="565" width="196" height="58" rx="10" fill="#1F2328" stroke="#D0D7DE"/>
+<text x="34" y="590" font-size="17" font-weight="700" fill="#FFFFFF">Gate</text>
+<text x="34" y="610" font-size="12.5" fill="#D0D7DE">Agents · 权限 · 审计 · MCP</text>
+<text x="355" y="599.0" font-size="14" text-anchor="middle" fill="#C9D1D9">—</text>
+<rect x="496" y="582" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="605" y="598" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/gate/</text>
+<rect x="746" y="582" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="855" y="598" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">modules/gate/</text>
+<text x="355" y="616.0" font-size="11.5" font-style="italic" text-anchor="middle" fill="#8C959F">UI：Frame › 设置</text>
+<line x1="20" y1="633" x2="980" y2="633" stroke="#E6E8EB"/>
+<rect x="20" y="643" width="196" height="58" rx="10" fill="#1F2328" stroke="#D0D7DE"/>
+<text x="34" y="668" font-size="17" font-weight="700" fill="#FFFFFF">Store</text>
+<text x="34" y="688" font-size="12.5" fill="#D0D7DE">hub · 唯一入口 · 搜索</text>
+<text x="355" y="677.0" font-size="14" text-anchor="middle" fill="#C9D1D9">—</text>
+<rect x="496" y="660" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="605" y="676" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/store/</text>
+<rect x="746" y="660" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="855" y="676" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">store/ (one file each)</text>
+<text x="355" y="694.0" font-size="11.5" font-style="italic" text-anchor="middle" fill="#8C959F">UI：所有组件都读它</text>
+<line x1="20" y1="711" x2="980" y2="711" stroke="#E6E8EB"/>
+<rect x="20" y="721" width="196" height="58" rx="10" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="34" y="746" font-size="17" font-weight="700" fill="#1F2328">Connectors</text>
+<text x="34" y="766" font-size="12.5" fill="#57606A">进出外部服务</text>
+<text x="355" y="755.0" font-size="14" text-anchor="middle" fill="#C9D1D9">—</text>
+<rect x="496" y="738" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="605" y="754" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">context/connectors/</text>
+<rect x="746" y="738" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="855" y="754" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">modules/connectors/</text>
+<text x="355" y="772.0" font-size="11.5" font-style="italic" text-anchor="middle" fill="#8C959F">UI：Frame › 设置</text>
+<line x1="20" y1="789" x2="980" y2="789" stroke="#E6E8EB"/>
+<rect x="20" y="799" width="196" height="58" rx="10" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="34" y="824" font-size="17" font-weight="700" fill="#1F2328">App</text>
+<text x="34" y="844" font-size="12.5" fill="#57606A">外框 · 样式 · 更新</text>
+<rect x="246" y="801" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#B6CCFE"/>
+<text x="355" y="817" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/frame/</text>
+<rect x="246" y="831" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#B6CCFE"/>
+<text x="355" y="847" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">ui/style/</text>
+<rect x="496" y="816" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#A9D8B8"/>
+<text x="605" y="832" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">agent/app/</text>
+<rect x="746" y="816" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="855" y="832" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">modules/app/</text>
+<line x1="20" y1="867" x2="980" y2="867" stroke="#E6E8EB"/>
+<rect x="20" y="877" width="196" height="58" rx="10" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="34" y="902" font-size="17" font-weight="700" fill="#1F2328">Windows</text>
+<text x="34" y="922" font-size="12.5" fill="#57606A">网页 · 手机</text>
+<text x="355" y="911.0" font-size="14" text-anchor="middle" fill="#C9D1D9">—</text>
+<text x="605" y="911.0" font-size="14" text-anchor="middle" fill="#C9D1D9">—</text>
+<rect x="746" y="879" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="855" y="895" font-size="13" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">modules/windows/</text>
+<rect x="746" y="909" width="218" height="24" rx="7" fill="#FFFFFF" stroke="#D0D7DE"/>
+<text x="855" y="925" font-size="11.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#1F2328">platform/web/ · ios/ · android/</text>
+<text x="355" y="928.0" font-size="11.5" font-style="italic" text-anchor="middle" fill="#8C959F">UI：每个窗口显示同一套 UI</text>
+<text x="28" y="991" font-size="13" fill="#8C959F">Desktop（platform/desktop/）和 Server（platform/server/）都运行这个共用的 Host。contracts/ 放各层之间的接口。</text>
+</svg>

@@ -1,52 +1,101 @@
-# Five-layer architecture
+# Architecture: four layers, 20 components
 
-Worldlet primarily owns the upper three layers. Keep product rules shared and the
-Platform host thin; the Harness and model service are replaceable through explicit contracts.
+Inside the app there are four layers, UI, Agent, Context and Platform, and 20 components; each component is one folder.
+Outside it are the person's own Agent (the Harness: planning, the tool loop and admitted jobs; Worldlet never customizes
+it, and `harness/` holds the reference adapter example and the `worldlet` skill) and the person's own models, reached
+through that Agent (Worldlet provides none). `contracts/` holds the interfaces between layers; `resources/` holds assets
+and declarations, not product logic.
 
-| Layer | Repository owner | Responsibility |
-| --- | --- | --- |
-| UI | `ui/` | Shared Web presentation, navigation, Fox and Applet interactions |
-| Core | `core/` | Pure product rules, records, scheduling decisions and validation |
-| Platform | `platform/` | Electron desktop shell (and the Node host for computers without a display), permissions, persistence, processes and browser IO |
-| Harness | The person's own Agent (`harness/` holds the reference adapter example and the `worldlet` skill) | Agent planning, tool loop and admitted job execution; Worldlet never customizes it |
-| Models/services | The person's provider, reached through their Agent | Inference access, quotas and usage; Worldlet provides no model |
+Pictures: the layers and their components, [four-layers.svg](four-layers.svg) ([中文](four-layers.zh.svg)); each
+component's folder in every layer, [layers-and-components.svg](layers-and-components.svg) ([中文](layers-and-components.zh.svg)).
 
-`contracts/` supplies interfaces across layers; it is not a sixth runtime layer or
-an extra execution hop. Resources contain assets and declarations, not product logic.
-See the [diagram](architecture.html).
+<a id="see-do-know"></a>
+## Four layers: UI, Agent, Context, Platform
+
+Inside the app there are four layers ([#677](https://github.com/clockless-org/worldlet/issues/677)), in plain words See, Do, Know and Host. UI is `ui/`, Agent is `agent/` and Context is `context/` (together they were once `core/`, [#681](https://github.com/clockless-org/worldlet/issues/681)), and Platform is `platform/`.
+
+| # | Layer | What it is | Code |
+| --- | --- | --- | --- |
+| 1 | **UI** (See) | Every screen and its interaction logic, one codebase that every window shows. World (`ui/world/`: places, HUD), Applets (`ui/applets/`: each Applet's screen beside its real website, games, practice), Companion (`ui/companion/`: face, conversation, voice), Attention (`ui/attention/`: what needs the person now, the artifact card and the Journal), Frame (`ui/frame/`: start, setup, settings, navigation), Style (`ui/style/`: shared controls, tokens and themes) | `ui/` |
+| 2 | **Agent** (Do) | Who does the work. Companion (`agent/companion/`: turns through the person's own Agent, memory, setup), Tasks (`agent/tasks/`: routines, checks, drafts), Applets (`agent/applets/`: running Applets, driving the browser), Attention (`agent/attention/`: deciding and ranking what needs the person), Gate (`agent/gate/`: every Agent, its Grants, World tools, approvals and audit, local and remote MCP), App rules (`agent/app/`: what the app reports, update channels). Everyone, the companion included, passes the Gate | `agent/` |
+| 3 | **Context** (Know) | Everything the World knows, in one hub on the person's own machine. Store (`context/store/`: the hub; every record, history, artifacts and made games; one way in and out, `context/store/context.ts`, which decides and audits every Agent's call against its Grants, and one search across the four kinds), Applets (`context/applets/`: the catalog, each Applet's records and the World log), Connectors (`context/connectors/`: Services in and out, what they sync, Service presets and the board). Four kinds of record live in the Store: Synced, Recorded, Made, Known ([#676](https://github.com/clockless-org/worldlet/issues/676)) | `context/` |
+| 4 | **Platform** (Host) | Where the World runs and every window that reaches it. Host (`platform/host/`: the shared host Desktop and Server both run; its `modules/` and `store/` have one part per component: world, applets, companion, attention, tasks, gate, connectors, app, windows), Desktop (`platform/desktop/`: Electron around the Host, the window, OS permissions, updates, installers), Server (`platform/server/`: Node around the Host, no screen), Web (`platform/web/`: how a page talks to its host, the page a browser opens, pairing), Phone (`platform/ios/`, `platform/android/`). It runs things and makes no product decisions | `platform/` |
+
+Someone asks in UI (or an Agent asks directly) → Agent runs it through the Gate, reading
+and writing Context → the result is a Made record (an Artifact) → shown in Attention and kept in the Journal (UI).
+
+Rules:
+
+- Calls go downward only.
+- Imports follow the layers: `context/` imports only itself and `contracts/`; `agent/` imports `context/` and `contracts/`;
+  `ui/` imports the public `index.ts` of both. `npm run check:arch` enforces this; the few exact exceptions are named in
+  [scripts/architecture-boundaries.ts](../scripts/architecture-boundaries.ts).
+- The operations repository uses this repository only through [`api/`](../api/README.md). Nothing here imports `api/`,
+  and moving or renaming a folder means updating `api/`, never the operations repository.
+- UI only reads Context; to change anything it hands the work to Agent.
+- Everyone in Agent passes the Gate, Fox included. Agents reach Context only through World tools and their Grants.
+- Only Connectors write Synced.
+- Work results become Artifacts, reach the person through Attention and stay in the Journal.
+- Nothing reads storage except through Context's single entry.
+- Nothing is deleted automatically; only a retention period the person sets removes data.
+
+The record envelope, the single read/write entry (`contextReader`, `contextWriter`, and `connectorWriter` for Synced),
+the decision and audit of every Agent's call at that entry (`agentContext`), and one search across all four kinds are in
+`context/store/context.ts` ([one way in](../context/store/STORAGE.md#one-way-in)); `npm run check:arch` enforces that UI
+only reads and only Connectors write Synced. Everything is kept in `world.sqlite`, persisted on the Host one file per
+component (`platform/host/store/`). Draft and pin state for Made records is the next step.
+
+<a id="folders-by-layer"></a>
+### Folders by layer
+
+Every folder of `ui/`, `agent/`, `context/` and `platform/` belongs to exactly one layer.
+`npm run check:docs` fails when a folder is missing or listed twice.
+
+The shared dispatcher the Platform calls is `agent/index.ts`, since it calls both Agent and Context.
+
+| Layer | Folders |
+| --- | --- |
+| UI | `ui/world/` `ui/applets/` `ui/companion/` `ui/attention/` `ui/frame/` `ui/style/` | Every screen and its interaction logic, one codebase every window shows |
+| Agent (`agent/`) | `agent/companion/` `agent/applets/` `agent/attention/` `agent/tasks/` `agent/gate/` `agent/app/` |
+| Context (`context/`) | `context/store/` `context/applets/` `context/connectors/` |
+| Platform | `platform/host/` `platform/desktop/` `platform/server/` `platform/web/` `platform/ios/` `platform/android/` `platform/bridge/` `platform/browser/` `platform/distribution/` `platform/install/` `platform/local-tools/` `platform/web-engine/` |
 
 <a id="features"></a>
-## Six features and the base
+## Components across the layers
 
-Layers cut the product across; features cut it down. Each feature is a vertical
-slice with its own UI, Core and (when it needs one) Platform part. Every `ui/` and
-`core/` component and every Electron host module (`platform/electron/src/modules/`) belongs to exactly one row below; `npm run check:docs` fails when a
-component is missing or listed twice.
+Most components have a part in more than one layer: the screen in UI, the rules in Agent or Context, and the host side
+in Platform. Each row is one component with its folder in every layer. Every `ui/`, `agent/` and `context/` folder and
+every host module (`platform/host/modules/`) is in exactly one row; `npm run check:docs` fails when one is missing or
+listed twice. Which layer each folder is in: [folders by layer](#folders-by-layer). Desktop (`platform/desktop/`) and
+Server (`platform/server/`) both run the shared Host (`platform/host/`).
 
-| Feature | What it is | UI | Core | Platform |
+| Component | What it does | UI | Agent and Context | Platform |
 | --- | --- | --- | --- | --- |
-| World | The place everything sits in: areas, HUD, themes | `ui/world/` `ui/hud/` `ui/themes/` `ui/theme-packages/` | `core/activity/` | `platform/electron/src/modules/world.ts` `platform/electron/src/modules/world-audio/` |
-| Applets | Where the person's data and actions live, with the real website beside them | `ui/applets/` `ui/browser/` `ui/games/` `ui/practice/` | `core/applets/` `core/board/` `core/browser/` `core/games/` | `platform/electron/src/modules/applet-art/` `platform/electron/src/modules/applet-tools/` `platform/electron/src/modules/browser/` `platform/electron/src/modules/calendar/` `platform/electron/src/modules/games/` `platform/electron/src/modules/sources/` |
-| Companion | Fox: the one conversation, voice, memory and what Fox is doing | `ui/companion/` | `core/companion/` | `platform/electron/src/modules/fox/` `platform/electron/src/modules/voice/` |
-| Attention | What needs the person now: ranked, at most nine, each waiting for Done, Send or Later | `ui/attention/` | `core/attention/` | `platform/electron/src/modules/attention/` |
-| Tasks | Work that runs without the person: routines, cron jobs, source checks, background drafts and Applet tasks. Fox starts some, Applets start others; the person's Agent does them | (no folder of its own: its status shows in Fox, on Applets and in the Ongoing Applet) | `core/tasks/` | `platform/electron/src/modules/tasks/` |
-| Artifacts & Journal | What work produces: one artifact for every card, draft, page and brief, shown wherever it is needed (Attention, Fox, Applets), and the Journal that keeps them by day | `ui/artifacts/` | `core/artifacts/` | `platform/electron/src/modules/artifacts/` |
-| Base | What every feature stands on: the connection to the person's Agent (adapters, World tools over the `worldlet` MCP server, phone and web pairing), local records, setup and the app shell | `ui/shell/` `ui/components/` `ui/onboarding/` `ui/distribution/` `ui/web/` (the page a web browser opens, [web](../core/phone/README.md#web)) | `core/agent/` `core/accounts/` `core/tools/` `core/phone/` `core/items/` `core/context/` `core/onboarding/` `core/diagnostics/` `core/distribution/` | `platform/electron/src/modules/agent-runtime/` `platform/electron/src/modules/phone/` `platform/electron/src/modules/shell/` `platform/electron/src/modules/media/` (the media surface the World's sound, Fox's voice and Voice Memos share), `contracts/` |
+| World | The places, HUD and themes the person moves through | `ui/world/` | (none: the World log is part of Context's applets) | `platform/host/modules/world/` |
+| Applets | The person's data and actions, each beside its real website; the Agent runs them and drives the browser | `ui/applets/` | `agent/applets/` `context/applets/` | `platform/host/modules/applets/` |
+| Companion | The one conversation, voice and memory, through the person's own Agent | `ui/companion/` | `agent/companion/` | `platform/host/modules/companion/` |
+| Attention | What needs the person now, at most nine, and the Journal of everything work produced | `ui/attention/` | `agent/attention/` | `platform/host/modules/attention/` |
+| Tasks | Work without the person: routines, checks, drafts, Applet jobs | (none: its status shows on the companion and on Applets) | `agent/tasks/` | `platform/host/modules/tasks/` |
+| Gate | Every Agent that reaches the World, its Grants, World tools, approvals and audit; local and remote MCP | (none: its pages are in the Frame's Settings) | `agent/gate/` | `platform/host/modules/gate/` |
+| Store | The hub: every record, one way in and out that decides and audits each Agent's call, one search | (none: every component reads it) | `context/store/` | `platform/host/store/` persists it, one file per component (`app.ts`, `applets.ts`, `attention.ts`, `companion.ts`, `connectors.ts`, `gate.ts`, `tasks.ts`) |
+| Connectors | Services in and out: sign-in, what they sync, Service presets and the board, approved writes | (none: its page is in the Frame's Settings) | `context/connectors/` | `platform/host/modules/connectors/` |
+| App | The app around it all: start, setup, settings, shared controls and themes, what it reports, updates | `ui/frame/` `ui/style/` | `agent/app/` | `platform/host/modules/app/` |
+| Windows | The same World in another window: a browser at its link, the phones | (none: every window shows the same UI) | (none) | `platform/host/modules/windows/` (the host side; `platform/web/`, `platform/ios/` and `platform/android/` are the windows) |
 
 Work flows Companion or Applets → Task → Artifact → Attention → Journal: Fox and
 Applets start tasks, each task's result is an artifact, an artifact that needs the
 person waits in Attention, and every artifact stays in the Journal. Task results
 never reach the person except as artifacts.
 
-Each feature keeps its own styles: the artifact card and the Journal in `ui/artifacts/`, Fox's
+Each feature keeps its own styles: the artifact card and the Journal in `ui/attention/`, Fox's
 conversation card and panel in `ui/companion/`, the Attention card in `ui/attention/`. The artifact
 card is built on the Attention card's parts and loads after them (`scripts/build-ui.ts`). Fox's
 animation (anatomy, poses, studies and players) is in `ui/companion/animation/`.
 
 ## Dependency rules
 
-Core imports only Core and Contracts; Contracts depends only on itself. UI consumes
-public Core interfaces and the Host bridge. It cannot reach Platform implementations or
+Context imports only Context and Contracts; Agent imports Agent, Context and Contracts; Contracts depends only on itself. UI consumes
+public Agent and Context interfaces and the Host bridge. It cannot reach Platform implementations or
 Harness internals. A component exports its supported `index.ts` surface; helpers are
 private. Platform code executes shared decisions rather than copying them.
 
@@ -56,8 +105,8 @@ Worldlet owns schedule settings and claim authority; Harness executes admitted j
 
 ## Chromium and trust boundaries
 
-One [Electron host](../platform/electron/README.md) serves Mac, Windows and Linux; it
-replaced the Swift/CEF and C#/WebView2 hosts (#996). The [Node host](../platform/node/README.md) runs
+One [Electron host](../platform/desktop/README.md) serves Mac, Windows and Linux; it
+replaced the Swift/CEF and C#/WebView2 hosts (#996). The [Node host](../platform/server/README.md) runs
 its modules that need no window for Linux and computers without a display, and shows the same World page in a web
 browser on that computer (below); it reuses those modules through a small `electron` stand-in rather than holding
 product rules of its own. The shared World UI is a separate
@@ -69,12 +118,12 @@ host privileges and run in their own session partition.
 <a id="the-world-in-a-web-browser"></a>
 **The World in a web browser.** There is one UI: the host serves the same World page to a browser on the same
 computer ([contracts/web-world.ts](../contracts/web-world.ts)), the Node host as its only page and the app beside its
-own window while it runs ([host/world-web.ts](../platform/electron/src/host/world-web.ts)). The page is the interface build, served
-read-only at `http://127.0.0.1:<port>/world/` by [local-relay.ts](../platform/electron/src/modules/phone/local-relay.ts)
+own window while it runs ([host/world-web.ts](../platform/host/world-web.ts)). The page is the interface build, served
+read-only at `http://127.0.0.1:<port>/world/` by [local-relay.ts](../platform/host/modules/windows/local-relay.ts)
 (files inside the build after resolving links, `resolveWorldFile`, and only the types the page loads). Its
 `worldletHost` is [web-host.ts](../platform/bridge/web-host.ts), which `resolveHost` picks only when the app gave the
 page none; it talks to the host over one WebSocket at `/world/socket`, and the host answers through the same router
-([host/web-page.ts](../platform/electron/src/host/web-page.ts)). The trust it gets:
+([host/web-page.ts](../platform/host/web-page.ts)). The trust it gets:
 
 - **Same computer only.** The server listens on 127.0.0.1 and answers only requests addressed to `127.0.0.1` or
   `localhost` on its port by name (the `Host` header), so a website cannot reach it through a name it points at
@@ -114,14 +163,14 @@ leaves them out, unlike the host services, which fail closed: every app window h
   players, the microphone (speaking to Fox, Talk, dictation and spoken replies), the desktop Companion window, and the
   corner room the Mac keeps for its window buttons.
 - **Fox's tools** that need one of these (the built-in browser, YouTube, the World's sound, music players) answer
-  that it is not available in a browser window ([page-features.ts](../core/tools/page-features.ts)) instead of failing
+  that it is not available in a browser window ([page-features.ts](../agent/gate/page-features.ts)) instead of failing
   on their own.
 - **The host refuses them too.** Before the router, a browser's page is refused the actions behind each of these
   features (`WEB_PAGE_ACTIONS`: the native website views and what drives them, YouTube, the World's sound, music
   players, speech and the desktop Companion), with the same reason Fox's tools give, so a page that asks anyway
   reaches nothing on this computer's screen. The list of sites the built-in browser visited stays readable.
 
-The World on another device meets the computer through the pairing room, as a third page with less trust (`ROOM_ALLOWED`): [the World on another device](../core/phone/README.md#the-world-on-another-device).
+The World on another device meets the computer through the pairing room, as a third page with less trust (`ROOM_ALLOWED`): [the World on another device](../platform/web/README.md#the-world-on-another-device).
 
 CDP controls a selected target; it is not a renderer, authorization bypass or general
 component API. Agent-operated World navigation uses versioned semantic actions through
@@ -142,19 +191,19 @@ capabilities fail explicitly; no silent Platform or Harness-specific alternate f
 
 This is the single audit checklist; other documents link here.
 
-- [ ] **Ownership:** identify one owner for each changed product rule; distinguish UI behavior, pure Core decisions, Platform effects and Harness execution.
+- [ ] **Ownership:** identify one owner for each changed product rule; distinguish UI behavior, pure Agent and Context decisions, Platform effects and Harness execution.
 - [ ] **Shared first:** check the Electron host modules for duplicate transitions, priorities, retry/timeout/cache policy, validation, prompts, status wording and privacy rules.
 - [ ] **Thin adapters:** each retained Platform decision has an OS/API/security reason. Shared code decides policy; the host still enforces actual permissions and validates untrusted inputs.
-- [ ] **Dependency direction:** Core imports only Core/Contracts; Contracts imports only Contracts. UI uses the bridge, not Platform implementations or Harness internals.
+- [ ] **Dependency direction:** Context imports only Context/Contracts, Agent only Agent/Context/Contracts; Contracts imports only Contracts. UI uses the bridge, not Platform implementations or Harness internals.
 - [ ] **Capabilities:** unsupported functionality follows declared host capabilities, not copied product flows or scattered platform-name checks.
 - [ ] **State and persistence:** Platform storage applies shared state transitions without losing stable IDs, account ownership or user decisions.
 - [ ] **Execution:** compare busy state, queueing, cancellation, deadlines, foreground priority and background recovery. OS-specific process mechanics may differ; product outcomes should not.
-- [ ] **Evidence:** trace the host path to the shared implementation. Run focused Core fixtures and the Electron module checks (`npm run test:electron`) for changed rules; list device-only verification separately.
+- [ ] **Evidence:** trace the host path to the shared implementation. Run focused Agent and Context fixtures and the Electron module checks (`npm run test:electron`) for changed rules; list device-only verification separately.
 - [ ] **Cleanup:** remove superseded Platform policy and tests that merely preserve its old implementation. Do not retain a silent duplicate as a fallback.
 - [ ] **Result:** mark each area pass/partial/fail, cite files, rank remaining work, and distinguish code validation from installed-app acceptance.
 
 Import checks do not prove behavior or performance on a device. The
-[parity ratchet](../contracts/README.md#parity-vectors) holds the Core operations the
+[parity ratchet](../contracts/README.md#parity-vectors) holds the shared Agent and Context operations the
 host must keep invoking (the union both native hosts used before #996). Focused commands live in
 [the component catalog](../contracts/COMPONENTS.md#architecture-audit). New changes require
 proportional checks and do not inherit blanket real-account or clean-machine acceptance.
@@ -163,10 +212,11 @@ proportional checks and do not inherit blanket real-account or clean-machine acc
 
 `npm run check:arch` resolves TypeScript imports (including baseUrl aliases,
 re-exports, type imports and dynamic imports), checks layer dependencies and public
-Core/UI component entry points, and rejects computed imports/CommonJS bypasses.
+UI, Agent and Context component entry points (each component's `index.ts`), the Context rules (UI only reads; only
+Connectors write Synced), and rejects computed imports/CommonJS bypasses.
 The policy lives in `scripts/architecture-boundaries.ts`; legacy edges are exact
 file pairs with reasons, and unused exceptions fail the check. New components follow
-the same rules without registration. The Electron host (`platform/electron`) is in this graph; Python helper internals
+the same rules without registration. The Electron host (`platform/desktop`) is in this graph; Python helper internals
 are not, and their own checks remain in the gate.
 
 The **Architecture** GitHub check runs this gate and shared type checking on every PR.
@@ -178,6 +228,6 @@ wire changes require explicit version negotiation. Passing this gate does not pr
 that no product rule is duplicated in the Electron host: review that with the audit above.
 
 Task/run/event shapes also live in [Contracts](../contracts/README.md#execution-journal).
-Their validators and privacy projections run in Core; both Platform adapters persist
+Their validators and privacy projections run in Agent and Context; both Platform adapters persist
 results into the existing local journal. Harness output never acquires database or
 arbitrary event-write authority.

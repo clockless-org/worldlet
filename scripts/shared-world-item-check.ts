@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {updateWorldItem,reviewWorldItem,prepareWorldItem,needsAttentionReview,worldItemMutation} from '../core/items/world-item-state.ts';
+import {updateWorldItem,reviewWorldItem,prepareWorldItem,needsAttentionReview,worldItemMutation} from '../context/store/world-item-state.ts';
 import {readItemHostRequest} from '../contracts/item-actions.ts';
 const now='2026-09-24T10:00:00Z';
 for(const status of ['done','dismissed','read']) {
@@ -34,7 +34,7 @@ assert.equal(needsAttentionReview({status:'open',policyVersion:2}),false);
 assert.equal(needsAttentionReview({status:'done'}),false);
 console.log('PASS shared item transitions, user overrides, re-extraction and review migration');
 
-const {validateWorldItem}=await import('../core/items/world-item-validation.ts');
+const {validateWorldItem}=await import('../context/store/world-item-validation.ts');
 const base={provider:'gmail',kind:'task',title:'Reply',context:'A real request',attentionReason:'Needs a reply',sources:[{provider:'gmail',id:'thread',quote:'Please reply'}]};
 const dates={start:null,end:null};
 validateWorldItem(base,dates);
@@ -51,7 +51,7 @@ validateWorldItem({...account,event:{topic:'Payment declined',subject:'Example B
 for(const event of [null,{topic:'Payment declined'},{topic:'Payment declined',subject:'Example Bank card ending 9999'},{topic:'Payment declined',subject:'Example Bank 4111111111111234'}])
  assert.throws(()=>validateWorldItem({...account,event},dates),/Invalid world item: event\./);
 console.log('PASS item field, Unicode, evidence, priority and date range validation, including grounded event identity');
-const {migrateWorldItems}=await import('../core/items/world-item-migration.ts');
+const {migrateWorldItems}=await import('../context/store/world-item-migration.ts');
 const legacy={sources:[{id:'s',origin:'gmail',enabled:true,revision:'r1'}],knowledge:[{sourceId:'s',sourceRevision:'r1',summary:'Context',activities:[{kind:'event',title:'Meet',quote:'Friday',start:'date',allDay:false}]}],originals:{s:{threadId:'abc'}}};
 const snapshot=JSON.stringify(legacy);
 const migrated=migrateWorldItems(legacy);
@@ -64,7 +64,7 @@ assert.equal(migrateWorldItems({...legacy,sources:[{...legacy.sources[0],enabled
 assert.equal(migrateWorldItems({...legacy,sources:[{...legacy.sources[0],revision:'r2'}]}).length,0);
 assert.deepEqual(migrateWorldItems(legacy),migrated);
 console.log('PASS portable legacy item migration, identity seeds, stale-source exclusion and immutability');
-const {resolveWorldItemID,matchingWorldItemSource,matchingWorldItemOwnerSource}=await import('../core/items/world-item-identity.ts');
+const {resolveWorldItemID,matchingWorldItemSource,matchingWorldItemOwnerSource}=await import('../context/store/world-item-identity.ts');
 const existing={...base,id:'saved',sources:[{provider:'gmail',id:'local',remoteId:'thread:abc'}]};
 const refresh={...base,id:'saved',sources:[{provider:'gmail',id:'thread:abc'}]};
 assert.equal(resolveWorldItemID(refresh,existing,undefined,'new-hash'),'saved');
@@ -82,7 +82,7 @@ assert(!matchingWorldItemOwnerSource(composite,{sources:[contextRef]}),'a contex
 assert(matchingWorldItemOwnerSource(composite,refresh),'owner aliases retain compatibility');
 assert(!matchingWorldItemOwnerSource({sources:[contextRef]},{sources:[contextRef]}),'missing owner fails closed');
 console.log('PASS shared identity selection, source ownership, remote aliases and canonical Unicode equality');
-const {visibleWorldItems,queryWorldItems,calendarItemTimes}=await import('../core/items/world-item-projection.ts');
+const {visibleWorldItems,queryWorldItems,calendarItemTimes}=await import('../context/store/world-item-projection.ts');
 assert.equal(visibleWorldItems([{sources:[{id:'a',local:true}]},{sources:[{id:'b',local:true}]},{sources:[{id:'remote'}]},{sources:[]}],['a']).length,2);
 const query=queryWorldItems([{...base,context:'👨‍👩‍👧‍👦'.repeat(501),reviewEvidence:['private history'],sources:[{quote:'x'.repeat(501),id:'source'}]}],[{error:'retry',id:'check'}],'gmail');
 assert.equal(query.items[0].context,'👨‍👩‍👧‍👦'.repeat(500));
@@ -96,7 +96,7 @@ assert.equal(corrected.start,'original');assert.equal(corrected.end,undefined);a
 assert.deepEqual(calendarItemTimes({...event,sources:[...event.sources,{provider:'google-calendar',id:'second'}]},{'google-calendar:event':{start:'original'}}).start,'model');
 console.log('PASS item visibility, bounded query projection and authoritative calendar times');
 
-const {attentionKind,projectWorldItems,refreshItemPage,settleItemPage}=await import('../core/items/world-items.ts');
+const {attentionKind,projectWorldItems,refreshItemPage,settleItemPage}=await import('../context/store/world-items.ts');
 assert.equal(attentionKind({kind:'event',provider:'gmail'}),'update');
 assert.equal(attentionKind({kind:'event',provider:'gmail',eventDisposition:'optional'}),'update');
 assert.equal(attentionKind({kind:'event',provider:'gmail',eventDisposition:'confirmed'}),'event');
@@ -129,7 +129,7 @@ assert.deepEqual(prepareWorldItem({kind:'task'},{kind:'task',identity:hashC},'le
 assert.equal(prepareWorldItem({kind:'event',obligationIdentityAliases:[hashC]},settled,'event',hashB,'run',now).obligationIdentityAliases,undefined);
 console.log('PASS durable obligation aliases, settled-state preservation and rejection of caller-proposed aliases');
 
-const {needsTaskContinuityReview}=await import('../core/items/world-item-identity.ts');
+const {needsTaskContinuityReview}=await import('../context/store/world-item-identity.ts');
 assert.equal(needsTaskContinuityReview({...base,id:'saved'},existing,'new','old'),true);
 assert.equal(needsTaskContinuityReview({...base,id:'saved'},existing,'old','old'),false);
 assert.equal(needsTaskContinuityReview({...base,id:'saved'},{...existing,obligationIdentityVersion:1,obligationIdentityAliases:['new']},'new','old'),false);
@@ -139,8 +139,8 @@ assert.equal(needsTaskContinuityReview(base,existing,'new','old'),false);
 console.log('PASS changed task evidence requires review; only host-saved aliases authorize continuity');
 
 // Synthetic grouped findings retain a finite deferral across serialization and synthesis.
-const {attentionLaterUntil}=await import('../core/attention/attention-time.ts');
-const {matchingAttentionID}=await import('../core/attention/attention-center.ts');
+const {attentionLaterUntil}=await import('../agent/attention/attention-time.ts');
+const {matchingAttentionID}=await import('../agent/attention/attention-center.ts');
 const deferredUntil=attentionLaterUntil(Date.parse(now),'UTC');
 assert.equal(deferredUntil,'2026-09-25T10:00:00.000Z');
 const group=updateWorldItem({...base,id:'group',attentionContentVersion:1},'open',now,deferredUntil);

@@ -3,10 +3,10 @@ import {build} from 'esbuild';
 import {chromium} from 'playwright';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {createServer} from 'node:http';
-import {attentionRequest,legacyActionDisplayText,summarizeRequest} from '../core/agent/system-requests.ts';
-import {firstValueRequest} from '../core/onboarding/first-value.ts';
+import {attentionRequest,legacyActionDisplayText,summarizeRequest} from '../agent/gate/system-requests.ts';
+import {firstValueRequest} from '../agent/companion/first-value.ts';
 import {restoreThread,threadRow,threadStart} from '../ui/companion/fox-thread.ts';
-import {validateConversationHistory} from '../core/companion/conversation-history.ts';
+import {validateConversationHistory} from '../agent/companion/conversation-history.ts';
 import {buildUI} from './build-ui.ts';
 
 const id='synthetic-notification',title='Fictional garden club',intent='Help me with this next step: Summarize this item. Read the saved evidence first, then complete it directly.';

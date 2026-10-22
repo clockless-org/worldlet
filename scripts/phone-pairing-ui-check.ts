@@ -1,4 +1,4 @@
-// The companion panel's Phone page and the World page's half of phone pairing (core/phone/README.md): pairing by QR
+// The companion panel's Phone page and the World page's half of phone pairing (platform/web/README.md): pairing by QR
 // code, the paired state, the Center sent to the host, and a phone chat line reaching Fox as the person's message.
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
@@ -16,12 +16,11 @@ try{
   if(b.action==='phonePair'&&b.kind==='agent'){if(b.operation==='start')w.agentPairing={state:'waiting',link:'worldlet://agent?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Studio+Mac'};if(b.operation==='end')w.agentPairing={state:'none'};return w.agentPairing;}
   if(b.action==='phonePair'){if(b.operation==='start')w.pairing={state:'waiting',link:'worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Studio+Mac'};if(b.operation==='end'){w.pairing={state:'none'};setTimeout(()=>w.dispatchEvent(new CustomEvent('worldlet:phone-status',{detail:w.pairing})));}return w.pairing;}
   if(b.action==='phonePublish')return {sent:true};
-  if(b.action==='order'&&b.operation==='send')return {available:true,ready:true,sent:{id:'order:order.x.'+b.id,screenshots:1,logLines:3,woke:true}};
   if(b.action==='agentChat'){w.worldletAgentEvent(b.id,{type:'progress',name:'read_mail'});w.worldletAgentEvent(b.id,{type:'delta',text:'Hello '});await new Promise(r=>setTimeout(r,400));w.worldletAgentEvent(b.id,{type:'delta',text:'from'});await new Promise(r=>setTimeout(r,400));return {message:'Hello from Fox.'};}
   return {ok:true};
  }}}};});
  await page.goto(worldUrl());await waitForWorld(page);
- // The Center goes to the host for the phone, shaped by core/phone.
+ // The Center goes to the host for the phone, shaped by agent/app.
  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='phonePublish'));
  const published=await page.evaluate(()=>(window as any).calls.find(c=>c.action==='phonePublish'));
  assert.equal(published.slot,'attention');assert.deepEqual([published.value.v,published.value.now,published.value.later],[1,[],[]]);
@@ -45,7 +44,7 @@ try{
  await phoneButton.waitFor();// unpaired (the host reports the change, as its relay does), the Phone button is back
  // One status read for Fox's Phone button as the World starts, one for the panel, then pairing and unpairing.
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='phonePair'&&!c.kind).map(c=>c.operation)),['status','status','start','end']);
- // Another computer (core/phone/README.md#another-computers-agent): its code is text to copy, then the paired laptop.
+ // Another computer (platform/web/README.md#another-computers-agent): its code is text to copy, then the paired laptop.
  await phone.getByRole('button',{name:'Pair another computer',exact:true}).click();
  await phone.locator('.companion-phone-code').getByText('worldlet://agent?v=1&s=',{exact:false}).waitFor();
  await phone.getByRole('button',{name:'Copy code',exact:true}).waitFor();
@@ -55,7 +54,7 @@ try{
  await phone.locator('.companion-phone-computers').getByRole('button',{name:'Unpair',exact:true}).click();
  await phone.getByRole('button',{name:'Pair another computer',exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='phonePair'&&c.kind==='agent').map(c=>c.operation)),['status','start','end']);
- // Any web browser (core/phone/README.md#web): on this computer one button makes a link this app serves itself and opens
+ // Any web browser (platform/web/README.md#web): on this computer one button makes a link this app serves itself and opens
  // it; another device's browser gets a link to copy. Once a browser opened one, Run in background appears, and Turn off
  // ends both.
  const web=phone.locator('.companion-phone-browser');
@@ -68,7 +67,7 @@ try{
  await web.getByRole('button',{name:'Copy link',exact:true}).click();
  await web.getByRole('button',{name:'Link copied',exact:true}).waitFor();
  assert.equal(await page.evaluate(()=>(window as any).copied),'https://worldlet.ai/open/#v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Studio+Mac','another device gets the relay link');
-// Run in background (modules/phone): only once a browser has opened a link, and the link stays as it was.
+// Run in background (modules/app): only once a browser has opened a link, and the link stays as it was.
 await web.getByRole('button',{name:'Run in background',exact:true}).click();
 await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='phonePair'&&c.kind==='local'&&c.operation==='background'));
 await web.getByText('Opened in Chrome on Mac · Active now').waitFor();
@@ -76,7 +75,7 @@ await web.getByText('Opened in Chrome on Mac · Active now').waitFor();
  await web.getByRole('button',{name:'Copy link',exact:true}).waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='phonePair'&&c.kind==='local').map(c=>c.operation)),['status','start','open','background','end']);
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='phonePair'&&c.kind==='web').map(c=>c.operation)),['status','start','end']);
- // The full World on another device (core/phone/README.md#the-world-on-another-device): Open the World opens its link
+ // The full World on another device (platform/web/README.md#the-world-on-another-device): Open the World opens its link
  // in a browser here, the page says when another device has it open, and that alone lets Worldlet run in background
  // (a computer's browser goes straight on to the World, so the Center's own pairing may never complete).
  await web.getByRole('button',{name:'Open the World',exact:true}).click();
@@ -99,7 +98,7 @@ await web.getByText('Opened in Chrome on Mac · Active now').waitFor();
  assert.equal(await page.evaluate(()=>(window as any).worldletPhoneMessage({type:'chat',id:'c1',text:'What is next?'})),true);
  assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentChat').length),1,'a repeated delivery runs once');
  assert.equal(await page.evaluate(()=>(window as any).worldletPhoneMessage({type:'run',id:'x'})),true);
- // Attention messages carry the item's id: the host names each delivery (core/phone phoneMessageKey), so Later then
+ // Attention messages carry the item's id: the host names each delivery (agent/app phoneMessageKey), so Later then
  // Done on one item both settle it, and only the same delivery again is taken once.
  const settles=()=>page.evaluate(()=>(window as any).calls.filter(c=>c.action==='worldItemStatus'&&c.id==='item-7').map(c=>c.status));
  for(const [action,key] of [['later','b:1'],['done','b:2'],['done','b:2']])
@@ -117,15 +116,11 @@ await web.getByText('Opened in Chrome on Mac · Active now').waitFor();
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.findLast(c=>c.action==='phonePublish'&&c.slot==='attention').value.accounts),[{provider:'gmail',title:'Mail',action:'reconnect'}]);
  assert.equal(await page.evaluate(()=>(window as any).worldletPhoneMessage({type:'connect',id:'k1',provider:'gmail'})),true);
  assert.equal(await page.evaluate(()=>(window as any).connected),'gmail');
- // The phone's Order button (owner request 2026-10-06): what was said goes out as an Order from this computer, place
- // Phone, never as a chat line to Fox, and Fox says here that it was sent.
+ // Orders were retired (2026-10-18): one an older phone still sends is taken and does nothing, never a chat line.
  const chats=await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentChat').length);
  assert.equal(await page.evaluate(()=>(window as any).worldletPhoneMessage({type:'order',id:'r1',said:'The Mail lamp stays red'})),true);
- await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='order'&&c.operation==='send'));
- const sent=await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='order'&&c.operation==='send'));
- assert.equal(sent.length,1);assert.deepEqual([sent[0].said,sent[0].place],['The Mail lamp stays red','Phone']);assert.match(sent[0].id,/^[a-f0-9]{8}$/);
- await page.locator('#worldConversation').getByText('Order sent to Claude: “The Mail lamp stays red”',{exact:false}).waitFor();
- assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentChat').length),chats,'an Order is not a chat line');
+ await page.waitForTimeout(200);
+ assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentChat'||c.action==='order').length),chats,'an old Order is neither sent nor a chat line');
  assert.deepEqual(errors,[]);
- console.log('PASS Phone page pairs by QR code, shows the paired phone and unpairs, and pairs another computer by code; the Center and accounts go to the host; phone chat reaches Fox once and streams back; Connect opens sign-in on the computer; a phone Order goes out as an Order and Fox says so.');
+ console.log('PASS Phone page pairs by QR code, shows the paired phone and unpairs, and pairs another computer by code; the Center and accounts go to the host; phone chat reaches Fox once and streams back; Connect opens sign-in on the computer; an old phone’s Order does nothing.');
 }finally{await browser.close();}

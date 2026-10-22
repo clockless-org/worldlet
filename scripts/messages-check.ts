@@ -5,10 +5,10 @@
 // Real chat.db reading, the permissions themselves and delivery need a signed-in Mac; this does not claim them.
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {messagesConversation,messagesConversationTitle,messagesLine,messagesOutgoingText,messagesRecipient,messagesSendFailure,messagesSnippet,validSentMessageId} from '../core/applets/index.ts';
+import {messagesConversation,messagesConversationTitle,messagesLine,messagesOutgoingText,messagesRecipient,messagesSendFailure,messagesSnippet,validSentMessageId} from '../context/applets/index.ts';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
 
-const pin=JSON.parse(readFileSync(new URL('../platform/electron/distribution/imsg.json',import.meta.url),'utf8'));
+const pin=JSON.parse(readFileSync(new URL('../platform/desktop/distribution/imsg.json',import.meta.url),'utf8'));
 assert.match(pin.sha256,/^[0-9a-f]{64}$/,'imsg is pinned by SHA-256');
 assert.equal(pin.source,`https://github.com/openclaw/imsg/releases/download/v${pin.version}/imsg-macos.zip`,'the official release archive');
 assert.ok(!pin.files.some((file:string)=>file.includes('bridge-helper')),'the IMCore bridge helper is not shipped');

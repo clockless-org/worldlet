@@ -6,21 +6,15 @@ import type {BrowserOutcomeRequest,BrowserReceipt} from './browser-receipt.ts';
 
 /** Validated operation families. Expand this map as remaining native APIs migrate. */
 export interface DevBuildStatus {supported:boolean;online?:boolean;applying?:boolean;candidate?:{id:string;revision:string;committedAt?:string;pr?:number;behind?:number};error?:string}
-/** Order (core/distribution/order.ts): whether this copy shows the button, and what a sent task carried. */
-export interface OrderReply {available:boolean;ready?:boolean;reason?:string;sent?:{id:string;screenshots:number;logLines:number;woke?:boolean;
- /** Why the instant post into the project failed, when it did. */
- wakeError?:string}}
 export interface HostBodies extends FoxHostBodies,BrowserSurfaceBodies,ItemHostBodies,PresentationHostBodies {
  browserOutcomeAction:Omit<BrowserOutcomeRequest,'action'>;
  devBuildStatus:{};
  devBuildApply:{id:string};
- order:{operation:'status'}|{operation:'send';id:string;said:string;place?:string};
 }
 /** Stable reply shapes are independent of the native embedding engine. */
 export interface HostReplies {
  devBuildStatus:DevBuildStatus;
  devBuildApply:{accepted:true};
- order:OrderReply;
  saveOverlay:{ok:true};
  saveSampleUI:{ok:true};
  setTextScale:{ok:true};
@@ -105,6 +99,16 @@ export interface HostCapabilities {version:1;features:HostFeatures;browserBudget
  * `browser` may come as `{stage:'browser',url}` with the validated consent address, so the page can open
  * it again or copy it when no browser came up (owner meetings 2026-10-02/03). */
 export const GOOGLE_SIGN_IN_EVENT='worldlet:google-sign-in';
+/** Host → World page while a service signs in with a code the person types on the service's own page (GitHub's device
+ * flow, context/connectors/github-device.ts): `new CustomEvent(SIGN_IN_CODE_EVENT,{detail:{provider,code,url}})`. The code is
+ * meant to be shown; it is not a secret, and it works only with the request Worldlet holds. */
+export const SIGN_IN_CODE_EVENT='worldlet:sign-in-code';
+export type SignInCode={provider:string;code:string;url:string};
+export const signInCode=(detail:unknown):SignInCode|null=>{
+ const v=detail as SignInCode;
+ return v&&typeof v==='object'&&typeof v.provider==='string'&&/^[a-z][a-z0-9-]{0,31}$/.test(v.provider)&&typeof v.code==='string'&&/^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(v.code)
+  &&typeof v.url==='string'&&/^https:\/\/github\.com\/[A-Za-z0-9/_-]*$/.test(v.url)?{provider:v.provider,code:v.code,url:v.url}:null;
+};
 export const GOOGLE_SIGN_IN_STAGES=['browser','preparing','verifying'] as const;
 export type GoogleSignInStage=typeof GOOGLE_SIGN_IN_STAGES[number];
 export const googleSignInStage=(detail:unknown):GoogleSignInStage|undefined=>{

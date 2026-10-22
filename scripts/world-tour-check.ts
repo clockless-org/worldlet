@@ -1,4 +1,4 @@
-// The guided tour after first arrival (ui/onboarding/world-tour.ts), in the owner's order of 2026-10-11: Fox, boxed where
+// The guided tour after first arrival (ui/frame/world-tour.ts), in the owner's order of 2026-10-11: Fox, boxed where
 // it always stands, says hello (we finally meet, nothing was left behind); the Attention Center with what Fox already
 // pulled out; the Applets, whose use Fox remembers, offering Connect Mail while Mail is not connected; the tasks and
 // Routines beside Fox; then Fox's settings and the phone, a code to get the app first, then the pairing code. Esc does
@@ -35,12 +35,12 @@ const ring=(page:Page)=>page.locator('.tour-spotlight:not([hidden]) .tour-spotli
 const guide=(page:Page)=>page.locator('.tour-spotlight:not([hidden]) .tour-spotlight-ring.is-guide').boundingBox();
 const depth=(page:Page)=>root(page,'depth');
 // The Tutorial switch: on, in the window's bottom-right, while a tour runs; once the tour is over it goes, and Show the
-// tutorial in Settings › Help plays it again (owner request 2026-10-11).
+// tutorial in Settings › General plays it again (owner request 2026-10-11).
 const tutorialSwitch=(page:Page)=>page.locator('.tour-switch');
 async function tutorialOn(page:Page){const s=tutorialSwitch(page);return await s.isVisible()&&await s.getAttribute('aria-checked')==='true';}
 async function showTutorial(page:Page){
  await page.locator('.companion-side .companion-panel-button').click();
- await page.locator('.companion-settings-item[data-setting=help]').click();
+ await page.locator('.companion-settings-item[data-setting=general]').click();
  await page.getByRole('button',{name:'Show the tutorial',exact:true}).click();
 }
 async function turn(page:Page,on:boolean){
@@ -239,7 +239,7 @@ try{
   assert.equal(await page.evaluate(()=>{const input=document.querySelector<HTMLElement>('[aria-label="Message Fox"]:is(input,textarea)');input?.focus();return document.activeElement===input;}),false,'Fox\'s input stays locked');
   await turn(page,false);
   await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='onboarding'&&c.stage==='finish'&&!c.itemId),null,{timeout:5000});
-  await page.waitForFunction(()=>[...document.querySelectorAll('.tour-coach:not([hidden])')].some(n=>/Turn the tutorial back on in Settings › Help/.test(n.textContent||'')),null,{timeout:5000});
+  await page.waitForFunction(()=>[...document.querySelectorAll('.tour-coach:not([hidden])')].some(n=>/Turn the tutorial back on in Settings › General/.test(n.textContent||'')),null,{timeout:5000});
   await page.waitForFunction(()=>document.querySelector<HTMLElement>('#notionWorld').dataset.tourLock===undefined&&document.querySelector<HTMLElement>('#notionWorld').dataset.tourSpotlight===undefined,null,{timeout:5000});
   assert.equal(await page.locator('.tour-switch').isVisible(),false,'the tour\'s switch goes once skipped');
   assert.equal(await page.locator('.world-tutorial').count(),0,'no switch is left in the World\'s corner');
@@ -247,7 +247,7 @@ try{
   await page.evaluate(()=>{const w=window as any;const old=structuredClone(w.fixture);old.onboarding.journeyStage='first-value';old.activityRevision=9;w.worldletReceive(old);});
   await page.waitForTimeout(2500);
   assert.equal(await page.evaluate(()=>document.querySelector<HTMLElement>('#notionWorld').dataset.tourSpotlight),undefined,'a stale snapshot does not restart the tour');
-  // Show the tutorial in Settings › Help reopens it.
+  // Show the tutorial in Settings › General reopens it.
   await turn(page,true);
   await waitStep(page,'hello');
   await turn(page,false);
@@ -346,9 +346,9 @@ try{
   const before=await page.evaluate(()=>(window as any).calls.length);
   const focusFox=()=>page.evaluate(()=>{const input=document.querySelector<HTMLElement>('[aria-label="Message Fox"]:is(input,textarea)');input?.focus();const ok=!!input&&document.activeElement===input;input?.blur();return ok;});
   const focusable=await focusFox();
-  // No switch waits in the World's corner; the keyboard reaches Show the tutorial in Settings › Help.
+  // No switch waits in the World's corner; the keyboard reaches Show the tutorial in Settings › General.
   assert.equal(await page.locator('.world-tutorial,.tour-switch:visible').count(),0,label+': no Tutorial switch in the World after the first run');
-  await settings.click();await page.locator('.companion-settings-item[data-setting=help]').click();
+  await settings.click();await page.locator('.companion-settings-item[data-setting=general]').click();
   const entry=page.getByRole('button',{name:'Show the tutorial',exact:true});
   await entry.focus();await page.keyboard.press('Enter');
   await waitStep(page,'hello');
@@ -398,6 +398,6 @@ try{
   assert.equal(await tutorialOn(page),true,'the switch is on during the first run');
   await page.close();
  }
- console.log('PASS world tour replay: Show the tutorial in Settings › Help replays the tour for finished journeys by pointer or keyboard, one at a time, and turning it off or Esc ends it, no sign-in and no journey change, wide and narrow');
+ console.log('PASS world tour replay: Show the tutorial in Settings › General replays the tour for finished journeys by pointer or keyboard, one at a time, and turning it off or Esc ends it, no sign-in and no journey change, wide and narrow');
  console.log('PASS world tour: in the owner\'s order, Fox boxed says hello where it stands (no hop to the middle), the Attention Center names what Fox already pulled out, the Applets (kept as history Fox remembers) offer Connect Mail only while Mail is not connected, the tasks and Routines beside Fox, then Fox\'s settings and the phone, the app first and then the pairing code; nothing follows the first win; Fox never moves for the card; with nothing connected Fox never waits on the Center; choices are underlined words, second ones muted; Fox\'s ring differs from the target\'s halo; the Tutorial switch in the window\'s bottom-right corner, turned off, ends it and goes, the World stays locked between steps, the card’s own Done works; no Esc, a click anywhere, Enter or → moves a telling step and nothing beneath responds; a transient snapshot never rewinds it; visiting a place resumes the same step; first value boxes the item, Show me or a click on it opens the card and the box moves to it; a theme of a brought Agent\'s conversations is the first value when no item waits, and the artifact Fox makes of it the first win, and with nothing at all the tour ends and frees the World; only key words are bold');
 }finally{await browser.close();}

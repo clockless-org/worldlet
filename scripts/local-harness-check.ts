@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,claudeCodeSignInExpired,codexProblem,modelAtCapacity,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
- type LocalHarnessId} from '../core/agent/index.ts';
+import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,claudeCodeSignInExpired,claudeCodeSignInElsewhere,CLAUDE_CODE_NOT_SIGNED_IN,CLAUDE_CODE_SIGN_IN_EXPIRED,codexProblem,codexWorldToolsFailed,modelAtCapacity,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
+ type LocalHarnessId} from '../agent/gate/index.ts';
 import {spawn} from 'node:child_process';
-import {openWorldToolBridge} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
-import {AgentNotStarting,BUSY_RETRIES,forgetNotStarting,LocalHarnessAdapter,LocalHarnessRuntime,harnessEnvironment,harnessVersion,locateLocalHarnesses,readSelection,searchDirectories,selectedInstall,writeSelection,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
+import {openWorldToolBridge} from '../platform/host/modules/gate/world-tool-bridge.ts';
+import {AgentNotStarting,BUSY_RETRIES,forgetNotStarting,LocalHarnessAdapter,LocalHarnessRuntime,harnessEnvironment,harnessVersion,locateLocalHarnesses,readSelection,searchDirectories,selectedInstall,writeSelection,type HarnessEnvironment} from '../platform/host/modules/companion/agent/local-harness.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Local Agent Harnesses at setup: the shared catalog, recommendation, per-command turns and output
@@ -28,6 +28,14 @@ assert.match(turn.system,/You are Fox/);assert.match(turn.system,/Be warm\./);
 assert.match(turn.prompt,/Person: hi\nFox: Hello!/);assert.match(turn.prompt,/"view":"world"/);assert.ok(turn.prompt.endsWith('Person: What is next?'));
 assert.match(turn.system,/cannot act in Worldlet/,'text-only by default');
 assert.match(localHarnessTurn({text:'hi'},{worldTools:true}).system,/describe_world_tools.*call_world_tool/);
+// An Applet analysis names query_world_items and upsert_world_items; a local Agent has only call_world_tool, so the
+// instructions say which target and action they are (Beta 4464: Codex answered they "aren't available" and saved nothing).
+{
+ const analysis=localHarnessTurn({text:'Read it with query_world_items, then submit with upsert_world_items.'},{worldTools:true}).system;
+ assert.match(analysis,/query_world_items is target "items", action "query"; upsert_world_items is target "items", action "save"/);
+ assert.doesNotMatch(localHarnessTurn({text:'hi'},{worldTools:true}).system,/Tool names in the message/,'only names the message uses');
+ assert.doesNotMatch(localHarnessTurn({text:'Use query_world_items.'}).system,/query_world_items/,'no World tools, no aliases');
+}
 {
  // Known actions travel with the instructions, so Fox calls one without discovery rounds (owner 2026-10-12: Fox slow).
  const tools=localHarnessTurn({text:'hi'},{worldTools:true}).system;
@@ -75,6 +83,9 @@ const codexTools=localHarnessInvocation('codex',turn,server).args;
 assert.ok(codexTools.includes('mcp_servers.worldlet.command="C:\\\\Program Files\\\\Worldlet\\\\Worldlet.exe"'),'TOML-escaped Windows path');
 assert.ok(codexTools.includes('mcp_servers.worldlet.env={ELECTRON_RUN_AS_NODE="1",WORLDLET_MCP_TOKEN_FILE="t"}'));
 assert.ok(codexTools.includes('mcp_servers.worldlet.tools.call_world_tool.approval_mode="approve"'),'codex exec cannot answer an approval prompt, so World tools are pre-approved');
+// Codex leaves out a server not ready when it first asks the model, and the turn runs without World tools (Mac Alpha
+// 4450/4459, #602): Worldlet's is required, so the turn waits for it, and a server that never starts fails plainly.
+assert.ok(codexTools.includes('mcp_servers.worldlet.required=true')&&codexTools.includes('mcp_servers.worldlet.startup_timeout_sec=30'),'Codex waits for World tools');
 assert.equal(codexTools.at(-1),'-');
 assert.deepEqual(localHarnessInvocation('openclaw',turn).args,['agent','exec','--json','--message-file','-']);
 // OpenClaw: a configuration for this turn that includes the person's own and adds Worldlet's server; their workspace as its own.
@@ -160,6 +171,10 @@ assert.equal(claudeCodeSignInExpired('Rate limited'),null);
 // Never signed in (Claude Code 2.1 `-p`): the same sign-in page, with its own line.
 assert.equal(claudeCodeSignInExpired('Not logged in · Please run /login'),'Claude Code isn’t signed in yet. Sign in in the browser page that opened.');
 assert.deepEqual(read('claude-code',[{type:'result',subtype:'success',is_error:true,result:'Invalid API key · Please run /login'}],1).outcome,{error:claudeCodeSignInExpired('Invalid API key')});
+// Once the page has opened this launch, the line points to Settings instead (Mac Beta 4508, 2026-10-20).
+assert.equal(claudeCodeSignInElsewhere(CLAUDE_CODE_NOT_SIGNED_IN),'Claude Code isn’t signed in yet. Sign in to it in Settings › Agents, under Provider.');
+assert.equal(claudeCodeSignInElsewhere(CLAUDE_CODE_SIGN_IN_EXPIRED),'Claude Code’s sign-in has expired. Sign in to it in Settings › Agents, under Provider.');
+assert.match(claudeCodeSignInElsewhere(CLAUDE_CODE_NOT_SIGNED_IN),/sign-in has expired|isn’t signed in/,'setup still shows its Sign in button');
 assert.deepEqual(read('claude-code',['not json','{"type":"other"}'],1,'boom\nError: connect ECONNREFUSED\n').outcome,{error:'Claude Code could not answer: Error: connect ECONNREFUSED'},'banners are not Fox’s words; stderr explains a failure');
 // A turn with no answer and nothing on stderr says what happened, not "sign in" (Mac Beta 4261, 2026-10-11: Codex was
 // signed in, yet the Attention check read "Open it once in Terminal to finish signing in").
@@ -183,13 +198,18 @@ assert.match(String((read('codex',[],1).outcome as {error:string}).error),/stopp
 }
 // Codex's sign-in and usage limit are told apart from its other failures.
 assert.equal(codexProblem('stream error: unexpected status 401 Unauthorized'),'Codex is not signed in. Open Terminal, run codex login, then try again.');
-assert.deepEqual(read('codex',[{type:'turn.failed',error:{message:'You\'ve hit your usage limit. Try again in 2 hours.'}}],1).outcome,{error:'Codex has reached its usage limit. Try again later, or switch its model in Settings › Agent.'});
+assert.deepEqual(read('codex',[{type:'turn.failed',error:{message:'You\'ve hit your usage limit. Try again in 2 hours.'}}],1).outcome,{error:'Codex has reached its usage limit. Try again later, or switch its model in Settings › Agents.'});
 assert.deepEqual(read('codex',[],1,'Error: Not logged in. Run codex login.').outcome,{error:codexProblem('not logged in')});
 assert.equal(codexProblem('stream disconnected before completion'),null);
+// A required World tool server that never started: Codex's own reason, not the last line of its stack trace.
+const handshake='2026-10-15T18:06:06.483153Z ERROR codex_core::session: Failed to create session: required MCP servers failed to initialize: worldlet: timed out handshaking with MCP server after 29.99s\nError: thread/start: thread/start failed: error creating thread: Fatal error: Failed to initialize session: required MCP servers failed to initialize: worldlet: timed out handshaking with MCP server after 29.99s (code -32603)\n\nStack backtrace:\n   0: <unknown>\n';
+assert.equal(codexWorldToolsFailed(handshake),'Codex could not start Worldlet’s tools: worldlet: timed out handshaking with MCP server after 29.99s. Try again.');
+assert.deepEqual(read('codex',[],1,handshake).outcome,{error:codexWorldToolsFailed(handshake)},'not the last line of its stack trace');
+assert.equal(codexWorldToolsFailed('Error: Not logged in. Run codex login.'),null);
 // A model busy for everyone is told apart from the person's own limits: the turn is worth another try (#416).
 assert.equal(modelAtCapacity('Selected model is at capacity. Please try a different model.'),true);
 assert.equal(modelAtCapacity('Claude Code could not answer: API Error: 529 {"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}'),true);
-assert.equal(modelAtCapacity('Codex has reached its usage limit. Try again later, or switch its model in Settings › Agent.'),false);
+assert.equal(modelAtCapacity('Codex has reached its usage limit. Try again later, or switch its model in Settings › Agents.'),false);
 assert.equal(modelAtCapacity('Codex is not signed in. Open Terminal, run codex login, then try again.'),false);
 
 // Host detection ----------------------------------------------------------------------------------
@@ -349,7 +369,7 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
    assert.equal(fs.readdirSync(spareHome).filter(name=>name.endsWith('.token')).length,0,'shutdown stops the spare and its bridge');
    script(path.join(bin,'claude'),`if [ "$1" = "--version" ]; then echo "2.1.0 (Claude Code)"; exit 0; fi\ncat > "$PWD/stdin.txt"\nprintf '%s\\n' "$@" > "$PWD/args.txt"\nenv > "$PWD/env.txt"\ncat "${fixture}"\n`);
   }
-  // A brought conversation Fox continues (core/tasks/fox-sessions.ts): its turns go on in the person's own Claude Code
+  // A brought conversation Fox continues (agent/tasks/fox-sessions.ts): its turns go on in the person's own Claude Code
   // session, in the folder it ran in; the kept one's Applet does too. A session Claude Code answers under a new ID is
   // continued there next time. Never one Worldlet keeps out of the history sync.
   {
@@ -419,6 +439,47 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
     assert.equal(fs.readFileSync(tries,'utf8').trim().split('\n').length,2,'background work runs again after turning busy mid-pass');
    }finally{BUSY_RETRIES.splice(0,BUSY_RETRIES.length,...waits);}
   }
+  // Codex's own default refused for a ChatGPT account (Alpha 4511, #668/#669): the same turn runs at once on the ChatGPT
+  // top-tier model, then its chat tier when that is refused too (Mac Alpha 4512/4513), and later turns name the one
+  // accepted; a model Worldlet named itself is not swapped for another.
+  {
+   const dir=path.join(scratch,'codex-refused');fs.mkdirSync(dir,{recursive:true});
+   const tries=path.join(dir,'tries.txt'),answer=path.join(dir,'answer.jsonl');
+   const refused=(model:string)=>{
+    const file=path.join(dir,model+'.jsonl'),reason=JSON.stringify({type:'error',status:400,error:{type:'invalid_request_error',message:`The '${model}' model is not supported when using Codex with a ChatGPT account.`}});
+    fs.writeFileSync(file,[{type:'turn.started'},{type:'error',message:reason},{type:'turn.failed',error:{message:reason}}].map(line=>JSON.stringify(line)).join('\n')+'\n');
+    return file;
+   };
+   fs.writeFileSync(answer,[{type:'turn.started'},{type:'item.completed',item:{id:'i1',type:'agent_message',text:'Hello from Codex'}},{type:'turn.completed',usage:{}}].map(line=>JSON.stringify(line)).join('\n')+'\n');
+   // A Codex whose account accepts only `accepted`; its own default is gpt-6.1-sol.
+   const codexAccepting=(accepted:string)=>{
+    const command=path.join(dir,'codex-'+accepted);
+    script(command,`cat > /dev/null\necho "$*" >> "${tries}"\ncase " $* " in *" --model ${accepted} "*) cat "${answer}";; *" --model gpt-6-sol "*) cat "${refused('gpt-6-sol')}"; exit 1;; *) cat "${refused('gpt-6.1-sol')}"; exit 1;; esac\n`);
+    return {id:'codex' as const,title:'Codex',command,prefix:[],configured:true};
+   };
+   const turns=()=>{const lines=fs.readFileSync(tries,'utf8').trim().split('\n');fs.rmSync(tries);return lines.map(args=>/--model (\S+)/.exec(args)?.[1]??'own');};
+   const sol=codexAccepting('gpt-6-sol');
+   await assert.rejects(new LocalHarnessRuntime(sol,unix,undefined,null,null,null,()=>'gpt-6.1-sol').run({action:'chat',text:'Hi',_background:true},agentHome),/not supported when using Codex with a ChatGPT account/);
+   assert.deepEqual(turns(),['gpt-6.1-sol'],'a model Worldlet named is not swapped');
+   assert.equal((await new LocalHarnessRuntime(sol,unix).run({action:'chat',text:'Hi',_background:true},agentHome)).message,'Hello from Codex');
+   assert.deepEqual(turns(),['own','gpt-6-sol'],'its own default once, then the ChatGPT top-tier model');
+   assert.equal((await new LocalHarnessRuntime(sol,unix).run({action:'chat',text:'Hi'},agentHome,async()=>null)).message,'Hello from Codex');
+   assert.deepEqual(turns(),['gpt-6-sol'],'later turns name it at once');
+   const terra=codexAccepting('gpt-5.6-terra');
+   assert.equal((await new LocalHarnessRuntime(terra,unix).run({action:'chat',text:'Hi'},agentHome,async()=>null)).message,'Hello from Codex');
+   assert.deepEqual(turns(),['own','gpt-6-sol','gpt-5.6-terra'],'the chat tier when the top tier is refused too');
+   assert.equal((await new LocalHarnessRuntime(terra,unix).run({action:'chat',text:'Hi',_background:true},agentHome)).message,'Hello from Codex');
+   assert.deepEqual(turns(),['gpt-5.6-terra']);
+  }
+  // A turn that stays silent until its deadline, nothing shown and no World tool called, runs once more on a new process
+  // (Mac Alpha 4469, #623).
+  {
+   const tries=path.join(scratch,'silent-tries.txt');fs.rmSync(tries,{force:true});
+   script(path.join(bin,'claude'),`${runs}echo try >> "${tries}"\ncat > "$PWD/stdin.txt"\nif [ "$(wc -l < "${tries}")" -lt 2 ]; then exec sleep 60; fi\ncat "${fixture}"\n`);
+   const quiet={action:'chat',text:'Hi',_background:true,_taskTimeoutSeconds:15};
+   assert.equal((await new LocalHarnessRuntime(found[0],unix).run(quiet,agentHome,async()=>null)).message,'Hello from Claude Code');
+   assert.equal(fs.readFileSync(tries,'utf8').trim().split('\n').length,2,'one more try after the silent one');
+  }
   // Cancellation stops the process.
   script(path.join(bin,'claude'),'sleep 30\n');
   const slow=new LocalHarnessRuntime(found[0],unix);
@@ -453,7 +514,7 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
    forgetNotStarting(found[0].command);
    script(path.join(bin,'claude'),runs+`cat > "$PWD/stdin.txt"\ncat "${fixture}"\n`);
    assert.equal((await new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi'},agentHome,async()=>null)).message,'Hello from Claude Code','chosen again, it is tried again');
-   assert.match(new AgentNotStarting({id:'hermes',title:'Hermes Agent'}).message,/Settings › Agent and choose Install again/);
+   assert.match(new AgentNotStarting({id:'hermes',title:'Hermes Agent'}).message,/Settings › Agents and choose Install again/);
   }
 
   // Hermes Agent over ACP, end to end: the session gets Worldlet's MCP server, the fixture Agent starts it and calls a

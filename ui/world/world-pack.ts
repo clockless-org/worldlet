@@ -1,5 +1,5 @@
-import {ACTIVE_THEME,validateSceneMotion,type SceneMotion} from '../themes/index.ts';
-export type {SceneMotion} from '../themes/index.ts';
+import {ACTIVE_THEME,validateSceneMotion,type SceneMotion} from '../style/index.ts';
+export type {SceneMotion} from '../style/index.ts';
 // Data-only portable world packages; never execute code from a world archive.
 export type WorldPoint=[number,number];
 export type WorldRect=[number,number,number,number];

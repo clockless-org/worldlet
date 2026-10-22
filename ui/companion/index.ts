@@ -7,7 +7,6 @@ export {mountEmailReview,presentEmailReview} from './fox-email-review.ts';
 export {renderFoxFrameTiming} from './fox-frame-timing.ts';
 export {mountMemoryManager} from './fox-memory-manager.ts';
 export {mountNotionReview} from './fox-notion-review.ts';
-export {createFoxPreferences} from './fox-preferences.ts';
 export {mountWriteNotice} from './fox-write-notice.ts';
 export {mountHarnessApproval} from './fox-harness-approval.ts';
 export {mountChannelReply} from './fox-channel-reply.ts';
@@ -19,4 +18,7 @@ export {mountHomeReview} from './fox-home-review.ts';
 export {helpNarration,narrateHelp} from './help-narration.ts';
 export {mountPhoneBridge} from './phone-bridge.ts';
 export {pairingQR} from './companion-phone.ts';
-export {routineTimePicker,routineWhenLine,scheduleWhen} from './agent-routines.ts';
+// Settings (ui/frame/) draws Fox's guides and model failures the way the conversation does.
+export {replyMarkdown} from './reply-markdown.ts';
+export {modelFailure} from './model-failure.ts';
+export {mountCompanionNative,type CompanionNativeHost} from './phone-ongoing.ts';

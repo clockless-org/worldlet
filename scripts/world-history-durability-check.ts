@@ -5,8 +5,8 @@ import {mkdtempSync,readFileSync,rmSync,writeFileSync,existsSync,unlinkSync} fro
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
-import {worldEventAppend,worldHistoryQuery,worldHistoryPage,journalEntry,taskExecutionEvents,conversationEntries} from '../core/items/index.ts';
-import {finishRuntimeTask} from '../core/tasks/index.ts';
+import {worldEventAppend,worldHistoryQuery,worldHistoryPage,journalEntry,taskExecutionEvents,conversationEntries} from '../context/store/index.ts';
+import {finishRuntimeTask} from '../agent/tasks/index.ts';
 const views=readFileSync(new URL('../contracts/storage/world-views.sql',import.meta.url),'utf8');
 const folder=mkdtempSync(join(tmpdir(),'worldlet-history-'));
 const open=(name='world')=>{const db=new DatabaseSync(join(folder,name+'.sqlite'));db.exec('CREATE TABLE IF NOT EXISTS entries (seq INTEGER PRIMARY KEY AUTOINCREMENT, at REAL NOT NULL, kind TEXT NOT NULL, key TEXT NOT NULL, body TEXT NOT NULL);'+views);return db;};

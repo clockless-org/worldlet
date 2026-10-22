@@ -1,6 +1,6 @@
 // Installed at document start in every CEF website page's main world (engine/page.ts) to notice a
 // page whose video needs H.264/AAC, which the standard CEF build lacks (#1174,
-// core/browser/video-formats.ts decides). It only counts: proprietary formats the page was told are
+// agent/applets/video-formats.ts decides). It only counts: proprietary formats the page was told are
 // missing, video it set up or played, and media that failed for want of a playable stream. Every
 // answer the page gets is the engine's own; it reads no content and sends nothing. The host reads
 // the counts with __worldletVideoFormats(). The build writes it to WorldletWeb/browser/video-formats.js;

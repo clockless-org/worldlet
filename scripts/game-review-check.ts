@@ -5,19 +5,19 @@
 // host recorder into a World database; Fox's own reads (`browser/records`, `browser/record`) then find
 // the session, list the games, and read each one, team preview to result, in at most two pages. Fox's
 // guidance tells it to do exactly that and to answer as a coach. Once the person stops playing, Worldlet
-// hands those games to Fox for a review without being asked (core/games/battle-review.ts). No browser,
+// hands those games to Fox for a review without being asked (context/store/battle-review.ts). No browser,
 // no model.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
-import {WebRecorder,readRecordings} from '../platform/electron/src/modules/browser/recorder.ts';
-import {WEB_RECORD,webTranscript,type WebRecord} from '../core/browser/index.ts';
-import {conversationGuidance} from '../core/companion/conversation-guidance.ts';
-import {listWorldTools} from '../core/tools/index.ts';
-import {BATTLE_REVIEW,battleNow,battleReviewDue,battleReviewTask,battleSummaryDue,battleWatch,battlesReviewed,battlesSummarized,finishedBattles,observeBattleMessage} from '../core/games/index.ts';
-import {BattleReviews} from '../platform/electron/src/modules/browser/battle-review.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
+import {WebRecorder,readRecordings} from '../platform/host/modules/applets/recorder.ts';
+import {WEB_RECORD,webTranscript,type WebRecord} from '../agent/applets/index.ts';
+import {conversationGuidance} from '../agent/companion/conversation-guidance.ts';
+import {listWorldTools} from '../agent/gate/index.ts';
+import {BATTLE_REVIEW,battleNow,battleReviewDue,battleReviewTask,battleSummaryDue,battleWatch,battlesReviewed,battlesSummarized,finishedBattles,observeBattleMessage} from '../context/store/index.ts';
+import {BattleReviews} from '../platform/host/modules/applets/battle-review.ts';
 
 type Frame={in?:string;out?:string};
 const fixture=JSON.parse(fs.readFileSync(new URL('./fixtures/showdown-battles.json',import.meta.url),'utf8')) as {games:{room:string;frames:Frame[]}[]};

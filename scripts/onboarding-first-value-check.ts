@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-import {attentionFailure} from '../core/attention/attention-failure.ts';
-import {firstValueCandidate,firstValueLinks,firstValueRequest,updateOnboarding} from '../core/onboarding/index.ts';
+import {attentionFailure} from '../agent/attention/attention-failure.ts';
+import {firstValueCandidate,firstValueLinks,firstValueRequest,updateOnboarding} from '../agent/companion/index.ts';
 import {helpNarration,narrateHelp} from '../ui/companion/help-narration.ts';
 import {bundleScript} from './browser-test.ts';
 assert.deepEqual(attentionFailure("Worldlet's included AI service needs a billing update.",100),{code:'service_credits',nextAt:1000});
@@ -42,7 +42,7 @@ assert.equal(firstValueCandidate([{...item,id:'lease',priority:'high'},bookable]
 assert.equal(firstValueCandidate([bookable],Date.now(),['other'])?.id,'book','with no eligible row shown, the best item is still offered');
 assert.ok(firstValueRequest('book',firstValueLinks(bookable)).includes('https://demo.worldlet.test/brightsmile'));
 assert.ok(!/request the normal approval/.test(firstValueRequest('book')),'Fox acts directly on website steps');
-const bundle=await bundleScript({entryPoints:['ui/onboarding/first-value.ts'],globalName:'FirstValue'});
+const bundle=await bundleScript({entryPoints:['ui/frame/first-value.ts'],globalName:'FirstValue'});
 const browser=await chromium.launch();
 try{
  const page=await browser.newPage();await page.setContent('<main id="world"></main>');await page.addScriptTag({content:bundle});

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {MINE_FIELDS,newMineState,actOnMine,mineNeighbours,elapsedMineSeconds,type MineState} from '../core/games/index.ts';
+import {MINE_FIELDS,newMineState,actOnMine,mineNeighbours,elapsedMineSeconds,type MineState} from '../context/store/index.ts';
 for(const field of Object.values(MINE_FIELDS))for(let i=0;i<field.rows*field.columns;i++){
  const initial=newMineState(field),next=actOnMine(initial,i,'dig',1000,()=>0);
  assert.equal(initial.opened.size,0,'decisions leave previous snapshots unchanged');assert.equal(next.mines.size,field.mines);

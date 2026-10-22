@@ -3,7 +3,7 @@
 // Fox's PASS hides the answer, and that Fox's voice rides with every turn. No model, no browser.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {FOX_VOICE,PLACE,PROACTIVE,placeKind,companionPrompt,onScreenText,proactiveAsked,proactiveCard,proactiveDue,proactiveHeard,proactiveLate,proactiveLine,proactiveQuietRequest,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed} from '../core/companion/index.ts';
+import {FOX_VOICE,PLACE,PROACTIVE,placeKind,companionPrompt,onScreenText,proactiveAsked,proactiveCard,proactiveDue,proactiveHeard,proactiveLate,proactiveLine,proactiveQuietRequest,proactiveSpoke,proactiveState,proactiveTask,proactiveToolAllowed} from '../agent/companion/index.ts';
 
 const day='2026-10-06',t0=1_800_000_000;
 const policyIncludes=(action:string)=>JSON.parse(fs.readFileSync('contracts/world-event-policy.json','utf8')).plumbing.includes(action);
@@ -167,7 +167,7 @@ assert(proactiveTask({moment:'wrapup',place:'World',local:'Thu 11:40',minutes:0,
 
 // No Browse with me | Don't bother switch anywhere: the host forgets the old choice and has no foxBrowse action, Fox's
 // card carries no switch. The host tells the page when the place is a game, which then keeps the game's pace.
-const hostSource=fs.readFileSync('platform/electron/src/modules/fox/index.ts','utf8');
+const hostSource=fs.readFileSync('platform/host/modules/companion/index.ts','utf8');
 assert(!/foxBrowse:|proactiveBrowse|preferences\.bool\('worldlet\.foxBrowse'/.test(hostSource));
 assert.match(hostSource,/preferences\.remove\('worldlet\.foxBrowse'\)/);
 assert.match(hostSource,/game=browser\(\)\?\.gameNow\?\.\(\)\?\?null/);
@@ -223,7 +223,7 @@ assert.equal(proactiveCard('Nice run.'),null);
 assert.equal(proactiveLine('PASS [card:venue-reply]'),null);
 assert.equal(proactiveLine('[card:venue-reply]'),null);
 // The host keeps the id only while that item is open in the World, and the page offers its card.
-const foxHost=fs.readFileSync('platform/electron/src/modules/fox/index.ts','utf8');
+const foxHost=fs.readFileSync('platform/host/modules/companion/index.ts','utf8');
 assert.match(foxHost,/card=line\?openItem\(proactiveCard\(result\.message\)\):''/);
 assert.match(foxHost,/item\.id===id&&\(item\.status\?\?'open'\)==='open'/);
 
@@ -247,21 +247,21 @@ assert.equal(onScreenText([]),'');
 const long=onScreenText([{kind:'text',body:'HEAD '+'a'.repeat(9000)},{kind:'text-more',body:'NEWEST POST'}]);
 assert(long.startsWith('HEAD')&&long.endsWith('NEWEST POST')&&[...long].length<=PLACE.pageCharacters,long.length+'');
 // The host puts it in the ask's context, and Hermes forwards it within the same bound.
-const fox=fs.readFileSync('platform/electron/src/modules/fox/index.ts','utf8');
+const fox=fs.readFileSync('platform/host/modules/companion/index.ts','utf8');
 assert.match(fox,/context\.page=\{site:visit\.site,title:visit\.title,text:pageText\}/);
 
 // Fox's voice rides with every Fox turn, whatever its personality, and is Worldlet's own text.
 const prompt=companionPrompt({format:'worldlet.companion',version:1,identity:{id:'fixture',name:'Fox',createdAt:'2026-09-24T00:00:00Z'},personality:'Formal',memoryAuthority:'worldlet',memories:[],conversations:[]} as any);
 assert(prompt.includes(FOX_VOICE));
 for(const banned of ['How can I help','Let me know if you need anything else'])assert(FOX_VOICE.includes(banned),banned);
-assert(!/\bPoke\b/.test(FOX_VOICE+fs.readFileSync('core/companion/fox-proactive.ts','utf8').replace(/modelled on Poke/,'')));
+assert(!/\bPoke\b/.test(FOX_VOICE+fs.readFileSync('agent/companion/fox-proactive.ts','utf8').replace(/modelled on Poke/,'')));
 
 // The host asks through plumbing commands, so asks never fill the World's history.
 const policy=JSON.parse(fs.readFileSync('contracts/world-event-policy.json','utf8'));
 for(const action of ['foxProactive','foxProactiveShown'])assert(policy.plumbing.includes(action),action);
 // The host never asks during onboarding or its tour, nor while the World is busy (Mac RC 2961: first
 // value's pick timed out).
-const host=fs.readFileSync('platform/electron/src/modules/fox/index.ts','utf8');
+const host=fs.readFileSync('platform/host/modules/companion/index.ts','utf8');
 assert.match(host,/if\(onboardingUnfinished\(store\.state\.onboarding\)\)return \{started:false,reason:'onboarding'\}/);
 assert.match(host,/store\.busy\|\|store\.organizing\)return \{started:false,reason:'busy'\}/);
 // No speak-first ask while a tour step shows.

@@ -5,7 +5,7 @@
 // This is not a live Google sign-in: whether Google refuses a given account is Google's call.
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-import {googleSignInPage,googleSignInRejected,signInRejectedMessage} from '../core/browser/index.ts';
+import {googleSignInPage,googleSignInRejected,signInRejectedMessage} from '../agent/applets/index.ts';
 import {pageErrors,worldUrl} from './browser-test.ts';
 
 for(const url of ['https://accounts.google.com/v3/signin/rejected?continue=https%3A%2F%2Fwww.youtube.com','https://accounts.google.com/signin/v2/deniedsigninrejected?flowName=GlifWebSignIn','https://ACCOUNTS.google.com/signin/rejected',new URL('https://accounts.google.com/v3/signin/rejected/')])

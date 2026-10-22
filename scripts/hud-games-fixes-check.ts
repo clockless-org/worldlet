@@ -48,7 +48,7 @@ const win=new FakeEl('window');g.window=Object.assign(win,{setTimeout:g.setTimeo
 
 // 1. World log: stop() removes the visibility listener and cancels a pending short wait.
 {
- const {mountWorldLog}=await import('../ui/hud/world-log.ts');
+ const {mountWorldLog}=await import('../ui/world/world-log.ts');
  let calls=0;
  const log=mountWorldLog({call:async()=>{calls++;return {entries:[]};}});
  await Promise.resolve();await Promise.resolve();
@@ -64,7 +64,7 @@ const win=new FakeEl('window');g.window=Object.assign(win,{setTimeout:g.setTimeo
 
 // 2. Minesweeper: a long press with no click after it does not swallow the next real click.
 {
- const {createMinesweeper}=await import('../ui/games/minesweeper.ts');
+ const {createMinesweeper}=await import('../ui/applets/minesweeper.ts');
  const game=createMinesweeper({status(){},best:{get:()=>0,set(){}}});
  const board=game.element as any as FakeEl,cell=board.children[0] as FakeEl,other=board.children[55] as FakeEl;
  board.fire('pointerdown',{pointerType:'touch',target:cell});runTimers();
@@ -85,7 +85,7 @@ const win=new FakeEl('window');g.window=Object.assign(win,{setTimeout:g.setTimeo
 
 // 3. Snake: filling the whole bed ends the game with no apple drawn on the snake.
 {
- const {createSnake}=await import('../ui/games/snake.ts');
+ const {createSnake}=await import('../ui/applets/snake.ts');
  const random=Math.random;Math.random=()=>0;
  let statusLine='';
  const game=createSnake({status:t=>{statusLine=t;},best:{get:()=>0,set(){}}});
@@ -120,7 +120,7 @@ const win=new FakeEl('window');g.window=Object.assign(win,{setTimeout:g.setTimeo
 
 // 4. Practice walkthrough: blocked storage and a missing stage do not throw.
 {
- const {createPracticeWalkthrough}=await import('../ui/practice/practice-walkthrough.ts');
+ const {createPracticeWalkthrough}=await import('../ui/applets/practice-walkthrough.ts');
  const root=new FakeEl('div');root.querySelector=(sel:string)=>sel==='.companion-avatar'?new FakeEl('img'):null;// no #notionStage
  const storage={getItem:()=>null,setItem(){throw Error('QuotaExceededError');}};
  const shown:any[]=[];

@@ -1,4 +1,4 @@
-import {releaseTag,displayReleaseVersion} from '../core/distribution/index.ts';
+import {releaseTag,displayReleaseVersion} from '../agent/app/index.ts';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';

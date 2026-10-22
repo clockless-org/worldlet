@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {contextLayout} from '../core/context/context-layout.ts';
-import {validateConversationHistory} from '../core/companion/conversation-history.ts';
+import {contextLayout} from '../context/connectors/context-layout.ts';
+import {validateConversationHistory} from '../agent/companion/conversation-history.ts';
 const original=contextLayout({themes:[{theme:'library'},{theme:'studio'}]});
 assert.deepEqual(original.places.map(p=>p.position),[[0,0,2],[0,0,17],[0,0,-13]]);
 const next=contextLayout({themes:[{theme:'library'},{theme:'studio'},{theme:'health'}],previous:JSON.stringify(original)});
@@ -20,14 +20,14 @@ assert.throws(()=>validateConversationHistory([null],false));
 validateConversationHistory([{}],false); // Preserve existing read compatibility; strict validation applies on write.
 assert.throws(()=>validateConversationHistory([{}],true));
 console.log('PASS shared context placement, previous-layout preservation, overlap rejection and conversation bounds');
-const {defaultSourceChecks,dueSourceCheck,startSourceCheck,reconcileSourceCheck}=await import('../core/tasks/source-checks.ts');
+const {defaultSourceChecks,dueSourceCheck,startSourceCheck,reconcileSourceCheck}=await import('../agent/tasks/source-checks.ts');
 const paused={id:'gmail',provider:'gmail',enabled:false,intervalMinutes:60,nextAt:9000};
 assert.deepEqual(defaultSourceChecks([paused],['gmail','notion'],100),[{id:'notion',provider:'notion',enabled:true,intervalMinutes:30,nextAt:100}]);
 assert.deepEqual(defaultSourceChecks([],['notion'],100,[{provider:'notion',intervalMinutes:45}]),[{id:'notion',provider:'notion',enabled:true,intervalMinutes:45,nextAt:100}],'new checks use the Applet registration interval');
 {
  // The host hands the Applet registrations to shared core instead of patching intervals itself.
  const {readFileSync}=await import('node:fs');
- const host=readFileSync(new URL('../platform/electron/src/modules/attention/center.ts',import.meta.url),'utf8');
+ const host=readFileSync(new URL('../platform/host/modules/attention/center.ts',import.meta.url),'utf8');
  assert.match(host,/core\('sourceChecksDefault',\{[^}]*\bregistrations\b/,'the Electron host passes registrations to sourceChecksDefault');
 }
 assert.equal(dueSourceCheck([paused],['gmail'],100,undefined,true),null,'first mail must not bypass pause');
@@ -42,7 +42,7 @@ assert.deepEqual(reconcileSourceCheck(finished,paused),{...finished,enabled:fals
 assert.equal(reconcileSourceCheck(finished,{...active,nextAt:1}).nextAt,3700,'unchanged configuration keeps scheduled next run');
 assert.equal(active.nextAt,9000,'rules never mutate stored input');
 console.log('PASS source schedule defaults, eligibility, due time and concurrent pause/reconfiguration');
-const {worldEvent}=await import('../core/items/world-events.ts');
+const {worldEvent}=await import('../context/store/world-events.ts');
 assert.equal(worldEvent('snapshot',{text:'private'}),null);
 assert.equal(worldEvent('browser',{operation:'status'}),null);
 assert.equal(worldEvent('worldAudio',{operation:'start'}),null);
@@ -50,7 +50,7 @@ assert.deepEqual(worldEvent('agentChat',{text:'private',apiKey:'secret',target:'
 assert.deepEqual(worldEvent('worldItemStatus',{id:'item-1',enabled:false,level:0,region:'x'.repeat(121)}),{body:{id:'item-1',enabled:false,level:0}});
 assert.equal(worldEvent('open',{provider:'🦊'.repeat(120)}).applet,'🦊'.repeat(120));
 console.log('PASS event privacy allowlist, bounded identifiers, transport exclusion and scalar state');
-const {recentWorldHistory}=await import('../core/items/world-events.ts');
+const {recentWorldHistory}=await import('../context/store/world-events.ts');
 const history=[{kind:'open',body:{provider:'gmail',status:'open'},at:'newest'},{kind:'agentChat',body:{},at:'chat'},{kind:'open',body:{status:'open',provider:'gmail'},at:'duplicate'},{kind:'done',body:{itemId:'one'},at:'older'},{kind:'open',body:{provider:'gmail',status:'open'},at:'oldest'}];
 assert.deepEqual(recentWorldHistory(history,2),[{provider:'gmail',status:'open',kind:'open',at:'newest'},{itemId:'one',kind:'done',at:'older'}]);
 assert.equal(recentWorldHistory(history,8).length,3,'only consecutive events are collapsed');
@@ -66,7 +66,7 @@ assert.deepEqual(validateAgentEvent({type:'delta',text:'Hello',privateTransport:
 assert.deepEqual(validateAgentEvent({type:'model_required'}),{type:'model_required'});
 assert.throws(()=>validateAgentEvent({type:'tool',id:'t',name:'read',args:[]}));
 console.log('PASS shared Agent capability/event validation and transport metadata exclusion');
-const {validateContextAnalysis,validateContextLayout,contextChunks}=await import('../core/context/context-validation.ts');
+const {validateContextAnalysis,validateContextLayout,contextChunks}=await import('../context/connectors/context-validation.ts');
 const knowledge={sourceId:'s',theme:'home',topic:'Mail',summary:'Summary',facts:[{text:'Fact',quote:'Evidence'}]};
 assert.equal(validateContextAnalysis([knowledge],[{id:'s',revision:'v2'}],['s'],['home'])[0].sourceRevision,'v2');
 assert.throws(()=>validateContextAnalysis([], [{id:'s',revision:'v2'}],['s'],['home']));
@@ -79,7 +79,7 @@ const unicode='你好🌎 e\u0301\n'.repeat(12000),chunks=contextChunks(unicode)
 assert.equal(chunks.join(''),unicode);assert.ok(chunks.every(s=>Buffer.byteLength(s)<=24000));
 assert.deepEqual(contextChunks('👨‍👩‍👧‍👦',1),['👨‍👩‍👧‍👦']);assert.deepEqual(contextChunks(''),[]);
 console.log('PASS context field validation, source coverage, layout limits and lossless Unicode chunking');
-const {receiveAppletActivity,describeAppletActivity,finishAppletActivity,appletActivitySnapshot}=await import('../core/applets/applet-activity.ts');
+const {receiveAppletActivity,describeAppletActivity,finishAppletActivity,appletActivitySnapshot}=await import('../context/applets/applet-activity.ts');
 let activity=receiveAppletActivity(undefined,{callId:'a',phase:'reading'},'turn')!;
 activity=receiveAppletActivity(activity,{callId:'b',phase:'reading'},'turn')!;
 activity=receiveAppletActivity(activity,{callId:'a',phase:'complete',count:2},'turn')!;
@@ -102,18 +102,18 @@ const projection=appletActivitySnapshot('gmail',true,'connected',[{provider:'gma
 assert.equal(projection.failed,true);assert.equal(projection.needsAttention,true);assert.equal(projection.running,true);
 assert.equal(appletActivitySnapshot('gmail',false,'reading',[],{lastStatus:'running'},activity).running,false);
 assert.equal(activity.calls.length,1);
-const {sourcesReading}=await import('../core/applets/status.ts');
+const {sourcesReading}=await import('../context/applets/status.ts');
 const synthesizing=appletActivitySnapshot('gmail',true,'connected',[],{lastStatus:'complete'},undefined,undefined,true);
 assert.deepEqual([synthesizing.running,synthesizing.synthesizing,sourcesReading([synthesizing])],[false,true,true],'read mail awaiting Attention synthesis is still being read');
 assert.equal(sourcesReading([appletActivitySnapshot('gmail',true,'connected',[],{lastStatus:'complete'},undefined)]),false);
-const {appletStatus,appletIndicator}=await import('../core/applets/status.ts');
+const {appletStatus,appletIndicator}=await import('../context/applets/status.ts');
 const wakes=Date.parse('2026-09-27T12:00:00Z'),snoozedLink=(now:number)=>[{provider:'gmail',...appletActivitySnapshot('gmail',true,'connected',[{provider:'gmail',status:'open',kind:'task',snoozedUntil:'2026-09-27T12:00:00Z'}],undefined,undefined,now)}];
 assert.deepEqual([appletStatus({provider:'gmail'},snoozedLink(wakes-1)).phase,appletStatus({provider:'gmail'},snoozedLink(wakes-1)).label],['connected','Connected · No saved items need attention'],'a snoozed item is quiet until its time');
 assert.deepEqual([appletStatus({provider:'gmail'},snoozedLink(wakes)).label,appletIndicator({provider:'gmail'},snoozedLink(wakes)).label],['Needs attention · 1 saved item needs attention','Needs attention']);
 console.log('PASS Applet concurrent reads, turn isolation, cancellation and persisted attention/error projection');
 
-import {updateOnboarding} from '../core/onboarding/onboarding.ts';
-import {APP_DEFINITIONS} from '../core/applets/catalog.ts';
+import {updateOnboarding} from '../agent/companion/onboarding.ts';
+import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
 const initialSetup={version:1,presets:['home'],completed:false};
 const placed=updateOnboarding(initialSetup,{operation:'region',region:'work',sourceIds:['s','s'],connectionIds:['c']});
 assert.deepEqual(initialSetup,{version:1,presets:['home'],completed:false});
@@ -150,7 +150,7 @@ assert.deepEqual(moved.unlockedApplets,['app-gmail','app-game-2048','app-random-
 assert.deepEqual(updateOnboarding({...firstFive,hiddenApplets:['app-breakout']},{operation:'offerGames'}).unlockedApplets,['app-gmail','app-game-2048'],'a removed Breakout keeps the Random game away too');
 console.log('PASS onboarding progress, placement, immutable inputs, Unicode notes, optional Applet roster and the one-time Games offer');
 
-import {recordBrowserVisit,searchBrowserHistory} from '../core/browser/browser-history.ts';
+import {recordBrowserVisit,searchBrowserHistory} from '../agent/applets/browser-history.ts';
 const visits=[{url:'https://example.com/A',title:'Notebook',text:'paper',visitedAt:100},{url:'https://example.com/b',title:'Paper',text:'notebook',visitedAt:200}];
 assert.equal(recordBrowserVisit(visits,{...visits[0],visitedAt:250},[true,true]),null,'unchanged same-day snapshot is throttled');
 assert.equal(recordBrowserVisit(visits,{...visits[0],url:'https://example.com/a',visitedAt:250},[true,true]).length,3,'URL paths are case sensitive');
@@ -176,7 +176,7 @@ let yieldingActivity=receiveAppletActivity(undefined,{callId:'partial',phase:'re
 yieldingActivity=receiveAppletActivity(yieldingActivity,{callId:'partial',phase:'yielded'},'yield-turn')!;
 assert.equal(yieldingActivity.failed,false);assert.equal(yieldingActivity.succeeded,false);assert.equal(yieldingActivity.calls.length,0);
 
-const {configureSourceCheck}=await import('../core/tasks/index.ts');
+const {configureSourceCheck}=await import('../agent/tasks/index.ts');
 const runningCheck={id:'gmail',provider:'gmail',enabled:true,intervalMinutes:60,lastStatus:'running',lastSuccessAt:12,nextAt:5000};
 assert.deepEqual(configureSourceCheck(runningCheck,{provider:'gmail',enabled:false},['gmail'],200),{...runningCheck,enabled:false,lastStatus:'cancelled',nextAt:200});
 assert.deepEqual(configureSourceCheck(undefined,{provider:'gmail',enabled:true},['gmail'],200),{id:'gmail',provider:'gmail',enabled:true,intervalMinutes:30,nextAt:200});

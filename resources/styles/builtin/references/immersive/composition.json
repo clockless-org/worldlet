@@ -291,6 +291,11 @@
       "sourceSha256": "ce030f2d3f658efda5ab449b4c3bdf6f9e40bf0bc2e19a85b3278463f86075ea",
       "encodedSha256": "fc0d447708e7a42e5d34a993fca5ddcc91cce0fde4606be1db0fd789d7bfb921"
     },
+    "board": {
+      "subjectLeft": 0.69,
+      "sourceSha256": "f54a977f32d9f2372e2ab838274746c0c85b056508a4171ec1ba9eec67f62e9a",
+      "encodedSha256": "225af4f93aff405754e8268cfd112e525d0cd294f662d9490a29ce9912ed4a5e"
+    },
     "doordash": {
       "subjectLeft": 0.7,
       "sourceSha256": "39303a82676cd38caf600c1bdc2ef2468f7a7e7320e2105bcce3c5d14ba597ef",

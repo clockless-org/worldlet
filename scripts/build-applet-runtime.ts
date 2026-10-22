@@ -1,8 +1,8 @@
-import {worldActions} from '../core/tools/gateway.ts';
+import {worldActions} from '../agent/gate/gateway.ts';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import path from 'node:path';
-import {APP_DEFINITIONS} from '../core/applets/catalog.ts';
-import {validateAppletRuntimes} from '../core/applets/runtime.ts';
+import {APP_DEFINITIONS} from '../context/applets/catalog.ts';
+import {validateAppletRuntimes} from '../context/applets/runtime.ts';
 export async function buildAppletRuntime(root:string,output:string){
  const rows=[],actions=worldActions();
  for(const app of APP_DEFINITIONS){

@@ -1,4 +1,4 @@
-// The `send` Harness service (contracts/harness-services.ts HarnessSend; core/agent/PORTABILITY.md#replying-in-a-channel):
+// The `send` Harness service (contracts/harness-services.ts HarnessSend; agent/gate/PORTABILITY.md#replying-in-a-channel):
 // Fox offers a reply in the channel a brought conversation came from, the person sees the exact text with Send, Edit and
 // Skip, and only their Send has their own Agent send it. OpenClaw and Hermes Agent declare it (`openclaw message send`,
 // `hermes send`), every other Harness does not and is not offered it. Fixture folders and a fake command only: nothing
@@ -9,10 +9,10 @@ import os from 'node:os';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {HARNESS_SERVICE_NAMES} from '../contracts/harness-services.ts';
-import {HARNESS_SERVICES,channelReplyText,harnessSendResult,harnessService,hermesSendArgs,hermesSendRoute,hermesSharedChat,openClawSendArgs,openClawSendRoute,openClawSharedSession} from '../core/agent/index.ts';
-import {harnessSend,type SendCommand} from '../platform/electron/src/modules/agent-runtime/harness-send.ts';
-import {installChannelReplies} from '../platform/electron/src/modules/fox/channel-reply.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {HARNESS_SERVICES,channelReplyText,harnessSendResult,harnessService,hermesSendArgs,hermesSendRoute,hermesSharedChat,openClawSendArgs,openClawSendRoute,openClawSharedSession} from '../agent/gate/index.ts';
+import {harnessSend,type SendCommand} from '../platform/host/modules/companion/agent/harness-send.ts';
+import {installChannelReplies} from '../platform/host/modules/companion/channel-reply.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
 import {mountChannelReply} from '../ui/companion/fox-channel-reply.ts';
 
 // Declared, never assumed from a name.

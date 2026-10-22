@@ -6,7 +6,7 @@ Object.assign(globalThis,{
  localStorage:{getItem:(k:string)=>store.get(k)??null,setItem:(k:string,v:string)=>store.set(k,v)},
  document:{documentElement:{lang:'en',classList:{contains:(c:string)=>c==='desktop-companion'}}},
 });
-const {mountDesktopCompanionHint}=await import('../ui/onboarding/desktop-companion-hint.ts');
+const {mountDesktopCompanionHint}=await import('../ui/frame/desktop-companion-hint.ts');
 const view={guideSource:null as string|null,busy:false,setGuide(g:any){guides.push(g);view.guideSource=g?.source??null;}};
 const state={onboarding:{completed:true}},root={dataset:{}};
 const wait=(ms:number)=>new Promise(r=>setTimeout(r,ms));

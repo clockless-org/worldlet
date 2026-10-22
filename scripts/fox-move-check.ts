@@ -1,11 +1,11 @@
-// Fox's own Hermes profile moving into the person's stock Hermes Agent (platform/electron/src/modules/agent-runtime/fox-move.ts):
+// Fox's own Hermes profile moving into the person's stock Hermes Agent (platform/host/modules/companion/agent/fox-move.ts):
 // once, only what that Hermes Agent lacks (memory files missing or empty there, skills it has not got, the person's own
 // scheduled jobs when it has none), never settings, keys, sign-ins, Hermes' bundled skills or Worldlet's own jobs, and
 // nothing of the person's Hermes Agent replaced.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {moveFoxProfile} from '../platform/electron/src/modules/agent-runtime/fox-move.ts';
+import {moveFoxProfile} from '../platform/host/modules/companion/agent/fox-move.ts';
 import {withTempDir} from './test-temp.ts';
 
 const write=(file:string,text:string)=>{fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,text);};

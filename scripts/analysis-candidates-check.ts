@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {mergeAnalysisCandidates as merge} from '../core/applets/analysis-candidates.ts';
+import {mergeAnalysisCandidates as merge} from '../context/applets/analysis-candidates.ts';
 const candidate={provider:'gmail',title:'Reply',sources:[{id:'thread',quote:'Please reply'}]};
 assert.deepEqual(merge([candidate],[{sources:candidate.sources,title:'Reply',provider:'gmail'}]),[candidate]);
 assert.equal(merge([candidate],[{...candidate,title:'Schedule meeting'}]).length,2,'same evidence may support different obligations');
@@ -11,14 +11,14 @@ assert.throws(()=>merge(full,[{...candidate,id:'overflow'}]));
 assert.equal(full[0].title,'Reply','merge must not mutate its inputs');
 console.log('PASS candidate replay dedup, explicit updates, distinct obligations and bounded staging');
 
-const {analysisSourceContent:source}=await import('../core/applets/analysis-candidates.ts');
+const {analysisSourceContent:source}=await import('../context/applets/analysis-candidates.ts');
 const record={id:'one',text:'Same body',title:'Original',url:'https://example.com',observedAt:1};
 assert.equal(source(record),source({...record,observedAt:99}),'poll time must not invalidate content');
 assert.equal(source(record),source({url:record.url,text:record.text,id:record.id,title:record.title}));
 for(const change of [{title:'Changed'},{url:'https://example.com/new'},{cancelled:true},{start:'2026-10-01T10:00:00Z'}])assert.notEqual(source(record),source({...record,...change}));
 console.log('PASS source versions include structured evidence and ignore poll timestamps');
 
-const {orderAnalysisRecords:order}=await import('../core/applets/analysis-candidates.ts');
+const {orderAnalysisRecords:order}=await import('../context/applets/analysis-candidates.ts');
 const queue=[{id:'bad',text:'bad'},{id:'next',text:'next'},{id:'last',text:'last'}];
 let attempted:Record<string,number>={};
 assert.deepEqual(order(queue,attempted),queue);
@@ -30,7 +30,7 @@ assert.equal(order([{id:'new',text:'new'},...queue],attempted)[0].id,'new');
 assert.equal(queue[0].id,'bad','ordering leaves stored observations unchanged');
 console.log('PASS failed records rotate without acknowledgement and new sources get a first attempt');
 
-const {analysisBatch:batch}=await import('../core/applets/analysis-candidates.ts');
+const {analysisBatch:batch}=await import('../context/applets/analysis-candidates.ts');
 const large=Array.from({length:20},(_,i)=>({id:String(i),text:'x'.repeat(12000)}));
 assert.equal(batch(large,20).length,2);
 assert.equal(batch(large,1).length,1);
@@ -44,9 +44,9 @@ assert.throws(()=>batch(queue,0));
 console.log('PASS whole-record character budget, count bound, oversized isolation and complete coverage');
 
 // A Calendar event's times are the provider's facts: upsert_world_items projects them before the candidate rules run,
-// so a model-written start or end never rejects the event (#1609, platform/electron/src/modules/attention/tools.ts).
-const {appletCandidateContent:content}=await import('../core/applets/candidate-content.ts');
-const {calendarItemTimes:times}=await import('../core/items/world-item-projection.ts');
+// so a model-written start or end never rejects the event (#1609, platform/host/modules/attention/tools.ts).
+const {appletCandidateContent:content}=await import('../context/applets/candidate-content.ts');
+const {calendarItemTimes:times}=await import('../context/store/world-item-projection.ts');
 const meeting={provider:'google-calendar',kind:'event',title:'Design review',reason:'Review the launch plan',summary:'Design review with the launch team.',
  start:'tomorrow at 3pm',end:'2026-10-06T14:00:00-07:00',sources:[{provider:'google-calendar',id:'event-1',quote:'Design review'}]};
 const evidence={'google-calendar:event-1':{provider:'google-calendar',id:'event-1',text:'Design review',start:'2026-10-07T15:00:00-07:00',end:'2026-10-07T16:00:00-07:00'}};

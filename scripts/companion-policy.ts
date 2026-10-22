@@ -10,7 +10,7 @@ for(const [key,value] of Object.entries(policy)){
  if(key.endsWith('Pattern'))assert(typeof value==='string'&&value.startsWith('^')&&value.endsWith('\\z'),`${key} is an anchored pattern`);
 }
 assert.equal(policy.format,'worldlet.companion');assert.equal(policy.version,1);
-const host='platform/electron/src/modules/fox/companion.ts',source=await read(host);
+const host='platform/host/modules/companion/companion.ts',source=await read(host);
 assert.match(source,/^import policy from '(?:\.\.\/)+contracts\/companion-policy\.json';$/m,`${host} imports the shared policy`);
 for(const match of source.matchAll(/(?<![\w-])policy\.(\w+)/g))assert(match[1] in policy,`Unknown companion policy ${match[1]} in ${host}`);
 assert(!/\bCompanionPolicy\b|\b16_?000_?000\b/.test(source),`${host} must not restate companion limits`);

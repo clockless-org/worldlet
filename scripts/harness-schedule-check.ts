@@ -4,14 +4,14 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
-import {afterScheduleCursor,harnessService,hermesScheduleJob,hermesScheduleRun,openClawScheduleJob,openClawScheduleRun,scheduleCursor,scheduleElsewhere,scheduleRunsAfter,scheduleStep,SCHEDULE_PUSH_MAX,dailyScheduleResult,dailyScheduleFailure,routineScheduleResult,journalTarget,WORLDLET_SCHEDULE} from '../core/agent/index.ts';
-import {hermesSchedule,openClawSchedule} from '../platform/electron/src/modules/agent-runtime/harness-schedule.ts';
-import {createHarnessJobs} from '../platform/electron/src/modules/fox/harness-jobs.ts';
-import {AGENT,PHONE} from '../platform/electron/src/host/services.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {afterScheduleCursor,harnessService,hermesScheduleJob,hermesScheduleRun,openClawScheduleJob,openClawScheduleRun,scheduleCursor,scheduleElsewhere,scheduleRunsAfter,scheduleStep,SCHEDULE_PUSH_MAX,dailyScheduleResult,dailyScheduleFailure,routineScheduleResult,journalTarget,WORLDLET_SCHEDULE} from '../agent/gate/index.ts';
+import {hermesSchedule,openClawSchedule} from '../platform/host/modules/companion/agent/harness-schedule.ts';
+import {createHarnessJobs} from '../platform/host/modules/companion/harness-jobs.ts';
+import {AGENT,PHONE} from '../platform/host/services.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
 
 // The person's scheduled jobs run on their own Agent's scheduler and each run comes back to the World
-// (core/agent/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent): Core's rules for OpenClaw's and Hermes Agent's
+// (agent/gate/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent): Core's rules for OpenClaw's and Hermes Agent's
 // records and for what a run becomes, the host's read-only `files` readers against fixture folders (OpenClaw's
 // task_runs, older cron_run_logs and JSONL run logs, its Gateway lock; Hermes Agent's run documents and ticker
 // heartbeat), and the Harness-neutral consumer writing Attention items and phone notifications into a World.
@@ -86,7 +86,7 @@ assert.equal(many.results[0].item.title,'Scheduled job');assert.equal(many.resul
 assert.equal(scheduleStep({harness,state:{version:1,since:0},jobs:[],runs:[{...ok,at:NOW-13*3600_000}],running:null,now:NOW}).results[0].push,null,'an old result is in the World, not pushed');
 const stopped=scheduleStep({harness,state:{version:1,since:0},jobs:[job,{...job,id:'off',name:'Off',paused:true}],runs:[],running:false,start:'openclaw gateway install',now:NOW});
 assert.equal(stopped.state.stoppedNoted,true);assert.equal(stopped.stopped?.item.kind,'task');
-assert.match(String(stopped.stopped?.item.summary),/^Morning news run on OpenClaw's own scheduler, which is not running\. Start it in Settings › Agent › Routines\./);
+assert.match(String(stopped.stopped?.item.summary),/^Morning news run on OpenClaw's own scheduler, which is not running\. Start it in Settings › Agents › Your Agent › Routines\./);
 assert.equal(scheduleStep({harness,state:stopped.state,jobs:[job],runs:[],running:false,now:NOW}).stopped,null,'noted once');
 assert.equal(scheduleStep({harness,state:stopped.state,jobs:[job],runs:[],running:true,now:NOW}).state.stoppedNoted,undefined,'noted again after it runs and stops');
 assert.equal(scheduleStep({harness,state:{version:1,since:0},jobs:[{...job,paused:true}],runs:[],running:false,now:NOW}).stopped,null,'nothing waiting');
@@ -220,12 +220,12 @@ try{
  // A default Routine that made no card says so plainly, as Worth Doing (owner decision 2026-10-11: never fail silently).
  const missed=dailyScheduleFailure({kind:'plan',day:'2026-10-11',reason:'Fox needs an Agent',at,now})!;
  assert.equal(missed.item.kind,'task');assert.equal(missed.item.title,'Today’s prep · Oct 11');assert.equal(missed.item.attentionContentVersion,1);
- assert.match(String(missed.item.summary),/^It did not finish: Fox needs an Agent\n\nAsk Fox to make it again, or pause it in Settings › Agent › Routines\.$/);
+ assert.match(String(missed.item.summary),/^It did not finish: Fox needs an Agent\n\nAsk Fox to make it again, or pause it in Settings › Agents › Your Agent › Routines\.$/);
  assert.equal(journalTarget(missed.item.sources),null,'No card to open');
  assert.deepEqual(missed.push,{kind:'routine',title:'Today’s prep · Oct 11',body:'Did not finish: Fox needs an Agent',collapse:'daily-plan'});
  assert.match(String(dailyScheduleFailure({kind:'summary',day:'2026-10-11',at,now})!.item.summary),/your Agent did not say why/);
  assert.equal(dailyScheduleFailure({kind:'plan',day:'soon',at,now}),null);
- const {DAILY_ROUTINE_NAMES}=await import('../core/artifacts/index.ts');
+ const {DAILY_ROUTINE_NAMES}=await import('../context/store/index.ts');
  assert.ok(brief.item.title.startsWith(DAILY_ROUTINE_NAMES.plan)&&summary.item.title.startsWith(DAILY_ROUTINE_NAMES.summary),'The same names as the Task panel and Settings');
  const ran=routineScheduleResult({ran:true,late:true,job:{id:'news',name:'Morning news',last_status:'ok'}},at,now)!;
  assert.equal(ran.item.kind,'update');assert.equal(ran.item.title,'Morning news');assert.match(String(ran.item.summary),/ran late/);

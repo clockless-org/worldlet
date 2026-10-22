@@ -6,11 +6,11 @@
   "purpose": "Image-generated visual target based on the current large-surface background; not a runtime screenshot.",
   "generatedAt": "2026-10-13T04:28:36.184Z",
   "sourceBackground": {
-    "path": "ui/theme-packages/village/assets/applet-scenes/google-calendar/background.webp",
+    "path": "ui/style/theme-packages/village/assets/applet-scenes/google-calendar/background.webp",
     "sha256": "a4218c9dfb845a984f1e9f7a7b24ee9612f50f8ff00895c67747c2f7a2586423"
   },
   "sourceFrame": {
-    "path": "ui/theme-packages/village/assets/applet-scenes/google-calendar/frame-mask.png",
+    "path": "ui/style/theme-packages/village/assets/applet-scenes/google-calendar/frame-mask.png",
     "sha256": "8cb17457e1d7d118c9b7503cf7466ad759a893a4ed8ad88688c997e38e824ad8"
   },
   "sourceImageSha256": "4f9cb197cbbfceb4bb3f8d3dbb20973e9cce2f60bf189f13db68c31f453228c5",

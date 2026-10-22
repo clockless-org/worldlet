@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-import {worldHistoryPage} from '../core/items/index.ts';
-import {worldEvent,recentWorldHistory} from '../core/items/world-events.ts';
+import {worldHistoryPage} from '../context/store/index.ts';
+import {worldEvent,recentWorldHistory} from '../context/store/world-events.ts';
 import {pageErrors,worldUrl,openCompanionPanel,waitForWorld} from './browser-test.ts';
 assert.equal(worldEvent('worldHistory',{}),null,'History reads must not journal themselves');
 assert.deepEqual(recentWorldHistory([{kind:'conversation.message',at:'now',body:{preview:'private'}},{kind:'applet.check',key:'gmail',at:'now',body:{status:'complete'}}],8),[{kind:'applet.check',applet:'gmail',at:'now',status:'complete'}]);
@@ -17,9 +17,11 @@ if(b.action==='worldHistory'){(window as any).historyCalls++;if((window as any).
  }}}};});
  await page.goto(process.env.WORLDLET_TEST_URL||worldUrl());await waitForWorld(page);
  await openCompanionPanel(page);
- // Every recorded event lives in Settings › Help, folded under For the Worldlet team; History is the plain feed.
+ // Every recorded event is on the Worldlet team's page, opened by clicking the version line under the Settings list five
+ // times (owner request 2026-10-22); History is the plain feed.
  const panel=page.locator('#companionInfo'),history=panel.locator('.companion-history-records');
- await panel.locator('[data-setting=help]').click();await panel.getByText('For the Worldlet team',{exact:true}).click();await history.getByText('Fixture message 60 <b>plain text</b>',{exact:true}).waitFor();
+ const teamPage=async()=>{for(let i=0;i<5;i++)await panel.locator('.companion-settings-version').dispatchEvent('click');};
+ await teamPage();await history.getByText('Fixture message 60 <b>plain text</b>',{exact:true}).waitFor();
  assert.equal(await history.locator('li').count(),50);assert.equal(await history.locator('b').count(),0);
  assert(await history.getByRole('img',{name:'You',exact:true}).count()>0);assert(await history.getByRole('img',{name:'Fox',exact:true}).count()>0);assert(await history.getByRole('img',{name:'Mail',exact:true}).count()>0);
  await history.locator('li').first().evaluate(e=>(window as any).retainedHistoryRow=e);
@@ -50,7 +52,7 @@ if(b.action==='worldHistory'){(window as any).historyCalls++;if((window as any).
  for(const [host,fixture] of [['legacy-mac',raw],['mac',projected],['windows',projected]] as const){
   await page.evaluate(rows=>{(window as any).historySample=false;(window as any).historyFixture=rows;sessionStorage.setItem('history-fixture',JSON.stringify(rows));},fixture);
   await page.reload();await waitForWorld(page);
-  await openCompanionPanel(page);await panel.locator('[data-setting=help]').click();await panel.getByText('For the Worldlet team',{exact:true}).click();await history.getByText('Source: Browser',{exact:false}).first().waitFor();
+  await openCompanionPanel(page);await teamPage();await history.getByText('Source: Browser',{exact:false}).first().waitFor();
   assert.equal(await history.locator('li').count(),9,host+' retained fixture after reload');
   assert.deepEqual(await history.locator('li').evaluateAll(rows=>rows.map(row=>(row as HTMLElement).dataset.seq)),raw.map(row=>String(row.seq)));
   assert.equal(await history.getByText('Some activity may be missing. Outcome unknown.',{exact:true}).count(),2);

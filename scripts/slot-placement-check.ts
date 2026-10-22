@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import {emptyRegionLayout,moveRegionApplet,parseRegionLayout,pinnedPlace,pinRegionApplet,recentlyUsedFirst,readRegionLayout,recordAppletUse} from '../ui/world/region-layout.ts';
-import {updateOnboarding} from '../core/onboarding/onboarding.ts';
-import {WORLD_APPS} from '../core/applets/catalog.ts';
-import {recommendForArea,appletHost} from '../core/applets/area-recommend.ts';
-import {inAppletCatalog} from '../core/applets/applet-support.ts';
+import {updateOnboarding} from '../agent/companion/onboarding.ts';
+import {WORLD_APPS} from '../context/applets/catalog.ts';
+import {recommendForArea,appletHost} from '../context/applets/area-recommend.ts';
+import {inAppletCatalog} from '../context/applets/applet-support.ts';
 import {WORLD_LAYOUT} from '../ui/world/world-layout.ts';
 import {APPLET_SPRITES} from '../ui/world/applet-sprites.ts';
 import {resolvePlacements,freePlacements,nearestPlacement,sameAnchor,slotsForApplet} from '../ui/world/slot-placement.ts';
@@ -99,7 +99,7 @@ assert.throws(()=>updateOnboarding({version:1,presets:['home'],completed:true},{
  const moved=recommendForArea({area:'work',apps,mine:new Map([...mine,['app-spotify','work']])});
  assert.ok(moved.includes('app-youtube')&&moved.indexOf('app-youtube')>moved.indexOf('app-zoom'),'moved-in categories follow the Area\'s own');
  assert.ok(!recommendForArea({area:'work',apps,mine}).includes('app-youtube'),'unrelated categories stay out');
- // What the person's own Agent suggested comes first in its own Area, and only there (core/agent/agent-profile.ts).
+ // What the person's own Agent suggested comes first in its own Area, and only there (agent/gate/agent-profile.ts).
  const suggested=new Set(['jira','youtube']);
  assert.deepEqual(recommendForArea({area:'work',apps,mine,installed:new Set(['zoom']),suggested}).slice(0,2),['app-jira','app-zoom'],'suggested, then installed');
  assert.ok(!recommendForArea({area:'work',apps,mine,suggested}).includes('app-youtube'),'a suggestion stays in its own Area');

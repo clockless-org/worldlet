@@ -17,7 +17,7 @@ await withBrowser(fileAccess,async browser=>{
    if(body.action==='snapshot')return {workspaceId:'fox-browse',revision:0,sources:[],knowledge:[],connections:[],onboarding:{completed:true},sampleEnabled:false,cloudConsent:true};
    if(body.action==='modelStatus')return {available:true,cloudAllowed:true};
    if(body.action==='foxProactive'){
-    // The host answers later with the line, as a page event (modules/fox proactiveRunTurn).
+    // The host answers later with the line, as a page event (modules/companion proactiveRunTurn).
     setTimeout(()=>window.dispatchEvent(new CustomEvent('worldlet:fox-proactive',{detail:{id:'proactive-1',line:'This video is the one your calendar note links to.',thread:body.thread,moment:body.moment}})),10);
     return {started:true,id:'proactive-1',...w.game?{game:true}:{}};
    }

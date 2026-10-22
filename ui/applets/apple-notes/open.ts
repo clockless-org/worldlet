@@ -1,4 +1,4 @@
-import {node,uiIcon} from '../../components/index.ts';
+import {node,uiIcon} from '../../style/index.ts';
 import type {AppletSceneRegion} from '../scene/applet-scene.ts';
 
 /** Notes owns only the notebook interaction. The host supplies saved originals and its safe Markdown renderer. */

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {applyMemoryEdits} from '../core/companion/memory-edits.ts';
+import {applyMemoryEdits} from '../agent/companion/memory-edits.ts';
 const archive:any={memories:[{id:'a',kind:'user',text:'Old'},{id:'b',kind:'longTerm',text:'Keep'},{id:'c',kind:'soul',text:'Identity'}],conversations:[{text:'History remains'}]};
 const corrected=applyMemoryEdits(archive,{user:'New'});
 assert.equal(corrected.memories.find(m=>m.kind==='user')?.text,'New');assert.equal(archive.memories[0].text,'Old');

@@ -12,12 +12,12 @@ assert.deepEqual(selectChecks(null),all);
 assert.deepEqual(selectChecks([]),[]);
 assert.deepEqual(selectChecks(['README.md','docs/RELEASE-GUIDELINES.md']),[]);
 assert.deepEqual(selectChecks(['ui/companion/motion.ts']),trustChecks);
-for(const file of ['scripts/machine-capacity.mjs','scripts/dev-workspace.ts','gatehouse/auth.mjs',
+for(const file of ['scripts/machine-capacity.mjs','scripts/dev-workspace.ts',
  '.github/workflows/architecture.yml','package-lock.json','package.json','release.json','new-root/config',
- 'platform/electron/distribution/mac/publish-release.py','scripts/release-label-check.ts','scripts/machine-health-check.ts']){
+ 'platform/desktop/distribution/mac/publish-release.py','scripts/release-label-check.ts','scripts/machine-health-check.ts']){
  assert.deepEqual(selectChecks([file]),all,file);
 }
-for(const file of ['core/agent/turn-trust.ts','harness/example/agent.py','contracts/agent.ts'])assert.deepEqual(selectChecks([file]),trustChecks,file);
+for(const file of ['agent/gate/turn-trust.ts','harness/example/agent.py','contracts/agent.ts'])assert.deepEqual(selectChecks([file]),trustChecks,file);
 const pkg=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8'));
 for(const platform of ['darwin','win32','linux']){
  const gates=gateCommands(platform);
@@ -53,10 +53,10 @@ for(const file of readdirSync(new URL('../.github/workflows/',import.meta.url)).
 }
 // A host popup-rule change (#781 shape) selects only the trust checks, not all operational checks.
 const popupPaths=['contracts/README.md','contracts/fixtures/parity/browser-popup.json',
- 'platform/electron/README.md','platform/electron/src/modules/browser/rules.ts','platform/electron/src/modules/browser/page.ts',
+ 'platform/desktop/README.md','platform/host/modules/applets/rules.ts','platform/host/modules/applets/page.ts',
  'scripts/electron-bridge-check.ts','scripts/parity-vectors.ts','scripts/parity-core-usage.ts'];
 assert.deepEqual(selectChecks(popupPaths),trustChecks);
-for(const file of ['scripts/attention-events-check.ts','platform/bridge/world-tool-runtime.ts','platform/electron/src/modules/fox/index.ts'])assert.deepEqual(selectChecks([file]),trustChecks,file);
+for(const file of ['scripts/attention-events-check.ts','platform/bridge/world-tool-runtime.ts','platform/host/modules/companion/index.ts'])assert.deepEqual(selectChecks([file]),trustChecks,file);
 assert.deepEqual(selectChecks([...popupPaths,'scripts/machine-wakeup.mjs']),all,'mixed changes retain operational checks');
 assert.deepEqual(selectChecks(['scripts/unknown-new-helper.ts']),all,'unclassified scripts remain conservative');
 assert(!workflow.includes('paths-ignore:')&&!workflow.includes('paths:'),'required check must always report');
@@ -103,7 +103,7 @@ console.log('PASS PR selection: docs/product/control-plane, full fallback, two-p
  for(const f of loadModules)assert.ok(existsSync(new URL('../'+f,import.meta.url)),'load list names a real module: '+f);
  const calls=[];const ok=(bin,args)=>{calls.push(args);return {status:0};};
  const all=()=>true;
- assert.equal(loadSmoke(['scripts/x.mjs','docs/a.md','ui/y.ts'],ok,all),0);assert.deepEqual(calls[0],['--check','scripts/x.mjs'],'only changed JS under scripts/gatehouse/platform is parsed');
+ assert.equal(loadSmoke(['scripts/x.mjs','docs/a.md','ui/y.ts'],ok,all),0);assert.deepEqual(calls[0],['--check','scripts/x.mjs'],'only changed JS under scripts/platform is parsed');
  assert.equal(loadSmoke(['scripts/x.mjs'],(bin,args)=>({status:args[0]==='--check'?1:0}),all),1,'a script that does not parse fails the PR');
  assert.equal(loadSmoke(['scripts/deleted.mjs'],(bin,args)=>({status:args[0]==='--check'?1:0}),()=>false),0,'a deleted script is not parsed');
  if(loadModules.includes('scripts/machine-wakeup.mjs'))assert.equal(loadSmoke([],(bin,args)=>({status:String(args.at(-1)).includes('machine-wakeup.mjs')?1:0})),1,'a daemon module that does not load fails the PR');

@@ -1,8 +1,8 @@
 {
   "references": {
-    "ui/theme-packages/village/assets/world/day.webp": "5add5153c97e3ce96a1bfd5a8cde2ba480d28fbab02cd20906d80854f5979ef8",
-    "ui/theme-packages/village/assets/devices/tripit.webp": "135aad597b521fcf74d8547f8c10acf71d7a7d3310ea02cf2b20b068b5597129",
-    "ui/theme-packages/village/assets/devices/strava.webp": "aa0b3b9fcaf1338654b3d9db227eb9bac8abdd334dafbc0c678f00e30bfc9d76"
+    "ui/style/theme-packages/village/assets/world/day.webp": "5add5153c97e3ce96a1bfd5a8cde2ba480d28fbab02cd20906d80854f5979ef8",
+    "ui/style/theme-packages/village/assets/devices/tripit.webp": "135aad597b521fcf74d8547f8c10acf71d7a7d3310ea02cf2b20b068b5597129",
+    "ui/style/theme-packages/village/assets/devices/strava.webp": "aa0b3b9fcaf1338654b3d9db227eb9bac8abdd334dafbc0c678f00e30bfc9d76"
   },
   "assets": {
     "weight-balance/icon.png": {

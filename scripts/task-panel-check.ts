@@ -1,8 +1,8 @@
-// The World's tasks beside Fox (core/tasks/task-panel.ts, core/tasks/next-run.ts): which rows go under Scheduled and Doing now,
+// The World's tasks beside Fox (agent/tasks/task-panel.ts, agent/tasks/next-run.ts): which rows go under Scheduled and Doing now,
 // their order, every row kept (a side lists them all), only what the person set going (no Applet checks, no finished
 // work), and the time text. Fixed clock, fictional jobs; no browser.
 import assert from 'node:assert/strict';
-import {nextCronRun,taskPanel,taskHowOften,routineEvery,routineDay,turnTaskName,TURN_TASK_SOURCE} from '../core/tasks/index.ts';
+import {nextCronRun,taskPanel,taskHowOften,routineEvery,routineDay,turnTaskName,TURN_TASK_SOURCE} from '../agent/tasks/index.ts';
 
 const at=(text:string)=>new Date(text).getTime();
 const now=at('2026-10-10T07:30:00');
@@ -81,7 +81,7 @@ assert.deepEqual([driving.now.rows[0].title,driving.now.rows[0].detail,driving.n
 assert.deepEqual([driving.now.rows[0].name,driving.now.rows[0].status,driving.now.rows[0].progress],['example.com','Choosing a court time',.5],'one of two steps done');
 assert.equal(taskPanel({page:{url:'about:blank',title:''}},now,L).now.total,0,'not a web page: no card for it');
 
-// The two default Routines, Today's prep and Wrap up today, stand on the Routines timeline (core/artifacts dailyPlanned).
+// The two default Routines, Today's prep and Wrap up today, stand on the Routines timeline (context/store dailyPlanned).
 {
  const daily=taskPanel({daily:[{kind:'summary',at:at('2026-10-10T18:00:00')},{kind:'plan',at:at('2026-10-11T07:00:00')},{kind:'plan',at:now-1}]},now,L);
  assert.deepEqual(daily.routines.rows.map(r=>[r.id,r.title,r.day,r.clock,r.by]),[['daily:summary','Wrap up today','Today','6:00 PM','Worldlet, with your Agent'],['daily:plan','Today’s prep','Tomorrow','7:00 AM','Worldlet, with your Agent']],'the summary tonight, the brief tomorrow; one due now is not planned');

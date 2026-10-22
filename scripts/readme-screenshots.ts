@@ -2,7 +2,7 @@
 // npm run build:native-ui first; writes docs/assets/readme/*.jpg.
 import {withBrowser,fileAccess,worldUrl} from './browser-test.ts';
 import dataset from '../ui/world/sample-persona.json' with {type:'json'};
-import {WORLD_APPS} from '../core/applets/catalog.ts';
+import {WORLD_APPS} from '../context/applets/catalog.ts';
 const out=(name:string)=>`docs/assets/readme/${name}.jpg`;
 const only=process.argv.slice(2);
 // CHROMIUM_PATH points at an installed Chromium when Playwright's own download is missing.

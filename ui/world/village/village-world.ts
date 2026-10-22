@@ -12,7 +12,7 @@ const LEVELS={overview:'overview',area:'building',applet:'object'} as const;
 function roomOf(a:WorldApplet,room:any={}){
  const region=regionId(a.region||'home');
  return Object.assign(room,{id:a.id,moduleId:a.id,key:a.key,art:a.art,title:a.title,region,buildingId:'building-'+region,entity:a.object?'matter':'app',
-  mine:a.mine,icon:a.icon,device:villageDevice(a.art||a.key),status:{state:a.status,count:a.count,connected:a.connected},allowance:a.allowance});
+  mine:a.mine,icon:a.icon,device:villageDevice(a.art||a.key),status:{state:a.status,count:a.count,connected:a.connected},allowance:a.allowance,figure:a.figure});
 }
 /** The animated Village World (pixi-world.ts) behind the host's World mount (world-renderer.ts). */
 export function renderVillageWorld(context:WorldContext):VillageWorldMount {

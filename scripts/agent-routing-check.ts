@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
-import {AGENT_NOTE_LIMIT,agentAnswerReason,agentBindingInstructions,agentBindingPlace,answeringAgent,bindAgent,noteAgentPlace,readAgentBindings} from '../core/agent/index.ts';
-import {conversationAttentionId,ongoingId} from '../core/tasks/index.ts';
-import {createHarnessAgents} from '../platform/electron/src/modules/fox/harness-agents.ts';
-import {AGENT} from '../platform/electron/src/host/services.ts';
-import {WorldLedger} from '../platform/electron/src/store/ledger.ts';
+import {AGENT_NOTE_LIMIT,agentAnswerReason,agentBindingInstructions,agentBindingPlace,answeringAgent,bindAgent,noteAgentPlace,readAgentBindings} from '../agent/gate/index.ts';
+import {conversationAttentionId,ongoingId} from '../agent/tasks/index.ts';
+import {createHarnessAgents} from '../platform/host/modules/companion/harness-agents.ts';
+import {AGENT} from '../platform/host/services.ts';
+import {WorldLedger} from '../platform/host/store/ledger.ts';
 import {withTempDir} from './test-temp.ts';
 
-// Several agents routed by channel and instructions per place (core/agent/PORTABILITY.md#which-agent-answers-where):
+// Several agents routed by channel and instructions per place (agent/gate/PORTABILITY.md#which-agent-answers-where):
 // the one precedence rule (person > group > Applet > area > the main agent), the bindings and notes the World keeps,
 // and the host finding the places an Applet's thread is in, a brought channel conversation's person or group among them.
 

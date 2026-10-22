@@ -1,10 +1,10 @@
-// Moment Applets on the World page (core/artifacts/README.md): an Applet Fox made for today stands on the Home ground
+// Moment Applets on the World page (context/store/ARTIFACTS.md): an Applet Fox made for today stands on the Home ground
 // as its own device under its own name, leads the Attention Center's Now, opens its page in the host's sandboxed view
 // laid over the panel's slot, Back hides that view, and Delete goes to the host. There is no Widgets Applet.
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {pageErrors,worldUrl,waitForWorld} from './browser-test.ts';
-import {READY_APPLETS,widgetDocument,readWidgetConsole} from '../core/artifacts/index.ts';
+import {READY_APPLETS,widgetDocument,readWidgetConsole} from '../context/store/index.ts';
 const browser=await chromium.launch({args:['--allow-file-access-from-files']});
 try{
  // A fixed morning in a fixed zone: the end three hours later reads the same on every host at any hour.
@@ -25,9 +25,9 @@ try{
  await page.waitForFunction(()=>((document.querySelector('#notionWorld') as any)?.sceneMetrics?.modules||[]).some(m=>m.id==='app-wgt-getty2abcd'&&m.visible!==false));
  const modules=await page.evaluate(()=>(document.querySelector('#notionWorld') as any).sceneMetrics.modules.map(m=>m.id));
  assert.ok(!modules.includes('app-widgets'),'no Widgets Applet');
- // It is the person's own Applet: the World marks it (core/applets/MY-APPLETS.md).
+ // It is the person's own Applet: the World marks it (context/applets/MY-APPLETS.md).
  assert.equal(await page.evaluate(()=>(document.querySelector('#notionWorld') as any).sceneMetrics.modules.find(m=>m.id==='app-wgt-getty2abcd')?.mine),'page');
- // Its pictures are asked of the host's painter by name and kind (core/applets/MY-APPLETS.md#pictures).
+ // Its pictures are asked of the host's painter by name and kind (context/applets/MY-APPLETS.md#pictures).
  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='appletArt'&&c.operation==='ensure'&&c.applets.some(a=>a.applet==='app-wgt-getty2abcd'&&a.kind==='page'&&a.title==='Getty Center today')));
  await page.screenshot({path:'/tmp/moment-world.png'});
  const row=page.locator('.world-task-group[data-group=widget] .world-widget');

@@ -1,5 +1,5 @@
 // The Obsidian reader is read-only and confined to the chosen vault
-// (platform/electron/src/modules/sources/local.ts), on a temporary vault; no dialog or app.
+// (platform/host/modules/connectors/local.ts), on a temporary vault; no dialog or app.
 import {writeFile,mkdir,symlink} from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
 import path from 'node:path';
@@ -12,7 +12,7 @@ await withTempDir('worldlet-vault-check-',async temp=>{
  await writeFile(path.join(temp,'outside.md'),'Outside');
  await symlink(path.join(temp,'outside.md'),path.join(vault,'escaped.md'));
  await writeFile(path.join(temp,'main.ts'),`import assert from 'node:assert/strict';
-import {createLocal} from ${JSON.stringify(path.resolve('platform/electron/src/modules/sources/local.ts'))};
+import {createLocal} from ${JSON.stringify(path.resolve('platform/host/modules/connectors/local.ts'))};
 const store={writable:true,sampleEnabled:()=>false,changed(){},state:{connections:[{id:'obsidian-vault',provider:'obsidian',vaultPath:${JSON.stringify(vault)}}]}};
 const local=createLocal({store,host:{profile:{webRoot:''},window:()=>null}} as any,()=>{});
 const list=await local.obsidianContent({operation:'list'});

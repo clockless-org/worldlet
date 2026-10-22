@@ -3,8 +3,8 @@ import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
 import path from 'node:path';
 import {tmpdir} from 'node:os';
 const platform=process.platform==='win32'?'windows':'macos';
-import {updateOnboarding} from '../core/onboarding/onboarding.ts';
-import {WORLD_APPS,seedAppletSelection} from '../core/applets/index.ts';
+import {updateOnboarding} from '../agent/companion/onboarding.ts';
+import {WORLD_APPS,seedAppletSelection} from '../context/applets/index.ts';
 // Every app setup can offer says what it is for in one line (demo feedback 2026-10-03); a website Applet never claims account sync.
 for(const app of WORLD_APPS){
  assert.ok(typeof app.purpose==='string'&&app.purpose.trim().length>=10&&app.purpose.length<=90&&!app.purpose.includes('\n'),'one-line purpose for '+app.key);
@@ -78,7 +78,7 @@ await withBrowser(fileAccess,async browser=>{
    assert.equal(await page.locator('#setupMore').isVisible(),false);
    await toggle.click();
    assert.equal(await page.locator('#setupMore').isVisible(),true);
-   assert.deepEqual(await page.locator('.setup-more .setup-agent-button.is-missing').evaluateAll(list=>list.map(b=>b.getAttribute('aria-label'))),['OpenClaw','pi','Claude Code'],'Hermes Agent is the card, the rest wait in More options');
+   assert.deepEqual(await page.locator('.setup-more .setup-agent-button.is-missing').evaluateAll(list=>list.map(b=>b.getAttribute('aria-label'))),['OpenClaw','pi','Codex','Claude Code'],'Hermes Agent is the card, the rest wait in More options');
    assert.deepEqual(await page.locator('.setup-more :is(.setup-google-button,.setup-chatgpt-button)').allTextContents(),['Continue with Google'],'only the mock\'s row, no ChatGPT');
    assert.equal(await page.locator('.setup-google-button').isDisabled(),true,'the mock signs in from its own link');
    assert.equal(await page.locator('.setup-signin-tag',{hasText:'Coming soon'}).count(),0,'nothing coming soon');
@@ -247,11 +247,10 @@ await withBrowser(fileAccess,async browser=>{
   await page.goto(worldUrl());
   await page.locator('.setup-agent-card[data-agent="openclaw"]').waitFor();
   await page.waitForFunction(()=>!(document.querySelector('.setup-agent-card[data-agent="claude-code"]') as HTMLButtonElement)?.disabled);
-  // Picked for the person (owner request 2026-10-06): Hermes, OpenClaw, pi first, then Claude Code; Codex alone is no
-  // Agent (owner decision 2026-10-09), so it has no card. Hermes isn't here, so OpenClaw is picked, first and lifted;
+  // Picked for the person (owner request 2026-10-06): Hermes, OpenClaw, pi first, then Codex, then Claude Code; Codex
+  // has a card like the others (owner request 2026-10-20). Hermes isn't here, so OpenClaw is picked, first and lifted;
   // the big button names it by its own name.
-  assert.deepEqual(await page.locator('.setup-agent-cards .setup-agent-card').evaluateAll((list:HTMLElement[])=>list.map(b=>b.dataset.agent)),['openclaw','pi','claude-code']);
-  assert.equal(await page.locator('[data-agent="codex"]').count(),0,'Codex has no card');
+  assert.deepEqual(await page.locator('.setup-agent-cards .setup-agent-card').evaluateAll((list:HTMLElement[])=>list.map(b=>b.dataset.agent)),['openclaw','pi','codex','claude-code']);
   assert.equal(await page.locator('.setup-agent-default').getAttribute('data-agent'),'openclaw');
   assert.equal(await page.locator('.setup-agent-default').getAttribute('aria-pressed'),'true');
   assert.equal(await page.locator('.setup-next').textContent(),'Build your world');
@@ -288,11 +287,11 @@ await withBrowser(fileAccess,async browser=>{
   // The tiles fill their grid with no gap (owner request 2026-10-09).
   const fill=await page.locator('.setup-tiles').evaluate(grid=>{const box=grid.getBoundingClientRect(),gap=10;let area=0;for(const tile of grid.querySelectorAll('.setup-tile')){const r=tile.getBoundingClientRect();area+=(r.width+gap)*(r.height+gap);}return area/((box.width+gap)*(box.height+gap));});
   assert.ok(Math.abs(fill-1)<.01,'The tiles fill the grid: '+fill);
-  await page.getByText('Nova signs in with its own account, which Fox can’t use. After setup, choose a model in Settings, under Agent.',{exact:true}).waitFor();
+  await page.getByText('Nova signs in with its own account, which Fox can’t use. After setup, choose a model in Settings, under Agents.',{exact:true}).waitFor();
   // Only what came over gets a tile (owner request 2026-10-09), in the order it arrives.
   assert.deepEqual(await page.locator('.setup-tile').evaluateAll(list=>list.map(e=>e.className.split(' ')[1])),['setup-tile-avatar','setup-tile-profile','setup-tile-conversations','setup-tile-notes','setup-tile-skills','setup-tile-routines','setup-tile-things','setup-tile-connections','setup-tile-apps']);
   assert.equal(await page.locator('.setup-tile-profile .setup-tile-note').textContent(),'Knows: Runs a small design studio in Kyoto');
-  // Meanwhile Worldlet asks the Agent what the person does most (core/agent/agent-profile.ts things), and says so.
+  // Meanwhile Worldlet asks the Agent what the person does most (agent/gate/agent-profile.ts things), and says so.
   assert.equal(await page.locator('.setup-tile-things.is-waiting .setup-tile-note').textContent(),'Asking Nova what you do most…');
   assert.equal(await page.locator('.setup-tile-conversations .setup-tile-count').textContent(),'3');
   assert.deepEqual(await page.locator('.setup-tile-conversations li').allTextContents(),['Trip plan for Kyoto','Weekly investor update','Fix the flaky login test']);
@@ -311,7 +310,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='select').map(c=>c.id)),['claude-code','openclaw']);
   assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>['localAgent','agentIntegrations'].includes(c.action)).map(c=>c.action+':'+c.operation+':'+c.id)),['localAgent:adopt:openclaw','agentIntegrations:port:openclaw']);
   assert.ok(!await page.evaluate(()=>(window as any).calls.some(c=>c.action==='connect')),'No Google sign-in');
-  // Which Agent, who answers for Fox, and what came along: IDs, buckets and outcomes only (core/diagnostics/ANALYTICS.md#bringing-an-agent).
+  // Which Agent, who answers for Fox, and what came along: IDs, buckets and outcomes only (agent/app/ANALYTICS.md#bringing-an-agent).
   await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='usageEvent'&&c.event==='agent_bring_completed'));
   const usage=await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='usageEvent'));
   const chosen=usage.find(c=>c.event==='local_agent_selected'&&c.local_agent==='openclaw');
@@ -320,7 +319,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.ok(brought&&brought.local_agent==='openclaw'&&brought.integrations_came_over==='1_9'&&brought.integrations_reconnect==='1_9'&&/^(0|1_9|10_99|100_999|1000_plus)$/.test(brought.bring_conversations),JSON.stringify(brought));
   assert.ok(!JSON.stringify(usage).match(/GitHub|Nova|#|\//),'No titles, names or paths in setup events');
   assert.equal(await page.evaluate(()=>(window as any).fixture.cloudConsent),true,'Choosing an Agent allows Fox to use the world’s context');
-  // OpenClaw then describes itself in the background (core/agent/agent-profile.ts): what its files did not show joins
+  // OpenClaw then describes itself in the background (agent/gate/agent-profile.ts): what its files did not show joins
   // the tiles and the World's selection, and only the outcome and a count leave the device.
   await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:agent-check',{detail:{id:'openclaw',result:'ok',ms:40000,profile:{agent:{name:'Nova'},workspaces:[],aboutUser:[],skills:[{name:'a'},{name:'b'},{name:'c'},{name:'d'},{name:'e'}],connections:[{name:'1Password vault',kind:'password_vault',service:'1password'}],channels:[{provider:'discord',place:'#groceries'}],routines:[],threads:[],applets:[{key:'amazon',title:'Amazon',why:'Restocks the kitchen'}],things:[{title:'Kitchen restock',threads:['#groceries'],key:'amazon'},{title:'Studio invoices',threads:[]}]}}})));
   await page.waitForFunction(()=>document.querySelectorAll('.setup-tile-connections .setup-tile-logos>*').length===4);
@@ -437,7 +436,7 @@ await withBrowser(fileAccess,async browser=>{
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-fit-2-1440-'+host+'.png')});
   assert.deepEqual(errors,[]);await page.close();
  }
-// One-click install (`--connect=<id>`, core/agent/PORTABILITY.md#local-harnesses-chosen-at-setup): the Agent the
+// One-click install (`--connect=<id>`, agent/gate/PORTABILITY.md#local-harnesses-chosen-at-setup): the Agent the
  // host hands over is connected with the same select as the big button and brought in by itself; one not
  // found here, or a select that fails, leaves the first half with it picked and the error shown; so does a select that
  // moved on before its answer check (`checkLater`) and hears that check failed; a second launch while setup is open
@@ -508,7 +507,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentHarness'&&c.operation==='requested').length>=1),true);
   assert.deepEqual(errors,[]);await page.close();
  }
- // An Agent older than Worldlet works with (core/agent/agent-versions.ts): its card says which version it needs, the big
+ // An Agent older than Worldlet works with (agent/gate/agent-versions.ts): its card says which version it needs, the big
  // button opens its own update in Terminal instead of connecting it, and Check again reads its version afresh.
  {
   const page=await browser.newPage({viewport:{width:1280,height:850},reducedMotion:'reduce'});const errors=pageErrors(page);
@@ -550,8 +549,8 @@ await withBrowser(fileAccess,async browser=>{
     w.calls.push(b);
     if(b.action==='snapshot')return structuredClone(w.fixture);
     if(b.action==='installedApplets')return {keys:[]};
-    // Codex alone is no Agent; Hermes appears once it is installed and signed in.
-    if(b.action==='agentHarness'&&b.operation==='detect'){w.detects++;return {agents:w.signedIn?[{id:'hermes',title:'Hermes Agent',configured:true,worldTools:true}]:[{id:'codex',title:'Codex',configured:true,worldTools:true}],recommended:null,selected:sessionStorage.getItem('fixture-agent'),...w.detects===2?{brokenHermes:true}:{}};}
+    // Hermes appears once it is installed and signed in.
+    if(b.action==='agentHarness'&&b.operation==='detect'){w.detects++;return {agents:w.signedIn?[{id:'hermes',title:'Hermes Agent',configured:true,worldTools:true}]:[],recommended:null,selected:sessionStorage.getItem('fixture-agent'),...w.detects===2?{brokenHermes:true}:{}};}
     if(b.action==='agentHarness'&&b.operation==='install-hermes'){
      event({stage:'install',step:3,steps:7,title:'Create Python environment'});
      if(w.failOnce){w.failOnce=false;throw Error('Hermes Agent could not be installed. Check your internet connection and try again. (Create Python environment: bootstrap Python installation failed)');}
@@ -576,7 +575,8 @@ await withBrowser(fileAccess,async browser=>{
   },{platform});
   await page.goto(worldUrl());
   await page.getByText('No agent on this computer yet',{exact:true}).waitFor();
-  assert.equal(await page.locator('[data-agent="codex"]').count(),0,'Codex alone is no Agent');
+  // Codex is supported, so it waits under More options with the other Agents not installed here.
+  assert.equal(await page.locator('.setup-agent-card[data-agent="codex"]').count(),0,'no Codex card when it is not here');
   await page.getByText('No agent found on this computer. Worldlet installs Hermes Agent for you the official way, then you sign in to ChatGPT inside it.',{exact:true}).waitFor();
   await page.getByRole('button',{name:'Check again'}).click();
   await page.waitForFunction(()=>(window as any).detects>=2);
@@ -612,7 +612,7 @@ await withBrowser(fileAccess,async browser=>{
   await page.screenshot({path:path.join(tmpdir(),'worldlet-setup-no-agent-'+platform+'.png')});
   assert.deepEqual(errors,[]);await page.close();
  }
- // Moving off Fox's own Hermes (ui/onboarding/README.md#moving-off-foxs-own-hermes-2026-10-09): a finished World whose Fox
+ // Moving off Fox's own Hermes (ui/frame/ONBOARDING.md#moving-off-foxs-own-hermes-2026-10-09): a finished World whose Fox
  // still runs on it gets the first page once; Google does not stand in for an Agent, an Agent it only copied from is not
  // taken as chosen, the pick answers for Fox itself, the right side shows every tile, nothing about
  // onboarding is redone, and Enter your world opens the World as it was.
@@ -648,7 +648,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.equal(await page.evaluate(()=>(window as any).calls.some(c=>c.action==='onboarding'&&c.operation==='setup')),false,'onboarding setup is not redone');
   assert.deepEqual(errors,[]);await page.close();
  }
- // My Agent is on another computer (core/phone/README.md#another-computers-agent): the code from Worldlet there pairs
+ // My Agent is on another computer (platform/web/README.md#another-computers-agent): the code from Worldlet there pairs
  // this one with it, and setup goes on to the second half; a refused code says why and the code box stays.
  {
   const page=await browser.newPage({viewport:{width:1024,height:700},reducedMotion:'reduce'});const errors=pageErrors(page);

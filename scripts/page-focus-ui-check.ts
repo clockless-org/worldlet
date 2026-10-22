@@ -1,14 +1,14 @@
-// Focus on website pages (core/browser/page-focus.ts): the page script (platform/bridge/page-focus.ts) in a real
-// Chromium page, and the Focus switch in a website Applet's top bar (ui/browser/browser-device.ts). An article page
+// Focus on website pages (agent/applets/page-focus.ts): the page script (platform/bridge/page-focus.ts) in a real
+// Chromium page, and the Focus switch in a website Applet's top bar (ui/applets/browser-device.ts). An article page
 // shows only its article over the page and gives the page back when Focus turns off; an app page keeps its page with
 // its distractions hidden; a page someone writes in is never an article; a single-page site's new address drops the
 // old article. The switch, after Back, is pressed while Focus is on, sends the person's choice, and brings Focus back after Fox.
 import assert from 'node:assert/strict';
-import {pageFocusPlan} from '../core/browser/index.ts';
+import {pageFocusPlan} from '../agent/applets/index.ts';
 import {bundleScript,pageErrors,withBrowser} from './browser-test.ts';
 
 const focus=await bundleScript({entryPoints:['platform/bridge/page-focus.ts'],target:'es2022'});
-const panel=await bundleScript({entryPoints:['ui/browser/browser-device.ts'],globalName:'BrowserPanel'});
+const panel=await bundleScript({entryPoints:['ui/applets/browser-device.ts'],globalName:'BrowserPanel'});
 const paragraph=(n:number)=>`<p>Paragraph ${n} of the story. The river town rebuilt its old stone bridge this autumn, and the people who cross it every morning say the walk feels different now: slower, quieter, with the water loud underneath and the hills close on both sides.</p>`;
 const ARTICLE=`<!doctype html><html><head><title>The bridge - Valley News</title></head><body>
 <header><nav><a href="/">Home</a> <a href="/world">World</a> <a href="/sport">Sport</a></nav></header>

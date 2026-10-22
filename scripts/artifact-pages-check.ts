@@ -1,8 +1,8 @@
-// Theme-driven Artifacts (core/artifacts/README.md#theme-driven-artifacts): one way to make every card, filled in the
+// Theme-driven Artifacts (context/store/ARTIFACTS.md#theme-driven-artifacts): one way to make every card, filled in the
 // host's template or laid out as a page by the Agent from the theme's look.
 import assert from 'node:assert/strict';
-import {ARTIFACT_PAGE_LIMITS,ARTIFACT_PAGE_REPORT,ARTIFACT_PAGE_ROOM,artifactPageActions,artifactPageBrief,artifactPageBudget,artifactPageDocument,artifactPageProblems,artifactPageTask,artifactPageTrialProblems,artifactPageZoom,artifactRenderMode,placeArtifactMaterials,readArtifactPage,readArtifactPageConsole,readArtifactPageSpec,type Artifact} from '../core/artifacts/index.ts';
-import {themeArtifact} from '../ui/themes/build-theme.ts';
+import {ARTIFACT_PAGE_LIMITS,ARTIFACT_PAGE_REPORT,ARTIFACT_PAGE_ROOM,artifactPageActions,artifactPageBrief,artifactPageBudget,artifactPageDocument,artifactPageProblems,artifactPageTask,artifactPageTrialProblems,artifactPageZoom,artifactRenderMode,placeArtifactMaterials,readArtifactPage,readArtifactPageConsole,readArtifactPageSpec,type Artifact} from '../context/store/index.ts';
+import {themeArtifact} from '../ui/style/themes/build-theme.ts';
 
 // Which mode: only an answer at medium or large size, in the World, with a theme look and a generator, is a page.
 const host={theme:true,generator:true};

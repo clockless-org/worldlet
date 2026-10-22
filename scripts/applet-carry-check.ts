@@ -1,7 +1,7 @@
 // Carrying the conversation between Applets (owner Order 2026-10-09), driven through the real World UI with a faked
 // native bridge. The page in a website Applet moves to a site that has its own website Applet in the World: the World
 // moves to that Applet (its title and place), the page it left is let go, and the conversation the person was having
-// continues there instead of the new site starting its own (core/companion/conversation-place.ts, carriesConversation).
+// continues there instead of the new site starting its own (agent/companion/conversation-place.ts, carriesConversation).
 import assert from 'node:assert/strict';
 import type {Page} from 'playwright';
 import {launchTestBrowser,pageErrors,worldUrl} from './browser-test.ts';

@@ -1,27 +1,29 @@
-// GitHub as a Worldlet Service (contracts/services.ts, core/accounts/mcp/github.ts, `read_service`): against a fixture
+// GitHub as a Worldlet Service (contracts/services.ts, context/connectors/mcp/github.ts, `read_service`): against a fixture
 // of GitHub's remote MCP server, a pasted token connects and is kept in the vault with only read tools enabled; list,
-// read and search come back bounded and call only the reader's read tools; another server address, an expired token
-// and a refused turn stop the read; and the Grant targets github/list, github/read and github/search are each enforced,
-// with none of them in an Agent's default Grants.
+// read, search and releases come back bounded and call only the reader's read tools; another server address, an expired
+// token and a refused turn stop the read; and the Grant targets github/list, github/read, github/search and
+// github/releases are each enforced, with none of them in an Agent's default Grants, and a "Can read GitHub" Grant
+// given before releases existed covers them.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import type {AgentIdentity,Grant} from '../contracts/agent-identity.ts';
-import {GITHUB_LIMITS,GITHUB_TOOLS,readGithub} from '../core/accounts/index.ts';
-import {channelDefaultGrants,standingActions,standingCallDecision} from '../core/agent/grants.ts';
-import {hermesChannelToolAllowed} from '../core/agent/hermes-server.ts';
-import {turnTrustObserve} from '../core/agent/turn-trust.ts';
-import {resolveAction,worldActionOf,worldActions} from '../core/tools/gateway.ts';
-import {McpAccounts} from '../platform/electron/src/modules/sources/mcp-account.ts';
-import {McpSource,McpSourceAccess,McpSourceConnections} from '../platform/electron/src/modules/sources/mcp-source.ts';
-import {GoogleAccount} from '../platform/electron/src/modules/sources/google-account.ts';
-import {GoogleSource,GoogleSourceAccess} from '../platform/electron/src/modules/sources/google-source.ts';
-import {APP_DEFINITIONS,connectToken} from '../core/applets/index.ts';
-import {validateAttentionRegistrations} from '../core/attention/attention-center.ts';
-import {attentionFollowupReads,attentionReads} from '../core/attention/index.ts';
-import {validateAppletRuntimes} from '../core/applets/runtime.ts';
-import {conversationGuidance} from '../core/companion/conversation-guidance.ts';
-import {listWorldTools} from '../core/tools/index.ts';
+import {GITHUB_LIMITS,GITHUB_TOOLS,readGithub} from '../context/connectors/index.ts';
+import {channelDefaultGrants,currentServiceGrant,serviceReadGrant,standingActions,standingCallDecision} from '../agent/gate/grants.ts';
+import {readServicePresetRead} from '../context/connectors/index.ts';
+import {hermesChannelToolAllowed} from '../agent/gate/hermes-server.ts';
+import {turnTrustObserve} from '../agent/gate/turn-trust.ts';
+import {resolveAction,worldActionOf,worldActions} from '../agent/gate/gateway.ts';
+import {McpAccounts} from '../platform/host/modules/connectors/mcp-account.ts';
+import {McpSource,McpSourceAccess,McpSourceConnections} from '../platform/host/modules/connectors/mcp-source.ts';
+import {GoogleAccount} from '../platform/host/modules/connectors/google-account.ts';
+import {GoogleSource,GoogleSourceAccess} from '../platform/host/modules/connectors/google-source.ts';
+import {APP_DEFINITIONS,connectToken} from '../context/applets/index.ts';
+import {validateAttentionRegistrations} from '../agent/attention/attention-center.ts';
+import {attentionFollowupReads,attentionReads} from '../agent/attention/index.ts';
+import {validateAppletRuntimes} from '../context/applets/runtime.ts';
+import {conversationGuidance} from '../agent/companion/conversation-guidance.ts';
+import {listWorldTools} from '../agent/gate/index.ts';
 import {withTempDir} from './test-temp.ts';
 
 const TOKEN='fixture-token';
@@ -55,6 +57,14 @@ await withTempDir('worldlet-github-service-',async temp=>{
     return text(Array.from({length:5},(_,i)=>({user:{login:'sam'},created_at:'2026-10-14T10:00:00Z',body:i===4?'y'.repeat(1500):`Comment ${41+i}`})));
    }
    return {isError:true,content:[]};
+  },
+  list_releases:({owner,repo,perPage,page})=>{
+   // More than asked for on the first page, a row that is not a release, and a short last page.
+   const release=(i:number)=>({tag_name:`v1.${i}.0`,name:i===1?'':`App 1.${i}`,html_url:`https://github.com/${owner}/${repo}/releases/tag/v1.${i}.0`,url:`https://api.github.com/repos/${owner}/${repo}/releases/${i}`,
+    published_at:i===2?null:`2026-10-${String(20-i).padStart(2,'0')}T09:00:00Z`,created_at:'2026-10-01T09:00:00Z',prerelease:i%2===1,draft:i===2,author:{login:'alex'},
+    assets:i===3?[]:[{name:'App.dmg',size:1},{name:'App-setup.exe',size:2},...i===4?Array.from({length:25},(_,n)=>({name:`extra-${n}.zip`})):[]],body:'Notes '+long});
+   if(page===1)return text([{name:'not a release'},...Array.from({length:perPage+2},(_,i)=>release(i+1))]);
+   return text(Array.from({length:3},(_,i)=>release((page-1)*perPage+i+1)));
   },
  };
  const fakeFetch=async(input:any,init:any={})=>{
@@ -97,7 +107,9 @@ await withTempDir('worldlet-github-service-',async temp=>{
  // What the host's `connect` accepts as a token: only for a token source, required there, shaped like one.
  assert.equal(connectToken('github','  github_pat_'+'A1'.repeat(20)+'  '),'github_pat_'+'A1'.repeat(20));
  assert.equal(connectToken('notion',undefined),'');
- for(const [provider,value,pattern] of [['github','',/read-only access to Issues, Pull requests and Metadata/],['github',undefined,/Paste a fine-grained token/],['github','secret value!',/does not look like a token/],['github','x'.repeat(256),/does not look like a token/],['notion','secretvaluesecretvalue1',/does not connect with a token/]] as const){
+ // With no token, GitHub signs in with its code instead.
+ assert.equal(connectToken('github',''),'');assert.equal(connectToken('github',undefined),'');
+ for(const [provider,value,pattern] of [['github','secret value!',/does not look like a token/],['github','x'.repeat(256),/does not look like a token/],['notion','secretvaluesecretvalue1',/does not connect with a token/]] as const){
   const error=(()=>{try{connectToken(provider,value);return null;}catch(error){return error as Error;}})();
   assert.match(error!.message,pattern,String(value));
   if(value)assert.ok(!error!.message.includes(value),'the error does not repeat what was pasted');
@@ -157,6 +169,29 @@ await withTempDir('worldlet-github-service-',async temp=>{
  // Only the reader's read tools were ever called.
  assert.ok(calls.every(c=>!c.name||GITHUB_TOOLS.includes(c.name)));
 
+ // releases: one repository's newest releases, a page at a time, each its tag, name, publishing, kind and assets.
+ calls.length=0;
+ const releases=await read({provider:'github',operation:'releases',id:'example-org/app'});
+ assert.deepEqual(authorized.at(-1),{name:'read_service',provider:'github',operation:'releases'});
+ assert.deepEqual(calls.filter(c=>c.name).map(c=>[c.name,c.args]),[['list_releases',{owner:'example-org',repo:'app',perPage:GITHUB_LIMITS.releasesPage,page:1}]]);
+ assert.equal(releases.records.length,GITHUB_LIMITS.releasesPage-1,'cut to the page; the row that is not a release is left out');
+ assert.equal(releases.cursor,'2');assert.equal(releases.scope,'Releases of example-org/app, newest first, page 1 · Read only');
+ assert.deepEqual(releases.records[0],{id:'example-org/app@v1.1.0',title:'v1.1.0',url:'https://github.com/example-org/app/releases/tag/v1.1.0',updatedAt:'2026-10-19T09:00:00Z',
+  fields:{repository:'example-org/app',tag:'v1.1.0',name:'v1.1.0',prerelease:true,draft:false,assetCount:2,publishedAt:'2026-10-19T09:00:00Z',assets:'App.dmg, App-setup.exe',author:'alex'}});
+ assert.deepEqual([releases.records[1].fields.draft,releases.records[1].fields.publishedAt,releases.records[1].updatedAt],[true,undefined,'2026-10-01T09:00:00Z'],'a draft is not published yet');
+ assert.deepEqual([releases.records[2].fields.assetCount,releases.records[2].fields.assets],[0,undefined]);
+ assert.equal(releases.records[3].fields.assetCount,27);assert.equal(String(releases.records[3].fields.assets).split(', ').length,GITHUB_LIMITS.assets,'asset names are capped, the count is not');
+ assert.ok(releases.records.every((r:any)=>!r.text&&!JSON.stringify(r).includes('Notes')),'release notes are not part of the read');
+ const older=await read({provider:'github',operation:'releases',id:'example-org/app',cursor:'2'});
+ assert.deepEqual([older.records.length,older.cursor],[3,undefined]);
+ for(const cursor of ['0',String(GITHUB_LIMITS.releasesPages+1),'x'])await assert.rejects(read({provider:'github',operation:'releases',id:'example-org/app',cursor}),/Invalid GitHub releases cursor/);
+ for(const id of ['example-org','example-org/app#1','../x','a/b/c','example-org/..','exa mple/app'])await assert.rejects(read({provider:'github',operation:'releases',id}),/Invalid GitHub repository/,id);
+ await assert.rejects(read({provider:'github',operation:'releases',id:'example-org/app',query:'v1'}),/only the repository/);
+ // A releases preset is checked the same way before it is saved.
+ assert.deepEqual(readServicePresetRead('github',{operation:'releases',id:' example-org/app '}),{operation:'releases',id:'example-org/app'});
+ assert.throws(()=>readServicePresetRead('github',{operation:'releases',id:'example-org/app#1'}),/Invalid GitHub repository/);
+ assert.throws(()=>readServicePresetRead('github',{operation:'releases',id:'example-org/app',query:'v1'}),/takes an id/);
+
  // A turn that does not authorize the read stops it before GitHub is asked.
  calls.length=0;
  await assert.rejects(read({provider:'github',operation:'list'},async()=>({error:'Allow private context first.'})),/Allow private context first/);
@@ -207,18 +242,19 @@ await withTempDir('worldlet-github-service-',async temp=>{
 // The reader alone: a different record than asked for is refused.
 await assert.rejects(readGithub({callTool:async()=>({content:[{type:'text',text:JSON.stringify(issue('example-org/app',41))}]}),listTools:async()=>({tools:[]})},{provider:'github',operation:'read',id:'example-org/app#40'}),/different record/);
 
-// Grants: github/list, github/read and github/search are the targets; none is in the default Grants.
+// Grants: github/list, github/read, github/search and github/releases are the targets; none is in the default Grants.
 const actions=worldActions();
-for(const operation of ['list','read','search'])assert.deepEqual(worldActionOf(actions,'read_service',{provider:'github',operation}),{target:'github',action:operation});
+for(const operation of ['list','read','search','releases'])assert.deepEqual(worldActionOf(actions,'read_service',{provider:'github',operation}),{target:'github',action:operation});
 const resolved=resolveAction(actions,'github','read',{id:'example-org/app#40'});
 assert.deepEqual(resolved.args,{id:'example-org/app#40',provider:'github',operation:'read'});
 assert.throws(()=>resolveAction(actions,'github','list',{provider:'other'}),/routing field provider/);
 assert.deepEqual(actions.find(a=>a.target==='github'&&a.action==='search')!.parameters.required,['query']);
+assert.deepEqual(actions.find(a=>a.target==='github'&&a.action==='releases')!.parameters.required,['id']);
 const now='2026-10-15T12:00:00.000Z';
 const agent:AgentIdentity={id:'claude-code',name:'Claude Code',harness:'claude-code',kind:'local',createdAt:now};
 const defaults=channelDefaultGrants(agent.id,now,actions);
 const serviceTargets=actions.filter(a=>a.tool==='read_service'&&a.defaults.provider==='github').map(a=>a.target+'/'+a.action);
-assert.deepEqual(serviceTargets,['github/list','github/read','github/search','applet:github/list','applet:github/read','applet:github/search']);
+assert.deepEqual(serviceTargets,['github/list','github/read','github/search','github/releases','applet:github/list','applet:github/read','applet:github/search','applet:github/releases']);
 assert.ok(defaults.every(g=>g.targets.every(t=>!serviceTargets.includes(t))),'read_service is in no default Grant');
 assert.equal(hermesChannelToolAllowed({name:'read_service'}),false);
 const decide=(grants:Grant[],operation:string)=>standingCallDecision({identity:agent,grants,target:'github',action:operation,tool:'read_service',args:{provider:'github',operation},foxTurn:null,now}).decision;
@@ -228,7 +264,18 @@ assert.equal(decide([...defaults,listOnly],'list'),'allowed');
 assert.equal(decide([...defaults,listOnly],'read'),'denied');
 assert.equal(decide([...defaults,listOnly],'search'),'denied');
 const all:Grant={...listOnly,id:'g2',targets:['github/*']};
-for(const operation of ['list','read','search'])assert.equal(decide([all],operation),'allowed');
+for(const operation of ['list','read','search','releases'])assert.equal(decide([all],operation),'allowed');
+assert.equal(decide([...defaults,listOnly],'releases'),'denied');
+// "Can read GitHub" covers releases, including a Grant the person gave before GitHub had them.
+const canRead=serviceReadGrant(agent.id,'github',now)!;
+assert.deepEqual(canRead.targets,['github/list','github/read','github/search','github/releases','context/search','context/read'],'and the saved context\'s search and read');
+const earlier={...canRead,targets:['github/list','github/read','github/search']};
+assert.equal(decide([earlier],'releases'),'denied');
+assert.equal(decide([currentServiceGrant(earlier)],'releases'),'allowed');
+assert.deepEqual(currentServiceGrant({...earlier,revokedAt:now}).revokedAt,now,'a revoked Grant stays revoked');
+assert.equal(decide([currentServiceGrant({...earlier,revokedAt:now})],'releases'),'denied');
+assert.deepEqual(currentServiceGrant(listOnly),listOnly,'any other Grant is kept as it is');
+assert.deepEqual(currentServiceGrant({...canRead,access:'write'}),{...canRead,access:'write'},'only a standing read Grant is "Can read GitHub"');
 assert.deepEqual(standingActions(actions,agent,[listOnly],false,now).map(a=>a.target+'/'+a.action),['github/list']);
 // Reading a Service makes the turn untrusted, so its writes are refused afterwards.
 assert.equal(turnTrustObserve({},{type:'tool',name:'_world_authorize',args:{name:'read_service'}}).untrusted,true);
@@ -247,4 +294,4 @@ assert.equal(worldActionOf(actions,'read_world_source',{provider:'github'}),null
 assert.deepEqual(defaults.flatMap(g=>g.targets.filter(t=>/github/.test(t))),['applet:github/runtime'],'the default Grants name only the GitHub Applet\'s saved World items, never a read of GitHub');
 assert.match(conversationGuidance({scope:'private',connectedSources:['github'],backgroundSources:['github']}),/github\/list.*never read with read_world_source/);
 
-console.log('PASS GitHub Service: token connect with read tools only, bounded list, read and search through read_service, other address, expired token and refused turn stop the read, Grant targets github/list|read|search enforced and in no default Grant, Attention reads the list only in the background collection and widens no Grant, a pasted token is checked before it is kept and a refused one replaces nothing');
+console.log('PASS GitHub Service: token connect with read tools only, bounded list, read, search and releases through read_service, other address, expired token and refused turn stop the read, Grant targets github/list|read|search|releases enforced and in no default Grant, an earlier Can read GitHub covers releases, Attention reads the list only in the background collection and widens no Grant, a pasted token is checked before it is kept and a refused one replaces nothing');

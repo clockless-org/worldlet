@@ -2,7 +2,7 @@
 // may picture a sender (Core), and the reflow/quote rules the reader applies to every original.
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {mailSenderAddress,mailOrganizationDomain,mailAvatarPlan,gravatarURL,mailIconURL,bimiLogoURL,mailLogoURL,mailRemoteHostAllowed} from '../core/applets/index.ts';
+import {mailSenderAddress,mailOrganizationDomain,mailAvatarPlan,gravatarURL,mailIconURL,bimiLogoURL,mailLogoURL,mailRemoteHostAllowed} from '../context/applets/index.ts';
 import {readableMail,splitQuoted} from '../ui/applets/gmail/focus.ts';
 
 assert.equal(mailSenderAddress('Alice Chen <Alice.Chen@Acme.io>'),'alice.chen@acme.io');
@@ -34,7 +34,7 @@ assert.equal(mailRemoteHostAllowed('brand.com'),true);assert.equal(mailRemoteHos
 for(const host of ['','1.2.3.4','::1','[::1]','localhost','a.localhost','x.local','x.internal','single','1e100.0x1'])assert.equal(mailRemoteHostAllowed(host),false,host);
 // The host follows a BIMI logo's redirects itself, and only to URLs Core still allows.
 {
- const host=readFileSync(new URL('../platform/electron/src/modules/sources/mail-avatar.ts',import.meta.url),'utf8');
+ const host=readFileSync(new URL('../platform/host/modules/connectors/mail-avatar.ts',import.meta.url),'utf8');
  assert.match(host,/redirect:senderChosen\?'manual':'follow'/);assert.match(host,/allowed=typeof senderChosen==='function'\?senderChosen:mailLogoURL;/);assert.match(host,/allowed\(new URL\(response\.headers\.get\('location'\)/);assert.match(host,/readImage\(url,32_768,0,true\)/);
 }
 console.log('PASS sender portrait sources: Gravatar, organization BIMI/icon, personal domains and fixtures');

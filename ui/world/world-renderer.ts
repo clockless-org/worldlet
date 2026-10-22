@@ -8,7 +8,7 @@ export interface WorldApplet {id:string;key:string;title:string;region:string;vi
  /** The Applet's lamp as the host shows it. The World lights the lamps in its art; the host draws the lamp's label and action. */
  lamp?:WorldLampState;
  connected?:boolean;
- /** Set for the person's own Applets (core/applets/MY-APPLETS.md): which kind it is. */
+ /** Set for the person's own Applets (context/applets/MY-APPLETS.md): which kind it is. */
  mine?:string;
  /** A thing that is not an Applet (a trip, a parcel). It is shown only while it is open. */
  object?:boolean;
@@ -19,7 +19,10 @@ export interface WorldApplet {id:string;key:string;title:string;region:string;vi
  /** While it is open, the host's Applet stage draws this Applet's own picture in front. The World stops drawing its device behind it. */
  staged?:boolean;
  /** Coding Applets: the weekly allowance left. `remaining` is a percentage; neither is set while it is unknown. */
- allowance?:{remaining?:number;resetsAt?:number;unavailable?:boolean}}
+ allowance?:{remaining?:number;resetsAt?:number;unavailable?:boolean};
+ /** A number drawn on the device's own face, when its theme has one: the board's north-star number (ui/applets/board).
+  * Tinted only with a tone. */
+ figure?:{text:string;tone?:'good'|'bad'}}
 export type WorldLampState='off'|'ready'|'processing'|'error';
 export interface WorldState {
  view:{id:string;level:'overview'|'area'|'applet'};

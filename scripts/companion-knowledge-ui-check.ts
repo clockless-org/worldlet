@@ -1,6 +1,6 @@
 // The Profile page shows what the World holds about the companion: saved memory by kind, Fox's own conversation and
 // the conversations and notes each other Agent brought, grouped and collapsible, and Fox's offer to save a task it
-// repeats (companion-skills.ts). The Agent's own skills and scheduled tasks are only in Settings › Agent (owner
+// repeats (companion-skills.ts). The Agent's own skills and scheduled tasks are only in Settings › Agents (owner
 // decision 2026-10-11), never listed twice. Fixture data only.
 import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,worldUrl,openCompanionPanel,waitForWorld} from './browser-test.ts';
@@ -26,8 +26,9 @@ await withBrowser(fileAccess,async browser=>{
  await waitForWorld(page);
  await openCompanionPanel(page);
  const panel=page.locator('#companionInfo');
- // What Fox knows sits first in Settings › Agent › Memory, beside the Agent's own memory (owner request 2026-10-11).
- await panel.locator('[data-setting=model]').click();
+ // What Fox knows sits first in Settings › Your data, beside the Agent's own memory (owner request 2026-10-11), folded until Show.
+ await panel.locator('[data-setting=context]').click();
+ await panel.locator('[data-context=memory]').getByRole('button',{name:'Show',exact:true}).click();
  const block=panel.locator('[data-part=memory] .companion-profile-knowledge');
  await block.getByRole('heading',{name:'What Nova knows'}).waitFor();
  const groups=block.locator('details.companion-knowledge-group');
@@ -53,5 +54,5 @@ await withBrowser(fileAccess,async browser=>{
  assert.deepEqual(await page.evaluate(()=>(window as any).skillCalls.filter((c:string)=>c!=='list')),['save']);
  await block.getByRole('button',{name:'Edit memory'}).click();
  assert.deepEqual(await page.evaluate(()=>(window as any).events),['memory-manager']);
- console.log('PASS companion profile: saved memory by kind, own conversation and the conversations and notes other Agents brought, grouped and collapsible; Fox’s offer to save a repeated task; the Agent’s skills and scheduled tasks only in Settings › Agent');
+ console.log('PASS companion profile: saved memory by kind, own conversation and the conversations and notes other Agents brought, grouped and collapsible; Fox’s offer to save a repeated task; the Agent’s skills and scheduled tasks only in Settings › Agents');
 });

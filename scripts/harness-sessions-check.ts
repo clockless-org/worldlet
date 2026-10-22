@@ -7,14 +7,14 @@ import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {WebSocketServer} from 'ws';
 import {acpApprovalOutcome,acpApprovalRequest,harnessSessionName,harnessSessionThread,hermesBorrowsCodex,hermesConversationIncluded,HERMES_CHANNEL_READ_ONLY,hermesAcpAnnouncement,hermesChannelToolAllowed,hermesChannelTrust,HermesOwnCalls,hermesStandingWriteApproval,hermesStreamAnnouncement,hermesServerEnvLines,hermesServerSettings,hermesWorldTools,hermesWorldToolsCommand,hermesWorldToolsRegistered,localHarnessStream,localHarnessTurn,openClawApprovalFor,openClawApprovalRequest,openClawConnect,openClawSessionIs,openClawDecision,openClawDeviceProof,
- openClawGateway,openClawResponsesBody,readHarnessApprovalRequest,readLocalHarnessLine,readOpenClawFrame,readResponsesChunk,responsesBody,responsesStream,turnWriteAdmission,usableHermesServerKey} from '../core/agent/index.ts';
-import {phoneLive,readPhoneMessage} from '../core/phone/index.ts';
+ openClawGateway,openClawResponsesBody,readHarnessApprovalRequest,readLocalHarnessLine,readOpenClawFrame,readResponsesChunk,responsesBody,responsesStream,turnWriteAdmission,usableHermesServerKey} from '../agent/gate/index.ts';
+import {phoneLive,readPhoneMessage} from '../platform/web/index.ts';
 import {mountHarnessApproval} from '../ui/companion/fox-harness-approval.ts';
-import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/electron/src/modules/agent-runtime/local-harness.ts';
-import {hermesServer,keepHermesResident} from '../platform/electron/src/modules/agent-runtime/hermes-service.ts';
-import {STANDING_OUTSIDE_TURN} from '../core/agent/grants.ts';
-import {holdStandingTurn,openStandingWorldTools,STANDING_LEGACY_ENDPOINT_FILE,standingEndpointFile} from '../platform/electron/src/modules/agent-runtime/world-tool-bridge.ts';
-import {createAgentAccess} from '../platform/electron/src/modules/agent-runtime/agent-access.ts';
+import {LocalHarnessAdapter,type HarnessEnvironment} from '../platform/host/modules/companion/agent/local-harness.ts';
+import {hermesServer,keepHermesResident} from '../platform/host/modules/companion/agent/hermes-service.ts';
+import {STANDING_OUTSIDE_TURN} from '../agent/gate/grants.ts';
+import {holdStandingTurn,openStandingWorldTools,STANDING_LEGACY_ENDPOINT_FILE,standingEndpointFile} from '../platform/host/modules/gate/world-tool-bridge.ts';
+import {createAgentAccess} from '../platform/host/modules/gate/agent-access.ts';
 import {withTempDir} from './test-temp.ts';
 
 // Resident Harness sessions (contracts/harness-services.ts `conversation` and `approvals`): the shared rules, then a
@@ -308,7 +308,7 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
   assert.ok(!replayed.some(e=>e.type==='delta'&&/replayed/.test(e.text)),'replayed history is not shown as Fox\'s words');
   assert.ok(fs.existsSync(path.join(turnHome,'harness-sessions.json')),'Worldlet keeps the thread-to-session map in its own folder');
   await adapter.shutdown();
-  // A brought conversation Fox was switched to (core/tasks/fox-sessions.ts) goes on in the person's own session, its
+  // A brought conversation Fox was switched to (agent/tasks/fox-sessions.ts) goes on in the person's own session, its
   // newest one (owner decision 2026-10-12): loaded, not one of Fox's own, so its turns keep coming back through the
   // history sync. One of another profile's, or with no session to continue, is a session of Fox's own as before.
   {
@@ -359,14 +359,14 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
   const key='fixture-key-'+'7'.repeat(32),serverHome=path.join(scratch,'server-home'),profile=path.join(serverHome,'.hermes');
   fs.mkdirSync(profile,{recursive:true});
   const channel:any[]=[];
-  // Each Agent's identity, Grants and audit (core/agent/GRANTS.md): token hashes in the vault, audit in the ledger.
+  // Each Agent's identity, Grants and audit (agent/gate/GRANTS.md): token hashes in the vault, audit in the ledger.
   const secrets=new Map<string,string>(),audit:any[]=[];
   const vault={get:(id:string)=>secrets.get(id)??null,set:(id:string,value:string)=>{secrets.set(id,value);},delete:(id:string)=>{secrets.delete(id);},deleteAll:()=>secrets.clear()};
   const access=createAgentAccess({root:path.join(scratch,'access-root'),vault,ledger:()=>({recordAgentAudit:(entry:any)=>{audit.push(entry);return true;},agentAudit:(agent:string)=>audit.filter(e=>e.agentId===agent).reverse()})});
   // An install from before per-Agent tokens: its registered entry names the profile's one endpoint file.
   fs.writeFileSync(path.join(profile,STANDING_LEGACY_ENDPOINT_FILE),'{}');
   const askCalls:[string,any][]=[];
-  const standing=await openStandingWorldTools({access,asks:(agentId,args)=>{askCalls.push([agentId,args]);return {ok:true,by:agentId};},channel:async(name,args,agent)=>{channel.push([name,args,agent]);return hermesChannelToolAllowed({name,args})?{items:[]}:{error:HERMES_CHANNEL_READ_ONLY};}});
+  const standing=await openStandingWorldTools({access,asks:(agent,args)=>{askCalls.push([agent.call.agentId,args]);return {ok:true,by:agent.call.agentId};},channel:async(name,args,agent)=>{channel.push([name,args,agent.call.agentId]);return hermesChannelToolAllowed({name,args})?{items:[]}:{error:HERMES_CHANNEL_READ_ONLY};}});
   const entry=standing.server(profile);
   assert.equal(entry.env.WORLDLET_MCP_ENDPOINT_FILE,path.join(profile,standingEndpointFile('hermes')),'Hermes Agent\'s own endpoint file');
   const endpoint=JSON.parse(fs.readFileSync(entry.env.WORLDLET_MCP_ENDPOINT_FILE,'utf8'));
@@ -510,7 +510,7 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
      assert.deepEqual(channel.map(([name,,agent])=>[name,agent]),[['query_world_items','codex']]);
      assert.ok(!JSON.parse(JSON.stringify(await ask('describe_world_tools',{}))).targets.includes('content'),'and it lists only its own targets');
      assert.deepEqual(toTurn,[],'nothing went to Fox\'s turn');
-     // "Can read GitHub" (Settings › Agent › Access): only that Service's read targets, taken from its name; the next
+     // "Can read GitHub" (Settings › Agents): only that Service's read targets, taken from its name; the next
      // call sees it (no restart) and every change is audited.
      channel.length=0;
      const github={target:'github',action:'list',arguments:'{}'};
@@ -519,7 +519,7 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
      assert.equal(access.grantService('nobody','github'),false,'an unknown Agent');
      assert.equal(access.grantService('codex','github'),true);
      assert.deepEqual(access.grants('codex').filter(g=>!g.revokedAt&&g.targets.some(t=>/^(github|posthog|cloudflare)\//.test(t))).map(g=>[g.id,g.targets,g.access,g.duration]),
-      [['codex-service-github',['github/list','github/read','github/search'],'read','standing']],'exactly GitHub\'s reads');
+      [['codex-service-github',['github/list','github/read','github/search','github/releases','context/search','context/read'],'read','standing']],'exactly GitHub\'s reads and its saved context');
      await ask('call_world_tool',github);
      assert.equal((await ask('call_world_tool',{target:'posthog',action:'query',arguments:'{"query":"select 1"}'})).error,STANDING_OUTSIDE_TURN,'another Service stays refused');
      assert.deepEqual(channel.map(([name,args,agent])=>[name,args.provider,args.operation,agent]),[['read_service','github','list','codex']],'granted: its next call runs');
@@ -531,7 +531,7 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
      assert.equal(access.ungrantService('codex','github'),true,'taking back twice changes nothing');
      assert.deepEqual(audit.filter(e=>e.agentId==='codex'&&['grant','ungrant'].includes(e.action)).map(e=>[e.target,e.action,e.grantId]),[['github','grant','codex-service-github'],['github','ungrant','codex-service-github']],'each change audited once');
      assert.deepEqual(audit.filter(e=>e.agentId==='codex'&&e.target==='github'&&e.action==='list').map(e=>e.decision),['denied','allowed','denied'],'and each call');
-     // Agent asks (core/agent/GRANTS.md#agent-asks): refused until the person lets it ask; then each call goes to the asks
+     // Agent asks (agent/gate/GRANTS.md#agent-asks): refused until the person lets it ask; then each call goes to the asks
      // service as this Agent's own (an agentId in the arguments names no one), never to Fox's turn or the channel.
      channel.length=0;askCalls.length=0;toTurn.length=0;
      const post={target:'asks',action:'post',arguments:JSON.stringify({title:'Which plan?',choices:['A','B'],agentId:'hermes'})};

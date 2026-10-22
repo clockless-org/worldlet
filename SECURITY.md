@@ -8,7 +8,7 @@ Include what you found, how to reproduce it, the affected version (Settings › 
 
 ## Scope
 
-In scope: the desktop app (Electron host, interface, Core), the phone apps, the Harness adapters and the `worldlet` MCP server they expose to an Agent.
+In scope: the desktop app (the Host and Electron app, the interface, the Agent and Context rules), the phone apps, the Harness adapters and the `worldlet` MCP server they expose to an Agent.
 
 Out of scope: problems in a third-party Agent or Harness (OpenClaw, Hermes Agent, Claude Code, Codex, pi) that Worldlet only connects to; report those to their own projects.
 

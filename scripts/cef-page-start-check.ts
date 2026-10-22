@@ -27,7 +27,7 @@ const stub:Plugin={name:'electron-stub',setup(b){
 
 await withTempDir('worldlet-cef-page-start-',async temp=>{
  const out=path.join(temp,'page.mjs');
- await build({entryPoints:['platform/electron/src/modules/browser/engine/page.ts'],bundle:true,format:'esm',platform:'node',outfile:out,logLevel:'error',plugins:[stub]});
+ await build({entryPoints:['platform/host/modules/applets/engine/page.ts'],bundle:true,format:'esm',platform:'node',outfile:out,logLevel:'error',plugins:[stub]});
  const webRoot=path.join(temp,'web');fs.mkdirSync(path.join(webRoot,'browser'),{recursive:true});
  fs.writeFileSync(path.join(webRoot,'browser','video-formats.js'),'(()=>{})');
  const {CefPageView}=await import(pathToFileURL(out).href);

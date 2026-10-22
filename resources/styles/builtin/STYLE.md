@@ -38,7 +38,7 @@ grades the material or reading text.
 
 ### Weather icon family
 
-`ui/components/weather-icons.ts` owns the scalable colored SVG family shared by the upper-right
+`ui/style/weather-icons.ts` owns the scalable colored SVG family shared by the upper-right
 weather control and forecast Applet: warm-gold sun, pale-gold moon, gray-white
 clouds, blue rain, ice-blue snow, fog and amber lightning. Partly cloudy variants
 combine a cloud with the sun or moon. Unknown data uses a neutral dash in the
@@ -72,7 +72,7 @@ Painted cast shadows cannot physically rotate with the sun. Registered day/night
 
 ## Ownership
 
-[`style.json`](../../../ui/theme-packages/village/style.json) registers references and World/Applet/companion/brand resources. [`tokens.json`](../../../ui/theme-packages/village/tokens.json) holds world/HUD appearance values. `../../../ui/components/style.ts` is the shared immutable code entry point. Functional render/interaction code, capability adapters, permissions and user records remain outside the pack.
+[`style.json`](../../../ui/style/theme-packages/village/style.json) registers references and World/Applet/companion/brand resources. [`tokens.json`](../../../ui/style/theme-packages/village/tokens.json) holds world/HUD appearance values. `../../../ui/style/style.ts` is the shared immutable code entry point. Functional render/interaction code, capability adapters, permissions and user records remain outside the pack.
 
 Only this built-in style is supported. No user style loader, executable pack or override mechanism is enabled.
 
@@ -81,7 +81,7 @@ Only this built-in style is supported. No user style loader, executable pack or 
 Reserve an artwork-integrated status-lamp socket when generating new Applets,
 using the existing Discord lamp as the visual reference. Keep its position and
 emission mask with the asset for later runtime coloring. The four-state policy
-is recorded in `core/attention/README.md`; its generic overlay is currently hidden
+is recorded in `agent/attention/README.md`; its generic overlay is currently hidden
 and visual implementation is deferred. Do not repaint existing devices yet.
 
 Ground devices, including logo sculptures, mascots and direct Mac launchers, use compact low bases to sit naturally in the village. Use warm timber throughout the base, with rounded wooden edges and sparse brass fasteners matching the existing devices. No stone or ivory rim. The device should read as a solid tabletop figurine firmly resting on its wooden base. A functional cabinet or dock can already provide the base. Preserve logo prominence, visible support/contact shading, shared perspective and the saved foot anchor; do not add landscape islands or tall display pedestals. See the Applet design guide for proportions and acceptance criteria.

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {CROPS,newGarden,plant,harvest,stage,ripeAt,ripeCount,nextRipe,buyPlot,plotPrice,restoreGarden,whenText} from '../ui/games/garden.ts';
+import {CROPS,newGarden,plant,harvest,stage,ripeAt,ripeCount,nextRipe,buyPlot,plotPrice,restoreGarden,whenText} from '../ui/applets/garden.ts';
 const H=3_600_000,now=new Date('2026-10-03T21:00:00').getTime();
 assert.deepEqual(CROPS.map(c=>c.minutes),[30,240,480,720,1320,1440],'crops ripen from half an hour to a day');
 for(const c of CROPS)assert.ok(c.sell>c.seed*1.8,`${c.key} pays back its seed`);

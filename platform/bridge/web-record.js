@@ -1,5 +1,5 @@
 /** Self-contained: serialized into the built-in browser's isolated world by the resource builder.
- * Reports what happens on a website page to the host recorder (core/browser/web-record.ts): the
+ * Reports what happens on a website page to the host recorder (agent/applets/web-record.ts): the
  * page's whole text as it changes, what the person typed (never passwords, card numbers or codes),
  * what they clicked and the address as it changes inside the page; a page showing a password, card
  * or one-time-code field is reported private instead. */
@@ -7,7 +7,7 @@ export function installWebRecorder() {
  const key='__worldletWebRecordV1';
  if(window[key])return;
  const send=value=>{try{if(typeof worldletRecord==='function')worldletRecord(JSON.stringify(value));}catch{}};
- // The same rule as core/browser/web-record.ts SECRET_NAME and secretField (web-record-check holds them equal).
+ // The same rule as agent/applets/web-record.ts SECRET_NAME and secretField (web-record-check holds them equal).
  const SECRET_NAME=/^pass(word|wd|code|phrase)?$|password|passwd|pwd|passcode|secret|token|^auth$|authorization|^session(.?(id|key|token))?$|^sid$|cookie|credential|api.?key|card.?(number|no|num)|cc.?(num|number)|^cvv|^cvc|^csc|^cvn|(^|[^a-z])t?otp|otp$|mfa|2fa|one.?time|^code$|(sms|auth|verify|confirm|access|login|security|email|phone).?code|verification|^pin$|ssn|social.?security|iban|routing.?number|account.?number|signature|assertion|jwt|bearer|^refresh$|nonce|csrf|xsrf/i;
  const FIELD_HINT=/\bpassword\b|^cc-|one-time-code|current-password|new-password/i;
  const secretHint=hint=>typeof hint==='string'&&!!hint.trim()&&(FIELD_HINT.test(hint)||[hint.trim(),...hint.split(/[^A-Za-z0-9]+/)].some(word=>!!word&&SECRET_NAME.test(word)));

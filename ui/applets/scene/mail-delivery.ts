@@ -1,4 +1,4 @@
-import type {ThemeSceneDelivery} from '../../themes/index.ts';
+import type {ThemeSceneDelivery} from '../../style/index.ts';
 /** Decorative media only. The host supplies a deduplicated mail event; entering a scene never plays it. */
 export function mountMailDelivery(host:HTMLElement,spec:ThemeSceneDelivery){
  const video=document.createElement('video');video.className='applet-mail-delivery';video.muted=true;video.playsInline=true;video.preload='none';video.hidden=true;video.setAttribute('aria-hidden','true');video.tabIndex=-1;

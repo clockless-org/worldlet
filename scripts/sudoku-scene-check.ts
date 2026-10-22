@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {solveSudokuPuzzle,countSudokuSolutions} from '../core/games/index.ts';
+import {solveSudokuPuzzle,countSudokuSolutions} from '../context/store/index.ts';
 import {bundleScript,withBrowser,pageErrors} from './browser-test.ts';
 const script=await bundleScript({stdin:{contents:"export {createGameApplet,mountAppletScene} from './ui/applets/index.ts';",resolveDir:process.cwd(),loader:'ts'},globalName:'Games'});
 const css=(await Promise.all(['dist/WorldletWeb/worldlet-ui.css','ui/applets/scene/applet-scene.css'].map(p=>readFile(p,'utf8')))).join('\n');

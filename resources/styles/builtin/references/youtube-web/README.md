@@ -1,6 +1,6 @@
 # YouTube web Applet — Focus concept
 
-Design approved and initial runtime implementation completed, 2026-09-18. The images remain concept artwork, not captured live pages. See [YouTube implementation](../../../../../core/applets/INTEGRATIONS.md#youtube-applet) for tested behavior.
+Design approved and initial runtime implementation completed, 2026-09-18. The images remain concept artwork, not captured live pages. See [YouTube implementation](../../../../../context/applets/INTEGRATIONS.md#youtube-applet) for tested behavior.
 
 ![YouTube Peek to Focus continuity](peek-focus-concept.png)
 

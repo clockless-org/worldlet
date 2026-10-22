@@ -3,11 +3,11 @@
  * about another. Each entry here is one turn tagged with the place (segment) it was asked
  * in; each context shows only its own segment (one visible thread per context). A turn is one card:
  * it shows Fox's steps while it works and becomes the answer when it finishes. */
-import {addHarnessUsage,harnessUsageLabel,legacyActionDisplayText,readHarnessUsage} from '../../core/agent/index.ts';
+import {addHarnessUsage,harnessUsageLabel,legacyActionDisplayText,readHarnessUsage} from '../../agent/gate/index.ts';
 import type {HarnessUsage} from '../../contracts/harness-services.ts';
-import {conversationTopics} from '../../core/companion/index.ts';
+import {conversationTopics} from '../../agent/companion/index.ts';
 import {contextThread} from '../attention/index.ts';
-import {uiIcon} from '../components/index.ts';
+import {uiIcon} from '../style/index.ts';
 
 export type ThreadStatus='working'|'done'|'error';
 /** `userIcon` marks a question the person asked with an action or a choice: its icon shows before
@@ -80,7 +80,7 @@ export function workingText(entry:ThreadEntry,current:string){
  return step.replace(/[\\`*_[\]<>#|]/g,'')+'…';
 }
 
-/** Earlier turns, oldest first, grouped by topic (owner Order 2026-10-08, core/companion/conversation-topics.ts).
+/** Earlier turns, oldest first, grouped by topic (owner Order 2026-10-08, agent/companion/conversation-topics.ts).
  * A topic of one turn is a plain card: the question and its answer. A topic of several turns is one stack
  * showing its newest turn under the topic's name and count, with card edges behind it; its name opens it into
  * its turns' cards and closes it again. `open` holds the opened topics' ids; `answer` renders an answer's Markdown. */

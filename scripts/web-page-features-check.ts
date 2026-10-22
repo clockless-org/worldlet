@@ -7,11 +7,11 @@ import assert from 'node:assert/strict';
 import {PAGE_FEATURES} from '../contracts/platform.ts';
 import {WEB_PAGE_FEATURES,WEB_PAGE_UNAVAILABLE,webDenied} from '../contracts/web-world.ts';
 import {hostFeatures,pageFeatures} from '../platform/bridge/features.ts';
-import {appletSupport,appletsOffPage} from '../core/applets/applet-support.ts';
-import {pageToolFeature} from '../core/tools/page-features.ts';
+import {appletSupport,appletsOffPage} from '../context/applets/applet-support.ts';
+import {pageToolFeature} from '../agent/gate/page-features.ts';
 import {createWorldToolRuntime} from '../platform/bridge/world-tool-runtime.ts';
-import {createWebPage,type PageSocket} from '../platform/electron/src/host/web-page.ts';
-import {hostCapabilities} from '../platform/electron/src/capabilities.ts';
+import {createWebPage,type PageSocket} from '../platform/host/web-page.ts';
+import {hostCapabilities} from '../platform/host/capabilities.ts';
 
 // 1. The page flags: on for every app window, older hosts and fixtures that leave them out; off only when said.
 const app={platform:'macos',hostCapabilities:hostCapabilities(()=>true)};

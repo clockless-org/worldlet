@@ -9,11 +9,11 @@
       "collection": "core",
       "group": "utilities",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/google-calendar.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/google-calendar.webp",
         "sha256": "8d2de692b23f492128928b7b2185ee4c3e741c1669049ef246e853f1ec8e31cd"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/google-calendar/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/google-calendar/background.webp",
         "sha256": "a4218c9dfb845a984f1e9f7a7b24ee9612f50f8ff00895c67747c2f7a2586423"
       },
       "status": "registered",
@@ -31,11 +31,11 @@
       "collection": "core",
       "group": "utilities",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/gmail.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/gmail.webp",
         "sha256": "0c4ae37957101d53d32faac9c0d093d0caa08d6e7e0d23c524150e308492e8ea"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/gmail/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/gmail/background.webp",
         "sha256": "b6fb61a673e1c4fcee7d8c1160b0964777de3682fdef5c49a7eddf8859b17086"
       },
       "status": "registered",
@@ -53,11 +53,11 @@
       "collection": "core",
       "group": "utilities",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/apple-notes.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/apple-notes.webp",
         "sha256": "8ffefec768667adace6646067f52e386a9b9c201b9a37ebb0ea3fcfcfc92151a"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/apple-notes/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/apple-notes/background.webp",
         "sha256": "e10049a793c115bb95d61eb263c6539e8993c2765f494624b30ffa4b86a5566a"
       },
       "status": "registered",
@@ -75,11 +75,11 @@
       "collection": "core",
       "group": "utilities",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/apple-reminders.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/apple-reminders.webp",
         "sha256": "b29a9e3bc16b92ad63a9275e7afba653a21704701e954a2a844f202eb3a5257b"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/apple-reminders/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/apple-reminders/background.webp",
         "sha256": "88bc8c9936201d6d1b9721d552fb6e38bd19f51dc398c5cd7aefc83de22c8288"
       },
       "status": "registered",
@@ -97,11 +97,11 @@
       "collection": "core",
       "group": "utilities",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/files/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/files/icon.webp",
         "sha256": "17c4e347fb73e0a90cee647e023889d3601d3ee66017cc00a16247c5494680ce"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/files/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/files/background.webp",
         "sha256": "77b0aa80071f4d053536284fb299c6879689d74dde3566b524fa42869f21b06d"
       },
       "status": "registered",
@@ -119,11 +119,11 @@
       "collection": "core",
       "group": "utilities",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/weather.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/weather.webp",
         "sha256": "a819366df95a94f49d0691a79b511629f2228f76c6faf4fa1d4ee713c856464c"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/weather/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/weather/background.webp",
         "sha256": "ece5f2d8a492d9c495113e0d49e317120c993c87d105226296f21fd0fc81ded0"
       },
       "status": "registered",
@@ -141,11 +141,11 @@
       "collection": "core",
       "group": "utilities",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/meetings.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/meetings.webp",
         "sha256": "f0d6289c97154e9d84f5ad125254fde23987edd5e8b5d1daa0daa791ae1d6a68"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/meetings/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/meetings/background.webp",
         "sha256": "9b4fb0efb2c3e26ecee89784625268a843712339ba05bfba5ffa6556fa3f3765"
       },
       "status": "registered",
@@ -163,11 +163,11 @@
       "collection": "core",
       "group": "utilities",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/voice-memos.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/voice-memos.webp",
         "sha256": "538e5659145eb68637dd2b0da83b6ae6bc57ee0ec804042d522fe5bf616859df"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/voice-memos/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/voice-memos/background.webp",
         "sha256": "e19cc0c01e2d05ad1cad1a128176a5dd1001124daed41287a468c66bd7ed1aae"
       },
       "status": "registered",
@@ -185,11 +185,11 @@
       "collection": "core",
       "group": "utilities",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/messages.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/messages.webp",
         "sha256": "3e186428d4f78658d76b6d87c7542a9ab4ddb0b098b7b9fddd2fd98f71a9949f"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/messages/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/messages/background.webp",
         "sha256": "92b2e5bc31498bfc7e6b50e4e4a7de0d16c10260d0fb4b20d7b891c4625c1db9"
       },
       "status": "registered",
@@ -207,11 +207,11 @@
       "collection": "core",
       "group": "utilities",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/browser.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/browser.webp",
         "sha256": "90523c7473ab13761208ec107b5f6223b4a4f919230bf8fdf7403dec20339400"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/browser/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/browser/background.webp",
         "sha256": "203e18549d1a4057be19761cd184c77e4c92834de1d5742036f41544f237d3e5"
       },
       "status": "registered",
@@ -229,11 +229,11 @@
       "collection": "core",
       "group": "utilities",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/maps/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/maps/icon.webp",
         "sha256": "d2a092c241b233e0d2b621c19e8c273d1d8cb75209caab12a61a0df363aac92d"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/maps/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/maps/background.webp",
         "sha256": "0e533481e880b75e7fccb96ae10b719423f3476f05e92183ae73669436474fa0"
       },
       "status": "registered",
@@ -251,11 +251,11 @@
       "collection": "core",
       "group": "utilities",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/clock/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/clock/icon.webp",
         "sha256": "d83a8298a80d9cbd35baca612290b16b40f8f280d4cb34a13b61ad95968a1ded"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/clock/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/clock/background.webp",
         "sha256": "25e30d2258da96a06ec2e058620563bcf174565d3bc3359b62b0ae35101c5e33"
       },
       "status": "registered",
@@ -273,11 +273,11 @@
       "collection": "core",
       "group": "utilities",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/contacts/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/contacts/icon.webp",
         "sha256": "8fdd5a7f575d5db70daf28cf682ec51c69ec88448def896e454b575774b98093"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/contacts/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/contacts/background.webp",
         "sha256": "934e22ccfadd1183b71b369acb9b8b6324859bb34ed5c96ac6ea53133a96f72d"
       },
       "status": "registered",
@@ -295,11 +295,11 @@
       "collection": "core",
       "group": "utilities",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/photos/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/photos/icon.webp",
         "sha256": "5d3e5ee597bcea639e12a7503ae4a28a956f63abdab56238e3f8fd7f9c0e717f"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/photos/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/photos/background.webp",
         "sha256": "d8dde9b890e2c8b8f85350b572bc3492aa3d4c39f3eb6d170147368420d0afa7"
       },
       "status": "registered",
@@ -317,11 +317,11 @@
       "collection": "core",
       "group": "utilities",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/music/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/music/icon.webp",
         "sha256": "bcd06b28957a8198a1d8b31f8ba7c77cdab6fbe9e3380d9437b30ae48d1ec8af"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/music/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/music/background.webp",
         "sha256": "109f8fee37d271231a088821e1a1667132c490a2e5f70b25e30a77c46149cf67"
       },
       "status": "registered",
@@ -339,11 +339,11 @@
       "collection": "core",
       "group": "utilities",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/news/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/news/icon.webp",
         "sha256": "64276c551b7a204af7d50d49cb739e4587bf0dd06c49a446b73793ce413a834e"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/news/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/news/background.webp",
         "sha256": "1a9a5e2c874a2a7e1db8c922ffb24c0cbb512ba3130159e6e7b161a8de20200c"
       },
       "status": "registered",
@@ -361,11 +361,11 @@
       "collection": "core",
       "group": "utilities",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/podcasts/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/podcasts/icon.webp",
         "sha256": "2a3dd7ee0348715d3ab5abfd3a01e68f7e7a9ae78bdcc62213cd7373a6be8f73"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/podcasts/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/podcasts/background.webp",
         "sha256": "7117e0cfb81e04c2393c1837d3de61affee2bedf82a6e3f919c76e7de1f11c73"
       },
       "status": "registered",
@@ -383,11 +383,11 @@
       "collection": "core",
       "group": "utilities",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/stocks/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/stocks/icon.webp",
         "sha256": "769afd420fee0dbda5674f11c5646c610f11e0a592a2aa83d4b446bc08ae9409"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/stocks/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/stocks/background.webp",
         "sha256": "1122043820d6603dd4ac7503f36026ab22245db8d3b9be13d10a4355c8f8e01c"
       },
       "status": "registered",
@@ -405,11 +405,11 @@
       "collection": "core",
       "group": "built-in-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/game-2048.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/game-2048.webp",
         "sha256": "a03552f28bf57a047b273743279563636f50b6255e3005fdaae34aef8452d89b"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/game-2048/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/game-2048/background.webp",
         "sha256": "e61b91608b5ae4331aaaa53d1808616dcd47c0eb9ab0da02c006c9e33b85a408"
       },
       "status": "registered",
@@ -427,11 +427,11 @@
       "collection": "core",
       "group": "built-in-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/snake.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/snake.webp",
         "sha256": "93d680f2da9c4daf639dca15997ffacf4d60d7e50a92c9f3da45ca90211b50fb"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/snake/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/snake/background.webp",
         "sha256": "0b4cee7fe9274c7c23db47ed962dba09cd2b37c96ea0be7f7f970743d8ecf7c0"
       },
       "status": "registered",
@@ -449,11 +449,11 @@
       "collection": "core",
       "group": "built-in-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/minesweeper.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/minesweeper.webp",
         "sha256": "f25bdeeb8a76a6dbfd353dd9a7031d2561f5ef51ef132082b59b3b3e139b77a7"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/minesweeper/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/minesweeper/background.webp",
         "sha256": "5beb17ac5687d46621dbed2ec815da1ccb7421fac2536937d6b89b93ae14df5a"
       },
       "status": "registered",
@@ -471,11 +471,11 @@
       "collection": "core",
       "group": "built-in-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/sudoku.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/sudoku.webp",
         "sha256": "71cea6cbbe96c35182bf867579f7161ba7f94d1e8ad09233f0d6ee8aef3e9912"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/sudoku/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/sudoku/background.webp",
         "sha256": "33ed2c97e7e96324f6f55cec297f334c2908b0ed6b6172e88fa1805beb478833"
       },
       "status": "registered",
@@ -493,11 +493,11 @@
       "collection": "core",
       "group": "built-in-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/gomoku/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/gomoku/icon.webp",
         "sha256": "5a2b33abe9ae55262836f39ff6383d3e7e9ef8f3072768d0142fb37975fe302c"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/gomoku/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/gomoku/background.webp",
         "sha256": "95a5c10cb403039813a7c419b586c0a0483628e0650f8bd2532d6076ff1335ff"
       },
       "status": "registered",
@@ -515,11 +515,11 @@
       "collection": "core",
       "group": "built-in-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/random-game.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/random-game.webp",
         "sha256": "1dcc460106bda6fa731b727909f854efa64f7ed09bce8c0f381301504d1b22ef"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/random-game/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/random-game/background.webp",
         "sha256": "4a864ec133ff1eb617854228c56ccb82ee0eb0f0cbd2bae34dfd6546d56dd895"
       },
       "status": "registered",
@@ -537,11 +537,11 @@
       "collection": "generic",
       "group": "Health",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-presets/weight-balance/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/weight-balance/icon.webp",
         "sha256": "51b0bb90c2e5b4da07fe7fe6f83889611c5475e270f7d5e44dfcf2d49e470e72"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-presets/weight-balance/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/weight-balance/background.webp",
         "sha256": "b95b1c67c0f50c64b92c22316de5936289846b198a69c0dea8239def9174dd0a"
       },
       "status": "registered",
@@ -559,11 +559,11 @@
       "collection": "generic",
       "group": "Health",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-presets/meal-planner/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/meal-planner/icon.webp",
         "sha256": "f319174804e3e7246c235c1114929d2b097ea21a5cd9370f41d7303418d227bd"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-presets/meal-planner/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/meal-planner/background.webp",
         "sha256": "2a862dd588f6b5d6af53a69bfadd171fd6d8d35a50ab76c30b5c3f5cef767db0"
       },
       "status": "registered",
@@ -581,11 +581,11 @@
       "collection": "generic",
       "group": "Health",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-presets/fitness/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/fitness/icon.webp",
         "sha256": "a4f656df65083a3213b7bae20b2ce37be86459c95e6760443c78b3ba756d2c86"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-presets/fitness/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/fitness/background.webp",
         "sha256": "bcde6802ebf759bce579380ae9c830584216b703a991e02b98c4bb0c006e3583"
       },
       "status": "registered",
@@ -603,11 +603,11 @@
       "collection": "generic",
       "group": "Health",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-presets/sleep/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/sleep/icon.webp",
         "sha256": "6773d7c09244fddcc71985c564cbffce5e1b9c8b0d8ad6e23c1fc770a85e4302"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-presets/sleep/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/sleep/background.webp",
         "sha256": "2a92f650f9258478fbdabeb4ea44f4c18684b3466fba9c0223a76be4294bd9ca"
       },
       "status": "registered",
@@ -625,11 +625,11 @@
       "collection": "generic",
       "group": "Out & about",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-presets/travel/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/travel/icon.webp",
         "sha256": "58e8c84f7e1a993074116889452dbce143a75be083bf05bcd81a7583ad25b0ae"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-presets/travel/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/travel/background.webp",
         "sha256": "16763941e71972c5a5d776841337ae1b7859effd9879831597bf8abd65d08143"
       },
       "status": "registered",
@@ -647,11 +647,11 @@
       "collection": "generic",
       "group": "Out & about",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-presets/outdoor/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/outdoor/icon.webp",
         "sha256": "663904add1b502d33980b1b38406e281d4d3fe65e546f37aab86f6d39563316a"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-presets/outdoor/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/outdoor/background.webp",
         "sha256": "5aa6c5958106fd9c03420f299248c970f5dd2f5bc6e5fab6baa7baad84413d71"
       },
       "status": "registered",
@@ -669,11 +669,11 @@
       "collection": "generic",
       "group": "Home",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-presets/shopping/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/shopping/icon.webp",
         "sha256": "328b57e28d63337cf298dba83418b4ec06f8d8bbd9cb6838635321d2a930f6b8"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-presets/shopping/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/shopping/background.webp",
         "sha256": "a78fadd9474b7dcae7508674d62a3cbc93e1a078a7887aa47a94c369da2ae58e"
       },
       "status": "registered",
@@ -691,11 +691,11 @@
       "collection": "generic",
       "group": "Home",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-presets/budget/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/budget/icon.webp",
         "sha256": "2ebf92c9a4222ee6f61b94203e31e897e1e2aa1e1b9db15cefe48ad340e64ef4"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-presets/budget/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/budget/background.webp",
         "sha256": "19e968cf5fe00d38ba0acf33baf7719b9ec6ef8af69e2411f3b31d3dafe98656"
       },
       "status": "registered",
@@ -713,11 +713,11 @@
       "collection": "generic",
       "group": "Home",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-presets/home-care/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/home-care/icon.webp",
         "sha256": "0a5875d6a4f267283283a2434e385dfb4c115a852cd0cfbad8bce52c31530d39"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-presets/home-care/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/home-care/background.webp",
         "sha256": "f06970a801965da1ba5ed5211792c1a371cb76ae34249c6cfe89ac3462991b28"
       },
       "status": "registered",
@@ -735,11 +735,11 @@
       "collection": "generic",
       "group": "Home",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-presets/garden/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/garden/icon.webp",
         "sha256": "1a19612351dbc9028906e17e8b66e0758f27e804478d68f5b26430b8d1aeefa9"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-presets/garden/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/garden/background.webp",
         "sha256": "e413d77576a53e5d5d134a793fb1743e3df0410b7dc7a99121c74ebcb2075e21"
       },
       "status": "registered",
@@ -757,11 +757,11 @@
       "collection": "generic",
       "group": "Life & learning",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-presets/daily-planner/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/daily-planner/icon.webp",
         "sha256": "edc4d9e3842782968435f317a1c16773fb2004618cdbf58958c066c823ed6a46"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-presets/daily-planner/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/daily-planner/background.webp",
         "sha256": "e6107ea10faa7a5193bd3443d76ddbc64b4db3501b9a16b7a6ed19aa7a4b6e21"
       },
       "status": "registered",
@@ -779,11 +779,11 @@
       "collection": "generic",
       "group": "Life & learning",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-presets/reading/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/reading/icon.webp",
         "sha256": "697d1abf8e65b9a892cdd27d585d77175b86d8fb7c08a60dc99467cb9120ae10"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-presets/reading/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/reading/background.webp",
         "sha256": "d8aedc52f9c2ed2a4f6f61ce38b696c3dbcb2d06cc984903bd9c36fd2ac25d3d"
       },
       "status": "registered",
@@ -801,11 +801,11 @@
       "collection": "generic",
       "group": "Life & learning",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-presets/language/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/language/icon.webp",
         "sha256": "e0bec1f0acfa1b8849a6e6ed5bad76297202f6fa4490fe63f2ae38319df69dea"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-presets/language/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/language/background.webp",
         "sha256": "4cf36f04fd215a347972f45f5d1ec2efbcc02c54dce8c28c5aedb116f6261aa7"
       },
       "status": "registered",
@@ -823,11 +823,11 @@
       "collection": "generic",
       "group": "Life & learning",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-presets/journal/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/journal/icon.webp",
         "sha256": "fe864def0bd801d8429e29c231e3c219d9e320447745e12c2d14b96cdd6954b8"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-presets/journal/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/journal/background.webp",
         "sha256": "249afe8d3a93c3fdda2b2804b60296cd8c7838d9b8dae14be7a066258b146af9"
       },
       "status": "registered",
@@ -845,11 +845,11 @@
       "collection": "generic",
       "group": "Work",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-presets/job-search/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/job-search/icon.webp",
         "sha256": "cbc997bbee3b6887f21cbcc5200ef8e93126c5552c1100d842971266f752c44d"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-presets/job-search/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/job-search/background.webp",
         "sha256": "99800889437ce3b8d6bb1034ec814c85a51f7cb5beb7672e63f2266a5484af77"
       },
       "status": "registered",
@@ -867,11 +867,11 @@
       "collection": "generic",
       "group": "Work",
       "icon": {
-        "path": "ui/theme-packages/village/assets/applet-presets/project-planner/icon.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/project-planner/icon.webp",
         "sha256": "e37ab874abf71f154ace5884e7d7c3785af3cfad59b9307ed9af609514598e31"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-presets/project-planner/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-presets/project-planner/background.webp",
         "sha256": "b8f371a014ddddc43193fb094b01279a077c6fa357d933210e875e05f3dbffc8"
       },
       "status": "registered",
@@ -889,11 +889,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/github.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/github.webp",
         "sha256": "6b0bc978ca0e1f0cbcef3ae07d0487d8d47e253a2674ac7cba4a66696aff0572"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/github/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/github/background.webp",
         "sha256": "9e0108d558ece3a644c35b450908e276932ac571e781ded44c9ce23fb5a1f29f"
       },
       "status": "registered",
@@ -911,11 +911,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/codex.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/codex.webp",
         "sha256": "81564825a97b24e89b204c31c0d4ebc8cf9743c1fe43a4e175ba950e1e1b0d2e"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/codex/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/codex/background.webp",
         "sha256": "3e02a470d79a05d5a50c2e7190897d0d37505cfef3b912019e7c5ef030c6d564"
       },
       "status": "registered",
@@ -933,11 +933,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/claude-code.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/claude-code.webp",
         "sha256": "d33f1efd8e2b6b566771d9a38d0a5329926b4faa99ed7e6adbaebba9fe8f7a59"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/claude-code/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/claude-code/background.webp",
         "sha256": "355f8df7431b9c9e2f9e9bd9d56518c37df8be5275aa4565ae67bb339b454e51"
       },
       "status": "registered",
@@ -955,11 +955,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/notion.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/notion.webp",
         "sha256": "4f6ba7e7d33f5fda3f011bd3699240d221dcef4182ee9b1af6d78bed7bf331e3"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/notion/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/notion/background.webp",
         "sha256": "9dbe43291091ea74d11c9e3256e59cdcc3fcedc4647fe76401b9856f495b2cfd"
       },
       "status": "registered",
@@ -977,11 +977,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/obsidian.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/obsidian.webp",
         "sha256": "f4a5d027ca9714fa2bffab6100d70dc0da33079f1277327477ae8484dd44df4b"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/obsidian/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/obsidian/background.webp",
         "sha256": "5c69f2fdb36c8fcb036c5d210f8ed6248799f262f9f849d31fcc5009217043f4"
       },
       "status": "registered",
@@ -999,11 +999,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/plaid.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/plaid.webp",
         "sha256": "70a227dc24cc37c6f1e6ef39c92348f3b7c93a428bcc479e6e2ebbf96163f27c"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/plaid/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/plaid/background.webp",
         "sha256": "0f20b2a60e090c48c16f170d2b9295fb87b405d3c555b0ed007be04d9e2314bf"
       },
       "status": "registered",
@@ -1021,11 +1021,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/stripe.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/stripe.webp",
         "sha256": "184d2278007574d98b894297da1f9b879930139a0edb0ea0ab694e0bd962954d"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/stripe/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/stripe/background.webp",
         "sha256": "421ff22eb3c99201ce2f562d3b7e8a7d90b22d3323e3878d3452467a1fd5621d"
       },
       "status": "registered",
@@ -1043,11 +1043,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/paypal.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/paypal.webp",
         "sha256": "234ea9d7bee980904fdec467be5886fabe130eb16521723015c3f117fa69bf52"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/paypal/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/paypal/background.webp",
         "sha256": "2c1371e07ed95eb7a031be35c488e4b6381b5f0542162351bb6e096f5537a985"
       },
       "status": "registered",
@@ -1065,11 +1065,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/todoist.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/todoist.webp",
         "sha256": "10b5e3cb0ffb152f1e9faee87826ab10e1d6c9e5a7eb46920e66d88730d74154"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/todoist/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/todoist/background.webp",
         "sha256": "ca81aa7e2ce6af935b0215d54efcd356441859507eff1cff2158f2152863833d"
       },
       "status": "registered",
@@ -1087,11 +1087,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/linear.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/linear.webp",
         "sha256": "0336c06ed91f16230c22ac26f4d325a3ff8349adc92624e8c9f8073a57eea073"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/linear/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/linear/background.webp",
         "sha256": "8c46182575586e97e71064883255c8cec59970213e9bf1adbdbfc25595ca078d"
       },
       "status": "registered",
@@ -1109,11 +1109,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/supabase.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/supabase.webp",
         "sha256": "ea768f593ccd3261b5f8d4dc0c54c748496814e3ae870dc2dc9ed28c009407d3"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/supabase/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/supabase/background.webp",
         "sha256": "6510717e3ac52e89712c0444f335c9bd12fd52b1d0c0433502021ed2dbfa8669"
       },
       "status": "registered",
@@ -1131,11 +1131,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/docker.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/docker.webp",
         "sha256": "7de0e6119481f7505b02ad01343e8b5060725f8119056cb758c359f9ada26c02"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/docker/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/docker/background.webp",
         "sha256": "350967366cf6db8fdd363772a0c376a0dcd852c8c003c1320655f3d4ca46377b"
       },
       "status": "registered",
@@ -1153,11 +1153,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/google-drive.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/google-drive.webp",
         "sha256": "5cf2e34ac0f72e9cae1b89cfef2dd7c4d1b6c2fd5c6f5a296c3f841ab21d5b5f"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/google-drive/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/google-drive/background.webp",
         "sha256": "d68ad7ff72a231af9450bf62ee78eb178d3c1fdbbc0e0a4af6474b950930f2bd"
       },
       "status": "registered",
@@ -1175,11 +1175,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/google-docs.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/google-docs.webp",
         "sha256": "04f5688301a4e2f20f9c6e239d1a50717a18c106a9a20ed273647f6b0d7d9a7e"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/google-docs/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/google-docs/background.webp",
         "sha256": "05530ab3b97378559fe93967eb43cc4c6ae2bab6bc1bae7f16d5af3c6a602894"
       },
       "status": "registered",
@@ -1197,11 +1197,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/google-sheets.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/google-sheets.webp",
         "sha256": "915296937307c426975c01703b0562d9608966eeda922bc480b2368933dcc75d"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/google-sheets/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/google-sheets/background.webp",
         "sha256": "36ca838e5781f9b88b23513bf109d2d39a75083d98a7a7270e6cfe57e4697044"
       },
       "status": "registered",
@@ -1219,11 +1219,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/google-slides.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/google-slides.webp",
         "sha256": "bc5552ce7c903b237e63d722b9fa7e7420296efaf7e380118b33c9d3c034a37e"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/google-slides/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/google-slides/background.webp",
         "sha256": "3383250bf5c511639312fc8eb3a9557e493cc9179004e65329cef806cf90b47a"
       },
       "status": "registered",
@@ -1241,11 +1241,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/oura.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/oura.webp",
         "sha256": "0a06375a59582941dcebc278311a2da7e3cd6d76f4adb31f3090d43636130e11"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/oura/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/oura/background.webp",
         "sha256": "862e75e6739a5aff3db0573f35bbce179b0256d6593afaef350026bfd325ef47"
       },
       "status": "registered",
@@ -1263,11 +1263,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/strava.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/strava.webp",
         "sha256": "aa0b3b9fcaf1338654b3d9db227eb9bac8abdd334dafbc0c678f00e30bfc9d76"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/strava/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/strava/background.webp",
         "sha256": "b04ad74f115aaa296e38cc468728ed1ee95ea3b72f379a980db5652a2430da3a"
       },
       "status": "registered",
@@ -1285,11 +1285,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/fitbit.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/fitbit.webp",
         "sha256": "f84d3a5fcf6149e433eb9c9b64be20e1440547a0f3d52995cb561d5ca7147256"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/fitbit/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/fitbit/background.webp",
         "sha256": "630e0303e34ab3ec5e9ab2819de9f6b6d18e76424b89d32fcb660f17237eb76e"
       },
       "status": "registered",
@@ -1307,11 +1307,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/google-maps.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/google-maps.webp",
         "sha256": "d648335f7b91ea5b036c3339f4fd2141e627937e4e79990d38d5dfa6051bbe32"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/google-maps/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/google-maps/background.webp",
         "sha256": "b54a022f11bbfa193b7ce3a8d52a12bf015aa53576d8e7b967f5921f450404df"
       },
       "status": "registered",
@@ -1329,11 +1329,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/airbnb.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/airbnb.webp",
         "sha256": "dc36aa75b53fe8b01f6432ac3ba080446908fd673994f30697c2c98cc5442a88"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/airbnb/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/airbnb/background.webp",
         "sha256": "709f7d5cacafdf2476f21afc5ae19f5799dc4f6c6fef4f3e4bd6269d0d265091"
       },
       "status": "registered",
@@ -1351,11 +1351,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/tripit.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/tripit.webp",
         "sha256": "135aad597b521fcf74d8547f8c10acf71d7a7d3310ea02cf2b20b068b5597129"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/tripit/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/tripit/background.webp",
         "sha256": "04b52680909dbd35839d453f0e60d0e6908818ae0c8fd3a6ef917f9c8893b5ae"
       },
       "status": "registered",
@@ -1373,11 +1373,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/x.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/x.webp",
         "sha256": "532bc7ae8943be715357e2dbfcc3ce43036d4705f9b7202b2aa2c791d81375e5"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/x/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/x/background.webp",
         "sha256": "07c27dbe9950057024198c397abfca35b7bcf0732f24f91efcc26a40f9498d1f"
       },
       "status": "registered",
@@ -1395,11 +1395,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/youtube.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/youtube.webp",
         "sha256": "6a77d3c45f9ec739304c0237619061d30d0ba5256eadd3abd7af3bbbe420470c"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/youtube/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/youtube/background.webp",
         "sha256": "3fb551611fb52e584956c2a03745a84150e84a7400df823c7f2743ff7ee54a2c"
       },
       "status": "registered",
@@ -1417,11 +1417,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/tiktok.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/tiktok.webp",
         "sha256": "4aab4870b54f7e036db400ba8984d90bed39c0743dca4704f0456b45f8b8c241"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/tiktok/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/tiktok/background.webp",
         "sha256": "51b2b9b5ec46787787f8f9cb7ceb4a8965dfe6ed2388fa1ca6a9ab3894ea0b92"
       },
       "status": "registered",
@@ -1439,11 +1439,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/discord.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/discord.webp",
         "sha256": "11a79de41f485cbe137f9600ef450ef3cfaac9bede3b50aea77cac6e49dc1e89"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/discord/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/discord/background.webp",
         "sha256": "380f2daa254ce71e251f9354e44d2d2f8f4e0267b5c61774ec5356207a103e8d"
       },
       "status": "registered",
@@ -1461,11 +1461,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/doordash.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/doordash.webp",
         "sha256": "64a4f2273f96bed12c7655fe52241d4a8a3ca8871deca36cc8fbf4b2a8ed8043"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/doordash/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/doordash/background.webp",
         "sha256": "ac6b82e6e2eba34218197217b0b61f40b2a18692bd45fc15fb94fa4f0f69f9ab"
       },
       "status": "registered",
@@ -1483,11 +1483,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/wordle.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/wordle.webp",
         "sha256": "d2d11cf3f2c805ffc9826ab539d076d77aeafaea0e1ae91c0fd8329b3bf769a3"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/wordle/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/wordle/background.webp",
         "sha256": "60828cd56a56c4f7ec373b39208bfff00ad1155284dc119e3600bffd6329f347"
       },
       "status": "registered",
@@ -1505,11 +1505,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/nyt-connections.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/nyt-connections.webp",
         "sha256": "8b6c48a14f280abb358b8ac17e7ac054f12716f87379036733a8141683f0a32f"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/nyt-connections/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/nyt-connections/background.webp",
         "sha256": "222c4998447d9721c6b266c79c91f11062a7859da15b72bb82e2d0b4950e1f52"
       },
       "status": "registered",
@@ -1527,11 +1527,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/slither-io.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/slither-io.webp",
         "sha256": "aefced09e7d088fbb8a9c7b407cfc28cac69e1f2190a39c97b6e86503d41536c"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/slither-io/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/slither-io/background.webp",
         "sha256": "c1ca26dbb53537c5727671f6422da168b3f135705c63799095553cb39c58a856"
       },
       "status": "registered",
@@ -1549,11 +1549,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/agar-io.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/agar-io.webp",
         "sha256": "af530cc7a0b1c51587cdb1572161e8d125ae97855c0e6bd5b253964eabe03f48"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/agar-io/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/agar-io/background.webp",
         "sha256": "ddab1bcb0fd88f31b111da2db2dbf46d1d52da24367a489d96966ec6b7386c6d"
       },
       "status": "registered",
@@ -1571,11 +1571,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/krunker-io.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/krunker-io.webp",
         "sha256": "60f4b30843c062af222296a65ac90e68d7df283faf63cbaeabee139357059e26"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/krunker-io/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/krunker-io/background.webp",
         "sha256": "df9b4285b38d03b099f005f4afe58e159e8b622704ed96338f5c6dfe3179b3ee"
       },
       "status": "registered",
@@ -1593,11 +1593,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/skribbl-io.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/skribbl-io.webp",
         "sha256": "f186fd2e60825acef419c8ebb530782c2f7eb87c13b876b6a6d5acdcf9d82bb2"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/skribbl-io/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/skribbl-io/background.webp",
         "sha256": "ddc39e21051066c5b64e647abb0d3103844f0ac15ba6fddc4de9e31b572fbc2e"
       },
       "status": "registered",
@@ -1615,11 +1615,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/infinite-craft.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/infinite-craft.webp",
         "sha256": "8bb8efdca9b04a506843acc9560bfa9f5a2174dbbfbab244f3d2bdb5194e9948"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/infinite-craft/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/infinite-craft/background.webp",
         "sha256": "573d650e203f858cee1188e51ebc045c9bd60c13be3ff4d41e6d2a58e7fe34ac"
       },
       "status": "registered",
@@ -1637,11 +1637,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/little-alchemy-2.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/little-alchemy-2.webp",
         "sha256": "a6db1c84519490ff8f01443acc81cc18fe5855ddf676f0066d37ea69ed7d91f1"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/little-alchemy-2/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/little-alchemy-2/background.webp",
         "sha256": "199fe515d3748bf9aebda7a91adbe0dffb2a25c5358b948b0d97185331d66a33"
       },
       "status": "registered",
@@ -1659,11 +1659,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/cookie-clicker.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/cookie-clicker.webp",
         "sha256": "316807a9917f1f2d9badab06e9f8b879ea7a48d6fa679ae948c1e72a50ee792f"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/cookie-clicker/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/cookie-clicker/background.webp",
         "sha256": "7bdce6a925e24076857cac52b7a1393a846f510887bf5c0e36e8e3a8cc7b8f2f"
       },
       "status": "registered",
@@ -1681,11 +1681,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/lichess.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/lichess.webp",
         "sha256": "f1f62a289046c6236ee20268ea83b2bb5b7263dd88a940da9160e11b3ecb7a5a"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/lichess/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/lichess/background.webp",
         "sha256": "b7dd8c0aac0f192dd05d0369d4b845ec65fb09c7a422e20ac8227991c7e51f72"
       },
       "status": "registered",
@@ -1703,11 +1703,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/drive-mad.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/drive-mad.webp",
         "sha256": "20ad9eb7cf57784d1684a0dedcd62572e46ffa47213b2f752605d5e93822762e"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/drive-mad/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/drive-mad/background.webp",
         "sha256": "77b616aaa6b3e5635465ae0ac8a57539a34eec1fa011c5ad79dc8fa838aa6425"
       },
       "status": "registered",
@@ -1725,11 +1725,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/subway-surfers.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/subway-surfers.webp",
         "sha256": "c32d787cac31cfbfe858f324cf8a9e4ae84bb6b2f4f7c149a6e07be393bdf4c8"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/subway-surfers/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/subway-surfers/background.webp",
         "sha256": "ab7750d92d4d9323e92b0275bba9a77e00e53e1203fdb837ddf8ecbee943b9e4"
       },
       "status": "registered",
@@ -1747,11 +1747,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/sekai.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/sekai.webp",
         "sha256": "29b600b1dae30adbb0bfe979d60c2534ac02587403b200c0938189c3a01b6f28"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/sekai/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/sekai/background.webp",
         "sha256": "70b33e3b10830ac7ab7093a753bb423f80a6635317d0be6d990f939b81a534e9"
       },
       "status": "registered",
@@ -1769,11 +1769,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/sekai-sketch-racer.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/sekai-sketch-racer.webp",
         "sha256": "2bcae0e2617c6489dd31c117da9ac1da38087ceaf8e79e6ab0bdfb5d02f02306"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/sekai-sketch-racer/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/sekai-sketch-racer/background.webp",
         "sha256": "a7b1008ead10d4da0f5bb74688fbef6ec30da7602161009e29c5656230da41e3"
       },
       "status": "registered",
@@ -1791,11 +1791,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/sekai-3d-uno.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/sekai-3d-uno.webp",
         "sha256": "a8938bacd4ff6ac41d5fa80b3a001829936909113e15803521aa7aef966ba1b0"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/sekai-3d-uno/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/sekai-3d-uno/background.webp",
         "sha256": "d63128f749da5b67e75ea339146221d3fd61131e4f85ae242887d0d97b26e1e5"
       },
       "status": "registered",
@@ -1813,11 +1813,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/sekai-devil-level.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/sekai-devil-level.webp",
         "sha256": "c778e13739ddad7ba61f70c736fd31e6d6c1c290f6afae3f0f80ed37b48280fe"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/sekai-devil-level/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/sekai-devil-level/background.webp",
         "sha256": "7844af4d8753c52fd5bbe3c8eec050aae94ff2b8487971bddecfb379207f6ead"
       },
       "status": "registered",
@@ -1835,11 +1835,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/pokemon-showdown.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/pokemon-showdown.webp",
         "sha256": "a665fe5fc8e529e96e2a9723c8b1fc079c863782682c3af297a7db6b24fb3840"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/pokemon-showdown/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/pokemon-showdown/background.webp",
         "sha256": "8af390fb6740dcb30e1e8a1a09bb837651833775dded89c2ab1b3a63ad3395cb"
       },
       "status": "registered",
@@ -1857,11 +1857,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/chatgpt.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/chatgpt.webp",
         "sha256": "c8175f17b6b17a60ca45e60b4cbf3d0c528aa59e6b2a1d4cdc22c7b3da31fcd8"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/chatgpt/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/chatgpt/background.webp",
         "sha256": "626de8709760457cb3e20765ff5a3ede3ef2adb1ee177b910193861392ca628c"
       },
       "status": "registered",
@@ -1879,11 +1879,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/claude.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/claude.webp",
         "sha256": "328e80eb30087d28cfb733aab6bb2288fa0a2684bea128fe98f7ed018c16667b"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/claude/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/claude/background.webp",
         "sha256": "b5c5606e58496de5ed510e2197a6b7d4ec874a15647f6432817e8db868dce3f3"
       },
       "status": "registered",
@@ -1901,11 +1901,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/gemini.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/gemini.webp",
         "sha256": "daa2bafdcd27ac32c35bbf27ebb6b09ff168f3a46f164a236e03461d2eae688d"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/gemini/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/gemini/background.webp",
         "sha256": "bf4813b9312804a695fe407f04f5b56e81f586df8d2111096c890de2392ed104"
       },
       "status": "registered",
@@ -1923,11 +1923,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/perplexity.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/perplexity.webp",
         "sha256": "497bfa8544adba514cb07b21f3ab1923576a4ca301355385600ceed165a568ee"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/perplexity/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/perplexity/background.webp",
         "sha256": "01bdf9ea62625418e2ed91c71521974b1431d1e5ace2300296312bb8e24ebb31"
       },
       "status": "registered",
@@ -1945,11 +1945,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/deepseek.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/deepseek.webp",
         "sha256": "47cf01a8df83f76de099a4bc9a8bf10a5eb0299836154d17a2777a88c1b4921c"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/deepseek/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/deepseek/background.webp",
         "sha256": "fd361b4a384497e3bd08e3a45e7d89f2c79e8b50ea2a12eb02c0b3ad4f7d7bd3"
       },
       "status": "registered",
@@ -1967,11 +1967,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/whatsapp.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/whatsapp.webp",
         "sha256": "7600015bf177e75bdfe1383b62e07dd0b08091e0ce7618666701c375be214f35"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/whatsapp/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/whatsapp/background.webp",
         "sha256": "e22bc1df5ebee9395273cbb11828cab72cdb74e4f51d56292761cfb8eb306047"
       },
       "status": "registered",
@@ -1989,11 +1989,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/telegram.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/telegram.webp",
         "sha256": "54c53b66699c14bee0f34bde71dd3a86b826e06cee2fd64fbd8dbba6fa44d18d"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/telegram/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/telegram/background.webp",
         "sha256": "d60b09ff4aa815843d92a28d0da7d0b86824490178d74e7b09eb78deca0fc20c"
       },
       "status": "registered",
@@ -2011,11 +2011,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/slack.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/slack.webp",
         "sha256": "6b7e31753b9e829238af2d628ea719c880dbaf90f0f28f6c5b9159f251d35a9a"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/slack/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/slack/background.webp",
         "sha256": "971e014aff3cdfce649bce8bdbfd945a4109a22e921c25e028088d524da92bcb"
       },
       "status": "registered",
@@ -2033,11 +2033,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/teams.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/teams.webp",
         "sha256": "c974fad6f18f3f1bf0729f07b99c316d45bec72e9a81d2942e55fa32799993c2"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/teams/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/teams/background.webp",
         "sha256": "2636b39b9ee7a1ae46582c77ca48d47cce4522213025806e161de7907883637b"
       },
       "status": "registered",
@@ -2055,11 +2055,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/zoom.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/zoom.webp",
         "sha256": "bc042432de9a6e48a85c02c0366391cecff7194de12bfdea52e6df4693ae0e9d"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/zoom/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/zoom/background.webp",
         "sha256": "f847208d7bdc10cc3e3b8a7b2019348c2099b19598333a32a764bbe6f3d1fbf0"
       },
       "status": "registered",
@@ -2077,11 +2077,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/dropbox.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/dropbox.webp",
         "sha256": "f3abdd80f95cd11d896b6f0d96f49b1c7d5c036abe9244cb7f3bfcde1287bafb"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/dropbox/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/dropbox/background.webp",
         "sha256": "6b5efca8efbbc93005481a5691e2d354cba69e461eb925641cd6aebdb6c4af68"
       },
       "status": "registered",
@@ -2099,11 +2099,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/onedrive.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/onedrive.webp",
         "sha256": "dafb8c863a777bc82f0e134d3046324bf7740043b79e9f19655646a95ce59ee5"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/onedrive/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/onedrive/background.webp",
         "sha256": "1b5e290fc27c807e287c99ee642995bf47db8e8e1cafa7bd890269e6f739ce9a"
       },
       "status": "registered",
@@ -2121,11 +2121,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/microsoft-word.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/microsoft-word.webp",
         "sha256": "20853b7aa4cab90a00400133b9cbad6a3267d7473984a7c52537391f144e3184"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/microsoft-word/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/microsoft-word/background.webp",
         "sha256": "d3af0897754124ff52549cd2a078923ab71c8be4d667483fa03843e67f712505"
       },
       "status": "registered",
@@ -2143,11 +2143,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/microsoft-excel.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/microsoft-excel.webp",
         "sha256": "13a85030b68737d2f248494d5c523fa08d46fc6ea939867e52e2e1392084a81c"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/microsoft-excel/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/microsoft-excel/background.webp",
         "sha256": "a7d20e0628639a56a29429fbee5fff736139415d13c6ba66f73828862b185d0c"
       },
       "status": "registered",
@@ -2165,11 +2165,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/microsoft-powerpoint.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/microsoft-powerpoint.webp",
         "sha256": "000cf02f4ef4281c76af6ccc506e206c7e4aca0ed4fe676accad78d4c1d6b065"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/microsoft-powerpoint/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/microsoft-powerpoint/background.webp",
         "sha256": "0f74681b7d84803800161e235edf770b47453793c739bcd3899b37a00745cf8e"
       },
       "status": "registered",
@@ -2187,11 +2187,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/figma.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/figma.webp",
         "sha256": "d7d6654695358fdb25da117d1d78a549fe1a04446988004a61185339835cc75a"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/figma/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/figma/background.webp",
         "sha256": "36f573cf9b74d925ba07444dc5c1c99659ea7ef9018c919e34732e58eff7cd54"
       },
       "status": "registered",
@@ -2209,11 +2209,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/canva.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/canva.webp",
         "sha256": "c7d6d432628918ee414dd6f82fa887c5c48c61ab5fc534cdb4055cb7ec73ceb1"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/canva/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/canva/background.webp",
         "sha256": "504e71d807130bc44fe806e14ea417bc3b2726d34e509f10aace9d5140153aaf"
       },
       "status": "registered",
@@ -2231,11 +2231,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/spotify.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/spotify.webp",
         "sha256": "98c76b39b261fc43effb38b27779d270731e3e6c2928a78cda9e66320a377d1f"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/spotify/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/spotify/background.webp",
         "sha256": "61d4b2a34aebb6057a0c42d31ab918fb98bb7d62242d21b8f3e4e293dfc0ae89"
       },
       "status": "registered",
@@ -2253,11 +2253,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/apple-music.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/apple-music.webp",
         "sha256": "27a0fe2ba4aa245a85c8573e65a8b7e0634e51b77838d991effbc0a9c52b63eb"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/apple-music/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/apple-music/background.webp",
         "sha256": "c3d9575c62c99de89e8dfd763b79de56e5d450ebc59d1278a3c08e4513b84edc"
       },
       "status": "registered",
@@ -2275,11 +2275,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/reddit.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/reddit.webp",
         "sha256": "398405a111853dbf81d579a2741867aa0338eeb2f882b1b322f04194d55eb406"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/reddit/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/reddit/background.webp",
         "sha256": "14d419bea3adf31ea274b29dc49e06f4c21110bbd50abaa8f2f3bfb33c81c888"
       },
       "status": "registered",
@@ -2297,11 +2297,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/instagram.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/instagram.webp",
         "sha256": "03b333fae0bcb0f128ee3d1d9b2f9ef986af64353597f7806f972f36ec946f6f"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/instagram/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/instagram/background.webp",
         "sha256": "900c4b6d915244efe9a1835c20d16cf5eb63e7ec825aea01d58c6be52431a6bf"
       },
       "status": "registered",
@@ -2319,11 +2319,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/linkedin.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/linkedin.webp",
         "sha256": "d609e986c9cc9346479f6da1b36fc7eda8fbb3784dba4149b1f4f3629ff5ea31"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/linkedin/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/linkedin/background.webp",
         "sha256": "5d6f28fc085ec8f91ef8575330171b190cdea295cd2f89e511864c9c9b520eee"
       },
       "status": "registered",
@@ -2341,11 +2341,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/amazon.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/amazon.webp",
         "sha256": "6f6b11c1501401194d432bb8080f14fdf4de94fdb163117b5d605ab6edc89f9d"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/amazon/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/amazon/background.webp",
         "sha256": "2069bea6c814d8ffbe51c2f377af0e1841e9a21390272dcd68d13aa24a44ab2b"
       },
       "status": "registered",
@@ -2363,11 +2363,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/netflix.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/netflix.webp",
         "sha256": "7002b2e7b74b96f56b1161dcef98619de4eeda6b85a3fc321c9422baa33f1381"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/netflix/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/netflix/background.webp",
         "sha256": "3ba9da7b6c5a7606f2208af8ac7637cf58e6331f160ce508f9a0ab651d32ed8d"
       },
       "status": "registered",
@@ -2385,11 +2385,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/outlook.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/outlook.webp",
         "sha256": "331e0f987e188cf4cce97849c53808b379ea9423fb8f68895fde267cd0438c32"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/outlook/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/outlook/background.webp",
         "sha256": "8b0102c630263776e79b39dd24892b85fece8011a8a42ec209d2ef0da1673eb0"
       },
       "status": "registered",
@@ -2407,11 +2407,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/apple-podcasts.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/apple-podcasts.webp",
         "sha256": "5c633f9854077535f55b9fae3d5d579d733d6c2b9f7f0c6e1d455a4727b8048e"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/apple-podcasts/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/apple-podcasts/background.webp",
         "sha256": "5059bb9d0b423d2e70a1e0ddc6dd2263111955f00b67b5a970ec6bb485e66d25"
       },
       "status": "registered",
@@ -2429,11 +2429,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/google-photos.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/google-photos.webp",
         "sha256": "4b360eb61ce712f29c778107227fa8d01a119436b9416c1c40a151c1a80abe8a"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/google-photos/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/google-photos/background.webp",
         "sha256": "18c27797983c5deb4a46163a60cf9510c0a357927206697b7f97b0d4d46dd2e9"
       },
       "status": "registered",
@@ -2451,11 +2451,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/pinterest.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/pinterest.webp",
         "sha256": "212e72b82a48822d0691eaf6c4af73a8235c6ee81d69799496c5c7c2975329ac"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/pinterest/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/pinterest/background.webp",
         "sha256": "bf4956b701469fd80616acfb22c6fb711efff374cbc91c59c9d6d9562b6902f0"
       },
       "status": "registered",
@@ -2473,11 +2473,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/facebook.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/facebook.webp",
         "sha256": "8b2b4e002593486dc05bf12276dd5c2be9d6ea9f0d0c025ca9484c5c8d2f6649"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/facebook/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/facebook/background.webp",
         "sha256": "1c9dc110725883d0ccdd62c46e65db0af936df0a940907e4ef761a25a8aa1518"
       },
       "status": "registered",
@@ -2495,11 +2495,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/threads.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/threads.webp",
         "sha256": "d6b31df70114826a6c114c6f76d8527ce1014b895ed54cf22f456056c2b4f0bf"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/threads/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/threads/background.webp",
         "sha256": "a95cc039b662b316302d97feca6c9be8cedf0a126c45c48936285c7e74751c26"
       },
       "status": "registered",
@@ -2517,11 +2517,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/capcut.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/capcut.webp",
         "sha256": "e16cd8e2ec3dfb16faf52d6678f43967a2f839165aee79f332c00c925f4b30ce"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/capcut/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/capcut/background.webp",
         "sha256": "b92d7b1ab0fd1dd8b3722a930f4dcc08b48f4f55d5906a0ee955d2ac81cc06fc"
       },
       "status": "registered",
@@ -2539,11 +2539,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/uber.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/uber.webp",
         "sha256": "ba7b567e25b2581d5b9ff40a2d2416dc0e0d26566a39525546fddd3558ebd5ab"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/uber/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/uber/background.webp",
         "sha256": "71af65534ce74b1521f9240bf5ca3488c1a4a8d1681ad09fba9ccd07a954014a"
       },
       "status": "registered",
@@ -2561,11 +2561,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/uber-eats.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/uber-eats.webp",
         "sha256": "8846650d45939e61fb3861eefe13638c62d83e53e58daee95e7373dd88a497c9"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/uber-eats/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/uber-eats/background.webp",
         "sha256": "0a416dcbc6ec01b5d4983651dfe1c58c028d1cdfb857ea144ffc79d7b8825ffa"
       },
       "status": "registered",
@@ -2583,11 +2583,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/booking.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/booking.webp",
         "sha256": "81a44ffe2946e4adfee91903635f05583d7fd5cc13312f02e511ee23beb47f2f"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/booking/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/booking/background.webp",
         "sha256": "dfc9f78c8bc6b6f4f5ed1d7a268f395755d75f5706b20eeadfd2734b719d62bb"
       },
       "status": "registered",
@@ -2605,11 +2605,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/feishu.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/feishu.webp",
         "sha256": "9370906a7276e6060f3ad3aa60db859a2c3aba54ae70c924b945f8f0ebdc517d"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/feishu/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/feishu/background.webp",
         "sha256": "c1e04cdab0d614233be3aeab4d5f0959c2b07091bad43b2b802fcb349780a1d0"
       },
       "status": "registered",
@@ -2627,11 +2627,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/bilibili.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/bilibili.webp",
         "sha256": "90827c42187a0d623fc38a964a32e58cebf6e28fae5070acab75a7f3c66ad2b8"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/bilibili/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/bilibili/background.webp",
         "sha256": "fc3895784ddb3a197d2569d275ba27de47da02c9b42180a7178602c15a9fe21e"
       },
       "status": "registered",
@@ -2649,11 +2649,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/xiaohongshu.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/xiaohongshu.webp",
         "sha256": "3b7ea816dd90878913bf3e38e00432493ba63ae404481b113c5ef8910049f885"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/xiaohongshu/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/xiaohongshu/background.webp",
         "sha256": "39f2ba24850845815f47e6e52c3afb3943204a06ddbf5e7745004684d564e45d"
       },
       "status": "registered",
@@ -2671,11 +2671,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/baidu-netdisk.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/baidu-netdisk.webp",
         "sha256": "325d7045ea14eda5559829ddb0e79ff25e75f93ee70c04add7461878c31846ef"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/baidu-netdisk/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/baidu-netdisk/background.webp",
         "sha256": "2baf1ed0a8c33266f3fd1330d458f5e178feadb08d1c5f7162bf4381aa3a9c6a"
       },
       "status": "registered",
@@ -2693,11 +2693,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/twitch.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/twitch.webp",
         "sha256": "384ee9a5bcf9c707e8c7facfa198946a05739a30719afade5f295df31c3bfafd"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/twitch/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/twitch/background.webp",
         "sha256": "32263ff0fefd517da158ee51b2d5c4c31aeee2d5d6db280e5c730f2a085b97de"
       },
       "status": "registered",
@@ -2715,11 +2715,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/copilot.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/copilot.webp",
         "sha256": "3d58e8e1791e6ae3c9dae0657c02a2997bd2760168bab460a9f31b0a421fa9ee"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/copilot/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/copilot/background.webp",
         "sha256": "2eb638f8f6e576df72862ca0f7c8c9f3dfeb1102ef1a4d2d1f45bdc935e4e85a"
       },
       "status": "registered",
@@ -2737,11 +2737,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/acrobat.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/acrobat.webp",
         "sha256": "cb6aefc7becff0186ddbbdbf7b309bfd4efed138210418cb1b95186ea4043912"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/acrobat/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/acrobat/background.webp",
         "sha256": "a3f69547699c49c4b868aed7c68c5d6cc3079c0914ef34f84afc8a5534d8392e"
       },
       "status": "registered",
@@ -2759,11 +2759,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/wikipedia.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/wikipedia.webp",
         "sha256": "fbae84fcb97b544ffcb8836df486f02c0169127f5df81d8d37c0c1d173d625aa"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/wikipedia/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/wikipedia/background.webp",
         "sha256": "47e21bf0326600b260cf9ba18c1313d4245a63699297bd1c13f75be4a01c416d"
       },
       "status": "registered",
@@ -2781,11 +2781,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/doubao.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/doubao.webp",
         "sha256": "1bdff89a5cc2e970aa7e10d8ca85c0d345fbca8258aa829ce6afcf4a5f947f3a"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/doubao/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/doubao/background.webp",
         "sha256": "71ac9a8baad53ecafaed4b05f8bfeecbbf701330408b3d92063e5baa92ee0abf"
       },
       "status": "registered",
@@ -2803,11 +2803,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/taobao.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/taobao.webp",
         "sha256": "b77417dc793320f3f8fb4c5c408a06965c410ffb9da1b9c9c26acaf105e4d5e4"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/taobao/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/taobao/background.webp",
         "sha256": "9924c75805f736e2eabf02b5ccf1c10616713c91d8701a99f9dcd2a9d96b014e"
       },
       "status": "registered",
@@ -2825,11 +2825,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/alipay.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/alipay.webp",
         "sha256": "562cab879f4d1812ec70560d18ce801a733b5d3a0a169d2ff34f332f2b4f5da8"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/alipay/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/alipay/background.webp",
         "sha256": "96b18d96b3f740102bc0613549d4fd0bdb5ff74932b29d4b39539cc238c54db3"
       },
       "status": "registered",
@@ -2847,11 +2847,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/douyin.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/douyin.webp",
         "sha256": "4aab4870b54f7e036db400ba8984d90bed39c0743dca4704f0456b45f8b8c241"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/douyin/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/douyin/background.webp",
         "sha256": "24b93686f4b986f2e169bebdf935f89774764085e578d996416f44044f826938"
       },
       "status": "registered",
@@ -2869,11 +2869,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/posthog.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/posthog.webp",
         "sha256": "46837e5a6bda9b44c71b3fad74e223e56e8281f8ddf68180aaa7ad73f1a8e7fe"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/posthog/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/posthog/background.webp",
         "sha256": "a6a30335a3b469800e2d5f9646667d2b14f068578a04ca165ed75b0b4b476ab3"
       },
       "status": "registered",
@@ -2891,11 +2891,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/cloudflare.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/cloudflare.webp",
         "sha256": "397a1265addce7d149ec5f0304091d151649705d93ee2c02788eaa94fb24f4ce"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/cloudflare/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/cloudflare/background.webp",
         "sha256": "3e31a7cf0c414ed8551b8ead94ba2af71d08a87e695daea2c1b483d4cd5d1178"
       },
       "status": "registered",
@@ -2913,11 +2913,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/vercel.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/vercel.webp",
         "sha256": "e631b11445f7ffb5e8b7ff407b3641defd74a94e3a98c6eab709c2d914ff598f"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/vercel/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/vercel/background.webp",
         "sha256": "cef8c987a3ea4caad56d8e0af00acec35c945e623dcbe49a285bfbff9f60176a"
       },
       "status": "registered",
@@ -2935,11 +2935,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/netlify.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/netlify.webp",
         "sha256": "3717b4232438ac61510cf6f2a7a72bb2925fd9a85a09cbdd3fd3dff02d77a209"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/netlify/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/netlify/background.webp",
         "sha256": "23c657c9946795d25655c5206c901d5bb9f10534ef84c9aa0603872c4508d1ed"
       },
       "status": "registered",
@@ -2957,11 +2957,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/firebase.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/firebase.webp",
         "sha256": "011049dc5fd6ffcf0a3f46261c7298bd7f6094f980ca7c1c049b2ddac7671da4"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/firebase/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/firebase/background.webp",
         "sha256": "ec6c84a2e9c08159c20122bb7b73fd2df50a5131f16aa9b05af815a91f010440"
       },
       "status": "registered",
@@ -2979,11 +2979,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/sentry.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/sentry.webp",
         "sha256": "f90f0cbd0aec79c77d9c5381642a469eb297a537d4552db0b04b03a3692a86af"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/sentry/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/sentry/background.webp",
         "sha256": "7aaed0b4dc32b9744ba17ba8088ef11c3f870c2449e977a98f971d2cb6a31d76"
       },
       "status": "registered",
@@ -3001,11 +3001,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/railway.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/railway.webp",
         "sha256": "05cde80f6729e78ee8ee1f423fdcf511b596502cf30c66ac07f3c5405c12737e"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/railway/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/railway/background.webp",
         "sha256": "c5263d6557974eeae71c5515625822cdab3a732dd30b74a3210bd0224d457a82"
       },
       "status": "registered",
@@ -3023,11 +3023,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/render.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/render.webp",
         "sha256": "9b424e558f31be6d4b2d8fffcf98bba8a18a993a05c949124ce4e6e96827c7d9"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/render/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/render/background.webp",
         "sha256": "4b6e5adebf2c2f4b32737b6f0929948c56440d9ea8fe0591483806c2e332dd76"
       },
       "status": "registered",
@@ -3045,11 +3045,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/gitlab.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/gitlab.webp",
         "sha256": "000939a5d5ed363abd09ec49815f27a042bc7c5d6cc83cdffe830ac1afdb38f3"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/gitlab/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/gitlab/background.webp",
         "sha256": "b4e5219760a2bd44a9dc327b85943c18bbfdc62ea8d947051776142b566b3531"
       },
       "status": "registered",
@@ -3067,11 +3067,11 @@
       "collection": "branded",
       "group": "products-and-external-games",
       "icon": {
-        "path": "ui/theme-packages/village/assets/devices/jira.webp",
+        "path": "ui/style/theme-packages/village/assets/devices/jira.webp",
         "sha256": "4d8e7b74c9fef150772893b5aaa591e5f7dcc7dc153d61ebb8575918df60455d"
       },
       "background": {
-        "path": "ui/theme-packages/village/assets/applet-scenes/jira/background.webp",
+        "path": "ui/style/theme-packages/village/assets/applet-scenes/jira/background.webp",
         "sha256": "380175c984b510837f549655ac5d3f7af25fcdf8768bc37103b740a52a813cb3"
       },
       "status": "registered",

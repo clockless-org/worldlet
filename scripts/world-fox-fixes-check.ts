@@ -1,6 +1,6 @@
 // Small lifecycle fixes in the World and Fox's Settings, checked without a browser:
 // a second win burst replaces the first (ui/world/world-celebration.ts), and leaving Settings › General drops its
-// app-update listener at once (ui/companion/companion-settings.ts).
+// app-update listener at once (ui/frame/companion-settings.ts).
 import assert from 'node:assert/strict';
 
 class Node{
@@ -43,7 +43,7 @@ const settle=async(turns=20)=>{for(let i=0;i<turns;i++)await new Promise(resolve
 
 // Settings › General: its update listener goes as soon as another page is shown, not at the next update event.
 {
- const {createCompanionSettings}=await import('../ui/companion/companion-settings.ts');
+ const {createCompanionSettings}=await import('../ui/frame/companion-settings.ts');
  const call=async(action:string)=>action==='appUpdate'?{installed:{version:'2026.1011.1',build:1},channel:'production',channels:[]}:{};
  const settings=createCompanionSettings({call,host:()=>undefined,pages:{fox:new Node() as any,phone:new Node() as any,knows:new Node() as any},records:{records:new Node() as any,showRecords(){}},
   onShow(){},close(){},openFeedback(){},replayTutorial(){}});

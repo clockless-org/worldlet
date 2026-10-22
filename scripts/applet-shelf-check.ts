@@ -1,7 +1,7 @@
-// The Applet shelf's order (core/applets/shelf.ts) without a page: the open Applet in the middle, one stable ring
+// The Applet shelf's order (context/applets/shelf.ts) without a page: the open Applet in the middle, one stable ring
 // around it, and the ones used longest ago behind "+N".
 import assert from 'node:assert/strict';
-import {seedShelf,enterShelf,shelfRing} from '../core/applets/index.ts';
+import {seedShelf,enterShelf,shelfRing} from '../context/applets/index.ts';
 
 const used:Record<string,number>={a:6,b:5,c:4,d:3,e:2,f:1,g:0};
 const lastUsed=(id:string)=>used[id]??0;

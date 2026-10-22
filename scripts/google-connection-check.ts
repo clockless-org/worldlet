@@ -11,7 +11,7 @@ const stagesHost={version:1,features:{...hostFeatures({platform:'macos'}),google
 // (owner meetings 2026-10-02/03) can be opened again or the link copied. Any other address is ignored.
 const consentUrl='https://accounts.google.com/o/oauth2/auth?client_id=fixture.apps.googleusercontent.com&scope=openid';
 const consentStage={stage:'browser',url:consentUrl},forgedStage={stage:'browser',url:'https://accounts.google.com.evil.test/o/oauth2/auth'};
-const bundle=await bundleScript({entryPoints:['ui/onboarding/world-onboarding.ts'],globalName:'GoogleConnectionCheck',platform:'browser'});
+const bundle=await bundleScript({entryPoints:['ui/frame/world-onboarding.ts'],globalName:'GoogleConnectionCheck',platform:'browser'});
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage();
  await page.setContent('<main id="root"></main>');
@@ -38,7 +38,7 @@ await withBrowser(fileAccess,async browser=>{
   assert.deepEqual(result.calls.map(c=>c.action),['connect','snapshot'],'one connection request, without enabling private processing');
   assert.equal(result.calls[0].body.provider,provider);
   assert.equal(result.consent,consent);
-  // Mac connects Calendar with local EventKit access (core/applets/INTEGRATIONS.md), not Google sign-in.
+  // Mac connects Calendar with local EventKit access (context/applets/INTEGRATIONS.md), not Google sign-in.
   if(provider==='google-calendar'){assert.ok(!result.guides.some(g=>[signIn.text,connecting.text].includes(g?.text)),'Mac Calendar never opens Google sign-in');continue;}
   assert.deepEqual(result.guides,expected[mode],mode+': browser steps only while consent is open, Cancel throughout, then a brief success');
  }

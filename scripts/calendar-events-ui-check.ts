@@ -10,7 +10,7 @@ const browser=await chromium.launch(process.platform==='win32'?{channel:'msedge'
 try{
  const page=await browser.newPage({viewport:{width:1500,height:844},reducedMotion:'reduce'});const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.setContent('<main id="notionWorld" class="native-console" style="position:fixed;inset:0;background:#879a82"><section class="pixi-applet-stage home-open" data-installation="true" data-animated-device="true" style="position:absolute;inset:10% 35% 8% 4%"></section></main>');
- for(const file of ['dist/WorldletWeb/worldlet-ui.css','ui/shell/pixi-world.css'])await page.addStyleTag({content:await readFile(file,'utf8')});await page.addScriptTag({content:result});
+ for(const file of ['dist/WorldletWeb/worldlet-ui.css','ui/frame/pixi-world.css'])await page.addStyleTag({content:await readFile(file,'utf8')});await page.addScriptTag({content:result});
  await page.evaluate(()=>{const w=window as any;w.now=new Date(2026,8,28,10,20).getTime();w.state={mode:'week',offset:0};w.events=[];w.picks=[];
   w.synced=[{id:'s1',title:'Design review',start:new Date(2026,8,28,9).toISOString(),record:{end:new Date(2026,8,28,10,30).toISOString()}},{id:'s2',title:'Standup',start:new Date(2026,8,28,10).toISOString()},{id:'s3',title:'Holiday',start:'2026-09-30',allDay:true}];
   // Like the World: a save or delete redraws through the new list at once.

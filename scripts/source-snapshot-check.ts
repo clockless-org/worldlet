@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {sourceSnapshotRows} from '../core/context/index.ts';
+import {sourceSnapshotRows} from '../context/connectors/index.ts';
 const source={id:'one',revision:1,title:'Original',origin:'file',enabled:true,connectionId:'mail',excerpt:'Original text',privatePath:'/private/fixture'};
 assert.equal(sourceSnapshotRows([source],[{sourceId:'one',sourceRevision:1},{sourceId:'one',sourceRevision:0}])[0].excerpt,'');
 assert.equal(sourceSnapshotRows([{...source,enabled:false}],[])[0].excerpt,'');

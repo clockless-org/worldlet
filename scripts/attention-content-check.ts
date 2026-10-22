@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
-import {validateWorldItem} from '../core/items/world-item-validation.ts';
+import {validateWorldItem} from '../context/store/world-item-validation.ts';
 import {readFileSync} from 'node:fs';
-import {processedAttentionContent,ATTENTION_CONTENT_LIMITS,attentionReasonWords} from '../core/attention/attention-content.ts';
-import services from '../core/tools/services.json' with {type:'json'};
-import {matterCopy} from '../core/attention/index.ts';
-import {attentionPreviewData} from '../core/attention/attention-preview.ts';
-import {projectWorldItems} from '../core/items/world-items.ts';
-import {planAttention,finishAttentionBudget} from '../core/attention/attention-center.ts';
-import {prepareWorldItem} from '../core/items/world-item-state.ts';
+import {processedAttentionContent,ATTENTION_CONTENT_LIMITS,attentionReasonWords} from '../agent/attention/attention-content.ts';
+import services from '../agent/gate/services.json' with {type:'json'};
+import {matterCopy} from '../agent/attention/index.ts';
+import {attentionPreviewData} from '../agent/attention/attention-preview.ts';
+import {projectWorldItems} from '../context/store/world-items.ts';
+import {planAttention,finishAttentionBudget} from '../agent/attention/attention-center.ts';
+import {prepareWorldItem} from '../context/store/world-item-state.ts';
 const original='2026 HYSTA Annual Conference | AI innovation, founders and many more details';
 const item=processedAttentionContent({id:'meeting',provider:'google-calendar',kind:'event',title:'HYSTA annual conference',reason:'Your conference is tomorrow.',summary:'A full-day conference. Review the agenda before going.',locationName:'Santa Clara Convention Center',location:'5001 Great America Pkwy, Santa Clara, CA',start:'2026-09-26T09:00:00-07:00',end:'2026-09-26T21:00:00-07:00',status:'open',sources:[{provider:'google-calendar',id:'event',quote:original}]});
 assert.equal(item.context,item.reason,'Legacy alias has one authoritative reason');
@@ -87,11 +87,11 @@ assert.equal(attentionReasonWords(nineWords),ATTENTION_CONTENT_LIMITS.reasonWord
 assert.throws(()=>processedAttentionContent({...brief,reason:nineWords}),new RegExp(`at most ${ATTENTION_CONTENT_LIMITS.reasonWords} words`));
 assert.equal(processedAttentionContent({...brief,reason:'Reply to Ms. Alvarez about pickup by Thursday'}).reason,'Reply to Ms. Alvarez about pickup by Thursday');
 
-// Both field tables in core/attention/README.md state Core's limits, not a stale copy.
-const readme=readFileSync(new URL('../core/attention/README.md',import.meta.url),'utf8');
+// Both field tables in agent/attention/README.md state Core's limits, not a stale copy.
+const readme=readFileSync(new URL('../agent/attention/README.md',import.meta.url),'utf8');
 for(const key of ['title','reason','summary','actionLabel','locationName','location'] as const){
  const rows=readme.split('\n').filter(line=>line.startsWith(`| \`${key}\` |`));
- assert.ok(rows.length>=(key==='actionLabel'?1:2),`core/attention/README.md lists ${key} in both field tables`);
+ assert.ok(rows.length>=(key==='actionLabel'?1:2),`agent/attention/README.md lists ${key} in both field tables`);
  for(const row of rows){
   const chars=[...row.matchAll(/(\d+) characters/g)].map(m=>Number(m[1])),words=[...row.matchAll(/(\d+) words/g)].map(m=>Number(m[1]));
   assert.deepEqual(chars,[ATTENTION_CONTENT_LIMITS[key]],`README ${key} row must state Core's ${ATTENTION_CONTENT_LIMITS[key]} characters: ${row}`);

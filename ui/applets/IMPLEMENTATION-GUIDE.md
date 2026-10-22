@@ -86,9 +86,9 @@ and [MCP Apps UI](https://developers.openai.com/plugins/build/chatgpt-ui).
 - `contracts/world.ts` already separates `scene`, `fullView` and `connection` in
   `AppletDefinition`; `connection` is currently a loose single declaration,
   **not** a typed multi-backend operation registry.
-- `core/applets/definitions/gmail.ts` combines a scene view with an original Web
+- `context/applets/definitions/gmail.ts` combines a scene view with an original Web
   route; its declared connection is separate from those views.
-- `core/applets/definitions/github.ts` and `apple-notes.ts` use different
+- `context/applets/definitions/github.ts` and `apple-notes.ts` use different
   connection/host requirements while both declare scene presentation.
 - Packaged `commands.json` comes from the existing World gateway (below). Extend
   that source of truth when adding operations, not a parallel executor/schema.
@@ -102,7 +102,7 @@ behavioral parity. No native policy or device behavior changes are made here.
 ## Integration map
 
 For a generated native Applet, default to `appletSurface`, `actionButton`,
-`emptyState` and `notice` from `ui/components/primitives/components.ts`.
+`emptyState` and `notice` from `ui/style/primitives/components.ts`.
 Use the [built-in HUD contract](../../resources/styles/builtin/UI.md) rather
 than introducing a local palette or image-based controls. The live component
 gallery includes an interactive Notes example; Weather is a production route
@@ -110,15 +110,15 @@ using the same shell, with live data and explicit unavailable/error states.
 
 | Concern | Starting points |
 | --- | --- |
-| Catalog and stable IDs | `core/applets/definitions/<key>.ts`, `core/applets/catalog.ts` |
+| Catalog and stable IDs | `context/applets/definitions/<key>.ts`, `context/applets/catalog.ts` |
 | Brand assets | `ui/applets/BRAND-ASSETS.md`, `ui/applets/brand-assets.json` |
 | Placement and world slots | `ui/world/world-layout.ts`, `ui/world/world-pack.ts`, `resources/worlds/`; retain compatible stored IDs |
 | Sprite rendering and Open items | `ui/world/village/pixi-world.ts`, `ui/world/pixi-stage.ts`, Applet-specific renderers |
 | Asset packaging | `scripts/build-world-assets.ts`; inspect the active asset paths before registering files |
-| Connections | `ui/applets/connection-guide.ts`, host adapters in `platform/electron/src/modules/sources/` (`connections.ts`, `apple.ts`, `local.ts`) and `harness/hermes/` |
-| Routing and selected originals | `ui/shell/notion-world.ts` |
-| Browser Focus | `ui/browser/browser-device.ts`, host browser module `platform/electron/src/modules/browser/` ([website views](../../platform/browser/INTEGRATION.md#native-browser)); dismiss must unload page/media unless the [resume rule](../../platform/browser/INTEGRATION.md#resuming-a-website-applet) keeps it |
-| Fox dialogue and actions | `ui/companion/native-chat.ts`, `ui/hud/native-hud.ts` |
+| Connections | `ui/applets/connection-guide.ts`, host adapters in `platform/host/modules/connectors/` (`connections.ts`, `apple.ts`, `local.ts`) and `harness/hermes/` |
+| Routing and selected originals | `ui/frame/notion-world.ts` |
+| Browser Focus | `ui/applets/browser-device.ts`, host browser module `platform/host/modules/applets/` ([website views](../../platform/browser/INTEGRATION.md#native-browser)); dismiss must unload page/media unless the [resume rule](../../platform/browser/INTEGRATION.md#resuming-a-website-applet) keeps it |
+| Fox dialogue and actions | `ui/companion/native-chat.ts`, `ui/world/native-hud.ts` |
 | Focused checks | Existing relevant scripts under `scripts/`; use fictional data for routine UI validation |
 
 ## Definition versus user instance
@@ -129,11 +129,11 @@ There is no universal installed-Applet loader implied by this guide. The histori
 
 ## Attention registration
 
-An optional typed `attention` declaration registers a trusted source reader or observation producer with the central runtime. See [Applet context and center synthesis](../../core/attention/README.md) for the contract, cost limits and lifecycle. Applets submit source facts; the center synthesizes and decides visibility. Registration alone does not implement a connector, create a background process or grant model access. Observations require stable source identity, original evidence and freshness. Keep acquisition, proposal and user completion separate.
+An optional typed `attention` declaration registers a trusted source reader or observation producer with the central runtime. See [Applet context and center synthesis](../../agent/attention/README.md) for the contract, cost limits and lifecycle. Applets submit source facts; the center synthesizes and decides visibility. Registration alone does not implement a connector, create a background process or grant model access. Observations require stable source identity, original evidence and freshness. Keep acquisition, proposal and user completion separate.
 
 ## Autonomous work contract
 
-Every registered Applet needs `applet.md` and `runtime.json` beside its UI files. See [Applet runtime](../../core/applets/RUNTIME.md) for schedules, trusted adapters, source analysis, optional Attention subscription, durable state and lamp behavior. Website Applets declare on-demand behavior rather than fake background work. Run `node scripts/applet-runtime-check.ts` after changing this contract.
+Every registered Applet needs `applet.md` and `runtime.json` beside its UI files. See [Applet runtime](../../context/applets/RUNTIME.md) for schedules, trusted adapters, source analysis, optional Attention subscription, durable state and lamp behavior. Website Applets declare on-demand behavior rather than fake background work. Run `node scripts/applet-runtime-check.ts` after changing this contract.
 
 
 ### Packaged command discovery

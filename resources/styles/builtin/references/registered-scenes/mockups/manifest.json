@@ -1,282 +1,282 @@
 {
   "schemaVersion": 1,
   "viewport": [
-    1500,
-    844
+    1672,
+    941
   ],
   "content": "fictional-design-samples",
   "sources": {
-    "ui/themes/scene-frame.ts": "f5e9d343b8afe6d3d99790954b27539edb9658f63859155ab29518e9911c972f",
-    "ui/applets/scene/applet-scene.ts": "395f5743eb06702ed4aaa1ac151f37982370d9ddca711b0cebaa5ac664b3390d",
-    "ui/applets/scene/scene-plane.ts": "4bebe0ba015feb88ed0c99fdc9f63cfc563023d207792fc2df67ebebbbc4f111",
+    "ui/style/themes/scene-frame.ts": "f5e9d343b8afe6d3d99790954b27539edb9658f63859155ab29518e9911c972f",
+    "ui/applets/scene/applet-scene.ts": "dff83df7777d2b41dab524619a7ca9a08fa771d8dabb52a2fdcb5ac1fb28193d",
+    "ui/applets/scene/scene-plane.ts": "76b994e1f0cb03cc3d7144e39331b1e3e205def892c3e2666aab8e8f8bd1214a",
     "ui/applets/gmail/page-turn.ts": "51002b7e298ca712fd48ccb700379f8250157ce9a890059a358a6e0dfd71ae60",
     "ui/applets/gmail/focus.css": "0f3974bfeb14f21f8cda094d162188e680978655c7391a13063483eeb4fad019",
-    "ui/applets/scene/applet-scene.css": "f40aa3039333b9d917c4bbdfc3f71b02552e18f9e4e14ece5f44c4d89e1f6226",
-    "scripts/fixtures/applet-scene-preview/preview.js": "4fa83590bfced58b857e7ef0a76bec94e97de87ea9863fe582d97090f1fb09f1",
-    "scripts/fixtures/applet-scene-preview/samples.js": "6a27cf7a5f57c283bb89cced6271683135c9ed37d0b46a8248b2e1a05c2ef1c6",
+    "ui/applets/scene/applet-scene.css": "16ca3208642306b44166dd9172867523ab47cb90b14e5c9a484a8eff01804a4f",
+    "scripts/fixtures/applet-scene-preview/preview.js": "5bc75d8b899e90cdaaf65d7ce2073fe3ee41beaeacdefe8e680d3f15ef444669",
+    "scripts/fixtures/applet-scene-preview/samples.js": "a980f64ee26a45bc92d6c0b343c2ffdc9cafbdc581b99e08cf6565f146107767",
     "scripts/fixtures/applet-scene-preview/samples.css": "f3e0b53d97c7bef10c13156371fa4b78368830d18f5badd04d2d1fb76af17bd0",
     "scripts/fixtures/applet-scene-preview/index.html": "bef0483437a4aae855781eb7b2213cba39ef9840ac98f275ffd36ef723b6a065",
-    "ui/theme-packages/village/presentation.json": "034340571ba1a0e652d42313d119e773b8c0d02fb244fffa2fe05286e2a07706",
+    "ui/style/theme-packages/village/presentation.json": "034340571ba1a0e652d42313d119e773b8c0d02fb244fffa2fe05286e2a07706",
     "resources/styles/builtin/references/registered-scenes/mockup-materials/manifest.json": "2a2f666e54b7fea85a1511fe9235a78115fc06b1ce69123068ab4f2e56cf380e",
-    "ui/applets/apple-notes/open.ts": "cfacad972616bc636cd58e3200b258e44688887c406a44bc725c8ecd7006f67a",
+    "ui/applets/apple-notes/open.ts": "07805378dd22750cb681ee4a19757911332fc6d5bcf3cec1f06da2a46f776744",
     "ui/applets/apple-notes/open.css": "7c0c2f3ca339f28aaf2da3a28d1c1f4ae106eb5f294849a654d699ea7bb24024",
-    "scripts/fixtures/notes-notebook/main.ts": "d6834be0deb2b6f678179d7ca45cba9fa1e1b258ca53b1e83cd57f80246c8c71",
-    "scripts/notes-notebook-preview.ts": "0676d3e1596cfc44be47ff87b2052687517cb25949a24e28237cdb5bfc0b4bc5",
-    "scripts/core-paper-preview.ts": "dc63a777be68edee7c579b56918ff86cf48b8d67cb977a23d14d4cf00add100c",
-    "scripts/fixtures/core-paper-applets/main.ts": "a3afc06e10a549cf242f4715c8a4d033b7c4d294562309c42846bba6f3d896ea",
-    "ui/applets/gmail/open.ts": "a031dd029249af4468ebbd207fd29f2b2dd6ceae538f08b7b0c27178efb5bb2b",
-    "ui/applets/gmail/focus.ts": "964cc5a3c3dc9d7cba43549328535e7ddea34f2eb4387e0498946767bf868bee",
+    "scripts/fixtures/notes-notebook/main.ts": "1075d4fa50aa09219207dec6137a07ebbcd64b6ef293f953cffa9e93d2ad2bee",
+    "scripts/notes-notebook-preview.ts": "98e7532b098421c508c9aa7ee14133a20d17b59fee08e420fcaf637291fc74b0",
+    "scripts/core-paper-preview.ts": "bde91846b8b345459a4a8556a88440357fd1f5fbff819416e930b6545605db72",
+    "scripts/fixtures/core-paper-applets/main.ts": "160a0f09eaf804be54d17d47f57f5ba8800a3b066febb1ee2556c0e68e6ab8d5",
+    "ui/applets/gmail/open.ts": "ac78bf9476b44ae4ab30159632f845b266744600851bb8b497b3e4e0ec4c2484",
+    "ui/applets/gmail/focus.ts": "699981c796b98fb2a3eed0e8c864c93b86c0419d1a06f23c4eaffdc566ddae67",
     "ui/applets/gmail/open.css": "b3235634d1fafdd4217e45a4feef9ec7246af4f4f07171c764ad229403ff7b0b",
-    "ui/applets/apple-reminders/open.ts": "31fd2e2372054b7a90bee932c2b33ab4a03bac05cb0f87f4e8956820a21c8a03",
-    "ui/applets/apple-reminders/regions.ts": "ac654c89060ebb3b19bf4909577150eb8ee8e6ce96efed0f9a6e3cf2dc45a861",
+    "ui/applets/apple-reminders/open.ts": "50d635889f2be1c18033a94a7e85681b442c9feecf5465768a065706072d5799",
+    "ui/applets/apple-reminders/regions.ts": "0cf555a10eef5031c2c5d7f1e910f7e10bed50e7c6ae0dc9e150832ab311d587",
     "ui/applets/apple-reminders/view-state.ts": "791c31d8d99ea252882dc41dca25698bf78133d7e01e16c236003fdfdf8790a7",
     "ui/applets/apple-reminders/open.css": "544b849abb02c930dacbf1005607600e408959da20893ece76d3c395d531b173",
     "ui/applets/google-calendar/open.css": "3112e297de1c4800acfb1f3247e8956d9a7830d03c1b204625b0d9b93dedcb81",
-    "ui/applets/google-calendar/grid.ts": "c08e206bcbd7e45831d1282d13b6fbc312b2fd4f2031fe224558d0d3988ecc94",
-    "ui/applets/google-calendar/regions.ts": "f8572e10516772200d2e0bbb6421bc194e188074f15890e746131b9e290e688d",
+    "ui/applets/google-calendar/grid.ts": "42500d557d664bac825de0ab231da2cd007d3c82bc0a921371c956dac20bcee0",
+    "ui/applets/google-calendar/regions.ts": "4f865c57aab0d39093e4186b4fe350aa1500e189084f1e9204e32ad608dc9af9",
     "ui/applets/scene/pointer-plane.ts": "29bfcf62b3c19a815b811eb50edec57b95b0f00b65f9b2da8d94d1788e351e2d",
-    "ui/applets/home-open.ts": "09f0132275acbf37583a7b239c3c7257442ae4b08ecd132df334cf5253e43c91"
+    "ui/applets/home-open.ts": "4029ac2a8e8e9d988f4d3fa59c57ac63a5eae937124a6468698e467e2e872d54"
   },
   "images": [
     {
       "id": "google-calendar",
       "title": "Calendar",
       "file": "google-calendar.webp",
-      "sha256": "3a7f88b1597b1d402dff3692ed1e1c10a6db662df036985b9b53999a83de7801"
+      "sha256": "6275067f36e954a8f47a8f19bd2a8fd07a4d8693f0e14f9d7f9a87f9ba91d43a"
     },
     {
       "id": "gmail",
       "title": "Mail",
       "file": "gmail.webp",
-      "sha256": "4fe7b44c2ba7fbe6d2acde150b325ab69429d5b31cee244dadfd24710c1ee7a0"
+      "sha256": "546f0d561a46666b2743b1647f7eb778ea14f2f4ab8f430bdaa3700221953a79"
     },
     {
       "id": "apple-notes",
       "title": "Notes",
       "file": "apple-notes.webp",
-      "sha256": "66aefed723520e72b5dc995c795fb4caa140ffc5f7aa9c5af21f57ac3280965c"
+      "sha256": "995a99e66ace247c2af6475da4d3451239f0bbaee62ba4e64a808c5c837d8afb"
     },
     {
       "id": "apple-reminders",
       "title": "Reminders",
       "file": "apple-reminders.webp",
-      "sha256": "b24ba07a9dd2d84b364a46ee6fcac8bf6630156d30763d64e1ec5efba65589e1"
+      "sha256": "918631d65714ec2aa915634c81f87e0e8c4b47e8cd95746f78264a9b429cbf93"
     },
     {
       "id": "files",
       "title": "Files",
       "file": "files.webp",
-      "sha256": "29f2cf6cb1cf7155cd6353502d8c36583beee17432937774c0225d4d099141c2"
+      "sha256": "7cc692b6b2dfe53e41f8ba8133da00d656e0de6f011075b66c950e63a4bb6926"
     },
     {
       "id": "weather",
       "title": "Weather",
       "file": "weather.webp",
-      "sha256": "27bfa843f8a0916f5427c44ba5b5d15915dca469f1c6515343d149d632c1ca80"
+      "sha256": "5049b088cace5af6d1b2244e7cc3e81e0fe65c6e9d881e80d82664fb25e92e0c"
     },
     {
       "id": "meetings",
       "title": "Meetings",
       "file": "meetings.webp",
-      "sha256": "fc24bbcc97fd9a4a0a27e9d20ccdf08519d51acd823f219eafbb3627d7549eef"
+      "sha256": "7194e240a432e0fafa1e19a90cb2abc883da08e2c7c1acec846b6172fa565b49"
     },
     {
       "id": "voice-memos",
       "title": "Voice Memos",
       "file": "voice-memos.webp",
-      "sha256": "c00a5dd73c3b8f6da1fc788862647ef36c6fc063edb3bc1aef0bc5a2ac5726b3"
+      "sha256": "6230abad714e5b9c8bd33a1a97a5c3a927689ad8cf9ff35484b8443610c234bc"
     },
     {
       "id": "messages",
       "title": "Messages",
       "file": "messages.webp",
-      "sha256": "d2f09f2fe38b2b564182fb8ae2da8cafe7e9a8465cb53fea8c484aabce753394"
+      "sha256": "23aa74d92c0300ea1b35787489c218d2b27257139b2e878dffbe60ef836cdf0e"
     },
     {
       "id": "browser",
       "title": "Browser",
       "file": "browser.webp",
-      "sha256": "b6ee7bafb167189c7e55d484bdabf5eeba5532b6343b0396591d3f36252c405a"
+      "sha256": "8ca940ad6f84a33e390921d68e02c51a446120052d836ad84c112e97209bed42"
     },
     {
       "id": "maps",
       "title": "Maps",
       "file": "maps.webp",
-      "sha256": "73c2a81caf4a679834b64b560dc5b56e9244b940f6684887e0ad0c569a56e026"
+      "sha256": "07eb464f8a04f53c9f4507107f0be4fa9e193cddb2f21eaf691379d7a7e2fdf4"
     },
     {
       "id": "clock",
       "title": "Clock",
       "file": "clock.webp",
-      "sha256": "855ea76f824df743db63aa163b9692b08d08cf6c5dfd63409757c57834749fe7"
+      "sha256": "6bac4e066df1da9069d35d2590c37f66afa5bcc69eb8a2574e9ef557b2760d7d"
     },
     {
       "id": "contacts",
       "title": "Contacts",
       "file": "contacts.webp",
-      "sha256": "22c87a6baf92c647b28b55f2caca7750d891a5548a742ee659b0b931aa9a8070"
+      "sha256": "bff052fc50b6a05998ccd0b6ea129eff78da26ea762f8dba9287ceac5b535eb9"
     },
     {
       "id": "photos",
       "title": "Photos",
       "file": "photos.webp",
-      "sha256": "7faf1107e830f8cf10d2fa6c33010d8836c2c04739b0bb710df0c61ec59f60c9"
+      "sha256": "967dfec2488c43df9d4d230b972abc3b1cba9778a42665ee03ef3826f9b64f6f"
     },
     {
       "id": "music",
       "title": "Music",
       "file": "music.webp",
-      "sha256": "ffa54b4b309cb80f2c299cc9c95f8e1882c00bd49b184c8405b4cfe63f5f4d5c"
+      "sha256": "e00ff0ff4473b78b3fc5986e20f0dc4f47a081ee38cb630c9afda04ce3e7026a"
     },
     {
       "id": "news",
       "title": "News",
       "file": "news.webp",
-      "sha256": "3419ecc3a60db64234e87810b6a00421eec72008f70bf575a36d987b08c04bcb"
+      "sha256": "44fe93f416160385a1470a75cedfb46d8ee17138ca1786c344efb04a6f6c3737"
     },
     {
       "id": "podcasts",
       "title": "Podcasts",
       "file": "podcasts.webp",
-      "sha256": "c2965e218ce65b51760bffd8ad3539204124469958e6b423d2ccd195305d10c6"
+      "sha256": "e94d89d43c9b394c5cf6e362b9703bb5ede906a73ffbdab86aa6047d6b3f49fe"
     },
     {
       "id": "stocks",
       "title": "Stocks",
       "file": "stocks.webp",
-      "sha256": "df20f752ed9a37f68604963b2155ddfd296545379fa435c199e751f99afded63"
+      "sha256": "63024bfd4f8c6027187400338b633487852b4905bf5f8d1e698e75e0f79af880"
     },
     {
       "id": "game-2048",
       "title": "2048",
       "file": "game-2048.webp",
-      "sha256": "f57f670625fc270b6751e452ef31a4ae0e63371da55167d991fd7a822d474705"
+      "sha256": "8bb63a6394d0835053f12f3ec2d2d790f4700471a0e6563a67d9ab2cb1a2d380"
     },
     {
       "id": "snake",
       "title": "Snake",
       "file": "snake.webp",
-      "sha256": "f7e88d523a049a9c622573725a587a62870b0ca87b51d83f1a7a211e823635ba"
+      "sha256": "0f1b3a58737dfa85f1bc8a7cb7566f28d1aae1c0c4117ba3a643abaf049a9c1b"
     },
     {
       "id": "minesweeper",
       "title": "Minesweeper",
       "file": "minesweeper.webp",
-      "sha256": "76aef275417fce1e590f9da65a8c57cba3719e4c71cc173221eecfbcabf78a34"
+      "sha256": "94908b7c4fd7103719662e31732c6f4887a646f04a57c40a97939fcf0c57c601"
     },
     {
       "id": "sudoku",
       "title": "Sudoku",
       "file": "sudoku.webp",
-      "sha256": "0ecd7ea592fe765a15829de0de69e74dc65bbd1cbbae01db9822a0c462359113"
+      "sha256": "2e4ab340587476a1e322ec3f0bdeab1501826ad23802e8a99547ddfbc1a4812e"
     },
     {
       "id": "gomoku",
       "title": "Gomoku",
       "file": "gomoku.webp",
-      "sha256": "544ff48a59eb8a37ef2c8d7289fd08f90992881bdeee3470367404fdf90bc036"
+      "sha256": "3d97034bdd1b13d0fd4263c133eb7d4bd79f101ef753b36b0251b7c30fef61c4"
     },
     {
       "id": "random-game",
       "title": "Random Game",
       "file": "random-game.webp",
-      "sha256": "40344f82c9356b07cadb481f0357db6187bd2b2c558d78e5e8f61c854d1300b6"
+      "sha256": "90dac0c47673c9b48c0615bca512451ac5bb3a8ab80e50c335f4d6e872b51280"
     },
     {
       "id": "weight-balance",
       "title": "Weight balance",
       "file": "weight-balance.webp",
-      "sha256": "0ce99b827886adeb3189b24ef88c779f9b9aef901bf37ddac7938baa7b8dc57a"
+      "sha256": "8440e512c3f3e8e8d1170d4f5ecf8da781437dff81d044039d908efee5d78cfe"
     },
     {
       "id": "meal-planner",
       "title": "Meal planner",
       "file": "meal-planner.webp",
-      "sha256": "986fd781ef260ad790007ad00f100100ee6f768002af8f0b1e49936df9366b4c"
+      "sha256": "38b7687f5e893566d25e5c5d4b7c82cac065701dfdd0352652b212d241ed9615"
     },
     {
       "id": "fitness",
       "title": "Workout plan",
       "file": "fitness.webp",
-      "sha256": "50d638ff7da62a1a71bfa490bec0298506936b8a1e9f01952025245372ade0da"
+      "sha256": "ab567037cb88ea588d585c2b2f87fee0caf7fddb07665d326ee27f27d69b3887"
     },
     {
       "id": "sleep",
       "title": "Sleep & recovery",
       "file": "sleep.webp",
-      "sha256": "bca00fe3af575af830772d9ed6af95be346805d24b02f3bb97113ac5c00e81c0"
+      "sha256": "d0ca0fac9eedb19f9a0a349d859570950c117282ed7e269504e57d4c4c9126ef"
     },
     {
       "id": "travel",
       "title": "Travel planner",
       "file": "travel.webp",
-      "sha256": "37798ae18f0e6c6bc16f8c56f980669f2ade9b5609852e9cd4b1fb697effe8c5"
+      "sha256": "87dc7ddeb2eb56199a0145eaae551958afa18ee6edc30faf300279c9a8ed6d6a"
     },
     {
       "id": "outdoor",
       "title": "Outdoor adventures",
       "file": "outdoor.webp",
-      "sha256": "321620e57876e56ee20b6bfc9ee3d350348639c07a51ac55f12cfb99d6e2cfdf"
+      "sha256": "7f0e3e4e8757913a8a8c3bb483af49a3d7c0af4c03a13a13f2c55fd9fc3ba981"
     },
     {
       "id": "shopping",
       "title": "Shopping list",
       "file": "shopping.webp",
-      "sha256": "5c9c5405ea7220762eec5f9b066eacbb77a07083c6ab24f45ba00162443de8e8"
+      "sha256": "c15d14c14e9bc555e1096571eb76858a8479f01efe64f42489f57b26c2457f84"
     },
     {
       "id": "budget",
       "title": "Household budget",
       "file": "budget.webp",
-      "sha256": "310016e7fe15bee8b535e03f95ad71d5fbcd53209cfaa9b279ea09bb6c96c756"
+      "sha256": "d8ced7f9fbf1c762ed0920e82fc8352b47263e43480d4c564f5d4bf2d0431f5a"
     },
     {
       "id": "home-care",
       "title": "Home care",
       "file": "home-care.webp",
-      "sha256": "dc1b27ecce7f314851bca8fe6ed5ce17fc1f5a622548721995ee33debe07bc75"
+      "sha256": "bad450ea0771b73efc436cdbee6127bc8489a832c497a6515381ebb453d546cb"
     },
     {
       "id": "garden",
       "title": "Garden planner",
       "file": "garden.webp",
-      "sha256": "e50f7bc8a89ae6dce5bafe5bed2f9cdfbcd66fefbf5679d1f1f1727c0266bd5a"
+      "sha256": "2b197f76897924838b5a97e53e1c375ed8a8e5a492d31fc2e5d54829fc1a3841"
     },
     {
       "id": "daily-planner",
       "title": "Daily planner",
       "file": "daily-planner.webp",
-      "sha256": "1117856bd5e982f92a9bf60f3b89ca63e346b248f6f3c368748a3ffd03446ba7"
+      "sha256": "805ce7591b103f8db5135c47622d59857622d9ea4454ef6daa64536d05a8c763"
     },
     {
       "id": "reading",
       "title": "Reading & research",
       "file": "reading.webp",
-      "sha256": "44b00e76dab7ad7b0e46df8fb465ee7d5a73a46905d0b9825bd7bfb4a26f399b"
+      "sha256": "0e9ac589fba2223f4d5c15f1a3e6c260cb439862e8d9c14d7cecb6cb4d62246d"
     },
     {
       "id": "language",
       "title": "Language practice",
       "file": "language.webp",
-      "sha256": "a42ed3a4707362d5e27e38ac69116a9b12c0a17dd383ea0db187783c96148658"
+      "sha256": "aee737fdd8cbcfccba075d02e24b1c4781264f57f41d18c4d1a9ee6104b2661f"
     },
     {
       "id": "journal",
       "title": "Personal journal",
       "file": "journal.webp",
-      "sha256": "70fe656dbfe91489727bf30c017a7a9b118c886fca00ee001e67d83b2d637e6d"
+      "sha256": "a5676d452555a3ad4ea5378d17916ab9d64cd80af49ae103e3dc01a95660b506"
     },
     {
       "id": "job-search",
       "title": "Job search",
       "file": "job-search.webp",
-      "sha256": "22e268569cfe018cb3a1f685b098aca11e0e7dcb4827c92618651d9adf827a6a"
+      "sha256": "41c13cc9e70a5eb64021d84d5afaf731f88981682508bcbc6ff0cb7005d37ffd"
     },
     {
       "id": "project-planner",
       "title": "Project planner",
       "file": "project-planner.webp",
-      "sha256": "64ffa55bf873e7406b2066425f56e11246354eb68752d6220c9c6841f9cd486f"
+      "sha256": "e4e3870eec6bbb2795426ed92699c48f7c42cdba36c8041e389e56062c475d7f"
     }
   ]
 }

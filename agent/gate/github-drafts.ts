@@ -1,0 +1,477 @@
+import {GITHUB_DRAFT_LIMITS,GITHUB_DRAFT_STATUSES,GITHUB_STANDING_WRITES,GITHUB_WRITE_GRANT_CHOICES,GITHUB_WRITE_TARGET,GITHUB_WRITES,type GithubAppCredentials,type GithubDraft,type GithubDraftCreate,type GithubDraftStatus,type GithubDraftTarget,type GithubStandingWrite,type GithubWrite,type GithubWriteGrantChoice,type GithubWriteRun,type GithubWriteScope} from '../../contracts/github-drafts.ts';
+import type {AgentAuditEntry} from '../../contracts/agent-identity.ts';
+import {AGENT_ASK_PROVIDER} from '../../contracts/agent-asks.ts';
+import {AGENT_ID_PATTERN} from '../../contracts/agent-identity.ts';
+import type {WorldItem} from '../../contracts/world.ts';
+import {looksSecret} from './agent-profile.ts';
+
+/** GitHub drafts (contracts/github-drafts.ts, agent/gate/GRANTS.md#github-drafts). Pure: hosts supply the stored
+ * drafts, the calling Agent's ID (from its token), the target as GitHub returned it, new IDs and the clock; they make the
+ * requests this plans and save what comes back. Every refusal throws an Error whose message the Agent or the page is
+ * shown, and never repeats a credential. */
+
+export const GITHUB_DRAFT_REASONS=Object.freeze({
+ invalid:'This GitHub draft is not valid.',
+ write:'Choose what to write: issue.create, issue.comment, labels.add, labels.remove, labels.set, issue.close or issue.reopen.',
+ target:'Name the target as owner/repo for a new Issue, or owner/repo#123 for anything else.',
+ secret:'GitHub drafts may not hold passwords, tokens or keys. Name the thing instead.',
+ control:'GitHub drafts may not hold control characters.',
+ full:`This Agent already has ${GITHUB_DRAFT_LIMITS.pendingPerAgent} GitHub drafts waiting. Wait for the person to approve or dismiss some first.`,
+ pull:'Only an Issue can be closed or reopened here, not a pull request.',
+ alreadyClosed:'This Issue is already closed.',
+ alreadyOpen:'This Issue is already open.',
+ archived:'This repository is archived: nothing can be written to it.',
+ missing:'No such GitHub draft.',
+ settled:'This GitHub draft is already settled.',
+ unknown:'Worldlet began writing this but cannot tell whether GitHub made it. Check GitHub before drafting it again.',
+ app:'The GitHub App is not valid: enter its App ID, its installation ID and its private key (a .pem file\'s whole text).',
+ prefix:'labels.set: every label in expected and set must start with prefix.',
+ unchanged:'labels.set: set is the same as expected, so nothing would change.',
+});
+/** Why Approve wrote nothing: the target is not as it was when the Agent drafted. */
+export const GITHUB_DRAFT_STALE=Object.freeze({
+ gone:'It is gone from GitHub (deleted, moved or no longer visible to the GitHub App), so nothing was written.',
+ state:(was:string,now:string)=>`It is ${now} now; it was ${was} when this was drafted, so nothing was written.`,
+ updated:'It changed on GitHub after this was drafted, so nothing was written. Ask the Agent to read it again and draft anew.',
+ labels:(prefix:string,now:readonly string[]|undefined)=>now?`Its labels${prefix?` under “${prefix}”`:''} are ${now.length?now.join(', '):'none'} now, not the ones expected, so nothing was written.`:'GitHub did not say which labels it has, so nothing was written.',
+});
+
+/** A draft ID: host-made, file-name safe. */
+export const GITHUB_DRAFT_ID_PATTERN=/^[a-z0-9][a-z0-9-]{7,63}$/;
+const REPO=/^([A-Za-z0-9-]{1,39})\/((?!\.+$)[A-Za-z0-9_.-]{1,100})$/;
+const ISSUE=/^([A-Za-z0-9-]{1,39})\/((?!\.+#)[A-Za-z0-9_.-]{1,100})#([1-9][0-9]{0,8})$/;
+// C0 controls (except tab and line breaks, allowed in multi-line text only), DEL, C1 controls, and the bidirectional
+// overrides that can make a card read differently from what it holds.
+const CONTROL=/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f‪-‮⁦-⁩]/;
+const LINE_BREAK=/[\t\r\n]/;
+const record=(value:unknown):Record<string,unknown>=>value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,unknown>:{};
+const instant=(value:unknown):value is string=>typeof value==='string'&&Number.isFinite(Date.parse(value));
+const count=(value:string)=>[...value].length;
+const fail=(reason:string):never=>{throw new Error(reason);};
+const only=(value:Record<string,unknown>,keys:string[])=>{for(const key of Object.keys(value))if(!keys.includes(key))fail(GITHUB_DRAFT_REASONS.invalid);};
+
+function text(value:unknown,limit:number,{multiline=false,required=false}={}):string {
+ if(value===undefined||value===null||value===''){if(required)fail(GITHUB_DRAFT_REASONS.invalid);return '';}
+ if(typeof value!=='string')return fail(GITHUB_DRAFT_REASONS.invalid);
+ if(CONTROL.test(value)||!multiline&&LINE_BREAK.test(value))fail(GITHUB_DRAFT_REASONS.control);
+ const clean=value.replace(/\r\n?/g,'\n').trim();
+ if(required&&!clean||count(clean)>limit)fail(GITHUB_DRAFT_REASONS.invalid);
+ if(looksSecret(clean))fail(GITHUB_DRAFT_REASONS.secret);
+ return clean;
+}
+function labels(value:unknown,required:boolean):string[] {
+ if(value===undefined&&!required)return [];
+ if(!Array.isArray(value)||value.length>GITHUB_DRAFT_LIMITS.labels||required&&!value.length)return fail(GITHUB_DRAFT_REASONS.invalid);
+ const items=value.map(entry=>text(entry,GITHUB_DRAFT_LIMITS.label,{required:true}));
+ if(new Set(items.map(item=>item.toLowerCase())).size!==items.length)fail(GITHUB_DRAFT_REASONS.invalid);
+ return items;
+}
+// GitHub's label names are case-insensitive.
+const lower=(label:string)=>label.toLowerCase();
+const under=(list:readonly string[],prefix:string)=>list.filter(label=>lower(label).startsWith(lower(prefix)));
+const sameLabels=(a:readonly string[],b:readonly string[])=>a.length===b.length&&a.every(label=>b.some(other=>lower(other)===lower(label)));
+/** A label prefix (`labels.set`, a standing GitHub write Grant), checked: one line, shorter than a label, nothing
+ * around it to trim. */
+export function readGithubLabelPrefix(value:unknown):string {
+ const prefix=text(value,GITHUB_DRAFT_LIMITS.label-1,{required:true});
+ if(prefix!==value)fail(GITHUB_DRAFT_REASONS.invalid);
+ return prefix;
+}
+
+/** A target, checked: `owner/repo` (a new Issue) or `owner/repo#123`. */
+export function githubDraftTargetId(write:GithubWrite,value:unknown):{owner:string;repo:string;number?:number} {
+ const match=typeof value==='string'?(write==='issue.create'?REPO:ISSUE).exec(value):null;
+ if(!match)return fail(GITHUB_DRAFT_REASONS.target);
+ return {owner:match[1],repo:match[2],...match[3]?{number:Number(match[3])}:{}};
+}
+
+/** `github-drafts/create` arguments, checked. An `agentId` the model sent is dropped: the host stamps the caller's own.
+ * Each write takes exactly what it writes: a title, body and optional labels for a new Issue, a body for a comment,
+ * labels to add or remove, an optional prefix with the expected and new labels to set, nothing else to close or
+ * reopen. */
+export function readGithubDraftCreate(input:unknown):GithubDraftCreate&{owner:string;repoName:string;number?:number} {
+ const value={...record(input)};delete value.agentId;
+ only(value,['write','target','title','body','labels','prefix','expected','set']);
+ if(!GITHUB_WRITES.includes(value.write as GithubWrite))fail(GITHUB_DRAFT_REASONS.write);
+ const write=value.write as GithubWrite,target=githubDraftTargetId(write,value.target);
+ const takes:Record<GithubWrite,string[]>={'issue.create':['title','body','labels'],'issue.comment':['body'],'labels.add':['labels'],'labels.remove':['labels'],'labels.set':['prefix','expected','set'],'issue.close':[],'issue.reopen':[]};
+ for(const key of ['title','body','labels','prefix','expected','set'])if(value[key]!==undefined&&!takes[write].includes(key))fail(GITHUB_DRAFT_REASONS.invalid);
+ const draft:GithubDraftCreate&{owner:string;repoName:string;number?:number}={write,target:value.target as string,owner:target.owner,repoName:target.repo,...target.number?{number:target.number}:{}};
+ if(write==='issue.create'){
+  draft.title=text(value.title,GITHUB_DRAFT_LIMITS.title,{required:true});
+  const body=text(value.body,GITHUB_DRAFT_LIMITS.body,{multiline:true});if(body)draft.body=body;
+  const given=labels(value.labels,false);if(given.length)draft.labels=given;
+ }
+ if(write==='issue.comment')draft.body=text(value.body,GITHUB_DRAFT_LIMITS.body,{multiline:true,required:true});
+ if(write==='labels.add'||write==='labels.remove')draft.labels=labels(value.labels,true);
+ if(write==='labels.set'){
+  // Both lists are required (either may be empty): what the Agent read, and what it becomes.
+  if(!Array.isArray(value.expected)||!Array.isArray(value.set))fail(GITHUB_DRAFT_REASONS.invalid);
+  const prefix=value.prefix===undefined?'':readGithubLabelPrefix(value.prefix),expected=labels(value.expected,false),set=labels(value.set,false);
+  if([...expected,...set].some(label=>!lower(label).startsWith(lower(prefix))))fail(GITHUB_DRAFT_REASONS.prefix);
+  if(sameLabels(expected,set))fail(GITHUB_DRAFT_REASONS.unchanged);
+  if(prefix)draft.prefix=prefix;
+  draft.expected=expected;draft.set=set;
+ }
+ return draft;
+}
+
+/** What GitHub's REST API returned for the target (`GET /repos/{owner}/{repo}` or `…/issues/{number}`), as a target;
+ * null when it is not the one asked for. */
+export function githubDraftTarget(kind:'repository'|'issue',value:unknown,expected:{owner:string;repo:string;number?:number}):GithubDraftTarget|null {
+ const v=record(value),name=`${expected.owner}/${expected.repo}`.toLowerCase();
+ if(kind==='repository'){
+  if(typeof v.full_name!=='string'||v.full_name.toLowerCase()!==name||!instant(v.updated_at))return null;
+  const url=typeof v.html_url==='string'&&v.html_url.toLowerCase()===`https://github.com/${name}`?v.html_url:`https://github.com/${v.full_name}`;
+  return {kind:'repository',state:v.archived===true||v.disabled===true?'archived':'active',updatedAt:v.updated_at,title:[...v.full_name].slice(0,GITHUB_DRAFT_LIMITS.title).join(''),url};
+ }
+ if(v.number!==expected.number||(v.state!=='open'&&v.state!=='closed')||!instant(v.updated_at)||typeof v.title!=='string')return null;
+ const pull=v.pull_request!==undefined&&v.pull_request!==null;
+ const web=typeof v.html_url==='string'?v.html_url:'',prefix=`https://github.com/${name}/${pull?'pull':'issues'}/${expected.number}`;
+ if(web.toLowerCase()!==prefix)return null;
+ const found:GithubDraftTarget={kind:pull?'pull request':'issue',state:v.state,updatedAt:v.updated_at,title:[...v.title].slice(0,GITHUB_DRAFT_LIMITS.title).join(''),url:web};
+ // GitHub answers each label as an object with its name.
+ if(Array.isArray(v.labels))found.labels=v.labels.flatMap(label=>typeof label==='string'?[label]:typeof record(label).name==='string'?[record(label).name as string]:[]);
+ return found;
+}
+
+/** `labels.set`'s check: why the target's labels (under the prefix) are not the expected ones, or '' when they are. */
+export function githubLabelChange(write:{labelPrefix?:string;expectedLabels?:string[]},target:GithubDraftTarget):string {
+ const prefix=write.labelPrefix??'';
+ if(!target.labels)return GITHUB_DRAFT_STALE.labels(prefix,undefined);
+ const now=under(target.labels,prefix);
+ return sameLabels(now,write.expectedLabels??[])?'':GITHUB_DRAFT_STALE.labels(prefix,now);
+}
+
+/** Whether a draft still waits on the person. */
+export const githubDraftPending=(draft:GithubDraft)=>draft.status==='pending';
+
+/** A new draft from `agentId` (the caller's own, from its token), with the target as the host just read it. Refused
+ * when the input is not valid, the write does not fit the target (closing a pull request, closing a closed Issue,
+ * anything in an archived repository, a label transition from labels the target does not have), or this Agent already
+ * has GITHUB_DRAFT_LIMITS.pendingPerAgent pending. */
+export function makeGithubDraft(drafts:readonly GithubDraft[],agentId:string,input:unknown,target:GithubDraftTarget,id:string,now:string):GithubDraft {
+ if(!AGENT_ID_PATTERN.test(agentId)||!GITHUB_DRAFT_ID_PATTERN.test(id)||!instant(now))fail(GITHUB_DRAFT_REASONS.invalid);
+ const create=readGithubDraftCreate(input);
+ if(drafts.filter(draft=>draft.agentId===agentId&&githubDraftPending(draft)).length>=GITHUB_DRAFT_LIMITS.pendingPerAgent)fail(GITHUB_DRAFT_REASONS.full);
+ if(drafts.some(draft=>draft.id===id))fail(GITHUB_DRAFT_REASONS.invalid);
+ if((create.write==='issue.create')!==(target.kind==='repository'))fail(GITHUB_DRAFT_REASONS.invalid);
+ if(target.kind==='repository'&&target.state!=='active')fail(GITHUB_DRAFT_REASONS.archived);
+ if((create.write==='issue.close'||create.write==='issue.reopen')&&target.kind!=='issue')fail(GITHUB_DRAFT_REASONS.pull);
+ if(create.write==='issue.close'&&target.state!=='open')fail(GITHUB_DRAFT_REASONS.alreadyClosed);
+ if(create.write==='issue.reopen'&&target.state!=='closed')fail(GITHUB_DRAFT_REASONS.alreadyOpen);
+ const draft:GithubDraft={id,agentId,write:create.write,repo:`${create.owner}/${create.repoName}`,...create.number?{number:create.number}:{},
+  ...create.title?{title:create.title}:{},...create.body?{body:create.body}:{},...create.labels?{labels:create.labels}:{},
+  ...create.write==='labels.set'?{labels:create.set,...create.prefix?{labelPrefix:create.prefix}:{},expectedLabels:create.expected}:{},
+  target:{...target,...target.labels?{labels:[...target.labels]}:{}},status:'pending',createdAt:now,updatedAt:now};
+ // The labels the Agent read must be the ones there now; otherwise its read is already stale.
+ if(draft.write==='labels.set'){const change=githubLabelChange(draft,target);if(change)fail(change);}
+ return draft;
+}
+
+/** Approve's check: why the target as it is now (null: gone) is not the one the draft was made against, or '' when it
+ * is the same. An Issue or pull request must have the same state and updatedAt (and, for `labels.set`, the expected
+ * labels); a repository must still exist and not be archived (its updatedAt moves with stars and settings, so it is not
+ * compared). */
+export function githubDraftChange(draft:GithubDraft,now:GithubDraftTarget|null):string {
+ if(!now||now.kind!==draft.target.kind)return GITHUB_DRAFT_STALE.gone;
+ if(now.state!==draft.target.state)return GITHUB_DRAFT_STALE.state(draft.target.state,now.state);
+ if(draft.write==='labels.set'){const change=githubLabelChange(draft,now);if(change)return change;}
+ if(now.kind!=='repository'&&now.updatedAt!==draft.target.updatedAt)return GITHUB_DRAFT_STALE.updated;
+ return '';
+}
+
+/** The read Approve makes again, and the one a draft is made with: GitHub REST paths under the API's root. */
+export function githubDraftReadPath(write:GithubWrite,target:{owner:string;repo:string;number?:number}):string {
+ const repo=`/repos/${encodeURIComponent(target.owner)}/${encodeURIComponent(target.repo)}`;
+ return write==='issue.create'?repo:`${repo}/issues/${target.number}`;
+}
+export function githubDraftTargetParts(draft:GithubDraft):{owner:string;repo:string;number?:number} {
+ const [owner,repo]=draft.repo.split('/');
+ return {owner,repo,...draft.number?{number:draft.number}:{}};
+}
+/** `labels.set`'s change: the labels to add (in `set`, not expected) and to remove (expected, not in `set`). Nothing
+ * else on the target is touched. */
+export function githubLabelMoves(write:{labels?:string[];expectedLabels?:string[]}):{add:string[];remove:string[]} {
+ const set=write.labels??[],expected=write.expectedLabels??[];
+ return {add:set.filter(label=>!expected.some(other=>lower(other)===lower(label))),remove:expected.filter(label=>!set.some(other=>lower(other)===lower(label)))};
+}
+/** The requests one approved draft makes, in order, each once. `accept` lists the statuses that count as done (removing
+ * a label that is no longer there is done). `result` names which answer's `html_url` is what the draft made. A label
+ * transition adds before it removes, so one cut short leaves both labels, which the next transition's check refuses,
+ * rather than none. */
+export type GithubWriteRequest={method:'POST'|'PATCH'|'DELETE';path:string;body?:Record<string,unknown>;accept:number[]};
+/** The line a new Issue or comment ends with, naming the Agent that drafted it: "Drafted by Claude Code in Worldlet".
+ * The name is the Agent's own label, kept to plain words so it cannot add a link, a mention or formatting. */
+export function githubDraftSignature(agentName:string):string {
+ const name=[...String(agentName??'').replace(/[^\p{L}\p{N} .'-]+/gu,' ').replace(/\s+/g,' ').trim()].slice(0,60).join('').trim()||'an Agent';
+ return `Drafted by ${name} in Worldlet`;
+}
+/** A body with its signature line (githubDraftSignature) after it. */
+export function githubSignedBody(body:string|undefined,signature:string):string {
+ return signature?`${body?body.trimEnd()+'\n\n':''}_${signature}_`:body??'';
+}
+/** `signature`: the githubDraftSignature line a new Issue's or comment's body ends with. */
+export function githubDraftRequests(draft:GithubDraft,signature=''):{requests:GithubWriteRequest[];result:'response'|'target'} {
+ const parts=githubDraftTargetParts(draft),repo=githubDraftReadPath('issue.create',parts),issue=`${repo}/issues/${draft.number}`;
+ const body=githubSignedBody(draft.body,signature);
+ switch(draft.write){
+  case 'issue.create':return {requests:[{method:'POST',path:`${repo}/issues`,body:{title:draft.title,...body?{body}:{},...draft.labels?.length?{labels:draft.labels}:{}},accept:[201]}],result:'response'};
+  case 'issue.comment':return {requests:[{method:'POST',path:`${issue}/comments`,body:{body},accept:[201]}],result:'response'};
+  case 'labels.add':return {requests:[{method:'POST',path:`${issue}/labels`,body:{labels:draft.labels},accept:[200]}],result:'target'};
+  case 'labels.remove':return {requests:(draft.labels??[]).map(label=>({method:'DELETE' as const,path:`${issue}/labels/${encodeURIComponent(label)}`,accept:[200,204,404]})),result:'target'};
+  case 'labels.set':{
+   // Each label removed by its name as GitHub spelled it on the target.
+   const {add,remove}=githubLabelMoves(draft),spelled=(label:string)=>draft.target.labels?.find(other=>lower(other)===lower(label))??label;
+   return {requests:[...add.length?[{method:'POST' as const,path:`${issue}/labels`,body:{labels:add},accept:[200]}]:[],
+    ...remove.map(spelled).map(label=>({method:'DELETE' as const,path:`${issue}/labels/${encodeURIComponent(label)}`,accept:[200,204,404]}))],result:'target'};
+  }
+  case 'issue.close':return {requests:[{method:'PATCH',path:issue,body:{state:'closed',state_reason:'completed'},accept:[200]}],result:'target'};
+  case 'issue.reopen':return {requests:[{method:'PATCH',path:issue,body:{state:'open'},accept:[200]}],result:'target'};
+ }
+}
+/** What the answers to an approved draft's requests (in order, as many as were made) come to: `written`, `failed` with
+ * GitHub's words, or, when labels.remove removed some labels and GitHub refused others, `written` with a reason naming
+ * both. Each label is its own request, so a refusal does not undo the removals before it. */
+export function githubDraftOutcome(draft:GithubDraft,answers:readonly {status:number;message?:string}[]):{status:'written'|'failed';reason?:string} {
+ const {requests}=githubDraftRequests(draft);
+ const said=(answer:{status:number;message?:string})=>{
+  const words=typeof answer.message==='string'?answer.message.replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,200):'';
+  return `${answer.status}${words?': '+words:''}`;
+ };
+ const refused=answers.flatMap((answer,i)=>requests[i]&&!requests[i].accept.includes(answer.status)?[{i,answer}]:[]);
+ if(!refused.length&&answers.length===requests.length)return {status:'written'};
+ const first=refused[0];
+ if(draft.write==='labels.remove'&&first){
+  const labels=draft.labels??[],failed=new Set(refused.map(r=>r.i));
+  const removed=labels.filter((_,i)=>i<answers.length&&!failed.has(i)),kept=labels.filter((_,i)=>failed.has(i));
+  if(removed.length)return {status:'written',reason:`Removed ${removed.join(', ')}. GitHub refused removing ${kept.join(', ')} (${said(first.answer)}), so ${kept.length===1?'it is':'they are'} still there.`};
+ }
+ return {status:'failed',reason:`GitHub refused the write (${first?said(first.answer):'no answer'}).`};
+}
+
+/** issue.create: the draft marked as being written, saved before the request is made. */
+export function startGithubDraftWrite(draft:GithubDraft,now:string):GithubDraft {
+ if(!githubDraftPending(draft))fail(GITHUB_DRAFT_REASONS.settled);
+ return {...draft,writeStartedAt:now,updatedAt:now};
+}
+/** How long after a create began its Issue is looked for: a write that began is answered within GitHub's timeout. */
+const CREATED_WITHIN_MS=10*60_000;
+/** A started create Worldlet did not see finish: the repository's Issues updated since a minute before it began,
+ * newest first, to look for it in (`githubDraftCreatedUrl`) instead of posting it again. */
+export function githubDraftCreatedPath(draft:GithubDraft):string {
+ const since=new Date(Date.parse(draft.writeStartedAt??draft.updatedAt)-60_000).toISOString();
+ return `${githubDraftReadPath('issue.create',githubDraftTargetParts(draft))}/issues?state=all&sort=created&direction=desc&per_page=50&since=${encodeURIComponent(since)}`;
+}
+/** Who writes: the person's own GitHub App (`appId`, Settings › Services › Advanced), or the person through their
+ * GitHub sign-in with the Worldlet GitHub App (`clientId`, its public client ID, and `slug`). */
+export type GithubWriter={appId:string}|{clientId:string;slug:string};
+/** The link of the Issue a started create made, from GitHub's answer to githubDraftCreatedPath: one with exactly the
+ * draft's title, made through `by` within minutes of the write beginning; '' when there is none. */
+export function githubDraftCreatedUrl(draft:GithubDraft,answer:unknown,by:GithubWriter):string {
+ const started=Date.parse(draft.writeStartedAt??''),prefix=`https://github.com/${draft.repo.toLowerCase()}/issues/`;
+ if(!Number.isFinite(started)||!Array.isArray(answer))return '';
+ for(const value of answer){
+  const v=record(value),app=record(v.performed_via_github_app),user=record(v.user),made=Date.parse(String(v.created_at??''));
+  // A user token's write shows the person as its author and the Worldlet GitHub App as what made it.
+  const byApp='appId' in by?(v.performed_via_github_app?String(app.id)===by.appId:user.type==='Bot')
+   :!!v.performed_via_github_app&&(app.client_id===by.clientId||app.slug===by.slug);
+  if(v.pull_request===undefined&&v.title===draft.title&&byApp&&made>=started-60_000&&made<=started+CREATED_WITHIN_MS
+   &&typeof v.html_url==='string'&&v.html_url.toLowerCase().startsWith(prefix))return v.html_url;
+ }
+ return '';
+}
+
+/** The written result's link: what GitHub answered with (a new Issue or comment), or else the target. */
+export function githubDraftResultUrl(draft:GithubDraft,answer:unknown):string {
+ const web=record(answer).html_url;
+ return typeof web==='string'&&web.toLowerCase().startsWith(`https://github.com/${draft.repo.toLowerCase()}/`)?web:draft.target.url;
+}
+
+/** The draft settled: written (with its result, and what part was not written), stale, failed or unknown (with why),
+ * or dismissed. Only a pending draft settles. */
+export function settleGithubDraft(draft:GithubDraft|null|undefined,status:Exclude<GithubDraftStatus,'pending'>,now:string,detail:{resultUrl?:string;reason?:string}={}):GithubDraft {
+ if(!draft)return fail(GITHUB_DRAFT_REASONS.missing);
+ if(!githubDraftPending(draft))fail(GITHUB_DRAFT_REASONS.settled);
+ const next:GithubDraft={...draft,status,updatedAt:now,settledAt:now};
+ if(status==='written'&&detail.resultUrl)next.resultUrl=detail.resultUrl;
+ if(status!=='dismissed'&&detail.reason)next.reason=[...detail.reason].slice(0,500).join('');
+ return next;
+}
+
+/** `github-drafts/read`: the caller's own drafts, newest first, optionally of one status or the IDs it names. */
+export function readGithubDrafts(drafts:readonly GithubDraft[],agentId:string,input:unknown={}):GithubDraft[] {
+ const value=record(input);only(value,['status','ids']);
+ if(value.status!==undefined&&!GITHUB_DRAFT_STATUSES.includes(value.status as GithubDraftStatus))fail(GITHUB_DRAFT_REASONS.invalid);
+ if(value.ids!==undefined&&(!Array.isArray(value.ids)||value.ids.length>GITHUB_DRAFT_LIMITS.read||value.ids.some(id=>typeof id!=='string'||!GITHUB_DRAFT_ID_PATTERN.test(id))))fail(GITHUB_DRAFT_REASONS.invalid);
+ const ids=(value.ids as string[]|undefined)??[];
+ return drafts.filter(draft=>draft.agentId===agentId&&(value.status===undefined||draft.status===value.status)&&(!ids.length||ids.includes(draft.id)))
+  .sort((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)).slice(0,GITHUB_DRAFT_LIMITS.read);
+}
+
+/** A stored draft, checked; null when it is not one. */
+export function readStoredGithubDraft(value:unknown):GithubDraft|null {
+ const v=record(value),t=record(v.target);
+ if(typeof v.id!=='string'||!GITHUB_DRAFT_ID_PATTERN.test(v.id)||typeof v.agentId!=='string'||!AGENT_ID_PATTERN.test(v.agentId)||!GITHUB_WRITES.includes(v.write as GithubWrite)
+  ||typeof v.repo!=='string'||!REPO.test(v.repo)||!GITHUB_DRAFT_STATUSES.includes(v.status as GithubDraftStatus)||!instant(v.createdAt)||!instant(v.updatedAt)
+  ||!['repository','issue','pull request'].includes(t.kind as string)||typeof t.state!=='string'||!instant(t.updatedAt)||typeof t.title!=='string'||typeof t.url!=='string')return null;
+ if(v.write!=='issue.create'&&!(Number.isInteger(v.number)&&(v.number as number)>0))return null;
+ const draft:GithubDraft={id:v.id,agentId:v.agentId,write:v.write as GithubWrite,repo:v.repo,
+  target:{kind:t.kind as GithubDraftTarget['kind'],state:t.state,updatedAt:t.updatedAt,title:t.title,url:t.url},
+  status:v.status as GithubDraftStatus,createdAt:v.createdAt,updatedAt:v.updatedAt};
+ if(Number.isInteger(v.number))draft.number=v.number as number;
+ if(typeof v.title==='string')draft.title=v.title;
+ if(typeof v.body==='string')draft.body=v.body;
+ if(Array.isArray(v.labels))draft.labels=v.labels.filter((l):l is string=>typeof l==='string').slice(0,GITHUB_DRAFT_LIMITS.labels);
+ if(typeof v.labelPrefix==='string'&&v.labelPrefix)draft.labelPrefix=v.labelPrefix;
+ if(Array.isArray(v.expectedLabels))draft.expectedLabels=v.expectedLabels.filter((l):l is string=>typeof l==='string').slice(0,GITHUB_DRAFT_LIMITS.labels);
+ if(Array.isArray(t.labels))draft.target.labels=t.labels.filter((l):l is string=>typeof l==='string');
+ // A label transition without the labels it expects would compare against nothing.
+ if(draft.write==='labels.set'&&!draft.expectedLabels)return null;
+ if(typeof v.resultUrl==='string')draft.resultUrl=v.resultUrl;
+ if(typeof v.reason==='string')draft.reason=v.reason;
+ if(instant(v.settledAt))draft.settledAt=v.settledAt;
+ if(instant(v.writeStartedAt))draft.writeStartedAt=v.writeStartedAt;
+ return draft;
+}
+
+/** What the draft does, in a line the card leads with: "Comment on example/app#12". */
+export function githubDraftHeadline(draft:GithubDraft):string {
+ const at=draft.number?`${draft.repo}#${draft.number}`:draft.repo;
+ switch(draft.write){
+  case 'issue.create':return `New Issue in ${at}`;
+  case 'issue.comment':return `Comment on ${at}`;
+  case 'labels.add':return `Add labels to ${at}`;
+  case 'labels.remove':return `Remove labels from ${at}`;
+  case 'labels.set':return `Change labels on ${at}`;
+  case 'issue.close':return `Close ${at}`;
+  case 'issue.reopen':return `Reopen ${at}`;
+ }
+}
+/** Exactly what will be written, as the card shows it. */
+export function githubDraftText(draft:GithubDraft):string {
+ const list=(draft.labels??[]).join(', ');
+ switch(draft.write){
+  case 'issue.create':return [draft.title,draft.body,list?'Labels: '+list:''].filter(Boolean).join('\n\n');
+  case 'issue.comment':return draft.body??'';
+  case 'labels.add':return 'Add: '+list;
+  case 'labels.remove':return 'Remove: '+list;
+  case 'labels.set':{const {add,remove}=githubLabelMoves(draft);return [add.length?'Add: '+add.join(', '):'',remove.length?'Remove: '+remove.join(', '):'',
+   `Only if its labels${draft.labelPrefix?` under “${draft.labelPrefix}”`:''} are exactly: ${(draft.expectedLabels??[]).join(', ')||'none'}`].filter(Boolean).join('\n');}
+  case 'issue.close':return `Close “${draft.target.title}” as completed.`;
+  case 'issue.reopen':return `Reopen “${draft.target.title}”.`;
+ }
+}
+
+/** The World item ID of a draft's Attention card. */
+export const githubDraftItemId=(draftId:string)=>'ghd-'+draftId;
+const ITEM_STATUS:Record<GithubDraftStatus,'open'|'done'|'dismissed'>={pending:'open',written:'done',stale:'dismissed',failed:'dismissed',unknown:'dismissed',dismissed:'dismissed'};
+/** The draft as an Attention task from the host's own provider `agents`, written with no model: it names the Agent, the
+ * repository and target, the exact text and a link to the target, and carries the draft's ID so its card approves this
+ * draft and no other. */
+export function githubDraftAttentionItem(draft:GithubDraft,agentName:string):WorldItem {
+ let name=draft.agentId;try{name=text(agentName,80)||draft.agentId;}catch{}
+ const headline=githubDraftHeadline(draft),body=[...githubDraftText(draft)].slice(0,1200).join('');
+ const signed=draft.write==='issue.create'||draft.write==='issue.comment'?` It ends with the line “${githubDraftSignature(name)}”.`:'';
+ const summary=`${name} wants to write this on GitHub.${signed} Nothing is written until you approve it.`;
+ return {id:githubDraftItemId(draft.id),provider:AGENT_ASK_PROVIDER,kind:'task',status:ITEM_STATUS[draft.status],title:headline,context:body,summary,
+  reason:[...(name+' drafted a GitHub change')].slice(0,56).join(''),attentionContentVersion:1,
+  attentionReason:[...summary].slice(0,600).join(''),
+  sources:[{provider:AGENT_ASK_PROVIDER,id:draft.id,quote:[...(draft.target.title||headline)].slice(0,1000).join(''),url:draft.resultUrl??draft.target.url}],
+  agentId:draft.agentId,agentName:name,githubDraftId:draft.id,githubDraftStatus:draft.status,githubDraftRepo:draft.repo,githubDraftWrite:draft.write,
+  githubDraftUrl:draft.resultUrl??draft.target.url,githubDraftText:githubDraftText(draft),...draft.reason?{githubDraftReason:draft.reason}:{},createdAt:draft.createdAt,updatedAt:draft.updatedAt};
+}
+
+// Standing GitHub writes (agent/gate/GRANTS.md#standing-github-writes): a comment or a label transition one Agent runs
+// on one repository without a card, under a Grant the person gave it in Settings. The same checks as a draft, then the
+// same kind of check as Approve against the target read right before writing.
+
+export const GITHUB_WRITE_REASONS=Object.freeze({
+ write:'Choose what to write: issue.comment or labels.set. Anything else is a GitHub draft for the person to approve (github-drafts/create).',
+ notGranted:'The person has not let this Agent make this change on this repository without asking. Draft it instead (github-drafts/create) for the person to approve.',
+ busy:'Another write to this Issue is running. Read it again, then try once more.',
+ scope:'Choose a repository as owner/repo and what the Agent may do there: comment, labels or comment-labels, with a label prefix for labels.',
+});
+/** Why a run wrote nothing: the target is not as the Agent read it. */
+export const GITHUB_WRITE_STALE=Object.freeze({
+ state:(was:string,now:string)=>`It is ${now} now, not ${was} as you read it, so nothing was written. Read it again first.`,
+ updated:'It changed on GitHub after you read it, so nothing was written. Read it again first.',
+});
+
+/** `github-writes/run` arguments, checked: a `github-drafts/create` of `issue.comment` or `labels.set` on
+ * `owner/repo#123` (the same limits, and no control characters, passwords, tokens or keys), and optionally the state
+ * and updatedAt the Agent read. */
+export function readGithubWriteRun(input:unknown):GithubWriteRun&{owner:string;repoName:string;number:number} {
+ const {expectedState,expectedUpdatedAt,...rest}=record(input);
+ if(!GITHUB_STANDING_WRITES.includes(rest.write as GithubStandingWrite))fail(GITHUB_WRITE_REASONS.write);
+ if(expectedState!==undefined&&expectedState!=='open'&&expectedState!=='closed'||expectedUpdatedAt!==undefined&&!instant(expectedUpdatedAt))fail(GITHUB_DRAFT_REASONS.invalid);
+ const create=readGithubDraftCreate(rest);
+ return {...create,write:create.write as GithubStandingWrite,number:create.number as number,
+  ...expectedState?{expectedState:expectedState as 'open'|'closed'}:{},...expectedUpdatedAt?{expectedUpdatedAt:expectedUpdatedAt as string}:{}};
+}
+/** What a standing GitHub write Grant reaches, from what the person chose in Settings: a repository (`owner/repo`) and
+ * `comment`, `labels` or `comment-labels`, with the label prefix that `labels` needs. Throws for anything else. */
+export function githubWriteScope(repo:unknown,choice:unknown,labelPrefix?:unknown):GithubWriteScope {
+ if(typeof repo!=='string'||!REPO.test(repo)||!GITHUB_WRITE_GRANT_CHOICES.includes(choice as GithubWriteGrantChoice))return fail(GITHUB_WRITE_REASONS.scope);
+ const writes:GithubStandingWrite[]=choice==='comment'?['issue.comment']:choice==='labels'?['labels.set']:['issue.comment','labels.set'];
+ if(!writes.includes('labels.set'))return labelPrefix===undefined||labelPrefix===''?{repo,writes}:fail(GITHUB_WRITE_REASONS.scope);
+ let prefix='';try{prefix=readGithubLabelPrefix(labelPrefix);}catch{fail(GITHUB_WRITE_REASONS.scope);}
+ return {repo,writes,labelPrefix:prefix};
+}
+/** A stored Grant's reach, checked; null when it is not one. */
+export function readGithubWriteScope(value:unknown):GithubWriteScope|null {
+ const v=record(value),writes=Array.isArray(v.writes)?v.writes:[];
+ const choice=writes.length===1&&writes[0]==='issue.comment'?'comment':writes.length===1&&writes[0]==='labels.set'?'labels'
+  :writes.length===2&&writes.includes('issue.comment')&&writes.includes('labels.set')?'comment-labels':'';
+ try{return githubWriteScope(v.repo,choice,v.labelPrefix);}catch{return null;}
+}
+/** Whether a reach covers this run: its repository (case-insensitive) and write and, for `labels.set`, a prefix at
+ * least as narrow as its own. */
+export function githubWriteScopeCovers(scope:GithubWriteScope,run:{write:GithubWrite;owner:string;repoName:string;prefix?:string}):boolean {
+ if(lower(scope.repo)!==lower(`${run.owner}/${run.repoName}`)||!scope.writes.includes(run.write as GithubStandingWrite))return false;
+ return run.write!=='labels.set'||!!scope.labelPrefix&&lower(run.prefix??'').startsWith(lower(scope.labelPrefix));
+}
+/** A run's check against the target read right before writing: why it is not as the Agent read it, or '' when it is.
+ * Gone (deleted, moved, no longer visible to the App); a state or updatedAt the Agent named that differs; for
+ * `labels.set`, labels under the prefix that are not exactly the expected ones. */
+export function githubWriteChange(run:GithubWriteRun,now:GithubDraftTarget|null):string {
+ if(!now||now.kind==='repository')return GITHUB_DRAFT_STALE.gone;
+ if(run.expectedState&&now.state!==run.expectedState)return GITHUB_WRITE_STALE.state(run.expectedState,now.state);
+ if(run.expectedUpdatedAt&&Date.parse(now.updatedAt)!==Date.parse(run.expectedUpdatedAt))return GITHUB_WRITE_STALE.updated;
+ return run.write==='labels.set'?githubLabelChange({...run.prefix?{labelPrefix:run.prefix}:{},expectedLabels:run.expected??[]},now):'';
+}
+/** The run as a draft that is written at once and never stored: what githubDraftRequests, githubDraftResultUrl and
+ * githubDraftHeadline plan and say. */
+export function githubWriteDraft(run:GithubWriteRun&{owner:string;repoName:string;number:number},agentId:string,target:GithubDraftTarget,now:string):GithubDraft {
+ return {id:'standing-write',agentId,write:run.write,repo:`${run.owner}/${run.repoName}`,number:run.number,...run.body?{body:run.body}:{},
+  ...run.write==='labels.set'?{labels:run.set??[],...run.prefix?{labelPrefix:run.prefix}:{},expectedLabels:run.expected??[]}:{},
+  target:{...target},status:'pending',createdAt:now,updatedAt:now};
+}
+/** The audit entry for one run's outcome (`write`): written, with the result's link, or why nothing was written. */
+export function githubWriteAuditEntry(agentId:string,grantId:string|undefined,headline:string,result:{written:boolean;url?:string;reason?:string},at:string):AgentAuditEntry {
+ const reason=result.written?`${headline}: written as the GitHub App without asking, under the person's standing Grant: ${result.url}`:`${headline}: nothing was written. ${result.reason??''}`.trim();
+ return {at,agentId,target:GITHUB_WRITE_TARGET,action:'write',decision:result.written?'allowed':'denied',...grantId?{grantId}:{},reason:[...reason].slice(0,300).join('')};
+}
+
+// The GitHub App the person connected as GitHub's write identity (contracts/github-drafts.ts GithubAppCredentials).
+
+/** The App's settings as the person entered them, checked; the error never repeats what was entered. */
+export function readGithubApp(input:unknown):GithubAppCredentials {
+ const v=record(input);
+ const appId=typeof v.appId==='string'?v.appId.trim():typeof v.appId==='number'?String(v.appId):'';
+ const installationId=typeof v.installationId==='string'?v.installationId.trim():typeof v.installationId==='number'?String(v.installationId):'';
+ const privateKey=typeof v.privateKey==='string'?v.privateKey.replace(/\r\n?/g,'\n').trim():'';
+ if(!/^[1-9][0-9]{0,11}$/.test(appId)||!/^[1-9][0-9]{0,14}$/.test(installationId)
+  ||!/^-----BEGIN (?:RSA )?PRIVATE KEY-----\n[A-Za-z0-9+/=\n]{100,8000}\n-----END (?:RSA )?PRIVATE KEY-----$/.test(privateKey))fail(GITHUB_DRAFT_REASONS.app);
+ return {appId,installationId,privateKey};
+}
+/** A stored App, or null. */
+export function readStoredGithubApp(value:string|null):GithubAppCredentials|null {
+ if(!value)return null;
+ try{return readGithubApp(JSON.parse(value));}catch{return null;}
+}
+/** The claims of the JSON Web Token the App signs (RS256) to ask GitHub for an installation token: issued a minute
+ * early for clock drift, valid for nine minutes (GitHub allows ten). `now` is in seconds. */
+export function githubAppJwtClaims(appId:string,now:number):{iat:number;exp:number;iss:string} {
+ return {iat:Math.floor(now)-60,exp:Math.floor(now)+540,iss:appId};
+}

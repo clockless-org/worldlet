@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {newSnakeState,steerSnake,stepSnake,pauseSnake,type SnakeState,type SnakePoint} from '../core/games/index.ts';
+import {newSnakeState,steerSnake,stepSnake,pauseSnake,type SnakeState,type SnakePoint} from '../context/store/index.ts';
 const ready=newSnakeState('wide');assert.equal(ready.columns,16);assert.equal(ready.rows,12);assert.equal(ready.body.length,7);assert.deepEqual(ready.food,[11,6]);assert.equal(stepSnake(ready),ready);
 assert.equal(steerSnake(ready,[-1,0]),ready,'reversing into the neck cannot start');assert.equal(steerSnake(ready,[.5,.5]),ready);assert.equal(steerSnake(ready,[1,1]),ready);
 let state=steerSnake(ready,[1,0]);for(let i=0;i<4;i++)state=stepSnake(state);state=stepSnake(steerSnake(state,[0,-1]),()=>0);

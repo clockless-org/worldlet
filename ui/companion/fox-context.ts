@@ -3,7 +3,7 @@
 // This is the only place that bounds the context; callers pass raw values and the
 // Hermes side (world_context.py) validates against the same shape. The app appends
 // one more field on the way out, `history` from its ledger, bounded on its side.
-import {WORLD_FACTS} from '../shell/index.ts';
+import {WORLD_FACTS} from '../frame/index.ts';
 import {FOX_MAIN_THREAD} from '../../contracts/companion-conversation.ts';
 
 export function foxContext(context: any={}){

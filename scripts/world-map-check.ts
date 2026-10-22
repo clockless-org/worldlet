@@ -1,6 +1,6 @@
 /** A static map uses the host's area buttons and real Attention rows; it cannot supply executable actions. */
 import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {build} from 'esbuild';import {launchTestBrowser,pageErrors} from './browser-test.ts';
-const script=await build({stdin:{contents:"export {renderWorldMap} from './ui/world/world-map.ts';export {mountMapAttention} from './ui/hud/map-attention.ts';",resolveDir:process.cwd(),loader:'ts'},bundle:true,format:'iife',globalName:'MapUI',write:false});
+const script=await build({stdin:{contents:"export {renderWorldMap} from './ui/world/world-map.ts';export {mountMapAttention} from './ui/world/map-attention.ts';",resolveDir:process.cwd(),loader:'ts'},bundle:true,format:'iife',globalName:'MapUI',write:false});
 const browser=await launchTestBrowser();try{
  const page=await browser.newPage({viewport:{width:1500,height:844}}),errors=pageErrors(page,{console:true});
  await page.setContent('<!doctype html><title>Shared painted world</title><main id="notionWorld" data-world-renderer="map" style="position:fixed;inset:0;--world-map-paper:#19251e;--world-map-ink:#fff8df;--world-map-accent:#c4ad71;--world-map-bodyFont:Georgia"><div id="map" style="position:absolute;inset:0"></div><div id="pins"></div><nav class="world-task-tracker"><div class="world-task-list"></div></nav><div class="world-today"></div></main>');

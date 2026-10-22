@@ -9,10 +9,10 @@ const presentation={hud:{skin:{}},tokens:{bodyFont:'Package Body, monospace',dis
  {file:'assets/fonts/ImplicitFace.woff2',license:'assets/LICENSE.txt'},
 ]};
 const pkg={manifest:{contractVersion:3,id:'village',title:'Font fixture',assets:'assets',presentation:'presentation.json'},presentation,data:{}};
-const bundle=await build({stdin:{contents:"export {activeBuildTheme,prepareBuildThemeFonts,themeSceneMaterial} from './ui/themes/build-theme.ts';export {applyThemeSurfaces} from './ui/themes/theme-surfaces.ts';",resolveDir:process.cwd(),loader:'ts'},bundle:true,format:'iife',globalName:'Theme',write:false,plugins:[{name:'font-fixture',setup(b){
- b.onLoad({filter:/ui\/theme-packages\/index\.ts$/},()=>({contents:'export const THEME_PACKAGES='+JSON.stringify([pkg]),loader:'ts'}));
+const bundle=await build({stdin:{contents:"export {activeBuildTheme,prepareBuildThemeFonts,themeSceneMaterial} from './ui/style/themes/build-theme.ts';export {applyThemeSurfaces} from './ui/style/themes/theme-surfaces.ts';",resolveDir:process.cwd(),loader:'ts'},bundle:true,format:'iife',globalName:'Theme',write:false,plugins:[{name:'font-fixture',setup(b){
+ b.onLoad({filter:/ui\/style\/theme-packages\/index\.ts$/},()=>({contents:'export const THEME_PACKAGES='+JSON.stringify([pkg]),loader:'ts'}));
 }}]});
-const font=await readFile('resources/common/fonts/InterVariable.woff2'),css=(await readFile('dist/WorldletWeb/worldlet-ui.css','utf8'))+'\n'+await readFile('ui/themes/theme-surfaces.css','utf8');
+const font=await readFile('resources/common/fonts/InterVariable.woff2'),css=(await readFile('dist/WorldletWeb/worldlet-ui.css','utf8'))+'\n'+await readFile('ui/style/themes/theme-surfaces.css','utf8');
 const browser=await launchTestBrowser();
 try{
  for(const withEnvironment of [false,true]){

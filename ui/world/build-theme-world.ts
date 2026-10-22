@@ -1,4 +1,4 @@
-import {themeAppletIcon,activeBuildTheme,themeAssetURL} from '../themes/index.ts';
+import {themeAppletIcon,activeBuildTheme,themeAssetURL} from '../style/index.ts';
 import type {WorldState,WorldMark,WorldApplet,WorldLampState} from './world-renderer.ts';
 import {renderWorldMap} from './world-map.ts';
 import {renderVillageWorld} from './village/village-world.ts';
@@ -7,7 +7,7 @@ import {createAppletImageLamps} from './applet-image-lamps.ts';
 import {createLampLabel,stackLampLabels} from './applet-lamp-label.ts';
 import {createLevelZoom} from './level-zoom.ts';
 import type {LampSignal} from './applet-lamp.ts';
-import {appletStatus,myAppletKind,CODING_SESSIONS,HOME_NATIVE} from '../../core/applets/index.ts';
+import {appletStatus,myAppletKind,CODING_SESSIONS,HOME_NATIVE} from '../../context/applets/index.ts';
 import {lastUse,regionId} from './region-layout.ts';
 import {weeklyQuota} from './weekly-allowance.ts';
 import {appletLamp,appletLampContent,lampDisplayState} from './applet-lamp.ts';
@@ -36,6 +36,8 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
  const visible=r=>!hidden.has(r.moduleId)&&(unlocked?unlocked.has(r.moduleId):r.installByDefault!==false);
  /** Each Applet's lamp (applet-lamp.ts), read again at most twice a second: pins move every frame, records do not. */
  let signals=new Map<string,LampSignal>(),signalsAt=-Infinity;
+ /** Numbers drawn on devices (WorldApplet.figure), by Applet. */
+ const figures=new Map<string,NonNullable<WorldApplet['figure']>>();
  const signalOf=(r):LampSignal|undefined=>{
   if(r.entity==='matter')return undefined;
   if(performance.now()-signalsAt>500){signalsAt=performance.now();signals=new Map();const byProvider=new Map<string,any[]>();
@@ -52,7 +54,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
   areas:(options.buildings||[]).filter(b=>b.id!=='building-people').map(b=>{const look=options.regionLayout?.themes?.[regionId(b.id)]||b.visualTheme;return {id:b.id,title:b.title,...(look?{look}:{})};}),
   applets:rooms.map(r=>({id:r.moduleId||r.id,key:r.key||r.id,title:r.title,region:r.region||String(r.buildingId||'').replace(/^building-/,''),visible:visible(r),status:r.status?.state,count:r.status?.count,icon:appletIcon(r),
    lamp:lamp(r,shell),connected:r.entity==='matter'?undefined:!!appletStatus(r,connections)?.connected,mine:myAppletKind(r)||undefined,object:r.entity==='matter'||undefined,
-   art:r.art&&r.art!==r.key?r.art:undefined,usedAt:lastUse(r,options.regionLayout)||undefined,staged:staged(r)||undefined,allowance:allowance(r)}))};};
+   art:r.art&&r.art!==r.key?r.art:undefined,usedAt:lastUse(r,options.regionLayout)||undefined,staged:staged(r)||undefined,allowance:allowance(r),figure:figures.get(r.moduleId)}))};};
  /** The Village's Applet stage draws the Applet's own open picture in front of the World (pixi-stage.ts): not for coding
   * sessions or the Home Applets drawn natively, and only once its contents arrived. */
  const staged=r=>stages.has(r.moduleId)&&!!(globalThis as any).__WORLDLET_25D_ASSETS__?.open?.[r.key]&&!CODING_SESSIONS.includes(r.key)&&!HOME_NATIVE.includes(r.key);
@@ -151,6 +153,8 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
   },
   setEnvironment(value){environment=value||{};refresh();},setConnections(list){connections=list||[];signalsAt=-Infinity;refresh();},
   setAppActivity(id,value){activities.set(id,value);signalsAt=-Infinity;refresh();},
+  /** The number on an Applet's device (WorldApplet.figure), or none. */
+  setDeviceFigure(id:string,value:WorldApplet['figure']|null){if(value)figures.set(id,value);else figures.delete(id);refresh();},
   devicePoint(id){return mount.anchor(id);},
   setDevicePresence(id,value){if(value)hidden.delete(id);else hidden.add(id);refresh();return true;},
   toggleMotion(){motion=!motion;stage.setMotion(motion);refresh();return motion;},

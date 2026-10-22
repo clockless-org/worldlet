@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import http from 'node:http';
 import path from 'node:path';
 import {WebSocketServer} from 'ws';
-import {REMOTE_GATEWAY_HARNESS_ID,harnessLocation,harnessService,readRemoteGatewayToken,readRemoteGatewayUrl,remoteGatewaySocketUrl} from '../core/agent/index.ts';
-import {RemoteGatewayAdapter,checkRemoteGateway,readRemoteGateway,remoteGatewayView,writeRemoteGateway} from '../platform/electron/src/modules/agent-runtime/remote-gateway.ts';
+import {REMOTE_GATEWAY_HARNESS_ID,harnessLocation,harnessService,readRemoteGatewayToken,readRemoteGatewayUrl,remoteGatewaySocketUrl} from '../agent/gate/index.ts';
+import {RemoteGatewayAdapter,checkRemoteGateway,readRemoteGateway,remoteGatewayView,writeRemoteGateway} from '../platform/host/modules/companion/agent/remote-gateway.ts';
 import {withTempDir} from './test-temp.ts';
 
-// Fox on an OpenClaw Gateway on another computer, reached directly (core/phone/README.md#an-agent-gateway-on-another-computer):
+// Fox on an OpenClaw Gateway on another computer, reached directly (platform/web/README.md#an-agent-gateway-on-another-computer):
 // the address rules (TLS except loopback and Tailscale), the token kept in the vault and never shown, the check before
 // Fox switches, and Fox's turns on a fixture Gateway (`/v1/responses`, a session per thread, World tools as client
 // function tools run here, its approvals socket at the same address), with background work left on this computer.
@@ -78,7 +78,7 @@ await withTempDir('worldlet-remote-gateway-',async scratch=>{
  const url=`http://127.0.0.1:${(server.address() as {port:number}).port}/claw`;
  try{
   // The check before Fox switches: a wrong token, an endpoint that is off, then the right one.
-  await assert.rejects(checkRemoteGateway(url,'wrong'),/could not sign in to its Gateway \(check the token in Settings › Agent\)/);
+  await assert.rejects(checkRemoteGateway(url,'wrong'),/could not sign in to its Gateway \(check the token in Settings › Agents\)/);
   endpoint=false;await assert.rejects(checkRemoteGateway(url,'claw-secret'),/\/v1\/responses endpoint is off/);endpoint=true;
   await assert.rejects(checkRemoteGateway('http://192.168.1.20:18789','claw-secret'),/only over HTTPS/);
   assert.deepEqual(await checkRemoteGateway(url+'/v1/','claw-secret'),{url,token:'claw-secret',host:'127.0.0.1'});

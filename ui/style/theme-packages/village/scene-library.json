@@ -1,0 +1,1437 @@
+{
+  "schemaVersion": 1,
+  "counts": {
+    "core": 24,
+    "generic": 16,
+    "branded": 100
+  },
+  "entries": [
+    {
+      "id": "google-calendar",
+      "title": "Calendar",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/google-calendar.webp",
+      "background": "assets/applet-scenes/google-calendar/background.webp",
+      "status": "registered",
+      "registrationKey": "google-calendar"
+    },
+    {
+      "id": "gmail",
+      "title": "Mail",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/gmail.webp",
+      "background": "assets/applet-scenes/gmail/background.webp",
+      "status": "registered",
+      "registrationKey": "gmail"
+    },
+    {
+      "id": "apple-notes",
+      "title": "Notes",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/apple-notes.webp",
+      "background": "assets/applet-scenes/apple-notes/background.webp",
+      "status": "registered",
+      "registrationKey": "apple-notes"
+    },
+    {
+      "id": "apple-reminders",
+      "title": "Reminders",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/apple-reminders.webp",
+      "background": "assets/applet-scenes/apple-reminders/background.webp",
+      "status": "registered",
+      "registrationKey": "apple-reminders"
+    },
+    {
+      "id": "files",
+      "title": "Files",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/applet-scenes/files/icon.webp",
+      "background": "assets/applet-scenes/files/background.webp",
+      "status": "registered",
+      "registrationKey": "files"
+    },
+    {
+      "id": "weather",
+      "title": "Weather",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/weather.webp",
+      "background": "assets/applet-scenes/weather/background.webp",
+      "status": "registered",
+      "registrationKey": "weather"
+    },
+    {
+      "id": "meetings",
+      "title": "Meetings",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/meetings.webp",
+      "background": "assets/applet-scenes/meetings/background.webp",
+      "status": "registered",
+      "registrationKey": "meetings"
+    },
+    {
+      "id": "voice-memos",
+      "title": "Voice Memos",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/voice-memos.webp",
+      "background": "assets/applet-scenes/voice-memos/background.webp",
+      "status": "registered",
+      "registrationKey": "voice-memos"
+    },
+    {
+      "id": "messages",
+      "title": "Messages",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/messages.webp",
+      "background": "assets/applet-scenes/messages/background.webp",
+      "status": "registered",
+      "registrationKey": "messages"
+    },
+    {
+      "id": "browser",
+      "title": "Browser",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/devices/browser.webp",
+      "background": "assets/applet-scenes/browser/background.webp",
+      "status": "registered",
+      "registrationKey": "browser"
+    },
+    {
+      "id": "maps",
+      "title": "Maps",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/applet-scenes/maps/icon.webp",
+      "background": "assets/applet-scenes/maps/background.webp",
+      "status": "registered",
+      "registrationKey": "maps"
+    },
+    {
+      "id": "clock",
+      "title": "Clock",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/applet-scenes/clock/icon.webp",
+      "background": "assets/applet-scenes/clock/background.webp",
+      "status": "registered",
+      "registrationKey": "clock"
+    },
+    {
+      "id": "contacts",
+      "title": "Contacts",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/applet-scenes/contacts/icon.webp",
+      "background": "assets/applet-scenes/contacts/background.webp",
+      "status": "registered",
+      "registrationKey": "contacts"
+    },
+    {
+      "id": "photos",
+      "title": "Photos",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/applet-scenes/photos/icon.webp",
+      "background": "assets/applet-scenes/photos/background.webp",
+      "status": "registered",
+      "registrationKey": "photos"
+    },
+    {
+      "id": "music",
+      "title": "Music",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/applet-scenes/music/icon.webp",
+      "background": "assets/applet-scenes/music/background.webp",
+      "status": "registered",
+      "registrationKey": "music"
+    },
+    {
+      "id": "news",
+      "title": "News",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/applet-scenes/news/icon.webp",
+      "background": "assets/applet-scenes/news/background.webp",
+      "status": "registered",
+      "registrationKey": "news"
+    },
+    {
+      "id": "podcasts",
+      "title": "Podcasts",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/applet-scenes/podcasts/icon.webp",
+      "background": "assets/applet-scenes/podcasts/background.webp",
+      "status": "registered",
+      "registrationKey": "podcasts"
+    },
+    {
+      "id": "stocks",
+      "title": "Stocks",
+      "collection": "core",
+      "group": "utilities",
+      "icon": "assets/applet-scenes/stocks/icon.webp",
+      "background": "assets/applet-scenes/stocks/background.webp",
+      "status": "registered",
+      "registrationKey": "stocks"
+    },
+    {
+      "id": "game-2048",
+      "title": "2048",
+      "collection": "core",
+      "group": "built-in-games",
+      "icon": "assets/devices/game-2048.webp",
+      "background": "assets/applet-scenes/game-2048/background.webp",
+      "status": "registered",
+      "registrationKey": "game-2048"
+    },
+    {
+      "id": "snake",
+      "title": "Snake",
+      "collection": "core",
+      "group": "built-in-games",
+      "icon": "assets/devices/snake.webp",
+      "background": "assets/applet-scenes/snake/background.webp",
+      "status": "registered",
+      "registrationKey": "snake"
+    },
+    {
+      "id": "minesweeper",
+      "title": "Minesweeper",
+      "collection": "core",
+      "group": "built-in-games",
+      "icon": "assets/devices/minesweeper.webp",
+      "background": "assets/applet-scenes/minesweeper/background.webp",
+      "status": "registered",
+      "registrationKey": "minesweeper"
+    },
+    {
+      "id": "sudoku",
+      "title": "Sudoku",
+      "collection": "core",
+      "group": "built-in-games",
+      "icon": "assets/devices/sudoku.webp",
+      "background": "assets/applet-scenes/sudoku/background.webp",
+      "status": "registered",
+      "registrationKey": "sudoku"
+    },
+    {
+      "id": "gomoku",
+      "title": "Gomoku",
+      "collection": "core",
+      "group": "built-in-games",
+      "icon": "assets/applet-scenes/gomoku/icon.webp",
+      "background": "assets/applet-scenes/gomoku/background.webp",
+      "status": "registered",
+      "registrationKey": "gomoku"
+    },
+    {
+      "id": "random-game",
+      "title": "Random Game",
+      "collection": "core",
+      "group": "built-in-games",
+      "icon": "assets/devices/random-game.webp",
+      "background": "assets/applet-scenes/random-game/background.webp",
+      "status": "registered",
+      "registrationKey": "random-game"
+    },
+    {
+      "id": "weight-balance",
+      "title": "Weight balance",
+      "collection": "generic",
+      "group": "Health",
+      "icon": "assets/applet-presets/weight-balance/icon.webp",
+      "background": "assets/applet-presets/weight-balance/background.webp",
+      "status": "registered",
+      "registrationKey": "weight-balance"
+    },
+    {
+      "id": "meal-planner",
+      "title": "Meal planner",
+      "collection": "generic",
+      "group": "Health",
+      "icon": "assets/applet-presets/meal-planner/icon.webp",
+      "background": "assets/applet-presets/meal-planner/background.webp",
+      "status": "registered",
+      "registrationKey": "meal-planner"
+    },
+    {
+      "id": "fitness",
+      "title": "Workout plan",
+      "collection": "generic",
+      "group": "Health",
+      "icon": "assets/applet-presets/fitness/icon.webp",
+      "background": "assets/applet-presets/fitness/background.webp",
+      "status": "registered",
+      "registrationKey": "fitness"
+    },
+    {
+      "id": "sleep",
+      "title": "Sleep & recovery",
+      "collection": "generic",
+      "group": "Health",
+      "icon": "assets/applet-presets/sleep/icon.webp",
+      "background": "assets/applet-presets/sleep/background.webp",
+      "status": "registered",
+      "registrationKey": "sleep"
+    },
+    {
+      "id": "travel",
+      "title": "Travel planner",
+      "collection": "generic",
+      "group": "Out & about",
+      "icon": "assets/applet-presets/travel/icon.webp",
+      "background": "assets/applet-presets/travel/background.webp",
+      "status": "registered",
+      "registrationKey": "travel"
+    },
+    {
+      "id": "outdoor",
+      "title": "Outdoor adventures",
+      "collection": "generic",
+      "group": "Out & about",
+      "icon": "assets/applet-presets/outdoor/icon.webp",
+      "background": "assets/applet-presets/outdoor/background.webp",
+      "status": "registered",
+      "registrationKey": "outdoor"
+    },
+    {
+      "id": "shopping",
+      "title": "Shopping list",
+      "collection": "generic",
+      "group": "Home",
+      "icon": "assets/applet-presets/shopping/icon.webp",
+      "background": "assets/applet-presets/shopping/background.webp",
+      "status": "registered",
+      "registrationKey": "shopping"
+    },
+    {
+      "id": "budget",
+      "title": "Household budget",
+      "collection": "generic",
+      "group": "Home",
+      "icon": "assets/applet-presets/budget/icon.webp",
+      "background": "assets/applet-presets/budget/background.webp",
+      "status": "registered",
+      "registrationKey": "budget"
+    },
+    {
+      "id": "home-care",
+      "title": "Home care",
+      "collection": "generic",
+      "group": "Home",
+      "icon": "assets/applet-presets/home-care/icon.webp",
+      "background": "assets/applet-presets/home-care/background.webp",
+      "status": "registered",
+      "registrationKey": "home-care"
+    },
+    {
+      "id": "garden",
+      "title": "Garden planner",
+      "collection": "generic",
+      "group": "Home",
+      "icon": "assets/applet-presets/garden/icon.webp",
+      "background": "assets/applet-presets/garden/background.webp",
+      "status": "registered",
+      "registrationKey": "garden"
+    },
+    {
+      "id": "daily-planner",
+      "title": "Daily planner",
+      "collection": "generic",
+      "group": "Life & learning",
+      "icon": "assets/applet-presets/daily-planner/icon.webp",
+      "background": "assets/applet-presets/daily-planner/background.webp",
+      "status": "registered",
+      "registrationKey": "daily-planner"
+    },
+    {
+      "id": "reading",
+      "title": "Reading & research",
+      "collection": "generic",
+      "group": "Life & learning",
+      "icon": "assets/applet-presets/reading/icon.webp",
+      "background": "assets/applet-presets/reading/background.webp",
+      "status": "registered",
+      "registrationKey": "reading"
+    },
+    {
+      "id": "language",
+      "title": "Language practice",
+      "collection": "generic",
+      "group": "Life & learning",
+      "icon": "assets/applet-presets/language/icon.webp",
+      "background": "assets/applet-presets/language/background.webp",
+      "status": "registered",
+      "registrationKey": "language"
+    },
+    {
+      "id": "journal",
+      "title": "Personal journal",
+      "collection": "generic",
+      "group": "Life & learning",
+      "icon": "assets/applet-presets/journal/icon.webp",
+      "background": "assets/applet-presets/journal/background.webp",
+      "status": "registered",
+      "registrationKey": "journal"
+    },
+    {
+      "id": "job-search",
+      "title": "Job search",
+      "collection": "generic",
+      "group": "Work",
+      "icon": "assets/applet-presets/job-search/icon.webp",
+      "background": "assets/applet-presets/job-search/background.webp",
+      "status": "registered",
+      "registrationKey": "job-search"
+    },
+    {
+      "id": "project-planner",
+      "title": "Project planner",
+      "collection": "generic",
+      "group": "Work",
+      "icon": "assets/applet-presets/project-planner/icon.webp",
+      "background": "assets/applet-presets/project-planner/background.webp",
+      "status": "registered",
+      "registrationKey": "project-planner"
+    },
+    {
+      "id": "github",
+      "title": "GitHub",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/github.webp",
+      "background": "assets/applet-scenes/github/background.webp",
+      "status": "registered",
+      "registrationKey": "github"
+    },
+    {
+      "id": "codex",
+      "title": "Codex",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/codex.webp",
+      "background": "assets/applet-scenes/codex/background.webp",
+      "status": "registered",
+      "registrationKey": "codex"
+    },
+    {
+      "id": "claude-code",
+      "title": "Claude Code",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/claude-code.webp",
+      "background": "assets/applet-scenes/claude-code/background.webp",
+      "status": "registered",
+      "registrationKey": "claude-code"
+    },
+    {
+      "id": "notion",
+      "title": "Notion",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/notion.webp",
+      "background": "assets/applet-scenes/notion/background.webp",
+      "status": "registered",
+      "registrationKey": "notion"
+    },
+    {
+      "id": "obsidian",
+      "title": "Obsidian",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/obsidian.webp",
+      "background": "assets/applet-scenes/obsidian/background.webp",
+      "status": "registered",
+      "registrationKey": "obsidian"
+    },
+    {
+      "id": "plaid",
+      "title": "Plaid",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/plaid.webp",
+      "background": "assets/applet-scenes/plaid/background.webp",
+      "status": "registered",
+      "registrationKey": "plaid"
+    },
+    {
+      "id": "stripe",
+      "title": "Stripe",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/stripe.webp",
+      "background": "assets/applet-scenes/stripe/background.webp",
+      "status": "registered",
+      "registrationKey": "stripe"
+    },
+    {
+      "id": "paypal",
+      "title": "PayPal",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/paypal.webp",
+      "background": "assets/applet-scenes/paypal/background.webp",
+      "status": "registered",
+      "registrationKey": "paypal"
+    },
+    {
+      "id": "todoist",
+      "title": "Todoist",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/todoist.webp",
+      "background": "assets/applet-scenes/todoist/background.webp",
+      "status": "registered",
+      "registrationKey": "todoist"
+    },
+    {
+      "id": "linear",
+      "title": "Linear",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/linear.webp",
+      "background": "assets/applet-scenes/linear/background.webp",
+      "status": "registered",
+      "registrationKey": "linear"
+    },
+    {
+      "id": "supabase",
+      "title": "Supabase",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/supabase.webp",
+      "background": "assets/applet-scenes/supabase/background.webp",
+      "status": "registered",
+      "registrationKey": "supabase"
+    },
+    {
+      "id": "docker",
+      "title": "Docker",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/docker.webp",
+      "background": "assets/applet-scenes/docker/background.webp",
+      "status": "registered",
+      "registrationKey": "docker"
+    },
+    {
+      "id": "google-drive",
+      "title": "Google Drive",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/google-drive.webp",
+      "background": "assets/applet-scenes/google-drive/background.webp",
+      "status": "registered",
+      "registrationKey": "google-drive"
+    },
+    {
+      "id": "google-docs",
+      "title": "Google Docs",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/google-docs.webp",
+      "background": "assets/applet-scenes/google-docs/background.webp",
+      "status": "registered",
+      "registrationKey": "google-docs"
+    },
+    {
+      "id": "google-sheets",
+      "title": "Google Sheets",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/google-sheets.webp",
+      "background": "assets/applet-scenes/google-sheets/background.webp",
+      "status": "registered",
+      "registrationKey": "google-sheets"
+    },
+    {
+      "id": "google-slides",
+      "title": "Google Slides",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/google-slides.webp",
+      "background": "assets/applet-scenes/google-slides/background.webp",
+      "status": "registered",
+      "registrationKey": "google-slides"
+    },
+    {
+      "id": "oura",
+      "title": "Oura Ring",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/oura.webp",
+      "background": "assets/applet-scenes/oura/background.webp",
+      "status": "registered",
+      "registrationKey": "oura"
+    },
+    {
+      "id": "strava",
+      "title": "Strava",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/strava.webp",
+      "background": "assets/applet-scenes/strava/background.webp",
+      "status": "registered",
+      "registrationKey": "strava"
+    },
+    {
+      "id": "fitbit",
+      "title": "Fitbit",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/fitbit.webp",
+      "background": "assets/applet-scenes/fitbit/background.webp",
+      "status": "registered",
+      "registrationKey": "fitbit"
+    },
+    {
+      "id": "google-maps",
+      "title": "Google Maps",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/google-maps.webp",
+      "background": "assets/applet-scenes/google-maps/background.webp",
+      "status": "registered",
+      "registrationKey": "google-maps"
+    },
+    {
+      "id": "airbnb",
+      "title": "Airbnb",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/airbnb.webp",
+      "background": "assets/applet-scenes/airbnb/background.webp",
+      "status": "registered",
+      "registrationKey": "airbnb"
+    },
+    {
+      "id": "tripit",
+      "title": "TripIt",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/tripit.webp",
+      "background": "assets/applet-scenes/tripit/background.webp",
+      "status": "registered",
+      "registrationKey": "tripit"
+    },
+    {
+      "id": "x",
+      "title": "X",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/x.webp",
+      "background": "assets/applet-scenes/x/background.webp",
+      "status": "registered",
+      "registrationKey": "x"
+    },
+    {
+      "id": "youtube",
+      "title": "YouTube",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/youtube.webp",
+      "background": "assets/applet-scenes/youtube/background.webp",
+      "status": "registered",
+      "registrationKey": "youtube"
+    },
+    {
+      "id": "tiktok",
+      "title": "TikTok",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/tiktok.webp",
+      "background": "assets/applet-scenes/tiktok/background.webp",
+      "status": "registered",
+      "registrationKey": "tiktok"
+    },
+    {
+      "id": "discord",
+      "title": "Discord",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/discord.webp",
+      "background": "assets/applet-scenes/discord/background.webp",
+      "status": "registered",
+      "registrationKey": "discord"
+    },
+    {
+      "id": "doordash",
+      "title": "DoorDash",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/doordash.webp",
+      "background": "assets/applet-scenes/doordash/background.webp",
+      "status": "registered",
+      "registrationKey": "doordash"
+    },
+    {
+      "id": "wordle",
+      "title": "Wordle",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/wordle.webp",
+      "background": "assets/applet-scenes/wordle/background.webp",
+      "status": "registered",
+      "registrationKey": "wordle"
+    },
+    {
+      "id": "nyt-connections",
+      "title": "Connections",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/nyt-connections.webp",
+      "background": "assets/applet-scenes/nyt-connections/background.webp",
+      "status": "registered",
+      "registrationKey": "nyt-connections"
+    },
+    {
+      "id": "slither-io",
+      "title": "Slither.io",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/slither-io.webp",
+      "background": "assets/applet-scenes/slither-io/background.webp",
+      "status": "registered",
+      "registrationKey": "slither-io"
+    },
+    {
+      "id": "agar-io",
+      "title": "Agar.io",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/agar-io.webp",
+      "background": "assets/applet-scenes/agar-io/background.webp",
+      "status": "registered",
+      "registrationKey": "agar-io"
+    },
+    {
+      "id": "krunker-io",
+      "title": "Krunker",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/krunker-io.webp",
+      "background": "assets/applet-scenes/krunker-io/background.webp",
+      "status": "registered",
+      "registrationKey": "krunker-io"
+    },
+    {
+      "id": "skribbl-io",
+      "title": "skribbl.io",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/skribbl-io.webp",
+      "background": "assets/applet-scenes/skribbl-io/background.webp",
+      "status": "registered",
+      "registrationKey": "skribbl-io"
+    },
+    {
+      "id": "infinite-craft",
+      "title": "Infinite Craft",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/infinite-craft.webp",
+      "background": "assets/applet-scenes/infinite-craft/background.webp",
+      "status": "registered",
+      "registrationKey": "infinite-craft"
+    },
+    {
+      "id": "little-alchemy-2",
+      "title": "Little Alchemy 2",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/little-alchemy-2.webp",
+      "background": "assets/applet-scenes/little-alchemy-2/background.webp",
+      "status": "registered",
+      "registrationKey": "little-alchemy-2"
+    },
+    {
+      "id": "cookie-clicker",
+      "title": "Cookie Clicker",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/cookie-clicker.webp",
+      "background": "assets/applet-scenes/cookie-clicker/background.webp",
+      "status": "registered",
+      "registrationKey": "cookie-clicker"
+    },
+    {
+      "id": "lichess",
+      "title": "Lichess",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/lichess.webp",
+      "background": "assets/applet-scenes/lichess/background.webp",
+      "status": "registered",
+      "registrationKey": "lichess"
+    },
+    {
+      "id": "drive-mad",
+      "title": "Drive Mad",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/drive-mad.webp",
+      "background": "assets/applet-scenes/drive-mad/background.webp",
+      "status": "registered",
+      "registrationKey": "drive-mad"
+    },
+    {
+      "id": "subway-surfers",
+      "title": "Subway Surfers",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/subway-surfers.webp",
+      "background": "assets/applet-scenes/subway-surfers/background.webp",
+      "status": "registered",
+      "registrationKey": "subway-surfers"
+    },
+    {
+      "id": "sekai",
+      "title": "Sekai",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/sekai.webp",
+      "background": "assets/applet-scenes/sekai/background.webp",
+      "status": "registered",
+      "registrationKey": "sekai"
+    },
+    {
+      "id": "sekai-sketch-racer",
+      "title": "Sketch Racer",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/sekai-sketch-racer.webp",
+      "background": "assets/applet-scenes/sekai-sketch-racer/background.webp",
+      "status": "registered",
+      "registrationKey": "sekai-sketch-racer"
+    },
+    {
+      "id": "sekai-3d-uno",
+      "title": "3D UNO!",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/sekai-3d-uno.webp",
+      "background": "assets/applet-scenes/sekai-3d-uno/background.webp",
+      "status": "registered",
+      "registrationKey": "sekai-3d-uno"
+    },
+    {
+      "id": "sekai-devil-level",
+      "title": "Devil Level: 50 Trolls",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/sekai-devil-level.webp",
+      "background": "assets/applet-scenes/sekai-devil-level/background.webp",
+      "status": "registered",
+      "registrationKey": "sekai-devil-level"
+    },
+    {
+      "id": "pokemon-showdown",
+      "title": "Pokémon Showdown",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/pokemon-showdown.webp",
+      "background": "assets/applet-scenes/pokemon-showdown/background.webp",
+      "status": "registered",
+      "registrationKey": "pokemon-showdown"
+    },
+    {
+      "id": "chatgpt",
+      "title": "ChatGPT",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/chatgpt.webp",
+      "background": "assets/applet-scenes/chatgpt/background.webp",
+      "status": "registered",
+      "registrationKey": "chatgpt"
+    },
+    {
+      "id": "claude",
+      "title": "Claude",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/claude.webp",
+      "background": "assets/applet-scenes/claude/background.webp",
+      "status": "registered",
+      "registrationKey": "claude"
+    },
+    {
+      "id": "gemini",
+      "title": "Gemini",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/gemini.webp",
+      "background": "assets/applet-scenes/gemini/background.webp",
+      "status": "registered",
+      "registrationKey": "gemini"
+    },
+    {
+      "id": "perplexity",
+      "title": "Perplexity",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/perplexity.webp",
+      "background": "assets/applet-scenes/perplexity/background.webp",
+      "status": "registered",
+      "registrationKey": "perplexity"
+    },
+    {
+      "id": "deepseek",
+      "title": "DeepSeek",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/deepseek.webp",
+      "background": "assets/applet-scenes/deepseek/background.webp",
+      "status": "registered",
+      "registrationKey": "deepseek"
+    },
+    {
+      "id": "whatsapp",
+      "title": "WhatsApp",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/whatsapp.webp",
+      "background": "assets/applet-scenes/whatsapp/background.webp",
+      "status": "registered",
+      "registrationKey": "whatsapp"
+    },
+    {
+      "id": "telegram",
+      "title": "Telegram",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/telegram.webp",
+      "background": "assets/applet-scenes/telegram/background.webp",
+      "status": "registered",
+      "registrationKey": "telegram"
+    },
+    {
+      "id": "slack",
+      "title": "Slack",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/slack.webp",
+      "background": "assets/applet-scenes/slack/background.webp",
+      "status": "registered",
+      "registrationKey": "slack"
+    },
+    {
+      "id": "teams",
+      "title": "Microsoft Teams",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/teams.webp",
+      "background": "assets/applet-scenes/teams/background.webp",
+      "status": "registered",
+      "registrationKey": "teams"
+    },
+    {
+      "id": "zoom",
+      "title": "Zoom",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/zoom.webp",
+      "background": "assets/applet-scenes/zoom/background.webp",
+      "status": "registered",
+      "registrationKey": "zoom"
+    },
+    {
+      "id": "dropbox",
+      "title": "Dropbox",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/dropbox.webp",
+      "background": "assets/applet-scenes/dropbox/background.webp",
+      "status": "registered",
+      "registrationKey": "dropbox"
+    },
+    {
+      "id": "onedrive",
+      "title": "OneDrive",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/onedrive.webp",
+      "background": "assets/applet-scenes/onedrive/background.webp",
+      "status": "registered",
+      "registrationKey": "onedrive"
+    },
+    {
+      "id": "microsoft-word",
+      "title": "Word",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/microsoft-word.webp",
+      "background": "assets/applet-scenes/microsoft-word/background.webp",
+      "status": "registered",
+      "registrationKey": "microsoft-word"
+    },
+    {
+      "id": "microsoft-excel",
+      "title": "Excel",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/microsoft-excel.webp",
+      "background": "assets/applet-scenes/microsoft-excel/background.webp",
+      "status": "registered",
+      "registrationKey": "microsoft-excel"
+    },
+    {
+      "id": "microsoft-powerpoint",
+      "title": "PowerPoint",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/microsoft-powerpoint.webp",
+      "background": "assets/applet-scenes/microsoft-powerpoint/background.webp",
+      "status": "registered",
+      "registrationKey": "microsoft-powerpoint"
+    },
+    {
+      "id": "figma",
+      "title": "Figma",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/figma.webp",
+      "background": "assets/applet-scenes/figma/background.webp",
+      "status": "registered",
+      "registrationKey": "figma"
+    },
+    {
+      "id": "canva",
+      "title": "Canva",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/canva.webp",
+      "background": "assets/applet-scenes/canva/background.webp",
+      "status": "registered",
+      "registrationKey": "canva"
+    },
+    {
+      "id": "spotify",
+      "title": "Spotify",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/spotify.webp",
+      "background": "assets/applet-scenes/spotify/background.webp",
+      "status": "registered",
+      "registrationKey": "spotify"
+    },
+    {
+      "id": "apple-music",
+      "title": "Apple Music",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/apple-music.webp",
+      "background": "assets/applet-scenes/apple-music/background.webp",
+      "status": "registered",
+      "registrationKey": "apple-music"
+    },
+    {
+      "id": "reddit",
+      "title": "Reddit",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/reddit.webp",
+      "background": "assets/applet-scenes/reddit/background.webp",
+      "status": "registered",
+      "registrationKey": "reddit"
+    },
+    {
+      "id": "instagram",
+      "title": "Instagram",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/instagram.webp",
+      "background": "assets/applet-scenes/instagram/background.webp",
+      "status": "registered",
+      "registrationKey": "instagram"
+    },
+    {
+      "id": "linkedin",
+      "title": "LinkedIn",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/linkedin.webp",
+      "background": "assets/applet-scenes/linkedin/background.webp",
+      "status": "registered",
+      "registrationKey": "linkedin"
+    },
+    {
+      "id": "amazon",
+      "title": "Amazon",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/amazon.webp",
+      "background": "assets/applet-scenes/amazon/background.webp",
+      "status": "registered",
+      "registrationKey": "amazon"
+    },
+    {
+      "id": "netflix",
+      "title": "Netflix",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/netflix.webp",
+      "background": "assets/applet-scenes/netflix/background.webp",
+      "status": "registered",
+      "registrationKey": "netflix"
+    },
+    {
+      "id": "outlook",
+      "title": "Outlook",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/outlook.webp",
+      "background": "assets/applet-scenes/outlook/background.webp",
+      "status": "registered",
+      "registrationKey": "outlook"
+    },
+    {
+      "id": "apple-podcasts",
+      "title": "Apple Podcasts",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/apple-podcasts.webp",
+      "background": "assets/applet-scenes/apple-podcasts/background.webp",
+      "status": "registered",
+      "registrationKey": "apple-podcasts"
+    },
+    {
+      "id": "google-photos",
+      "title": "Google Photos",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/google-photos.webp",
+      "background": "assets/applet-scenes/google-photos/background.webp",
+      "status": "registered",
+      "registrationKey": "google-photos"
+    },
+    {
+      "id": "pinterest",
+      "title": "Pinterest",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/pinterest.webp",
+      "background": "assets/applet-scenes/pinterest/background.webp",
+      "status": "registered",
+      "registrationKey": "pinterest"
+    },
+    {
+      "id": "facebook",
+      "title": "Facebook",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/facebook.webp",
+      "background": "assets/applet-scenes/facebook/background.webp",
+      "status": "registered",
+      "registrationKey": "facebook"
+    },
+    {
+      "id": "threads",
+      "title": "Threads",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/threads.webp",
+      "background": "assets/applet-scenes/threads/background.webp",
+      "status": "registered",
+      "registrationKey": "threads"
+    },
+    {
+      "id": "capcut",
+      "title": "CapCut",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/capcut.webp",
+      "background": "assets/applet-scenes/capcut/background.webp",
+      "status": "registered",
+      "registrationKey": "capcut"
+    },
+    {
+      "id": "uber",
+      "title": "Uber",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/uber.webp",
+      "background": "assets/applet-scenes/uber/background.webp",
+      "status": "registered",
+      "registrationKey": "uber"
+    },
+    {
+      "id": "uber-eats",
+      "title": "Uber Eats",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/uber-eats.webp",
+      "background": "assets/applet-scenes/uber-eats/background.webp",
+      "status": "registered",
+      "registrationKey": "uber-eats"
+    },
+    {
+      "id": "booking",
+      "title": "Booking.com",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/booking.webp",
+      "background": "assets/applet-scenes/booking/background.webp",
+      "status": "registered",
+      "registrationKey": "booking"
+    },
+    {
+      "id": "feishu",
+      "title": "飞书",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/feishu.webp",
+      "background": "assets/applet-scenes/feishu/background.webp",
+      "status": "registered",
+      "registrationKey": "feishu"
+    },
+    {
+      "id": "bilibili",
+      "title": "哔哩哔哩",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/bilibili.webp",
+      "background": "assets/applet-scenes/bilibili/background.webp",
+      "status": "registered",
+      "registrationKey": "bilibili"
+    },
+    {
+      "id": "xiaohongshu",
+      "title": "小红书",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/xiaohongshu.webp",
+      "background": "assets/applet-scenes/xiaohongshu/background.webp",
+      "status": "registered",
+      "registrationKey": "xiaohongshu"
+    },
+    {
+      "id": "baidu-netdisk",
+      "title": "百度网盘",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/baidu-netdisk.webp",
+      "background": "assets/applet-scenes/baidu-netdisk/background.webp",
+      "status": "registered",
+      "registrationKey": "baidu-netdisk"
+    },
+    {
+      "id": "twitch",
+      "title": "Twitch",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/twitch.webp",
+      "background": "assets/applet-scenes/twitch/background.webp",
+      "status": "registered",
+      "registrationKey": "twitch"
+    },
+    {
+      "id": "copilot",
+      "title": "Microsoft Copilot",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/copilot.webp",
+      "background": "assets/applet-scenes/copilot/background.webp",
+      "status": "registered",
+      "registrationKey": "copilot"
+    },
+    {
+      "id": "acrobat",
+      "title": "Adobe Acrobat",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/acrobat.webp",
+      "background": "assets/applet-scenes/acrobat/background.webp",
+      "status": "registered",
+      "registrationKey": "acrobat"
+    },
+    {
+      "id": "wikipedia",
+      "title": "Wikipedia",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/wikipedia.webp",
+      "background": "assets/applet-scenes/wikipedia/background.webp",
+      "status": "registered",
+      "registrationKey": "wikipedia"
+    },
+    {
+      "id": "doubao",
+      "title": "豆包",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/doubao.webp",
+      "background": "assets/applet-scenes/doubao/background.webp",
+      "status": "registered",
+      "registrationKey": "doubao"
+    },
+    {
+      "id": "taobao",
+      "title": "淘宝",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/taobao.webp",
+      "background": "assets/applet-scenes/taobao/background.webp",
+      "status": "registered",
+      "registrationKey": "taobao"
+    },
+    {
+      "id": "alipay",
+      "title": "支付宝",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/alipay.webp",
+      "background": "assets/applet-scenes/alipay/background.webp",
+      "status": "registered",
+      "registrationKey": "alipay"
+    },
+    {
+      "id": "douyin",
+      "title": "抖音",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/douyin.webp",
+      "background": "assets/applet-scenes/douyin/background.webp",
+      "status": "registered",
+      "registrationKey": "douyin"
+    },
+    {
+      "id": "posthog",
+      "title": "PostHog",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/posthog.webp",
+      "background": "assets/applet-scenes/posthog/background.webp",
+      "status": "registered",
+      "registrationKey": "posthog"
+    },
+    {
+      "id": "cloudflare",
+      "title": "Cloudflare",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/cloudflare.webp",
+      "background": "assets/applet-scenes/cloudflare/background.webp",
+      "status": "registered",
+      "registrationKey": "cloudflare"
+    },
+    {
+      "id": "vercel",
+      "title": "Vercel",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/vercel.webp",
+      "background": "assets/applet-scenes/vercel/background.webp",
+      "status": "registered",
+      "registrationKey": "vercel"
+    },
+    {
+      "id": "netlify",
+      "title": "Netlify",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/netlify.webp",
+      "background": "assets/applet-scenes/netlify/background.webp",
+      "status": "registered",
+      "registrationKey": "netlify"
+    },
+    {
+      "id": "firebase",
+      "title": "Firebase",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/firebase.webp",
+      "background": "assets/applet-scenes/firebase/background.webp",
+      "status": "registered",
+      "registrationKey": "firebase"
+    },
+    {
+      "id": "sentry",
+      "title": "Sentry",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/sentry.webp",
+      "background": "assets/applet-scenes/sentry/background.webp",
+      "status": "registered",
+      "registrationKey": "sentry"
+    },
+    {
+      "id": "railway",
+      "title": "Railway",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/railway.webp",
+      "background": "assets/applet-scenes/railway/background.webp",
+      "status": "registered",
+      "registrationKey": "railway"
+    },
+    {
+      "id": "render",
+      "title": "Render",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/render.webp",
+      "background": "assets/applet-scenes/render/background.webp",
+      "status": "registered",
+      "registrationKey": "render"
+    },
+    {
+      "id": "gitlab",
+      "title": "GitLab",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/gitlab.webp",
+      "background": "assets/applet-scenes/gitlab/background.webp",
+      "status": "registered",
+      "registrationKey": "gitlab"
+    },
+    {
+      "id": "jira",
+      "title": "Jira",
+      "collection": "branded",
+      "group": "products-and-external-games",
+      "icon": "assets/devices/jira.webp",
+      "background": "assets/applet-scenes/jira/background.webp",
+      "status": "registered",
+      "registrationKey": "jira"
+    }
+  ],
+  "excluded": [
+    {
+      "id": "ongoing",
+      "title": "Ongoing",
+      "reason": "Uses a generic scene for its actual subject"
+    },
+    {
+      "id": "board",
+      "title": "Board",
+      "reason": "A built-in board with drawn interim art; no curated scene yet"
+    },
+    {
+      "id": "sekai-rogue-ai-tic-tac-toe",
+      "title": "Rogue AI Tic-Tac-Toe",
+      "reason": "Overlapping external mini-game; main Sekai entry retained"
+    },
+    {
+      "id": "sekai-mixing-colors",
+      "title": "Mixing Colors",
+      "reason": "Overlapping external mini-game; main Sekai entry retained"
+    },
+    {
+      "id": "sekai-roller-coaster",
+      "title": "Roller Coaster Builder",
+      "reason": "Overlapping external mini-game; main Sekai entry retained"
+    }
+  ]
+}

@@ -14,7 +14,7 @@ assert.equal(guidedVisibleText('Internal planning <worldlet-answer>I opened the 
 assert.equal(guidedVisibleText('<worldlet-answer>Incomplete'), '');
 console.log('PASS guided answers expose only the completed public answer, never surrounding planning');
 
-import {firstWinCandidate} from '../ui/onboarding/first-win.ts';
+import {firstWinCandidate} from '../ui/frame/first-win.ts';
 const result='<worldlet-answer>A renewal needs your decision.</worldlet-answer><worldlet-candidate>saved-123</worldlet-candidate>';
 assert.equal(firstWinCandidate(result),'saved-123');
 assert.equal(guidedVisibleText(result),'A renewal needs your decision.');

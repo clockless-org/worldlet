@@ -1,6 +1,6 @@
 /** The pinned, signed and notarized imsg release (github.com/openclaw/imsg, MIT) that the Mac host's Messages
  * Applet reads and sends iMessages through. Only the archive whose SHA-256 matches
- * platform/electron/distribution/imsg.json is ever unpacked; the IMCore bridge helper it also ships is left out
+ * platform/desktop/distribution/imsg.json is ever unpacked; the IMCore bridge helper it also ships is left out
  * (it needs System Integrity Protection off), so sends go through the Messages app's own AppleScript. */
 import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
@@ -8,10 +8,10 @@ import {cpSync,existsSync,mkdirSync,readFileSync,renameSync,rmSync,writeFileSync
 import path from 'node:path';
 import {workspace} from './dev-workspace.ts';
 type Pin={version:string;source:string;sha256:string;files:string[]};
-export const imsgPin=(root:string):Pin=>JSON.parse(readFileSync(path.join(root,'platform/electron/distribution/imsg.json'),'utf8'));
+export const imsgPin=(root:string):Pin=>JSON.parse(readFileSync(path.join(root,'platform/desktop/distribution/imsg.json'),'utf8'));
 const digest=(data:Buffer)=>createHash('sha256').update(data).digest('hex');
 /** Verified, unpacked imsg in `.local/imsg/<version>` (the development host's lookup path,
- * platform/electron/src/resources.ts). Reuses the primary checkout's archive before downloading. */
+ * platform/host/resources.ts). Reuses the primary checkout's archive before downloading. */
 export async function cachedImsg(root:string):Promise<string>{
  const pin=imsgPin(root);
  const cache=path.join(root,'.local','imsg'),folder=path.join(cache,pin.version),archive=path.join(cache,pin.version+'-imsg-macos.zip');
@@ -47,5 +47,5 @@ export async function packageImsg(root:string,output:string){
  mkdirSync(target,{recursive:true});
  for(const file of imsgPin(root).files)cpSync(path.join(folder,file),path.join(target,file),{recursive:true});
  chmodSync(path.join(target,'imsg'),0o755);
- copyFileSync(path.join(root,'platform/electron/distribution/imsg-LICENSE.txt'),path.join(target,'LICENSE.txt'));
+ copyFileSync(path.join(root,'platform/desktop/distribution/imsg-LICENSE.txt'),path.join(target,'LICENSE.txt'));
 }

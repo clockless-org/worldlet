@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {groupAttentionEvents as group,attentionEventRecord as record} from '../core/attention/index.ts';
+import {groupAttentionEvents as group,attentionEventRecord as record} from '../agent/attention/index.ts';
 // Synthetic accounts, merchants and messages only. `thread` adds a shared source record,
 // the only evidence that separate messages belong to one incident.
 const now=Date.parse('2026-01-10T12:00:00Z'),later='2026-01-11T12:00:00.000Z';
@@ -89,7 +89,7 @@ out=group([pay('c','Synthetic Cafe',{status:'dismissed'}),pay('e','Synthetic Caf
 assert.deepEqual(out.map(e=>e.status),['dismissed','open']);
 console.log('PASS without a saved record, member state stands in for it with the same inheritance rules');
 
-const {collectMatters}=await import('../core/attention/index.ts');
+const {collectMatters}=await import('../agent/attention/index.ts');
 const thread={provider:'gmail',id:'thread-1',quote:'Synthetic thread'};
 const page=(id:string,sources:any[],extra={})=>[id,{id,worldItemId:'item-'+id,sourceProvider:'gmail',worldItemKind:'update',worldItemStatus:'open',worldItemSources:sources,worldItemSignal:{},...extra}];
 const pages=new Map<string,any>([page('p1',[thread]),page('p2',[thread,{provider:'gmail',id:'thread-2',quote:'Follow-up'}]),page('p3',[{provider:'gmail',id:'thread-3',quote:'Other'}])] as any);
@@ -125,11 +125,11 @@ for(const status of ['done','dismissed']){
 console.log('PASS active UI projection retains historical settlement while admitting new evidence');
 
 // #687: the explicit event identity travels extraction → validation → storage → projection → cards.
-const {processedAttentionContent}=await import('../core/attention/attention-content.ts');
-const {validateWorldItem}=await import('../core/items/world-item-validation.ts');
-const {prepareWorldItem}=await import('../core/items/world-item-state.ts');
-const {queryWorldItems}=await import('../core/items/world-item-projection.ts');
-const {projectWorldItems,refreshItemPage}=await import('../core/items/world-items.ts');
+const {processedAttentionContent}=await import('../agent/attention/attention-content.ts');
+const {validateWorldItem}=await import('../context/store/world-item-validation.ts');
+const {prepareWorldItem}=await import('../context/store/world-item-state.ts');
+const {queryWorldItems}=await import('../context/store/world-item-projection.ts');
+const {projectWorldItems,refreshItemPage}=await import('../context/store/world-items.ts');
 const alert=(id:string,quote:string,event?:any,extra={})=>({id,provider:'gmail',kind:'update',title:'Card payment declined',reason:'Your card may need attention',summary:'A synthetic payment was declined.',
  occurredAt:'2026-01-09T08:00:00Z',sources:[{provider:'gmail',id:'msg-'+id,quote}],...(event?{event}:{}),...extra});
 const bank={topic:'Payment declined',subject:'Example Bank card ending 1234'};

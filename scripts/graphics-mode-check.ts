@@ -1,6 +1,6 @@
-// Software graphics after a crashing GPU process, and exit codes as fixed names (core/diagnostics/graphics-mode.ts).
+// Software graphics after a crashing GPU process, and exit codes as fixed names (agent/app/graphics-mode.ts).
 import assert from 'node:assert/strict';
-import {afterGpuCrash,exitCodeName,graphicsMode,EXIT_CODE_NAMES,GPU_CRASH_WINDOW_MS,SOFTWARE_GRAPHICS_MS} from '../core/diagnostics/index.ts';
+import {afterGpuCrash,exitCodeName,graphicsMode,EXIT_CODE_NAMES,GPU_CRASH_WINDOW_MS,SOFTWARE_GRAPHICS_MS} from '../agent/app/index.ts';
 
 const now=Date.parse('2026-10-14T17:00:00Z');
 assert.equal(graphicsMode(null,now),'hardware','no state: hardware');

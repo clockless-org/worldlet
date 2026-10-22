@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,pageErrors,worldUrl} from './browser-test.ts';
-// Artifacts on the World page (core/artifacts/README.md): what Fox shows is kept, the Journal page of Fox's panel
+// Artifacts on the World page (context/store/ARTIFACTS.md): what Fox shows is kept, the Journal page of Fox's panel
 // lays it out as a timeline of days, opening it shows it again, × forgets it, and Fox finds and opens earlier ones. An Attention card
 // whose item has left the World opens as it was. Bundled UI with a faked native bridge that keeps artifacts in
 // memory; fictional turns, no model or account.
@@ -147,7 +147,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await book.evaluate(e=>(e as HTMLDialogElement).open),false,'The Journal steps aside');
  assert.equal(await card.locator('h2').textContent(),'Dinner at Nopa');
  assert.equal(await card.locator('.fox-artifact-origin').textContent(),'Coming Up · earlier');
- // Still over the moment's Applet: a card opens small in its corner there (ui/artifacts/fox-artifact.ts, #108).
+ // Still over the moment's Applet: a card opens small in its corner there (ui/attention/fox-artifact.ts, #108).
  assert.equal(await card.getAttribute('data-size'),'small');
  await card.getByRole('button',{name:'Close artifact'}).click();
 
@@ -167,7 +167,7 @@ await withBrowser(fileAccess,async browser=>{
  assert.equal(await page.evaluate(()=>(window as any).kept.has('attention-cal:gone')),false);
  await page.keyboard.press('Escape');
 
- // The card system (ui/artifacts/CARD-SYSTEM.md): a tone, a painted picture and showing blocks, all in the Attention
+ // The card system (ui/attention/CARD-SYSTEM.md): a tone, a painted picture and showing blocks, all in the Attention
  // card's design.
  if(await book.evaluate(e=>(e as HTMLDialogElement).open))await book.getByRole('button',{name:'Close journal'}).click();
  await ask('labs','Here are the labs.');

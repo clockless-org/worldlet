@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {chipFamily,deviceClass,localDataDimensions,memoryBucket,rowBucket,sizeBucket,stallTask} from '../core/diagnostics/index.ts';
-import {busyWith,onStall,watchMainStalls,type Stall} from '../platform/electron/src/host/busy.ts';
+import {chipFamily,deviceClass,localDataDimensions,memoryBucket,rowBucket,sizeBucket,stallTask} from '../agent/app/index.ts';
+import {busyWith,onStall,watchMainStalls,type Stall} from '../platform/host/busy.ts';
 
 // Device class: the chip family and a memory band, never the model string or the exact size.
 assert.equal(chipFamily('Apple M1'),'apple_m1');

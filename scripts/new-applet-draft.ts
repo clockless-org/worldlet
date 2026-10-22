@@ -1,7 +1,7 @@
 import {mkdir,writeFile,access} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {APP_DEFINITIONS,getApp} from '../core/applets/catalog.ts';
+import {APP_DEFINITIONS,getApp} from '../context/applets/catalog.ts';
 import {WORLD_PRESETS} from '../ui/world/world-presets.ts';
 const root=fileURLToPath(new URL('../',import.meta.url));
 export async function createAppletDraft({key,title,reference,region,website=null,outputRoot=path.join(root,'.local/applet-drafts')}){

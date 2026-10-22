@@ -2,12 +2,12 @@ import {renderNotesOpen,selectNotebookItem} from '../../../ui/applets/apple-note
 import {mountAppletScene,type AppletSceneSource} from '../../../ui/applets/scene/applet-scene.ts';
 import {marked} from 'marked';
 import DOMPurify from 'dompurify';
-import presentation from '../../../ui/theme-packages/village/presentation.json';
+import presentation from '../../../ui/style/theme-packages/village/presentation.json';
 const garden='> A brighter, kinder garden\n\nIdeas for a colorful, cozy garden space this spring. A place to slow down, notice the little things, and enjoy the beauty right outside our door.\n\n---\n\n- [x] Plant lavender by the stone wall\n- [x] Add more daisies near the path\n- [ ] Find a rustic lantern\n- [ ] Set up a small herb corner\n- [ ] Add a bird-friendly plant\n- [ ] Take photos in bloom!';
 const rows=[['Garden Ideas','Plan for a blooming spring…','Garden',garden],['Herb Care','Watering schedule & tips','Garden','Water the basil in the morning.\n\nKeep rosemary in a sunny spot.'],['Patio Corner','A cozy reading spot','Ideas','A chair, a small table, and a good book.'],['Plant Wishlist','Lavender, hydrangea, more!','Garden','- Lavender\n- Hydrangea\n- Daisies'],['Sunny Day Notes','Little things that make…','Ideas','Leave time for a walk.'],['Compost Guide','What goes in and why','Archive','Keep the compost balanced.']];
 const items=rows.map(([title,summary,folder,text],i)=>({id:'note-'+i,title,summary,record:{id:'note-'+i,title,folder,modifiedAt:'2024-04-'+(24-i*3),text}}));
-const source=structuredClone(presentation.appletScenes['apple-notes']) as unknown as AppletSceneSource;source.background='/ui/theme-packages/village/'+source.background+'?v='+source.registration.sha256;
-if(source.registration.webFrame)source.registration.webFrame.mask='/ui/theme-packages/village/'+source.registration.webFrame.mask;
+const source=structuredClone(presentation.appletScenes['apple-notes']) as unknown as AppletSceneSource;source.background='/ui/style/theme-packages/village/'+source.background+'?v='+source.registration.sha256;
+if(source.registration.webFrame)source.registration.webFrame.mask='/ui/style/theme-packages/village/'+source.registration.webFrame.mask;
 if((window as any).__NOTES_REGIONS__){source.registration.regions=[{id:'main',role:'primary',rect:[.5,.24,.25,.36],quad:[[0,.04],[.92,0],[1,.94],[.04,1]],material:'paper'},{id:'heading',role:'secondary',rect:[.22,.23,.2,.1],material:'paper'},{id:'index',role:'secondary',rect:[.22,.36,.2,.34],material:'paper'},{id:'status',role:'secondary',rect:[.5,.63,.25,.16],material:'paper'}];}
 const scene=mountAppletScene(document.querySelector('#viewport')!, 'apple-notes',{source});
 const owner={},fixture={items,opened:[],created:0,selected:[],acknowledged:[],pending:{},fail:false,mode:'inline',mount,selectOriginal:(id:string)=>selectNotebookItem(owner,id)};

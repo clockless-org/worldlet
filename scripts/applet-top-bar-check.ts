@@ -48,7 +48,7 @@ async function playing(page:Page){
  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='browserShow'));
  await page.evaluate(()=>(window as any).worldletBrowser({phase:'video',platform:'youtube',playing:true}));
  await page.locator('.browser-pip-offer').waitFor();
- // The host says Focus applies on the page (core/browser/page-focus.ts): its switch follows Back.
+ // The host says Focus applies on the page (agent/applets/page-focus.ts): its switch follows Back.
  await page.evaluate(()=>(window as any).worldletBrowser({phase:'focus',platform:'youtube',available:true,on:true,reader:false}));
  await page.locator('.browser-focus').waitFor();
  // The page has one before and one after it, so its Back and Forward show.

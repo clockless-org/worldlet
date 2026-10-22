@@ -6,7 +6,7 @@ Default controls and materials follow the [built-in UI standard](../../resources
 
 This is the design handbook for making Worldlet Applets. It records the product decisions, not a claim that every animation or integration already exists. Start here before designing a device or implementing its interaction. This ordinary repository document is the authoring entry point; no Create Applet skill is used. Implementation steps live in [Implementation guide](IMPLEMENTATION-GUIDE.md). The Factory workflow remains future work.
 
-Implementation fields, compatibility and route details live in [Applet presentation](../components/INTERACTION.md#applet-presentation). Current acceptance lives in [Applet review](../components/INTERACTION.md#applet-presentation-acceptance-contract). If older studies disagree with this handbook, follow this handbook for Applet design; keep serialized IDs compatible.
+Implementation fields, compatibility and route details live in [Applet presentation](../style/INTERACTION.md#applet-presentation). Current acceptance lives in [Applet review](../style/INTERACTION.md#applet-presentation-acceptance-contract). If older studies disagree with this handbook, follow this handbook for Applet design; keep serialized IDs compatible.
 
 ## 1. What an Applet is
 
@@ -47,7 +47,7 @@ runtime colors can align to the actual socket at every zoom level.
 
 The approved states are off (signed out and unusable), white (signed in or usable without login),
 deeply breathing white with a Running label (processing; every 2.4 seconds, so running reads from the overview) and red (error); unread saved findings have no
-lamp state. See [Attention Center](../../core/attention/README.md#deferred-device-lamps)
+lamp state. See [Attention Center](../../agent/attention/README.md#deferred-device-lamps)
 for priority. The current generic dot overlay is hidden.
 All 112 built-in Applet sprites, including Mac application launchers, author
 this socket directly into the sprite: a small brass rim around a charcoal-black, unlit lens. Keep the existing device,
@@ -157,7 +157,7 @@ Generate art without baked-in readable records, dates or UI buttons. Those belon
 
 ## 6. Content is useful, source-backed and honest
 
-Fox may organize the content displayed in Open instead of copying noisy original titles. Use a short action/fact title, brief context (at most two visible lines), and the real date/status when relevant. Follow the precise field budgets in [Core Applet content](../../core/applets/INTEGRATIONS.md#core-applet-content).
+Fox may organize the content displayed in Open instead of copying noisy original titles. Use a short action/fact title, brief context (at most two visible lines), and the real date/status when relevant. Follow the precise field budgets in [Core Applet content](../../context/applets/INTEGRATIONS.md#core-applet-content).
 
 Keep provider IDs, source IDs, timestamps, evidence and original links separate from rewritten text. Focus distinguishes a Fox summary from the original. If there is no summary, show the original honestly. Never merge records solely because their titles match.
 
@@ -180,7 +180,7 @@ Sample replaces data only. It uses the same navigation, renderer and interaction
 | Obsidian | Purple crystal linking notebook leaves | Notes from the selected local vault | Original Markdown at left; selected leaf and device at right |
 | YouTube | Recognizable cinema screen | Skipped until a useful native Open exists | Real website at left; related cinema scenery at right |
 
-These are design intentions. [Core content](../../core/applets/INTEGRATIONS.md#core-applet-content) and [Work Applets](../../core/applets/INTEGRATIONS.md#work-applets) record actual capabilities and gaps, including incomplete physical Peek animation and provider-specific session execution limits.
+These are design intentions. [Core content](../../context/applets/INTEGRATIONS.md#core-applet-content) and [Work Applets](../../context/applets/INTEGRATIONS.md#work-applets) record actual capabilities and gaps, including incomplete physical Peek animation and provider-specific session execution limits.
 
 ## 8. Authoring and acceptance checklist
 
@@ -212,11 +212,11 @@ The coding battery is part of the Peek device assembly, sharing its position, sc
 
 ## Native / Web presentation switch
 
-Hybrid Applets expose a Native / Web switch in the Applet's [top bar](../components/INTERACTION.md#top-bar), right of the title, in Open and Focus: a capsule of two icon buttons, the chosen view lit. Native is the simplified reader; Web replaces the left content with the original website inside the same Applet. Preserve the selected native item on return. Never navigate to Browser merely to open the original, and do not duplicate the toggle with a globe or “View original” action. Switching away unloads the browser content and media but retains sign-in. Local-only Applets such as Obsidian do not offer their marketing website as an equivalent Web mode. Keep editing actions with Fox.
+Hybrid Applets expose a Native / Web switch in the Applet's [top bar](../style/INTERACTION.md#top-bar), right of the title, in Open and Focus: a capsule of two icon buttons, the chosen view lit. Native is the simplified reader; Web replaces the left content with the original website inside the same Applet. Preserve the selected native item on return. Never navigate to Browser merely to open the original, and do not duplicate the toggle with a globe or “View original” action. Switching away unloads the browser content and media but retains sign-in. Local-only Applets such as Obsidian do not offer their marketing website as an equivalent Web mode. Keep editing actions with Fox.
 
 ## Health, Travel and Money
 
-Use the [route and capability matrix](../../core/applets/INTEGRATIONS.md#health-travel-money-applets). Native readers require a working, authorized data path. A published MCP is not enough if the client or account is ineligible. Stripe customer folios and PayPal merchant invoices use native Open/Focus; the remaining seven devices open websites directly. Never present decorative activity marks or coins as live health/financial measurements.
+Use the [route and capability matrix](../../context/applets/INTEGRATIONS.md#health-travel-money-applets). Native readers require a working, authorized data path. A published MCP is not enough if the client or account is ineligible. Stripe customer folios and PayPal merchant invoices use native Open/Focus; the remaining seven devices open websites directly. Never present decorative activity marks or coins as live health/financial measurements.
 
 ### Open conversation clearance
 

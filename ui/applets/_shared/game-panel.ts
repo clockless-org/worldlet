@@ -1,5 +1,5 @@
-import {node,actionButton,uiIcon} from '../../components/index.ts';
-import {bestScore,gameSymbol,type Game,type GameHost} from '../../games/index.ts';
+import {node,actionButton,uiIcon} from '../../style/index.ts';
+import {bestScore,gameSymbol,type Game,type GameHost} from '../game-boards.ts';
 import type {AppletScene} from '../scene/applet-scene.ts';
 
 /** One live game. A measured heading/control pair can surround its board without replacing its input or state. */
