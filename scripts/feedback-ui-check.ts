@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {withBrowser,fileAccess,pageErrors,worldUrl,waitForWorld,SETTINGS_BUTTON} from './browser-test.ts';
 await withBrowser(fileAccess,async browser=>{
  const page=await browser.newPage({viewport:{width:1380,height:900},reducedMotion:'reduce'}),errors=pageErrors(page);
- await page.addInitScript(()=>{window.calls=[];(window as any).failFeedback=true;window.webkit={messageHandlers:{worldlet:{async postMessage(b){calls.push(b);if(b.action==='snapshot')return {workspaceId:'feedback-fixture',revision:0,sources:[],knowledge:[],connections:[],onboarding:{completed:true,unlockedApplets:['app-gmail']},sampleEnabled:false,cloudConsent:true};if(b.action==='modelStatus')return {available:true,provider:'hermes'};if(b.action==='feedback'){if((window as any).failFeedback)throw Error('Fixture offline');return {ok:true,id:b.id};}return {ok:true};}}}};});
+ await page.addInitScript(()=>{window.calls=[];(window as any).failFeedback=true;window.webkit={messageHandlers:{worldlet:{async postMessage(b){calls.push(b);if(b.action==='snapshot')return {workspaceId:'feedback-fixture',revision:0,sources:[],knowledge:[],connections:[],onboarding:{completed:true,unlockedApplets:['app-gmail']},sampleEnabled:false,cloudConsent:true};if(b.action==='modelStatus')return {available:true,provider:'hermes'};if(b.action==='appUpdate')return {channel:(window as any).channel||'production'};if(b.action==='feedback'){if((window as any).failFeedback)throw Error('Fixture offline');return {ok:true,id:b.id};}return {ok:true};}}}};});
  await page.goto(worldUrl());await waitForWorld(page);
  await page.evaluate(()=>{const r=document.querySelector<HTMLElement>('#notionWorld')!;r.dataset.depth='object';r.dataset.page='app-gmail';});
  await page.locator('#notionInput').click();
@@ -23,6 +23,17 @@ await withBrowser(fileAccess,async browser=>{
   await panel.waitFor();
   assert.equal(await settings.evaluate(e=>(e as HTMLDialogElement).open),false,'Settings steps aside for it');
  };
+ // Production keeps Feedback in Help; the Dev, Alpha and Beta apps also show the bug in Fox's bar, which opens it.
+ const bug=page.locator('.companion-bug-button');
+ assert.equal(await bug.isVisible(),false,'no bug in Production');
+ for(const channel of ['alpha','beta']){
+  await page.evaluate(c=>{(window as any).channel=c;window.dispatchEvent(new Event('worldlet:app-update'));},channel);
+  await bug.waitFor();assert.equal(await bug.getAttribute('aria-label'),'Report a bug');
+ }
+ await bug.click();await panel.waitFor();
+ await page.keyboard.press('Escape');await panel.waitFor({state:'hidden'});
+ await page.evaluate(()=>{(window as any).channel='production';window.dispatchEvent(new Event('worldlet:app-update'));});
+ await bug.waitFor({state:'hidden'});
  await openFeedback();
  {const viewport=page.viewportSize()!,c=(await panel.boundingBox())!;assert(c.x+c.width>viewport.width-40&&c.y+c.height>viewport.height-40,'the panel stands in the bottom-right: '+JSON.stringify(c));}
  const draft=panel.getByLabel('Your feedback',{exact:true}),send=panel.getByRole('button',{name:'Send',exact:true}),mic=panel.getByRole('button',{name:'Hold to talk',exact:true});
@@ -55,5 +66,5 @@ await withBrowser(fileAccess,async browser=>{
  await page.screenshot({path:'/tmp/worldlet-feedback-desktop.png'});
  await page.setViewportSize({width:375,height:812});await openFeedback();
  const small=(await panel.boundingBox())!;assert(small.x>=0&&small.y>=0&&small.x+small.width<=375&&small.y+small.height<=812,'fits a phone: '+JSON.stringify(small));assert(await panel.evaluate(e=>e.scrollWidth<=e.clientWidth+1));await page.screenshot({path:'/tmp/worldlet-feedback-small.png'});
- assert.deepEqual(errors,[]);console.log('PASS feedback UI: opened from Settings › Help into its own panel, no button in the World, the box and microphone up front, Escape and outside click close it, retry/dedup, retained draft, receipt-only success, reviewed dictation, cancellation and small viewport.');
+ assert.deepEqual(errors,[]);console.log('PASS feedback UI: opened from Settings › Help or the bug in Fox’s bar on Alpha and Beta into its own panel, no button in the World, the box and microphone up front, Escape and outside click close it, retry/dedup, retained draft, receipt-only success, reviewed dictation, cancellation and small viewport.');
 });
