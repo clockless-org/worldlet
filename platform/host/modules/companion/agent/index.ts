@@ -634,16 +634,13 @@ export function installAgentRuntime(host:Host){
   worldLink:async()=>{const status=await phone()?.worldRoomLink?.();return typeof status?.link==='string'?status.link:null;},
   renewWorldLink:async()=>{await phone()?.worldRoomRenew?.();},
   board:async tab=>worldBoard?worldBoard.view({operation:'read',...tab?{tab}:{}}):null});
- /** Your World's address (Settings › Agents): `status`, `check` and `claim` a `name`, `release`, `share` the board
+ /** Your World's address (Settings › Agents): `status`, `share` the board
   * (`open`: anyone with the link), `unshare` and `remove` (a browser or a person) by `id`. Not in ROOM_ALLOWED: only
   * this computer's pages change who may reach the World. */
  host.register({worldAddress:async request=>{
   const address=worldAddress!;
   try{
    if(request.operation==='status')return await address.status();
-   if(request.operation==='check')return await address.check(request.name);
-   if(request.operation==='claim')return await address.claim(request.name);
-   if(request.operation==='release')return await address.release();
    if(request.operation==='share')return await address.share(request.open);
    if(request.operation==='unshare')return await address.unshare(request.id);
    if(request.operation==='remove')return await address.remove(request.id);

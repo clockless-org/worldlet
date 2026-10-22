@@ -1,17 +1,14 @@
 # Your World's address
 
-Every World has its own web address, `https://<name>.worldlet.ai`, and it is the only address you need: open it on any device to reach your World, and connect Claude, ChatGPT or another MCP client at `https://<name>.worldlet.ai/mcp` ([remote MCP](REMOTE-MCP.md)). Nobody else sees anything there unless you allow them. The World, your records and Fox stay on your computer. The address works while that computer is on and Worldlet runs there; when it is off, the page says the World is offline.
+Every World has its own web address, `https://<room>.worldlet.ai`, and it is the only address you need: open it on any device to reach your World, and connect Claude, ChatGPT or another MCP client at `https://<room>.worldlet.ai/mcp` ([remote MCP](REMOTE-MCP.md)). Nobody else sees anything there unless you allow them. The World, your records and Fox stay on your computer. The address works while that computer is on and Worldlet runs there; when it is off, the page says the World is offline.
 
-## Your default address, and a name of your own
+## One address, nothing to choose
 
-On its first run with remote access on (owner decision 2026-10-21), your World gets a default address, `https://w-<8 letters or digits>.worldlet.ai`, shown in Settings › Agents under **Your World's address**: one card with the address, **Copy for Claude or ChatGPT** (its `/mcp`) and **Choose a name** until one is chosen (owner request 2026-10-22: no Advanced). Browsers, people and shares you allowed are listed under it, each with a way to end it, only when there are some.
+The address is the room of [remote access](REMOTE-MCP.md)'s connection (owner request 2026-10-22, "再简单点"): 32 letters and digits, the same room as in `mcp.worldlet.ai/<room>`. There is nothing to choose, register or confirm, so a World can never be left without one. Settings › Agents shows it under **Your World's address**: one card with the address and **Copy for Claude or ChatGPT** (its `/mcp`). Browsers, people and shares you allowed are listed under it, each with a way to end it, only when there are some.
 
-**Choose a name** gives your World a name of your own, like `alex.worldlet.ai`. A name is 3 to 32 lowercase letters or digits, with single hyphens between them. Names starting with `w-` are default addresses, and some names are kept for Worldlet itself (`www`, `mcp`, `api`, `admin` and others). Names are first come, first served.
-
-- You choose a name once, and it stays: it is your World's handle. The page and `/mcp` move to it.
-- The default address is kept beside it, so a connector added at the default `/mcp` keeps working. Browsers and people you allowed must ask again at the new name, because their passkeys belong to the address they were made for.
-- Settings has no way to give a chosen name up. The host still can (`worldAddress` `release`): it frees the name and takes your World back to its default address, where browsers must ask again.
-- The address reaches your computer over [remote access](REMOTE-MCP.md)'s connection, so choosing a name turns remote access on. Turning remote access off (`worldlet remote off`) makes the address say your World is offline; Settings then offers **Turn on** on the card. A new remote access address keeps both names.
+- Turning remote access off (`worldlet remote off`) makes the address say your World is offline; Settings then offers **Turn on** on the card.
+- A new remote access address (`remoteMcp` `renew`) is a new World address. Browsers and people you allowed must ask again there, because their passkeys belong to the address they were made for; shares are kept.
+- Names chosen before 2026-10-22 (and `w-…` default names) are no longer used by Worldlet. The website still answers them until they lapse unconfirmed.
 
 ## Your browsers
 
@@ -34,8 +31,8 @@ Each person you allow is listed under **People**, like an Agent of their own: wh
 
 ## How it works
 
-- **The website** (the website Worker in the operations repository) serves one static page at the address. The page is the same for everyone and holds no data. The website passes each of the page's requests (`/api/address/…`) to this computer over remote access's connection, as an `address` request (`kind: 'address'` on the front's frame, [REMOTE-MCP.md](REMOTE-MCP.md#how-it-works)), and keeps nothing. Its one record is the name registry: each name and the SHA-256 of its World's room. A name is claimed, confirmed (on each start and daily), renamed and released only with the World's host token. `/mcp` at the address is the World's remote MCP address too.
-- **The computer decides everything** ([world-address.ts](world-address.ts); host: `platform/host/modules/gate/world-address.ts`, host action `worldAddress`). It answers only requests for the name it holds now.
+- **The website** (the website Worker in the operations repository) serves one static page at the address. The page is the same for everyone and holds no data. The website passes each of the page's requests (`/api/address/…`) to this computer over remote access's connection, as an `address` request (`kind: 'address'` on the front's frame, [REMOTE-MCP.md](REMOTE-MCP.md#how-it-works)), and keeps nothing. For a room address it keeps nothing at all: it finds the World from the label itself. `/mcp` at the address is the World's remote MCP address too.
+- **The computer decides everything** ([world-address.ts](world-address.ts); host: `platform/host/modules/gate/world-address.ts`, host action `worldAddress`). It answers only requests for its current room's address.
   - **Passkeys** are WebAuthn credentials whose relying party is the address itself. ES256 and RS256 are taken. Every answer is checked: the challenge is single use and two minutes long, the origin and relying party must be the address, the person must be present, the signature must verify against the kept public key, and a counter that goes back is refused.
   - **Requests to be let in** are cards like a connector's (the ledger's `remote-mcp-consents`, provider `agents`), at most five waiting at once, for ten minutes. Only this computer's pages answer them: `remoteMcp` and `worldAddress` are not in `ROOM_ALLOWED`.
   - **Sessions** last twelve hours and are kept in memory only. Removing a browser or a person ends theirs at once.
@@ -45,4 +42,4 @@ Each person you allow is listed under **People**, like an Agent of their own: wh
 
 TLS ends at the website, as for remote MCP: it sees requests in transit and keeps none of them.
 
-`node scripts/world-address-check.ts` checks the host with passkeys made the way a browser's authenticator makes them. It covers claiming and renaming, the code and card, sign-in and every refusal, sharing, Remove and Sign out, New address, and that no session reaches an item, ledger row or log line.
+`node scripts/world-address-check.ts` checks the host with passkeys made the way a browser's authenticator makes them. It covers the room address, the code and card, sign-in and every refusal, sharing, Remove and Sign out, New address, and that no session reaches an item, ledger row or log line.

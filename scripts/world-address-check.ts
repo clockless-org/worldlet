@@ -7,8 +7,8 @@ import {createAgentAccess} from '../platform/host/modules/gate/agent-access.ts';
 import {openStandingWorldTools} from '../platform/host/modules/gate/world-tool-bridge.ts';
 import {REMOTE_MCP_VAULT,createRemoteMcpHost} from '../platform/host/modules/gate/remote-mcp.ts';
 import {WORLD_ADDRESS_VAULT,createWorldAddressHost} from '../platform/host/modules/gate/world-address.ts';
-import {DEFAULT_ADDRESS_NAME,WORLD_ADDRESS_LIMITS,addressNameFrom,newDefaultAddressName,derToRaw,readWorldAddressState,validAddressName,worldAddress} from '../agent/gate/world-address.ts';
-import {readRemoteMcpRequest,remoteConsentItemId} from '../agent/gate/remote-mcp.ts';
+import {WORLD_ADDRESS_LIMITS,derToRaw,readWorldAddressState,validAddressName,worldAddress} from '../agent/gate/world-address.ts';
+import {readRemoteMcpRequest,remoteConsentItemId,remoteMcpRoom} from '../agent/gate/remote-mcp.ts';
 import {roomDenied} from '../contracts/web-world.ts';
 import {projectWorldItems} from '../context/store/world-items.ts';
 
@@ -66,38 +66,18 @@ await withTempDir('worldlet-world-address-',async dir=>{
  for(const name of ['log','error','warn'] as const)console[name]=(...args:unknown[])=>{logged.push(args.map(String).join(' '));};
  const standing=await openStandingWorldTools({access,channel:async()=>({error:'not here'})});
  const remote=createRemoteMcpHost({vault,access,tools:()=>Promise.resolve(standing),ledger:()=>ledger,changed:()=>{},WebSocket:FakeSocket as any,now});
- // The website's registry, as worker/world-address.ts answers it: a name, and the hash of its World's room.
- const names=new Map<string,string>(),calls:{method:string;url:string;auth:string}[]=[];
- const keyOf=(token:string)=>sha(sha(token).toString('hex').slice(0,32)).toString('hex');
- const site=async(input:any,init:any={})=>{
-  const url=String(input),method=init.method??'GET',auth=String(init.headers?.Authorization??'');calls.push({method,url,auth});
-  const token=/^Bearer (.{43})$/.exec(auth)?.[1];
-  if(method==='GET'){const name=url.split('/').pop()!;return Response.json({name,valid:validAddressName(name),available:!names.has(name)});}
-  if(!token)return Response.json({error:'token'},{status:401});
-  const key=keyOf(token);
-  const only=new URL(url).searchParams.get('name');
-  if(method==='DELETE'){for(const [n,k] of names)if(k===key&&(only===null||n===only))names.delete(n);return Response.json({released:[]});}
-  const {name}=JSON.parse(init.body);
-  if(names.has(name)&&names.get(name)!==key)return Response.json({error:'This name is taken. Choose another.',code:'taken'},{status:409});
-  // A World keeps its default name beside a chosen one; a claim replaces only its other name of the same kind.
-  for(const [n,k] of names)if(k===key&&DEFAULT_ADDRESS_NAME.test(n)===DEFAULT_ADDRESS_NAME.test(name))names.delete(n);
-  names.set(name,key);return Response.json({name,address:`https://${name}.worldlet.ai`},{status:201});
- };
  // A long random stand-in for the World link's secret, so the ledger check below can only match the secret itself.
  const linkSecret=()=>crypto.randomBytes(24).toString('base64url');
  let worldLinkSecret=linkSecret(),renewed=0;
  const firstLinkSecret=worldLinkSecret;
  const board={revision:1,definition:{title:'Team'},presets:[{id:'p',read:{query:'SELECT secret'}}],view:{title:'Team',tabs:[{id:'main',title:'Main',blocks:[{id:'n',title:'Users',kind:'number',preset:'p',status:'ok',number:{value:42}}]}],resolvedAt:'2026-10-18T12:00:00.000Z'}};
- const address=createWorldAddressHost({vault,remote,ledger:()=>ledger,changed:()=>{},fetch:site as any,now,
+ const address=createWorldAddressHost({vault,remote,ledger:()=>ledger,changed:()=>{},now,
   worldLink:async()=>`https://worldlet.ai/world/2026.1018.4700/#v=1&s=${worldLinkSecret}&n=Studio+Mac&m=room`,
   renewWorldLink:async()=>{renewed+=1;worldLinkSecret=linkSecret();},board:async()=>board});
  try{
   // Names.
   for(const ok of ['kelvin','abc','team-board'])assert.ok(validAddressName(ok),ok);
   for(const bad of ['ab','a--b','xn--abc','-ab','ab-','www','mcp','Kelvin','x'.repeat(33)])assert.ok(!validAddressName(bad),bad);
-  assert.equal(addressNameFrom(' Kelvin '),'kelvin');
-  assert.equal(addressNameFrom('w-7k3m9p2x'),'','names starting w- are default names, never chosen');
-  assert.match(newDefaultAddressName(),DEFAULT_ADDRESS_NAME);assert.ok(validAddressName(newDefaultAddressName()));
   assert.equal(worldAddress('kelvin'),'https://kelvin.worldlet.ai');
   assert.equal(worldAddress('kelvin','http://localhost:8766'),'http://kelvin.localhost:8766');
   // The front's frame for the page: `kind: 'address'`, with the address's origin as base.
@@ -108,34 +88,21 @@ await withTempDir('worldlet-world-address-',async dir=>{
   assert.equal(readRemoteMcpRequest(JSON.stringify({...frame,base:'http://evil.example'})),null);
   say('PASS names are 3 to 32 plain characters, never reserved; the front\'s address frames are read with their kind and origin.');
 
-  // Choosing a name turns remote access on and claims it with the host token, first come, first served.
-  assert.equal((await address.status()).name,null);
-  assert.deepEqual(await address.check('Kelvin'),{name:'kelvin',valid:true,available:true});
-  assert.deepEqual(await address.check('a--b'),{name:'a--b',valid:false,available:false});
-  names.set('taken',keyOf('X'.repeat(43)));
-  await assert.rejects(address.claim('taken'),/taken/);
-  await assert.rejects(address.claim('no'),/3 to 32/);
-  let status=await address.claim('kelvin');
+  // The address is the room of remote access's host token: nothing to choose, register or confirm.
+  assert.equal((await address.status()).name,null,'no address while remote access has no token');
+  await remote.enable();
   const {token}=JSON.parse(secrets.get(REMOTE_MCP_VAULT)!);
-  assert.equal(names.get('kelvin'),keyOf(token),'claimed with the host token, which the website hashes');
-  assert.equal(calls.at(-1)!.auth,'Bearer '+token);
-  assert.deepEqual([status.name,status.address,status.remote],['kelvin','https://kelvin.worldlet.ai',true]);
+  const room=await remoteMcpRoom(token),HOST=`${room}.worldlet.ai`;
+  let status=await address.status();
+  assert.deepEqual([status.name,status.address,status.mcp,status.remote,status.reachable],[room,'https://'+HOST,`https://${HOST}/mcp`,true,false]);
   let ws=FakeSocket.last!;ws.open();
   assert.equal((await address.status()).reachable,true);
-  // With remote access on, the World also gets its default name, kept beside the chosen one; the remote MCP address is
-  // the World's own address.
-  const settled=async()=>{for(let i=0;i<50&&!(await address.status()).defaultName;i++)await new Promise(r=>setTimeout(r,5));return address.status();};
-  status=await settled();
-  assert.match(status.defaultName!,DEFAULT_ADDRESS_NAME);assert.equal(names.get(status.defaultName!),keyOf(token));
-  assert.deepEqual([status.name,status.chosen,status.mcp],['kelvin',true,'https://kelvin.worldlet.ai/mcp']);
-  assert.equal((await remote.status()).address,'https://kelvin.worldlet.ai/mcp','Claude and ChatGPT connect at the World\'s own address');
-  const firstDefault=status.defaultName!;
-  await assert.rejects(address.claim('kelvin-two'),/stays/,'a chosen name stays');
-  say('PASS choosing a name turns remote access on and claims it on the website with the host token; a taken name is refused; the default name is kept beside it, and the MCP address is the World\'s own.');
+  assert.equal((await remote.status()).address,`https://${HOST}/mcp`,'Claude and ChatGPT connect at the World\'s own address');
+  say('PASS the address is the room of remote access\'s host token, with nothing to choose or register, and the MCP address is the World\'s own.');
 
   // The page's requests, as the front sends them over remote access's connection.
   let next=0;
-  async function page(method:string,pathname:string,{body,query='',bearer='',base='https://kelvin.worldlet.ai'}:{body?:unknown,query?:string,bearer?:string,base?:string}={}){
+  async function page(method:string,pathname:string,{body,query='',bearer='',base=`https://${HOST}`}:{body?:unknown,query?:string,bearer?:string,base?:string}={}){
    const id='a'+(next++),before=ws.sent.length;
    ws.onmessage!({data:JSON.stringify({t:'req',id,method,base,path:pathname,query,headers:{'content-type':'application/json',...bearer?{authorization:'Bearer '+bearer}:{}},body:body===undefined?'':JSON.stringify(body),kind:'address'})});
    const find=()=>ws.sent.slice(before).map(d=>JSON.parse(d)).find(f=>f.t==='res'&&f.id===id);
@@ -144,7 +111,7 @@ await withTempDir('worldlet-world-address-',async dir=>{
    assert.ok(answer,`no answer to ${method} ${pathname}`);
    return {status:answer.status as number,json:()=>JSON.parse(answer.body)};
   }
-  assert.deepEqual((await page('GET','/hello')).json(),{v:1,name:'kelvin'});
+  assert.deepEqual((await page('GET','/hello')).json(),{v:1,name:room});
   assert.equal((await page('GET','/hello',{base:'https://other.worldlet.ai'})).status,404,'another name is no one\'s here');
   // An MCP client's request never reaches the address server, nor the page's the MCP server.
   // Its answer by id, not whatever was sent last; a slow host gets 10 s, as in page().
@@ -157,10 +124,10 @@ await withTempDir('worldlet-world-address-',async dir=>{
   say('PASS the page\'s requests reach only the address server, for the name this World holds.');
 
   // The owner's new browser: a passkey made for this address, a code, a card; Allow; then the passkey signs in.
-  const origin='https://kelvin.worldlet.ai',laptop=authenticator('kelvin.worldlet.ai',origin);
+  const origin=`https://${HOST}`,laptop=authenticator(HOST,origin);
   const options=async(purpose:string)=>(await page('POST','/passkey/options',{body:{purpose}})).json();
   let o=await options('register');
-  assert.equal(o.rpId,'kelvin.worldlet.ai');assert.match(o.challenge,/^[A-Za-z0-9_-]{43}$/);assert.match(o.user.id,/^[A-Za-z0-9_-]{22}$/);
+  assert.equal(o.rpId,HOST);assert.match(o.challenge,/^[A-Za-z0-9_-]{43}$/);assert.match(o.user.id,/^[A-Za-z0-9_-]{22}$/);
   // Refused: another site's answer, a challenge for something else, a reused challenge, a credential that was not made.
   assert.match((await page('POST','/access',{body:{challengeId:o.id,label:'Laptop',credential:laptop.create(o.challenge,{at:'https://evil.example'})}})).json().error,/another site/);
   assert.match((await page('POST','/access',{body:{challengeId:o.id,label:'Laptop',credential:laptop.create(o.challenge)}})).json().error,/ran out/,'a challenge works once');
@@ -179,7 +146,7 @@ await withTempDir('worldlet-world-address-',async dir=>{
   const item=ledger.value('items',remoteConsentItemId(request.id))!;
   assert.equal(item.title,'Allow Chrome on Mac to open your World?');assert.match(String(item.summary),new RegExp(`code ${request.code}`));
   const projected={pages:[] as any[],roots:['root']};projectWorldItems(projected,[item]);
-  assert.deepEqual(projected.pages[0].worldItemRemoteConsent,{id:request.id,client:'Chrome on Mac',code:request.code,returnsTo:'kelvin.worldlet.ai',status:'pending',asks:'owner'});
+  assert.deepEqual(projected.pages[0].worldItemRemoteConsent,{id:request.id,client:'Chrome on Mac',code:request.code,returnsTo:HOST,status:'pending',asks:'owner'});
   assert.notEqual(roomDenied({action:'remoteMcp',operation:'allow'}),'','only this computer\'s pages answer it');
   assert.notEqual(roomDenied({action:'worldAddress',operation:'share'}),'');
   // Before Allow: the passkey signs nothing in.
@@ -204,12 +171,12 @@ await withTempDir('worldlet-world-address-',async dir=>{
 
   // Refused sign-ins: another site, a wrong key, a reused challenge, a copied passkey (its counter went back).
   o=await options('signin');
-  assert.match((await page('POST','/signin',{body:{challengeId:o.id,credential:laptop.get(o.challenge,{at:'https://kelvin.worldlet.ai.evil.example'})}})).json().error,/another site/);
+  assert.match((await page('POST','/signin',{body:{challengeId:o.id,credential:laptop.get(o.challenge,{at:`https://${HOST}.evil.example`})}})).json().error,/another site/);
   o=await options('signin');
   const stranger=crypto.generateKeyPairSync('ec',{namedCurve:'P-256'}).privateKey;
   assert.equal((await page('POST','/signin',{body:{challengeId:o.id,credential:laptop.get(o.challenge,{key:stranger})}})).status,401);
   assert.equal((await page('POST','/signin',{body:{challengeId:o.id,credential:laptop.get(o.challenge)}})).status,400,'a challenge works once');
-  const phone=authenticator('kelvin.worldlet.ai',origin,-257);
+  const phone=authenticator(HOST,origin,-257);
   o=await options('register');
   asked=await page('POST','/access',{body:{challengeId:o.id,label:'Phone',credential:phone.create(o.challenge)}});
   address.decide(asked.json().id,true);
@@ -226,11 +193,11 @@ await withTempDir('worldlet-world-address-',async dir=>{
   // Sharing the board: invite-only and open; a visitor asks with their own passkey; what they see is read only.
   status=await address.share(false);
   const invite=status.shares[0];
-  assert.match(invite.link!,/^https:\/\/kelvin\.worldlet\.ai\/s\/[A-Za-z0-9_-]{22}$/);
+  assert.match(invite.link!,new RegExp(`^https://${HOST}/s/[A-Za-z0-9_-]{22}$`));
   assert.deepEqual((await page('GET','/share',{query:'id='+invite.id})).json(),{id:invite.id,title:'Board',kind:'board',open:false});
   assert.equal((await page('GET','/share',{query:'id=nothing-here-at-all'})).status,404);
   assert.equal((await page('GET','/view',{query:'share='+invite.id})).status,401,'invite-only: nothing without signing in');
-  const sam=authenticator('kelvin.worldlet.ai',origin);
+  const sam=authenticator(HOST,origin);
   o=await options('register');
   asked=await page('POST','/access',{body:{challengeId:o.id,label:'Sam',share:invite.id,credential:sam.create(o.challenge)}});
   const samAsk=asked.json();
@@ -273,33 +240,28 @@ await withTempDir('worldlet-world-address-',async dir=>{
 
   // Denied and expired requests; the limit on waiting requests.
   o=await options('register');
-  const denied=(await page('POST','/access',{body:{challengeId:o.id,label:'Unknown',credential:authenticator('kelvin.worldlet.ai',origin).create(o.challenge)}})).json();
+  const denied=(await page('POST','/access',{body:{challengeId:o.id,label:'Unknown',credential:authenticator(HOST,origin).create(o.challenge)}})).json();
   address.decide(denied.id,false);
   assert.deepEqual((await page('GET','/access/wait',{query:'id='+denied.id})).json(),{status:'denied'});
-  for(let i=0;i<WORLD_ADDRESS_LIMITS.requests;i++){o=await options('register');assert.equal((await page('POST','/access',{body:{challengeId:o.id,label:'Many',credential:authenticator('kelvin.worldlet.ai',origin).create(o.challenge)}})).status,200);}
+  for(let i=0;i<WORLD_ADDRESS_LIMITS.requests;i++){o=await options('register');assert.equal((await page('POST','/access',{body:{challengeId:o.id,label:'Many',credential:authenticator(HOST,origin).create(o.challenge)}})).status,200);}
   o=await options('register');
-  assert.equal((await page('POST','/access',{body:{challengeId:o.id,label:'Many',credential:authenticator('kelvin.worldlet.ai',origin).create(o.challenge)}})).status,429);
+  assert.equal((await page('POST','/access',{body:{challengeId:o.id,label:'Many',credential:authenticator(HOST,origin).create(o.challenge)}})).status,429);
   clock+=WORLD_ADDRESS_LIMITS.requestSeconds*1000+1;
   o=await options('register');
-  const late=await page('POST','/access',{body:{challengeId:o.id,label:'Later',credential:authenticator('kelvin.worldlet.ai',origin).create(o.challenge)}});
+  const late=await page('POST','/access',{body:{challengeId:o.id,label:'Later',credential:authenticator(HOST,origin).create(o.challenge)}});
   assert.equal(late.status,200,'expired requests no longer count');
   say('PASS denied requests say so, at most '+WORLD_ADDRESS_LIMITS.requests+' wait at once, and they run out.');
 
-  // A new remote address moves the name to the new host token; a rename starts sign-ins over; giving it up frees it.
+  // A new remote address is a new World address: sign-ins start over there, and the old one answers no more.
   await remote.renew();
   ws=FakeSocket.last!;ws.open();
-  const fresh=JSON.parse(secrets.get(REMOTE_MCP_VAULT)!).token;
-  assert.equal(names.get('kelvin'),keyOf(fresh));assert.equal(names.get(firstDefault),keyOf(fresh),'the default name moves too');
-  // Giving the chosen name up: the World is at its default name again, sign-ins start over, and a name may be chosen anew.
-  status=await address.release();
-  assert.deepEqual([status.name,status.chosen,status.devices.length,status.visitors.length],[firstDefault,false,0,0],'passkeys belong to the old address');
-  assert.equal(names.has('kelvin'),false);assert.equal(names.get(firstDefault),keyOf(fresh));
-  await assert.rejects(address.release(),/no name of its own/);
-  status=await address.claim('kelvin-studio');
-  assert.equal(names.get('kelvin-studio'),keyOf(fresh));assert.equal(names.get(firstDefault),keyOf(fresh));
-  assert.deepEqual([status.name,status.chosen,status.defaultName],['kelvin-studio',true,firstDefault]);
-  assert.equal((await page('GET','/hello',{base:'https://kelvin.worldlet.ai'})).status,404);
-  say('PASS New address keeps both names on the new host token; giving the chosen name up goes back to the default one and starts sign-ins over.');
+  const fresh=JSON.parse(secrets.get(REMOTE_MCP_VAULT)!).token,freshRoom=await remoteMcpRoom(fresh);
+  status=await address.status();
+  assert.deepEqual([status.name,status.address,status.devices.length,status.visitors.length],[freshRoom,`https://${freshRoom}.worldlet.ai`,0,0],'passkeys belong to the old address');
+  assert.ok(status.shares.length>0,'shares are kept');
+  assert.equal((await page('GET','/hello',{base:`https://${HOST}`})).status,404,'the old address answers no more');
+  assert.deepEqual((await page('GET','/hello',{base:`https://${freshRoom}.worldlet.ai`})).json(),{v:1,name:freshRoom});
+  say('PASS New address gives the World a new address and starts sign-ins over.');
 
   // Nothing a browser could reuse is kept outside the vault or logged; the vault keeps public keys, never sessions.
   const kept=JSON.stringify(readWorldAddressState(JSON.parse(secrets.get(WORLD_ADDRESS_VAULT)!)));

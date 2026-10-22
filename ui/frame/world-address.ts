@@ -1,12 +1,11 @@
 /** Your World's address, the one place in Settings › Agents for reaching the World from elsewhere (agent/gate/WORLD-ADDRESS.md,
- * hosts `worldAddress` and `remoteMcp`). Owner request 2026-10-22: one card, no Advanced. It shows the address
- * (`<name>.worldlet.ai`, at first a default `w-…` name), Copy for Claude or ChatGPT (its `/mcp`), and Choose a name until
- * one is chosen; it stays once chosen. Browsers, people and shares the person allowed are listed under it only when
+ * hosts `worldAddress` and `remoteMcp`). Owner requests 2026-10-22: one card, no Advanced, and one address with nothing
+ * to choose. It shows the address (`<room>.worldlet.ai`) and Copy for Claude or ChatGPT (its `/mcp`). Browsers, people and shares the person allowed are listed under it only when
  * there are some, each with a way to end it. Remote access underneath has no controls of its own here: it is on by
  * default, and the card offers Turn on only when it is off. Plain words: no passkeys, tokens or rooms. */
 import {agentButton as button,agentDay,agentEl as el} from './agent-change.ts';
 import {settingsIcon} from './settings-rows.ts';
-type Status={name:string|null;address?:string;chosen:boolean;defaultName:string|null;mcp?:string;reachable:boolean;remote:boolean;error?:string;
+type Status={name:string|null;address?:string;mcp?:string;reachable:boolean;remote:boolean;error?:string;
  devices:{id:string;name:string;addedAt:string;usedAt?:string}[];
  visitors:{id:string;name:string;sees:string[];seenAt?:string}[];
  shares:{id:string;title:string;open:boolean;link?:string;people:number}[]};
@@ -15,7 +14,7 @@ export async function showWorldAddress(target:HTMLElement,call:(action:string,bo
  const box=el('div','companion-settings-approvals companion-settings-world-address'),said=el('p','companion-settings-status');said.setAttribute('role','status');
  box.dataset.worldAddress='';
  target.append(el('h5','companion-settings-subhead','Use your World anywhere'),box,said);
- let changing=false,copied='',timer:ReturnType<typeof setTimeout>|null=null;
+ let copied='',timer:ReturnType<typeof setTimeout>|null=null;
  const day=(iso?:string)=>iso?agentDay(Date.parse(iso)):'';
  async function act(body:Record<string,unknown>,done:string){
   said.textContent='';
@@ -25,24 +24,6 @@ export async function showWorldAddress(target:HTMLElement,call:(action:string,bo
  async function copy(text:string,what:string){
   try{await navigator.clipboard.writeText(text);copied=text;await draw();said.textContent=what;}catch{said.textContent='Could not copy. Try again.';}
  }
- function picker(row:HTMLElement,status:Status){
-  const name=document.createElement('input');name.className='companion-settings-input';name.placeholder='alex';name.maxLength=32;name.setAttribute('aria-label','Name for your World\'s address');
-  name.autocomplete='off';name.spellcheck=false;
-  const preview=el('span','companion-settings-quiet');
-  const show=()=>{const v=name.value.trim().toLowerCase();preview.textContent=v?`Your address: https://${v}.worldlet.ai`:'3 to 32 letters or digits; hyphens between them are fine.';};
-  name.oninput=show;show();
-  row.append(name,preview,button('Choose','world-address-claim',async()=>{
-   said.textContent='';
-   try{
-    const check=await call('worldAddress',{operation:'check',name:name.value});
-    if(!check?.valid){said.textContent='Use 3 to 32 lowercase letters or digits, with single hyphens between them. Some names are kept for Worldlet itself.';return;}
-    if(!check.available&&!check.yours){said.textContent=`${check.name}.worldlet.ai is taken. Try another name.`;return;}
-    await call('worldAddress',{operation:'claim',name:name.value});changing=false;await draw();
-    said.textContent=status.devices.length?'Your World has its own name now, and it stays. Browsers you allowed before need to ask again there.':'Your World has its own name now, and it stays.';
-   }catch(e){said.textContent=(e as Error).message||'Could not choose that name. Try again.';}
-  },true));
-  row.append(button('Cancel','world-address-cancel',async()=>{changing=false;await draw();}));
- }
  async function draw(){
   const status:Status|{error:string}=await call('worldAddress',{operation:'status'}).catch((e:Error)=>({error:e.message}));
   if(!current())return;
@@ -50,7 +31,7 @@ export async function showWorldAddress(target:HTMLElement,call:(action:string,bo
   const row=el('div','companion-settings-row has-icon'),words=el('div');row.append(settingsIcon({icon:'link'}),words);box.append(row);
   words.append(el('strong','','Your World\'s address'));
   if(!('devices' in status)){words.append(el('span','',status.error||'Not available here.'));return;}
-  // The host connects and makes the default name in the background: look again every few seconds until it answers.
+  // The host connects in the background: look again every few seconds until the address answers.
   if(timer)clearTimeout(timer);
   timer=status.remote&&!status.reachable?setTimeout(()=>{timer=null;if(current())void draw();},5000):null;
   if(!status.remote){
@@ -62,21 +43,15 @@ export async function showWorldAddress(target:HTMLElement,call:(action:string,bo
    return;
   }
   if(!status.name){
-   words.append(el('span','',status.error?`Your World could not get its address yet: ${status.error} Worldlet keeps trying.`:'Your World is getting its address. This takes a moment.'));
-   return;
-  }
-  if(changing){
-   words.append(el('span','','Choose a name, like alex.worldlet.ai. You choose it once and it stays.'));
-   const form=el('div','companion-settings-access-add');picker(form,status);box.append(form);
+   words.append(el('span','','Your World is getting its address. This takes a moment.'));
    return;
   }
   const host=(status.address||'').replace(/^https:\/\//,'');
   const address=el('code','companion-settings-remote-address',host);address.dataset.worldAddressLink='';words.append(address);
-  words.append(el('span','companion-settings-quiet',status.error?status.error:status.reachable?'Open it on any device, or paste it in Claude or ChatGPT as a connector. A card here asks you to allow each one.'
+  words.append(el('span','companion-settings-quiet',status.reachable?'Open it on any device, or paste it in Claude or ChatGPT as a connector. A card here asks you to allow each one.'
    :'This computer cannot reach the internet right now. Worldlet keeps trying.'));
   const actions=el('div','companion-settings-actions');
   if(status.mcp)actions.append(button(copied===status.mcp?'Copied':'Copy for Claude or ChatGPT','world-address-copy',()=>copy(status.mcp!,'Copied. Paste it in Claude or ChatGPT as a connector.'),true));
-  if(!status.chosen)actions.append(button('Choose a name','world-address-change',async()=>{changing=true;await draw();}));
   row.append(actions);
 
   // Who can open the World here: listed only when there is someone, each with a way to end it.
