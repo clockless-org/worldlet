@@ -205,12 +205,11 @@ export function installPhone(host:Host){
  }
  const phoneOpen=()=>{const seen=relay.status().seenAt;return !!seen&&Date.now()-seen<ACTIVE||Date.now()-lastActive<ACTIVE;};
  // Another Worldlet that runs Fox's turns on this computer's Agent (platform/web/README.md#another-computers-agent):
- // a second pairing on the same relay with a `worldlet://agent` code. Its turns run here on the Agent service's own
+ // a second pairing in the same room with a `worldlet://agent` code. Its turns run here on the Agent service's own
  // runtime (remote-host.ts), never through the World page: in that computer's own sessions, with its instructions and
  // view, and every World tool call goes back to run in its World. It gets nothing of this World (no Attention Center,
  // conversation, widgets or Applets) but the `desktop` slot, which lists the person's agents here, and anything it
- // sends but a turn, a tool's answer or a cancel is dropped. It reads the relay every minute while it runs, and
- // throughout a turn, so this side listens closely.
+ // sends but a turn, a tool's answer or a cancel is dropped.
  const agentService=()=>host.optional<AgentService>(AGENT);
  const remoteHost=createRemoteAgentHost({
   send:message=>agent.send(message),name:computerName,client:()=>agent.status().phone?.name||'computer',
@@ -231,7 +230,7 @@ export function installPhone(host:Host){
  });
  const agent=createPhoneRelay({
   fetch:(input,init)=>fetch(input,init),vault,name:computerName,userAgent:`Worldlet/${version} (agent pairing)`,kind:'agent',
-  relay:process.env.WORLDLET_PAIR_RELAY||undefined,read:readRemoteToHost,
+  relay:process.env.WORLDLET_PAIR_RELAY||undefined,read:readRemoteToHost,room:{},
   deliver:message=>remoteHost.receive(message),
   onChange:status=>{if(status.state!=='paired')remoteHost.stop();host.page.event('worldlet:agent-pair-status',status);},
  });
@@ -265,9 +264,6 @@ export function installPhone(host:Host){
    host.page.event('worldlet:web-pair-status',webStatus(status));
   },
  });
- // A browser link from before the room kept its boxes on the relay: it is ended there once, which deletes them.
- if(vault.get('web-pairing'))void createPhoneRelay({fetch:(input,init)=>fetch(input,init),vault,name:computerName,userAgent:`Worldlet/${version} (web pairing)`,kind:'web',
-  relay:process.env.WORLDLET_PAIR_RELAY||undefined,deliver:async()=>false}).end().catch(error=>host.diagnostics.record(error,'phonePairing'));
  webPaired=browser.status().state==='paired';
  // A browser on this computer (platform/web/README.md#web): a pairing of its own, served by this app on 127.0.0.1
  // (local-relay.ts) with the page and a relay in memory, so what it shows never leaves the computer. The server starts

@@ -1,23 +1,7 @@
 import Foundation
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
-
-/// Sends one relay request; tests replace it.
-public protocol RelayTransport: Sendable {
-    func send(_ request: URLRequest) async throws -> (Data, Int)
-}
-
-public struct URLSessionTransport: RelayTransport {
-    public init() {}
-    public func send(_ request: URLRequest) async throws -> (Data, Int) {
-        let (data, response) = try await URLSession.shared.data(for: request)
-        return (data, (response as? HTTPURLResponse)?.statusCode ?? 0)
-    }
-}
 
 public enum RelayError: LocalizedError, Equatable {
-    /// The pairing no longer exists: the computer unpaired, or the relay forgot an idle pairing.
+    /// The pairing no longer exists: the computer unpaired, or the pairing is from before the room and cannot meet there.
     case ended
     case failed(String)
 
@@ -29,7 +13,7 @@ public enum RelayError: LocalizedError, Equatable {
     }
 }
 
-/// What one poll brought. Nil fields did not change.
+/// What one sync brought. Nil fields did not change.
 public struct PhoneUpdate: Sendable {
     public var attention: AttentionSnapshot?
     public var conversation: Conversation?
@@ -38,23 +22,18 @@ public struct PhoneUpdate: Sendable {
     public var desktop: DesktopInfo?
     /// The widgets for now (pages may be left out; the app keeps the ones it has).
     public var widgets: WidgetsSnapshot?
-    /// When the computer last reached the relay (milliseconds since 1970).
+    /// When the computer was last in the room (milliseconds since 1970).
     public var computerSeenAt: Double?
 }
 
-/// The phone's side of a pairing, against the relay in worker/pairing.ts or in the pairing room (platform/web/README.md#room).
-/// It keeps the poll cursor or the room socket; the app keeps the link in the Keychain and calls `sync()` while it is
-/// open. A relay pairing moves to the room once the computer's desktop slot says `room` (`inRoom` then turns true, and
-/// the app keeps the link that says so). In the room the computer sends everything it has when the phone arrives, then
-/// each change; nothing waits there, so a message goes only while the computer is in the room too.
+/// The phone's side of a pairing, in the pairing room (platform/web/README.md#room). It keeps the room socket; the app
+/// keeps the link in the Keychain and calls `sync()` while it is open. The computer sends everything it has when the phone
+/// arrives, then each change; nothing waits there, so a message goes only while the computer is in the room too. A link
+/// kept from before the room (no `room`) cannot meet there: its session is ended from the start.
 public actor PhoneSession {
     public let link: PairLink
     public let keys: PairKeys
-    private let transport: RelayTransport
     private let connector: RoomConnector
-    private var cursor = 0
-    /// The pairing meets in the room.
-    public private(set) var inRoom: Bool
     private var socket: RoomSocket?
     /// Counts sockets, so a closed one's last events change nothing.
     private var generation = 0
@@ -68,62 +47,17 @@ public actor PhoneSession {
     private var info: PhoneInfo?
     private var waiters: [UUID: CheckedContinuation<Void, Never>] = [:]
 
-    public init(link: PairLink, transport: RelayTransport = URLSessionTransport(), room: RoomConnector = URLSessionRoomConnector()) {
+    public init(link: PairLink, room: RoomConnector = URLSessionRoomConnector()) {
         self.link = link
         keys = PairKeys(secret: link.secret)
-        self.transport = transport
         connector = room
-        inRoom = link.room == true
+        ended = link.room != true
     }
 
-    private struct SlotRow: Decodable { let name: String; let version: Int; let box: String }
-    private struct View: Decodable {
-        struct Peer: Decodable { let seenAt: Double? }
-        let version: Int
-        let peer: Peer?
-        let slots: [SlotRow]
-    }
-    private struct Failure: Decodable { let error: String? }
-    private struct Box: Encodable { let box: String }
     private struct Event: Decodable { let t: String; let online: Bool?; let from: String?; let data: String? }
     private struct Frame: Codable { var s: String?; var b: String?; var m: String?; var e: String? }
     private struct Out: Encodable { let data: String }
     private struct End: Codable { let end: Bool }
-
-    private func request(_ path: String, method: String = "GET", query: [URLQueryItem] = [], body: Encodable? = nil,
-                         timeout: TimeInterval = 20) async throws -> Data {
-        var parts = URLComponents(url: link.relay.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
-        if !query.isEmpty { parts.queryItems = query }
-        var r = URLRequest(url: parts.url!)
-        r.httpMethod = method
-        r.timeoutInterval = timeout
-        r.setValue("Bearer \(keys.phoneToken)", forHTTPHeaderField: "Authorization")
-        r.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        r.setValue("Worldlet-iOS/1 (phone pairing)", forHTTPHeaderField: "User-Agent")
-        if let body { r.httpBody = try JSONEncoder().encode(body) }
-        let (data, status) = try await transport.send(r)
-        if status == 404 { throw RelayError.ended }
-        guard (200..<300).contains(status) else {
-            throw RelayError.failed((try? JSONDecoder().decode(Failure.self, from: data))?.error ?? "Worldlet could not reach your computer (\(status)).")
-        }
-        return data
-    }
-
-    /// One poll. The first poll after scanning completes the pairing on the computer. With `wait` (seconds, at most 20)
-    /// the relay holds the request until the computer sends something new, so changes arrive as they happen.
-    public func sync(wait: Int = 0) async throws -> PhoneUpdate {
-        if inRoom { return try await roomSync(wait: wait) }
-        var query = [URLQueryItem(name: "after", value: String(cursor))]
-        if wait > 0 { query.append(URLQueryItem(name: "wait", value: String(min(wait, 20)))) }
-        let data = try await request("api/pair/\(keys.id)", query: query, timeout: TimeInterval(wait) + 15)
-        let view = try JSONDecoder().decode(View.self, from: data)
-        var update = PhoneUpdate(computerSeenAt: view.peer?.seenAt)
-        for slot in view.slots { read(slot: slot.name, box: slot.box, into: &update) }
-        cursor = max(cursor, view.version)
-        // The computer waits in the room: the pairing moves there.
-        if update.desktop?.room == true { inRoom = true }
-        return update
-    }
 
     /// A slot's box, opened into `update`. A box that does not open (or a slot this version does not know) is skipped,
     /// never trusted.
@@ -139,11 +73,9 @@ public actor PhoneSession {
         }
     }
 
-    // MARK: The room
-
-    /// What came from the computer since the last sync. With `wait` it waits up to that many seconds for something to
-    /// come (or the computer to arrive or leave). The computer counts as seen now while it is in the room.
-    private func roomSync(wait: Int) async throws -> PhoneUpdate {
+    /// What came from the computer since the last sync. With `wait` (seconds, at most 20) it waits that long for something
+    /// to come (or the computer to arrive or leave). The computer counts as seen now while it is in the room.
+    public func sync(wait: Int = 0) async throws -> PhoneUpdate {
         if ended { throw RelayError.ended }
         connect()
         // Until the room says whether the computer is there, a first sync waits for it.
@@ -258,61 +190,32 @@ public actor PhoneSession {
     }
 
     public func send(_ message: PhoneMessage) async throws {
-        if inRoom {
-            try await reachComputer()
-            try await frame(Frame(m: try keys.seal(message, place: PairKeys.place(to: "desktop"))))
-            return
-        }
-        _ = try await request("api/pair/\(keys.id)/messages", method: "POST",
-                              body: Box(box: try keys.seal(message, place: PairKeys.place(to: "desktop"))))
+        try await reachComputer()
+        try await frame(Frame(m: try keys.seal(message, place: PairKeys.place(to: "desktop"))))
     }
 
+    /// The phone's name, said to the computer now if it is in the room and again each time it comes.
     public func announce(_ info: PhoneInfo) async throws {
         self.info = info
-        if inRoom {
-            if computer { try await introduce() }
-            return
-        }
-        _ = try await request("api/pair/\(keys.id)/slots/phone", method: "PUT",
-                              body: Box(box: try keys.seal(info, place: PairKeys.place(slot: "phone"))))
+        if computer { try await introduce() }
     }
 
     /// Where this iPhone's notifications go: the APNs device token in hex, "apns" for App Store and TestFlight builds,
-    /// "apns-dev" for debug builds (Apple's sandbox). With `direct` (the computer's desktop slot says `push`) the token
-    /// goes to the computer in a sealed message and the relay's registration is removed, so the relay keeps none
-    /// (platform/web/README.md#push); otherwise the relay keeps it, as older computers need.
-    public func registerPush(platform: String, token: String, direct: Bool = false) async throws {
-        guard direct else {
-            _ = try await request("api/pair/\(keys.id)/push", method: "PUT", body: PushToken(platform: platform, token: token))
-            return
-        }
+    /// "apns-dev" for debug builds (Apple's sandbox). It goes to the computer in a sealed `push` message, so the relay
+    /// keeps none (platform/web/README.md#push); the computer forgets it with the pairing.
+    public func registerPush(platform: String, token: String) async throws {
         try await send(.push(id: UUID().uuidString, platform: platform, token: token))
-        if !inRoom { try? await unregisterPush() }
     }
 
-    public func unregisterPush() async throws {
-        // A pairing in the room has no relay registration; the computer forgets the token with the pairing.
-        if inRoom { return }
-        do { _ = try await request("api/pair/\(keys.id)/push", method: "DELETE") } catch RelayError.ended {}
-    }
-
-    /// Stops the notifications first (the relay drops them with the pairing too; this says so without relying on it).
+    /// Ends the pairing; the computer hears it if it is in the room now.
     public func unpair() async throws {
-        if inRoom {
-            // The computer hears it if it is in the room now.
-            if (try? await reachComputer()) != nil {
-                try? await frame(Frame(e: try keys.seal(End(end: true), place: PairKeys.place(slot: "end"))))
-            }
-            ended = true
-            leaveRoom()
-            return
+        if (try? await reachComputer()) != nil {
+            try? await frame(Frame(e: try keys.seal(End(end: true), place: PairKeys.place(slot: "end"))))
         }
-        try? await unregisterPush()
-        do { _ = try await request("api/pair/\(keys.id)", method: "DELETE") } catch RelayError.ended {}
+        ended = true
+        leaveRoom()
     }
 }
 
-private struct PushToken: Encodable { let platform: String; let token: String }
-
-/// An APNs device token as the relay takes it: lowercase hex.
+/// An APNs device token as the computer takes it: lowercase hex.
 public func pushTokenHex(_ token: Data) -> String { token.map { String(format: "%02x", $0) }.joined() }

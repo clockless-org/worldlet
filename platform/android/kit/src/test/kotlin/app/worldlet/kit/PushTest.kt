@@ -6,6 +6,7 @@ import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
@@ -13,7 +14,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 /** Notifications (platform/web/README.md, push): a box the relay hands Firebase Messaging opens with the pairing keys, in
- * the place "push" only, and the phone registers its token with the relay. */
+ * the place "push" only, and the phone hands its token to the computer in a sealed message. */
 class PushTest {
     private val secret = ByteArray(32) { it.toByte() }
     private val keys = PairKeys(secret)
@@ -85,34 +86,25 @@ class PushTest {
     }
 
     @Test
-    fun registersWithRelay() = runTest {
-        val requests = mutableListOf<RelayRequest>()
-        val answers = ArrayDeque(listOf(200 to """{"ok":true}""", 200 to """{"ok":true}""", 404 to """{"error":"gone"}"""))
-        val session = PhoneSession(PairLink(secret, name = "Mac"), { requests += it; answers.removeFirst() })
+    fun handsTheTokenToTheComputer() = runTest {
+        val room = FakeRoom()
+        val session = PhoneSession(PairLink(secret, name = "Mac", room = true), room)
+        runCatching { session.sync() }
+        val socket = room.opened.single()
+        socket.deliver("""{"t":"desktop","online":true}""")
         session.registerPush("fcm", "token:abc_123-XYZ")
-        assertEquals("PUT", requests[0].method)
-        assertEquals("https://worldlet.ai/api/pair/${keys.id}/push", requests[0].url)
-        assertEquals("Bearer ${keys.phoneToken}", requests[0].headers["Authorization"])
-        val body = Json.parseToJsonElement(requests[0].body!!).jsonObject
-        assertEquals(mapOf("platform" to "fcm", "token" to "token:abc_123-XYZ"), body.mapValues { it.value.jsonPrimitive.content })
         session.unregisterPush()
-        assertEquals("DELETE" to "https://worldlet.ai/api/pair/${keys.id}/push", requests[1].method to requests[1].url)
-        session.unregisterPush() // a pairing that already ended has no token to forget
-    }
-
-    @Test
-    fun handsTheTokenToAComputerThatKeepsIt() = runTest {
-        val requests = mutableListOf<RelayRequest>()
-        val session = PhoneSession(PairLink(secret, name = "Mac"), { requests += it; 200 to "{}" })
-        session.registerPush("fcm", "token:abc_123-XYZ", direct = true)
-        session.unregisterPush(direct = true)
-        assertEquals(listOf("POST /messages", "DELETE /push", "POST /messages", "DELETE /push"),
-            requests.map { "${it.method} ${it.url.substringAfterLast('/').let { last -> "/$last" }}" }, "sealed to the computer, and the relay keeps none")
         fun handed(i: Int): Map<String, String> {
-            val box = Json.parseToJsonElement(requests[i].body!!).jsonObject["box"]!!.jsonPrimitive.content
+            val frame = Json.parseToJsonElement(Json.parseToJsonElement(socket.sent[i]).jsonObject["data"]!!.jsonPrimitive.content).jsonObject
+            val box = frame["m"]!!.jsonPrimitive.content
             return Json.parseToJsonElement(keys.openText(box, PairKeys.to("desktop"))).jsonObject.filterKeys { it != "id" }.mapValues { it.value.jsonPrimitive.content }
         }
+        assertEquals(2, socket.sent.size, "only sealed messages to the computer")
         assertEquals(mapOf("type" to "push", "platform" to "fcm", "token" to "token:abc_123-XYZ"), handed(0))
-        assertEquals(mapOf("type" to "push", "platform" to "", "token" to ""), handed(2), "taken back")
+        assertEquals(mapOf("type" to "push", "platform" to "", "token" to ""), handed(1), "taken back")
+        // The computer away: taking the token back does not fail, handing it does.
+        socket.deliver("""{"t":"desktop","online":false}""")
+        session.unregisterPush()
+        assertFailsWith<RelayException.Failed> { session.registerPush("fcm", "t") }
     }
 }

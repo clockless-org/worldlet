@@ -121,7 +121,7 @@ object Push {
 }
 
 /** A notification's button (platform/web/README.md, Push › Actions): sends the same sealed message as the app's own button
- * (PhonePush.message) to the computer through the relay, without bringing the app up. The notification goes once the
+ * (PhonePush.message) to the computer through the pairing room, without bringing the app up. The notification goes once the
  * message is out; when it could not go, it comes back with its buttons and says so. A push from an earlier pairing does
  * nothing. */
 class PushActionReceiver : BroadcastReceiver() {
@@ -159,15 +159,14 @@ class WorldletApp : Application() {
     }
 }
 
-/** Firebase Messaging's entry point: a new token goes to the relay while paired, and a message for this pairing becomes a
+/** Firebase Messaging's entry point: a new token goes to the computer while paired, and a message for this pairing becomes a
  * notification unless the app is on screen. */
 class PushService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
-        val store = PairingStore(applicationContext)
-        val link = store.load() ?: return
+        val link = PairingStore(applicationContext).load() ?: return
         if (!Push.allowed(applicationContext)) return
         val session = PhoneSession(link, room = RoomClient)
-        runBlocking { runCatching { withTimeoutOrNull(20_000) { session.registerPush("fcm", token, store.keepsPush) } } }
+        runBlocking { runCatching { withTimeoutOrNull(20_000) { session.registerPush("fcm", token) } } }
         session.leaveRoom()
     }
 

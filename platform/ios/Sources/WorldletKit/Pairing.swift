@@ -6,10 +6,10 @@ import Crypto
 #endif
 
 // Phone pairing protocol v1, the iPhone half of platform/web/pairing.ts (see platform/web/README.md). The QR code carries a
-// 32-byte secret; HKDF-SHA256 turns it into the relay pairing id, one bearer token per side and the AES-256-GCM key
-// that seals every payload. scripts/phone-pairing-check.ts and PairingTests.swift pin the same test vector.
+// 32-byte secret; HKDF-SHA256 turns it into the pairing id, one room token per side and the AES-256-GCM key
+// that seals every payload. scripts/phone-payloads-check.ts and PairingTests.swift pin the same test vector.
 public enum PairingError: LocalizedError, Equatable {
-    case notWorldlet, needsUpdate, incomplete, unknownRelay
+    case notWorldlet, needsUpdate, incomplete, unknownRelay, olderComputer
 
     public var errorDescription: String? {
         switch self {
@@ -17,6 +17,7 @@ public enum PairingError: LocalizedError, Equatable {
         case .needsUpdate: "Update Worldlet to pair with this computer."
         case .incomplete: "This pairing code is incomplete."
         case .unknownRelay: "This pairing code names an unknown relay."
+        case .olderComputer: "This code is from an older Worldlet. Update Worldlet on your computer and pair again."
         }
     }
 }
@@ -35,7 +36,8 @@ public enum Base64URL {
     }
 }
 
-/// `worldlet://pair?v=1&s=<secret>&n=<computer name>[&r=<relay origin>][&m=room]`
+/// `worldlet://pair?v=1&s=<secret>&n=<computer name>[&r=<relay origin>]&m=room`; a code without `m=room` is from a computer
+/// that pairs through the old relay API, which is gone.
 public struct PairLink: Equatable, Codable, Sendable {
     public static let protocolVersion = "1"
     public static let defaultRelay = URL(string: "https://worldlet.ai")!
@@ -43,19 +45,16 @@ public struct PairLink: Equatable, Codable, Sendable {
     public let secret: Data
     public let relay: URL
     public let name: String
-    /// The pairing meets in the pairing room (platform/web/README.md#room): the code said `m=room`, or the computer moved a
-    /// relay pairing there. Absent from links kept before.
+    /// The pairing meets in the pairing room (platform/web/README.md#room). Absent from links kept from before the room,
+    /// which are ended (`PhoneSession`).
     public let room: Bool?
 
-    public init(secret: Data, relay: URL = PairLink.defaultRelay, name: String, room: Bool = false) {
+    public init(secret: Data, relay: URL = PairLink.defaultRelay, name: String, room: Bool = true) {
         self.secret = secret
         self.relay = relay
         self.name = name
         self.room = room ? true : nil
     }
-
-    /// The same pairing, met in the room from now on.
-    public var inRoom: PairLink { PairLink(secret: secret, relay: relay, name: name, room: true) }
 
     public init(parsing text: String) throws {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -75,7 +74,8 @@ public struct PairLink: Equatable, Codable, Sendable {
                   url.path.isEmpty, url.query == nil else { throw PairingError.unknownRelay }
             relay = url
         }
-        self.init(secret: secret, relay: relay, name: String((query["n"] ?? "").prefix(64)), room: query["m"] == "room")
+        guard query["m"] == "room" else { throw PairingError.olderComputer }
+        self.init(secret: secret, relay: relay, name: String((query["n"] ?? "").prefix(64)))
     }
 }
 
@@ -117,7 +117,7 @@ public struct PairKeys: Sendable {
         return try JSONDecoder().decode(type, from: plain)
     }
 
-    /// A notification's sealed content: place "push" (additional data `<id>|push`), as the relay's /notify takes it.
+    /// A notification's sealed content: place "push" (additional data `<id>|push`), as the website Worker's /api/push takes it.
     public static let pushPlace = "push"
 
     public func openPush(box: String) throws -> PhonePush { try open(PhonePush.self, box: box, place: PairKeys.pushPlace) }

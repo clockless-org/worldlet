@@ -407,7 +407,7 @@ class DemoUiTest {
     fun anotherComputersLinkAsksFirst() {
         val model = demo()
         show(model)
-        model.pair("worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Office+PC")
+        model.pair("worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Office+PC&m=room")
         compose.waitForIdle()
         // Nothing changes until the person answers.
         assert(model.phase == AppModel.Phase.Paired && model.computerName == "Studio Mac" && model.widgets.isNotEmpty())

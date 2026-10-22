@@ -21,7 +21,7 @@ import androidx.core.content.ContextCompat
 import app.worldlet.android.AppModel
 
 /** Android 13 and later ask before an app shows notifications: once, after pairing, with one line on what they are for
- * (README.md, Notifications). Either answer is kept, and the relay gets the token only if the person allows them. */
+ * (README.md, Notifications). Either answer is kept, and the computer gets the token only if the person allows them. */
 @Composable
 fun NotificationAsk(model: AppModel) {
     if (Build.VERSION.SDK_INT < 33 || !model.notifies || model.phase != AppModel.Phase.Paired) return

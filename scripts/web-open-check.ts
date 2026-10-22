@@ -1,6 +1,6 @@
 // Worldlet in a web browser (platform/web/README.md#web): the computer's `web` pairing (platform/host/modules/
 // phone/relay.ts) and the page (platform/web/page) against the relay this computer serves itself (local-relay.ts), which answers
-// like worker/pairing.ts, over real HTTP on 127.0.0.1: the link, the
+// the relay protocol (platform/web/README.md#local-relay), over real HTTP on 127.0.0.1: the link, the
 // first poll completing the pairing with the browser's name, the Center reaching the page, Done and a chat line
 // reaching the computer, the fragment leaving the address bar, a reload from storage, and the page ending with the link.
 import assert from 'node:assert/strict';
@@ -345,6 +345,5 @@ await server.close();await rm(out,{recursive:true,force:true});
  const served=fox.indexOf("if(name==='share_world_link'){"),paged=fox.indexOf("if(!page.ready())return tool?NEEDS_WORLD:null;");
  assert.ok(served>0&&paged>served,'world/link is answered without the page');
  assert.equal(resolveAction(worldActions(),'world','link',{}).name,'share_world_link');
- assert.match(phone,/if\(vault\.get\('web-pairing'\)\)void createPhoneRelay\([\s\S]{0,300}\.end\(\)/,'a browser link from before the room is ended on the relay once');
  console.log('PASS a line said in a browser or on the phone reaches Fox without the World page.');
 }

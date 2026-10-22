@@ -1,20 +1,19 @@
 import {DEFAULT_PAIR_RELAY,PUSH_BOX_PLACE,ROOM_LINK_MODE,readRoomFrame,roomEntry,base64url,boxPlace,fromBase64url,newPairSecret,openBox,pairKeys,pairLink,readPhoneMessage,sealBox,sha256Hex,phoneMessageKey,stalePhoneMessage,phonePushToken,PHONE_SEEN_LIMIT,type PairKeys,type PairKind,type PhoneMessage,type PhonePush,type RoomFrame,type RoomSocketFactory} from '../../../web/index.ts';
 
-// The desktop side of phone pairing (platform/web/README.md), free of Electron so scripts/phone-pairing-check.ts can drive
-// it against the relay Worker in process. It keeps one pairing: the secret in the vault, the relay cursor in memory.
-// The host runs one for the phone and one for another Worldlet that uses this computer's Agent (`kind: 'agent'`,
-// platform/web/README.md#another-computers-agent): the same relay, keys and boxes, with a code and vault entry of its own.
-// Slots the desktop owns are sealed and written only when their content changes; the phone's messages go to `deliver`,
-// and one it does not take yet is kept in the vault and offered again on each poll, while the relay's cursor moves on
-// (a message held on the relay instead came back at once on every long poll, about four requests a second). The agent pairing reads its
-// client's messages with `read` (agent/app readRemoteToHost) instead of a phone's, and `send` queues one to the client. `notify` asks the relay to
-// wake the phone with a sealed notification; `push` in the status says whether the phone registered for them. A phone
-// that hands its notification token to the computer (a `push` message, platform/web/README.md#push) has it kept in the
-// vault, never delivered: `notify` then sends the token with the box to the relay's `/api/push`, which stores nothing.
-// With `room` (the phone's pairing, platform/web/README.md#room) the computer also waits in the pairing room (agent/app
-// room.ts), and its code says so (`m=room`): a phone app that meets it there moves the pairing into the room for good,
-// the relay's pairing is deleted with everything it kept, and from then on slots and messages pass only while both are
-// connected, as with a browser (room-link.ts). An older app keeps using the relay.
+// The computer's side of a pairing (platform/web/README.md), free of Electron so the checks drive it in process. It keeps
+// one pairing: the secret in the vault. With `room` (the phone's pairing and the agent pairing, platform/web/README.md#room)
+// the pairing lives only in the pairing room (agent/app room.ts) and its code says so (`m=room`): slots and messages
+// pass only while both sides are connected, as with a browser (room-link.ts), and nothing is kept on the relay. A
+// pairing made on the relay before is forgotten, so the other side pairs again (owner decision 2026-10-21: the relay's
+// phone API is gone). Without `room` it speaks the relay protocol, which only the relay this computer serves itself
+// still answers (the browser on this computer, local-relay.ts).
+// Slots the computer owns are sealed and sent only when their content changes; the other side's messages go to
+// `deliver`, and one the computer does not take yet is kept in the vault and offered again. The host runs one for the
+// phone and one for another Worldlet that uses this computer's Agent (`kind: 'agent'`,
+// platform/web/README.md#another-computers-agent), with a code and vault entry of its own: it reads its client's
+// messages with `read` (agent/app readRemoteToHost) instead of a phone's, and `send` passes one to the client. A phone
+// hands its notification token to the computer (a `push` message, platform/web/README.md#push), which keeps it in the
+// vault, never delivers it, and sends it with each sealed notification to the relay's `/api/push`, which stores nothing.
 export type PhoneState='none'|'waiting'|'paired';
 export type PhoneStatus={state:PhoneState,link?:string,phone?:{name:string,version:string}|null,seenAt?:number|null,push?:{platform:string}|null,error?:string};
 /** The relay's answer to a notification: sent, or why not (no-device, not-configured, device-gone, or an error). */
@@ -72,6 +71,7 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
  };
  const forgetSeen=()=>{seen=[];seenSet.clear();options.vault.delete(SEEN_ID);};
  const save=()=>{if(saved)options.vault.set(VAULT_ID,JSON.stringify(saved));else{options.vault.delete(VAULT_ID);forgetSeen();keep(null);pending.length=0;keepPending();}};
+ if(options.room&&saved&&!saved.room){saved=null;push=undefined;save();}
  const ensureKeys=async()=>keys??=saved?await pairKeys(fromBase64url(saved.secret)):null;
  const link=()=>pairLink({secret:fromBase64url(saved!.secret),relay:saved!.relay,name:saved!.name,kind})+(options.room?'&m='+ROOM_LINK_MODE:'');
  // A phone in the room now is seen now.
@@ -122,12 +122,8 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
    seenAt=Date.now();
    if(!event.online){peers.delete(event.id);changed();return;}
    peers.add(event.id);
-   // The phone came to the room: the pairing lives here from now on, and the relay's copy is deleted.
-   if(!saved.room){
-    const k=keys!;saved.room=true;saved.paired=true;published.clear();save();
-    if(!device&&push)push=null;
-    void request('/api/pair/'+k.id,{method:'DELETE'}).catch(()=>{});
-   }
+   // The first phone to come completes the pairing.
+   if(!saved.paired){saved.paired=true;published.clear();save();}
    changed();wake();
    // What this computer has, to the phone that came.
    for(const [slot,value] of latest)roomSend(await sealSlot(slot,value),event.id);
@@ -164,9 +160,9 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
  async function start(){
   await end().catch(()=>{});
   const secret=newPairSecret(),k=await pairKeys(secret),relay=relayOf();
-  await request('/api/pair',{method:'POST',body:JSON.stringify({id:k.id,desktop:await sha256Hex(k.desktopToken),phone:await sha256Hex(k.phoneToken)})},k.desktopToken);
+  if(!options.room)await request('/api/pair',{method:'POST',body:JSON.stringify({id:k.id,desktop:await sha256Hex(k.desktopToken),phone:await sha256Hex(k.phoneToken)})},k.desktopToken);
   leaveRoom();
-  saved={secret:base64url(secret),relay,name:options.name(),paired:false,phone:null};keys=k;cursor=0;push=undefined;keep(null);published.clear();error='';
+  saved={secret:base64url(secret),relay,name:options.name(),paired:false,phone:null,...(options.room?{room:true as const}:{})};keys=k;cursor=0;push=undefined;keep(null);published.clear();error='';
   forgetSeen();save();changed();
   await connectRoom().catch(()=>{});
   return status();
@@ -202,14 +198,10 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
  /** Wake the paired phone with a notification, sealed whole (only the phone opens it). Never throws. */
  async function notify(value:PhonePush,collapse?:string):Promise<PhoneNotifyResult>{
   const k=await ensureKeys().catch(()=>null);if(!k||!saved?.paired)return {sent:false,reason:'not-paired'};
+  if(!device)return {sent:false,reason:'no-device'};
   try{
-   const box=await sealBox(k,PUSH_BOX_PLACE,value),extra=collapse?{collapse}:{};
-   // A relay without `/api/push` (older, or one of the person's own) answers 404: that is not the pairing ending, and the
-   // relay's own registration is tried instead.
-   const direct=device&&await request('/api/push',{method:'POST',body:JSON.stringify({pair:k.id,platform:device.platform,token:device.token,box,...extra})})
-    .catch(e=>{if(e?.status===404||e?.status===405)return null;throw e;});
-   if(!direct&&inRoom())return {sent:false,reason:'no-device'};
-   const answer=direct||await request(`/api/pair/${k.id}/notify`,{method:'POST',body:JSON.stringify({box,...extra})});
+   const box=await sealBox(k,PUSH_BOX_PLACE,value);
+   const answer=await request('/api/push',{method:'POST',body:JSON.stringify({pair:k.id,platform:device.platform,token:device.token,box,...collapse?{collapse}:{}})});
    if(answer?.reason==='device-gone'){if(device)keep(null);if(push){push=null;changed();}}
    return {sent:answer?.sent===true,...(typeof answer?.reason==='string'?{reason:answer.reason}:{})};
   }catch(e){if(!ended(e))error=(e as Error).message;return {sent:false,error:(e as Error).message};}
@@ -228,8 +220,6 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
   try{view=await request(`/api/pair/${k.id}?after=${cursor}${wait?`&wait=${wait}`:''}`,{},undefined,wait*1000+15_000);error='';}
   catch(e){if(!ended(e)){error=(e as Error).message;}return false;}
   seenAt=view.peer?.seenAt??null;
-  // An older relay sends no `push`: the status then says nothing about notifications. A token this computer keeps wins.
-  if('push' in view&&!device){const next=view.push?.platform?{platform:String(view.push.platform)}:null;if(JSON.stringify(next)!==JSON.stringify(push)){push=next;changed();}}
   let arrived=false;
   if(!saved.paired&&view.peer?.pairedAt){
    saved.paired=true;save();arrived=true;changed();
@@ -251,11 +241,10 @@ export function createPhoneRelay<M extends {type:string,id:string}=PhoneMessage>
   cursor=Math.max(cursor,view.version);
   return arrived;
  }
- /** Queues a message to the other side (the agent pairing's client). Throws when the relay refuses it. */
+ /** Sends a message to the other side in the room (the agent pairing's client). Throws when it is not there. */
  async function send(value:unknown){
-  const k=await ensureKeys();if(!k||!saved?.paired)throw new Error('Not paired.');
-  try{await request(`/api/pair/${k.id}/messages`,{method:'POST',body:JSON.stringify({box:await sealBox(k,boxPlace('to','phone'),value)})});}
-  catch(e){ended(e);throw e;}
+  const k=await ensureKeys();if(!k||!saved?.paired||!inRoom())throw new Error('Not paired.');
+  if(!peers.size||!roomSend({m:await sealBox(k,boxPlace('to','phone'),value)}))throw new Error('The other computer is not connected.');
  }
  return {status,start,end,publish,notify,poll,send,get paired(){return !!saved?.paired;},get pairing(){return !!saved;},get open(){return peers.size>0;},get room(){return inRoom();}};
 }

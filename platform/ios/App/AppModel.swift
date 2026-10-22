@@ -5,8 +5,8 @@ import UserNotifications
 import WorldletKit
 
 /// The app's whole state: the pairing, the last Attention Center and conversation the computer sent, and the chat lines
-/// this phone sent that the computer has not shown yet. While the app is open it keeps one long poll waiting at the
-/// relay, which answers the moment the computer sends a change, so the Center and Fox's replies arrive as they happen.
+/// this phone sent that the computer has not shown yet. While the app is open it stays in the pairing room, where the
+/// computer sends each change the moment it happens, so the Center and Fox's replies arrive as they happen.
 @MainActor @Observable
 final class AppModel {
     enum Phase { case unpaired, connecting, paired }
@@ -31,7 +31,8 @@ final class AppModel {
     private(set) var widgets: [PhoneWidget] = []
     /// Where each widget's page was scrolled, while the app runs, so a page reloaded for a change opens where it was.
     @ObservationIgnored var widgetScroll: [String: Double] = [:]
-    /// Widget keys edited here whose message has not reached the relay yet (no network); sent again on the next poll.
+    /// Widget keys edited here whose message has not reached the computer yet (no network, or it is away); sent again on
+    /// the next sync.
     private var widgetUnsent: [String: Set<String>] = [:]
     var error: String?
     /// A pairing link opened while this iPhone follows another computer: it replaces that pairing only once the person
@@ -53,6 +54,12 @@ final class AppModel {
             return
         }
         if let link = PairingStore.load() {
+            // A pairing kept from before the pairing room cannot meet there: it is ended, and the person pairs again.
+            guard link.room == true else {
+                forget()
+                error = RelayError.ended.localizedDescription
+                return
+            }
             if let stored = WidgetStore.load() {
                 widgets = stored.widgets
                 widgetUnsent = stored.unsent.mapValues { Set($0) }
@@ -80,7 +87,7 @@ final class AppModel {
         takesOrders = Demo.order
     }
 
-    /// The computer reached the relay recently (it checks in at least every 15 seconds while Worldlet runs).
+    /// The computer is in the pairing room, or left it recently.
     /// When it is away the phone keeps showing what it sent last.
     var computerOnline: Bool {
         if Demo.enabled { return true }
@@ -122,7 +129,7 @@ final class AppModel {
         }
     }
 
-    /// The person chose to follow the other computer: this pairing ends on the relay and everything it brought (the
+    /// The person chose to follow the other computer: this pairing ends and everything it brought (the
     /// Center, the conversation, widgets and their unsent edits) goes before the new one starts.
     func replacePairing(with link: PairLink) {
         replacement = nil
@@ -146,7 +153,7 @@ final class AppModel {
         phase = .connecting
         error = nil
         Task { try? await session.announce(PhoneInfo(name: UIDevice.current.name, version: Self.appVersion)) }
-        // A launch in the background (a notification's button) does not poll: the relay would think the app is showing,
+        // A launch in the background (a notification's button) does not sync: the room would say the app is showing,
         // and the computer would hold back the notification with Fox's answer. Coming to the front resumes.
         if UIApplication.shared.applicationState != .background { resume() }
     }
@@ -167,7 +174,6 @@ final class AppModel {
         opening = nil
         askNotifications = false
         UserDefaults.standard.removeObject(forKey: Self.sentPushKey)
-        keepsPush = false
         PairingStore.delete()
         phase = .unpaired
         attention = .empty
@@ -194,7 +200,7 @@ final class AppModel {
         loop = Task { [weak self] in
             while !Task.isCancelled {
                 guard let self else { return }
-                // The first poll answers at once (it completes the pairing); later ones wait at the relay for news.
+                // The first sync answers at once; later ones wait in the room for news.
                 let ok = await self.sync(wait: self.phase == .paired ? 20 : 0)
                 if !ok { try? await Task.sleep(for: .seconds(3)) }
             }
@@ -208,18 +214,13 @@ final class AppModel {
         if let session { Task { await session.leaveRoom() } }
     }
 
-    /// One poll; false when it failed, so the loop backs off before trying again.
+    /// One sync; false when it failed, so the loop backs off before trying again.
     @discardableResult
     func sync(wait: Int = 0) async -> Bool {
         guard let session else { return false }
         do {
             let update = try await session.sync(wait: wait)
             guard self.session === session else { return false }
-            // The computer moved the pairing into the pairing room: the kept link says so from now on.
-            if await session.inRoom, let link, link.room != true, self.session === session {
-                self.link = link.inRoom
-                PairingStore.save(link.inRoom)
-            }
             apply(update)
             if phase == .connecting {
                 phase = .paired
@@ -245,10 +246,8 @@ final class AppModel {
         if let seen = update.computerSeenAt { computerSeenAt = Date(timeIntervalSince1970: seen / 1000) }
         if let desktop = update.desktop, !desktop.name.isEmpty { computerName = desktop.name }
         if let desktop = update.desktop { takesOrders = desktop.order == true }
-        if let desktop = update.desktop, (desktop.push == true) != keepsPush {
-            keepsPush = desktop.push == true
-            sendPushToken()
-        }
+        // The computer sends its desktop slot each time it meets the phone in the room: a token it has not taken yet goes now.
+        if update.desktop != nil { sendPushToken() }
         if let snapshot = update.attention {
             attention = snapshot
             receivedAttention = true
@@ -288,22 +287,19 @@ final class AppModel {
 
     // MARK: Notifications
 
-    /// The relay's platform for this build's APNs token: Apple's sandbox for debug builds.
+    /// The platform for this build's APNs token: Apple's sandbox for debug builds.
     #if DEBUG
     static let pushPlatform = "apns-dev"
     #else
     static let pushPlatform = "apns"
     #endif
     private static let askedKey = "notificationsAsked"
-    /// The pairing, platform and token the relay last took, so a token is sent again only when one of them changes.
+    /// The pairing, platform and token the computer last took, so a token is sent again only when one of them changes.
     private static let sentPushKey = "pushSent"
 
     /// Asks once, after pairing, whether to turn notifications on (HomeView's alert, before the system's own question).
     var askNotifications = false
     @ObservationIgnored private var pushToken: String?
-    /// The computer keeps the token itself (its desktop slot says `push`), so the relay gets none.
-    /// Starts as it was last sent, so a launch does not hand the token back to the relay before the slot arrives.
-    @ObservationIgnored private var keepsPush = UserDefaults.standard.string(forKey: AppModel.sentPushKey)?.hasSuffix(" direct") == true
     /// Where a tapped notification goes; HomeView opens it once the Center has what it names.
     var opening: PushTarget?
     /// A Center snapshot came since the tap, so an item or Applet still missing from it is gone.
@@ -334,7 +330,7 @@ final class AppModel {
         }
     }
 
-    /// The APNs device token (AppDelegate). The relay gets it once per pairing, and again when it changes.
+    /// The APNs device token (AppDelegate). The computer gets it once per pairing, and again when it changes.
     func registered(token: Data) {
         pushToken = pushTokenHex(token)
         sendPushToken()
@@ -342,12 +338,11 @@ final class AppModel {
 
     private func sendPushToken() {
         guard let session, let keys, let token = pushToken, phase == .paired else { return }
-        let direct = keepsPush
-        let sent = "\(keys.id) \(Self.pushPlatform) \(token)\(direct ? " direct" : "")"
+        let sent = "\(keys.id) \(Self.pushPlatform) \(token)"
         guard UserDefaults.standard.string(forKey: Self.sentPushKey) != sent else { return }
         Task {
-            // A failure is tried again with the token the next launch brings.
-            guard (try? await session.registerPush(platform: Self.pushPlatform, token: token, direct: direct)) != nil, self.session === session else { return }
+            // A failure (the computer away) is tried again when the computer next comes to the room.
+            guard (try? await session.registerPush(platform: Self.pushPlatform, token: token)) != nil, self.session === session else { return }
             UserDefaults.standard.set(sent, forKey: Self.sentPushKey)
         }
     }
@@ -465,7 +460,7 @@ final class AppModel {
     }
 
     /// Sends what was said with the Order button as an Order from the computer (agent/app `order`), never a line for
-    /// Fox; false when it did not reach the relay.
+    /// Fox; false when it did not reach the computer.
     func order(_ said: String) async -> Bool {
         let said = said.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !said.isEmpty, let session else { return false }
@@ -496,7 +491,8 @@ final class AppModel {
 
     /// The observer's reports per Applet, sent every ten seconds and when the page closes.
     @ObservationIgnored private var webBuffers: [String: WebReportBuffer] = [:]
-    /// Messages the relay did not take yet (no network); sent again with the next ones, the oldest dropped past 40.
+    /// Messages that did not reach the computer yet (no network, or it is away); sent again with the next ones, the
+    /// oldest dropped past 40.
     @ObservationIgnored private var webOutbox: [PhoneMessage] = []
     @ObservationIgnored private var webTimer: Task<Void, Never>?
 

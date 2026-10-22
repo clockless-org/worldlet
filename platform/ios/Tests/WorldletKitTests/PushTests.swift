@@ -5,9 +5,6 @@ import CryptoKit
 #else
 import Crypto
 #endif
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
 @testable import WorldletKit
 
 final class PushTests: XCTestCase {
@@ -91,35 +88,21 @@ final class PushTests: XCTestCase {
         XCTAssertNil(try read(#"{"v":1,"id":"n","at":0,"kind":"task","title":"Done","body":""}"#).category)
     }
 
-    func testRegisterAndUnpairCallTheRelay() async throws {
-        let link = PairLink(secret: secret, name: "Mac")
-        let relay = FakeRelay()
-        relay.answers = [(200, #"{"ok":true}"#), (200, #"{"ok":true}"#), (404, #"{"error":"gone"}"#)]
-        let session = PhoneSession(link: link, transport: relay)
-        let token = pushTokenHex(Data([0x00, 0xab, 0x10, 0xff]))
-        XCTAssertEqual(token, "00ab10ff")
-        try await session.registerPush(platform: "apns-dev", token: token)
-        try await session.unpair()
-        let id = PairKeys(secret: secret).id
-        XCTAssertEqual(relay.requests.map { "\($0.httpMethod ?? "") \($0.url?.path ?? "")" },
-                       ["PUT /api/pair/\(id)/push", "DELETE /api/pair/\(id)/push", "DELETE /api/pair/\(id)"])
-        let body = try JSONSerialization.jsonObject(with: XCTUnwrap(relay.requests[0].httpBody)) as? [String: String]
-        XCTAssertEqual(body, ["platform": "apns-dev", "token": "00ab10ff"])
-        XCTAssertEqual(relay.requests[0].value(forHTTPHeaderField: "Authorization"), "Bearer \(PairKeys(secret: secret).phoneToken)")
-    }
-
-    func testDirectRegisterHandsTheTokenToTheComputer() async throws {
-        let link = PairLink(secret: secret, name: "Mac")
-        let relay = FakeRelay()
-        relay.answers = [(201, #"{"seq":1}"#), (200, #"{"ok":true}"#)]
-        let session = PhoneSession(link: link, transport: relay)
-        try await session.registerPush(platform: "apns", token: "00ab10ff", direct: true)
+    func testRegisterHandsTheTokenToTheComputerAndUnpairEnds() async throws {
+        XCTAssertEqual(pushTokenHex(Data([0x00, 0xab, 0x10, 0xff])), "00ab10ff")
         let keys = PairKeys(secret: secret)
-        XCTAssertEqual(relay.requests.map { "\($0.httpMethod ?? "") \($0.url?.path ?? "")" },
-                       ["POST /api/pair/\(keys.id)/messages", "DELETE /api/pair/\(keys.id)/push"], "sealed to the computer, and the relay keeps none")
-        struct Sent: Decodable { let box: String }
+        let room = FakeRoom()
+        let session = PhoneSession(link: PairLink(secret: secret, name: "Mac"), room: room)
+        let socket = try await connectedRoom(room, session)
+        socket.deliver(roomEvent(["t": "desktop", "online": true]))
+        _ = try await session.sync(wait: 1)
+        try await session.registerPush(platform: "apns", token: "00ab10ff")
         struct Handed: Decodable, Equatable { let type: String; let platform: String; let token: String }
-        let box = try JSONDecoder().decode(Sent.self, from: XCTUnwrap(relay.requests[0].httpBody)).box
-        XCTAssertEqual(try keys.open(Handed.self, box: box, place: PairKeys.place(to: "desktop")), Handed(type: "push", platform: "apns", token: "00ab10ff"))
+        XCTAssertEqual(try keys.open(Handed.self, box: XCTUnwrap(sentFrames(socket).last?.m), place: PairKeys.place(to: "desktop")),
+                       Handed(type: "push", platform: "apns", token: "00ab10ff"), "sealed to the computer")
+        try await session.unpair()
+        struct End: Decodable { let end: Bool }
+        XCTAssertEqual(try keys.open(End.self, box: XCTUnwrap(sentFrames(socket).last?.e), place: PairKeys.place(slot: "end")).end, true)
+        do { _ = try await session.sync(); XCTFail("expected ended") } catch { XCTAssertEqual(error as? RelayError, .ended) }
     }
 }

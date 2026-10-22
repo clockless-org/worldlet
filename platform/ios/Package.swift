@@ -1,6 +1,6 @@
 // swift-tools-version:5.9
-// WorldletKit: the iPhone app's pairing protocol, relay client and payload models, kept free of UIKit so `swift test`
-// runs them on Linux too (with swift-crypto standing in for CryptoKit). The app target itself is in project.yml.
+// WorldletKit: the iPhone app's pairing protocol, pairing room client and payload models, kept free of UIKit so
+// `swift test` runs them on Linux too (with swift-crypto standing in for CryptoKit). The app target itself is in project.yml.
 import PackageDescription
 
 let package = Package(

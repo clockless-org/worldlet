@@ -2,7 +2,7 @@ import UserNotifications
 import WorldletKit
 
 /// WorldletNotify, the Notification Service Extension. APNs brings the relay's fallback text ("New from your computer")
-/// with the computer's sealed content (`p` the pairing id, `b` the box, worker/pairing.ts /notify); this opens it with
+/// with the computer's sealed content (`p` the pairing id, `b` the box, the website Worker's /api/push); this opens it with
 /// the pairing key from the shared Keychain group (PairingStore) and shows what the computer said, with where a tap
 /// goes as `open` in userInfo (PushTarget) and its buttons as the category (PhonePush.category). A box it cannot open
 /// (another pairing, none, or a phone not unlocked since it started) keeps the fallback, without buttons.

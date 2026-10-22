@@ -43,12 +43,8 @@ class PairingStore(context: Context) {
         prefs.edit().putString(LINK, Base64Url.encode(sealed)).apply()
     }
 
-    /** The computer keeps this phone's notification token (its desktop slot says `push`), so a new token goes to it. */
-    var keepsPush: Boolean
-        get() = prefs.getBoolean(KEEPS_PUSH, false)
-        set(value) { prefs.edit().putBoolean(KEEPS_PUSH, value).apply() }
-
     fun delete() {
+        // The flag earlier versions kept goes with the pairing.
         prefs.edit().remove(LINK).remove(KEEPS_PUSH).apply()
     }
 
