@@ -142,11 +142,11 @@ await withTempDir('worldlet-world-address-',async dir=>{
   o=await options('register');
   let asked=await page('POST','/access',{body:{challengeId:o.id,label:'Chrome on Mac',credential:laptop.create(o.challenge)}});
   assert.equal(asked.status,200);
-  const request=asked.json();assert.match(request.code,/^\d{4}$/);
+  const request=asked.json();assert.deepEqual(Object.keys(request),['id']);
   const item=ledger.value('items',remoteConsentItemId(request.id))!;
-  assert.equal(item.title,'Allow Chrome on Mac to open your World?');assert.match(String(item.summary),new RegExp(`code ${request.code}`));
+  assert.equal(item.title,'Allow Chrome on Mac to open your World?');assert.doesNotMatch(String(item.summary),/code/);
   const projected={pages:[] as any[],roots:['root']};projectWorldItems(projected,[item]);
-  assert.deepEqual(projected.pages[0].worldItemRemoteConsent,{id:request.id,client:'Chrome on Mac',code:request.code,returnsTo:HOST,status:'pending',asks:'owner'});
+  assert.deepEqual(projected.pages[0].worldItemRemoteConsent,{id:request.id,client:'Chrome on Mac',from:'',returnsTo:HOST,status:'pending',asks:'owner'});
   assert.notEqual(roomDenied({action:'remoteMcp',operation:'allow'}),'','only this computer\'s pages answer it');
   assert.notEqual(roomDenied({action:'worldAddress',operation:'share'}),'');
   // Before Allow: the passkey signs nothing in.

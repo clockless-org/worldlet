@@ -14,8 +14,8 @@ The address is the room of [remote access](REMOTE-MCP.md)'s connection (owner re
 
 On another device, open the address and choose **Ask to use this browser**:
 
-1. The browser makes a passkey for this address and shows a four-digit code.
-2. A card in Attention on your computer asks whether to allow it. Choose **Allow** only if you are using that browser right now and it shows the same code.
+1. The browser makes a passkey for this address.
+2. A card in Attention on your computer asks whether to allow it, naming the browser and the city it asks from. Choose **Allow** only if you are using that browser right now.
 3. **Open your World** signs in with the passkey and opens your whole World in that browser.
 
 From then on, **Sign in with a passkey** is all it takes. Under the address, **Sign out** forgets a browser's passkey. It also changes your World's link for other devices, so a World page that browser still has open closes; copy the link again wherever else you use it.
@@ -42,4 +42,4 @@ Each person you allow is listed under **People**, like an Agent of their own: wh
 
 TLS ends at the website, as for remote MCP: it sees requests in transit and keeps none of them.
 
-`node scripts/world-address-check.ts` checks the host with passkeys made the way a browser's authenticator makes them. It covers the room address, the code and card, sign-in and every refusal, sharing, Remove and Sign out, New address, and that no session reaches an item, ledger row or log line.
+`node scripts/world-address-check.ts` checks the host with passkeys made the way a browser's authenticator makes them. It covers the room address, the card, sign-in and every refusal, sharing, Remove and Sign out, New address, and that no session reaches an item, ledger row or log line.

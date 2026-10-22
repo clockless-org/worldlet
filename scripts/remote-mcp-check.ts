@@ -117,22 +117,23 @@ await withTempDir('worldlet-remote-mcp-',async dir=>{
   assert.equal(client.token_endpoint_auth_method,'none');
   say('PASS registration takes https, loopback and app-scheme redirects, and refuses the rest.');
 
-  // Authorize: the page waits with a code, and the card in Attention names the client, where it returns and the code.
+  // Authorize: the page waits, and the card in Attention names the client, where it returns and where it was started from.
   const verifier=b64url(crypto.randomBytes(48)),challenge=b64url(crypto.createHash('sha256').update(verifier).digest());
   const authorizeQuery=(extra:Record<string,string>={})=>new URLSearchParams({response_type:'code',client_id:client.client_id,redirect_uri:redirect,code_challenge:challenge,code_challenge_method:'S256',state:'st-1',scope:'world',...extra}).toString();
   assert.match((await front('GET','/authorize',{query:authorizeQuery({client_id:'nobody'.padEnd(43,'x')})})).body,/not registered/);
   assert.match((await front('GET','/authorize',{query:authorizeQuery({redirect_uri:'https://evil.example/cb'})})).body,/did not register/);
   const noPkce=await front('GET','/authorize',{query:authorizeQuery({code_challenge_method:'plain'})});
   assert.equal(noPkce.status,302);assert.match(noPkce.headers.location,/^https:\/\/claude\.ai\/api\/mcp\/auth_callback\?error=invalid_request/);
-  const pageAnswer=await front('GET','/authorize',{query:authorizeQuery()});
+  const pageAnswer=await front('GET','/authorize',{query:authorizeQuery(),headers:{'x-mcp-from':'Chrome on Mac · San Francisco, US'}});
   assert.equal(pageAnswer.status,200);
   assert.match(pageAnswer.headers['content-security-policy'],/script-src 'nonce-[A-Za-z0-9_-]+'/);
-  const code=/class="code">(\d{4})</.exec(pageAnswer.body)![1];
+  assert.doesNotMatch(pageAnswer.body,/code/i,'no code to compare');
   const consentId=/wait\?id=([A-Za-z0-9_-]+)/.exec(pageAnswer.body)![1];
   const item=ledger.value('items',remoteConsentItemId(consentId))!;
-  assert.deepEqual([item.provider,item.status,item.remoteConsentClient,item.remoteConsentCode,item.remoteConsentReturnsTo],['agents','open','Claude',code,'claude.ai']);
+  assert.deepEqual([item.provider,item.status,item.remoteConsentClient,item.remoteConsentFrom,item.remoteConsentReturnsTo],['agents','open','Claude','Chrome on Mac · San Francisco, US','claude.ai']);
+  assert.match(String(item.summary),/connecting Claude from Chrome on Mac · San Francisco, US\. It returns to claude\.ai\./);
   const projected={pages:[] as any[],roots:['root']};projectWorldItems(projected,[item]);
-  assert.deepEqual(projected.pages[0].worldItemRemoteConsent,{id:consentId,client:'Claude',code,returnsTo:'claude.ai',status:'pending'});
+  assert.deepEqual(projected.pages[0].worldItemRemoteConsent,{id:consentId,client:'Claude',from:'Chrome on Mac · San Francisco, US',returnsTo:'claude.ai',status:'pending'});
   // Only this computer's pages may answer it: a World page on another device cannot.
   assert.notEqual(roomDenied({action:'remoteMcp',operation:'allow'}),'');
   // A wait that is not answered yet comes back pending.
@@ -145,7 +146,7 @@ await withTempDir('worldlet-remote-mcp-',async dir=>{
   const authCode=back.searchParams.get('code')!;
   assert.deepEqual(remote.decide(consentId,true).ok,false,'answered once');
   assert.equal(ledger.value('items',remoteConsentItemId(consentId))!.status,'done');
-  say('PASS authorize: the page waits with a code, the card names client, return place and code, and Allow hands back a code with state and iss.');
+  say('PASS authorize: the page waits, the card names client, return place and where it was started, and Allow hands back a code with state and iss.');
 
   // Token: the verifier must match, the code works once.
   const tokenRequest=(values:Record<string,string>,headers:Record<string,string>={})=>front('POST','/token',{headers:{'content-type':'application/x-www-form-urlencoded',...headers},body:new URLSearchParams(values).toString()});
