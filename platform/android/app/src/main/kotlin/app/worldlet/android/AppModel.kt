@@ -46,8 +46,8 @@ import kotlinx.coroutines.launch
 /**
  * The app's whole state, as the iPhone's AppModel keeps it: the pairing, the last Attention Center and conversation
  * the computer sent, and the chat lines this phone sent that the computer has not shown yet. While the app is in the
- * foreground it keeps one long poll waiting at the relay, which answers the moment the computer sends a change, so the
- * Center and Fox's replies arrive as they happen.
+ * foreground it stays in the pairing room, where the computer sends each change the moment it happens, so the Center and
+ * Fox's replies arrive as they happen.
  */
 class AppModel(
     private val store: PairingStore?,
@@ -57,8 +57,8 @@ class AppModel(
     private val widgetStore: WidgetStore? = null,
     /** This phone's notification token (Push.kt), null while notifications are off; absent in a build without push. */
     private val pushToken: (suspend () -> String?)? = null,
-    /** The pairing room's WebSocket client (RoomClient.kt); without one the phone stays on the relay. */
-    private val room: RoomConnector? = null,
+    /** The pairing room's WebSocket client (RoomClient.kt). */
+    private val room: RoomConnector = RoomClient,
 ) : ViewModel() {
     enum class Phase { Unpaired, Connecting, Paired }
 
@@ -114,6 +114,12 @@ class AppModel(
         val demo = demo
         if (demo != null) loadDemo(demo) else {
             store?.load()?.let { link ->
+                if (!link.room) {
+                    // A pairing from before the pairing room has nowhere to meet any more: it ended, as an ended pairing does.
+                    forget()
+                    error = RelayException.Ended.message
+                    return@let
+                }
                 widgets = widgetStore?.load()?.widgets.orEmpty()
                 start(link)
             }
@@ -142,8 +148,7 @@ class AppModel(
         takesOrders = options.order
     }
 
-    /** The computer reached the relay recently (it checks in at least every 15 seconds while Worldlet runs). When it
-     * is away the phone keeps showing what it sent last. */
+    /** The computer was in the pairing room recently. When it is away the phone keeps showing what it sent last. */
     val computerOnline: Boolean
         get() = demo != null || computerSeenAt?.let { Instant.now().epochSecond - it.epochSecond < 90 } ?: false
 
@@ -181,7 +186,7 @@ class AppModel(
         }
     }
 
-    /** The person chose to follow the other computer: this pairing ends on the relay and everything it brought (the
+    /** The person chose to follow the other computer: this pairing ends and everything it brought (the
      * Center, the conversation, widgets and the edits made to them) goes before the new one starts. */
     fun replacePairing(link: PairLink) {
         replacement = null
@@ -205,7 +210,7 @@ class AppModel(
         resume()
     }
 
-    /** The relay forgets this phone's notification token first, so nothing more is sent to it. */
+    /** The computer forgets this phone's notification token first, so nothing more is sent to it. */
     fun unpair() {
         val session = this.session
         demo = null
@@ -216,14 +221,13 @@ class AppModel(
         }
     }
 
-    /** Gives the relay this phone's notification token, or takes it back while notifications are off, so the computer
-     * notifies only a phone that shows them: once each time the pairing connects, and after the person answers the ask. */
+    /** Gives the computer this phone's notification token, or takes it back while notifications are off, so it notifies
+     * only a phone that shows them: once each time the pairing connects, and after the person answers the ask. */
     fun syncPush() {
         val session = session ?: return
         val token = pushToken ?: return
         if (demo != null) return
-        val direct = store?.keepsPush == true
-        viewModelScope.launch { runCatching { token()?.let { session.registerPush("fcm", it, direct) } ?: session.unregisterPush(direct) } }
+        viewModelScope.launch { runCatching { token()?.let { session.registerPush("fcm", it) } ?: session.unregisterPush() } }
     }
 
     fun show(target: PushTarget) { if (demo == null) this.target = target }
@@ -260,7 +264,7 @@ class AppModel(
         loop?.cancel()
         loop = viewModelScope.launch {
             while (isActive) {
-                // The first poll answers at once (it completes the pairing); later ones wait at the relay for news.
+                // The first sync answers at once (it opens the room); later ones wait there for news.
                 val ok = sync(if (phase == Phase.Paired) 20 else 0)
                 if (!ok) delay(3_000)
             }
@@ -270,7 +274,7 @@ class AppModel(
     fun pause() {
         loop?.cancel()
         loop = null
-        // In the pairing room the computer then knows the app is put away, and notifies instead.
+        // The computer then knows the app is put away, and notifies instead.
         session?.leaveRoom()
     }
 
@@ -280,8 +284,6 @@ class AppModel(
         try {
             val update = session.sync(wait)
             if (this.session !== session) return false
-            // The computer moved the pairing into the pairing room: the kept link says so from now on.
-            link?.takeIf { session.inRoom && !it.room }?.copy(room = true)?.let { moved -> link = moved; store?.save(moved) }
             apply(update)
             if (phase == Phase.Connecting) {
                 phase = Phase.Paired
@@ -306,9 +308,6 @@ class AppModel(
         update.computerSeenAt?.let { computerSeenAt = Instant.ofEpochMilli(it.toLong()) }
         update.desktop?.name?.takeIf { it.isNotEmpty() }?.let { computerName = it }
         update.desktop?.let { takesOrders = it.order }
-        update.desktop?.let { desktop ->
-            store?.takeIf { it.keepsPush != desktop.push }?.let { it.keepsPush = desktop.push; if (phase == Phase.Paired) syncPush() }
-        }
         update.attention?.let { snapshot ->
             attention = snapshot
             receivedAttention = true
@@ -462,7 +461,7 @@ class AppModel(
     }
 
     /** Sends what was said with the Order button as an Order from the computer (agent/app `order`), never a line for
-     * Fox; false when it did not reach the relay. */
+     * Fox; false when it did not reach the computer. */
     suspend fun order(said: String): Boolean {
         val line = said.trim()
         if (line.isEmpty()) return false
@@ -492,8 +491,8 @@ class AppModel(
     /** Opens an Applet's website here; one with no website opens nothing. */
     fun browse(applet: PhoneApplet?) { browsing = applet?.takeIf { it.website != null } }
 
-    // The observer's reports per Applet, sent every ten seconds and when the page closes; messages the relay did not
-    // take yet (no network) go again with the next ones, the oldest dropped past 40.
+    // The observer's reports per Applet, sent every ten seconds and when the page closes; messages that did not go
+    // yet (no network, or the computer away) go again with the next ones, the oldest dropped past 40.
     private val webBuffers = mutableMapOf<String, WebReportBuffer>()
     private val webOutbox = ArrayDeque<PhoneMessage>()
     private var webTimer: Job? = null

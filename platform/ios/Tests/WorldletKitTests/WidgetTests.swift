@@ -120,9 +120,13 @@ final class WidgetTests: XCTestCase {
         let keys = PairKeys(secret: link.secret)
         let snapshot = try JSONDecoder().decode(WidgetsSnapshot.self, from: Data(slot.utf8))
         let box = try keys.seal(snapshot, place: PairKeys.place(slot: "widgets"))
-        let relay = FakeRelay()
-        relay.answers = [(200, #"{"version":3,"role":"phone","peer":null,"slots":[{"name":"widgets","version":3,"box":"\#(box)"}],"messages":[]}"#)]
-        let update = try await PhoneSession(link: link, transport: relay).sync()
-        XCTAssertEqual(update.widgets, snapshot)
+        let room = FakeRoom()
+        let session = PhoneSession(link: link, room: room)
+        let socket = try await connectedRoom(room, session)
+        socket.deliver(roomEvent(["t": "desktop", "online": true]))
+        socket.deliver(roomFrame(["s": "widgets", "b": box]))
+        var widgets: WidgetsSnapshot?
+        for _ in 0..<20 where widgets == nil { widgets = try await session.sync(wait: 1).widgets }
+        XCTAssertEqual(widgets, snapshot)
     }
 }

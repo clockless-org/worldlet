@@ -10,7 +10,7 @@ import {WORLD_PAGE_CSP_META,WORLD_PROTOCOL,WORLD_SOCKET_PATH,WORLD_TOKEN,worldTo
 // Worldlet in a browser on this computer, served by this computer (owner decision 2026-10-13: "我们不要存，用户应该从他
 // 安装worldlet的设备直接serve"; platform/web/README.md#web). The app answers on 127.0.0.1 with the browser page (platform/web/page,
 // built into the interface's `open/` folder) and the relay protocol the page and the computer already speak
-// (worker/pairing.ts in the operations repository: the link, the first poll completing the pairing, slots, messages),
+// (the protocol worldlet.ai's relay spoke until 2026-10-21, now served only here: the link, the first poll completing the pairing, slots, messages),
 // kept in this process's memory. Nothing goes over the internet and nothing is written to disk: the boxes are sealed as
 // on any relay, and a restart leaves only the pairing itself, which the computer hands back (`adopt`).
 const SLOT_OWNER:Record<string,'desktop'|'phone'>={attention:'desktop',conversation:'desktop',live:'desktop',widgets:'desktop',desktop:'desktop',phone:'phone'};
@@ -22,7 +22,7 @@ type Pair={desktop:string,phone:string,version:number,phoneSeen:number|null,desk
 const hex=async(text:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text))),b=>b.toString(16).padStart(2,'0')).join('');
 const json=(value:unknown,status=200)=>new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
 
-/** The relay, in memory: `fetch` answers `/api/pair…` requests as worker/pairing.ts does for what both sides use. */
+/** The relay, in memory: `fetch` answers the `/api/pair…` requests both sides use (platform/web/README.md#local-relay). */
 export function createLocalRelay({now=()=>Date.now()}:{now?:()=>number}={}){
  const pairs=new Map<string,Pair>();
  const make=(desktop:string,phone:string,pairedAt:number|null):Pair=>({desktop,phone,version:0,phoneSeen:null,desktopSeen:now(),pairedAt,slots:new Map(),messages:[],waiters:new Set()});

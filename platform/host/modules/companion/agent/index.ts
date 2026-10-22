@@ -595,8 +595,8 @@ export function installAgentRuntime(host:Host){
   changed:reason=>{for(const listener of listeners)try{listener(reason);}catch(error){host.diagnostics.record(error,'agentRuntime');}}
  });
  // The pairing with Worldlet on another computer whose Agent Fox uses (platform/web/README.md#another-computers-agent).
- const remote=createRemoteAgentLink({fetch:(input,init)=>fetch(input,init),vault:host.use<VaultService>(VAULT),
-  name:()=>os.hostname().replace(/\.(local|lan|home)$/i,'').slice(0,60)||'Computer',version:app.getVersion(),userAgent:`Worldlet/${app.getVersion()} (agent pairing)`,
+ const remote=createRemoteAgentLink({vault:host.use<VaultService>(VAULT),
+  name:()=>os.hostname().replace(/\.(local|lan|home)$/i,'').slice(0,60)||'Computer',version:app.getVersion(),
   // Unpaired on the other computer: Fox has no Agent until one is chosen.
   onEnded:()=>{if(adapter instanceof RemoteHarnessAdapter)void switchTo(noAgent()).catch(error=>host.diagnostics.record(error,'agentRuntime'));}});
  const vault=host.use<VaultService>(VAULT);

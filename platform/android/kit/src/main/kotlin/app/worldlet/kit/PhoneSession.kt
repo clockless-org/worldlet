@@ -1,59 +1,24 @@
 package app.worldlet.kit
 
 import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URI
-import java.net.URLEncoder
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
-/** One relay request, as the transport sends it; tests replace the transport. */
-data class RelayRequest(val method: String, val url: String, val headers: Map<String, String>, val body: String?, val timeoutMillis: Int)
-
-fun interface RelayTransport {
-    suspend fun send(request: RelayRequest): Pair<Int, String>
-}
-
-/** The platform's own HTTP client, so the kit needs no networking library. */
-object HttpTransport : RelayTransport {
-    override suspend fun send(request: RelayRequest): Pair<Int, String> = withContext(Dispatchers.IO) {
-        val connection = URI(request.url).toURL().openConnection() as HttpURLConnection
-        try {
-            connection.requestMethod = request.method
-            connection.connectTimeout = 15_000
-            connection.readTimeout = request.timeoutMillis
-            request.headers.forEach { (k, v) -> connection.setRequestProperty(k, v) }
-            if (request.body != null) {
-                connection.doOutput = true
-                connection.outputStream.use { it.write(request.body.toByteArray()) }
-            }
-            val status = connection.responseCode
-            val stream = if (status >= 400) connection.errorStream else connection.inputStream
-            status to (stream?.bufferedReader()?.use { it.readText() } ?: "")
-        } finally {
-            connection.disconnect()
-        }
-    }
-}
-
 sealed class RelayException(message: String) : IOException(message) {
-    /** The pairing no longer exists: the computer unpaired, or the relay forgot an idle pairing. */
+    /** The pairing no longer exists: the computer unpaired, or it is a pairing from before the pairing room. */
     data object Ended : RelayException("This phone is no longer paired. Pair again from Worldlet on your computer.") {
         private fun readResolve(): Any = Ended
     }
     class Failed(message: String) : RelayException(message)
 }
 
-/** What one poll brought. Null fields did not change. */
+/** What one sync brought. Null fields did not change. */
 data class PhoneUpdate(
     val attention: AttentionSnapshot? = null,
     val conversation: Conversation? = null,
@@ -62,35 +27,30 @@ data class PhoneUpdate(
     val desktop: DesktopInfo? = null,
     /** The widgets for now (context/store). */
     val widgets: WidgetsSnapshot? = null,
-    /** When the computer last reached the relay (milliseconds since 1970). */
+    /** When the computer was last in the room (milliseconds since 1970). */
     val computerSeenAt: Double? = null,
 )
 
-/** The phone's side of a pairing, against the relay in worker/pairing.ts or in the pairing room (platform/web/README.md#room,
- * through [room]). It keeps the poll cursor or the room socket; the app keeps the link in its encrypted store and calls
- * [sync] while it is open. A relay pairing moves to the room once the computer's desktop slot says `room` ([inRoom] then
- * turns true, and the app keeps the link that says so). In the room the computer sends everything it has when the phone
- * arrives, then each change; nothing waits there, so a message goes only while the computer is in the room too. */
+/** The phone's side of a pairing, in the pairing room (platform/web/README.md#room) on the link's relay host, through
+ * [room]. It keeps the room socket; the app keeps the link in its encrypted store and calls [sync] while it is open. The
+ * computer sends everything it has when the phone arrives, then each change; nothing waits there, so a message goes only
+ * while the computer is in the room too. A link from before the pairing room (no `m=room`) has nowhere to meet: its
+ * session is ended from the start, so the app asks to pair again. */
 class PhoneSession(
     val link: PairLink,
-    private val transport: RelayTransport = HttpTransport,
-    private val userAgent: String = "Worldlet-Android/1 (phone pairing)",
-    private val room: RoomConnector? = null,
+    private val room: RoomConnector,
 ) {
     val keys = PairKeys(link.secret)
 
-    /** The pairing meets in the room. */
-    @Volatile
-    var inRoom = link.room && room != null
-        private set
     private val lock = Any()
     private var socket: RoomSocket? = null
     /** Counts sockets, so a closed one's last events change nothing. */
     private var generation = 0
-    /** The computer is in the room; the room said whether it is ([heard]); the computer ended the pairing. */
+    /** The computer is in the room; the room said whether it is ([heard]); the pairing ended (the computer ended it, the
+     * phone unpaired, or the link is not a room link). */
     private var computer = false
     private var heard = false
-    private var ended = false
+    private var ended = !link.room
     /** What the computer sent since the last sync, and whether anything came. */
     private var collected = PhoneUpdate()
     private var fresh = false
@@ -99,56 +59,6 @@ class PhoneSession(
     @Volatile
     private var info: PhoneInfo? = null
     private val news = MutableStateFlow(0)
-
-    @Volatile
-    var cursor = 0
-        private set
-
-    @Serializable
-    private data class SlotRow(val name: String, val version: Int = 0, val box: String)
-
-    @Serializable
-    private data class Peer(val seenAt: Double? = null)
-
-    @Serializable
-    private data class View(val version: Int, val peer: Peer? = null, val slots: List<SlotRow> = emptyList())
-
-    @Serializable
-    private data class Failure(val error: String? = null)
-
-    private suspend fun request(path: String, method: String = "GET", query: List<Pair<String, String>> = emptyList(), body: JsonObject? = null, timeoutSeconds: Int = 20): String {
-        val base = link.relay.trimEnd('/') + "/" + path
-        val url = if (query.isEmpty()) base else base + "?" + query.joinToString("&") { (k, v) -> "$k=" + URLEncoder.encode(v, "UTF-8") }
-        val headers = mapOf(
-            "Authorization" to "Bearer ${keys.phoneToken}",
-            "Content-Type" to "application/json",
-            "User-Agent" to userAgent,
-        )
-        val (status, text) = transport.send(RelayRequest(method, url, headers, body?.toString(), timeoutSeconds * 1000))
-        if (status == 404) throw RelayException.Ended
-        if (status !in 200..299) {
-            val error = runCatching { WorldletJson.decodeFromString(Failure.serializer(), text).error }.getOrNull()
-            throw RelayException.Failed(error ?: "Worldlet could not reach your computer ($status).")
-        }
-        return text
-    }
-
-    /** One poll. The first poll after scanning completes the pairing on the computer. With [wait] (seconds, at most 20)
-     * the relay holds the request until the computer sends something new, so changes arrive as they happen. */
-    suspend fun sync(wait: Int = 0): PhoneUpdate {
-        if (inRoom) return roomSync(wait)
-        val query = buildList {
-            add("after" to cursor.toString())
-            if (wait > 0) add("wait" to minOf(wait, 20).toString())
-        }
-        val view = WorldletJson.decodeFromString(View.serializer(), request("api/pair/${keys.id}", query = query, timeoutSeconds = wait + 15))
-        var update = PhoneUpdate(computerSeenAt = view.peer?.seenAt)
-        for (slot in view.slots) update = read(slot.name, slot.box, update)
-        cursor = maxOf(cursor, view.version)
-        // The computer waits in the room: the pairing moves there.
-        if (update.desktop?.room == true && room != null) inRoom = true
-        return update
-    }
 
     /** A slot's box, opened into [update]. A box that does not open (or a slot this version does not know) is skipped,
      * never trusted. */
@@ -164,11 +74,10 @@ class PhoneSession(
         } ?: update
     }
 
-    // The room
-
-    /** What came from the computer since the last sync. With [wait] it waits up to that many seconds for something to
-     * come (or the computer to arrive or leave). The computer counts as seen now while it is in the room. */
-    private suspend fun roomSync(wait: Int): PhoneUpdate {
+    /** What came from the computer since the last sync; the first one opens the room. With [wait] (seconds, at most 20)
+     * it waits for something to come (or the computer to arrive or leave). The computer counts as seen now while it is in
+     * the room. Throws [RelayException.Ended] once the pairing ended. */
+    suspend fun sync(wait: Int = 0): PhoneUpdate {
         if (ended) throw RelayException.Ended
         connect()
         // Until the room says whether the computer is there, a first sync waits for it.
@@ -188,13 +97,12 @@ class PhoneSession(
     }
 
     private fun connect() {
-        val connector = room ?: return
         synchronized(lock) {
             if (socket != null || ended) return
             heard = false
             val current = ++generation
             val (url, protocols) = roomEntry(keys, link.relay)
-            socket = connector.open(url, protocols, { text -> handle(text, current) }, { closed(current) })
+            socket = room.open(url, protocols, { text -> handle(text, current) }, { closed(current) })
         }
     }
 
@@ -276,55 +184,33 @@ class PhoneSession(
     }
 
     suspend fun send(message: PhoneMessage) {
-        if (inRoom) {
-            reachComputer()
-            if (!frame(buildJsonObject { put("m", keys.sealText(message.toJson().toString(), PairKeys.to("desktop"))) })) throw RelayException.Failed(AWAY)
-            return
-        }
-        request("api/pair/${keys.id}/messages", "POST", body = box(keys.sealText(message.toJson().toString(), PairKeys.to("desktop"))))
+        reachComputer()
+        if (!frame(buildJsonObject { put("m", keys.sealText(message.toJson().toString(), PairKeys.to("desktop"))) })) throw RelayException.Failed(AWAY)
     }
 
-    suspend fun announce(info: PhoneInfo) {
+    /** The phone's name, said now if the computer is in the room and again each time it comes. */
+    fun announce(info: PhoneInfo) {
         this.info = info
-        if (inRoom) {
-            if (synchronized(lock) { computer }) introduce()
-            return
-        }
-        request("api/pair/${keys.id}/slots/phone", "PUT", body = box(keys.seal(PhoneInfo.serializer(), info, PairKeys.slot("phone"))))
+        if (synchronized(lock) { computer }) introduce()
     }
 
-    /** Gives this phone's push token ([platform] "fcm") to whoever wakes it while it is closed. With [direct] (the
-     * computer's desktop slot says `push`) it goes to the computer in a sealed message and the relay's registration is
-     * removed, so the relay keeps none (platform/web/README.md#push); otherwise the relay keeps it, as older computers need. */
-    suspend fun registerPush(platform: String, token: String, direct: Boolean = false) {
-        if (!direct) {
-            request("api/pair/${keys.id}/push", "PUT", body = buildJsonObject { put("platform", platform); put("token", token) })
-            return
-        }
+    /** Gives this phone's push token ([platform] "fcm") to the computer in a sealed message; the computer wakes the
+     * phone while it is closed (platform/web/README.md#push). */
+    suspend fun registerPush(platform: String, token: String) {
         send(PhoneMessage.Push(java.util.UUID.randomUUID().toString(), platform, token))
-        if (!inRoom) runCatching { unregisterPush() }
     }
 
-    /** Stops notifications: the relay forgets this phone's token, and with [direct] the computer too. */
-    suspend fun unregisterPush(direct: Boolean = false) {
-        if (direct) runCatching { send(PhoneMessage.Push(java.util.UUID.randomUUID().toString(), "", "")) }
-        // A pairing in the room has no relay registration.
-        if (inRoom) return
-        try { request("api/pair/${keys.id}/push", "DELETE") } catch (_: RelayException.Ended) {}
+    /** Stops notifications: the computer forgets this phone's token, if it can be reached. */
+    suspend fun unregisterPush() {
+        runCatching { send(PhoneMessage.Push(java.util.UUID.randomUUID().toString(), "", "")) }
     }
 
     suspend fun unpair() {
-        if (inRoom) {
-            // The computer hears it if it is in the room now.
-            if (runCatching { reachComputer() }.isSuccess) frame(buildJsonObject { put("e", keys.sealText("""{"end":true}""", PairKeys.slot("end"))) })
-            synchronized(lock) { ended = true }
-            leaveRoom()
-            return
-        }
-        try { request("api/pair/${keys.id}", "DELETE") } catch (_: RelayException.Ended) {}
+        // The computer hears it if it is in the room now.
+        if (runCatching { reachComputer() }.isSuccess) frame(buildJsonObject { put("e", keys.sealText("""{"end":true}""", PairKeys.slot("end"))) })
+        synchronized(lock) { ended = true }
+        leaveRoom()
     }
-
-    private fun box(sealed: String) = buildJsonObject { put("box", sealed) }
 
     private companion object {
         const val AWAY = "Your computer is not reachable. Open Worldlet on it and try again."

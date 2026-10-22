@@ -5,7 +5,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -14,7 +13,7 @@ import kotlinx.serialization.json.jsonPrimitive
 class PairingTest {
     private val secret = ByteArray(32) { it.toByte() }
 
-    /** The same vector as scripts/phone-pairing-check.ts and the iPhone's PairingTests.swift: every side must derive
+    /** The same vector as scripts/phone-payloads-check.ts and the iPhone's PairingTests.swift: every side must derive
      * identical ids, tokens and keys. */
     @Test
     fun derivationMatchesDesktop() {
@@ -26,17 +25,23 @@ class PairingTest {
 
     @Test
     fun linkParsing() {
-        val link = PairLink.parse("worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Kelvin%E2%80%99s+Mac")
+        val link = PairLink.parse("worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Alex%E2%80%99s+Mac&m=room")
         assertTrue(link.secret.contentEquals(secret))
         assertEquals("https://worldlet.ai", link.relay)
-        assertEquals("Kelvin’s Mac", link.name)
-        val local = PairLink.parse("worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=x&r=http%3A%2F%2F127.0.0.1%3A8787")
+        assertEquals("Alex’s Mac", link.name)
+        assertTrue(link.room)
+        val local = PairLink.parse("worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=x&m=room&r=http%3A%2F%2F127.0.0.1%3A8787")
         assertEquals("http://127.0.0.1:8787", local.relay)
         fun reason(text: String) = assertFailsWith<PairingException> { PairLink.parse(text) }.reason
         assertEquals(PairingException.Reason.NotWorldlet, reason("https://worldlet.ai"))
         assertEquals(PairingException.Reason.NeedsUpdate, reason("worldlet://pair?v=2&s=AAEC"))
         assertEquals(PairingException.Reason.Incomplete, reason("worldlet://pair?v=1&s=AAEC"))
-        assertEquals(PairingException.Reason.UnknownRelay, reason("worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&r=http%3A%2F%2Fevil.example"))
+        assertEquals(PairingException.Reason.UnknownRelay, reason("worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&m=room&r=http%3A%2F%2Fevil.example"))
+        // A code from a computer that still pairs through the old relay is refused, saying to update it.
+        val old = assertFailsWith<PairingException> { PairLink.parse("worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Mac") }
+        assertEquals(PairingException.Reason.OlderComputer, old.reason)
+        assertEquals("This code is from an older Worldlet. Update Worldlet on your computer and pair again.", old.message)
+        assertEquals(PairingException.Reason.OlderComputer, reason("worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Mac&m=relay"))
         // The stored link round-trips.
         assertEquals(link, WorldletJson.decodeFromString(PairLink.serializer(), WorldletJson.encodeToString(PairLink.serializer(), link)))
     }
@@ -94,8 +99,7 @@ class PairingTest {
     fun desktopOrderIsOptional() {
         assertEquals(false, WorldletJson.decodeFromString(DesktopInfo.serializer(), """{"v":1,"at":"","name":"Studio","version":"1.0"}""").order)
         assertEquals(true, WorldletJson.decodeFromString(DesktopInfo.serializer(), """{"v":1,"at":"","name":"Studio","version":"1.0","order":true}""").order)
-        assertEquals(true, WorldletJson.decodeFromString(DesktopInfo.serializer(), """{"v":1,"at":"","name":"Studio","version":"1.0","push":true}""").push)
-        assertEquals(false, WorldletJson.decodeFromString(DesktopInfo.serializer(), """{"v":1,"at":"","name":"Studio","version":"1.0"}""").push)
+        assertEquals("Studio", WorldletJson.decodeFromString(DesktopInfo.serializer(), """{"v":1,"at":"","name":"Studio","version":"1.0","push":true,"room":true}""").name, "fields older computers sent still decode")
     }
 
     @Test
@@ -196,33 +200,5 @@ class PairingTest {
         assertEquals("Help me do it", item.fox?.option)
         assertEquals(true, item.fox?.turns?.first()?.working)
         assertEquals(listOf("Due Friday", "Bring **the form**.", "gmail", "scene-dentist"), listOf(item.fact, item.summary, item.source, item.art))
-    }
-}
-
-/** A relay that answers like worker/pairing.ts for one pairing, enough to drive the session's cursor and errors. */
-class SessionTest {
-    @Test
-    fun syncAdvancesCursorAndEnds() = runTest {
-        val link = PairLink(ByteArray(32) { it.toByte() }, name = "Mac")
-        val keys = PairKeys(link.secret)
-        val conversation = Conversation(busy = true, messages = listOf(Turn("t", Turn.Role.Fox, "Hello")))
-        val box = keys.seal(Conversation.serializer(), conversation, PairKeys.slot("conversation"))
-        val requests = mutableListOf<RelayRequest>()
-        val answers = ArrayDeque(listOf(
-            200 to """{"version":7,"role":"phone","peer":{"seenAt":1700000000000},"slots":[{"name":"conversation","version":7,"box":"$box"},{"name":"attention","version":6,"box":"AAAA"}],"messages":[]}""",
-            200 to """{"version":7,"role":"phone","peer":null,"slots":[],"messages":[]}""",
-            404 to """{"error":"gone"}""",
-        ))
-        val session = PhoneSession(link, { requests += it; answers.removeFirst() })
-        val first = session.sync()
-        assertEquals(conversation, first.conversation)
-        assertNull(first.attention, "a box that does not open is skipped")
-        assertEquals(1_700_000_000_000.0, first.computerSeenAt)
-        assertEquals("https://worldlet.ai/api/pair/${keys.id}?after=0", requests[0].url)
-        assertEquals("Bearer ${keys.phoneToken}", requests[0].headers["Authorization"])
-        session.sync(wait = 20)
-        assertEquals("https://worldlet.ai/api/pair/${keys.id}?after=7&wait=20", requests[1].url)
-        assertEquals(35_000, requests[1].timeoutMillis)
-        assertFailsWith<RelayException.Ended> { session.sync() }
     }
 }

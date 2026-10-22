@@ -5,8 +5,8 @@ import {createPhoneRelay} from '../platform/host/modules/windows/relay.ts';
 
 // The phone's notification token kept on the computer (platform/web/README.md#push): the phone hands it over with a sealed
 // `push` message, the computer keeps it in its vault and never delivers it, and a notification goes to the relay's
-// stateless `/api/push` with the token and the box. A relay without `/api/push` (404) gets the old `/notify`, and the
-// pairing stays. The relay here is the in-memory one (local-relay.ts) with `/api/push` added when `direct` is on.
+// stateless `/api/push` with the token and the box; without a token nothing is asked. The relay here is the in-memory one
+// (local-relay.ts) with `/api/push` added.
 const APNS='a'.repeat(64),FCM='f'.repeat(40);
 assert.deepEqual(readPhoneMessage({type:'push',id:'p1',platform:'apns',token:APNS}),{type:'push',id:'p1',platform:'apns',token:APNS});
 assert.deepEqual(readPhoneMessage({type:'push',id:'p2',platform:'fcm',token:FCM}),{type:'push',id:'p2',platform:'fcm',token:FCM});
@@ -17,12 +17,11 @@ assert.equal(readPhoneMessage({type:'push',id:'p6',platform:'fcm',token:''}),nul
 assert.equal(phoneDesktop({name:'Mac',version:'1'},0).push,true,'the computer says it keeps the token');
 
 const local=createLocalRelay();
-let direct=true,gone=false;
+let gone=false;
 const sent:any[]=[];
 const fetch=(async(input:string|URL|Request,init?:RequestInit)=>{
  const request=new Request(input,init);
  if(new URL(request.url).pathname==='/api/push'){
-  if(!direct)return new Response(JSON.stringify({error:'Not found'}),{status:404});
   sent.push({...await request.json(),auth:request.headers.get('Authorization')});
   return Response.json(gone?{sent:false,reason:'device-gone'}:{sent:true});
  }
@@ -40,7 +39,7 @@ await phone(`/api/pair/${keys.id}`);
 await relay.poll();
 assert.equal(relay.status().state,'paired');
 const push={v:1 as const,id:'n1',at:Date.now(),kind:'fox' as const,title:'Fox',body:'Done',open:{conversation:true as const}};
-assert.deepEqual(await relay.notify(push),{sent:false,reason:'no-device'},'without a token the relay is asked, as before');
+assert.deepEqual(await relay.notify(push),{sent:false,reason:'no-device'},'without a token there is nothing to send');
 assert.equal(sent.length,0);
 
 await say({type:'push',id:'t1',platform:'apns',token:APNS});
@@ -60,12 +59,6 @@ relay=make();
 assert.deepEqual(relay.status().push,{platform:'apns'});
 assert.deepEqual(await relay.notify(push),{sent:true});
 assert.equal(sent.length,2);
-
-// A relay without /api/push: the old /notify, and the pairing stays.
-direct=false;
-assert.deepEqual(await relay.notify(push),{sent:false,reason:'no-device'});
-assert.equal(relay.status().state,'paired');
-direct=true;
 
 // A new token replaces it; a gone device is forgotten.
 await say({type:'push',id:'t2',platform:'fcm',token:FCM});
@@ -103,4 +96,4 @@ assert.deepEqual(delivered,[]);
 assert.equal(store.has('web-pairing-push'),false);
 await web.end();
 
-console.log('PASS phone push: the token stays on the computer, notifications go through the stateless /api/push, older relays still work.');
+console.log('PASS phone push: the token stays on the computer, notifications go through the stateless /api/push, nothing is sent without one.');

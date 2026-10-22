@@ -15,7 +15,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 
 /** A room whose messages the test delivers, recording what the phone sent. */
-private class FakeRoom : RoomConnector {
+internal class FakeRoom : RoomConnector {
     class Socket(val url: String, val protocols: List<String>, val deliver: (String) -> Unit, val closed: () -> Unit) : RoomSocket {
         val sent = mutableListOf<String>()
         var open = true
@@ -47,15 +47,14 @@ class RoomTest {
     @Test
     fun linkSaysRoom() {
         assertTrue(PairLink.parse("worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Mac&m=room").room)
-        val old = PairLink.parse("worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Mac")
-        assertFalse(old.room)
+        assertFailsWith<PairingException> { PairLink.parse("worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Mac") }
         assertFalse(WorldletJson.decodeFromString(PairLink.serializer(), """{"secret":"AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8","name":"Mac"}""").room, "a link kept before")
     }
 
     @Test
     fun syncSendAndEndInTheRoom() = runTest {
         val room = FakeRoom()
-        val session = PhoneSession(PairLink(secret, name = "Mac", room = true), { error("no relay") }, room = room)
+        val session = PhoneSession(PairLink(secret, name = "Mac", room = true), room)
         session.announce(PhoneInfo(name = "Pixel", version = "2"))
         assertEquals(null, session.sync().computerSeenAt, "the room has not said the computer is there")
         val socket = room.opened.single()
@@ -85,26 +84,27 @@ class RoomTest {
         assertFalse(socket.open)
     }
 
+    /** A link kept from before the pairing room (no `m=room`) has nowhere to meet: it is ended, so the app asks to pair
+     * again, and it never opens anything. */
     @Test
-    fun relayPairingMovesToTheRoom() = runTest {
-        val desktop = keys.sealText("""{"v":1,"at":"","name":"Mac","version":"1","room":true}""", PairKeys.slot("desktop"))
-        val requests = mutableListOf<RelayRequest>()
+    fun linkFromBeforeTheRoomIsEnded() = runTest {
         val room = FakeRoom()
-        val session = PhoneSession(PairLink(secret, name = "Mac"), { requests += it; 200 to """{"version":3,"peer":{"seenAt":1},"slots":[{"name":"desktop","version":3,"box":"$desktop"}]}""" }, room = room)
-        assertFalse(session.inRoom)
-        assertEquals(true, session.sync().desktop?.room)
-        assertTrue(session.inRoom, "the computer waits in the room")
-        runCatching { session.sync() }
-        assertEquals(1, room.opened.size, "the next sync goes to the room")
-        assertEquals(1, requests.size)
-        // Without a room client (an older build of the app's code), the relay stays.
-        assertFalse(PhoneSession(PairLink(secret, name = "Mac", room = true), { requests += it; 200 to "{}" }).inRoom)
+        val kept = WorldletJson.decodeFromString(PairLink.serializer(), """{"secret":"AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8","name":"Mac"}""")
+        val session = PhoneSession(kept, room)
+        assertFailsWith<RelayException.Ended> { session.sync() }
+        assertFailsWith<RelayException.Ended> { session.sync(wait = 20) }
+        assertFailsWith<RelayException.Ended> { session.send(PhoneMessage.Chat("c1", "Hi")) }
+        assertFailsWith<RelayException.Ended> { session.registerPush("fcm", "token") }
+        session.announce(PhoneInfo(name = "Pixel", version = "2"))
+        session.unregisterPush()
+        session.unpair()
+        assertTrue(room.opened.isEmpty(), "no room, and no relay either")
     }
 
     @Test
     fun leavingTheRoomWhenPutAway() = runTest {
         val room = FakeRoom()
-        val session = PhoneSession(PairLink(secret, name = "Mac", room = true), { error("no relay") }, room = room)
+        val session = PhoneSession(PairLink(secret, name = "Mac", room = true), room)
         runCatching { session.sync() }
         room.opened.single().deliver(event { put("t", "desktop"); put("online", true) })
         session.sync(wait = 1)

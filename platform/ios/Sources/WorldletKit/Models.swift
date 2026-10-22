@@ -460,12 +460,6 @@ public struct DesktopInfo: Codable, Sendable, Equatable {
     /// True while the computer takes Orders (agent/app PhoneDesktop `order`): the dock shows its Order button. Absent
     /// from computers that don't.
     public let order: Bool?
-    /// True when the computer keeps this iPhone's notification token itself (agent/app PhoneDesktop `push`): the app
-    /// hands it over with a `push` message and the relay keeps none. Absent from older computers.
-    public let push: Bool?
-    /// True when the computer waits in the pairing room (agent/app PhoneDesktop `room`): the pairing moves there and the
-    /// relay keeps nothing more. Absent from older computers.
-    public let room: Bool?
 }
 
 /// The phone's own slot: the desktop shows its name in Settings.
@@ -513,7 +507,7 @@ public enum PhoneMessage: Encodable, Sendable, Equatable {
     /// A line with attached files (each sent before as `file` parts), said in the main conversation, an item's card
     /// (`item`) or an Applet's page (`applet`).
     case attach(id: String, text: String, files: [String], item: String?, applet: String?)
-    /// This iPhone's notification token for a computer that keeps it (agent/app PhoneMessage `push`; empty takes it back).
+    /// This iPhone's notification token, which the computer keeps (agent/app PhoneMessage `push`; empty takes it back).
     case push(id: String, platform: String, token: String)
 
     private enum Keys: String, CodingKey { case type, id, text, item, applet, action, provider, widget, state, said, records, approval, choice, file, part, parts, name, mime, data, files, platform, token }

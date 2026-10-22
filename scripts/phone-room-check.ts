@@ -4,12 +4,11 @@ import {createLocalRelay} from '../platform/host/modules/windows/local-relay.ts'
 import {createPhoneRelay} from '../platform/host/modules/windows/relay.ts';
 import {memoryRoom} from './memory-room.ts';
 
-// The phone's pairing in the pairing room (platform/web/README.md#room): the computer's code says `m=room` and the computer
-// waits in the room as well as on the relay. An older app pairs on the relay as before. An app that comes to the room
-// moves the pairing there, also one paired on the relay before: the relay's pairing is deleted, and slots, the phone's
-// name and its messages pass only while both are connected; a phone that comes back gets everything at once. The
-// notification token the phone handed over is the only way to wake it (no `/notify`). The relay here is the in-memory
-// one (local-relay.ts) and the room memory-room.ts.
+// The phone's pairing in the pairing room (platform/web/README.md#room): the computer's code says `m=room` and the pairing
+// lives only there. Nothing goes to the relay but `/api/push`: slots, the phone's name and its messages pass only while
+// both are connected, and a phone that comes back gets everything at once. The notification token the phone handed over
+// is the only way to wake it. A phone pairing kept from the relay (before 2026-10-21) is forgotten. The relay here is
+// the in-memory one (local-relay.ts) and the room memory-room.ts.
 const RELAY='http://127.0.0.1:9',APNS='a'.repeat(64);
 const local=createLocalRelay(),room=memoryRoom();
 const calls:string[]=[];
@@ -24,7 +23,6 @@ const delivered:PhoneMessage[]=[];
 const make=()=>createPhoneRelay({fetch,vault,name:()=>'Mac',userAgent:'check',relay:RELAY,room:{WebSocket:room.Socket as any},deliver:async message=>{delivered.push(message);return true;}});
 const sleep=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms));
 const until=async(ok:()=>boolean,what:string)=>{for(let i=0;i<100&&!ok();i++)await sleep(20);assert.ok(ok(),what);};
-const relayGet=async(keys:PairKeys)=>(await local.fetch(new Request(`${RELAY}/api/pair/${keys.id}`,{headers:{Authorization:'Bearer '+keys.phoneToken}}))).status;
 
 // A phone app in the room: what the computer sent, by slot, and whether the computer is there.
 async function phone(keys:PairKeys){
@@ -46,28 +44,25 @@ async function phone(keys:PairKeys){
 const attention={v:1,at:new Date().toISOString(),now:[],later:[],accounts:[]};
 const push={v:1 as const,id:'n1',at:Date.now(),kind:'fox' as const,title:'Fox',body:'Done',open:{conversation:true as const}};
 
-// An older app scanning the code pairs on the relay, as before.
+// A pairing kept from the relay is forgotten: the phone pairs again.
+store.set('phone-pairing',JSON.stringify({secret:'A'.repeat(43),relay:RELAY,name:'Mac',paired:true}));
+store.set('phone-pairing-push',JSON.stringify({platform:'apns',token:APNS}));
 let mac=make();
+assert.equal(mac.status().state,'none');
+assert.equal(store.has('phone-pairing')||store.has('phone-pairing-push'),false);
+
+// A new code: the computer waits in the room, and the first phone there completes the pairing. The relay is never asked.
 let status=await mac.start();
 assert.match(status.link!,/^worldlet:\/\/pair\?v=1&s=[A-Za-z0-9_-]{43}&n=Mac&r=http%3A%2F%2F127\.0\.0\.1%3A9&m=room$/);
+assert.equal(status.state,'waiting');
 let keys=await pairKeys(readPairLink(status.link!).secret);
-assert.equal(await relayGet(keys),200,'the first poll completes the pairing on the relay');
-await mac.poll();
-assert.equal(mac.status().state,'paired');
-assert.equal(await mac.publish('attention',attention),true);
-assert.ok(calls.includes('PUT /api/pair/:id/slots/attention'),'an older app reads the relay');
-assert.equal(mac.room,false);
-
-// The app updates and comes to the room: the pairing moves there and the relay's copy is deleted.
-const desktopSlot={v:1,at:new Date().toISOString(),name:'Mac',version:'1',push:true,room:true};
-await mac.publish('desktop',desktopSlot);
+await mac.publish('attention',attention);
+await mac.publish('desktop',{v:1,at:new Date().toISOString(),name:'Mac',version:'1',push:true,room:true});
 let app=await phone(keys);
-await until(()=>app.computer&&mac.open,'the computer meets the app');
+await until(()=>app.computer&&mac.open&&mac.status().state==='paired','paired in the room');
 await until(()=>app.slots.has('attention')&&app.slots.has('desktop'),'everything the computer has, at once');
-assert.equal(app.slots.get('desktop').room,true);
-await until(()=>store.get('phone-pairing')?.includes('"room":true')===true,'kept in the room');
-await until(()=>calls.includes('DELETE /api/pair/:id'),'the relay pairing is deleted');
-assert.equal(await relayGet(keys),404,'the relay keeps nothing more');
+assert.ok(store.get('phone-pairing')?.includes('"room":true'));
+assert.deepEqual(calls,[],'nothing on the relay');
 assert.equal(mac.room,true);
 assert.ok((mac.status().seenAt??0)>Date.now()-1000,'a phone in the room is seen now');
 
@@ -114,13 +109,11 @@ await mac.end();
 await until(()=>app.ended,'the app hears the pairing is off');
 assert.equal(store.has('phone-pairing'),false);
 
-// A new code met in the room straight away: the relay pairing made with the code is deleted.
+// A new code, met in the room again.
 mac=make();
 keys=await pairKeys(readPairLink((await mac.start()).link!).secret);
 app=await phone(keys);
 await until(()=>mac.status().state==='paired'&&mac.open,'paired in the room');
-await until(()=>store.get('phone-pairing')?.includes('"room":true')===true&&calls.includes('DELETE /api/pair/:id'),'nothing left on the relay');
-assert.equal(await relayGet(keys),404);
 // The app unpairs: the computer forgets it.
 await app.say({type:'chat',id:'c9',text:'bye'});
 const endFrame=await sealBox(keys,boxPlace('slot','end'),{end:true});
@@ -143,4 +136,4 @@ assert.equal(PUSH_BOX_PLACE,'push');
  assert.deepEqual(readRoomFrame(JSON.stringify({r:'box'})),{r:'box'});
 }
 
-console.log('PASS phone room: an older app keeps the relay, an app in the room moves the pairing there and the relay keeps nothing, slots on return, the kept token wakes it, a direct line\'s pieces.');
+console.log('PASS phone room: the pairing lives only in the room, a relay pairing is forgotten, slots on return, the kept token wakes it, a direct line\'s pieces.');

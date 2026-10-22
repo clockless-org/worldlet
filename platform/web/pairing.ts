@@ -1,7 +1,7 @@
 // Phone pairing protocol v1 (README.md in this folder). The desktop makes a 32-byte secret and shows it to the phone in
 // a QR code. Everything else comes from that secret with HKDF-SHA256, identically on the desktop (WebCrypto) and the
 // iPhone (CryptoKit, platform/ios/Worldlet/Pairing.swift): the relay pairing id, one bearer token per side, and the AES-256-GCM
-// key that seals every payload. The relay (worker/pairing.ts) stores only token hashes and sealed boxes.
+// key that seals every payload. The pairing room (and this computer's own relay, local-relay.ts) sees only token hashes and sealed boxes.
 export const PAIR_PROTOCOL=1;
 export const PAIR_SALT='worldlet-pair-v1';
 export const DEFAULT_PAIR_RELAY='https://worldlet.ai';

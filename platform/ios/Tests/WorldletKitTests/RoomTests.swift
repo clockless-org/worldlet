@@ -56,6 +56,30 @@ final class FakeRoom: RoomConnector, @unchecked Sendable {
     }
 }
 
+/// A room event as the room sends it (`desktop` online, or a `msg`).
+func roomEvent(_ value: [String: Any]) -> String {
+    String(decoding: try! JSONSerialization.data(withJSONObject: value), as: UTF8.self)
+}
+
+/// A frame the computer sent through the room.
+func roomFrame(_ value: [String: String]) -> String {
+    roomEvent(["t": "msg", "from": "desktop", "data": String(decoding: try! JSONSerialization.data(withJSONObject: value), as: UTF8.self)])
+}
+
+/// Starts a sync, which opens the room, and returns its socket.
+func connectedRoom(_ room: FakeRoom, _ session: PhoneSession) async throws -> FakeRoomSocket {
+    Task { _ = try? await session.sync(wait: 0) }
+    for _ in 0..<100 where room.last == nil { try await Task.sleep(nanoseconds: 10_000_000) }
+    return try XCTUnwrap(room.last)
+}
+
+/// What the phone sent through the room, each frame unwrapped.
+struct SentFrame: Decodable { let s: String?; let b: String?; let m: String?; let e: String? }
+func sentFrames(_ socket: FakeRoomSocket) throws -> [SentFrame] {
+    struct Out: Decodable { let data: String }
+    return try socket.sent.map { try JSONDecoder().decode(SentFrame.self, from: Data(try JSONDecoder().decode(Out.self, from: Data($0.utf8)).data.utf8)) }
+}
+
 final class RoomTests: XCTestCase {
     let secret = Data(0..<32)
 
@@ -70,53 +94,68 @@ final class RoomTests: XCTestCase {
     func testLinkSaysRoom() throws {
         let link = try PairLink(parsing: "worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Mac&m=room")
         XCTAssertEqual(link.room, true)
-        let old = try PairLink(parsing: "worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Mac")
+        let kept = try JSONDecoder().decode(PairLink.self, from: JSONEncoder().encode(link))
+        XCTAssertEqual(kept, link, "the kept link reads back")
+    }
+
+    /// A code or a kept link from before the room is refused or ended: the old relay API is gone.
+    func testOlderPairingIsRefusedAndEnded() async throws {
+        XCTAssertThrowsError(try PairLink(parsing: "worldlet://pair?v=1&s=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&n=Mac")) {
+            XCTAssertEqual($0 as? PairingError, .olderComputer)
+            XCTAssertEqual($0.localizedDescription, "This code is from an older Worldlet. Update Worldlet on your computer and pair again.")
+        }
+        // A link kept before the room decodes without it.
+        let old = try JSONDecoder().decode(PairLink.self, from: JSONEncoder().encode(PairLink(secret: secret, name: "Mac", room: false)))
         XCTAssertNil(old.room)
-        XCTAssertEqual(old.inRoom.room, true)
-        // A link kept before decodes without it.
-        let kept = try JSONDecoder().decode(PairLink.self, from: JSONEncoder().encode(old))
-        XCTAssertNil(kept.room)
-    }
-
-    private func event(_ value: [String: Any]) -> String {
-        String(decoding: try! JSONSerialization.data(withJSONObject: value), as: UTF8.self)
-    }
-
-    private func frame(_ value: [String: String]) -> String {
-        event(["t": "msg", "from": "desktop", "data": String(decoding: try! JSONSerialization.data(withJSONObject: value), as: UTF8.self)])
+        let room = FakeRoom()
+        let session = PhoneSession(link: old, room: room)
+        do { _ = try await session.sync(); XCTFail("expected ended") } catch { XCTAssertEqual(error as? RelayError, .ended) }
+        do { try await session.send(.chat(id: "c", text: "Hi")); XCTFail("expected ended") } catch { XCTAssertEqual(error as? RelayError, .ended) }
+        do { try await session.registerPush(platform: "apns", token: "00"); XCTFail("expected ended") } catch { XCTAssertEqual(error as? RelayError, .ended) }
+        try await session.unpair()
+        XCTAssertTrue(room.opened.isEmpty, "nothing is opened for it")
     }
 
     func testRoomSyncSendAndEnd() async throws {
         let keys = PairKeys(secret: secret)
         let room = FakeRoom()
-        let session = PhoneSession(link: PairLink(secret: secret, name: "Mac", room: true), transport: FakeRelay(), room: room)
+        let session = PhoneSession(link: PairLink(secret: secret, name: "Mac"), room: room)
         try await session.announce(PhoneInfo(name: "iPhone", version: "2"))
-        let socket = try await connected(room, session)
-        socket.deliver(event(["t": "desktop", "online": true]))
+        let socket = try await connectedRoom(room, session)
+        socket.deliver(roomEvent(["t": "desktop", "online": true]))
         let conversation = Conversation(v: 1, at: "", busy: false, name: "Fox", messages: [Turn(id: "t", role: .fox, text: "Hello", at: "")])
-        socket.deliver(frame(["s": "conversation", "b": try keys.seal(conversation, place: PairKeys.place(slot: "conversation"))]))
+        socket.deliver(roomFrame(["s": "attention", "b": "AAAA"]))
+        socket.deliver(roomFrame(["s": "conversation", "b": try keys.seal(conversation, place: PairKeys.place(slot: "conversation"))]))
+        let live = LiveTurn(at: "", id: "turn:1", user: "Hi", steps: ["Thinking"], text: "Hel", done: false)
+        socket.deliver(roomFrame(["s": "live", "b": try keys.seal(live, place: PairKeys.place(slot: "live"))]))
         var update = PhoneUpdate()
-        for _ in 0..<20 where update.conversation == nil { update = try await session.sync(wait: 1) }
+        for _ in 0..<20 where update.live == nil {
+            let next = try await session.sync(wait: 1)
+            update.conversation = next.conversation ?? update.conversation
+            update.attention = next.attention ?? update.attention
+            update.live = next.live
+            update.computerSeenAt = next.computerSeenAt
+        }
         XCTAssertEqual(update.conversation?.messages.first?.text, "Hello", "what the computer sends in the room")
+        XCTAssertEqual(update.live, live)
+        XCTAssertNil(update.attention, "a box that does not open is skipped")
         XCTAssertNotNil(update.computerSeenAt, "a computer in the room is seen now")
 
         // The phone said its name when the computer came, and a line goes as a sealed message.
         try await session.send(.chat(id: "c1", text: "Hi"))
-        struct Out: Decodable { let data: String }
-        struct Frame: Decodable { let s: String?; let b: String?; let m: String? }
-        let frames = try socket.sent.map { try JSONDecoder().decode(Frame.self, from: Data(try JSONDecoder().decode(Out.self, from: Data($0.utf8)).data.utf8)) }
+        let frames = try sentFrames(socket)
         XCTAssertEqual(frames.first?.s, "phone")
         XCTAssertEqual(try keys.open(PhoneInfo.self, box: XCTUnwrap(frames.first?.b), place: PairKeys.place(slot: "phone")).name, "iPhone")
         struct Chat: Decodable { let type: String; let text: String }
         XCTAssertEqual(try keys.open(Chat.self, box: XCTUnwrap(frames.last?.m), place: PairKeys.place(to: "desktop")).text, "Hi")
 
         // The computer leaves: a line cannot go, and nothing waits.
-        socket.deliver(event(["t": "desktop", "online": false]))
+        socket.deliver(roomEvent(["t": "desktop", "online": false]))
         _ = try await session.sync(wait: 1)
         do { try await session.send(.chat(id: "c2", text: "Later")); XCTFail("sent with no computer") } catch RelayError.failed {}
 
         // The computer ends the pairing.
-        socket.deliver(frame(["e": try keys.seal(["end": true], place: PairKeys.place(slot: "end"))]))
+        socket.deliver(roomFrame(["e": try keys.seal(["end": true], place: PairKeys.place(slot: "end"))]))
         var ended = false
         for _ in 0..<20 where !ended {
             do { _ = try await session.sync(wait: 1) } catch RelayError.ended { ended = true }
@@ -124,47 +163,15 @@ final class RoomTests: XCTestCase {
         XCTAssertTrue(ended)
     }
 
-    func testRelayPairingMovesToTheRoom() async throws {
-        let keys = PairKeys(secret: secret)
-        let desktop = try keys.seal(["v": AnyCodable(1), "at": AnyCodable(""), "name": AnyCodable("Mac"), "version": AnyCodable("1"), "room": AnyCodable(true)], place: PairKeys.place(slot: "desktop"))
-        let relay = FakeRelay()
-        relay.answers = [(200, #"{"version":3,"peer":{"seenAt":1},"slots":[{"name":"desktop","version":3,"box":"\#(desktop)"}]}"#)]
-        let room = FakeRoom()
-        let session = PhoneSession(link: PairLink(secret: secret, name: "Mac"), transport: relay, room: room)
-        let isInRoom = await session.inRoom
-        XCTAssertFalse(isInRoom)
-        let update = try await session.sync()
-        XCTAssertEqual(update.desktop?.room, true)
-        let moved = await session.inRoom
-        XCTAssertTrue(moved, "the computer waits in the room")
-        _ = try? await session.sync(wait: 0)
-        XCTAssertEqual(room.opened.count, 1, "the next sync goes to the room")
-        XCTAssertEqual(relay.requests.count, 1)
-    }
-
     func testLeavingTheRoomWhenPutAway() async throws {
         let room = FakeRoom()
-        let session = PhoneSession(link: PairLink(secret: secret, name: "Mac", room: true), transport: FakeRelay(), room: room)
-        let socket = try await connected(room, session)
-        socket.deliver(event(["t": "desktop", "online": true]))
+        let session = PhoneSession(link: PairLink(secret: secret, name: "Mac"), room: room)
+        let socket = try await connectedRoom(room, session)
+        socket.deliver(roomEvent(["t": "desktop", "online": true]))
         _ = try await session.sync(wait: 1)
         await session.leaveRoom()
-        socket.deliver(event(["t": "desktop", "online": true]))
+        socket.deliver(roomEvent(["t": "desktop", "online": true]))
         _ = try? await session.sync(wait: 0)
         XCTAssertEqual(room.opened.count, 2, "a sync after coming back opens the room again")
     }
-
-    /// Starts a sync, which opens the room, and returns its socket.
-    private func connected(_ room: FakeRoom, _ session: PhoneSession) async throws -> FakeRoomSocket {
-        Task { _ = try? await session.sync(wait: 0) }
-        for _ in 0..<100 where room.last == nil { try await Task.sleep(nanoseconds: 10_000_000) }
-        return try XCTUnwrap(room.last)
-    }
-}
-
-/// A JSON value for sealing test slots.
-struct AnyCodable: Encodable {
-    let value: Encodable
-    init(_ value: Encodable) { self.value = value }
-    func encode(to encoder: Encoder) throws { try value.encode(to: encoder) }
 }

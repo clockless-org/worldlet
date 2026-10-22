@@ -23,9 +23,9 @@ struct WorldletApp: App {
     }
 }
 
-/// Notifications (README.md › Notifications): the APNs token goes to the relay through the model; a tap opens what the
-/// notification names, and its buttons answer from the shade (AppModel.answerNotification); one that arrives while the
-/// app is open shows nothing, since the live Center and Fox already do.
+/// Notifications (README.md › Notifications): the APNs token goes to the computer through the model; a tap opens what
+/// the notification names, and its buttons answer from the shade (AppModel.answerNotification); one that arrives while
+/// the app is open shows nothing, since the live Center and Fox already do.
 @MainActor
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     lazy var model = AppModel()

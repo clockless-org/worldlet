@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 
 // Phone pairing protocol v1, the Android half of platform/web/pairing.ts (see platform/web/README.md), the same as the
 // iPhone's Pairing.swift. The QR code carries a 32-byte secret; HKDF-SHA256 turns it into the relay pairing id, one
-// bearer token per side and the AES-256-GCM key that seals every payload. scripts/phone-pairing-check.ts,
+// bearer token per side and the AES-256-GCM key that seals every payload. scripts/phone-payloads-check.ts,
 // PairingTests.swift and PairingTest.kt pin the same test vector.
 
 class PairingException(val reason: Reason) : Exception(reason.message) {
@@ -21,6 +21,8 @@ class PairingException(val reason: Reason) : Exception(reason.message) {
         NotWorldlet("This is not a Worldlet pairing code."),
         NeedsUpdate("Update Worldlet to pair with this computer."),
         Incomplete("This pairing code is incomplete."),
+        /** A code without `m=room`, from a computer that still pairs through the old relay, which is gone. */
+        OlderComputer("This code is from an older Worldlet. Update Worldlet on your computer and pair again."),
         UnknownRelay("This pairing code names an unknown relay."),
     }
 }
@@ -34,14 +36,14 @@ object Base64Url {
     }
 }
 
-/** `worldlet://pair?v=1&s=<secret>&n=<computer name>[&r=<relay origin>]` */
+/** `worldlet://pair?v=1&s=<secret>&n=<computer name>&m=room[&r=<relay origin>]` */
 @Serializable
 data class PairLink(
     @Serializable(with = SecretSerializer::class) val secret: ByteArray,
     val relay: String = DEFAULT_RELAY,
     val name: String,
-    /** The pairing meets in the pairing room (platform/web/README.md#room): the code said `m=room`, or the computer moved a
-     * relay pairing there. Absent from links kept before. */
+    /** The pairing meets in the pairing room (platform/web/README.md#room): the code said `m=room`, as every code [parse]
+     * takes does. False only for a link kept from before the room, whose session is ended (PhoneSession). */
     val room: Boolean = false,
 ) {
     override fun equals(other: Any?) =
@@ -66,6 +68,7 @@ data class PairLink(
             if (query["v"] != PROTOCOL_VERSION) throw PairingException(PairingException.Reason.NeedsUpdate)
             val secret = Base64Url.decode(query["s"] ?: "")
             if (secret == null || secret.size != 32) throw PairingException(PairingException.Reason.Incomplete)
+            if (query["m"] != "room") throw PairingException(PairingException.Reason.OlderComputer)
             var relay = DEFAULT_RELAY
             val r = query["r"]
             if (!r.isNullOrEmpty()) {
@@ -77,7 +80,7 @@ data class PairLink(
                 if (!ok) throw PairingException(PairingException.Reason.UnknownRelay)
                 relay = r
             }
-            return PairLink(secret, relay, (query["n"] ?: "").take(64), room = query["m"] == "room")
+            return PairLink(secret, relay, (query["n"] ?: "").take(64), room = true)
         }
     }
 }
@@ -140,7 +143,7 @@ class PairKeys(secret: ByteArray) {
         /** "slot:attention", "to:desktop": the additional data binds a box to its pairing and place. */
         fun slot(name: String) = "slot:$name"
         fun to(role: String) = "to:$role"
-        /** The place of a notification's box (agent/app, POST /notify): the additional data is `<id>|push`. */
+        /** The place of a notification's box (agent/app, POST /api/push): the additional data is `<id>|push`. */
         const val PUSH = "push"
 
         /** RFC 5869 HKDF-SHA256 with the protocol's salt. */
