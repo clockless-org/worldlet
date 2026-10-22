@@ -44,9 +44,11 @@ export class WorldWindow {
   });
   const worldSession=session.fromPartition('persist:world');
   serveWorld(worldSession,()=>profile.webRoot,hooks.ingest?request=>hooks.ingest!(request):undefined);
-  // The World needs no device or notification permissions; speech capture is host-owned.
-  worldSession.setPermissionRequestHandler((_contents,_permission,answer)=>answer(false));
-  worldSession.setPermissionCheckHandler(()=>false);
+  // The World needs no device or notification permissions; speech capture is host-owned. Writing plain text to the
+  // clipboard is allowed, so its Copy buttons (an address, a link, a code) work; reading the clipboard is not.
+  const allowed=(permission:string)=>permission==='clipboard-sanitized-write';
+  worldSession.setPermissionRequestHandler((_contents,permission,answer)=>answer(allowed(permission)));
+  worldSession.setPermissionCheckHandler((_contents,permission)=>allowed(permission));
   this.view=new WebContentsView({webPreferences:{preload,session:worldSession,contextIsolation:true,sandbox:true,nodeIntegration:false,webSecurity:true,spellcheck:false,backgroundThrottling:false}});
   this.view.setBackgroundColor('#20251d');
   this.window.contentView.addChildView(this.view);

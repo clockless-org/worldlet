@@ -94,9 +94,10 @@ export function createWorldAddressHost({vault,remote,ledger,changed,worldLink,re
    if(!token||!(await remote.status().catch(()=>null))?.enabled)return;
    let state=load();
    for(let tries=0;!state.defaultName&&tries<3;tries++){
-    const name=newDefaultAddressName(),{status}=await registry('PUT',token,name);
+    const name=newDefaultAddressName(),{status,value}=await registry('PUT',token,name);
     if(status===409)continue;
-    if(status!==200&&status!==201){lastError='This computer cannot reach worldlet.ai right now.';return;}
+    // The website's own words (too many new names from this network today, say) say more than "cannot reach".
+    if(status!==200&&status!==201){lastError=typeof value?.error==='string'&&value.error?value.error:'This computer cannot reach worldlet.ai right now.';return;}
     state=load();state.defaultName=name;if(!state.name)state.name=name;save(state);
    }
    if(!state.name)return;
