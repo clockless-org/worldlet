@@ -21,7 +21,7 @@ export const POSTHOG_GATE:ServiceGate=Object.freeze({name:'posthog',title:'PostH
  missing:'PostHog has no such project at this address. Check the PostHog address and the project ID.',
  invalid:'PostHog could not run this read.',
  busy:'PostHog is limiting reads right now. Try again in a minute.',
- signedOut:'PostHog signed you out. Sign in to PostHog again in Settings › Connectors.'});
+ signedOut:'PostHog signed you out. Sign in to PostHog again in Settings › Services.'});
 
 /** PostHog's own sign-in (context/connectors/connectors.ts, `mcp-oauth`): its remote MCP server's address names its
  * authorization server, where Worldlet registers itself and signs in with PKCE on this computer. The access token it

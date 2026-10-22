@@ -42,7 +42,7 @@ Updating replaces the app bundle only; `~/Library/Application Support/Worldlet/`
 
 ### Update channels
 
-Owner request 2026-10-04: **Settings › General** chooses which builds an installed copy follows, on Mac and Windows. The installed version (`2026.MMDD.BUILD`) and its channel always show under the Settings list; the phone apps show their version in their own Settings. The channels are the release stages ([`update-channel.ts`](../../agent/app/update-channel.ts)):
+Owner request 2026-10-04: **Settings › General** (under **Update channel**, folded below the Updates row) chooses which builds an installed copy follows, on Mac and Windows. The installed version (`2026.MMDD.BUILD`) and its channel always show under the Settings list; the phone apps show their version in their own Settings. The channels are the release stages ([`update-channel.ts`](../../agent/app/update-channel.ts)):
 
 | Channel | Stage | Builds | Feed |
 | --- | --- | --- | --- |

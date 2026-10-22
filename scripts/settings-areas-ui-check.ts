@@ -80,7 +80,7 @@ await withBrowser(async browser=>{
 
  // The three areas, then the rest smaller under a line.
  await open('');
- assert.deepEqual(await list.locator('[data-setting] strong').allTextContents(),['Connectors','Agents','Context','Fox','Phone','General','Help']);
+ assert.deepEqual(await list.locator('[data-setting] strong').allTextContents(),['Services','Agents','Your data','Fox','Phone','General','Help']);
  assert.deepEqual(await list.locator('.companion-settings-item:not(.is-minor)').evaluateAll(n=>n.map(b=>(b as HTMLElement).dataset.setting)),['connectors','agents','context']);
  assert.equal(await list.locator('.companion-settings-minor').count(),1,'one line between the areas and the rest');
  const [big,small]=await Promise.all([list.locator('[data-setting=agents] strong').evaluate(e=>parseFloat(getComputedStyle(e).fontSize)),list.locator('[data-setting=help] strong').evaluate(e=>parseFloat(getComputedStyle(e).fontSize))]);

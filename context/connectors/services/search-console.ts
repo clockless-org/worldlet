@@ -28,7 +28,7 @@ export const SEARCH_CONSOLE_GATE:ServiceGate=Object.freeze({name:'search-console
  missing:'Search Console has no such site for this service account. Read list for the sites it can see.',
  invalid:'Search Console could not run this read.',
  busy:'Search Console is limiting reads right now. Try again in a minute.',
- signedOut:'Google signed you out of Search Console. Sign in again in Settings › Connectors.',
+ signedOut:'Google signed you out of Search Console. Sign in again in Settings › Services.',
  signInForbidden:'Your Google account cannot see that site in Search Console. Read list for the sites it can see, or ask the site\'s owner in Search Console to add you as a user.'});
 
 /** What is kept of a pasted key, and all the Platform signs with. */

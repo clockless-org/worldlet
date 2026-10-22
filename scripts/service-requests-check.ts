@@ -2,7 +2,7 @@
 // `read_service` call on the standing server puts one Attention card from provider `agents` in the World's ledger,
 // written with no model, at most once a day for that Agent and Service; the refusal says the person was asked. Allow
 // gives the read Grant (only once the Service is connected), Not now leaves it; a Service that is not connected asks to
-// connect it, from the card when it signs in or in Settings › Connectors when it takes a key. Checked against a real
+// connect it, from the card when it signs in or in Settings › Services when it takes a key. Checked against a real
 // ledger, Agent access store and standing server.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -33,7 +33,7 @@ assert.throws(()=>answerServiceRequest(answerServiceRequest(first,'allow',true,T
 const card=serviceRequestItem(first,'PostHog'),connect=serviceRequestItem(waiting,'Cloudflare'),key=serviceRequestItem({...waiting,provider:'github',id:'codex.github'},'GitHub',{signIn:false});
 assert.deepEqual([card.title,card.provider,card.kind,card.status],['Codex wants to look at your PostHog.','agents','task','open']);
 assert.equal(connect.title,'Codex wants to use Cloudflare. It isn\'t connected yet.');
-assert.match(String(key.summary),/Settings › Connectors/);
+assert.match(String(key.summary),/Settings › Services/);
 for(const item of [card,connect,key])for(const text of [item.title,item.summary,item.reason])assert.doesNotMatch(String(text),CONNECTOR_TECHNICAL_WORDS,String(text));
 assert.match(serviceRequestRefusal('PostHog',true,true),/asked the person in their Attention Center/);
 
@@ -73,7 +73,7 @@ await withTempDir('worldlet-requests-',async dir=>{
   assert.throws(()=>requests.answer({operation:'allow',id:'codex.cloudflare'}),/Connect it first/);
   connected.add('cloudflare');
   assert.deepEqual(requests.answer({operation:'allow',id:'codex.cloudflare'}),{ok:true,status:'allowed'});
-  // A Service that takes a key sends the person to Settings › Connectors; Not now leaves it, for a day.
+  // A Service that takes a key sends the person to Settings › Services; Not now leaves it, for a day.
   await call('github');
   assert.equal(items().find((item:any)=>item.serviceRequestProvider==='github').serviceRequestSignIn,false);
   assert.deepEqual(requests.answer({operation:'decline',id:'codex.github'}),{ok:true,status:'declined'});
@@ -90,4 +90,4 @@ await withTempDir('worldlet-requests-',async dir=>{
   assert.throws(()=>requests.answer({operation:'maybe',id:'codex.github'}),/Unknown request operation/);
  }finally{await standing.close();}
 });
-console.log('PASS Service requests: a refused read_service puts one plain Attention card up per Agent and Service a day and says so; Allow gives the read Grant only once connected, Not now holds for the day; Connect signs in from the card or sends a key service to Settings › Connectors; a revoked Agent never asks');
+console.log('PASS Service requests: a refused read_service puts one plain Attention card up per Agent and Service a day and says so; Allow gives the read Grant only once connected, Not now holds for the day; Connect signs in from the card or sends a key service to Settings › Services; a revoked Agent never asks');

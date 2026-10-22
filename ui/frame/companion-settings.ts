@@ -1,6 +1,5 @@
-import {defaultBrowserText,displayReleaseVersion} from '../../agent/app/index.ts';
+import {defaultBrowserText,displayReleaseVersion,loginItemText} from '../../agent/app/index.ts';
 import {BROWSER_HOME,createBrowserHome} from '../../agent/applets/index.ts';
-import {createFoxPreferences} from './fox-preferences.ts';
 import {createPanelGuide} from './panel-guide.ts';
 import {modelHealthView,type ModelFix} from './model-health.ts';
 import {showAgentPermissions} from './agent-permissions.ts';
@@ -14,13 +13,14 @@ import {showAgentMemory} from './agent-memory.ts';
 import {showWorldletAccounts} from './worldlet-accounts.ts';
 import {showConnectors} from './connectors-page.ts';
 import {agentEl as el} from './agent-change.ts';
+import {settingsIcon,settingsRow,settingsSwitch} from './settings-rows.ts';
 
 /** What the World view lends Settings: the sample world switch and which host features exist. */
 export type CompanionSettingsHost={toggleSample?:()=>Promise<unknown>;sample:()=>boolean;localDataDeletion:()=>boolean};
 /** The companion pages that are sections of their own in the one list: Fox's profile and Phone. */
 export type CompanionSettingsPages={fox:HTMLElement;phone:HTMLElement;/** What Fox itself knows, shown first in Context › Memory. */knows:HTMLElement};
 /** `minor`: below the three areas, smaller. `show` gets the part to open, if one was named. */
-type Item={id:string;label:string;hint:string;page?:boolean;minor?:boolean;show:(detail:HTMLElement,part:string)=>void|Promise<void>};
+type Item={id:string;label:string;hint:string;/** Its line icon in the list (ui/style/primitives/icons.ts). */icon:string;page?:boolean;minor?:boolean;show:(detail:HTMLElement,part:string)=>void|Promise<void>};
 
 const MODEL_EVENTS=['worldlet:model-changed','worldlet:model-refresh'];
 // Settings is three areas, Connectors, Agents and Context, with Fox, Phone, General and Help below them (issue #674).
@@ -115,16 +115,22 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
   target.append(box,said);
   await draw();
  }
- // The update channel (agent/app/update-channel.ts): Dev, Alpha, Beta and Production, the release stages.
- // Only the owner's installed copy shows the switcher (`switchable`); the Dev app and everyone else see the channel
- // they follow and nothing to change. Only the channels this copy can follow can be chosen; the host says why not.
- async function updates(target:HTMLElement){
+ // Updates are one row: the version, what the updater is doing, and Check for updates. The update channel
+ // (agent/app/update-channel.ts: Dev, Alpha, Beta and Production, the release stages) is folded under it in `more`.
+ // Only the owner's installed copy can switch (`switchable`); the Dev app and everyone else see the channel they follow
+ // and nothing to change. Only the channels this copy can follow can be chosen; the host says why not.
+ async function updates(box:HTMLElement,more:HTMLElement){
   const turn=ticket,rows=el('div','companion-settings-rows'),said=status(),about=note('');
   let state=await call('appUpdate',{operation:'status'});if(turn!==ticket)return;
+  const line=el('span',''),title=el('strong','');
+  const check=action('Check for updates',async()=>{said.textContent='Checking…';try{state=await call('appUpdate',{operation:'check'});said.textContent='';draw();}catch(e){said.textContent=(e as Error).message||'Could not check for updates.';}},{id:'check-updates'});
+  box.replaceChildren(settingsRow({icon:{icon:'download'},title,line,controls:[check],setting:'updates'}));
   const draw=()=>{
-   const installed=state?.installed?.build?['Worldlet',displayReleaseVersion(state.installed.version||'',state.installed.build),'· Build '+state.installed.build].filter(Boolean).join(' '):'';
-   about.textContent=[installed,state?.channelNote||''].filter(Boolean).join('. ');
-   said.textContent=['checking','downloading','preparing','current','available','ready','error','installing'].includes(state?.state)?(state.detail||state.label||''):'';
+   const installed=state?.installed?.build?['Worldlet',displayReleaseVersion(state.installed.version||'',state.installed.build)].filter(Boolean).join(' '):'';
+   title.textContent=installed||'Updates';
+   about.textContent=[installed&&installed+' · Build '+state.installed.build,state?.channelNote||''].filter(Boolean).join('. ');
+   const doing=['checking','downloading','preparing','current','available','ready','error','installing'].includes(state?.state)?(state.detail||state.label||''):'';
+   line.textContent=doing||'Worldlet updates itself.';
    rows.replaceChildren();
    if(!state?.switchable){
     const c=(state?.channels||[]).find((o:any)=>o.id===state?.channel);
@@ -144,19 +150,14 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     row.append(words,b);rows.append(row);
    }
   };
-  const changed=(event:Event)=>{if(turn!==ticket||!target.isConnected){window.removeEventListener('worldlet:app-update',changed);return;}state={...state,...(event as CustomEvent).detail};draw();};
+  const changed=(event:Event)=>{if(turn!==ticket||!box.isConnected){window.removeEventListener('worldlet:app-update',changed);return;}state={...state,...(event as CustomEvent).detail};draw();};
   window.addEventListener('worldlet:app-update',changed);leaving.push(()=>window.removeEventListener('worldlet:app-update',changed));
   draw();
-  target.append(about,rows,...state?.switchable?[note('Moving to a steadier channel installs its newest build at the next update, even when it is older than this one. Your world and accounts stay as they are.')]:[],
-   action('Check for updates',async()=>{said.textContent='Checking…';try{state=await call('appUpdate',{operation:'check'});draw();}catch(e){said.textContent=(e as Error).message||'Could not check for updates.';}},{id:'check-updates'}),said);
+  const channel=el('details','companion-settings-elsewhere') as HTMLDetailsElement;channel.dataset.setting='update-channel';
+  channel.append(el('summary','','Update channel'),about,rows,...state?.switchable?[note('Moving to a steadier channel installs its newest build at the next update, even when it is older than this one. Your world and accounts stay as they are.')]:[]);
+  box.after(said);more.append(channel);
  }
  const restartFox=async(said:HTMLElement)=>{said.textContent='Restarting Fox…';try{await call('restartFox');window.location.reload();}catch(e){said.textContent='Could not restart: '+((e as Error).message||'reopen Worldlet and try again.');}};
- // A Fox preference screen, drawn in the details instead of the bubble.
- // Each screen has a guide of its own, so one section can show two of them.
- const screen=(name:string)=>async(target:HTMLElement)=>{
-  const own=createPanelGuide();target.append(own.element);
-  await createFoxPreferences({call,view:own.view,setup:()=>{},toggleSample:()=>host()?.toggleSample?.(),embedded:true}).show(name);
- };
  // The model Fox thinks with (owner request 2026-10-05). Worldlet provides none: it is the person's Agent, answering
  // on its own sign-in with the provider chosen below.
  // This is the one place to connect it and to see and fix what is wrong with it (owner request 2026-10-06):
@@ -362,47 +363,66 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
  // then, smaller, Fox, Phone, General and Help.
  const items:Item[]=[
   // The services Worldlet connects itself, one tile each, with keys folded under Advanced (connectors-page.ts).
-  {id:'connectors',label:'Connectors',hint:'The services your World reads',show:async target=>{const turn=ticket;await showConnectors(target,call,()=>turn===ticket&&target.isConnected);}},
-  {id:'agents',label:'Agents',hint:'Who uses your World, and what each may do',show:agentsSetting},
+  {id:'connectors',label:'Services',hint:'Apps your World can read',icon:'plug',show:async target=>{const turn=ticket;await showConnectors(target,call,()=>turn===ticket&&target.isConnected);}},
+  {id:'agents',label:'Agents',hint:'AI helpers working for you',icon:'people',show:agentsSetting},
   // Everything the World keeps (world-context-page.ts), with what each Agent and Fox remember.
-  {id:'context',label:'Context',hint:'Everything your World keeps',show:async target=>{const turn=ticket,live=()=>turn===ticket&&target.isConnected;
+  {id:'context',label:'Your data',hint:'What is kept on this computer',icon:'lock',show:async target=>{const turn=ticket,live=()=>turn===ticket&&target.isConnected;
    const memory=part('memory','Memory','What Fox and your Agent remember about you and your work. Your Agent’s memory lives in your Agent; Worldlet only shows it.');
    memory.append(pages.knows);
    await showWorldContext(target,call,live,{memory,localDeletion:()=>!!host()?.localDataDeletion(),sample:()=>!!host()?.sample(),
     openJournal:()=>{close();window.dispatchEvent(new CustomEvent('worldlet:journal-open',{detail:{}}));}});
    await showAgentMemory(memory,call,live,{ask:text=>{close();window.dispatchEvent(new CustomEvent('worldlet:fox-ask',{detail:{text}}));}});
   }},
-  {id:'fox',label:'Fox',hint:'Name, look and personality',page:true,minor:true,show:target=>{target.append(pages.fox);}},
-  {id:'phone',label:'Phone',hint:'Attention and Fox on your phone',page:true,minor:true,show:target=>{target.append(pages.phone);}},
-  {id:'general',label:'General',hint:'Updates, start at login, default browser, usage counts',minor:true,show:async target=>{
-   target.append(subhead('Updates'));await updates(target);
+  {id:'fox',label:'Fox',hint:'Name, look and personality',icon:'heart',page:true,minor:true,show:target=>{target.append(pages.fox);}},
+  {id:'phone',label:'Phone',hint:'Attention and Fox on your phone',icon:'phone',page:true,minor:true,show:target=>{target.append(pages.phone);}},
+  {id:'general',label:'General',hint:'Updates, start at login, default browser, usage counts',icon:'settings',minor:true,show:async target=>{
+   // One row each with a switch where it is on or off (owner request 2026-10-21: Settings for people who know nothing
+   // about computers). A row's slot is drawn again when what it shows changes.
+   const turn=ticket,said=status(),rows=el('div','companion-settings-rows');
+   const slot=()=>{const box=el('div','companion-settings-slot');rows.append(box);return box;};
+   const failed=(e:unknown)=>{said.textContent=(e as Error).message||'Could not change it.';return false;};
+   target.append(rows,said);
+   await updates(slot(),target);
+   // Open at login shows what the system reports, not what was last asked for (#1229).
+   {
+    const box=slot();
+    const draw=async()=>{
+     const login=await call('loginItem').catch(()=>null);if(turn!==ticket||!login)return;
+     const on=login.status==='enabled'||login.status==='requires-approval';
+     box.replaceChildren(settingsRow({icon:{icon:'play'},title:'Open Worldlet when you log in',setting:'login-item',
+      line:login.status==='requires-approval'||login.status==='unsupported'||!login.status?loginItemText(login.status,login.platform):'',
+      controls:login.status==='unsupported'||!login.status?[]:[settingsSwitch({label:'Open Worldlet when you log in',on,id:'login-item',
+       change:async value=>{said.textContent='';try{await call('loginItem',{operation:'set',enabled:value});void draw();}catch(e){return failed(e);}}})]}));
+    };
+    await draw();
+   }
+   // Off until turned on (owner request 2026-10-12): links from other apps then open in their own Thing or the Browser.
+   {
+    const box=slot();
+    const draw=async()=>{
+     const info=await call('defaultBrowser').catch(()=>null);if(turn!==ticket||!info)return;
+     box.replaceChildren(settingsRow({icon:{icon:'compass'},title:'Use Worldlet as your default browser',setting:'default-browser',line:defaultBrowserText(info.status,info.platform),
+      controls:info.status==='unsupported'?[]:[settingsSwitch({label:'Use Worldlet as your default browser',on:info.status==='on',id:'default-browser',
+       change:async value=>{said.textContent='';try{await call('defaultBrowser',{operation:'set',enabled:value});void draw();}catch(e){return failed(e);}}})]}));
+    };
+    // The Mac's confirmation or a choice in Windows Settings lands later; the host says when the status moved.
+    const moved=()=>{if(!box.isConnected){window.removeEventListener('worldlet:default-browser',moved);return;}void draw();};
+    window.addEventListener('worldlet:default-browser',moved);
+    await draw();
+   }
    // The one privacy choice left after the Privacy section went (owner request 2026-10-10): the website's privacy page
    // promises that usage counts can be turned off, and off stops all reporting.
    {
-    const turn=ticket,said=status(),row=el('div','companion-settings-row'),words=el('div');row.dataset.setting='usage-analytics';
+    const box=slot();
     const draw=async()=>{
      const info=await call('foxPreferences').catch(()=>null);if(turn!==ticket)return;
      const on=info?.usageAnalyticsEnabled===true;
-     words.replaceChildren(el('strong','',on?'Sharing basic usage counts':'Not sharing usage counts'),el('span','',on?'Setup, connection and feature counts, never what you write, read or browse. Turning it off stops all reporting.':'Nothing about how you use Worldlet leaves this computer.'));
-     row.replaceChildren(words,action(on?'Stop sharing':'Share',async()=>{said.textContent='';try{await call('foxPreferenceChange',{setting:'usage_analytics',value:!on});await draw();}catch(e){said.textContent=(e as Error).message||'Could not change it.';}},{id:'usage-analytics'}));
+     box.replaceChildren(settingsRow({icon:{icon:'coins'},title:'Share anonymous usage counts',setting:'usage-analytics',
+      line:on?'Setup, connection and feature counts, never what you write, read or browse. Turning it off stops all reporting.':'Nothing about how you use Worldlet leaves this computer.',
+      controls:[settingsSwitch({label:'Share anonymous usage counts',on,id:'usage-analytics',
+       change:async value=>{said.textContent='';try{await call('foxPreferenceChange',{setting:'usage_analytics',value});void draw();}catch(e){return failed(e);}}})]}));
     };
-    target.append(subhead('Usage counts'),row,said);await draw();
-   }
-   target.append(subhead('Open at login'));await screen('login')(target);
-   // Off until turned on (owner request 2026-10-12): links from other apps then open in their own Thing or the Browser.
-   {
-    const turn=ticket,said=status(),row=el('div','companion-settings-row'),words=el('div');row.dataset.setting='default-browser';
-    const draw=async()=>{
-     const info=await call('defaultBrowser').catch(()=>null);if(turn!==ticket||!info)return;
-     const on=info.status==='on';
-     words.replaceChildren(el('strong','',on?'Worldlet is your default browser':'Worldlet is not your default browser'),el('span','',defaultBrowserText(info.status,info.platform)));
-     row.replaceChildren(words);
-     if(info.status!=='unsupported')row.append(action(on?'Stop using':'Use Worldlet',async()=>{said.textContent='';try{await call('defaultBrowser',{operation:'set',enabled:!on});await draw();}catch(e){said.textContent=(e as Error).message||'Could not change it.';}},{id:'default-browser'}));
-    };
-    // The Mac's confirmation or a choice in Windows Settings lands later; the host says when the status moved.
-    const moved=()=>{if(!row.isConnected){window.removeEventListener('worldlet:default-browser',moved);return;}void draw();};
-    window.addEventListener('worldlet:default-browser',moved);
-    target.append(subhead('Default browser'),row,said);await draw();
+    await draw();
    }
    // The Browser's own settings, folded away (owner request 2026-10-11: Settings has too much).
    const general=target;
@@ -431,28 +451,34 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
     target.append(note(on?'You are in the sample world. Turn it off to return to your own world.':'Look around a made-up world with sample mail, events and tasks. Your own world and accounts stay as they are.'),toggle,said);
    }
   }},
-  {id:'help',label:'Help',hint:'Feedback, restart, reset',minor:true,show:target=>{
-   const said=status();
+  {id:'help',label:'Help',hint:'Feedback, restart, reset',icon:'chat',minor:true,show:target=>{
+   const said=status(),rows=el('div','companion-settings-rows');
+   // Feedback, restarting Fox and the tutorial first, one row each (owner requests 2026-10-11 and 2026-10-21);
+   // diagnostics, Reset and the team's tools under More.
+   rows.append(
+    settingsRow({icon:{icon:'chat'},title:'Send feedback',line:'Tell the Worldlet team what works and what doesn’t. Type it, or hold Fox to say it.',
+     controls:[action('Send feedback',()=>openFeedback(),{primary:true,id:'feedback'})]}),
+    settingsRow({icon:{icon:'refresh'},title:'Restart Fox',line:'If Fox stops answering or seems stuck. Conversations, memory and connections are kept.',
+     controls:[action('Restart Fox',()=>restartFox(said),{id:'restart'})]}));
+   // The practice world has no tour.
+   if(!host()?.sample())rows.append(settingsRow({icon:{icon:'map'},title:'Tutorial',line:'Walk through the World again.',
+    controls:[action('Show the tutorial',()=>replayTutorial(),{id:'tutorial'})]}));
+   const more=el('details','companion-settings-elsewhere') as HTMLDetailsElement;more.dataset.setting='help-more';
+   more.append(el('summary','','More'));
+   const moreRows=el('div','companion-settings-rows');
+   moreRows.append(
+    settingsRow({icon:{icon:'download'},title:'Save diagnostics',line:'A file to send with your feedback when something is wrong.',
+     controls:[action('Save diagnostics',async()=>{try{await call('exportDiagnostics');}catch(e){said.textContent=(e as Error).message||'Could not save diagnostics.';}},{id:'diagnostics'})]}),
+    settingsRow({icon:{icon:'alert'},title:'Start over',line:'Reset erases Fox’s memory, your saved items and account connections on this computer, keeps your model setup, and starts setup again. You will be asked to confirm first.',
+     controls:[action('Reset',async()=>{said.textContent='';try{const result=await call('resetFox');if(result?.cancelled)return;window.location.reload();}catch(e){said.textContent='Could not reset: '+((e as Error).message||'reopen Worldlet and try again.');}},{id:'reset'})]}));
    // The Debug window and every recorded event are for the Worldlet team: folded away (owner request 2026-10-10).
    const team=el('details','companion-settings-elsewhere') as HTMLDetailsElement;
    team.append(el('summary','','For the Worldlet team'),
     action('Open Debug',async()=>{try{close();await call('showDebug');}catch{said.textContent='Could not open Debug.';}}),
     subhead('Activity records'),note('Every event Worldlet recorded on this computer, newest first.'),records.records);
    team.ontoggle=()=>{if(team.open)records.showRecords();};
-   // Feedback and the tutorial live here, not in the World's corners (owner request 2026-10-11),
-   // one part each (owner request 2026-10-11: Settings has too much): feedback with its diagnostics file, the tutorial,
-   // restarting Fox; the team's tools stay folded at the end.
-   target.append(
-    subhead('Feedback'),note('Tell the Worldlet team what works and what doesn’t. Type it, or hold Fox to say it. For a problem, save diagnostics too and send the file with it.'),
-    action('Send feedback',()=>openFeedback(),{primary:true,id:'feedback'}),
-    action('Save diagnostics',async()=>{try{await call('exportDiagnostics');}catch(e){said.textContent=(e as Error).message||'Could not save diagnostics.';}},{id:'diagnostics'}));
-   // The practice world has no tour.
-   if(!host()?.sample())target.append(subhead('Tutorial'),action('Show the tutorial',()=>replayTutorial(),{id:'tutorial'}));
-   target.append(
-    subhead('Restart Fox'),note('If Fox stops answering or seems stuck. Conversations, memory and connections are kept.'),
-    action('Restart Fox',()=>restartFox(said),{id:'restart'}),
-    subhead('Reset'),note('Reset erases Fox’s memory, your saved items and account connections on this computer, keeps your model setup, and starts setup again. You will be asked to confirm first.'),
-    action('Reset',async()=>{said.textContent='';try{const result=await call('resetFox');if(result?.cancelled)return;window.location.reload();}catch(e){said.textContent='Could not reset: '+((e as Error).message||'reopen Worldlet and try again.');}},{id:'reset'}),said,team);
+   more.append(moreRows,team);
+   target.append(rows,said,more);
   }},
  ];
  // The version at a glance under the list (owner request 2026-10-04): 2026.MMDD.BUILD and the update channel.
@@ -467,8 +493,9 @@ export function createCompanionSettings({call,host,pages,records,onShow,close,op
  // The three areas, then a line, then the rest in smaller type.
  for(const item of items){
   if(item.minor&&!list.querySelector('.companion-settings-minor'))list.append(el('div','companion-settings-minor'));
-  const b=el('button','companion-settings-item'+(item.minor?' is-minor':'')) as HTMLButtonElement;b.type='button';b.dataset.setting=item.id;
-  b.append(el('strong','',item.label),el('span','',item.hint));b.onclick=()=>void show(item.id);list.append(b);
+  const b=el('button','companion-settings-item has-icon'+(item.minor?' is-minor':'')) as HTMLButtonElement;b.type='button';b.dataset.setting=item.id;
+  const words=el('div','companion-settings-item-words');words.append(el('strong','',item.label),el('span','',item.hint));
+  b.append(settingsIcon({icon:item.icon},item.minor?16:20),words);b.onclick=()=>void show(item.id);list.append(b);
  }
  /** Shows section `id` (or the area an old name moved to) at `at`, one of its parts. */
  async function show(id:string,at=''){

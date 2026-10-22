@@ -53,14 +53,14 @@ export function answerServiceRequest(request:ServiceRequest|null|undefined,outco
 /** The request's Attention card: "Claude Code wants to look at your PostHog." with Allow and Not now, or, when it is not
  * connected, "Claude Code wants to use Cloudflare. It isn't connected yet." with Connect Cloudflare. `title` is the
  * Service's own name; `signIn`: the Service connects with its own sign-in from the card (context/connectors/connectors.ts),
- * landing in `region`, where its Thing lives; otherwise the card sends the person to Settings › Connectors. */
+ * landing in `region`, where its Thing lives; otherwise the card sends the person to Settings › Services. */
 export function serviceRequestItem(request:ServiceRequest,title:string,{signIn=true,region}:{signIn?:boolean;region?:string}={}):WorldItem {
  const agent=request.agentName,service=name(title,request.provider);
  const heading=request.connected?`${agent} wants to look at your ${service}.`:`${agent} wants to use ${service}. It isn't connected yet.`;
  const summary=request.connected
-  ?`Allow lets ${agent} look at your ${service} when it needs to. Before anything is changed, Worldlet asks you. You can change this in Settings › Connectors.`
+  ?`Allow lets ${agent} look at your ${service} when it needs to. Before anything is changed, Worldlet asks you. You can change this in Settings › Services.`
   :signIn?`Connect ${service} signs you in with ${service}'s own page, then lets ${agent} look at it. Before anything is changed, Worldlet asks you.`
-  :`Connect ${service} in Settings › Connectors, then come back and allow ${agent} to look at it. Before anything is changed, Worldlet asks you.`;
+  :`Connect ${service} in Settings › Services, then come back and allow ${agent} to look at it. Before anything is changed, Worldlet asks you.`;
  return {id:serviceRequestItemId(request.id),provider:AGENT_ASK_PROVIDER,kind:'task',status:ITEM_STATUS[request.status],title:heading,context:summary,summary,
   reason:[...`${agent} asks to look at ${service}`].slice(0,56).join(''),attentionContentVersion:1,attentionReason:summary,
   sources:[{provider:AGENT_ASK_PROVIDER,id:request.id,quote:heading}],

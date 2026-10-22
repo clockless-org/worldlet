@@ -248,9 +248,9 @@ try{
   [['reschedule',{daily:{hour:9,minute:30}}],['create',{name:'Plant water',prompt:'Remind me to water the plants.',schedule:{everyHours:3}}]],'what the person chose is what the Agent is asked');
  assert.doesNotMatch(await skillsPart.locator('[data-harness=hermes]').innerText()+'\n'+await routinesPart.innerText(),/\bcron\b|\bMCP\b|config\.yaml/i,'plain words; no commands');
  await accounts.locator('[data-connection=conn-00000000000000c1]').getByText(/^Tool( · |$)/).waitFor();
- // The services themselves moved to Settings › Connectors: Google is a tile there, and the keys, the GitHub App,
+ // The services themselves moved to Settings › Services: Google is a tile there, and the keys, the GitHub App,
  // Search Console and HTTP JSON are under its Advanced (connectors-ui-check.ts covers the tiles).
- await accounts.getByText('Services such as Google, Notion and GitHub are in Settings › Connectors.',{exact:true}).waitFor();
+ await accounts.getByText('Services such as Google, Notion and GitHub are in Settings › Services.',{exact:true}).waitFor();
  assert.equal(await accounts.locator('[data-account=gmail]').count(),0,'Google is not listed twice');
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'connectors'}})));
  await settingsPage.locator('[data-setting=connectors][aria-current=true]').waitFor();

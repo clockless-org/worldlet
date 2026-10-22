@@ -1,4 +1,4 @@
-// Settings › Connectors (ui/frame/connectors-page.ts): one tile per service, its state and its words, decided here
+// Settings › Services (ui/frame/connectors-page.ts): one tile per service, its state and its words, decided here
 // from the World's connection rows so every host shows the same thing. Plain words only on this path
 // (CONNECTOR_TECHNICAL_WORDS); keys and addresses live under Advanced.
 import {CONNECTORS,plainConnectorText,type Connector} from './connectors.ts';
@@ -45,7 +45,7 @@ function signedOut(row:ConnectionRow){
  return failed(row)&&(['expired','revoked'].includes(String(row.syncStatus))||SIGNED_OUT.test(String(row.syncError??'')));
 }
 
-/** The tiles Settings › Connectors shows, in the registry's order: every `always` connector, and the others once
+/** The tiles Settings › Services shows, in the registry's order: every `always` connector, and the others once
  * they are connected. `waiting`: the connector whose sign-in is open now. */
 export function connectorTiles(connections:readonly ConnectionRow[]=[],waiting?:string|null):ConnectorTile[] {
  const tiles:ConnectorTile[]=[];
@@ -83,7 +83,7 @@ export interface ConnectorReader {id:string;name:string;granted:boolean}
 /** The Agents that may read a connected service (`agentAccess` `serviceReaders`): the Agent Fox uses (`main`, read on by
  * default when the service is connected) and every other Agent that has reached the World. */
 export interface ConnectorReaders {main:ConnectorReader|null;others:ConnectorReader[]}
-/** "Who may use it", the sentences under a connected service's tile (agent/gate/GRANTS.md#settings--connectors). `main`:
+/** "Who may use it", the sentences under a connected service's tile (agent/gate/GRANTS.md#settings--services). `main`:
  * the switch for the Agent Fox uses; `fox` when there is none (Fox's own turns read it when the person asks). `changes`
  * cannot be turned off: every change is a draft the person approves. `others` leads to Choose Agents, each a switch; an
  * Agent not chosen asks the person on an Attention card the first time it needs the service (agent/gate/service-requests.ts). */

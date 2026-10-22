@@ -1212,11 +1212,11 @@ export function mountNotionWorld(data: World, native: any) {
       notify(result.status==='allowed'?`${wanted.agent} can now look at your ${wanted.service}.`:`${wanted.agent} will not look at your ${wanted.service}.`);
      }catch(e){notify(e.message);}finally{busy=false;}
     };
-    // A Service that takes a key is connected in Settings › Connectors; the card waits, and Allow works once it is.
+    // A Service that takes a key is connected in Settings › Services; the card waits, and Allow works once it is.
     const connectors=()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'connectors'}}));
     attentionPreview.setActions(wanted.connected?[{key:'allow',label:'Allow',primary:true,run:answer('allow')},{key:'decline',label:'Not now',run:answer('decline')}]
      :wanted.signIn?[{key:'connect',label:'Connect '+wanted.service,primary:true,run:answer('allow')},{key:'decline',label:'Not now',run:answer('decline')}]
-     :[{key:'connectors',label:'Open Connectors',primary:true,run:connectors},{key:'allow',label:'Allow',run:answer('allow')},{key:'decline',label:'Not now',run:answer('decline')}]);
+     :[{key:'connectors',label:'Open Services',primary:true,run:connectors},{key:'allow',label:'Allow',run:answer('allow')},{key:'decline',label:'Not now',run:answer('decline')}]);
     attentionPreview.setReview(null);
     showDraftLine(page);voice?.setAttentionActions?.([]);
     return;

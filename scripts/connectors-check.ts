@@ -1,4 +1,4 @@
-// Settings › Connectors in Core (context/connectors/connectors.ts, context/applets/connector-tiles.ts): which tiles show, each
+// Settings › Services in Core (context/connectors/connectors.ts, context/applets/connector-tiles.ts): which tiles show, each
 // one's state and words from the World's connection rows, and that nothing on the default path uses a technical word.
 import assert from 'node:assert/strict';
 import {CONNECTORS,CONNECTOR_TECHNICAL_WORDS,connectorTiles,connectorDisconnectQuestion,connectorFailure,plainConnectorText,type ConnectorTile} from '../context/connectors/index.ts';
