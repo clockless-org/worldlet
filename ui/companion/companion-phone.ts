@@ -1,6 +1,6 @@
 import qrcode from 'qrcode-generator';
 
-// The companion panel's Mobile page (platform/web/README.md): pair the Worldlet iPhone or Android app by QR code, see the paired
+// Settings › Phone (its section is still named Mobile) (platform/web/README.md): pair the Worldlet iPhone or Android app by QR code, see the paired
 // phone and whether it takes notifications, unpair. The host owns the pairing (`phonePair`) and reports changes as
 // `worldlet:phone-status`. Below it, another Worldlet (a laptop) can use this computer's Agent for Fox (`phonePair` with
 // `kind: 'agent'`, `worldlet:agent-pair-status`, platform/web/README.md#another-computers-agent): its code is pasted there
@@ -87,7 +87,7 @@ export function createCompanionPhone({call}:{call:(action:string,body?:any)=>Pro
   return box;
  }
  function render(){
-  const head=[el('h3','','Mobile'),el('p','companion-phone-intro','Take your Attention Center and Fox with you. Your computer does the work; your iPhone or Android phone shows what needs you and talks to Fox.')];
+  const head=[el('h3','','Phone'),el('p','companion-phone-intro','Take your Attention Center and Fox with you. Your computer does the work; your iPhone or Android phone shows what needs you and talks to Fox.')];
   const body=el('div','companion-phone-body');
   if(!status)body.append(el('p','companion-info-note','Checking pairing…'));
   else if(status.state==='waiting'&&status.link){

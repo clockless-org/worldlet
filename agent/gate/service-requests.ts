@@ -58,7 +58,7 @@ export function serviceRequestItem(request:ServiceRequest,title:string,{signIn=t
  const agent=request.agentName,service=name(title,request.provider);
  const heading=request.connected?`${agent} wants to look at your ${service}.`:`${agent} wants to use ${service}. It isn't connected yet.`;
  const summary=request.connected
-  ?`Allow lets ${agent} look at your ${service} when it needs to. Before anything is changed, Worldlet asks you. You can change this in Settings › Services.`
+  ?`Allow lets ${agent} look at your ${service} when it needs to. Before anything is changed, Worldlet asks you. You can change this in Settings › Agents.`
   :signIn?`Connect ${service} signs you in with ${service}'s own page, then lets ${agent} look at it. Before anything is changed, Worldlet asks you.`
   :`Connect ${service} in Settings › Services, then come back and allow ${agent} to look at it. Before anything is changed, Worldlet asks you.`;
  return {id:serviceRequestItemId(request.id),provider:AGENT_ASK_PROVIDER,kind:'task',status:ITEM_STATUS[request.status],title:heading,context:summary,summary,

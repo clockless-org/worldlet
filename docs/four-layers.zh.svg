@@ -147,7 +147,7 @@
 <text x="522" y="1122" font-size="13" fill="#1F2328">• companion 用的 Agent：Hermes、Claude Code、OpenClaw…</text>
 <text x="522" y="1140" font-size="13" fill="#1F2328">• 本机：Claude Code · Codex · 脚本</text>
 <text x="522" y="1158" font-size="13" fill="#1F2328">• 云端：claude.ai · ChatGPT · Cursor</text>
-<text x="522" y="1190" font-size="12.5" font-style="italic" fill="#1A7F37">适配器 · 本地 MCP · 远程 MCP（OAuth + 4 位码）→ 门禁</text>
+<text x="522" y="1190" font-size="12.5" font-style="italic" fill="#1A7F37">适配器 · 本地 MCP · 远程 MCP（OAuth + 卡片上允许）→ 门禁</text>
 <rect x="20" y="1232" width="474" height="150" rx="12" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.4"/>
 <text x="36" y="1260" font-size="16" font-weight="700" fill="#1F2328">外部服务</text>
 <text x="478" y="1260" font-size="13" font-weight="700" text-anchor="end" fill="#9A6700">→ Connectors（Context）</text>

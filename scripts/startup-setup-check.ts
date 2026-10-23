@@ -282,12 +282,12 @@ await withBrowser(fileAccess,async browser=>{
   await page.getByRole('heading',{name:'Nova moved in'}).waitFor();
   assert.equal(await page.locator('.setup-passport-name').textContent(),'Nova');
   assert.equal(await page.locator('.setup-passport-from').textContent(),'OpenClaw');
-  // Worldlet provides no model (owner request 2026-10-05): setup says where to choose one.
+  // Worldlet provides no model (owner request 2026-10-05): setup says where to sign in to a provider.
   assert.equal(await page.locator('.setup-passport .setup-agent-fact').count(),0,'The Agent keeps its own model, so its card shows none (owner request 2026-10-09)');
   // The tiles fill their grid with no gap (owner request 2026-10-09).
   const fill=await page.locator('.setup-tiles').evaluate(grid=>{const box=grid.getBoundingClientRect(),gap=10;let area=0;for(const tile of grid.querySelectorAll('.setup-tile')){const r=tile.getBoundingClientRect();area+=(r.width+gap)*(r.height+gap);}return area/((box.width+gap)*(box.height+gap));});
   assert.ok(Math.abs(fill-1)<.01,'The tiles fill the grid: '+fill);
-  await page.getByText('Nova signs in with its own account, which Fox can’t use. After setup, choose a model in Settings, under Agents.',{exact:true}).waitFor();
+  await page.getByText('Nova signs in with its own account, which Fox can’t use. After setup, open Settings › Agents, choose Manage on your Agent and sign in to a provider.',{exact:true}).waitFor();
   // Only what came over gets a tile (owner request 2026-10-09), in the order it arrives.
   assert.deepEqual(await page.locator('.setup-tile').evaluateAll(list=>list.map(e=>e.className.split(' ')[1])),['setup-tile-avatar','setup-tile-profile','setup-tile-conversations','setup-tile-notes','setup-tile-skills','setup-tile-routines','setup-tile-things','setup-tile-connections','setup-tile-apps']);
   assert.equal(await page.locator('.setup-tile-profile .setup-tile-note').textContent(),'Knows: Runs a small design studio in Kyoto');

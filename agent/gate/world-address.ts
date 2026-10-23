@@ -22,7 +22,7 @@ export const ADDRESS_ZONE='worldlet.ai';
 export const ADDRESS_NAME=/^(?!.*--)[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/;
 export const RESERVED_ADDRESS_NAMES:ReadonlySet<string>=new Set(('www mcp api app apps admin dev docs help status mail email smtp imap pop ns ns1 ns2 cdn static assets '+
  'world worlds worldlet worldlets download downloads install update updates blog news support security login signin signup auth account accounts '+
- 'billing pay payment payments shop store test staging beta alpha preview gatehouse ops internal official team owner root system').split(' '));
+ 'billing pay payment payments shop store test staging beta alpha preview gatehouse ops internal official team owner root system magic').split(' '));
 export const WORLD_ADDRESS_LIMITS=Object.freeze({
  /** Requests to be let in waiting on the person at once, and how long one waits. */
  requests:5,requestSeconds:600,
