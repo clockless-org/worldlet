@@ -188,3 +188,19 @@ await withTempDir('worldlet-sync-consent-',async dir=>{
  sync.stop();store.closeLedger();
 });
 console.log('PASS Service sync: revoking and restoring consent rejects the prior in-flight response.');
+
+// Finishing a run keeps its task's newest 100 runs and reads only that task's runs (an index of them): another task's
+// runs are left alone.
+await withTempDir('worldlet-runtime-runs-',async dir=>{
+ const ledger=new WorldLedger(path.join(dir,'world'));
+ ledger.transaction(()=>{for(const task of ['mine','other'])for(let i=0;i<105;i++)ledger.put('runtime-runs',`${task}-${i}`,{id:`${task}-${i}`,taskId:task,status:'succeeded',startedAt:i});});
+ assert.equal(ledger.claimRuntimeTask('mine','synthetic','source-io','live'),true);
+ assert.equal(ledger.finishRuntimeTask('mine','live','succeeded',0),true);
+ const left=ledger.all("SELECT key FROM entries WHERE kind='state.runtime-runs'").map(row=>String(row.key));
+ assert.equal(left.filter(key=>key.startsWith('mine-')||key==='live').length,100);
+ assert.ok(left.includes('live')&&!left.includes('mine-0')&&!left.includes('mine-5')&&left.includes('mine-6'));
+ assert.equal(left.filter(key=>key.startsWith('other-')).length,105);
+ assert.match(ledger.all("EXPLAIN QUERY PLAN SELECT body FROM entries WHERE kind='state.runtime-runs' AND (CASE WHEN json_valid(body) THEN json_extract(body,'$.taskId') END)=? AND seq IN (SELECT MAX(seq) FROM entries WHERE kind='state.runtime-runs' GROUP BY key)",'mine').map(row=>row.detail).join('\n'),/entries_runtime_run_task/);
+ ledger.close();
+});
+console.log('PASS Service sync: finishing a run prunes only its own task\'s runs, found through their index.');

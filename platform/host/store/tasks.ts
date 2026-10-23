@@ -11,6 +11,19 @@ const now=()=>Date.now()/1000;
 const RUNTIME_BUCKETS=['runtime-tasks','runtime-runs','runtime-generations','runtime-deliveries','runtime-operations'];
 const RUNS_PER_PROVIDER=100;
 const generation=(ledger:WorldLedger,owner:string)=>Number(ledger.find('runtime-generations',owner)?.generation??0);
+// A run's task, from its stored row; a row that is not JSON has none. Runs are rows of their own under their id, scattered
+// through a large World among bigger rows, so one task's runs are found through this index rather than by reading every
+// run of every task (a second or more once those pages left memory).
+const RUN_TASK="CASE WHEN json_valid(body) THEN json_extract(body,'$.taskId') END";
+const indexed=new WeakSet<WorldLedger>();
+function taskRuns(ledger:WorldLedger,taskID:string):Row[] {
+ if(!indexed.has(ledger)){ledger.exec(`CREATE INDEX IF NOT EXISTS entries_runtime_run_task ON entries((${RUN_TASK}),seq) WHERE kind='state.runtime-runs';`);indexed.add(ledger);}
+ return ledger.all(`SELECT body FROM entries WHERE kind='state.runtime-runs' AND (${RUN_TASK})=? AND seq IN (SELECT MAX(seq) FROM entries WHERE kind='state.runtime-runs' GROUP BY key)`,taskID).map(row=>{
+  let value;try{value=JSON.parse(String(row.body));}catch{}
+  if(!value||typeof value!=='object'||Array.isArray(value))throw new WorldletError('Invalid world data; existing data was preserved.');
+  return value;
+ });
+}
 function recordTaskExecution(ledger:WorldLedger,claim:Row){for(const event of core<Row[]>('taskExecutionEvents',claim))ledger.append(event,event.taskId??'');}
 function saveDeliveries(ledger:WorldLedger,rows:Row[]){
  for(const row of ledger.records('runtime-deliveries'))if(typeof row.id==='string')ledger.deleteRuntimeRecord('runtime-deliveries',row.id);
@@ -80,7 +93,7 @@ export class TaskTables {
    this.deleteRuntimeRecord('runtime-tasks',taskID);this.put('runtime-tasks',taskID,result.task);
    this.deleteRuntimeRecord('runtime-runs',runID);this.put('runtime-runs',runID,result.run);
    recordTaskExecution(this,result);
-   for(const id of core<string[]>('runtimeRunPrune',{taskId:taskID,runs:this.records('runtime-runs')}))this.deleteRuntimeRecord('runtime-runs',id);
+   for(const id of core<string[]>('runtimeRunPrune',{taskId:taskID,runs:taskRuns(this,taskID)}))this.deleteRuntimeRecord('runtime-runs',id);
    return true;
   });
  }
