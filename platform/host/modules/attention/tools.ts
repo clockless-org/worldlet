@@ -3,6 +3,7 @@ import {contextReader,contextWriter,type AgentContext} from '../../../../context
 import {core} from '../../core.ts';
 import {attentionImageURL} from '../../../../agent/attention/index.ts';
 import {WorldletError} from '../../files.ts';
+import {busyWith} from '../../busy.ts';
 import type {Row} from '../../types.ts';
 import type {AttentionCenter} from './center.ts';
 import {CONTEXT_CHANGED,SOURCE_PAUSED,uuid,message,isValidation,isCancel,isRow,rows,strings,withinCharacters,characterCount,characterPrefix,httpsLinks} from './util.ts';
@@ -34,7 +35,8 @@ export async function worldToolReply(center:AttentionCenter,name:string,args:Row
   store.recordHistory({...body,...(typeof body.id==='string'?{targetId:body.id}:{}),id:uuid(),kind:'applet.activity',at:Date.now()/1000},monitorProvider??(typeof args.provider==='string'?args.provider:''));
  };
  try{
-  const result=await worldTool(center,name,args,turn,monitorProvider,agent);
+  // A tool's synchronous work (saving an Applet's records, publishing facts) is named if it holds the app a second or more.
+  const result=await busyWith('tool'+name.replace(/[^A-Za-z0-9]/g,'').slice(0,40),()=>worldTool(center,name,args,turn,monitorProvider,agent));
   recordOutcome(result.error!=null||args.failed===true?'failed':'complete');
   if(name==='upsert_world_items'&&result.error==null)center.savedItems(turn);
   return result;
