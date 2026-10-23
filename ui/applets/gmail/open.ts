@@ -25,13 +25,18 @@ export function mailCategory(item){
 /** The theme paints the desk; live HTML supplies the inbox and selected original. */
 type MailDeskState={tab:string;query:string;selected:string};
 const desks=new WeakMap<HTMLElement,MailDeskState>();
+// Envelope metadata read from originals, kept across repaints: a saved finding whose letter is not among the recent
+// records has no sender until its original is read.
+const readSenders=new Map<string,ReturnType<typeof mailMetadata>>(),triedSenders=new Set<string>();
+/** Summaries are Markdown; a one-line snippet shows their words, not the marks. */
+export function mailSnippet(text=''){return String(text).replace(/\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/\*\*|__|`/g,'').replace(/^\s*(?:#{1,6}|[-*•]|\d+[.)])\s+/gm,'').replace(/\s+/g,' ').trim();}
 export function renderMailOpen(region:HTMLElement,items,value,onPick,regions:readonly AppletSceneRegion[]=[]){
  const slots=Object.fromEntries(regions.map(r=>[r.id,r.element])),distributed=['navigation','letters','heading','actions','status'].every(id=>slots[id])&&region.closest<HTMLElement>('.applet-scene')?.dataset.compact!=='true';
  const active=document.activeElement as HTMLInputElement|null,wasHere=!!active&&!!region.closest('.applet-scene')?.contains(active),focusId=wasHere?active?.dataset.itemId:null,focusLabel=wasHere?active?.getAttribute('aria-label'):null,focusFolder=wasHere?active?.dataset.folder:null,caret=wasHere&&active instanceof HTMLInputElement?[active.selectionStart,active.selectionEnd]:null;
  const state=desks.get(region)||{tab:distributed?'inbox':'attention',query:'',selected:''};desks.set(region,state);
  const actions=value?.mail,threads=mailMatters(items),important=threads.filter(item=>!!item.attention).slice(0,9);
  // Only originals read by this rendered desk can fill absent envelope metadata. Summaries cannot.
- const readMetadata=new Map<string,ReturnType<typeof mailMetadata>>(),metadata=item=>readMetadata.get(item.id)||mailMetadata(item.record);
+ const metadata=item=>readSenders.get(item.id)||mailMetadata(item.record);
  const el=(tag,cls,text='')=>Object.assign(document.createElement(tag),{className:cls,textContent:text});
  const button=(text,run,cls='mail-desk-button')=>{const b=el('button',cls,text) as HTMLButtonElement;b.type='button';b.onclick=run;return b;};
  region.classList.add('mail-desk-host');region.dataset.mailReading=String(!!value?.reading);region.setAttribute('aria-label','Mail');
@@ -64,13 +69,35 @@ export function renderMailOpen(region:HTMLElement,items,value,onPick,regions:rea
    const b=button('',()=>{state.selected=item.id;if(!actions?.read){onPick(item);return;}desk.dataset.reading='true';paintRows();void read(item,true);},'mail-letter');
    b.dataset.itemId=item.id;b.dataset.curated=String(!!item.curated);b.dataset.stacked=String(item.messageCount>1);b.setAttribute('aria-label',title);b.title=title;
    const avatar=mailAvatar(record.from,record.avatar);avatar.classList.add('mail-letter-avatar');
-   const copy=el('span','mail-letter-text');copy.append(el('strong','mail-letter-sender',mailIdentity(record.from).name),el('span','mail-letter-subject',mailTitle(title)),el('small','mail-letter-snippet',item.summary||item.context||''));
+   const copy=el('span','mail-letter-text');copy.append(el('strong','mail-letter-sender',mailIdentity(record.from).name),el('span','mail-letter-subject',mailTitle(title)),el('small','mail-letter-snippet',mailSnippet(item.summary||item.context||'')));
    const side=el('span','mail-letter-side');if(record.date){const time=mailTime(record.date);const node=el('time','mail-letter-time',new Date(time.iso||record.date).toLocaleDateString(undefined,{month:'short',day:'numeric'}));node.title=time.exact;side.append(node);}
    if(item.attention){const mark=el('i','applet-attention applet-item-attention');mark.dataset.state=item.attention.state;mark.innerHTML=attentionIcon(item.attention.state,false,item.attention.priority);mark.setAttribute('aria-hidden','true');side.append(mark);}
    b.append(avatar,copy,side);list.append(b);
   }
   if(!filtered.length){const text=state.query?'No matching letters.':value?.reading?'Reading mail…':!value?.connected?'Connect Mail with Fox to read your letters.':value?.loaded&&!value?.error?(state.tab==='attention'?'No letters need you right now.':'No letters in this view.'):'Waiting for saved mail.';list.append(el('p',value?.loaded&&!value?.error?'mail-empty':'mail-desk-status',text));}
-  paintRows();void read(filtered.find(item=>item.id===state.selected));
+  paintRows();void read(filtered.find(item=>item.id===state.selected));void fillSenders(filtered);
+ }
+ function showSender(item,resolved){
+  const row=[...(list as HTMLElement).querySelectorAll<HTMLElement>('.mail-letter')].find(e=>e.dataset.itemId===item.id);
+  if(!row)return;
+  row.querySelector('.mail-letter-sender')!.textContent=mailIdentity(resolved.from).name;
+  const avatar=mailAvatar(resolved.from,resolved.avatar);avatar.classList.add('mail-letter-avatar');row.querySelector('.mail-letter-avatar')?.replaceWith(avatar);
+ }
+ // The first letters without a sender read their originals one at a time, so the list names who wrote them.
+ let filling=0;
+ async function fillSenders(shown){
+  if(!actions?.read)return;
+  const run=++filling;
+  for(const item of shown.filter(item=>!metadata(item).from&&!triedSenders.has(item.id)).slice(0,8)){
+   triedSenders.add(item.id);
+   try{
+    const original=await actions.read(item);
+    if(run!==filling||!desk.isConnected)return;
+    const from=mailMetadata(original?.messages?.[0]||original||{}).from;
+    if(!from)continue;
+    const resolved={...metadata(item),from};readSenders.set(item.id,resolved);showSender(item,resolved);
+   }catch{if(run!==filling||!desk.isConnected)return;}
+  }
  }
  function paintRows(){for(const row of list.querySelectorAll('.mail-letter'))row.setAttribute('aria-pressed',String(row.dataset.itemId===state.selected));}
  async function read(item,explicit=false){
@@ -83,12 +110,8 @@ export function renderMailOpen(region:HTMLElement,items,value,onPick,regions:rea
    const original=actions?.read?await actions.read(item):{text:item.record?.text||item.summary||'',title:item.record?.title||item.title};
    if(request!==serial||!desk.isConnected)return;if(typeof original?.text!=='string')throw Error('This letter is unavailable.');
    const listed=metadata(item),source=actions?.read?mailMetadata(original.messages?.[0]||original):listed;
-   const resolved={...listed,from:listed.from||source.from};readMetadata.set(item.id,resolved);
-   const row=[...(list as HTMLElement).querySelectorAll<HTMLElement>('.mail-letter')].find(e=>e.dataset.itemId===item.id);
-   if(row&&resolved.from!==listed.from){
-    row.querySelector('.mail-letter-sender')!.textContent=mailIdentity(resolved.from).name;
-    const avatar=mailAvatar(resolved.from,resolved.avatar);avatar.classList.add('mail-letter-avatar');row.querySelector('.mail-letter-avatar')?.replaceWith(avatar);
-   }
+   const resolved={...listed,from:listed.from||source.from};
+   if(resolved.from!==listed.from){readSenders.set(item.id,resolved);showSender(item,resolved);}
    body.replaceChildren();if(actions?.renderOriginal)body.append(actions.renderOriginal(original));else body.append(el('h3','',original.title||item.title),el('p','mail-desk-plain',original.text));
    turnMailPage(body,previous);
    const tools=el('footer','mail-desk-actions');if(actions?.reply){const reply=button('Reply with Fox',()=>actions.reply(item));if(distributed){const icon=el('span','mail-folder-icon');icon.innerHTML=uiIcon('reply');reply.prepend(icon);}tools.append(reply);}tools.append(button('Original',()=>onPick(item)));(distributed?slots.actions:letter).append(tools);

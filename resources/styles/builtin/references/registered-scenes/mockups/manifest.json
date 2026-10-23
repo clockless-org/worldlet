@@ -24,7 +24,7 @@
     "scripts/notes-notebook-preview.ts": "98e7532b098421c508c9aa7ee14133a20d17b59fee08e420fcaf637291fc74b0",
     "scripts/core-paper-preview.ts": "bde91846b8b345459a4a8556a88440357fd1f5fbff819416e930b6545605db72",
     "scripts/fixtures/core-paper-applets/main.ts": "160a0f09eaf804be54d17d47f57f5ba8800a3b066febb1ee2556c0e68e6ab8d5",
-    "ui/applets/gmail/open.ts": "ac78bf9476b44ae4ab30159632f845b266744600851bb8b497b3e4e0ec4c2484",
+    "ui/applets/gmail/open.ts": "00b1e09996ae3936c83408b981968269279a61316adb968035b2bce99d2a470e",
     "ui/applets/gmail/focus.ts": "699981c796b98fb2a3eed0e8c864c93b86c0419d1a06f23c4eaffdc566ddae67",
     "ui/applets/gmail/open.css": "b3235634d1fafdd4217e45a4feef9ec7246af4f4f07171c764ad229403ff7b0b",
     "ui/applets/apple-reminders/open.ts": "50d635889f2be1c18033a94a7e85681b442c9feecf5465768a065706072d5799",
