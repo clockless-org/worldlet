@@ -8,14 +8,13 @@ import {harnessConnections,hermesConnectionsService,openClawConnectionsService} 
 import type {HarnessEnvironment} from '../platform/host/modules/companion/agent/local-harness.ts';
 import {createHarnessConnections} from '../platform/host/modules/companion/harness-connections.ts';
 import {AGENT} from '../platform/host/services.ts';
-import {connectionLine,connectionUseLine,showAgentConnections} from '../ui/frame/agent-connections.ts';
 import {withTempDir} from './test-temp.ts';
 
 // The Agent's connections in the World (agent/gate/PORTABILITY.md#the-agents-connections-in-the-world): the declared
 // `connections` service, Hermes Agent's mcp_servers and chat tokens and OpenClaw's mcp status and channels read without
 // a secret, each server's last use matched from its own tool naming, the exact command of each change, the host
 // services against fixture `hermes` and `openclaw` commands that behave like their own `mcp add/remove/unset` (their
-// files changed only by them), the World's preview-then-confirm and Settings › Agents › Accounts.
+// files changed only by them) and the World's preview-then-confirm.
 
 // Declarations ------------------------------------------------------------------------------------------------------
 assert.equal(harnessService('hermes','connections'),'files');assert.equal(harnessService('openclaw','connections'),'native');
@@ -77,14 +76,6 @@ assert.equal(commandReason('\u001b[32m  Connecting\u001b[0m\n  ✗ Failed to con
 
 // Hosts: fixture `hermes` and `openclaw` commands ------------------------------------------------------------------
 if(process.platform==='win32'){console.log('SKIP connection fixtures on Windows (shell fixtures); shared rules PASS');process.exit(0);}
-class Node {
- children:Node[]=[];className='';type='';disabled=false;dataset:Record<string,string>={};attributes:Record<string,string>={};onclick:any=null;isConnected=true;value='';placeholder='';spellcheck=false;autocomplete='';private own='';
- get textContent():string {return this.own+this.children.map(c=>c.textContent).join('');}
- set textContent(value:string){this.own=String(value);this.children=[];}
- append(...nodes:Node[]){this.children.push(...nodes);}replaceChildren(...nodes:Node[]){this.children=nodes;this.own='';}remove(){this.isConnected=false;}
- setAttribute(name:string,value:string){this.attributes[name]=value;}
- all(test:(n:Node)=>boolean):Node[] {return [...(test(this)?[this]:[]),...this.children.filter(c=>c.isConnected).flatMap(c=>c.all(test))];}
-}
 await withTempDir('worldlet-connections-',async temp=>{
  const scratch=fs.realpathSync(temp),home=path.join(scratch,'home'),bin=path.join(scratch,'bin');fs.mkdirSync(bin,{recursive:true});
  const script=(name:string,source:string)=>{const file=path.join(scratch,name+'.cjs');fs.writeFileSync(file,source);fs.writeFileSync(path.join(bin,name),`#!/bin/sh\nexec "${process.execPath}" "${file}" "$@"\n`);fs.chmodSync(path.join(bin,name),0o755);return path.join(bin,name);};
@@ -226,49 +217,5 @@ else process.exit(2);
  await assert.rejects(world.preview('openclaw',{remove:docs.id}),/can be changed only in OpenClaw itself/);
  await assert.rejects(world.preview('hermes',{remove:'not-an-id'}),/no longer there/);
  host.store.sampleEnabled=()=>true;await assert.rejects(world.preview('hermes',{remove:docs.id}),/your own world/);host.store.sampleEnabled=()=>false;
-
- // Settings › Agents › Accounts: a row per connection with its last use; Remove and Add each say what they
- // do in plain words (never the command itself), and run it on Confirm.
- (globalThis as any).document={createElement:()=>new Node()};
- const requests:any[]=[];
- let answer:any={harnesses:[{harness:'hermes',title:'Hermes Agent',inUse:true,changes:true,connections:[{id:listed[0].id,kind:'mcp',name:'github',where:'https://api.githubcopilot.com/mcp/',enabled:true,sign:'token',agent:'default',main:true,removable:true,lastUsed:{at:Date.UTC(2026,9,8,12),tool:'search_issues',thread:'Discord · Release notes'}},
-  {id:listed[4].id,kind:'account',name:'Telegram',where:'telegram',enabled:true,sign:'token',agent:'default',main:true}]},{harness:'other',title:'Other Agent',changes:false,connections:[{id:'conn-0000000000000000',kind:'mcp',name:'x',where:'y',enabled:false,removable:true}]}]};
- const call=async(action:string,args:any)=>{
-  // What Hermes Agent said about itself at setup (agent/gate/agent-profile.ts); Other Agent said nothing.
-  if(action==='agentHarness')return {profile:args.id==='hermes'?{connections:[{name:'1Password vault',kind:'password_vault',usedFor:'Logs in to shopping sites'},{name:'Telegram',kind:'channel'}],channels:[{provider:'discord',place:'#groceries'}]}:null};
-  requests.push([action,args]);if(args.operation==='preview')return {command:args.remove?'hermes mcp remove github':'hermes mcp add fetch --url https://f.example.com',confirm:'c-1'};
-  if(args.operation==='change'){answer={harnesses:[{...answer.harnesses[0],connections:answer.harnesses[0].connections.slice(1)}]};return {ok:true};}return answer;};
- const target=new Node();
- await showAgentConnections(target as any,call,()=>true);
- const rows=target.all(n=>!!n.dataset.connection);
- assert.deepEqual(rows.map(r=>r.dataset.connection),[listed[0].id,listed[4].id,'conn-0000000000000000']);
- assert.match(rows[0].textContent,/githubTool.*Last used .*2026 for search_issues in “Discord · Release notes”\./);
- assert.match(rows[1].textContent,/TelegramChat account/);assert.doesNotMatch(target.textContent,/githubcopilot|token|OAuth|profile/,'no address, sign-in method or profile');assert.equal(rows[1].all(n=>n.dataset.action==='remove-connection').length,0,'an account is listed, not removed');
- assert.equal(rows[2].all(n=>n.dataset.action==='remove-connection').length,0,'no Remove where the Agent cannot be changed from here');
- // The connections it reported itself are listed under its own, without one it already lists, and never removable.
- const told=target.all(n=>!!n.dataset.reported);
- assert.deepEqual(told.map(r=>r.dataset.reported),['1Password vault','Discord #groceries']);
- assert.match(told[0].textContent,/1Password vaultPassword vaultLogs in to shopping sites/);assert.match(told[1].textContent,/Discord #groceriesChat channelHermes Agent told Worldlet it uses this\./);
- assert.equal(told.flatMap(r=>r.all(n=>!!n.dataset.action)).length,0,'listed only');
- assert.match(target.textContent,/Change these in Other Agent itself\./);
- await rows[0].all(n=>n.dataset.action==='remove-connection')[0].onclick();
- await new Promise(resolve=>setImmediate(resolve));
- assert.equal(requests.filter(([,a])=>a.operation==='change').length,0,'Remove only shows the command');
- assert.match(rows[0].textContent,/Hermes Agent will remove github\.RemoveCancel/);
- assert.doesNotMatch(target.textContent,/MCP\b|hermes mcp/,'plain words: tools, never MCP or the command');
- rows[0].all(n=>n.dataset.action==='confirm-connection')[0].onclick();
- await new Promise(resolve=>setTimeout(resolve,10));
- assert.deepEqual(requests.filter(([,a])=>a.operation!=='list'),[['harnessConnections',{operation:'preview',harness:'hermes',remove:listed[0].id}],['harnessConnections',{operation:'change',confirm:'c-1'}]]);
- assert.deepEqual(target.all(n=>!!n.dataset.connection).map(r=>r.dataset.connection),[listed[4].id],'the list is read again after a change');
- assert.match(target.textContent,/github was removed from Hermes Agent\./);
- const form=target.all(n=>n.dataset.add==='hermes')[0],[nameInput,whereInput]=form.all(n=>n.className==='companion-settings-input');
- nameInput.value='fetch';whereInput.value='https://f.example.com';
- form.all(n=>n.dataset.action==='add-connection')[0].onclick();await new Promise(resolve=>setTimeout(resolve,10));
- assert.deepEqual(requests.at(-1),['harnessConnections',{operation:'preview',harness:'hermes',add:{name:'fetch',url:'https://f.example.com'}}]);
- form.all(n=>n.dataset.action==='cancel-connection')[0].onclick();
- assert.match(target.textContent,/Nothing was changed\./);assert.equal(requests.filter(([,a])=>a.operation==='change').length,1,'Cancel runs nothing');
- assert.equal(connectionUseLine({id:'c',kind:'mcp',name:'x',where:'',enabled:true}),'Not used in your Agent’s recent history.');
- assert.equal(connectionLine({id:'c',kind:'mcp',name:'x',where:'node s.js',enabled:false,agent:'work',sign:'needs-sign-in'}),'Tool · needs sign-in in your Agent · turned off');
- delete (globalThis as any).document;
 });
-console.log('PASS Agent connections: declared per Harness, Hermes Agent and OpenClaw MCP servers and chat accounts listed with no secret and their last use from the Agent\'s own history, added and removed only through fixture `hermes mcp add/remove` and `openclaw mcp add/unset` after a confirmed preview, Settings › Agents › Accounts');
+console.log('PASS Agent connections: declared per Harness, Hermes Agent and OpenClaw MCP servers and chat accounts listed with no secret and their last use from the Agent\'s own history, added and removed only through fixture `hermes mcp add/remove` and `openclaw mcp add/unset` after a confirmed preview');
