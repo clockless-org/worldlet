@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {activityObserve,activityEvent,activityURL} from '../context/applets/index.ts';
+import {activityObserve,activityEvent,activityURL,ACTIVITY_CONTENT_GAP_MS} from '../context/applets/index.ts';
 import {invoke} from '../agent/index.ts';
 import type {ActivityEndReason} from '../contracts/activity.ts';
 const page={url:'https://example.com/a?token=secret',title:'Page',text:'Visible text',documentId:'doc1',visible:true,truncated:false};
@@ -25,6 +25,18 @@ console.log('PASS activity correlation, sampled dwell, clock gaps, background ex
 const longText='long paragraph '.repeat(10000);
 const chunks=activityObserve({...input,page:{...page,text:longText}}).events.filter(e=>e.kind==='activity.page.content');
 assert.equal(chunks.map(e=>e.data.text).join(''),longText);assert(chunks.length>1);assert(chunks.every(e=>e.data.snapshotId==='one'));
+
+// A changing page's text is recorded at most every ACTIVITY_CONTENT_GAP_MS; the state carries a key, never the text.
+{
+ const contents=(r:{events:{kind:string}[]})=>r.events.filter(e=>e.kind==='activity.page.content').length;
+ let r=activityObserve({...input,id:'gap1',tick:1000,page:{...page,text:'Feed one'}});assert.equal(contents(r),1);
+ assert(!JSON.stringify(r.state).includes('Feed one'),'the state holds no page text');
+ r=activityObserve({...input,id:'gap2',tick:2000,state:r.state,page:{...page,text:'Feed two'}});assert.equal(contents(r),0,'a change within the gap waits');
+ r=activityObserve({...input,id:'gap3',tick:3000,state:r.state,page:{...page,title:'Other',text:'Feed two'}});assert.equal(contents(r),1,'a new title records at once');
+ r=activityObserve({...input,id:'gap4',tick:4000,state:r.state,page:{...page,title:'Other',text:'Feed three'}});assert.equal(contents(r),0);
+ r=activityObserve({...input,id:'gap5',tick:3000+ACTIVITY_CONTENT_GAP_MS,state:r.state,page:{...page,title:'Other',text:'Feed three'}});assert.equal(contents(r),1,'after the gap the current text is recorded');
+ r=activityObserve({...input,id:'gap6',tick:30000,state:r.state,page:{...page,title:'Other',text:'Feed three'}});assert.equal(contents(r),0,'unchanged text is not recorded again');
+}
 
 // Coverage is an explicit limitation, not evidence of attached frames/workers or completed actions.
 const coverage={scope:'document' as const,frameElements:2,workers:'not-observed' as const};

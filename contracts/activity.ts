@@ -2,7 +2,9 @@
 /** Counts DOM frame elements only, without inspecting their documents or discovering worker targets. */
 export interface ActivityCoverage {scope:'document';frameElements:number;workers:'not-observed'}
 export interface ActivityPage {url:string;title:string;text:string;documentId:string;visible:boolean;truncated:boolean;omitted?:string;scrollX?:number;scrollY?:number;clicks?:Array<{tag:string;label:string;href?:string}>;edits?:Array<{tag:string;inputType:string;characters:number}>;interactions?:Array<Record<string,unknown>>;dropped?:number;coverage?:ActivityCoverage}
-export interface ActivityState {visitId:string;url:string;navigationURL:string;documentId:string;title:string;text:string;lastTick:number;active:boolean;visibleMs:number;scrollX?:number;scrollY?:number;coverage?:string}
+/** `textKey` names the last recorded text (its length and a hash), not the text: the state goes back and forth with every
+ * sample, and a long page's text made each round trip costly. `contentTick` is when that text was recorded. */
+export interface ActivityState {visitId:string;url:string;navigationURL:string;documentId:string;title:string;textKey:string;contentTick?:number;lastTick:number;active:boolean;visibleMs:number;scrollX?:number;scrollY?:number;coverage?:string}
 export interface ActivityFact {version:1;id:string;at:number;kind:string;surfaceId:string;visitId?:string;data:Record<string,unknown>}
 /** Ends an observed visit, not necessarily the underlying browser document. */
 export type ActivityEndReason='navigation'|'hidden'|'closed'|'popup'|'unavailable';
