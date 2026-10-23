@@ -82,7 +82,9 @@ export class WorldLedger {
    return value;
   });
  }
- find(bucket:string,id:string){return this.records(bucket).find(row=>row.id===id);}
+ /** A bucket's row with this id. Rows are kept under their id, so the row under that key answers without reading the
+  * bucket's other rows (an Applet's observations are megabytes); a row kept under another key is still found. */
+ find(bucket:string,id:string){const row=this.value(bucket,id);return row?.id===id?row:this.records(bucket).find(row=>row.id===id);}
  /** One key's current value in a state bucket, without reading the bucket's other values (large ones stay unread). */
  value(bucket:string,id:string):Row|null {
   const raw=this.all('SELECT body FROM entries WHERE kind=? AND key=? ORDER BY seq DESC LIMIT 1','state.'+bucket,id)[0];
