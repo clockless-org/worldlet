@@ -73,14 +73,17 @@ body.setAttribute('aria-label','Artifact contents');
  // Page mode (context/store/ARTIFACTS.md#theme-driven-artifacts): when the Agent has laid this card out as a page in the
  // theme's style, the page shows in a sandboxed view of its own over the card, below the row of the card's own controls.
  // A small card, a card over an Applet or a page that cannot show keeps the template card.
- let pageId='';
+ let pageId='',pageSent='';
  const pageRect=()=>{const r=panel.getBoundingClientRect();return {x:r.left,y:r.top+ARTIFACT_PAGE_CONTROLS,width:r.width,height:Math.max(0,r.height-ARTIFACT_PAGE_CONTROLS)};};
  const pageFits=()=>!!pageId&&!!pages&&!panel.hidden&&!inApplet()&&(panel.dataset.size==='medium'||panel.dataset.size==='large');
  function syncPage(){
   if(pageFits()){
    const first=panel.dataset.render!=='page';panel.dataset.render='page';
-   requestAnimationFrame(()=>{if(panel.dataset.render==='page')void pages!({operation:first?'show':'layout',id:pageId,rect:pageRect()}).catch(()=>{pageId='';syncPage();});});
-  }else if(panel.dataset.render==='page'){delete panel.dataset.render;void pages?.({operation:'hide'}).catch(()=>{});layout();}
+   // A refit that left the page where it was sends nothing: the World's own refits asked the host to lay the page out
+   // again unchanged every few seconds, each call kept in the World's history.
+   requestAnimationFrame(()=>{if(panel.dataset.render!=='page')return;const rect=pageRect(),key=pageId+JSON.stringify(rect);if(!first&&key===pageSent)return;pageSent=key;
+    void pages!({operation:first?'show':'layout',id:pageId,rect}).catch(()=>{pageId='';pageSent='';syncPage();});});
+  }else if(panel.dataset.render==='page'){delete panel.dataset.render;pageSent='';void pages?.({operation:'hide'}).catch(()=>{});layout();}
  }
  const overflows=()=>!!shown&&shown.step.text!=='brief'&&body.scrollHeight>body.clientHeight+1;
  // A window resize and the card's own ResizeObserver often ask in the same frame: one check a frame answers both.

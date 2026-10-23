@@ -111,9 +111,9 @@ export function scheduleElsewhere(harness:string,mode:HarnessServiceMode|null):s
 /** Runs ended before Worldlet first watched this Harness are history, not news. */
 export const SCHEDULE_PUSH_MAX=3,SCHEDULE_PUSH_FRESH_MS=12*3600_000,SCHEDULE_ITEMS_MAX=20;
 const collapseKey=(job:string)=>('job-'+job.replace(/[^A-Za-z0-9_.-]+/g,'-')).slice(0,64);
-type ItemFacts={kind:'task'|'update';title:string;reason:string;summary:string;source:string;quote:string;at:number};
-const scheduleItem=(provider:string,{kind,title,reason,summary,source,quote,at}:ItemFacts)=>processedAttentionContent({
- provider,kind,title:clip(title,40),reason,summary:clip(summary,1200),...kind==='task'?{priority:'elevated'}:{},occurredAt:new Date(at).toISOString(),
+type ItemFacts={kind:'task'|'update';title:string;reason:string;summary:string;source:string;quote:string;at:number;priority?:'important'};
+const scheduleItem=(provider:string,{kind,title,reason,summary,source,quote,at,priority}:ItemFacts)=>processedAttentionContent({
+ provider,kind,title:clip(title,40),reason,summary:clip(summary,1200),...priority?{priority}:kind==='task'?{priority:'elevated'}:{},occurredAt:new Date(at).toISOString(),
  sources:[{provider,id:clip(source,500),quote:clip(quote,1000)}]});
 const itemFor=(harness:ScheduleHarness,facts:ItemFacts)=>scheduleItem('harness:'+harness.id,facts);
 /** A run's phone line: what it said on one line, else that it finished or why not. */
@@ -183,16 +183,33 @@ function cardLines(body:string){
  * this file stays free of the artifacts module; scripts/harness-schedule-check.ts checks they match). */
 const DAILY_NAMES={plan:'Today’s prep',summary:'Wrap up today'} as const;
 /** A kept morning brief (`plan`, Today’s prep) or day summary (Wrap up today): Worth Knowing, opening the Journal on its card (source
- * `journal:<day>:<card id>`). The same day's card saved again updates the same item. */
+ * `journal:<day>:<card id>`). The same day's card saved again updates the same item. It is important enough for a seat
+ * in Now: as an ordinary update it went to Later, under the older days' (Mac 4613: Oct 23's brief in Later, Oct 22's
+ * summary in Now); dailySuperseded keeps one of each in the Center. */
 export function dailyScheduleResult(input:{kind:'plan'|'summary';day:string;artifact:{id:string;title?:string;brief?:string;body?:string};at:number;now:number}):ScheduleResult|null {
  const {kind,day,artifact,at,now}=input;
  if(kind!=='plan'&&kind!=='summary'||!DAY.test(day)||typeof artifact?.id!=='string'||!artifact.id||!Number.isFinite(at))return null;
  const name=DAILY_NAMES[kind]+' · '+dayLabel(day);
  const said=text(artifact.brief)||cardLines(text(artifact.body));
  const item=worldletItem({kind:'update',title:name,reason:kind==='plan'?'Fox made it for your day':'Fox wrote up your day',summary:(said?said+'\n\n':'')+'It is kept in your Journal.',
-  source:'journal:'+day+':'+artifact.id,quote:text(artifact.title)||name,at});
+  source:'journal:'+day+':'+artifact.id,quote:text(artifact.title)||name,at,priority:'important'});
  const line=firstLine(said.replace(/^\s*[-*+]\s+/gm,'').replace(/[*_`>#|]/g,''));
  return {item,push:now-at<=SCHEDULE_PUSH_FRESH_MS?{kind:'routine',title:name,body:clip(line||'Ready in your Journal.',240),collapse:'daily-'+kind}:null};
+}
+/** A day's brief or summary kept takes over from its routine's earlier days: their open results are read and its runs
+ * that did not finish, that day's included, are done, so the Center holds the latest of each instead of a backlog of
+ * past days (Mac 4613 kept nine, Oct 13 on, in Later). */
+export function dailySuperseded(kind:'plan'|'summary',day:string,items:readonly Record<string,unknown>[]):{id:string;status:'read'|'done'}[] {
+ if(kind!=='plan'&&kind!=='summary'||!DAY.test(day))return [];
+ const name=DAILY_NAMES[kind]+' · ',failed=new RegExp('^daily:'+kind+':(\\d{4}-\\d{2}-\\d{2})$');
+ return items.flatMap((item):{id:string;status:'read'|'done'}[]=>{
+  const id=text(item.id),status=text(item.status)||'open',source=text(record(Array.isArray(item.sources)?item.sources[0]:null).id);
+  if(!id||item.provider!==WORLDLET_SCHEDULE||status!=='open')return [];
+  const result=JOURNAL_SOURCE.exec(source),failure=failed.exec(source);
+  if(result&&text(item.title).startsWith(name)&&result[1]<day)return [{id,status:'read' as const}];
+  if(failure&&failure[1]<=day)return [{id,status:'done' as const}];
+  return [];
+ });
 }
 /** One of the two default Routines that ran and made no card (the Agent failed, or finished without one): Worth Doing,
  * saying so plainly, so it never fails silently (owner decision 2026-10-11). The same day's again updates the item. */

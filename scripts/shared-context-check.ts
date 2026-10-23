@@ -46,6 +46,8 @@ const {worldEvent}=await import('../context/store/world-events.ts');
 assert.equal(worldEvent('snapshot',{text:'private'}),null);
 assert.equal(worldEvent('browser',{operation:'status'}),null);
 assert.equal(worldEvent('worldAudio',{operation:'start'}),null);
+assert.equal(worldEvent('artifactPages',{operation:'layout',id:'page-1'}),null,'a card page laid out again is plumbing');
+assert.notEqual(worldEvent('artifactPages',{operation:'make',id:'page-1'}),null,'making a card page stays in history');
 assert.deepEqual(worldEvent('agentChat',{text:'private',apiKey:'secret',target:'email',provider:'gmail',moduleId:'app-mail',id:'opaque',level:Infinity,place:{private:'nested'}}),{body:{provider:'gmail',moduleId:'app-mail'},applet:'app-mail'});
 assert.deepEqual(worldEvent('worldItemStatus',{id:'item-1',enabled:false,level:0,region:'x'.repeat(121)}),{body:{id:'item-1',enabled:false,level:0}});
 assert.equal(worldEvent('open',{provider:'🦊'.repeat(120)}).applet,'🦊'.repeat(120));
