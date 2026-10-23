@@ -66,6 +66,8 @@ for(const invalid of [
 assert.throws(()=>readBrowserSurfaceRequest({action:'browserLayout',rect,paperEdge,page:{width:640,height:480}}));
 const frame={asset:paperEdge.asset,source:{x:0,y:0,width:1,height:1},target:rect};
 assert.doesNotThrow(()=>readBrowserSurfaceRequest({action:'browserLayout',rect,paperEdge:{...paperEdge,frame}}));
+assert.deepEqual((readBrowserSurfaceRequest({action:'browserLayout',rect,paperEdge:{...paperEdge,clear:[{x:10,y:-30,width:400,height:36}]}}) as any).paperEdge?.clear,[{x:10,y:-30,width:400,height:36}],'a paper edge leaves the toolbar on the frame unpainted');
+for(const clear of [{x:0,y:0,width:1,height:1},Array(9).fill({x:0,y:0,width:1,height:1}),[{x:0,y:0,width:-1,height:1}],[{x:0,y:0,width:1}]])assert.throws(()=>readBrowserSurfaceRequest({action:'browserLayout',rect,paperEdge:{...paperEdge,clear}}));
 for(const bad of [{...frame,source:{...frame.source,width:2}},{...frame,asset:'https://example.com/mask.png'},{...frame,target:{...rect,width:0}}])assert.throws(()=>readBrowserSurfaceRequest({action:'browserLayout',rect,paperEdge:{...paperEdge,frame:bad}}));
 const detached=readBrowserSurfaceRequest({action:'browserLayout',rect,paperEdge});
 if(detached.action==='browserLayout')(detached.paperEdge!.profile.top as number[])[0]=0;

@@ -46,7 +46,8 @@ export class PaperEdge {
    const {x,y}=this.offset;
    window.setBounds({x:screen.x+x,y:screen.y+y,width:this.offset.width,height:this.offset.height});
    const paint={src:this.image(edge.asset),image:{...edge.image,x:edge.image.x-x,y:edge.image.y-y},profile:edge.profile,
-    ...f?{frame:{src:this.image(f.asset),source:f.source,target:{...f.target,x:f.target.x-x,y:f.target.y-y}}}:{}};
+    ...f?{frame:{src:this.image(f.asset),source:f.source,target:{...f.target,x:f.target.x-x,y:f.target.y-y}}}:{},
+    ...edge.clear?{clear:edge.clear.map(r=>({...r,x:r.x-x,y:r.y-y}))}:{}};
    void this.ready!.then(()=>{
     if(token!==this.generation||window.isDestroyed())return false;
     return window.webContents.executeJavaScript(`paperEdge.apply(${JSON.stringify(paint)})`,false);

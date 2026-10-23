@@ -2,15 +2,17 @@
 export interface SurfaceRect {x:number;y:number;width:number;height:number}
 /** Narrow paper overlap in CSS pixels, sampled along each side (clockwise). */
 export interface BrowserPaperProfile {top:readonly number[];right:readonly number[];bottom:readonly number[];left:readonly number[]}
-/** A packaged painting projected relative to the native page; only its narrow edge is drawn over the page. */
-export interface BrowserPaperEdge {asset:string;image:SurfaceRect;profile:BrowserPaperProfile;frame?:{asset:string;source:SurfaceRect;target:SurfaceRect}}
+/** A packaged painting projected relative to the native page; only its narrow edge is drawn over the page. `clear`
+ * leaves up to 8 rects (relative to the page, like `image`) unpainted, so World controls standing on the frame, such as
+ * the page's toolbar on its top rail, show through the painting drawn above the World. */
+export interface BrowserPaperEdge {asset:string;image:SurfaceRect;profile:BrowserPaperProfile;frame?:{asset:string;source:SurfaceRect;target:SurfaceRect};clear?:SurfaceRect[]}
 export function readBrowserPaperProfile(input:unknown):BrowserPaperProfile {
  const value=object(input);keys(value,['top','right','bottom','left']);
  for(const side of ['top','right','bottom','left'])if(!Array.isArray(value[side])||(value[side] as unknown[]).length<2||(value[side] as unknown[]).length>64||!(value[side] as unknown[]).every(n=>typeof n==='number'&&Number.isFinite(n)&&n>=0&&n<=3))throw Error('Invalid browser paper edge profile');
  return {top:[...value.top as number[]],right:[...value.right as number[]],bottom:[...value.bottom as number[]],left:[...value.left as number[]]};
 }
 export function readBrowserPaperEdge(input:unknown):BrowserPaperEdge {
- const value=object(input);keys(value,['asset','image','profile','frame']);
+ const value=object(input);keys(value,['asset','image','profile','frame','clear']);
  if(typeof value.asset!=='string'||value.asset.length>512||!/^theme-assets\/[a-z0-9-]+\/(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-]+\.(?:webp|png|jpg)$/.test(value.asset))throw Error('Invalid browser paper edge asset');
  const image=readRect(value.image);if(image.width<=0||image.height<=0||image.width>32768||image.height>32768||Math.abs(image.x)>32768||Math.abs(image.y)>32768)throw Error('Invalid browser paper image bounds');
  let frame:BrowserPaperEdge['frame'];
@@ -20,7 +22,13 @@ export function readBrowserPaperEdge(input:unknown):BrowserPaperEdge {
   if(source.x<0||source.y<0||source.width<=0||source.height<=0||source.x+source.width>1||source.y+source.height>1)throw Error('Invalid frame source bounds');
   frame={asset:checked.asset,source,target:checked.image};
  }
- return {asset:value.asset,image,profile:readBrowserPaperProfile(value.profile),...frame?{frame}:{}};
+ let clear:SurfaceRect[]|undefined;
+ if(value.clear!==undefined){
+  if(!Array.isArray(value.clear)||value.clear.length>8)throw Error('Invalid browser paper clear rects');
+  clear=value.clear.map(readRect);
+  if(clear.some(r=>r.width<0||r.height<0||r.width>32768||r.height>32768||Math.abs(r.x)>32768||Math.abs(r.y)>32768))throw Error('Invalid browser paper clear rect');
+ }
+ return {asset:value.asset,image,profile:readBrowserPaperProfile(value.profile),...frame?{frame}:{},...clear?{clear}:{}};
 }
 /** How many website pages stay live at once and how many Fox browser tasks may drive pages at the
  * same time (agent/applets/budget.ts). Hosts send it with their capabilities (`browserBudget`). */

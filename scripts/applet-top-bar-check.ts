@@ -195,9 +195,12 @@ function assertShelfRow(r:any,width:number,label:string,leading=true){
   const opened=()=>page.evaluate(()=>(window as any).calls.filter(c=>c.action==='browserCommand'&&c.operation==='open').map(c=>c.args?.url));
   await field.click();await field.fill('example.com/news');await page.keyboard.press('Enter');
   await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='browserCommand'&&c.operation==='open'&&c.args?.url==='https://example.com/news'));
+  // Typed after a click, not filled: the click selects the whole address, so typing replaces it.
+  await field.click();await page.keyboard.type('example.org');await page.keyboard.press('Enter');
+  await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='browserCommand'&&c.operation==='open'&&c.args?.url==='https://example.org/'));
   await field.click();await field.fill('tennis lessons near me');await page.keyboard.press('Enter');
   await page.waitForFunction(()=>(window as any).calls.some(c=>c.action==='browserCommand'&&c.operation==='open'&&/google\.com\/search\?q=tennis%20lessons%20near%20me$/.test(c.args?.url||'')));
-  assert.equal((await opened()).length,2,'one page each '+JSON.stringify(await opened()));
+  assert.equal((await opened()).length,3,'one page each '+JSON.stringify(await opened()));
   assert.deepEqual(errors,[]);await page.close();
   console.log('PASS the toolbar\'s field shows where the page is, the whole address to edit, and opens an address or a search.');
  }
