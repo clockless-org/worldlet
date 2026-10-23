@@ -28,7 +28,7 @@ Requirements: Node.js 22.19+ (`package.json` `engines`) and Python 3.11–3.13 f
 
 ### Worktrees: test independently, integrate into main
 
-GitHub `origin/main` is the cross-machine source of truth. Keep the primary workspace/thread on `main` and only fast-forward it from origin. Main accepts changes through GitHub PRs (squash); direct pushes, force pushes and deletion are blocked, including for administrators.
+GitHub `origin/main` is the cross-machine source of truth. Keep the primary workspace/thread on `main` and only fast-forward it from origin. Create worktrees outside the repository folder (for example `git worktree add ~/.claude/worktrees/worldlet-<name> -b <branch> origin/main`), never next to or inside it, and remove the worktree and its branch once the PR merges or the work is dropped (owner decision 2026-10-22). Main accepts changes through GitHub PRs (squash); direct pushes, force pushes and deletion are blocked, including for administrators.
 
 No dedicated `dev` integration branch is required. Features are developed and tested independently, then pushed as issue-linked PRs. Agents are authorized to review and squash-merge completed PRs after proportional checks and required GitHub checks pass, without waiting for human review. Failures or conflicts must be resolved first; never bypass protection. The owner accepts behavior by using the latest main-backed app.
 

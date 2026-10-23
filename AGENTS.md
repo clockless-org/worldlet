@@ -33,3 +33,4 @@ Use placeholders instead: `alex@example.com`, `example.com`, `192.0.2.10` (or `1
 - Keep each pull request to one change. Run `npm run check:pr` and `npm test` before pushing, and `npm run test:ui:quick` when the change touches the interface; pull request CI runs the same checks and the fastest UI checks (`test:ui:pr`) on Linux and should finish within about five minutes.
 - Update the documentation a change affects in the same pull request (`npm run check:docs` checks links and the inventory in [docs/README.md](docs/README.md)).
 - Describe the change in plain language: what a reader sees before and after, and how it works.
+- The repository folder holds only the primary checkout on `main`. Work in a worktree created outside it, under `~/.claude/worktrees/` or the agent app's own worktree location, never next to or inside the checkout. When the work is merged or dropped, remove the worktree and delete its branch, locally and on GitHub (owner decision 2026-10-22).
