@@ -413,5 +413,18 @@ try{
   assert.deepEqual(ledger.records('task-reviews').map(row=>row.id),['new'],'settled reviews are deleted');
   console.log('PASS a queued task review of the same evidence, or of a removed task, is dropped instead of shown again');
  }
+ {
+  // Settling an Attention pass rewrites only the delivery rows it changes, not the whole delivery history.
+  const ledger=opened(path.join(scratch,'deliveries')).ledger();
+  for(let i=0;i<300;i++)ledger.put('runtime-deliveries','d'+i,{id:'d'+i,consumerId:'attention:center',entityId:'gmail:'+i,revision:'r1',status:'acknowledged'});
+  ledger.put('runtime-deliveries','seed',{id:'seed',consumerId:'attention:center',entityId:'gmail:seed',revision:'r1',status:'pending',attempts:0});
+  const seqs=()=>new Map(ledger.all("SELECT key,seq FROM entries WHERE kind='state.runtime-deliveries'").map(row=>[row.key,row.seq]));
+  const before=seqs();
+  ledger.failAttentionDeliveries([{id:'gmail:seed',revision:'r1'}],'incomplete_coverage',false);
+  const after=seqs();
+  assert.equal(after.size,before.size,'no delivery is lost');
+  assert.deepEqual([...after].filter(([key,seq])=>before.get(key)!==seq).map(([key])=>key).filter(key=>key!=='seed'),[],'unchanged deliveries are not rewritten');
+  console.log('PASS settling an Attention pass rewrites only the deliveries it changes');
+ }
 }catch(error){console.error('FAIL library storage:',error);process.exitCode=1;}
 finally{for(const store of stores)store.closeLedger();fs.rmSync(scratch,{recursive:true,force:true});}
