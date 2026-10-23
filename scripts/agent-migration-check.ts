@@ -7,7 +7,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {claudeCodeConversationTitle,claudeCodeTurn,hermesConversationIncluded,hermesConversationTitle,hermesRoutine,hermesTurn,migrationMemoryNote,migrationRoutineKey,migrationSkillMarkdown,migrationSkillPath,migrationSkillsSafe,
  openClawAgentSkill,openClawChannelPrompts,openClawConversationIncluded,openClawConversationSkill,openClawConversationTitle,openClawPromptFor,openClawRoutine,openClawSkillName,openClawTurn,piTurn} from '../agent/gate/index.ts';
 import {openClawAgents,parseJSON5,readOpenClaw,reportOpenClawWorkspaces,scanOpenClawWorkspaces,surveyOpenClaw} from '../platform/host/modules/companion/agent/openclaw-files.ts';
-import {sessionFiles,surveyAgentHistory} from '../platform/host/modules/companion/agent/agent-files.ts';
+import {claudeCodeConversation,codexConversation,newBudget,sessionFiles,surveyAgentHistory} from '../platform/host/modules/companion/agent/agent-files.ts';
 import {firstSentence,localAgentModel,openClawWorkspace,readLocalAgentMemory,summarizeLocalAgent} from '../platform/host/modules/companion/agent/local-memory.ts';
 import {bringAgent,broughtFile,placeBrought,readBrought,restoreBrought} from '../platform/host/modules/companion/migration.ts';
 import {allowed as inBackup,validate as validateBackup} from '../platform/host/modules/app/backup.ts';
@@ -463,5 +463,43 @@ try{
  assert.deepEqual(sessionFiles(listedHome,path.join(listedHome,'sessions'),3).map(row=>path.basename(row.file)),['b.jsonl','a.jsonl']);
  fs.symlinkSync(elsewhere,path.join(listedHome,'archived_sessions'));assert.deepEqual(sessionFiles(listedHome,path.join(listedHome,'archived_sessions'),0),[]);
 }finally{fs.rmSync(listedHome,{recursive:true,force:true});fs.rmSync(elsewhere,{recursive:true,force:true});}
+
+// A session file an Agent keeps appending to is read again from where the last read stopped, and reads the same as the
+// whole file read fresh: lines added (an unfinished last line too), the file rewritten, cut or holding a bad byte.
+const appended=fs.mkdtempSync(path.join(os.tmpdir(),'worldlet-appended-'));
+try{
+ const project=path.join(appended,'projects','p');fs.mkdirSync(project,{recursive:true});
+ const live=path.join(project,'live.jsonl');let copies=0;
+ const user=(n:number)=>JSON.stringify({type:'user',sessionId:'s'+(n%2),cwd:'/work/'+n,message:{role:'user',content:'question '+n},timestamp:new Date(Date.UTC(2026,9,1,0,n)).toISOString()});
+ const reply=(n:number)=>JSON.stringify({type:'assistant',sessionId:'s1',message:{role:'assistant',content:[{type:'text',text:'answer '+n}]},timestamp:new Date(Date.UTC(2026,9,1,0,n,30)).toISOString()});
+ // Compared with a copy under a name never read before, so the copy is read whole.
+ const same=(read:(file:string)=>unknown)=>{const name='copy'+(copies+=1),fresh=path.join(project,name+'.jsonl');fs.copyFileSync(live,fresh);assert.deepEqual(read(live),JSON.parse(JSON.stringify(read(fresh)).replaceAll(name,'live')));};
+ const claude=(file:string)=>claudeCodeConversation(appended,file,newBudget());
+ fs.writeFileSync(live,user(1)+'\n'+reply(1)+'\n');same(claude);
+ fs.appendFileSync(live,user(2)+'\n'+JSON.stringify({type:'summary',summary:'Trip plans'})+'\n');same(claude);
+ fs.appendFileSync(live,reply(2));same(claude);
+ assert.equal(claude(live)?.conversation.turns.length,4);
+ fs.appendFileSync(live,'\n'+user(3).slice(0,20));same(claude);
+ fs.appendFileSync(live,user(3).slice(20)+'\n'+JSON.stringify({type:'custom-title',customTitle:'Named'})+'\n');same(claude);
+ assert.equal(claude(live)?.conversation.turns.length,5);
+ // A line still being written, cut inside a character, waits for the rest.
+ const accented=Buffer.from(JSON.stringify({type:'user',sessionId:'s1',message:{role:'user',content:'café '+'é'.repeat(10)}})+'\n');
+ fs.appendFileSync(live,accented.subarray(0,accented.indexOf(0xc3)+1));same(claude);
+ fs.appendFileSync(live,accented.subarray(accented.indexOf(0xc3)+1));same(claude);
+ assert.equal(claude(live)?.conversation.turns.length,6);
+ fs.writeFileSync(live,user(7)+'\n'+reply(7)+'\n'+user(8)+'\n'+reply(8)+'\n'+user(9)+'\n'+reply(9)+'\n');same(claude);
+ fs.writeFileSync(live,user(4)+'\n');same(claude);
+ fs.appendFileSync(live,Buffer.from([0xff,0x0a]));same(claude);assert.equal(claude(live),null);
+ const codexRoot=path.join(appended,'codex'),day=path.join(codexRoot,'sessions','2026','10','01');fs.mkdirSync(day,{recursive:true});
+ const rollout=path.join(day,'rollout-live.jsonl');
+ const event=(payload:object,n:number)=>JSON.stringify({type:'event_msg',timestamp:new Date(Date.UTC(2026,9,1,1,n)).toISOString(),payload});
+ const codex=(file:string)=>codexConversation(codexRoot,file,new Map(),newBudget());
+ const sameCodex=()=>{const copy=path.join(day,'rollout-copy'+(copies+=1)+'.jsonl');fs.copyFileSync(rollout,copy);assert.deepEqual(codex(rollout),codex(copy));};
+ fs.writeFileSync(rollout,JSON.stringify({type:'session_meta',payload:{id:'c1',cwd:'/work'}})+'\n'+event({type:'user_message',message:'hello'},1)+'\n');sameCodex();
+ fs.appendFileSync(rollout,event({type:'agent_message',message:'hi'},2)+'\n');sameCodex();
+ assert.equal(codex(rollout)?.conversation.turns.length,2);
+ fs.appendFileSync(rollout,event({type:'item_completed',item:{type:'AgentMessage',content:[{type:'Text',text:'done'}]}},3)+'\n');sameCodex();
+ assert.deepEqual(codex(rollout)?.conversation.turns.map(turn=>turn.text),['done']);
+}finally{fs.rmSync(appended,{recursive:true,force:true});}
 
 console.log('PASS: OpenClaw, Claude Code, pi, Hermes Agent and Codex conversations, notes, skills and scheduled jobs come into Fox the same way; their own files are only read');
