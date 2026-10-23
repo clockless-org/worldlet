@@ -22,7 +22,8 @@ git_dir=$(cd "$(git rev-parse --git-dir)" && pwd -P) || exit $status
 common_dir=$(cd "$(git rev-parse --git-common-dir)" && pwd -P) || exit $status
 [ "$git_dir" = "$common_dir" ] || exit $status`;
 const advice=`echo "Worldlet: the primary checkout stays on main; the Dev app builds from it. Work in a worktree:" >&2
-echo "  git worktree add ../worldlet-<name> -b <branch> origin/main" >&2`;
+echo "  git worktree add ~/.claude/worktrees/worldlet-<name> -b <branch> origin/main" >&2
+echo "  (never next to or inside this checkout; remove the worktree and its branch when the work is done)" >&2`;
 export const hooks={
  'post-checkout':`${head}
 status=0
