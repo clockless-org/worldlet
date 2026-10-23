@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {openAgentDatabase,type AgentDatabase,type AgentStatement} from './agent-database.ts';
-import {claudeCodeAgentSkill,claudeCodeConversationTitle,claudeCodeTurn,codexSessionIncluded,codexTurns,hermesConversationIncluded,hermesConversationTitle,hermesSendRoute,hermesSharedChat,hermesProfileSkill,hermesRoutine,hermesScheduleJob,hermesTurn,migrationNotesSession,piConversationTitle,piTurn,promptTemplateSkill,
+import {claudeCodeAgentSkill,claudeCodeConversationTitle,claudeCodeTurn,codexSessionIncluded,codexTurn,hermesConversationIncluded,hermesConversationTitle,hermesSendRoute,hermesSharedChat,hermesProfileSkill,hermesRoutine,hermesScheduleJob,hermesTurn,migrationNotesSession,piConversationTitle,piTurn,promptTemplateSkill,
  type HermesSendRoute,type MigrationRoutineResult,type MigrationTurn} from '../../../../../agent/gate/index.ts';
 import {realPath as real} from '../../../files.ts';
 import {declaredName,discoverHermes} from './hermes-files.ts';
@@ -151,21 +151,68 @@ export function sessionFiles(root:string,folder:string,depth=1):{file:string;tim
  return files.sort((a,b)=>b.time-a.time).slice(0,SESSION_FILES);
 }
 const lines=(text:string)=>text.split('\n').flatMap(line=>{if(!line.trim())return [];const value=json(line);return value&&typeof value==='object'?[value]:[];});
+/** How one kind of session file adds up, line by line: `step` takes each line's value in order, `copy` gives a state to
+ * add the unfinished last line to without changing the kept one. */
+type Fold<S>={kind:string;init:()=>S;step:(state:S,entry:Record<string,any>)=>void;copy:(state:S)=>S};
+type Folded={kind:string;dev:number;ino:number;size:number;mtime:number;through:number;tail:Buffer;state:unknown;bad:boolean};
+/** The session files read last (an Agent at work appends to one): the next read takes only the lines added since. */
+const folded=new Map<string,Folded>();
+const FOLDED_FILES=4,TAIL=256;
+/** A session file's lines added up as `lines(readFile(root,file,TRANSCRIPT_LIMIT))` would, reading only what an Agent
+ * appended since the last read. A file that changed any other way (replaced, cut, rewritten) is read again whole. */
+function foldLines<S>(root:string,file:string,fold:Fold<S>):S {
+ let info:fs.Stats;
+ try{info=fs.lstatSync(file);}catch{folded.delete(file);return fold.init();}
+ if(!info.isFile()||info.size>TRANSCRIPT_LIMIT||!inside(file,root)){folded.delete(file);return fold.init();}
+ let fd:number;
+ try{fd=fs.openSync(file,'r');}catch{folded.delete(file);return fold.init();}
+ try{
+  const read=(from:number,to:number)=>{const buffer=Buffer.alloc(Math.max(0,to-from));let at=0;while(at<buffer.length){const n=fs.readSync(fd,buffer,at,buffer.length-at,from+at);if(!n)break;at+=n;}return buffer.subarray(0,at);};
+  let kept=folded.get(file);
+  if(kept&&(kept.kind!==fold.kind||kept.dev!==info.dev||kept.ino!==info.ino||info.size<kept.through||!read(kept.through-kept.tail.length,kept.through).equals(kept.tail)))kept=undefined;
+  if(!kept)kept={kind:fold.kind,dev:info.dev,ino:info.ino,size:0,mtime:0,through:0,tail:Buffer.alloc(0),state:fold.init(),bad:false};
+  folded.delete(file);folded.set(file,kept);
+  while(folded.size>FOLDED_FILES)folded.delete(folded.keys().next().value!);
+  const state=kept.state as S;
+  if(kept.bad)return fold.init();
+  if(kept.size===info.size&&kept.mtime===info.mtimeMs&&kept.through===info.size)return state;
+  const added=read(kept.through,info.size),end=added.lastIndexOf(10)+1;
+  let whole:string,rest='';
+  try{whole=utf8.decode(added.subarray(0,end));}catch{kept.bad=true;kept.state=fold.init();return fold.init();}
+  // The last line may still be being written, cut inside a character.
+  try{rest=utf8.decode(added.subarray(end));}catch{}
+  for(const entry of lines(whole))fold.step(state,entry);
+  kept.through+=end;kept.size=info.size;kept.mtime=info.mtimeMs;
+  kept.tail=Buffer.from(read(Math.max(0,kept.through-TAIL),kept.through));
+  const last=lines(rest);
+  if(!last.length)return state;
+  const finished=fold.copy(state);for(const entry of last)fold.step(finished,entry);
+  return finished;
+ }finally{fs.closeSync(fd);}
+}
 const mtimeDate=(file:string)=>{try{return fs.statSync(file).mtime.toISOString().slice(0,10);}catch{return '';}};
 
 // Claude Code -----------------------------------------------------------------------------------
 
+type ClaudeCodeLines={turns:MigrationTurn[];titles:Record<string,string>;cwd:string|null;sessions:Set<string>};
+const CLAUDE_CODE_TITLES:[string,string][]=[['custom-title','customTitle'],['summary','summary'],['ai-title','aiTitle']];
+const CLAUDE_CODE_LINES:Fold<ClaudeCodeLines>={kind:'claude-code',
+ init:()=>({turns:[],titles:{},cwd:null,sessions:new Set()}),
+ step:(state,entry)=>{
+  const turn=claudeCodeTurn(entry);if(turn)state.turns.push(turn);
+  for(const [type,field] of CLAUDE_CODE_TITLES)if(entry.type===type&&typeof entry[field]==='string')state.titles[type]=entry[field];
+  if(state.cwd===null&&typeof entry.cwd==='string')state.cwd=entry.cwd;
+  if(typeof entry.sessionId==='string')state.sessions.add(entry.sessionId);
+ },
+ copy:state=>({turns:[...state.turns],titles:{...state.titles},cwd:state.cwd,sessions:new Set(state.sessions)})};
 /** One Claude Code session file as a conversation (its key is the file's session ID), with its working folder and the
  * session IDs it names, or null when it holds no visible turn. */
 export function claudeCodeConversation(root:string,file:string,budget:Budget):{conversation:BroughtConversation;cwd:string|null;sessions:string[]}|null {
- const entries=lines(readFile(root,file,TRANSCRIPT_LIMIT));
- const turns=entries.map(claudeCodeTurn).filter((turn):turn is MigrationTurn=>!!turn);
+ const {turns,titles,cwd,sessions}=foldLines(root,file,CLAUDE_CODE_LINES);
  if(!turns.length)return null;
- const last=(type:string,field:string)=>entries.filter(entry=>entry.type===type&&typeof entry[field]==='string').at(-1)?.[field];
- const title=last('custom-title','customTitle')??last('summary','summary')??last('ai-title','aiTitle');
- const cwd=entries.find(entry=>typeof entry.cwd==='string')?.cwd??null,key=path.basename(file,'.jsonl');
+ const title=titles['custom-title']??titles['summary']??titles['ai-title'],key=path.basename(file,'.jsonl');
  return {conversation:{key,title:claudeCodeConversationTitle({title,cwd,first:turns.find(turn=>turn.role==='user')?.text}),turns:keep(turns,budget)},cwd,
-  sessions:[...new Set([key,...entries.flatMap(entry=>typeof entry.sessionId==='string'?[entry.sessionId]:[])])]};
+  sessions:[...new Set([key,...sessions])]};
 }
 export const claudeCodeHome=(home=os.homedir(),environment=process.env)=>absolute(environment.CLAUDE_CONFIG_DIR)??path.join(home,'.claude');
 /** The folder a Claude Code conversation ran in (its transcript's `cwd`), so it can be resumed there; null when the
@@ -273,13 +320,23 @@ export function codexNames(root:string):Map<string,string> {
  for(const entry of lines(readFile(root,path.join(root,'session_index.jsonl'),8_000_000)))if(typeof entry.id==='string'&&typeof entry.thread_name==='string'&&entry.thread_name.trim())names.set(entry.id,entry.thread_name.trim());
  return names;
 }
+/** A Codex session's lines as `codexTurns` reads them: its first `session_meta`, the turns of completed items, and every
+ * line's turn for a session written before Codex marked them. */
+type CodexLines={meta:Record<string,any>|undefined;completed:MigrationTurn[];all:MigrationTurn[]};
+const CODEX_LINES:Fold<CodexLines>={kind:'codex',
+ init:()=>({meta:undefined,completed:[],all:[]}),
+ step:(state,entry)=>{
+  if(state.meta===undefined&&entry.type==='session_meta')state.meta=entry.payload??{};
+  const turn=codexTurn(entry);if(!turn)return;
+  state.all.push(turn);if(entry.payload?.type==='item_completed')state.completed.push(turn);
+ },
+ copy:state=>({meta:state.meta,completed:[...state.completed],all:[...state.all]})};
 /** One Codex session file as a conversation (its key is the session ID), with its working folder, or null when Codex
  * started it for itself or it holds no visible turn. */
 export function codexConversation(root:string,file:string,names:Map<string,string>,budget:Budget):{conversation:BroughtConversation;cwd:string|null;sessions:string[]}|null {
- const entries=lines(readFile(root,file,TRANSCRIPT_LIMIT));
- const meta=entries.find(entry=>entry.type==='session_meta')?.payload??{};
+ const read=foldLines(root,file,CODEX_LINES),meta=read.meta??{};
  if(!codexSessionIncluded(meta))return null;
- const turns=codexTurns(entries);
+ const turns=read.completed.length?read.completed:read.all;
  if(!turns.length)return null;
  const id=typeof meta.id==='string'?meta.id:path.basename(file,'.jsonl');
  return {conversation:{key:id,title:claudeCodeConversationTitle({title:names.get(id)??meta.thread_name,cwd:meta.cwd,first:turns.find(turn=>turn.role==='user')?.text}),turns:keep(turns,budget)},
