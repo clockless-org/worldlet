@@ -3,10 +3,10 @@
  * allows, which agent, when and in which Fox conversation it was granted, when it was last used, and Revoke, which asks
  * once more in the page and then makes that Agent forget it its own way. An Agent that cannot have a rule revoked from
  * here says how instead. Plain words only: no allowlist, cron or MCP in what the page shows. */
-import {agentButton as button,agentEl as el} from './agent-change.ts';
+import {agentButton as button,agentDay,agentEl as el} from './agent-change.ts';
 type Rule={id:string;allows:string;agent:string;kind:string;main?:boolean;grantedAt?:number;lastUsedAt?:number;note?:string;thread?:string;inWorld?:boolean};
 type Harness={harness:string;title:string;rules:Rule[];revoke:'live'|'restart'|null;note?:string;error?:string;inUse?:boolean};
-const day=(at:number)=>new Date(at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+const day=(at:number)=>agentDay(at);
 const KIND:Record<string,string>={command:'Run',tool:'Use the tool',automation:'In a routine, run'};
 /** What a rule lets the Agent do, as the start of a sentence: “Run”, “Use the tool”. */
 export function permissionVerb(rule:Rule):string {return KIND[rule.kind]??'Do';}
