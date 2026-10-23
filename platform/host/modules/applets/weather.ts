@@ -46,7 +46,7 @@ let locating=false;
  * Windows asks the system location service. Elsewhere location fails explicitly. */
 async function weatherLocate(surface:MediaSurface):Promise<Row> {
  if(locating)throw new WorldletError('Getting your location.');
- if(process.platform!=='darwin'&&process.platform!=='win32')throw new WorldletError('Location is unavailable on this computer. Search for a city instead.');
+ if(process.platform!=='darwin'&&process.platform!=='win32')throw new WorldletError('Location is unavailable on this computer. Tell Fox your city instead.');
  locating=true;
  let value:Row;
  try{
@@ -56,14 +56,14 @@ async function weatherLocate(surface:MediaSurface):Promise<Row> {
    finally{surface.allowLocation=false;}
   }else{
    const command=path.join(process.env.SystemRoot??'C:\\Windows','System32','WindowsPowerShell','v1.0','powershell.exe');
-   const result=await run(command,['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-Command',LOCATE_POWERSHELL],{env:environment(WINDOWS_BASE),timeout:22_000,limit:4000,timeoutMessage:'Location timed out. Choose a city manually.'});
-   try{value=JSON.parse(result.stdout.toString('utf8').trim());}catch{throw new WorldletError('Could not get your location. Search for a city.');}
+   const result=await run(command,['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-Command',LOCATE_POWERSHELL],{env:environment(WINDOWS_BASE),timeout:22_000,limit:4000,timeoutMessage:'Location timed out. Tell Fox your city instead.'});
+   try{value=JSON.parse(result.stdout.toString('utf8').trim());}catch{throw new WorldletError('Could not get your location. Tell Fox your city instead.');}
   }
  }finally{locating=false;}
- if(value?.error==='denied')throw new WorldletError(process.platform==='win32'?'Location is not allowed. Choose a city or allow location access in Windows Settings.':'Location is not allowed. Search for a city or allow Worldlet in System Settings.');
- if(value?.error==='timeout')throw new WorldletError('Location timed out. Choose a city manually.');
+ if(value?.error==='denied')throw new WorldletError(process.platform==='win32'?'Location is not allowed. Tell Fox your city, or allow location access in Windows Settings.':'Location is not allowed. Tell Fox your city, or allow Worldlet in System Settings.');
+ if(value?.error==='timeout')throw new WorldletError('Location timed out. Tell Fox your city instead.');
  const {latitude,longitude,accuracy,at}=value??{};
- if(![latitude,longitude,accuracy,at].every(n=>typeof n==='number'&&Number.isFinite(n))||Math.abs(latitude)>90||Math.abs(longitude)>180||accuracy<0||Math.abs(Date.now()-at)>300_000)throw new WorldletError('Could not get your location. Search for a city.');
+ if(![latitude,longitude,accuracy,at].every(n=>typeof n==='number'&&Number.isFinite(n))||Math.abs(latitude)>90||Math.abs(longitude)>180||accuracy<0||Math.abs(Date.now()-at)>300_000)throw new WorldletError('Could not get your location. Tell Fox your city instead.');
  return {name:'Current location',latitude:Math.round(latitude*10000)/10000,longitude:Math.round(longitude*10000)/10000,source:'device',locatedAt:at,accuracy};
 }
 
