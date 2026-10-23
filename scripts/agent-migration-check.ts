@@ -7,7 +7,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {claudeCodeConversationTitle,claudeCodeTurn,hermesConversationIncluded,hermesConversationTitle,hermesRoutine,hermesTurn,migrationMemoryNote,migrationRoutineKey,migrationSkillMarkdown,migrationSkillPath,migrationSkillsSafe,
  openClawAgentSkill,openClawChannelPrompts,openClawConversationIncluded,openClawConversationSkill,openClawConversationTitle,openClawPromptFor,openClawRoutine,openClawSkillName,openClawTurn,piTurn} from '../agent/gate/index.ts';
 import {openClawAgents,parseJSON5,readOpenClaw,reportOpenClawWorkspaces,scanOpenClawWorkspaces,surveyOpenClaw} from '../platform/host/modules/companion/agent/openclaw-files.ts';
-import {surveyAgentHistory} from '../platform/host/modules/companion/agent/agent-files.ts';
+import {sessionFiles,surveyAgentHistory} from '../platform/host/modules/companion/agent/agent-files.ts';
 import {firstSentence,localAgentModel,openClawWorkspace,readLocalAgentMemory,summarizeLocalAgent} from '../platform/host/modules/companion/agent/local-memory.ts';
 import {bringAgent,broughtFile,placeBrought,readBrought,restoreBrought} from '../platform/host/modules/companion/migration.ts';
 import {allowed as inBackup,validate as validateBackup} from '../platform/host/modules/app/backup.ts';
@@ -450,5 +450,18 @@ try{
  assert.deepEqual(scanOpenClawWorkspaces(outside,true).map(folder=>path.relative(fs.realpathSync(outside),folder)).sort(),[path.join('Code','bots','scout'),path.join('elsewhere','helper')]);
  assert.equal(openClawAgents(outside,{} as NodeJS.ProcessEnv).find(a=>a.id==='helper')?.workspace,fs.realpathSync(path.join(outside,'elsewhere','helper')));
 }finally{fs.rmSync(outside,{recursive:true,force:true});}
+
+// Session files are listed by their folder's place: a linked file, or a linked folder leading out of the Agent's home,
+// is left out, and so is a session folder that is itself a link out of it; the files in a folder inside it are listed newest
+// first.
+const listedHome=fs.mkdtempSync(path.join(os.tmpdir(),'worldlet-session-files-')),elsewhere=fs.mkdtempSync(path.join(os.tmpdir(),'worldlet-elsewhere-'));
+try{
+ const day=path.join(listedHome,'sessions','2026','10','23');fs.mkdirSync(day,{recursive:true});
+ fs.writeFileSync(path.join(day,'a.jsonl'),'{}\n');fs.writeFileSync(path.join(day,'b.jsonl'),'{}\n');fs.utimesSync(path.join(day,'b.jsonl'),new Date(),new Date(Date.now()+60_000));
+ fs.writeFileSync(path.join(elsewhere,'away.jsonl'),'{}\n');fs.symlinkSync(path.join(elsewhere,'away.jsonl'),path.join(day,'linked.jsonl'));
+ fs.mkdirSync(path.join(listedHome,'sessions','2026','10'),{recursive:true});fs.symlinkSync(elsewhere,path.join(listedHome,'sessions','2026','10','24'));
+ assert.deepEqual(sessionFiles(listedHome,path.join(listedHome,'sessions'),3).map(row=>path.basename(row.file)),['b.jsonl','a.jsonl']);
+ fs.symlinkSync(elsewhere,path.join(listedHome,'archived_sessions'));assert.deepEqual(sessionFiles(listedHome,path.join(listedHome,'archived_sessions'),0),[]);
+}finally{fs.rmSync(listedHome,{recursive:true,force:true});fs.rmSync(elsewhere,{recursive:true,force:true});}
 
 console.log('PASS: OpenClaw, Claude Code, pi, Hermes Agent and Codex conversations, notes, skills and scheduled jobs come into Fox the same way; their own files are only read');
