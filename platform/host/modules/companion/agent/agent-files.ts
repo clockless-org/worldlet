@@ -134,13 +134,17 @@ const piExtras=(root:string)=>markdownFiles(root,path.join(root,'prompts')).flat
 /** JSONL session files `depth` folders below `folder` (one per project; Codex files by date),
  * newest first, so a full budget keeps the recent ones. */
 export function sessionFiles(root:string,folder:string,depth=1):{file:string;time:number;size:number}[] {
- const files:{file:string;time:number;size:number}[]=[],within=insideOf(root);
+ const files:{file:string;time:number;size:number}[]=[],base=real(root)+path.sep;
  const visit=(dir:string,level:number)=>{
   if(level<depth){for(const name of directories(dir))visit(path.join(dir,name),level+1);return;}
+  // A file that is not a link resolves where its folder does, so the folder is resolved once rather than every file
+  // (a Codex history is thousands of files, listed again every few minutes).
+  let at='';try{at=real(dir)+path.sep;}catch{}
+  if(!at.startsWith(base))return;
   let names:string[]=[];try{names=fs.readdirSync(dir).filter(name=>name.endsWith('.jsonl'));}catch{}
   for(const name of names){
    const file=path.join(dir,name);
-   try{const info=fs.lstatSync(file);if(info.isFile()&&within(file))files.push({file,time:info.mtimeMs,size:info.size});}catch{}
+   try{const info=fs.lstatSync(file);if(info.isFile())files.push({file,time:info.mtimeMs,size:info.size});}catch{}
   }
  };
  visit(folder,0);
