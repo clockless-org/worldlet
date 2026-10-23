@@ -30,7 +30,7 @@ const CHANGES={
  conversations:['addCompanionTurns','replaceCompanionHistory'],
  'chat-by-place':['replaceCompanionViews'],
  companion:['saveCompanionStored'],
- 'web-recordings':['recordWeb','pruneWeb','deleteWeb'],
+ 'web-recordings':['recordWeb','pruneWeb','tidyWebStep','deleteWeb'],
  'brought-agents':['replaceBrought'],
 } as const satisfies Partial<Record<ContextDomainId,readonly (keyof WorldLedger)[]>>;
 type Named<T extends Record<string,readonly string[]>,D extends keyof T>=T[D][number]&keyof WorldLedger;

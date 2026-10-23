@@ -228,6 +228,19 @@ try{
   assert.ok(ledger.webVisits({terms:['text éé'],before:at+10}).visits.some(v=>v.id==='budget')&&!ledger.webVisits({terms:['response éé'],before:at+10}).total,'the search index forgets the removed records only');
   db.exec(`INSERT INTO web_records_search(web_records_search) VALUES('integrity-check')`);
  }
+ {
+  // The host tidies a bounded step at a time between other work: no step removes more than a few hundred records.
+  const at=Date.now()/1000-40*86400;
+  ledger.recordWeb([{id:'steps',site:'example.com',url:'https://example.com/',title:'x',applet:'browser',startedAt:at,endedAt:at}],
+   Array.from({length:450},(_,i)=>({visit:'steps',at:at+i,kind:'response',url:'https://example.com/'+i,meta:{},body:'old '+i})));
+  const limits={rawKinds:RAW_KINDS,rawBefore:at+1000,maxBytes:2_000_000_000};
+  let removed=0,steps=0,step;
+  while((step=ledger.tidyWebStep(limits))!=='done'){assert.ok(step<=200,'one step removes at most 200 records');removed+=step;assert.ok(++steps<50);}
+  assert.equal(removed,450,'the steps together remove every expired record');
+  assert.equal(ledger.webVisit('steps'),null,'a visit left empty goes');
+  assert.match(deviceSource,/busyWith\('pruneWeb',\(\)=>[^;]*\.tidyWebStep\(limits\)\)/,'the host runs one named step at a time');
+  assert.doesNotMatch(deviceSource,/\.pruneWeb\(/,'the host never tidies everything at once');
+ }
  // The host routes both operations to this one rule.
  assert.match(deviceSource,/op==='recordings'\|\|op==='deleteRecordings'\)\{[^}]*manageRecordings\(op,args,\{agent,/,'the host passes who is asking');
 }finally{
