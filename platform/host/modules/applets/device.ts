@@ -47,6 +47,8 @@ const LOAD_WAIT_MS=8000;
 const PAGE_AFTER_MS=300;
 /** How long the same page goes before its text is read again for browsing history. */
 const HISTORY_REREAD_MS=30_000;
+// Between the recordings tidy's steps (`pruneRecordings`): input, frames and Fox go first.
+const TIDY_PAUSE_MS=20;
 const MEETING_HOSTS=['meet.google.com','zoom.us','teams.microsoft.com','teams.live.com','teams.cloud.microsoft'];
 /** Focus on website pages (agent/applets/page-focus.ts): each site's choice is a record in the World. */
 const FOCUS_BUCKET='site-focus';
@@ -223,11 +225,23 @@ export class BrowserDevice {
   this.battles.observe(visits,records);
  }
  private prunedAt=0;
+ private tidying=false;
  /** Raw network records older than WEB_RECORD.rawDays go, and the oldest when over the size limit; at most
-  * hourly when a page opens, and on the start and hourly timers. */
+  * hourly when a page opens, and on the start and hourly timers. The tidy runs a bounded step at a time between other
+  * work: done at once over a large World, it held the app (and the page being opened) for up to a quarter minute. */
  private pruneRecordings(timer=false){
   const now=Date.now()/1000;if(!timer&&now-this.prunedAt<3600)return;this.prunedAt=now;
-  try{if(!this.store.writable||this.sample)return;contextChanges(ledgerContext(this.store.ledger()),'world','web-recordings').pruneWeb({rawKinds:RAW_KINDS,rawBefore:now-WEB_RECORD.rawDays*86400,maxBytes:WEB_RECORD.maxBytes});}catch(error){this.host.diagnostics.record(error,'webRecord');}
+  if(this.tidying)return;
+  const limits={rawKinds:RAW_KINDS,rawBefore:now-WEB_RECORD.rawDays*86400,maxBytes:WEB_RECORD.maxBytes};
+  const step=()=>{
+   try{
+    if(this.store.writable&&!this.sample&&busyWith('pruneWeb',()=>contextChanges(ledgerContext(this.store.ledger()),'world','web-recordings').tidyWebStep(limits))!=='done'){
+     setTimeout(step,TIDY_PAUSE_MS).unref?.();return;
+    }
+   }catch(error){this.host.diagnostics.record(error,'webRecord');}
+   this.tidying=false;
+  };
+  this.tidying=true;step();
  }
  show(body:Row){
   const requested=typeof body.platform==='string'?body.platform:'x',address:string|undefined=body.url;

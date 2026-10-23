@@ -33,9 +33,13 @@ function ensureWeb(ledger:WorldLedger){
  ready.web.add(ledger);
 }
 const webVisitRow=(row:Row)=>({id:String(row.id),site:String(row.site),url:String(row.url),title:String(row.title),applet:String(row.applet),startedAt:Number(row.started_at),endedAt:Number(row.ended_at)});
-/** The recordings' size in bytes, from each row's header (octet_length reads no recorded body), as the last tidy
- * (`pruneWeb`, a minute after start and hourly) counted it; a cold disk still takes a second to walk the headers. */
-const recordingBytes=new WeakMap<WorldLedger,number>();
+/** The recordings' size in bytes, from each row's header (octet_length reads no recorded body). The tidy counts it a
+ * slice at a time (`tidyWebStep`, a minute after start), through record `through`; saves and removals keep it current
+ * after that. A cold disk takes seconds to walk every header, so no single step walks them all. */
+const tallies=new WeakMap<WorldLedger,{through:number;bytes:number;complete:boolean;oldest:number}>();
+const tally=(ledger:WorldLedger)=>{let entry=tallies.get(ledger);if(!entry)tallies.set(ledger,entry={through:0,bytes:0,complete:false,oldest:0});return entry;};
+/** One tidy step's bounds: headers counted, and the bodies one removal reads to take them out of the search index. */
+const TIDY={countRows:2000,dropRows:200,dropBytes:2_000_000};
 
 export class RecordingTables {
  browserVisits(this:WorldLedger):{id:number;url:string;title:string;text:string;visitedAt:number}[] {
@@ -58,6 +62,7 @@ export class RecordingTables {
  /** Saves visits (new or extended) and their new records in one transaction. */
  recordWeb(this:WorldLedger,visits:{id:string;site:string;url:string;title:string;applet:string;startedAt:number;endedAt:number}[],records:{visit:string;at:number;kind:string;url:string;meta:Row;body:string}[]){
   ensureWeb(this);
+  let added=0;
   try{
    this.transaction(()=>{
     const visit=this.handle.prepare(`INSERT INTO web_visits(id,site,url,title,applet,started_at,ended_at) VALUES(?,?,?,?,?,?,?)
@@ -68,8 +73,11 @@ export class RecordingTables {
     for(const r of records){
      const id=Number(insert.run(r.visit,r.at,r.kind,r.url,JSON.stringify(r.meta??{}),r.body).lastInsertRowid);
      if(index&&r.body)index.run(id,r.body);
+     added+=Buffer.byteLength(r.body);
     }
    });
+   // A count still in progress reaches these records itself.
+   const counted=tallies.get(this);if(counted?.complete)counted.bytes+=added;
   }catch(error){if(error instanceof WorldletError)throw error;throw new WorldletError('Could not save the browsing recording.');}
  }
  /** Visits newest first, optionally on one site, in a time range, and holding every term. Each comes
@@ -141,39 +149,50 @@ export class RecordingTables {
  /** The newest visits, for Fox's sense of what just happened. */
  recentWebVisits(this:WorldLedger,limit:number){ensureWeb(this);return this.all('SELECT * FROM web_visits ORDER BY ended_at DESC LIMIT ?',limit).map(webVisitRow);}
  /** Removes raw network records older than `rawBefore` and, above `maxBytes`, the oldest raw records
-  * until the recordings fit; empty visits go too. Returns how many records were removed. */
- pruneWeb(this:WorldLedger,{rawKinds,rawBefore,maxBytes}:{rawKinds:string[];rawBefore:number;maxBytes:number}):number {
-  ensureWeb(this);
-  const kinds=rawKinds.map(()=>'?').join(',');
-  let removed=0,counted=0;
-  try{
-   this.transaction(()=>{
-    const drop=(where:string,...values:any[])=>{
-     if(webSearchable.has(this))this.run(`INSERT INTO web_records_search(web_records_search,rowid,body) SELECT 'delete',id,body FROM web_records WHERE ${where} AND body<>''`,...values);
-     removed+=Number(this.run(`DELETE FROM web_records WHERE ${where}`,...values).changes);
-    };
-    drop(`kind IN (${kinds}) AND at<?`,...rawKinds,rawBefore);
-    // octet_length reads each body's size from its row header; length() would read every body (gigabytes).
-    let bytes=Number(this.all('SELECT coalesce(sum(octet_length(body)),0) AS n FROM web_records')[0]?.n??0);
-    while(bytes>maxBytes){
-     const oldest=this.all(`SELECT id,octet_length(body) AS n FROM web_records WHERE kind IN (${kinds}) ORDER BY id LIMIT 500`,...rawKinds);
-     if(!oldest.length)break;
-     const last=Number(oldest[oldest.length-1].id);
-     drop(`kind IN (${kinds}) AND id<=?`,...rawKinds,last);
-     bytes-=oldest.reduce((sum,row)=>sum+Number(row.n),0);
-    }
-    this.run('DELETE FROM web_visits WHERE NOT EXISTS (SELECT 1 FROM web_records r WHERE r.visit=web_visits.id)');
-    counted=Math.max(0,bytes);
-   });
-   recordingBytes.set(this,counted);
-  }catch{throw new WorldletError('Could not tidy the browsing recordings.');}
+  * until the recordings fit; visits left empty go too. Returns how many records were removed. The host tidies a step
+  * at a time (`tidyWebStep`) so the app stays responsive; this runs every step at once. */
+ pruneWeb(this:WorldLedger,limits:{rawKinds:string[];rawBefore:number;maxBytes:number}):number {
+  let removed=0,step;
+  while((step=this.tidyWebStep(limits))!=='done')removed+=step;
   return removed;
  }
+ /** One bounded step of `pruneWeb`: counts the next slice of record sizes, or removes the next few expired (or, over
+  * `maxBytes`, oldest) raw records in a transaction of their own. Returns how many records it removed, or `done`. */
+ tidyWebStep(this:WorldLedger,{rawKinds,rawBefore,maxBytes}:{rawKinds:string[];rawBefore:number;maxBytes:number}):number|'done' {
+  ensureWeb(this);
+  const kinds=rawKinds.map(()=>'?').join(','),counted=tally(this);
+  try{
+   if(!counted.complete){
+    const slice=this.all(`SELECT coalesce(sum(octet_length(body)),0) AS n,count(*) AS rows,max(id) AS last FROM (SELECT id,body FROM web_records WHERE id>? ORDER BY id LIMIT ?)`,counted.through,TIDY.countRows)[0];
+    if(Number(slice?.rows??0)){counted.bytes+=Number(slice!.n);counted.through=Number(slice!.last);}
+    else counted.complete=true;
+    return 0;
+   }
+   // octet_length reads each body's size from its row header; length() would read the body.
+   const pick=(rows:Row[])=>{let bytes=0;return rows.filter((row,i)=>{bytes+=Number(row.n);return i===0||bytes<=TIDY.dropBytes;});};
+   let rows=pick(this.all(`SELECT id,visit,octet_length(body) AS n FROM web_records WHERE kind IN (${kinds}) AND at<? LIMIT ?`,...rawKinds,rawBefore,TIDY.dropRows));
+   // Over the limit, the oldest raw records in record order, from where the last step stopped (kept records are passed once).
+   if(!rows.length&&counted.bytes>maxBytes){
+    rows=pick(this.all(`SELECT id,visit,octet_length(body) AS n FROM web_records NOT INDEXED WHERE id>? AND kind IN (${kinds}) ORDER BY id LIMIT ?`,counted.oldest,...rawKinds,TIDY.dropRows));
+    if(rows.length)counted.oldest=Number(rows[rows.length-1].id);
+   }
+   if(!rows.length)return 'done';
+   const ids=rows.map(row=>Number(row.id)),list=ids.map(()=>'?').join(','),visits=[...new Set(rows.map(row=>String(row.visit)))];
+   this.transaction(()=>{
+    if(webSearchable.has(this))this.run(`INSERT INTO web_records_search(web_records_search,rowid,body) SELECT 'delete',id,body FROM web_records WHERE id IN (${list}) AND body<>''`,...ids);
+    this.run(`DELETE FROM web_records WHERE id IN (${list})`,...ids);
+    this.run(`DELETE FROM web_visits WHERE id IN (${visits.map(()=>'?').join(',')}) AND NOT EXISTS (SELECT 1 FROM web_records r WHERE r.visit=web_visits.id)`,...visits);
+   });
+   counted.bytes=Math.max(0,counted.bytes-rows.reduce((sum,row)=>sum+Number(row.n),0));
+   return rows.length;
+  }catch{throw new WorldletError('Could not tidy the browsing recordings.');}
+ }
+ /** The recordings' size in bytes, as the tidy counted it (finishing the count when it has not yet). */
  webRecordBytes(this:WorldLedger):number {
   ensureWeb(this);
-  let bytes=recordingBytes.get(this);
-  if(bytes===undefined)recordingBytes.set(this,bytes=Number(this.all('SELECT coalesce(sum(octet_length(body)),0) AS n FROM web_records')[0]?.n??0));
-  return bytes;
+  const counted=tally(this);
+  while(!counted.complete)this.tidyWebStep({rawKinds:[],rawBefore:0,maxBytes:Number.MAX_SAFE_INTEGER});
+  return counted.bytes;
  }
  /** The recorded sites, most recently visited first, with how many visits each holds. */
  webSites(this:WorldLedger):{site:string;visits:number;lastAt:number}[] {
@@ -191,6 +210,8 @@ export class RecordingTables {
    return this.transaction(()=>{
     if(webSearchable.has(this))this.run(`INSERT INTO web_records_search(web_records_search,rowid,body) SELECT 'delete',id,body FROM web_records WHERE ${visits} AND body<>''`,...values);
     this.run(`DELETE FROM web_records WHERE ${visits}`,...values);
+    // The size is counted again, a slice at a time, by the next tidy.
+    tallies.delete(this);
     return Number(this.run(`DELETE FROM web_visits WHERE ${where}`,...values).changes);
    });
   }catch{throw new WorldletError('Could not delete the browsing recordings.');}
