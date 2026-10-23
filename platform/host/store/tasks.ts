@@ -25,9 +25,20 @@ function taskRuns(ledger:WorldLedger,taskID:string):Row[] {
  });
 }
 function recordTaskExecution(ledger:WorldLedger,claim:Row){for(const event of core<Row[]>('taskExecutionEvents',claim))ledger.append(event,event.taskId??'');}
+/** Writes only the delivery rows that changed. Rewriting every row after each Attention pass held the main thread
+ * for 13 s on a desktop with a long delivery history (2026-10-23). */
 function saveDeliveries(ledger:WorldLedger,rows:Row[]){
- for(const row of ledger.records('runtime-deliveries'))if(typeof row.id==='string')ledger.deleteRuntimeRecord('runtime-deliveries',row.id);
- for(const row of rows)if(typeof row.id==='string')ledger.put('runtime-deliveries',row.id,row);
+ const before=new Map<string,string>();
+ for(const row of ledger.records('runtime-deliveries'))if(typeof row.id==='string')before.set(row.id,JSON.stringify(row));
+ const kept=new Set<string>();
+ for(const row of rows){
+  if(typeof row.id!=='string')continue;
+  kept.add(row.id);
+  if(before.get(row.id)===JSON.stringify(row))continue;
+  if(before.has(row.id))ledger.deleteRuntimeRecord('runtime-deliveries',row.id);
+  ledger.put('runtime-deliveries',row.id,row);
+ }
+ for(const id of before.keys())if(!kept.has(id))ledger.deleteRuntimeRecord('runtime-deliveries',id);
 }
 
 export class TaskTables {
