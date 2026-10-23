@@ -45,6 +45,8 @@ await withBrowser(fileAccess,async browser=>{
     // The host keeps the draft quietly and tells the page (worldlet:email-drafted); the turn ends when the check says.
     await new Promise(resolve=>{w.finish=resolve;});
     w.reviews.push({id:'R9',draft:{from:'me@example.com',to:'Priya Shah <priya@example.com>',subject:'Re: Venue',body:'Hi Priya,\n\nThursday works. I will confirm the time by [day].',threadId:'18c2a1'},attempted:false,confirmed:false,createdAt:Math.floor(Date.now()/1000)});
+    // An older draft for the same thread, from two days ago: only the newest stands on today's page.
+    w.reviews.push({id:'R8',draft:{from:'me@example.com',to:'Priya Shah <priya@example.com>',subject:'Re: Venue',body:'Hi Priya,\n\nAn older draft.',threadId:'18c2a1'},attempted:false,confirmed:false,createdAt:Math.floor(Date.now()/1000)-2*86400});
     window.dispatchEvent(new CustomEvent('worldlet:email-drafted',{detail:{id:'R9'}}));
     return {message:'A reply to Priya is ready for your review.'};
    }
@@ -86,7 +88,12 @@ await withBrowser(fileAccess,async browser=>{
  const reply=book.locator('.companion-reply').filter({hasText:'Re: Venue'});
  await reply.waitFor();
  assert.match(await reply.innerText(),/Reply · Priya Shah[\s\S]*Thursday works\./i,'the draft waits as a reply card');
+ assert.equal(await book.locator('.companion-reply').count(),1,'one card per thread: the newer draft');
  assert.deepEqual(await reply.locator('button').allTextContents(),['Send','Edit','Skip'],'only the person sends it');
+ // The draft still has a gap Fox left for the person: Send opens the words with the gap selected and sends nothing.
+ await reply.getByRole('button',{name:'Send'}).click();
+ assert.equal(await reply.locator('.companion-reply-note').innerText(),'Fill in [day] first.');
+ assert.equal(await reply.locator('textarea').evaluate((e:HTMLTextAreaElement)=>e.value.slice(e.selectionStart,e.selectionEnd)),'[day]');
  await page.keyboard.press('Escape');
  await book.waitFor({state:'hidden'});
  // The item's Attention card points at the draft made for it.

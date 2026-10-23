@@ -13,7 +13,7 @@ import {artifactBrief,artifactFitSteps,journalDays,madeArtifacts,readArtifact,ty
  * The morning brief (owner Order 2026-10-07), and Fox by itself for a new mail task (owner decision 2026-10-09,
  * context/store/replies.ts), leave a reply draft for each mail that waits for the person, a card of its own on today's page: Send sends that exact draft, Edit changes its words in place, Skip drops it. Morning brief
  * in the head says, in the person's words, what the 6 AM brief holds. */
-type Reply={id:string;kind:'reply';title:string;to:string;draft:Record<string,string>;createdAt:number;updatedAt:number};
+type Reply={id:string;kind:'reply';title:string;to:string;draft:Record<string,string>;createdAt:number;updatedAt:number;madeAt:number};
 type Entry=Artifact|MadeArtifact|Reply;
 // Days drawn at a time; older ones follow as the timeline scrolls near its end.
 const DAYS_AT_ONCE=7;
@@ -21,6 +21,15 @@ const DAYS_AT_ONCE=7;
 // out-of-range time still reads "Invalid Date", as toLocaleTimeString gives, where the formatter would throw.
 const CLOCK=new Intl.DateTimeFormat(undefined,{hour:'numeric',minute:'2-digit'});
 const clock=(seconds:number)=>{const at=new Date(seconds*1000);return Number.isNaN(at.getTime())?String(at):CLOCK.format(at);};
+/** A bracketed gap the model left for the person to fill, such as "[the priority you want to discuss]"; a Markdown link is not one. */
+export const replyBlank=(body:string)=>/\[[^\]\n]{2,}\](?!\()/.exec(body)?.[0]??'';
+/** One card per conversation: a second draft for the same thread or subject replaces the older one. */
+export function newestReplies<T extends {to:string;title:string;madeAt:number;draft:Record<string,string>}>(replies:T[]):T[] {
+ const key=(r:T)=>r.draft.threadId?'thread:'+r.draft.threadId:'to:'+r.to.toLowerCase()+'\n'+r.title.replace(/^(?:re|fwd?)\s*:\s*/i,'').toLowerCase();
+ const newest=new Map<string,T>();
+ for(const r of replies){const k=key(r),seen=newest.get(k);if(!seen||r.madeAt>seen.madeAt)newest.set(k,r);}
+ return replies.filter(r=>newest.get(key(r))===r);
+}
 export function createCompanionArtifacts({call,open,openMade,review}:{call:(action:string,body?:any)=>Promise<any>;open:(id:string)=>void;openMade:(id:string,keep:boolean)=>void;review?:(detail:{id:string;draft:Record<string,string>;attempted:boolean})=>void}){
  const el=(tag:string,cls='',text='')=>{const node=document.createElement(tag);if(cls)node.className=cls;if(text)node.textContent=text;return node;};
  const section=el('section','companion-info-section companion-artifacts companion-journal');section.dataset.section='Journal';
@@ -64,7 +73,9 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
  function replyCard(entry:JournalDay<Entry>['entries'][number]){
   let reply=entry.artifact as Reply,busy=false;
   const li=el('li','companion-artifact companion-reply');li.dataset.artifactId=reply.id;li.dataset.kind='reply';li.dataset.size=entry.size;
-  const top=el('span','companion-artifact-origin');top.append(el('span','','Reply · '+reply.to),el('time','',clock(reply.createdAt)));
+  // A draft made on an earlier day stands on today's page; it shows the day it was made, not today's midnight.
+  const made=new Date(reply.madeAt*1000),earlier=reply.madeAt<reply.createdAt;
+  const top=el('span','companion-artifact-origin');top.append(el('span','','Reply · '+reply.to),el('time','',earlier&&!Number.isNaN(made.getTime())?made.toLocaleDateString(undefined,{month:'short',day:'numeric'}):clock(reply.createdAt)));
   const text=el('p','companion-reply-text',reply.draft.body||''),edit=el('textarea','companion-reply-edit') as HTMLTextAreaElement;edit.hidden=true;edit.setAttribute('aria-label','Reply to '+reply.to);
   const note=el('span','companion-reply-note');note.setAttribute('role','status');
   const actions=el('div','companion-reply-actions'),send=el('button','companion-reply-send','Send') as HTMLButtonElement,change=el('button','','Edit') as HTMLButtonElement,skip=el('button','','Skip') as HTMLButtonElement;
@@ -78,6 +89,9 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
   // continues in Fox's email review, which asks for send access or checks delivery and never sends a second copy.
   send.onclick=()=>work(async()=>{
    if(!edit.hidden){note.textContent='Save your edit first.';return;}
+   // Never send a gap Fox left for the person: open the words with the gap selected.
+   const blank=replyBlank(reply.draft.body||'');
+   if(blank){edit.value=reply.draft.body||'';edit.hidden=false;text.hidden=true;change.textContent='Save';edit.focus();const at=edit.value.indexOf(blank);edit.setSelectionRange(at,at+blank.length);note.textContent='Fill in '+blank+' first.';return;}
    let result:any;
    try{result=await call('emailAction',{operation:'send',id:reply.id});}
    catch(error){const now=await call('emailAction',{operation:'list'}).catch(()=>null),mine=(now?.reviews||[]).find((r:any)=>r.id===reply.id);if(mine?.attempted){review?.({id:reply.id,draft:reply.draft,attempted:true});return;}throw error;}
@@ -179,10 +193,10 @@ export function createCompanionArtifacts({call,open,openMade,review}:{call:(acti
   // A draft still waiting stands on today's page, however early it was made.
   const now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime()/1000;
   const replies:Reply[]=(Array.isArray(mail?.reviews)?mail.reviews:[]).filter((r:any)=>r&&!r.attempted&&typeof r.id==='string'&&r.draft&&typeof r.draft.to==='string').map((r:any)=>{
-   const at=Math.max(Number(r.createdAt)||today,today);
-   return {id:r.id,kind:'reply',title:String(r.draft.subject||'(No subject)').slice(0,120),to:String(r.draft.to).replace(/\s*<[^>]*>\s*$/,'').slice(0,80)||r.draft.to,draft:r.draft,createdAt:at,updatedAt:at};
+   const made=Number(r.createdAt)||today,at=Math.max(made,today);
+   return {id:r.id,kind:'reply',title:String(r.draft.subject||'(No subject)').slice(0,120),to:String(r.draft.to).replace(/\s*<[^>]*>\s*$/,'').slice(0,80)||r.draft.to,draft:r.draft,createdAt:at,updatedAt:at,madeAt:made};
   });
-  artifacts=[...(Array.isArray(kept?.artifacts)?kept.artifacts:[]).map(readArtifact).filter(Boolean) as Artifact[],...madeArtifacts(made||{}),...replies];
+  artifacts=[...(Array.isArray(kept?.artifacts)?kept.artifacts:[]).map(readArtifact).filter(Boolean) as Artifact[],...madeArtifacts(made||{}),...newestReplies(replies)];
   draw();
  }
  for(const name of ['worldlet:artifacts','worldlet:widgets','worldlet:email-drafted'])window.addEventListener(name,()=>{if(active)void load();});
