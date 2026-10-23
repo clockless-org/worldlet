@@ -6,7 +6,7 @@ const browserAdapter={
  async load(){try{return JSON.parse(localStorage.getItem(key)||'null')}catch{return null}},
  async save(value){localStorage.setItem(key,JSON.stringify(value))},
  async request(operation,params){const base=operation==='search'?'https://geocoding-api.open-meteo.com/v1/search':'https://api.open-meteo.com/v1/forecast';const r=await fetch(base+'?'+new URLSearchParams(params),{credentials:'omit',referrerPolicy:'no-referrer',signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('Weather is unavailable. Please try again later.');return r.json()},
- async locate(){return new Promise((resolve,reject)=>{if(!navigator.geolocation)return reject(Error('Please search for a city.'));navigator.geolocation.getCurrentPosition(p=>resolve({latitude:Math.round(p.coords.latitude*10000)/10000,longitude:Math.round(p.coords.longitude*10000)/10000,accuracy:p.coords.accuracy,locatedAt:Date.now(),source:'device',name:'Current location'}),()=>reject(Error('Location is unavailable. Search for a city or allow location access in System Settings.')),{enableHighAccuracy:false,timeout:15000,maximumAge:300000})})}
+ async locate(){return new Promise((resolve,reject)=>{if(!navigator.geolocation)return reject(Error('Tell Fox your city instead.'));navigator.geolocation.getCurrentPosition(p=>resolve({latitude:Math.round(p.coords.latitude*10000)/10000,longitude:Math.round(p.coords.longitude*10000)/10000,accuracy:p.coords.accuracy,locatedAt:Date.now(),source:'device',name:'Current location'}),()=>reject(Error('Location is unavailable. Tell Fox your city, or allow location access in System Settings.')),{enableHighAccuracy:false,timeout:15000,maximumAge:300000})})}
 };
 // Keep the painted world in daytime without changing the clock or forecast.
 export function daytimeScene(current){return {...current,celestialDaylight:current.daylight,daylight:1,twilight:0,night:false};}
@@ -58,8 +58,8 @@ export function mountWorldEnvironment({root,dialog,close,onChange,onOpenWeather,
   await loaded;if(destroyed||locating||recording||adapter.presets)return;
   locationPrompted=true;locating=true;locationMessage='';const turn=++generation;busy=false;tick();
   await persist();
-  try{const p=await adapter.locate();if(destroyed||turn!==generation)return;if(!validPlace(p))throw Error('Location unavailable. Search for a city instead.');place=cleanPlace({...p,source:'device'});weather=null;followingDevice=true;lastLocateAttempt=Date.now();await persist();await refresh(true);}
-  catch(e){if(turn===generation)locationMessage=e.message||'Location unavailable. Search for a city instead.';}
+  try{const p=await adapter.locate();if(destroyed||turn!==generation)return;if(!validPlace(p))throw Error('Location unavailable. Tell Fox your city instead.');place=cleanPlace({...p,source:'device'});weather=null;followingDevice=true;lastLocateAttempt=Date.now();await persist();await refresh(true);}
+  catch(e){if(turn===generation)locationMessage=e.message||'Location unavailable. Tell Fox your city instead.';}
   finally{locating=false;if(!destroyed)tick();}
  }
  async function ensureLocation(){await loaded;if(!destroyed&&!recording&&!adapter.presets&&!place&&!locationPrompted&&adapter.autoLocate?.())await locate();}
