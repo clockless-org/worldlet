@@ -7,7 +7,14 @@ export const RELATED_CONTEXT_CHARACTERS=3000;
 const internalFact=new Set(['keys','fingerprint','changedAt']);
 // What the Center's batch reads. The shared item query also carries checks, operations, browser
 // workflows and runtime task rows: local state that changes every pass and says nothing about a finding.
-const modelFields=['items','taskReviews','context','pendingContextIds','skippedContextIds','appletCandidates','userContext','attentionFocus','timeZone'];
+// Small required fields first: an Agent that cuts a long tool reply short (Hermes spills one over 200,000
+// characters and reads its opening) must still see what to process and how to cite it.
+const modelFields=['pendingContextIds','skippedContextIds','timeZone','userContext','attentionFocus','context','appletCandidates','items','taskReviews'];
+/** Characters of the whole batch. Hermes read only the first 200,000 of a 207 KB reply: no pending IDs or
+ * source references survived, and every pass on 2026-10-23 ended unverified or incomplete. */
+export const ATTENTION_INPUT_CHARACTERS=100_000;
+// A queued task review waits for the person in Fox; the Center only needs to know it exists, not its evidence.
+const reviewSummary=(row:Row)=>({id:row.id,...row.previous?.id?{previous:{id:row.previous.id,title:row.previous.title}}:{},...row.proposal?{proposal:{title:row.proposal.title,provider:row.proposal.provider}}:{}});
 /** Reuse S's grounded extraction. The host retains originals for final validation. */
 export function attentionBatchInput(snapshot:Row) {
  const references=new Set((snapshot.context||[]).map((row:Row)=>{const owner=row.sourceReference||{provider:row.provider,id:row.sourceId};return owner.provider+':'+owner.id;}));
@@ -43,6 +50,20 @@ export function attentionBatchInput(snapshot:Row) {
   // a later pass's output, 20–80s). Omitted items stay saved; their IDs remain reusable.
   return unchanged?{...Object.fromEntries(['id','kind','provider','title','status','start','end','dueAt'].filter(k=>item[k]!==undefined).map(k=>[k,item[k]])),unchanged:true}:citable(item);
  });
- const rest=Object.fromEntries(modelFields.filter(name=>snapshot[name]!==undefined).map(name=>[name,snapshot[name]]));
- return {...rest,appletCandidates:candidates,context,...snapshot.items?{items}:{}};
+ const shaped:Row={...snapshot,appletCandidates:candidates,context,...Array.isArray(snapshot.taskReviews)?{taskReviews:snapshot.taskReviews.map(reviewSummary)}:{},...snapshot.items?{items}:{}};
+ const batch:Row=Object.fromEntries(modelFields.filter(name=>shaped[name]!==undefined).map(name=>[name,shaped[name]]));
+ // Over the bound, drop the least needed rows from the end: queued reviews, candidates, saved items, then related
+ // records. Pending seeds always stay; a dropped saved item stays saved and a dropped related record is only context.
+ const trims:[string,(row:Row)=>boolean][]=[['taskReviews',()=>true],['appletCandidates',()=>true],['items',()=>true],['context',row=>!pending.has(row.id)]];
+ let size=JSON.stringify(batch).length;
+ for(const [name,droppable] of trims){
+  const list=batch[name];
+  if(!Array.isArray(list))continue;
+  for(let index=list.length-1;index>=0&&size>ATTENTION_INPUT_CHARACTERS;index--){
+   if(!droppable(list[index]))continue;
+   size-=JSON.stringify(list[index]).length+1;
+   list.splice(index,1);
+  }
+ }
+ return batch;
 }

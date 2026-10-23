@@ -67,6 +67,19 @@ const wider=attentionBatchInput({pendingContextIds:['cal'],context:sourceEvidenc
  appletCandidates:[{title:'Standup moved',sources:[{provider:'google-calendar',id:'standup',quote:'Standup 09:30'},{provider:'gmail',id:'older-thread',quote:'Moved standup'}]}]});
 assert.deepEqual(wider.items[0].sources,[{provider:'google-calendar',id:'standup',quote:'Standup'}]);
 assert.deepEqual(wider.appletCandidates[0].sources,[{provider:'google-calendar',id:'standup',quote:'Standup 09:30'}]);
+// An Agent that reads only the opening of a long reply still sees what to process; the batch stays under its bound.
+const {ATTENTION_INPUT_CHARACTERS}=await import('../agent/attention/batch-input.ts');
+const quote='Long quoted evidence. '.repeat(200);
+const heavy=attentionBatchInput({items:Array.from({length:80},(_,i)=>({id:'item'+i,kind:'update',title:'Item '+i,summary:quote,sources:[{provider:'google-calendar',id:'standup',quote:'Standup'}]})),
+ taskReviews:Array.from({length:12},(_,i)=>({id:'review'+i,previous:{id:'task'+i,title:'Task '+i,sources:[{quote}]},proposal:{title:'Changed task '+i,provider:'gmail',summary:quote,sources:[{quote}]},candidates:[{id:'c',summary:quote}]})),
+ context:sourceEvidenceContext([{id:'cal',provider:'google-calendar',sourceId:'standup',text:'Standup 15:30'},...Array.from({length:16},(_,i)=>({id:'near'+i,provider:'gmail',sourceId:'m'+i,text:quote}))]),
+ pendingContextIds:['cal'],userContext:{},timeZone:'UTC'});
+assert.equal(Object.keys(heavy)[0],'pendingContextIds','pending IDs open the batch');
+assert.ok(JSON.stringify(heavy).indexOf('"context"')<JSON.stringify(heavy).indexOf('"items"'),'source records come before saved items');
+assert.ok(JSON.stringify(heavy).length<=ATTENTION_INPUT_CHARACTERS,'the batch stays under its bound');
+assert.equal(heavy.context[0].id,'cal','pending seeds always stay');
+assert.equal(heavy.taskReviews.length,0,'queued reviews go first when over the bound');
+assert.deepEqual(attentionBatchInput({taskReviews:[{id:'r',previous:{id:'t',title:'T',sources:[{quote}]},proposal:{title:'P',provider:'gmail',summary:quote},candidates:[{id:'c'}]}]}).taskReviews,[{id:'r',previous:{id:'t',title:'T'},proposal:{title:'P',provider:'gmail'}}],'queued reviews carry identity only');
 const {attentionExecution}=await import('../agent/attention/attention-execution.ts');
 assert.match(attentionExecution('synthesis').prompt!,/Output only new findings and existing items whose content this context changes\. An item marked unchanged/);
 console.log('PASS script → S checkpoints → M evidence projection: promotions preserved, deterministic skips, times, revision gating, withdrawals, compact cross-Applet evidence, in-context citations only and unchanged-item marking');
