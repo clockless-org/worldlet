@@ -9,7 +9,12 @@ export function agentButton(label:string,action:string,run:(b:HTMLButtonElement)
  b.onclick=async()=>{if(b.disabled)return;b.disabled=true;try{await run(b);}finally{if(b.isConnected)b.disabled=false;}};
  return b;
 }
-export const agentDay=(at:number)=>new Date(at).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+/** A day said the way people say it: today, yesterday, Oct 21, and the year only when it is not this one. */
+export const agentDay=(at:number,now=Date.now())=>{
+ const d=new Date(at),n=new Date(now),start=(x:Date)=>new Date(x.getFullYear(),x.getMonth(),x.getDate()).getTime();
+ const days=Math.round((start(n)-start(d))/86400000);
+ return days===0?'today':days===1?'yesterday':d.toLocaleDateString(undefined,{month:'short',day:'numeric',...d.getFullYear()!==n.getFullYear()?{year:'numeric'}:{}});
+};
 /** Asks, then runs. `where` gets the question; `said` the outcome; `done` runs after the Agent did it. */
 export async function confirmAgentChange({call,action,harness,title,request,where,said,current,question,verb,working,done}:{
  call:AgentCall;action:string;harness:string;title:string;request:Record<string,unknown>;where:HTMLElement;said:HTMLElement;current:()=>boolean;

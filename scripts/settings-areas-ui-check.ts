@@ -99,7 +99,7 @@ await withBrowser(async browser=>{
  await hermes.getByText('Your Agent',{exact:true}).waitFor();
  await hermes.getByText('Fox works through it. It may do what you ask Fox, and asks you before it changes anything.',{exact:true}).waitFor();
  await hermes.getByText('It may look at and change things in your World and see your board.',{exact:true}).waitFor();
- await claude.getByText(/^On another computer\. Last used .*2026\.$/).waitFor();
+ await claude.getByText(/^On another computer\. Last used Oct 17(, 2026)?\.$/).waitFor();
  await claude.getByText('It may look at your World, read GitHub and ask you things.',{exact:true}).waitFor();
  assert.equal(await rows.locator('.companion-settings-icon').count(),2,'each Agent has its picture');
  assert.equal(await claude.locator('.companion-settings-icon img').count(),1,'Claude wears its logo');

@@ -238,7 +238,7 @@ try{
  await local.locator('[data-view=own-agent]').waitFor();
  const rule=permissions.locator('[data-rule=rule-00000000000000a1]');
  await rule.getByText('npm test',{exact:true}).waitFor();
- await rule.getByText(/^Allowed .*2026, in Fox’s main conversation\.$/).waitFor();
+ await rule.getByText(/^Allowed [A-Z][a-z]{2} \d{1,2}(, 2026)?, in Fox’s main conversation\.$/).waitFor();
  await permissions.locator('[data-rule=rule-00000000000000a2]').getByText('Use the tool github › search_issues').waitFor();
  // Plain words: tools and things it may do, never MCP, allowlist or cron.
  assert.doesNotMatch(await permissions.innerText(),/\bMCP\b|allowlist|cron/i,'plain words only');
@@ -257,7 +257,7 @@ try{
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:companion-info',{detail:{tab:'Settings',setting:'access'}})));
  const accessPart=local.locator('[data-part=access]'),hermesAccess=accessPart.locator('[data-access-agent=hermes]');
  await hermesAccess.getByText(/^Hermes Agent/).first().waitFor();
- await hermesAccess.getByText(/^On this computer\. Last used .*2026\.$/).waitFor();
+ await hermesAccess.getByText(/^On this computer\. Last used [A-Z][a-z]{2} \d{1,2}(, 2026)?\.$/).waitFor();
  await hermesAccess.getByText('It may look at and change things in your World, read PostHog, take work, see your board, report its work, read what Agents saved and update Issues in example/app without asking.',{exact:true}).waitFor();
  await hermesAccess.getByText(/^Quiet: Building the installer · Fix the build · reported \d+ min ago\.$/).waitFor();
  assert.equal(await accessPart.locator('details,input,textarea,select').count(),0,'nothing folded and nothing to type');
@@ -340,7 +340,7 @@ try{
  await page.screenshot({path:'/tmp/your-agent-access.png'});
  await hermesAccess.locator('[data-action=confirm-revoke-agent]').click();
  await accessPart.getByText('Hermes Agent can no longer reach your World.',{exact:true}).waitFor();
- await hermesAccess.getByText(/^On this computer\. Revoked .*2026\.$/).waitFor();
+ await hermesAccess.getByText(/^On this computer\. Revoked Oct 15(, 2026)?\.$/).waitFor();
  assert.equal(await hermesAccess.locator('[data-action=revoke-agent]').count(),0,'nothing left to remove');
  assert.deepEqual(await page.evaluate(()=>(window as any).calls.filter(c=>c.action==='agentAccess'&&c.operation==='revoke').map(c=>c.id)),['hermes']);
  // Revoked, it is no longer your Agent's row on the list: your Agent has a row of its own, with Manage.

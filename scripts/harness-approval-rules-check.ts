@@ -231,7 +231,7 @@ let stdin='';process.stdin.on('data',c=>stdin+=c);process.stdin.on('end',()=>{
  await showAgentPermissions(target as any,call,()=>true);
  const rows=target.all(n=>!!n.dataset.rule);
  assert.deepEqual(rows.map(r=>r.dataset.rule),[granted.id,outside.id,'rule-0000000000000000']);
- assert.match(rows[0].textContent,/^Run recursive delete[\s\S]*Allowed .*2026, in the gmail Applet\./);
+ assert.match(rows[0].textContent,/^Run recursive delete[\s\S]*Allowed [A-Z][a-z]{2} \d{1,2}(, 2026)?, in the gmail Applet\./);
  assert.match(rows[1].textContent,/Allowed outside Worldlet; Hermes Agent keeps no date\./);assert.doesNotMatch(target.textContent,/Main agent|“work”/,'no profile names');
  assert.match(rows[2].textContent,/^Use the tool x/);
  assert.equal(rows[2].all(n=>n.dataset.action==='revoke-rule').length,0,'no Revoke where the Agent cannot have it revoked');

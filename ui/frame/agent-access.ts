@@ -10,7 +10,7 @@
  * request 2026-10-22: no Advanced in Settings); standing GitHub writes, wake commands, Agents for scripts and who gets new
  * work stay with the host's `agentAccess`. Plain words: the page names places in the World and what was allowed, never
  * tokens, endpoints or MCP. */
-import {agentButton as button,agentEl as el} from './agent-change.ts';
+import {agentButton as button,agentDay,agentEl as el} from './agent-change.ts';
 import {AGENT_ICONS,appLogoSource} from '../applets/index.ts';
 import {settingsIcon,settingsRow,settingsSwitch,type SettingsIcon} from './settings-rows.ts';
 /** The Agent Fox works through (companion-settings.ts): first in the list, with Manage for its own page. `harness` names
@@ -39,7 +39,7 @@ const ARTIFACT_TOGGLES=[['save','Can save to your Journal','can now save to your
 const DRAFT_TOGGLES=[['draft','Can draft GitHub changes','can now draft GitHub changes for you to approve','can no longer draft GitHub changes']] as const;
 /** "Can report its work" and "Can see other Agents" (core reportGrant), the same way. */
 const REPORT_TOGGLES=[['report','Can report its work','can now report what it is doing','can no longer report what it is doing'],['list','Can see other Agents','can now see what your other Agents are doing','can no longer see your other Agents']] as const;
-const date=(at:string)=>new Date(at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+const date=(at:string)=>agentDay(Date.parse(at));
 /** The line under an Agent's name: where it runs and when it was last used or revoked. */
 export function accessLine(agent:Agent):string {
  const where=agent.kind==='remote'?'On another computer':'On this computer';
