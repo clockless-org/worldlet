@@ -2,6 +2,11 @@ import type {ActivityObservation,ActivityState,ActivityFact} from '../../contrac
 import {journalPayload} from '../store/index.ts';
 const id=(s:unknown):s is string=>typeof s==='string'&&/^[a-zA-Z0-9_.:-]{1,180}$/.test(s);
 const short=(s:unknown,n:number)=>typeof s==='string'?s.slice(0,n):'';
+/** A changed page's text is recorded again at most this often (sample clock, ms); a new title or page records at once.
+ * A page that changes while it scrolls was recorded whole on every sample, about once a second. */
+export const ACTIVITY_CONTENT_GAP_MS=10_000;
+/** The text's length and FNV-1a hash: enough to tell a changed text from the last recorded one. */
+function textKey(text:string){let hash=0x811c9dc5;for(let i=0;i<text.length;i++){hash^=text.charCodeAt(i);hash=Math.imul(hash,0x01000193);}return text.length+':'+(hash>>>0).toString(36);}
 /** URLs lose credentials, query and fragment values; originals are not telemetry. */
 export function activityURL(raw:string):string {
  // Foundation's embedded JS engine need not provide WHATWG URL.
@@ -49,7 +54,7 @@ export function activityObserve(input:ActivityObservation):{state:ActivityState|
  const url=activityURL(p.url);if(!url||!id(p.documentId))throw Error('Invalid activity page');
  if(!state||state.navigationURL!==p.url||state.documentId!==p.documentId){
   if(state)emit('page.closed',{url:state.url,totalVisibleMs:state.visibleMs,reason:'navigation'});
-  state={visitId:input.id,url,navigationURL:p.url,documentId:p.documentId,title:'',text:'',lastTick:input.tick,active:false,visibleMs:0};
+  state={visitId:input.id,url,navigationURL:p.url,documentId:p.documentId,title:'',textKey:textKey(''),lastTick:input.tick,active:false,visibleMs:0};
   emit('page.opened',{url});
  }
  const active=input.active&&p.visible===true&&!p.omitted;
@@ -63,10 +68,11 @@ export function activityObserve(input:ActivityObservation):{state:ActivityState|
   state.coverage=coverage;
  }
  const title=p.omitted?'':short(p.title,500),text=p.omitted?'':short(p.text,1_000_000);
- if(state.title!==title||state.text!==text||p.omitted){
+ const key=textKey(text),due=state.contentTick===undefined||input.tick-state.contentTick>=ACTIVITY_CONTENT_GAP_MS;
+ if(state.title!==title||p.omitted||state.textKey!==key&&due){
   const parts=Math.max(1,Math.ceil(text.length/16000));
   for(let part=0;part<parts;part++)emit('page.content',{url,title,text:text.slice(part*16000,(part+1)*16000),snapshotId:input.id,part,parts,visible:active,scope:'visible-viewport-text',truncated:p.truncated===true||p.text.length>1_000_000,...(p.omitted?{omitted:short(p.omitted,100)}:{})});
-  state.title=title;state.text=text;
+  state.title=title;state.textKey=key;state.contentTick=input.tick;
  }
  // An exclusion applies to the entire observation, including buffers queued before a privacy transition.
  if(p.omitted)return {state,events};
