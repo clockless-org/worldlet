@@ -6,7 +6,7 @@ import {uiIcon} from '../style/index.ts';
 import {mountCompanionInfo} from './companion-info.ts';
 import {watchModelNeeded} from './model-needed.ts';
 import {mountAppletTaskResults} from './applet-task-results.ts';
-import {mountFoxProactive,arriveProactive} from './fox-proactive.ts';
+import {mountFoxProactive,arriveProactive,PROACTIVE_LINE_MS} from './fox-proactive.ts';
 import {isDesktopCompanion,requireWorldSurface} from './world-surface.ts';
 import {errorFields,isRequestCancellation,reportEngagement,reportProductEvent} from '../frame/index.ts';
 import {FOX_RETRY_ACTION,FOX_RETRY_DELAY_MS,foxTurnFailureText,foxTurnRetry} from '../../agent/companion/index.ts';
@@ -1071,6 +1071,9 @@ export function createNativeChat(call){return function({button,input,status,exec
    const open=make('button','','Open card');open.type='button';
    open.onclick=()=>{api.setGuide(null,{only:'proactive:'+line.id});reportProductEvent('attention_opened_from_fox');window.dispatchEvent(new CustomEvent('worldlet:attention-open',{detail:{id:line.card}}));};
    api.setGuide({source:'proactive:'+line.id,takeover:false,text:line.text,remember:true,actions:line.card?[open]:[]});api.revealGuide();
+   // A line is about its moment: one still showing after PROACTIVE_LINE_MS goes (Mac 4604: "…tonight; don't reopen the
+   // day…", said late at night, still showed at 9:41 the next morning).
+   setTimeout(()=>api.setGuide(null,{only:'proactive:'+line.id}),PROACTIVE_LINE_MS);
   }
  });
  root.addEventListener('worldlet:companion-info-opened',()=>panelButton.dataset.panelOpen='true');

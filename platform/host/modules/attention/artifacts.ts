@@ -1,5 +1,5 @@
 import {contextReader,contextWriter,mergeArtifact,orderArtifacts,readArtifact,validArtifactId,type Artifact} from '../../../../context/store/index.ts';
-import {dailyScheduleFailure,dailyScheduleResult,type ScheduleResult} from '../../../../agent/gate/index.ts';
+import {dailyScheduleFailure,dailyScheduleResult,dailySuperseded,type ScheduleResult} from '../../../../agent/gate/index.ts';
 import {WorldletError} from '../../files.ts';
 import {PHONE,type PhoneService} from '../../services.ts';
 import type {Host,Row} from '../../types.ts';
@@ -21,6 +21,12 @@ export function installArtifacts(host:Host){
  function scheduledResult(kind:unknown,day:unknown,artifact:Artifact,at:number){
   if(kind!=='plan'&&kind!=='summary'||typeof day!=='string')return;
   keep(dailyScheduleResult({kind,day,artifact:artifact as any,at,now:Date.now()}));
+  // The routine's earlier days leave the Center (core dailySuperseded).
+  try{
+   const writer=contextWriter(store.context(),'fox');
+   for(const {id,status} of dailySuperseded(kind,day,contextReader(store.context()).bodies('attention-items')))writer.write('attention-items',{operation:'status',with:{id,status}});
+   store.worldChanged();
+  }catch(error){host.diagnostics.record(error,'artifacts');}
  }
  function keep(result:ScheduleResult|null){
   try{

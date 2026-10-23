@@ -50,6 +50,16 @@ await withBrowser(fileAccess,async browser=>{
  await page.locator('#attentionPreview').getByText('Answer Priya about the venue').first().waitFor();
  await page.screenshot({path:'output/fox-card/card.png'});
  assert.equal(await card.getByText('Priya still needs your venue answer by Friday.').isVisible(),false,'the line gives way to the card');
+ // A line is about its moment: one nothing replaced goes after half an hour instead of showing into the next day.
+ await page.keyboard.press('Escape');
+ await page.evaluate(()=>{const w=window as any,thread=w.calls.find((c:any)=>c.action==='foxProactive').thread;
+  window.dispatchEvent(new CustomEvent('worldlet:fox-proactive',{detail:{id:'proactive-late',thread,moment:'late',line:'The day is done; rest well.'}}));});
+ const late=card.getByText('The day is done; rest well.');
+ await late.waitFor();
+ await page.clock.fastForward(20*60_000);
+ assert.equal(await late.isVisible(),true,'still showing after twenty minutes');
+ await page.clock.fastForward(11*60_000);
+ await late.waitFor({state:'hidden'});
  assert.deepEqual(errors,[]);
- console.log('PASS Fox points to Attention: a line about a waiting item offers Open card, which opens that item’s Attention card');
+ console.log('PASS Fox points to Attention: a line about a waiting item offers Open card, which opens that item’s Attention card; a line nothing replaced goes after half an hour');
 });

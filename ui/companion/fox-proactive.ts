@@ -12,6 +12,8 @@ import {PROACTIVE,proactiveLate,type ProactiveMoment} from '../../agent/companio
  * A line about something waiting on the person carries the open Attention item it is about (`card`, owner 2026-10-10:
  * Attention is the one place to act), and Fox's card offers to open that item's card.
  */
+/** How long a line Fox said first stays in its card when nothing replaces it. */
+export const PROACTIVE_LINE_MS=30*60_000;
 export function mountFoxProactive({call,thread,world,busy,environment,say}:{
  call:(action:string,request:object)=>Promise<any>;
  /** The current place's thread key, or '' where Fox must not speak first (onboarding, desktop companion). */

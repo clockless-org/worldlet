@@ -451,7 +451,18 @@ function scriptedAgent(store:WorldStore,services:Map<string,unknown>,{cancelOnce
   assert.equal(shown().length,1,'Any other card is no Attention item');
   await actions.get('worldItemStatus')!({action:'worldItemStatus',id:shown()[0].id,status:'read'} as any,{requestId:'check',transport:'host'});
   assert.equal(shown()[0].status,'read','Got it settles it like any update');
+  // The next days: a brief that did not finish, then one kept. The kept one takes a seat in Now (important) and the
+  // routine's earlier days leave: Oct 12's result read, the failure done; Wrap up today's items stay as they are.
+  const run=(scheduled:string,day:string,id:string)=>actions.get('artifacts')!({action:'artifacts',operation:'save',scheduled,day,artifact:{id,kind:'answer',title:'Card '+day,body:'Day '+day,size:'large',origin:{type:'conversation',place:'world'}}} as any,{requestId:'check',transport:'host'});
+  await run('plan','2026-10-12','art-brief0000012');await run('summary','2026-10-12','art-summa0000012');
+  await actions.get('artifacts')!({action:'artifacts',operation:'scheduleFailed',scheduled:'plan',day:'2026-10-13',reason:'Your Agent stopped.'} as any,{requestId:'check',transport:'host'});
+  await run('plan','2026-10-13','art-brief0000013');
+  const by=(title:string)=>shown().find(item=>item.title===title&&item.kind==='update')!;
+  assert.equal(by('Today’s prep · Oct 13').status,'open');assert.equal(by('Today’s prep · Oct 13').priority,'important','It is important enough for Now');
+  assert.equal(by('Today’s prep · Oct 12').status,'read','The earlier day\'s brief is read');
+  assert.equal(shown().find(item=>item.kind==='task')!.status,'done','The run that did not finish is done');
+  assert.equal(by('Wrap up today · Oct 12').status,'open','The other routine\'s result stays');
   assert.deepEqual(env.errors,[],'No unexpected diagnostics');
-  console.log('PASS Electron scheduled results: a kept morning brief is a Worth Knowing item that opens its Journal card, updated in place and settled like any update.');
+  console.log('PASS Electron scheduled results: a kept morning brief is a Worth Knowing item that opens its Journal card, updated in place and settled like any update; a newer day\'s takes over from its routine\'s earlier days.');
  }finally{await env.close();}
 }
