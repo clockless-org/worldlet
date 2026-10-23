@@ -4,7 +4,7 @@
 // never a token; reads go to the Search Console API with the Google sign-in's access token, renewed once after a 401;
 // a sign-in Google no longer accepts and a site the account cannot see say so in plain words; signing in to Mail again
 // keeps Search Console; Disconnect forgets Search Console but not the Google sign-in; a service account key still
-// replaces it under Advanced; and a host with no Google sign-in says to use Advanced. Against a fake Google.
+// replaces it under Advanced; and a host with no Google sign-in says it cannot sign in there. Against a fake Google.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -120,10 +120,10 @@ await withTempDir('worldlet-search-console-sign-in-',async temp=>{
  account.disconnect(null);
  assert.equal(source.connected('search-console'),false);
 
- // No Google sign-in on this host: plain words, pointing to Advanced.
+ // No Google sign-in on this host: plain words.
  const bare=new ServiceSource({vault:{...vault,get:()=>null},fetch:fakeFetch as typeof fetch,openExternal:browser});
- await assert.rejects(bare.connect('search-console','',{}),/cannot sign in with Google here\. Connect it under Advanced instead/);
+ await assert.rejects(bare.connect('search-console','',{}),/cannot sign in with Google in this copy of Worldlet\./);
  // Nothing a token: no access or refresh token in any Service entry.
  for(const [id,value] of values)if(id.startsWith('service:'))assert.doesNotMatch(value,/access-|refresh-/,id);
 });
-console.log('PASS Search Console through Google sign-in: a tile of its own into Work, only the read-only permission added on a loopback address with PKCE, nothing but "reads with Google" in the vault, reads with the Google access token renewed after a 401, plain words when signed out or the site is not theirs, a new Mail sign-in keeps it, Disconnect keeps the Google sign-in, and a host with no Google sign-in points to Advanced');
+console.log('PASS Search Console through Google sign-in: a tile of its own into Work, only the read-only permission added on a loopback address with PKCE, nothing but "reads with Google" in the vault, reads with the Google access token renewed after a 401, plain words when signed out or the site is not theirs, a new Mail sign-in keeps it, Disconnect keeps the Google sign-in, and a host with no Google sign-in says it cannot sign in there');

@@ -159,7 +159,7 @@
 <text x="522" y="1122" font-size="13" fill="#1F2328">• The companion’s Agent: Hermes, Claude Code, OpenClaw…</text>
 <text x="522" y="1140" font-size="13" fill="#1F2328">• Local: Claude Code · Codex · scripts</text>
 <text x="522" y="1158" font-size="13" fill="#1F2328">• Cloud: claude.ai · ChatGPT · Cursor</text>
-<text x="522" y="1190" font-size="12.5" font-style="italic" fill="#1A7F37">adapter · local MCP · remote MCP (OAuth + 4-digit code) → Gate</text>
+<text x="522" y="1190" font-size="12.5" font-style="italic" fill="#1A7F37">adapter · local MCP · remote MCP (OAuth + Allow on a card) → Gate</text>
 <rect x="20" y="1232" width="474" height="150" rx="12" fill="#FFFFFF" stroke="#9A6700" stroke-width="1.4"/>
 <text x="36" y="1260" font-size="16" font-weight="700" fill="#1F2328">Services</text>
 <text x="478" y="1260" font-size="13" font-weight="700" text-anchor="end" fill="#9A6700">→ Connectors (Context)</text>

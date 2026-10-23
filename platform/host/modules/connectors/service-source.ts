@@ -228,7 +228,7 @@ export class ServiceSource {
   * it), checks it with one read and keeps that it reads so. A sign-in that does not finish, or a read Google refuses,
   * leaves a kept key as it was. Disconnecting later forgets only this; the Google sign-in stays for Mail and Calendar. */
  private async googleSignIn(provider:string,service:Definition<unknown>,open:(url:string)=>Promise<void>,cancelled:()=>boolean){
-  if(!this.google)throw new WorldletError(`${service.gate.title} cannot sign in with Google here. Connect it under Advanced instead.`);
+  if(!this.google)throw new WorldletError(`${service.gate.title} cannot sign in with Google in this copy of Worldlet.`);
   await this.google.connect(open,cancelled);
   const settings=service.settings({});
   try{await service.check(this.http(service,settings,'',true),settings);}
