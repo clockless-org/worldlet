@@ -1,5 +1,5 @@
 /** The in-page second ask Settings › Agents uses before any change to the person's Agent (its skills and scheduled
- * tasks, like its tools in agent-connections.ts): the host's `preview` returns the exact command and a one-time
+ * tasks): the host's `preview` returns the exact command and a one-time
  * confirmation; the page says in plain words what will happen (never the command itself), and only the
  * person's own button runs it (`change` with that confirmation). Cancel changes nothing. */
 export type AgentCall=(action:string,body?:any)=>Promise<any>;
