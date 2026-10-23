@@ -5,6 +5,8 @@
     "desktopCompanionDrag",
     "worldHistory",
     "worldLog",
+    "worldActivity",
+    "artifacts:list",
     "voiceMemos",
     "snapshot",
     "conversationRecall",
