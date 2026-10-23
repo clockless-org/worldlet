@@ -1,6 +1,6 @@
 import type {BrowserPaperProfile,SurfaceRect} from '../../contracts/browser-surface.ts';
 /** The scene's own pixels over the outermost 0–3 CSS pixels. No page DOM or input is touched. */
-type Paint={src:string;image:SurfaceRect;profile:BrowserPaperProfile;frame?:{src:string;source:SurfaceRect;target:SurfaceRect}};
+type Paint={src:string;image:SurfaceRect;profile:BrowserPaperProfile;frame?:{src:string;source:SurfaceRect;target:SurfaceRect};clear?:SurfaceRect[]};
 const canvas=document.querySelector('canvas')!,g=canvas.getContext('2d')!;
 let current:Paint|null=null,bitmap:HTMLImageElement|null=null,mask:HTMLImageElement|null=null,generation=0;
 function paint(){
@@ -15,7 +15,7 @@ function paint(){
   const m=layer.getContext('2d')!;m.setTransform(dpr,0,0,dpr,0,0);
   const {source:s,target:t}=current.frame;
   m.drawImage(mask,s.x*mask.width,s.y*mask.height,s.width*mask.width,s.height*mask.height,t.x,t.y,t.width,t.height);
-  g.globalCompositeOperation='destination-in';g.drawImage(layer,0,0,w,h);g.globalCompositeOperation='source-over';return;
+  g.globalCompositeOperation='destination-in';g.drawImage(layer,0,0,w,h);g.globalCompositeOperation='source-over';clearControls();return;
  }
  // Punch out the page, keeping the original painted paper as a thin foreground. Each side is sampled clockwise.
  const hole=new Path2D();
@@ -23,8 +23,10 @@ function paint(){
  p.right.forEach((n,i)=>hole.lineTo(w-n,i*h/(p.right.length-1)));
  p.bottom.forEach((n,i)=>hole.lineTo(w-i*w/(p.bottom.length-1),h-n));
  p.left.forEach((n,i)=>hole.lineTo(n,h-i*h/(p.left.length-1)));
- hole.closePath();g.globalCompositeOperation='destination-out';g.fill(hole);g.globalCompositeOperation='source-over';
+ hole.closePath();g.globalCompositeOperation='destination-out';g.fill(hole);g.globalCompositeOperation='source-over';clearControls();
 }
+// World controls standing on the frame (the page's toolbar) show through: the World draws the same frame under them.
+function clearControls(){for(const r of current?.clear||[])g.clearRect(r.x,r.y,r.width,r.height);}
 (window as any).paperEdge={
  async apply(value:Paint|null){
   const token=++generation;current=value;

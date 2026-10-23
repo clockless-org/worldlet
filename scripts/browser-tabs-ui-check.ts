@@ -47,6 +47,11 @@ await withBrowser(fileAccess,async browser=>{
  assert.deepEqual(await labels(),['*Google']);
  const geometry=await page.evaluate(()=>{const strip=document.querySelector('.browser-tabs').getBoundingClientRect(),bar=document.querySelector('.browser-toolbar').getBoundingClientRect(),rect=(window as any).calls.filter((c:any)=>['browserShow','browserLayout'].includes(c.action)).at(-1).rect;return {stripBottom:strip.bottom,stripTop:strip.top,height:strip.height,barBottom:bar.bottom,rectY:rect.y};});
  assert.ok(geometry.rectY>=geometry.stripBottom&&geometry.barBottom<=geometry.stripTop,'the native page starts below the strip; the toolbar floats above both, taking no room '+JSON.stringify(geometry));
+ // The host paints the frame above the World, so the toolbar on its top rail is left unpainted there.
+ await page.waitForFunction(()=>{const w=window as any,last=w.calls.filter((c:any)=>['browserShow','browserLayout'].includes(c.action)).at(-1);return !!last?.paperEdge?.clear;});
+ const hole=await page.evaluate(()=>{const bar=document.querySelector('.browser-toolbar').getBoundingClientRect(),last=(window as any).calls.filter((c:any)=>['browserShow','browserLayout'].includes(c.action)).at(-1);
+  return {clear:last.paperEdge.clear,expected:[{x:bar.x-last.rect.x,y:bar.y-last.rect.y,width:bar.width,height:bar.height}]};});
+ assert.deepEqual(hole.clear,hole.expected,'the frame the host paints leaves the toolbar showing');
  assert.ok(geometry.height<=36,'the strip is slim '+JSON.stringify(geometry));
  await go('browser','https://flights.example.com/sfo');
  await page.waitForFunction(()=>document.querySelector('.browser-tabs .browser-tab-pick')?.textContent.startsWith('Flights'));

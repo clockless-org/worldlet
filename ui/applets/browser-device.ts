@@ -210,7 +210,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   const start=visible&&!!page.url?appletHome():'';
   const away=!!start&&(appletKey==='browser'?!atBrowserHome(page.url,start):!atAppletHome(page.url,[start,landedHomes.get(appletKey)||'']));
   homeButton.hidden=!visible||!appletHome();homeButton.disabled=!away;
-  const bar=visible&&appletKey!=='web';if(toolbar.hidden===bar){toolbar.hidden=!bar;dockToolbarEnds(bar);root.dispatchEvent(new CustomEvent('worldlet:page-controls'));}
+  const bar=visible&&appletKey!=='web';if(toolbar.hidden===bar){toolbar.hidden=!bar;dockToolbarEnds(bar);root.dispatchEvent(new CustomEvent('worldlet:page-controls'));geometry();}
   syncAddress(visible?page.url:'');
  }
  // Picture in picture and the shelf's + (a new page in the Browser) end the toolbar's row while it shows (owner request
@@ -233,8 +233,12 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   addressUrl=url;if(document.activeElement===addressField)return;
   const shown=url?pageAddress(url):'';if(addressField.value!==shown)addressField.value=shown;addressField.title=url;
  }
- addressField.onfocus=()=>{addressField.value=addressUrl;addressField.select();};
- addressField.onblur=()=>syncAddress(addressUrl);
+ // A click's own mouseup put the caret back after select(), so what was typed next was added to the address
+ // (a click, then "example.com", opened google.com/example.com): the click that focuses keeps the whole address selected.
+ let selectOnUp=false;
+ addressField.onfocus=()=>{addressField.value=addressUrl;addressField.select();selectOnUp=true;};
+ addressField.onmouseup=event=>{if(!selectOnUp)return;selectOnUp=false;if(addressField.selectionStart===addressField.selectionEnd){event.preventDefault();addressField.select();}};
+ addressField.onblur=()=>{selectOnUp=false;syncAddress(addressUrl);};
  addressField.onkeydown=event=>{if(event.key==='Escape'){event.stopPropagation();addressField.value=addressUrl;addressField.blur();}};
  addressForm.onsubmit=event=>{
   event.preventDefault();const text=addressField.value.trim();if(!text)return;
@@ -564,7 +568,11 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
    const rect={x:x+inset,y:y+top,width:Math.max(0,right-x-2*inset),height:Math.max(0,bottom-y-top-inset)};
    if(rect.width<1||rect.height<1)return;
    panelRect=rect;
-   const edge=panelScene.paperEdge(rect),paper=edge?{paperEdge:edge}:{};
+   // The host paints the frame in its own window above the World, which hid the toolbar on the frame's top rail: its
+   // place stays unpainted (the World's own frame is under it).
+   const edge=panelScene.paperEdge(rect),bar=edge&&!toolbar.hidden?toolbar.getBoundingClientRect():null;
+   const clear=bar&&bar.width>0&&bar.height>0?{clear:[{x:bar.x-rect.x,y:bar.y-rect.y,width:bar.width,height:bar.height}]}:{};
+   const paper=edge?{paperEdge:{...edge,...clear}}:{};
    // Fox's copy above Fox's conversation box (else the panel's corner); a panel grown too small for it takes Fox's page in instead.
    const copyRect=copyPage?foxCopyPlacement({panel:rect,page:copyPage,dialogue:dialogueRect()}):null;
    if(copyPage&&!copyRect){copyPage=null;copyTake=true;copyOff=true;markFoxControl();}
