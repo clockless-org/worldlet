@@ -18,7 +18,7 @@ The [README](../README.md) says what Worldlet is and how to install it. This pag
 | Topic | Read |
 | --- | --- |
 | The principles everything is designed by | [Charter](CHARTER.md) |
-| The stack in computer terms, as a picture | [Stack diagram](stack-in-computer-terms.svg) ([Chinese](stack-in-computer-terms.zh.svg)) · [the four layers and their components](four-layers.svg) · [one person, one World](one-world.svg) ([Chinese](one-world.zh.svg)) |
+| The stack in computer terms, as a picture | [Stack diagram](stack-in-computer-terms.svg) ([Chinese](stack-in-computer-terms.zh.svg)) · [the four layers and their components](four-layers.svg) · [the interfaces between the layers](layer-interfaces.svg) · [one person, one World](one-world.svg) ([Chinese](one-world.zh.svg)) |
 | Four layers and 20 components: UI, Agent, Context, Platform | [Architecture](UI-CORE-PLATFORM.md) · [shared UI, pure Agent and Context, thin Platform](../contracts/COMPONENTS.md) |
 | How Worldlet talks to an Agent, and an Agent to the World | [Platform–Harness contract](../contracts/HARNESS.md) · [Agent adapters](../harness/README.md) |
 | What each Agent may do in the World, and what it did | [Agent identity, Grants and audit](../agent/gate/GRANTS.md) |
@@ -56,7 +56,7 @@ The generated inventory lists every Markdown file in the repository. `npm run ch
 
 <!-- documentation-inventory:start -->
 
-Indexed: **286 Markdown documents** and **750 supporting documentation files**.
+Indexed: **286 Markdown documents** and **751 supporting documentation files**.
 
 | Category | Files |
 | --- | ---: |
@@ -67,7 +67,7 @@ Indexed: **286 Markdown documents** and **750 supporting documentation files**.
 | Resource and artwork records | 74 |
 | Module and service documentation | 40 |
 | Website documentation and articles | 0 |
-| Documentation diagrams, previews and evidence | 750 |
+| Documentation diagrams, previews and evidence | 751 |
 
 <details><summary>Root entry points (6)</summary>
 
@@ -390,7 +390,7 @@ Indexed: **286 Markdown documents** and **750 supporting documentation files**.
 
 </details>
 
-<details><summary>Documentation diagrams, previews and evidence (750)</summary>
+<details><summary>Documentation diagrams, previews and evidence (751)</summary>
 
 - [agent/app/analytics-insights.json](../agent/app/analytics-insights.json)
 - [docs/assets/readme/applet-notes.jpg](assets/readme/applet-notes.jpg)
@@ -399,6 +399,7 @@ Indexed: **286 Markdown documents** and **750 supporting documentation files**.
 - [docs/assets/readme/world.jpg](assets/readme/world.jpg)
 - [docs/four-layers.svg](four-layers.svg)
 - [docs/four-layers.zh.svg](four-layers.zh.svg)
+- [docs/layer-interfaces.svg](layer-interfaces.svg)
 - [docs/layers-and-components.svg](layers-and-components.svg)
 - [docs/layers-and-components.zh.svg](layers-and-components.zh.svg)
 - [docs/one-world.svg](one-world.svg)

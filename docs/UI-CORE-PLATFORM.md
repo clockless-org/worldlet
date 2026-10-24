@@ -7,7 +7,8 @@ through that Agent (Worldlet provides none). `contracts/` holds the interfaces b
 and declarations, not product logic.
 
 Pictures: the layers and their components, [four-layers.svg](four-layers.svg) ([中文](four-layers.zh.svg)); each
-component's folder in every layer, [layers-and-components.svg](layers-and-components.svg) ([中文](layers-and-components.zh.svg)).
+component's folder in every layer, [layers-and-components.svg](layers-and-components.svg) ([中文](layers-and-components.zh.svg)); the interfaces between UI, Agent and Context and to outside sources and Agents, around one Context Store,
+[layer-interfaces.svg](layer-interfaces.svg).
 
 <a id="see-do-know"></a>
 ## Four layers: UI, Agent, Context, Platform
