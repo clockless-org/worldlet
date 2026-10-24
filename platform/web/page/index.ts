@@ -4,7 +4,7 @@ import {createRoomWebClient,isRoomLink,type RoomSocketFactory} from '../room.ts'
 import {type PhoneAttentionItem,type PhoneTask} from '../payloads.ts';
 
 // Worldlet in a web browser (platform/web/README.md#web): the page the relay serves at /open/ pairs with the computer
-// like the phone apps, from the link the computer's Mobile page makes, and shows what the phones show: what needs
+// like the phone apps, from the link the computer's Settings › Phone makes, and shows what the phones show: what needs
 // the person (the Attention Center's Now and Later), what the Agent is doing (the Task panel), today's Journal and
 // Fox's conversation. The computer does all the work; this page only shows what it sends and passes back what the person
 // does. The link stays in this browser's storage (never sent anywhere: it is the URL fragment), so a reload or a
@@ -23,7 +23,7 @@ export type WebOpenOptions={fetch:typeof fetch,storage:Pick<Storage,'getItem'|'s
  /** `/open/?simple`: the person wants the Center here, not the full World; kept for this browser. */
  simple?:boolean};
 
-/** "Chrome on Mac": what the computer's Mobile page calls this browser. */
+/** "Chrome on Mac": what the computer's Settings › Phone calls this browser. */
 export function browserName(userAgent:string){
  const browser=/Edg\//.test(userAgent)?'Edge':/Firefox\//.test(userAgent)?'Firefox':/Chrome\//.test(userAgent)?'Chrome':/Safari\//.test(userAgent)?'Safari':'a browser';
  const system=/iPhone|iPad/.test(userAgent)?'iPhone':/Android/.test(userAgent)?'Android':/Mac OS X/.test(userAgent)?'Mac':/Windows/.test(userAgent)?'Windows':/Linux/.test(userAgent)?'Linux':'';
@@ -142,7 +142,7 @@ export function mountWebOpen(root:HTMLElement,options:WebOpenOptions){
   if(!client||ended){
    const page=el('section','web-page web-start');
    page.append(el('h2','',ended?'This link is off':'Open Worldlet here'),
-    el('p','',notice||'On your computer, open Worldlet, then Fox’s panel › Mobile › In a browser, and choose Open in browser or Copy link.'));
+    el('p','',notice||'On your computer, open Worldlet, then Settings › Phone › In a browser, and choose Open in browser or Copy link.'));
    root.replaceChildren(header,page);return;
   }
   const nav=el('nav','web-tabs');
