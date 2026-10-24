@@ -4,7 +4,8 @@ import path from 'node:path';
 // The credential vault's storage on the Node host (platform/server), where there is no keychain for Electron's
 // `safeStorage`: AES-256-GCM with a random key in an owner-only `vault.key` beside `vault.json`. The secrets are as safe
 // as that file (the computer's account and disk encryption), not tied to a keychain. A vault written by the Electron
-// host on Linux (libsecret) is not readable here, nor this one there: each host keeps its own.
+// host on Linux (libsecret) is not readable here. The desktop app opens this one when it takes the library over from
+// the service (platform/host/service.ts) and seals each entry again with its keychain.
 export const VAULT_KEY_FILE='vault.key';
 const VERSION=1,IV=12,TAG=16;
 export function nodeVaultStorage(root:string){
