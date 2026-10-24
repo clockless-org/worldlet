@@ -13,9 +13,20 @@ Remote access is on by default (owner decision 2026-10-17): the installed app's 
    - **Cursor**: add it to `~/.cursor/mcp.json` as `{"mcpServers":{"worldlet":{"url":"https://mcp.worldlet.ai/<room>"}}}`, then choose Connect in Cursor's MCP settings.
    - **Any other MCP client** that speaks Streamable HTTP and OAuth 2.1 with dynamic client registration works the same way.
 3. The client opens a page that waits. In Worldlet, a card in Attention names the client, where it returns and the browser and city it was started from ("Chrome on Mac · San Francisco, US", as the website's front words it; never the address or the whole user agent). Choose **Allow** only if that is you. With Services connected, the card says so in plain words: **Allow** also lets it read them ("Allow also lets it read your GitHub and PostHog"), and **Allow without them** keeps them private.
-4. The client returns signed in. Its tools are `describe_world_tools` and `call_world_tool`, the same two a local Agent gets.
+4. The client returns signed in. Its tools are `search`, `fetch` and `remember` ([below](#search-fetch-and-remember)), and `describe_world_tools` and `call_world_tool`, the same two a local Agent gets.
 
 What the new Agent may do starts with the default Grants: reads, drafts for your review and the browser link. **Allow** adds **Can read <Service>** for each Service connected when it signs in (the host's `services`, given when its code is redeemed), which also lets it search the World's saved context of those Services; **Allow without them** does not. Give it more under its name in Settings › Agents, for example **Can read GitHub**, **Can ask you** or **Can see your board**. **Revoke** ends its connection at once, its refresh token included.
+
+<a id="search-fetch-and-remember"></a>
+## Search, fetch and remember
+
+A chat model finds its way faster with plain tools than by discovering a hundred targets, and ChatGPT's connectors and deep research look for `search` and `fetch` by name. So remote MCP also offers three tools ([`connector-tools.ts`](connector-tools.ts)). Each one is only ordinary World tool calls by the connected Agent, through the standing server's own call, so its Grants decide each call and its audit records each, exactly as if it had made them itself:
+
+- **`search`** (`query`) asks three sources at once and returns `results`, each with an `id`, `title`, `url` when the source has one, a short `snippet` and its `source`: the saved context of connected Services (`context/search`, needs **Can read <Service>**), the companion's memory and past conversations (`companion/recall`, a default read) and notes Agents saved to the Journal (`agent-artifacts/read`). A source the Agent may not read is left out and listed in `notSearched` with the reason. Results are marked as untrusted content.
+- **`fetch`** (`id`) reads one result in full by the id `search` gave: `service:`, `memory:` or `journal:` and that source's own id. It returns `id`, `title`, `text`, `url` and `metadata`.
+- **`remember`** (`title`, `text`, optional `key`) saves a note to the person's Journal ([Agent artifacts](GRANTS.md#agent-artifacts)), where the person and other Agents find it again, `search` included. It needs **Can save to your Journal** under the connector's name in Settings › Agents; the same `key` (letters, digits, `.`, `_`, `:` and `-`, no spaces) replaces that note.
+
+`node scripts/connector-tools-check.ts` checks the three through the standing server with fictional records, Grants and revoke.
 
 ## A token for a script or another computer
 
