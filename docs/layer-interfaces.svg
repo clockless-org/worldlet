@@ -1,88 +1,84 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1360" height="800" viewBox="0 0 1360 800" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="890" viewBox="0 0 1220 890" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
 <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#57606A"/></marker></defs>
-<rect x="0" y="0" width="1360" height="800" rx="18" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1"/>
-<rect x="0.5" y="0.5" width="1359" height="799" rx="18" fill="none" stroke="#D8DDE4" stroke-width="1"/>
+<rect x="0" y="0" width="1220" height="890" rx="18" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1"/>
+<rect x="0.5" y="0.5" width="1219" height="889" rx="18" fill="none" stroke="#D8DDE4" stroke-width="1"/>
 <text x="28" y="48" font-size="26" font-weight="700" fill="#1F2328">Worldlet: everything works around one Context Store</text>
-<text x="28" y="78" font-size="15" fill="#57606A">UI, Agents and outside sources all read and write the same Store. Only two interfaces face outside: Connectors for sources, MCP for Agents.</text>
-<rect x="250" y="112" width="790" height="660" rx="20" fill="#FAFBFC" stroke="#8C959F" stroke-width="1" stroke-dasharray="6 4"/>
-<text x="270" y="140" font-size="14" font-weight="700" fill="#57606A">Worldlet, on the person's own machine</text>
-<text x="1020" y="752" font-size="12.5" fill="#57606A" text-anchor="end">Platform (platform/) runs it all: Desktop · Server · Web · Phone</text>
-<rect x="470" y="330" width="320" height="240" rx="16" fill="#FBF3FF" stroke="#8250DF" stroke-width="2.5"/>
-<text x="630.0" y="362" font-size="22" font-weight="800" fill="#8250DF" text-anchor="middle">Context Store</text>
-<text x="630.0" y="384" font-size="12" fill="#57606A" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">context/ · one world.sqlite</text>
-<rect x="482.0" y="400" width="143.0" height="70" rx="10" fill="#FFFFFF" stroke="#D2A8FF" stroke-width="1"/>
-<text x="494.0" y="428" font-size="15" font-weight="700" fill="#1F2328">Synced</text>
-<text x="494.0" y="450" font-size="12" fill="#1F2328">copies of every source</text>
-<rect x="635.0" y="400" width="143.0" height="70" rx="10" fill="#FFFFFF" stroke="#D2A8FF" stroke-width="1"/>
-<text x="647.0" y="428" font-size="15" font-weight="700" fill="#1F2328">Recorded</text>
-<text x="647.0" y="450" font-size="12" fill="#1F2328">conversations, asks</text>
-<rect x="482.0" y="480" width="143.0" height="70" rx="10" fill="#FFFFFF" stroke="#D2A8FF" stroke-width="1"/>
-<text x="494.0" y="508" font-size="15" font-weight="700" fill="#1F2328">Made</text>
-<text x="494.0" y="530" font-size="12" fill="#1F2328">artifacts, things, drafts</text>
-<rect x="635.0" y="480" width="143.0" height="70" rx="10" fill="#FFFFFF" stroke="#D2A8FF" stroke-width="1"/>
-<text x="647.0" y="508" font-size="15" font-weight="700" fill="#1F2328">Known</text>
-<text x="647.0" y="530" font-size="12" fill="#1F2328">memory, knowledge</text>
-<rect x="470" y="160" width="320" height="100" rx="12" fill="#EEF4FF" stroke="#B6CCFE" stroke-width="1"/>
+<text x="28" y="78" font-size="15" fill="#57606A">Three layers in the middle, outside sources on the left, outside Agents on the right. Only two interfaces face outside: Connectors and MCP.</text>
+<rect x="286" y="112" width="688" height="720" rx="20" fill="#FAFBFC" stroke="#8C959F" stroke-width="1" stroke-dasharray="6 4"/>
+<text x="306" y="140" font-size="14" font-weight="700" fill="#57606A">Worldlet, on the person's own machine</text>
+<text x="306" y="818" font-size="12" fill="#57606A">Platform (platform/) runs it all: Desktop · Server · Web · Phone</text>
+<rect x="470" y="160" width="320" height="96" rx="12" fill="#EEF4FF" stroke="#B6CCFE" stroke-width="1"/>
 <text x="486" y="190" font-size="20" font-weight="800" fill="#1F4BB8">UI</text>
 <text x="522" y="190" font-size="12" fill="#57606A" font-family="ui-monospace, Menlo, monospace">ui/</text>
 <text x="486" y="214" font-size="13" fill="#1F2328">World · Applets (the Store's things) ·</text>
 <text x="486" y="232" font-size="13" fill="#1F2328">Companion · Attention · Settings</text>
-<text x="486" y="250" font-size="12" fill="#57606A">same UI in every window</text>
-<line x1="560" y1="328" x2="560" y2="262" stroke="#57606A" stroke-width="2" marker-end="url(#ar)"/>
-<text x="570" y="300" font-size="12.5" font-weight="700" fill="#57606A">reads</text>
-<rect x="840" y="300" width="170" height="300" rx="12" fill="#F1FAF3" stroke="#9FD8AE" stroke-width="1"/>
-<text x="854" y="330" font-size="20" font-weight="800" fill="#1A7F37">Agent</text>
-<text x="928" y="330" font-size="12" fill="#57606A" font-family="ui-monospace, Menlo, monospace">agent/</text>
-<text x="854" y="358" font-size="13" font-weight="700" fill="#1F2328">Chief of staff: Fox</text>
-<text x="854" y="377" font-size="13" fill="#1F2328">Workers: tasks,</text>
-<text x="854" y="396" font-size="13" fill="#1F2328">Applets, any Agent</text>
-<text x="854" y="423" font-size="12" fill="#57606A">They talk to each</text>
-<text x="854" y="442" font-size="12" fill="#57606A">other through the</text>
-<text x="854" y="461" font-size="12" fill="#57606A">Store, so it is kept</text>
-<rect x="850" y="532" width="150" height="56" rx="8" fill="#DCF2E2" stroke="#1A7F37" stroke-width="1"/>
-<text x="860" y="556" font-size="14" font-weight="800" fill="#1A7F37">Gate</text>
-<text x="860" y="576" font-size="11.5" fill="#1F2328">Grants · approval · audit</text>
-<line x1="792" y1="450" x2="838" y2="450" stroke="#57606A" stroke-width="2" marker-start="url(#ar)" marker-end="url(#ar)"/>
-<text x="815.0" y="438" font-size="11.5" font-weight="700" fill="#57606A" text-anchor="middle">read</text>
-<text x="815.0" y="470" font-size="11.5" font-weight="700" fill="#57606A" text-anchor="middle">write</text>
-<path d="M792 210 L925.0 210 L925.0 298" fill="none" stroke="#57606A" stroke-width="2" marker-end="url(#ar)"/>
-<text x="804" y="202" font-size="12" font-weight="700" fill="#57606A">changes go through Agent</text>
-<rect x="186" y="340" width="200" height="220" rx="14" fill="#FFF1E0" stroke="#D4760A" stroke-width="3"/>
-<text x="286.0" y="364" font-size="11" font-weight="800" fill="#9A4B00" text-anchor="middle">OUTSIDE INTERFACE 1</text>
-<text x="286.0" y="394" font-size="24" font-weight="800" fill="#9A4B00" text-anchor="middle">Connectors</text>
-<text x="286.0" y="422" font-size="12.5" fill="#1F2328" text-anchor="middle">one-click sign-in</text>
-<text x="286.0" y="441" font-size="12.5" fill="#1F2328" text-anchor="middle">periodic sync in</text>
-<text x="286.0" y="460" font-size="12.5" fill="#1F2328" text-anchor="middle">writes out only as drafts</text>
-<text x="286.0" y="479" font-size="12.5" fill="#1F2328" text-anchor="middle">you approve on a card</text>
-<line x1="388" y1="450" x2="468" y2="450" stroke="#57606A" stroke-width="2" marker-end="url(#ar)"/>
-<text x="428" y="438" font-size="11.5" font-weight="700" fill="#57606A" text-anchor="middle">sync</text>
-<rect x="1020" y="340" width="210" height="220" rx="14" fill="#FFF1E0" stroke="#D4760A" stroke-width="3"/>
-<text x="1125.0" y="364" font-size="11" font-weight="800" fill="#9A4B00" text-anchor="middle">OUTSIDE INTERFACE 2</text>
-<text x="1125.0" y="394" font-size="24" font-weight="800" fill="#9A4B00" text-anchor="middle">MCP</text>
-<text x="1125.0" y="422" font-size="11.5" fill="#1F2328" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">&lt;room&gt;.worldlet.ai/mcp</text>
-<text x="1125.0" y="441" font-size="12.5" fill="#1F2328" text-anchor="middle">or local worldlet server</text>
-<text x="1125.0" y="460" font-size="12.5" fill="#1F2328" text-anchor="middle">Allow card · own Grants</text>
-<text x="1125.0" y="479" font-size="12.5" fill="#1F2328" text-anchor="middle">revoke any time</text>
-<rect x="1032" y="522" width="186" height="26" rx="6" fill="#FFFFFF" stroke="#57606A" stroke-width="1" stroke-dasharray="6 4"/>
-<text x="1125.0" y="540" font-size="11" fill="#57606A" text-anchor="middle">planned: search, fetch, remember</text>
-<line x1="1018" y1="450" x2="1012" y2="450" stroke="#57606A" stroke-width="2" marker-end="url(#ar)"/>
-<rect x="20" y="340" width="150" height="220" rx="12" fill="#F6F8FA" stroke="#D0D7DE" stroke-width="1"/>
-<text x="34" y="368" font-size="15" font-weight="800" fill="#1F2328">Outside sources</text>
-<text x="34" y="396" font-size="12.5" fill="#1F2328">Gmail · Calendar</text>
-<text x="34" y="418" font-size="12.5" fill="#1F2328">GitHub · Notion</text>
-<text x="34" y="440" font-size="12.5" fill="#1F2328">Linear · Todoist</text>
-<text x="34" y="462" font-size="12.5" fill="#1F2328">PostHog · Supabase</text>
-<text x="34" y="484" font-size="12.5" fill="#1F2328">files · browsing</text>
-<line x1="172" y1="450" x2="184" y2="450" stroke="#57606A" stroke-width="2" marker-end="url(#ar)"/>
-<rect x="1246" y="340" width="96" height="220" rx="12" fill="#F6F8FA" stroke="#D0D7DE" stroke-width="1"/>
-<text x="1258" y="368" font-size="15" font-weight="800" fill="#1F2328">Outside</text>
-<text x="1258" y="386" font-size="15" font-weight="800" fill="#1F2328">Agents</text>
-<text x="1258" y="414" font-size="12.5" fill="#1F2328">ChatGPT</text>
-<text x="1258" y="435" font-size="12.5" fill="#1F2328">claude.ai</text>
-<text x="1258" y="456" font-size="12.5" fill="#1F2328">Claude Code</text>
-<text x="1258" y="477" font-size="12.5" fill="#1F2328">Codex</text>
-<text x="1258" y="498" font-size="12.5" fill="#1F2328">Hermes</text>
-<text x="1258" y="519" font-size="12.5" fill="#1F2328">scripts</text>
-<line x1="1244" y1="450" x2="1232" y2="450" stroke="#57606A" stroke-width="2" marker-end="url(#ar)"/>
-<text x="28" y="786" font-size="12.5" fill="#57606A">Rules: UI only reads the Store. Only Connectors write Synced. Every Agent, Fox included, passes the Gate and reaches the Store through one entry, context/store/context.ts.</text>
+<text x="486" y="248" font-size="12" fill="#57606A">same UI in every window</text>
+<line x1="630.0" y1="258" x2="630.0" y2="316" stroke="#57606A" stroke-width="2" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<text x="642.0" y="284" font-size="12" font-weight="700" fill="#57606A">read · write</text>
+<text x="642.0" y="300" font-size="11.5" fill="#57606A">the person's own edits, written as the person</text>
+<rect x="470" y="320" width="320" height="240" rx="16" fill="#FBF3FF" stroke="#8250DF" stroke-width="2.5"/>
+<text x="630.0" y="352" font-size="22" font-weight="800" fill="#8250DF" text-anchor="middle">Context Store</text>
+<text x="630.0" y="374" font-size="12" fill="#57606A" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">context/ · one world.sqlite</text>
+<rect x="482.0" y="390" width="143.0" height="70" rx="10" fill="#FFFFFF" stroke="#D2A8FF" stroke-width="1"/>
+<text x="494.0" y="418" font-size="15" font-weight="700" fill="#1F2328">Synced</text>
+<text x="494.0" y="440" font-size="12" fill="#1F2328">copies of every source</text>
+<rect x="635.0" y="390" width="143.0" height="70" rx="10" fill="#FFFFFF" stroke="#D2A8FF" stroke-width="1"/>
+<text x="647.0" y="418" font-size="15" font-weight="700" fill="#1F2328">Recorded</text>
+<text x="647.0" y="440" font-size="12" fill="#1F2328">conversations, asks</text>
+<rect x="482.0" y="470" width="143.0" height="70" rx="10" fill="#FFFFFF" stroke="#D2A8FF" stroke-width="1"/>
+<text x="494.0" y="498" font-size="15" font-weight="700" fill="#1F2328">Made</text>
+<text x="494.0" y="520" font-size="12" fill="#1F2328">artifacts, things, drafts</text>
+<rect x="635.0" y="470" width="143.0" height="70" rx="10" fill="#FFFFFF" stroke="#D2A8FF" stroke-width="1"/>
+<text x="647.0" y="498" font-size="15" font-weight="700" fill="#1F2328">Known</text>
+<text x="647.0" y="520" font-size="12" fill="#1F2328">memory, knowledge</text>
+<line x1="630.0" y1="562" x2="630.0" y2="618" stroke="#57606A" stroke-width="2" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<text x="642.0" y="590" font-size="12" font-weight="700" fill="#57606A">read · write, through the Gate</text>
+<rect x="470" y="620" width="320" height="180" rx="12" fill="#F1FAF3" stroke="#9FD8AE" stroke-width="1"/>
+<text x="486" y="650" font-size="20" font-weight="800" fill="#1A7F37">Agent</text>
+<text x="560" y="650" font-size="12" fill="#57606A" font-family="ui-monospace, Menlo, monospace">agent/</text>
+<text x="486" y="676" font-size="13" font-weight="700" fill="#1F2328">Chief of staff: Fox</text>
+<text x="486" y="696" font-size="13" fill="#1F2328">Workers: tasks, Applets, any Agent</text>
+<text x="486" y="716" font-size="12" fill="#57606A">They talk to each other through</text>
+<text x="486" y="736" font-size="12" fill="#57606A">the Store, so every word is kept</text>
+<rect x="480" y="754" width="300" height="36" rx="8" fill="#DCF2E2" stroke="#1A7F37" stroke-width="1"/>
+<text x="492" y="777" font-size="14" font-weight="800" fill="#1A7F37">Gate</text>
+<text x="536" y="777" font-size="12" fill="#1F2328">Grants · approval · audit · revoke</text>
+<rect x="186" y="330" width="200" height="220" rx="14" fill="#FFF1E0" stroke="#D4760A" stroke-width="3"/>
+<text x="286.0" y="354" font-size="11" font-weight="800" fill="#9A4B00" text-anchor="middle">OUTSIDE INTERFACE 1</text>
+<text x="286.0" y="384" font-size="24" font-weight="800" fill="#9A4B00" text-anchor="middle">Connectors</text>
+<text x="286.0" y="412" font-size="12.5" fill="#1F2328" text-anchor="middle">one-click sign-in</text>
+<text x="286.0" y="431" font-size="12.5" fill="#1F2328" text-anchor="middle">periodic sync in</text>
+<text x="286.0" y="450" font-size="12.5" fill="#1F2328" text-anchor="middle">writes out only as drafts</text>
+<text x="286.0" y="469" font-size="12.5" fill="#1F2328" text-anchor="middle">you approve on a card</text>
+<line x1="388" y1="440" x2="468" y2="440" stroke="#57606A" stroke-width="2" marker-end="url(#ar)"/>
+<text x="428" y="428" font-size="11.5" font-weight="700" fill="#57606A" text-anchor="middle">sync</text>
+<rect x="20" y="330" width="150" height="220" rx="12" fill="#F6F8FA" stroke="#D0D7DE" stroke-width="1"/>
+<text x="34" y="358" font-size="15" font-weight="800" fill="#1F2328">Outside sources</text>
+<text x="34" y="386" font-size="12.5" fill="#1F2328">Gmail · Calendar</text>
+<text x="34" y="408" font-size="12.5" fill="#1F2328">GitHub · Notion</text>
+<text x="34" y="430" font-size="12.5" fill="#1F2328">Linear · Todoist</text>
+<text x="34" y="452" font-size="12.5" fill="#1F2328">PostHog · Supabase</text>
+<text x="34" y="474" font-size="12.5" fill="#1F2328">files · browsing</text>
+<line x1="172" y1="440" x2="184" y2="440" stroke="#57606A" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="874" y="600" width="210" height="220" rx="14" fill="#FFF1E0" stroke="#D4760A" stroke-width="3"/>
+<text x="979.0" y="624" font-size="11" font-weight="800" fill="#9A4B00" text-anchor="middle">OUTSIDE INTERFACE 2</text>
+<text x="979.0" y="654" font-size="24" font-weight="800" fill="#9A4B00" text-anchor="middle">MCP</text>
+<text x="979.0" y="682" font-size="11.5" fill="#1F2328" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">&lt;room&gt;.worldlet.ai/mcp</text>
+<text x="979.0" y="701" font-size="12.5" fill="#1F2328" text-anchor="middle">or local worldlet server</text>
+<text x="979.0" y="720" font-size="12.5" fill="#1F2328" text-anchor="middle">Allow card · own Grants</text>
+<text x="979.0" y="739" font-size="12.5" fill="#1F2328" text-anchor="middle">revoke any time</text>
+<rect x="886" y="782" width="186" height="26" rx="6" fill="#FFFFFF" stroke="#57606A" stroke-width="1" stroke-dasharray="6 4"/>
+<text x="979.0" y="800" font-size="11" fill="#57606A" text-anchor="middle">planned: search, fetch, remember</text>
+<line x1="872" y1="710" x2="792" y2="710" stroke="#57606A" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="1100" y="600" width="100" height="220" rx="12" fill="#F6F8FA" stroke="#D0D7DE" stroke-width="1"/>
+<text x="1112" y="628" font-size="15" font-weight="800" fill="#1F2328">Outside</text>
+<text x="1112" y="646" font-size="15" font-weight="800" fill="#1F2328">Agents</text>
+<text x="1112" y="674" font-size="12.5" fill="#1F2328">ChatGPT</text>
+<text x="1112" y="695" font-size="12.5" fill="#1F2328">claude.ai</text>
+<text x="1112" y="716" font-size="12.5" fill="#1F2328">Claude Code</text>
+<text x="1112" y="737" font-size="12.5" fill="#1F2328">Codex</text>
+<text x="1112" y="758" font-size="12.5" fill="#1F2328">Hermes</text>
+<text x="1112" y="779" font-size="12.5" fill="#1F2328">scripts</text>
+<line x1="1098" y1="710" x2="1086" y2="710" stroke="#57606A" stroke-width="2" marker-end="url(#ar)"/>
+<text x="28" y="866" font-size="12.5" fill="#57606A">Rules: only Connectors write Synced. Every Agent, Fox included, passes the Gate. Everything reaches the Store through one entry, context/store/context.ts.</text>
 </svg>
