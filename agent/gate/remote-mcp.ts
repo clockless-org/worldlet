@@ -107,8 +107,15 @@ export function validRedirect(value:unknown):boolean {
  if(url.protocol==='http:')return ['localhost','127.0.0.1','[::1]'].includes(url.hostname);
  return /^[a-z][a-z0-9+.-]*:$/.test(url.protocol)&&!['javascript:','data:','file:','vbscript:','blob:','about:','ws:','wss:','ftp:','filesystem:'].includes(url.protocol);
 }
-/** Where a redirect returns, in a few words for the card: a host name, or the app's scheme. */
+/** Where a redirect returns, in a few words for the card: a host name, or the app's scheme. Worldlet's one address for
+ * every World (`<front>/mcp`, used by app directories such as ChatGPT's) returns through its callback, which names the
+ * client's own redirect: the card names that one. */
 export function redirectPlace(value:string):string {
+ const shared=MCP_FRONT_ORIGIN+'/mcp/callback/';
+ if(value.startsWith(shared)&&!value.slice(shared.length).includes('?'))try{
+  const inner=atob(value.slice(shared.length).replace(/-/g,'+').replace(/_/g,'/'));
+  if(validRedirect(inner)&&!inner.startsWith(shared))return redirectPlace(inner);
+ }catch{}
  try{const url=new URL(value);return url.protocol==='https:'||url.protocol==='http:'?url.hostname:url.protocol.slice(0,-1)+' app';}catch{return 'an unknown place';}
 }
 

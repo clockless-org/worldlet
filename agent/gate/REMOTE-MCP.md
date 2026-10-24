@@ -9,7 +9,7 @@ Remote access is on by default (owner decision 2026-10-17): the installed app's 
 1. In Worldlet, open Settings › Agents and choose **Copy for Claude or ChatGPT** on **Your World's address**, below the list of Agents (**Turn on** first if it was turned off). It is your World's own address with `/mcp`, `https://<room>.worldlet.ai/mcp`.
 2. Add the address as a remote MCP server in the client:
    - **Claude** (claude.ai, the desktop app, and cloud sessions that use the account's connectors): Settings › Connectors › Add custom connector. Paste the address and leave the OAuth fields empty.
-   - **ChatGPT**: Settings › Connectors (Apps) › Create, with developer mode on where the plan asks for it. Paste the address as the MCP server URL and choose OAuth.
+   - **ChatGPT**: add the Worldlet app from ChatGPT's apps once it is listed. Until then, Settings › Connectors (Apps) › Create, with developer mode on where the plan asks for it: paste the address as the MCP server URL and choose OAuth.
    - **Cursor**: add it to `~/.cursor/mcp.json` as `{"mcpServers":{"worldlet":{"url":"https://mcp.worldlet.ai/<room>"}}}`, then choose Connect in Cursor's MCP settings.
    - **Any other MCP client** that speaks Streamable HTTP and OAuth 2.1 with dynamic client registration works the same way.
 3. The client opens a page that waits. In Worldlet, a card in Attention names the client, where it returns and the browser and city it was started from ("Chrome on Mac · San Francisco, US", as the website's front words it; never the address or the whole user agent). Choose **Allow** only if that is you. With Services connected, the card says so in plain words: **Allow** also lets it read them ("Allow also lets it read your GitHub and PostHog"), and **Allow without them** keeps them private.
@@ -27,6 +27,12 @@ A chat model finds its way faster with plain tools than by discovering a hundred
 - **`remember`** (`title`, `text`, optional `key`) saves a note to the person's Journal ([Agent artifacts](GRANTS.md#agent-artifacts)), where the person and other Agents find it again, `search` included. It needs **Can save to your Journal** under the connector's name in Settings › Agents; the same `key` (letters, digits, `.`, `_`, `:` and `-`, no spaces) replaces that note.
 
 `node scripts/connector-tools-check.ts` checks the three through the standing server with fictional records, Grants and revoke.
+
+## One address for every World
+
+An app directory, such as ChatGPT's apps, lists one server address for everyone, so Worldlet also answers at `https://mcp.worldlet.ai/mcp` (the website Worker in the operations repository; owner request 2026-10-24). Signing in there, a page asks once for the World's address (the one under **Your World's address**), and then everything goes to that World's own address: it registers there as a connector that returns through the shared address's callback, and the person allows it on the same card in Attention. The card names where the client really returns (`redirectPlace` reads the callback), and the tools, Grants, audit and Revoke are the same as for a connector added with the World's own address. The shared address keeps nothing: its tokens are this World's own, with the room in front so each request finds its World.
+
+The tools carry MCP annotations, which app directories ask for: `search`, `fetch` and `describe_world_tools` are read-only, `remember` only saves a note, and `call_world_tool` is marked as one that may change things (its Grants and the person's approvals still decide each call).
 
 ## A token for a script or another computer
 

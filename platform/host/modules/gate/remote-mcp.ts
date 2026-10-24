@@ -1,5 +1,5 @@
 import {DEFAULT_PAIR_RELAY} from '../../../web/index.ts';
-import {CONNECTOR_TOOLS,CONNECTOR_TOOL_NAMES,connectorCall,isWorldAddressRequest,MCP_FRONT_ORIGIN,REMOTE_MCP_LIMITS,agentRevoked,createRemoteMcpServer,emptyRemoteMcpState,newRemoteMcpToken,readRemoteMcpRequest,readRemoteMcpState,remoteConsentItem,
+import {CONNECTOR_TOOLS,CONNECTOR_TOOL_NAMES,GATEWAY_TOOL_ANNOTATIONS,connectorCall,isWorldAddressRequest,MCP_FRONT_ORIGIN,REMOTE_MCP_LIMITS,agentRevoked,createRemoteMcpServer,emptyRemoteMcpState,newRemoteMcpToken,readRemoteMcpRequest,readRemoteMcpState,remoteConsentItem,
  remoteMcpAddress,remoteMcpAgent,remoteMcpHostEntry,remoteMcpResponseFrame,remoteMcpRoom,type RemoteMcpConsent,type RemoteMcpRequest,type RemoteMcpResponse,type RemoteMcpServer,type RemoteMcpState} from '../../../../agent/gate/index.ts';
 import type {AgentAccess,VaultService} from '../../services.ts';
 import {toolText,worldToolList,type StandingWorldTools} from './world-tool-bridge.ts';
@@ -78,7 +78,7 @@ export function createRemoteMcpHost({vault,access,tools,ledger,changed,services=
    }catch{return null;}
   },
   active,
-  tools:()=>[...worldToolList(),...CONNECTOR_TOOLS],
+  tools:()=>[...worldToolList().map(tool=>GATEWAY_TOOL_ANNOTATIONS[tool.name]?{...tool,annotations:GATEWAY_TOOL_ANNOTATIONS[tool.name]}:tool),...CONNECTOR_TOOLS],
   call:async(agentId,name,args)=>{
    const identity=access.identity(agentId),standing=tools();
    if(!identity||!standing)return {text:JSON.stringify({error:'Worldlet is still starting. Try again in a moment.'}),isError:true};

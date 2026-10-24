@@ -7,7 +7,7 @@ import {createAgentAccess} from '../platform/host/modules/gate/agent-access.ts';
 import {openStandingWorldTools} from '../platform/host/modules/gate/world-tool-bridge.ts';
 import {REMOTE_MCP_VAULT,createRemoteMcpHost} from '../platform/host/modules/gate/remote-mcp.ts';
 import {serviceGranted} from '../agent/gate/grants.ts';
-import {MCP_HOST_PROTOCOL,REMOTE_MCP_LIMITS,readRemoteMcpRequest,remoteConsentItemId,remoteMcpRoom,validRedirect,wellKnownAddress} from '../agent/gate/remote-mcp.ts';
+import {MCP_HOST_PROTOCOL,REMOTE_MCP_LIMITS,readRemoteMcpRequest,redirectPlace,remoteConsentItemId,remoteMcpRoom,validRedirect,wellKnownAddress} from '../agent/gate/remote-mcp.ts';
 import {roomDenied} from '../contracts/web-world.ts';
 import {projectWorldItems} from '../context/store/world-items.ts';
 
@@ -107,6 +107,12 @@ await withTempDir('worldlet-remote-mcp-',async dir=>{
   // Registration (RFC 7591): https, loopback and an app's own scheme; never javascript:, data: or plain http elsewhere.
   for(const uri of ['https://claude.ai/api/mcp/auth_callback','http://127.0.0.1:33418/callback','cursor://anysphere.cursor-mcp/oauth/callback'])assert.ok(validRedirect(uri),uri);
   for(const uri of ['javascript:alert(1)','data:text/html,x','http://example.com/cb','https://example.com/cb#x','file:///etc/passwd'])assert.ok(!validRedirect(uri),uri);
+  // The card names where a client really returns, also through Worldlet's one address for every World.
+  const through=(uri:string)=>'https://mcp.worldlet.ai/mcp/callback/'+Buffer.from(uri).toString('base64url');
+  assert.equal(redirectPlace('https://claude.ai/api/mcp/auth_callback'),'claude.ai');
+  assert.equal(redirectPlace(through('https://chatgpt.com/connector_platform_oauth_redirect')),'chatgpt.com');
+  assert.equal(redirectPlace(through('cursor://anysphere.cursor-mcp/oauth/callback')),'cursor app');
+  for(const odd of [through('javascript:alert(1)'),through(through('https://evil.example/cb')),'https://mcp.worldlet.ai/mcp/callback/%%%'])assert.equal(redirectPlace(odd),'mcp.worldlet.ai',odd);
   assert.equal((await front('POST','/register',{body:JSON.stringify({redirect_uris:['http://example.com/cb']})})).status,400);
   assert.equal((await front('POST','/register',{body:'not json'})).status,400);
   const redirect='https://claude.ai/api/mcp/auth_callback';
@@ -180,6 +186,9 @@ await withTempDir('worldlet-remote-mcp-',async dir=>{
   assert.deepEqual([note.status,note.body],[202,'']);
   const listed=(await rpc(tokens.access_token,{jsonrpc:'2.0',id:2,method:'tools/list'})).json();
   assert.deepEqual(listed.result.tools.map((t:any)=>t.name),['describe_world_tools','call_world_tool','search','fetch','remember']);
+  // App directories (ChatGPT's) ask for annotations: reads say so, and call_world_tool is marked as one that may change things.
+  assert.deepEqual(listed.result.tools.map((t:any)=>[t.name,t.annotations?.readOnlyHint]),[['describe_world_tools',true],['call_world_tool',false],['search',true],['fetch',true],['remember',false]]);
+  assert.equal(listed.result.tools[1].annotations.destructiveHint,true);
   const described=(await rpc(tokens.access_token,{jsonrpc:'2.0',id:3,method:'tools/call',params:{name:'describe_world_tools',arguments:{}}})).json();
   assert.equal(described.result.isError,false);
   assert.ok(JSON.parse(described.result.content[0].text),'describe answers JSON');
