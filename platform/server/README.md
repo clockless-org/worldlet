@@ -141,22 +141,24 @@ The skill is [harness/skills/worldlet/SKILL.md](../../harness/skills/worldlet/SK
 | `node dist/node/worldlet.cjs` | Run it; SIGTERM or Ctrl-C stops it. On Windows, where SIGTERM ends a process at once, a parent that started it with an IPC channel sends `{type:'worldlet:stop'}` for a clean stop |
 | `node dist/node/worldlet.cjs --host-contract-check` | Print the actions, services and capabilities it implements, on a temporary library |
 | `node dist/node/worldlet.cjs status` | The [command line](#the-worldlet-command): `status`, `link [--qr]`, `setup --agent <id>`, `register --agent <id>`, `register --script <name>` |
-| `npm run package:linux` | The [Linux package](#package) in `dist/ci/linux` (`-- --arch x64` for one architecture, `-- --reuse-web` to keep the interface build already there) |
+| `npm run package:server` | The [packages](#package) for Linux, Mac and Windows in `dist/ci/server` (`-- --target linux-x64` for one, `-- --reuse-web` to keep the interface build already there) |
 | `npm run test:node-host` | Shim and vault storage checks, then build, contract check, boot, restart and stop; the command line against fake `claude` and `codex` commands (socket and endpoint files owner-only, the link never in the log); `link --qr` read back as the link's QR code; then the World in headless Chromium (SwiftShader WebGL) on a library with one item, and the server's refusals (`-- --screenshot <file>` keeps a picture) |
 
 Node 22.19 or later.
 
 ## Package
 
-`scripts/package-node-host.ts` (`npm run package:linux`) builds `worldlet-server-<label>-linux-x64.tar.gz` and
-`-linux-arm64.tar.gz`. Each holds `worldlet.cjs`, the interface build it serves (`WorldletWeb`, with
-`applet-runtime.json`, `attention-applets.json` and `applets/`), Node 22.22.1 for that architecture in `node/` (from
-nodejs.org, checked against the hashes pinned in the script), the `bin/worldlet` command (that Node running
-`worldlet.cjs`) and `SHA256SUMS` of every file. Beside them it writes each tarball's `.sha256`, the record
-`worldlet-server-<label>-linux.json` (Build, version and each tarball's size and SHA-256) and `release.json`. Release
-machine 02 builds them with the Mac package of the same commit, and `node scripts/ci-release.mjs publish --platform
-linux` puts them on the Build's release and writes the channel's Linux feed (`linux-dev.json`, `linux-alpha.json`,
-`linux.json` on Beta); a promotion moves them with Mac ([releasing](../../docs/RELEASING.md)).
+`scripts/package-node-host.ts` (`npm run package:server`) builds `worldlet-server-<label>-<target>.tar.gz` for
+`linux-x64`, `linux-arm64`, `macos-x64`, `macos-arm64` and `windows-x64`. Each holds `worldlet.cjs`, the interface build
+it serves (`WorldletWeb`, with `applet-runtime.json`, `attention-applets.json` and `applets/`), Node 22.22.1 for that
+system in `node/` (from nodejs.org, checked against the hashes pinned in the script), the `worldlet` command (`bin/worldlet`,
+that Node running `worldlet.cjs`; `bin\worldlet.cmd` and `node\node.exe` on Windows) and `SHA256SUMS` of every file.
+Nothing in them is built for the system that packs them, so one machine packs all five. Beside them it writes each
+tarball's `.sha256`, the record `worldlet-server-<label>.json` (Build, version and each tarball's size and SHA-256) and
+`release.json`. Release machine 02 builds them with the Mac package of the same commit, and `node scripts/ci-release.mjs
+publish --platform server` puts them on the Build's release and writes the channel's service feed (`server-dev.json`,
+`server-alpha.json`, `server.json` on Beta) and the older Linux-only feed (`linux-dev.json`, `linux-alpha.json`,
+`linux.json`) that install.sh reads today; a promotion moves them with Mac ([releasing](../../docs/RELEASING.md)).
 
 ### Periodic Service collection
 
