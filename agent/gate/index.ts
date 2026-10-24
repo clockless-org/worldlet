@@ -40,6 +40,7 @@ export * from './harness-controls.ts';
 export * from './harness-memory.ts';
 export * from './agent-profile.ts';
 export * from './remote-mcp.ts';
+export * from './connector-tools.ts';
 export * from './world-address.ts';
 export * from './service-requests.ts';
 // What was the tools folder (#714).

@@ -32,7 +32,7 @@ export const REMOTE_MCP_LIMITS=Object.freeze({
 });
 /** MCP protocol versions this server speaks, newest first. */
 export const REMOTE_MCP_PROTOCOLS=['2025-06-18','2025-03-26','2024-11-05'] as const;
-export const REMOTE_MCP_INSTRUCTIONS='Worldlet is the person\'s World, running on their own computer. Call describe_world_tools to see what you may do here, then call_world_tool. Some calls wait for the person\'s approval in Worldlet; a refused call says why.';
+export const REMOTE_MCP_INSTRUCTIONS='Worldlet is the person\'s World, running on their own computer. To find what they know, use search, then fetch a result; to keep a note for them and their other Agents, use remember. For anything else, call describe_world_tools to see what you may do here, then call_world_tool. Some calls wait for the person\'s approval in Worldlet; a refused call says why.';
 const FORWARDED_HEADERS=['authorization','content-type','accept','mcp-protocol-version','mcp-session-id','x-mcp-from'];
 
 const enc=new TextEncoder();

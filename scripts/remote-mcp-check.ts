@@ -179,7 +179,7 @@ await withTempDir('worldlet-remote-mcp-',async dir=>{
   const note=await rpc(tokens.access_token,{jsonrpc:'2.0',method:'notifications/initialized'});
   assert.deepEqual([note.status,note.body],[202,'']);
   const listed=(await rpc(tokens.access_token,{jsonrpc:'2.0',id:2,method:'tools/list'})).json();
-  assert.deepEqual(listed.result.tools.map((t:any)=>t.name),['describe_world_tools','call_world_tool']);
+  assert.deepEqual(listed.result.tools.map((t:any)=>t.name),['describe_world_tools','call_world_tool','search','fetch','remember']);
   const described=(await rpc(tokens.access_token,{jsonrpc:'2.0',id:3,method:'tools/call',params:{name:'describe_world_tools',arguments:{}}})).json();
   assert.equal(described.result.isError,false);
   assert.ok(JSON.parse(described.result.content[0].text),'describe answers JSON');
