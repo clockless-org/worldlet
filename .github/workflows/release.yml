@@ -165,16 +165,17 @@ jobs:
           for platform in $PLATFORMS; do
             node scripts/ci-release.mjs publish --channel "$CHANNEL" --platform "$platform" --dir "dist/ci/$platform"
           done
-      # The Linux headless service follows Mac: release machine 02 builds its tarballs beside the Mac DMG of the same commit
-      # (scripts/package-node-host.ts), so they move to a channel when Mac does. A Build made before them has none.
-      - name: Publish the Linux service
+      # The headless service (Linux, Mac and Windows) follows Mac: release machine 02 builds its tarballs beside the Mac DMG
+      # of the same commit (scripts/package-node-host.ts), so they move to a channel when Mac does. A Build made before
+      # them has none.
+      - name: Publish the headless service
         if: inputs.platform != 'windows'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          if ! node scripts/ci-release.mjs fetch --build "$BUILD" --dir dist/ci --platform linux; then
-            echo "Build $BUILD has no Linux service on its release; Linux stays where it is." | tee -a "$GITHUB_STEP_SUMMARY"
+          if ! node scripts/ci-release.mjs fetch --build "$BUILD" --dir dist/ci --platform server; then
+            echo "Build $BUILD has no headless service on its release; the service stays where it is." | tee -a "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
-          node scripts/ci-release.mjs publish --channel "$CHANNEL" --platform linux --dir dist/ci/linux
+          node scripts/ci-release.mjs publish --channel "$CHANNEL" --platform server --dir dist/ci/server

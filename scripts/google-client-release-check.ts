@@ -16,9 +16,9 @@ assert.match(read('scripts/package-electron.ts'),/copyFileSync\(path\.join\(goog
 // Windows: the installer, MSIX and Steam packages each refuse a payload without it.
 assert.match(read('scripts/windows-installer.ts'),/if\(!existsSync\(path\.join\(payload,'resources\/GoogleOAuthClient\.json'\)\)\)throw Error\('Incomplete Windows package: resources\/GoogleOAuthClient\.json/);
 for(const file of ['scripts/windows-msix.ts','scripts/windows-steam.ts'])assert.match(read(file),/'resources\/GoogleOAuthClient\.json'/,file);
-// Linux: staged beside worldlet.cjs in each architecture's folder, and a release refuses to package without it.
+// The headless service: staged beside worldlet.cjs in each system's folder, and a release refuses to package without it.
 const linux=read('scripts/package-node-host.ts');
 assert.match(linux,/import \{stageGoogleRegistration\} from '\.\/google-oauth-windows\.ts';/);
 assert.match(linux,/if\(!stageGoogleRegistration\(root,stage\)\)\{\s*\n\s*if\(process\.env\.WORLDLET_RELEASE_MANIFEST\)throw Error\(/);
 assert.ok(linux.indexOf('stageGoogleRegistration(root,stage)')<linux.indexOf("listed=walk(stage)"),'staged before SHA256SUMS lists every file');
-console.log('PASS Google registration in every release: required when signing (Mac), by the Windows installer, MSIX and Steam packages, and staged beside worldlet.cjs for the Linux service, which refuses a release without it');
+console.log('PASS Google registration in every release: required when signing (Mac), by the Windows installer, MSIX and Steam packages, and staged beside worldlet.cjs for the headless service, which refuses a release without it');

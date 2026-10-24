@@ -3,8 +3,8 @@
 // 2026-10-08): no release machine and no separate storage.
 //
 // Where things live:
-//  v<label>          one release per Build, holding the Mac DMG, the Windows installer, the Linux service tarballs and their
-//                    checksums. A prerelease until the Build is promoted to Beta, which makes it the repository's latest release.
+//  v<label>          one release per Build, holding the Mac DMG, the Windows installer, the headless service's tarballs
+//                    (Linux, Mac and Windows) and their checksums. A prerelease until the Build is promoted to Beta, which makes it the repository's latest release.
 //  channel-<name>    one release per channel (dev, alpha, beta) holding that channel's update feeds, replaced in place,
 //                    so a feed's address never changes: releases/download/channel-<name>/<feed>.
 //  staging-<name>    the same for a channel that is not live yet (platform/desktop/distribution/Channels.json): CI
@@ -27,17 +27,19 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url));
 export const BUILD_OFFSET=4000;
 export const CHANNELS={
- dev:{prefix:'dev/',mac:['appcast-dev.xml'],windows:'windows-dev.json',linux:'linux-dev.json',history:false},
- alpha:{prefix:'alpha/',mac:['appcast-alpha.xml'],windows:'windows-alpha.json',linux:'linux-alpha.json',history:false},
- beta:{prefix:'',mac:['appcast.xml','appcast-intel.xml'],windows:'windows-preview.json',linux:'linux.json',history:true},
+ dev:{prefix:'dev/',mac:['appcast-dev.xml'],windows:'windows-dev.json',server:'server-dev.json',linux:'linux-dev.json',history:false},
+ alpha:{prefix:'alpha/',mac:['appcast-alpha.xml'],windows:'windows-alpha.json',server:'server-alpha.json',linux:'linux-alpha.json',history:false},
+ beta:{prefix:'',mac:['appcast.xml','appcast-intel.xml'],windows:'windows-preview.json',server:'server.json',linux:'linux.json',history:true},
 };
-export const PLATFORMS=['mac','windows','linux'];
+/** `server` is the headless service for every system; `linux` is its old name, still taken from the release machines. */
+export const PLATFORMS=['mac','windows','server'];
+const platformOf=name=>name==='linux'?'server':name;
 export const macName=(version,build)=>`Worldlet-${version}-${build}-macos-universal.dmg`;
 export const windowsName=(version,build)=>`Worldlet-${version}-${build}-windows-x64-unsigned.exe`;
-/** The headless service for Linux (scripts/package-node-host.ts), one tarball per architecture, and its record. */
-export const LINUX_ARCHES=['x64','arm64'];
-export const linuxName=(label,arch)=>`worldlet-server-${label}-linux-${arch}.tar.gz`;
-export const linuxRecordName=label=>`worldlet-server-${label}-linux.json`;
+/** The headless service (scripts/package-node-host.ts), one tarball per system and architecture, and its record. */
+export const SERVER_TARGETS=['linux-x64','linux-arm64','macos-x64','macos-arm64','windows-x64'];
+export const serverName=(label,target)=>`worldlet-server-${label}-${target}.tar.gz`;
+export const serverRecordName=label=>`worldlet-server-${label}.json`;
 
 /** The release identity of a commit: its Build, native version and label. `committedAt` is the commit time. */
 export function releaseIdentity(count,committedAt,offset=BUILD_OFFSET){
@@ -64,7 +66,7 @@ export function liveChannel(channel,config=JSON.parse(readFileSync(path.join(roo
 /** Where a channel's feeds go: the release `channel-<name>`, or `staging-<name>` while it is not live. */
 export function channelKeys(channel,live){
  const c=CHANNELS[channel];
- return {feedTag:(live?'channel-':'staging-')+channel,prefix:c.prefix,mac:c.mac,windows:c.windows,linux:c.linux,history:c.history};
+ return {feedTag:(live?'channel-':'staging-')+channel,prefix:c.prefix,mac:c.mac,windows:c.windows,server:c.server,linux:c.linux,history:c.history};
 }
 export const assetURL=(repo,tag,name)=>`https://github.com/${repo}/releases/download/${tag}/${name}`;
 
@@ -101,9 +103,11 @@ export async function verifyMacItem(item,file,publicKey){
  * /downloads/alpha/ on the website, which forwards to the release); `download` is the release asset itself. */
 export const windowsManifest=({version,build,sha256},size,prefix,download)=>({formatVersion:1,version,build,architecture:'x64',signed:false,url:'/downloads/'+prefix+windowsName(version,build),size,sha256,googleSignIn:true,download});
 
-/** The Linux feed install.sh reads (`/downloads/linux.json` on Beta): the Build and each architecture's tarball, at its
- * website path (`url`, which forwards to the release) and its release asset (`download`). */
-export const linuxManifest=({version,build,files},prefix,download)=>({formatVersion:1,version,build,files:Object.fromEntries(Object.entries(files).map(([arch,file])=>[arch,{...file,url:'/downloads/'+prefix+file.name,download:download(file.name)}]))});
+/** The service feed the one-line installers read (`/downloads/server.json` on Beta): the Build and each target's tarball,
+ * at its website path (`url`, which forwards to the release) and its release asset (`download`). */
+export const serverManifest=({version,build,files},prefix,download)=>({formatVersion:1,version,build,files:Object.fromEntries(Object.entries(files).map(([target,file])=>[target,{...file,url:'/downloads/'+prefix+file.name,download:download(file.name)}]))});
+/** The older Linux feed (`/downloads/linux.json`), the Linux targets by architecture, for install.sh before server.json. */
+export const linuxManifest=(built,prefix,download)=>serverManifest({...built,files:Object.fromEntries(Object.entries(built.files).filter(([target])=>target.startsWith('linux-')).map(([target,file])=>[target.slice(6),file]))},prefix,download);
 
 async function sha256(file){const h=createHash('sha256');for await(const b of createReadStream(file))h.update(b);return h.digest('hex');}
 /** GitHub Releases of this repository through the gh CLI (GH_TOKEN with contents: write). */
@@ -185,25 +189,26 @@ export async function publish({channel,platform,dir,live=liveChannel(channel),st
   await own.ensure(tag,{title:`Worldlet v${label}`,target:identity.sourceCommit,notes:`Build ${identity.build} of ${identity.sourceCommit}.`});
   await own.ensure(keys.feedTag,{title:`Worldlet ${channel} channel${live?'':' (staging)'}`,notes:`The ${channel} channel's update feeds. Installed apps read them here; the installers are in each build's release.`});
   let result;
-  if(platform==='linux'){
-   // Linux follows the same rules with its own feed: every tarball checked against its record, then uploaded with its
-   // checksum and the records, and the feed last.
-   const record=readdirOne(dir,/^worldlet-server-.*-linux\.json$/),built=JSON.parse(readFileSync(record,'utf8'));
-   if(built.build!==identity.build||built.version!==identity.version||path.basename(record)!==linuxRecordName(label))throw Error('The Linux record is not this Build.');
-   const arches=Object.keys(built.files||{});
-   if(!arches.length||!arches.every(arch=>LINUX_ARCHES.includes(arch)))throw Error('The Linux record names no known architecture.');
-   for(const arch of arches){
-    const file=built.files[arch],tarball=path.join(dir,file.name);
-    if(file.name!==linuxName(label,arch)||!existsSync(tarball)||statSync(tarball).size!==file.size||await sha256(tarball)!==file.sha256)throw Error(`${file.name} differs from its record.`);
+  if(platform==='server'){
+   // The service follows the same rules with its own feed: every tarball checked against its record, then uploaded with
+   // its checksum and the records, and the feeds last.
+   const record=readdirOne(dir,/^worldlet-server-[\d.]+\.json$/),built=JSON.parse(readFileSync(record,'utf8'));
+   if(built.build!==identity.build||built.version!==identity.version||path.basename(record)!==serverRecordName(label))throw Error('The service record is not this Build.');
+   const targets=Object.keys(built.files||{});
+   if(!targets.length||!targets.every(target=>SERVER_TARGETS.includes(target)))throw Error('The service record names no known target.');
+   for(const target of targets){
+    const file=built.files[target],tarball=path.join(dir,file.name);
+    if(file.name!==serverName(label,target)||!existsSync(tarball)||statSync(tarball).size!==file.size||await sha256(tarball)!==file.sha256)throw Error(`${file.name} differs from its record.`);
    }
-   const current=feedBuild('windows',await own.read(keys.feedTag,keys.linux));
-   if(current>identity.build||current===identity.build&&!keys.history)return {skipped:`${keys.feedTag}/${keys.linux} already has Build ${current}`};
-   for(const arch of arches){const tarball=path.join(dir,built.files[arch].name);await own.upload(tag,tarball);await own.upload(tag,tarball+'.sha256');}
+   const current=feedBuild('windows',await own.read(keys.feedTag,keys.server));
+   if(current>identity.build||current===identity.build&&!keys.history)return {skipped:`${keys.feedTag}/${keys.server} already has Build ${current}`};
+   for(const target of targets){const tarball=path.join(dir,built.files[target].name);await own.upload(tag,tarball);await own.upload(tag,tarball+'.sha256');}
    await own.upload(tag,record);
    writeFileSync(record+'.release.json',readFileSync(path.join(dir,'release.json')));await own.upload(tag,record+'.release.json');
-   const manifest=linuxManifest(built,keys.prefix,name=>assetURL(own.repo,tag,name));
-   await own.put(keys.feedTag,keys.linux,JSON.stringify(manifest,null,2)+'\n');
-   result={published:true,build:identity.build,keys:[...arches.map(arch=>`${tag}/${built.files[arch].name}`),`${keys.feedTag}/${keys.linux}`]};
+   const download=name=>assetURL(own.repo,tag,name),feeds=[keys.server];
+   await own.put(keys.feedTag,keys.server,JSON.stringify(serverManifest(built,keys.prefix,download),null,2)+'\n');
+   if(targets.some(target=>target.startsWith('linux-'))){await own.put(keys.feedTag,keys.linux,JSON.stringify(linuxManifest(built,keys.prefix,download),null,2)+'\n');feeds.push(keys.linux);}
+   result={published:true,build:identity.build,keys:[...targets.map(target=>`${tag}/${built.files[target].name}`),...feeds.map(feed=>`${keys.feedTag}/${feed}`)]};
   }else if(platform==='mac'){
    const dmg=readdirOne(dir,/-macos-universal\.dmg$/),name=path.basename(dmg),appcast=readFileSync(path.join(dir,'appcast.xml'),'utf8');
    const item=macItem(appcast,name,assetURL(own.repo,tag,name),now);
@@ -252,7 +257,7 @@ export async function publish({channel,platform,dir,live=liveChannel(channel),st
  }finally{if(!store)own.close();}
 }
 /** A published Build's files from its release, laid out as `publish` reads them (`<dir>/mac`, `<dir>/windows`,
- * `<dir>/linux`): the installer, its checksum, its build records (the Sparkle item, the Windows record, the Linux record,
+ * `<dir>/server`): the installer, its checksum, its build records (the Sparkle item, the Windows record, the service record,
  * release.json) and the Store MSIX when there is one. Promotion uses it: the release machines build the Dev packages (owner decision 2026-10-10), so there is no
  * workflow artifact. Throws when the release lacks a record (a Build published before the records were kept). */
 export async function fetchBuild({build,dir,store,platforms=['mac','windows']}){
@@ -263,7 +268,7 @@ export async function fetchBuild({build,dir,store,platforms=['mac','windows']}){
   const has=new Set(found.assets);
   const files={
    mac:[[/-macos-universal\.dmg$/,''],[/-macos-universal\.dmg$/,'.sha256'],[/-macos-universal\.dmg$/,'.appcast.xml','appcast.xml'],[/-macos-universal\.dmg$/,'.release.json','release.json']],
-   linux:[[/-linux\.json$/,''],[/-linux\.json$/,'.release.json','release.json'],...LINUX_ARCHES.flatMap(arch=>[[new RegExp(`-linux-${arch}\\.tar\\.gz$`),''],[new RegExp(`-linux-${arch}\\.tar\\.gz$`),'.sha256']])],
+   server:[[/^worldlet-server-[\d.]+\.json$/,''],[/^worldlet-server-[\d.]+\.json$/,'.release.json','release.json'],...SERVER_TARGETS.flatMap(target=>[[new RegExp(`-${target}\\.tar\\.gz$`),''],[new RegExp(`-${target}\\.tar\\.gz$`),'.sha256']])],
    windows:[[/-windows-x64-unsigned\.exe$/,''],[/-windows-x64-unsigned\.exe$/,'.sha256'],[/-windows-x64-unsigned\.exe$/,'.json'],[/-windows-x64-unsigned\.exe$/,'.release.json','release.json'],[/-windows-x64-store\.msix$/,'',null,true],[/-windows-x64-store\.msix$/,'.json',null,true]],
   };
   const out={};
@@ -313,18 +318,18 @@ async function main(){
   writeFileSync(arg('out'),JSON.stringify(releaseManifest(identity,arg('sha')),null,2)+'\n');return;
  }
  if(command==='publish'){
-  // --channel dev|alpha|beta --platform mac|windows|linux --dir <build output>
-  const channel=arg('channel'),platform=arg('platform'),dir=path.resolve(arg('dir')||'');
-  if(!CHANNELS[channel]||!PLATFORMS.includes(platform)||!existsSync(dir))throw Error('Usage: ci-release.mjs publish --channel dev|alpha|beta --platform mac|windows|linux --dir <dir>');
+  // --channel dev|alpha|beta --platform mac|windows|server --dir <build output>
+  const channel=arg('channel'),platform=platformOf(arg('platform')),dir=path.resolve(arg('dir')||'');
+  if(!CHANNELS[channel]||!PLATFORMS.includes(platform)||!existsSync(dir))throw Error('Usage: ci-release.mjs publish --channel dev|alpha|beta --platform mac|windows|server --dir <dir>');
   const live=liveChannel(channel),result=await publish({channel,platform,dir,live});
   const line=result.published?`Published ${platform} Build ${result.build} to ${channel}${live?'':' (staging)'}: ${result.keys.join(', ')}`:`Skipped ${platform} ${channel}: ${result.skipped}`;
   if(process.env.GITHUB_STEP_SUMMARY)writeFileSync(process.env.GITHUB_STEP_SUMMARY,`- ${line}\n`,{flag:'a'});
   console.log(line);return;
  }
  if(command==='fetch'){
-  // --build <n> --dir <dir> [--platform mac,windows,linux]: the Build's files from its release, for a promotion.
-  const build=Number(arg('build')),dir=path.resolve(arg('dir')||''),platforms=(arg('platform')||'mac,windows').split(',');
-  if(!Number.isSafeInteger(build)||!arg('dir')||!platforms.every(p=>PLATFORMS.includes(p)))throw Error('Usage: ci-release.mjs fetch --build <n> --dir <dir> [--platform mac,windows,linux]');
+  // --build <n> --dir <dir> [--platform mac,windows,server]: the Build's files from its release, for a promotion.
+  const build=Number(arg('build')),dir=path.resolve(arg('dir')||''),platforms=(arg('platform')||'mac,windows').split(',').map(platformOf);
+  if(!Number.isSafeInteger(build)||!arg('dir')||!platforms.every(p=>PLATFORMS.includes(p)))throw Error('Usage: ci-release.mjs fetch --build <n> --dir <dir> [--platform mac,windows,server]');
   const r=await fetchBuild({build,dir,platforms});console.log(`Fetched Build ${build} from ${r.tag} into ${dir}`);return;
  }
  if(command==='analytics'){
