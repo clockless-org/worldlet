@@ -39,7 +39,8 @@ Differences from the desktop app:
   cannot do is not offered there: websites and the Browser open in a new tab, and YouTube, the World's sound, voice and
   the desktop Companion are hidden ([what a browser window cannot do](../../docs/UI-CORE-PLATFORM.md#the-world-in-a-web-browser)).
 - **Its own vault.** The secrets are as safe as `vault.key` (the computer account and disk encryption), not tied to a
-  keychain. A vault the Electron host wrote with `safeStorage` is not readable here, nor this one there.
+  keychain. A vault the Electron host wrote with `safeStorage` is not readable here; this one opens in the desktop app
+  when it [takes the library over](#the-desktop-app-takes-over), which seals it again with its keychain.
 
 ## Read-only board access
 
@@ -97,10 +98,20 @@ answers on its control socket says so and exits with code 1.
 | `register --agent <id>` | Registers the `worldlet` MCP server and skill in `claude-code` or `codex`. Hermes Agent gets its entry in its own profile once it is Fox's Agent ([World tools on Hermes](../../agent/gate/PORTABILITY.md#world-tools-on-hermes)) |
 | `remote [on\|off]` | Turns [remote access](../../agent/gate/REMOTE-MCP.md) for cloud connectors (on by default) on or off (Settings › Agents only turns it on), and prints this World's address and what is connected. Each connector still waits for Allow on its card in Attention |
 | `remote token <name>` | Makes a [token](../../agent/gate/REMOTE-MCP.md#a-token-for-a-script-or-another-computer) for an Agent that cannot open a browser, such as a script or a daemon on another computer, and prints it once with the address. Remote access must be on |
+| `stop` | Stops the host cleanly on every system (a SIGTERM ends it at once on Windows). A service started at login starts again at the next login; the desktop app sends it when it [takes the library over](#the-desktop-app-takes-over) |
 | `register --script <name>` | Adds an [Agent for a script](../../agent/gate/GRANTS.md#agents-for-scripts) (a daemon or scheduled job on this computer) and prints its endpoint file in the MCP home |
 
 Neither command gives consent or finishes onboarding: World tools on the standing server keep answering that the person
 has not finished setting up until they do so in the World, as in the desktop app.
+
+## The desktop app takes over
+
+On a Mac or Windows computer the service uses the same library as the desktop app, so the World is the same one when
+the person installs the app later. Two hosts never run on one library: a release app, as it starts, removes the
+service's start at login (the launch agent `ai.worldlet.service` on a Mac, the `WorldletService` value of the
+current user's Run key on Windows), asks a running service to `stop` over the control socket and waits for it
+([platform/host/service.ts](../host/service.ts)). The vault entries the service sealed with `vault.key` open in the app
+and are sealed again with the app's keychain storage the first time they are read (`createVault`'s `earlier`).
 
 ## First setup on your own server
 

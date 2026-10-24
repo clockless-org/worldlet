@@ -8,8 +8,10 @@ type Storage=Pick<typeof safeStorage,'isEncryptionAvailable'|'encryptString'|'de
 /** Small credentials (CLI grants, client secrets) encrypted with the OS keychain-backed
  * key (`safeStorage`: Keychain on Mac, DPAPI on Windows, libsecret on Linux). The file is
  * owner-only and excluded from World backups; reset deletes it. A file that no longer parses is
- * never overwritten in place: the next write first moves it aside as `vault.json.corrupt-<time>`. */
-export function createVault(root:string,service:string,storage:Storage=safeStorage,platform:string=process.platform):VaultService {
+ * never overwritten in place: the next write first moves it aside as `vault.json.corrupt-<time>`.
+ * `earlier` opens what another host sealed in the same library (the headless service's vault key, service.ts): an entry
+ * only it opens is sealed again with `storage` the first time it is read. */
+export function createVault(root:string,service:string,storage:Storage=safeStorage,platform:string=process.platform,earlier?:Pick<Storage,'decryptString'>):VaultService {
  const file=path.join(root,'vault.json');
  const parse=():Record<string,string>=>{const value=readJSON(file);if(!value||typeof value!=='object'||Array.isArray(value))throw Error('Not a vault.');return value;};
  const read=():Record<string,string>=>{try{return fs.existsSync(file)?parse():{};}catch{return {};}};
@@ -24,11 +26,15 @@ export function createVault(root:string,service:string,storage:Storage=safeStora
  };
  let warned=false;
  const key=(id:string)=>service+':'+id;
- return {
+ const vault:VaultService={
   get(id){
    const value=read()[key(id)];
    if(!value)return null;
-   try{return storage.decryptString(Buffer.from(value,'base64'));}catch{return null;}
+   try{return storage.decryptString(Buffer.from(value,'base64'));}catch{}
+   if(!earlier)return null;
+   let secret:string;try{secret=earlier.decryptString(Buffer.from(value,'base64'));}catch{return null;}
+   try{vault.set(id,secret);}catch{}
+   return secret;
   },
   set(id,secret){
    if(!storage.isEncryptionAvailable())throw new WorldletError('Secure credential storage is unavailable on this computer.');
@@ -39,4 +45,5 @@ export function createVault(root:string,service:string,storage:Storage=safeStora
   delete(id){if(!(key(id) in read()))return;const values=readForWrite();delete values[key(id)];writeJSON(file,values);},
   deleteAll(){fs.rmSync(file,{force:true});}
  };
+ return vault;
 }

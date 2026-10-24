@@ -28,6 +28,8 @@ import {updateAcceptance} from '../../host/modules/app/update-acceptance.ts';
 import {modules} from '../../host/modules/index.ts';
 import {runCheck} from './checks/index.ts';
 import {ensureDirectory,errorMessage} from '../../host/files.ts';
+import {takeOverService} from '../../host/service.ts';
+import {nodeVaultStorage} from '../../server/src/vault-storage.ts';
 import {createVault} from '../../host/vault.ts';
 import {ANALYTICS,DESKTOP_COMPANION,PHONE,RTC_PAGE,RUN_IN_BACKGROUND,VAULT,WORLD_ROOM_PAGE,WORLD_WEB,type AnalyticsService,type DesktopCompanionService,type PhoneService,type RtcPageFactory,type VaultService,type WorldRoomPageService,type WorldWebService} from '../../host/services.ts';
 import {roomDenied} from '../../../contracts/web-world.ts';
@@ -113,6 +115,8 @@ async function start(){
  installQuitTask();
  const diagnostics=createDiagnostics(profile.root);
  keepProcessOutput(profile.root);
+ // The headless service a one-line install set up on this library stops for good before this host opens it (service.ts).
+ if(profile.channel==='release'&&!profile.rcCheck)for(const line of await takeOverService(profile.root))diagnostics.log('service: '+line);
  const preferences=Preferences.at(profile.root,()=>macDefaults(macDomain(profile)));
  const services=new Map<string,unknown>();
  const reloadListeners:(()=>void)[]=[],quitListeners:(()=>void|Promise<void>)[]=[],loadedListeners:(()=>void)[]=[],connectedListeners:(()=>void)[]=[],startedListeners:(()=>void)[]=[];
@@ -174,7 +178,7 @@ async function start(){
   started=true;
   for(const listener of startedListeners)try{listener();}catch(error){diagnostics.record(error,'hostStarted');}
  };
- host.provide(VAULT,createVault(profile.root,profile.channel==='release'?'app.worldlet.context':profile.worktree?'app.worldlet.context.dev.wt'+profile.worktree:'app.worldlet.context.dev'));
+ host.provide(VAULT,createVault(profile.root,profile.channel==='release'?'app.worldlet.context':profile.worktree?'app.worldlet.context.dev.wt'+profile.worktree:'app.worldlet.context.dev',undefined,undefined,nodeVaultStorage(profile.root)));
  host.provide<RtcPageFactory>(RTC_PAGE,openRtcWindow);
  host.provide<WorldRoomPageService>(WORLD_ROOM_PAGE,{accept:socket=>remote.connect(socket)});
  for(const install of modules)install(host);

@@ -1,6 +1,6 @@
 // The credential vault (platform/host/vault.ts), with Electron stubbed: a vault file that no longer parses
 // is moved aside before the next write instead of being overwritten (every stored credential was lost before), and
-// Linux's keyring-less `basic_text` storage is reported by code.
+// Linux's keyring-less `basic_text` storage is reported by code, and what the headless service sealed opens in the app.
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -50,7 +50,17 @@ warnings.length=0;
 createVault(root,'app.worldlet.check',{...storage('basic_text'),getSelectedStorageBackend:()=>{throw Error('not on this platform');}},'darwin').set('c','3');
 assert.deepEqual(warnings,[]);
 assert.equal(plain.get('a'),'1');
-console.log('PASS vault: a damaged vault is kept aside before the next write, deletes never rewrite it, and keyring-less Linux storage is reported by code');
+
+// The app takes over a library from the headless service: what the key of the service sealed opens through earlier
+// and is sealed again with the storage of the app on that first read.
+const service=createVault(root,'app.worldlet.check',{...storage('basic_text'),encryptString:(text:string)=>Buffer.from('service:'+text)},'linux');
+service.set('notion','five');
+const earlier={decryptString:(data:Buffer)=>{const text=data.toString();if(!text.startsWith('service:'))throw Error('no');return text.slice(8);}};
+assert.equal(createVault(root,'app.worldlet.check',storage('gnome_libsecret'),'linux').get('notion'),null,'without earlier, the entry of the service stays closed');
+const app=createVault(root,'app.worldlet.check',storage('gnome_libsecret'),'linux',earlier);
+assert.equal(app.get('notion'),'five');
+assert.equal(createVault(root,'app.worldlet.check',storage('gnome_libsecret'),'linux').get('notion'),'five','sealed again with the storage of the app');
+console.log('PASS vault: a damaged vault is kept aside before the next write, deletes never rewrite it, keyring-less Linux storage is reported by code, and the entries of the headless service move to the storage of the app when it takes over');
 `);
  await build({entryPoints:[path.join(temp,'main.ts')],outfile:path.join(temp,'check.mjs'),bundle:true,platform:'node',format:'esm',target:'node22',logLevel:'error',
   banner:{js:"import {createRequire as __createRequire} from 'node:module';const require=__createRequire(import.meta.url);"},

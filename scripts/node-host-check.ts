@@ -106,7 +106,7 @@ await withTempDir('wl-',async temp=>{
   const exited=new Promise<number|null>(resolve=>child.on('exit',code=>resolve(code)));
   const deadline=Date.now()+30_000;
   while(!ready(out)&&child.exitCode===null&&Date.now()<deadline)await sleep(100);
-  return {output:()=>out,async stop(){
+  return {output:()=>out,exited,async stop(){
    if(ipc)child.send({type:'worldlet:stop'});else child.kill('SIGTERM');
    const code=await Promise.race([exited,sleep(20_000).then(()=>'hung' as const)]);
    if(code==='hung')child.kill('SIGKILL');
@@ -179,7 +179,7 @@ await withTempDir('wl-',async temp=>{
   const start=async()=>{
    const running=await runHost(cliEnv,out=>/World ready at /.test(out)&&fs.existsSync(socket));
    assert.ok(fs.existsSync(socket),'the control socket is in the library: '+running.output().slice(-400));
-   return {output:running.output,stop:async()=>assert.equal(await running.stop(),0,'stops cleanly: '+running.output().slice(-400))};
+   return {output:running.output,exited:running.exited,stop:async()=>assert.equal(await running.stop(),0,'stops cleanly: '+running.output().slice(-400))};
   };
   let running=await start();
   const localLink=fs.readFileSync(path.join(library,'world-link.txt'),'utf8').trim(),localSecret=new URL(localLink).hash;
@@ -281,8 +281,13 @@ await withTempDir('wl-',async temp=>{
    for(const agent of ['claude-code','codex'])assert.equal(mode(path.join(mcp,`worldlet-mcp-endpoint.${agent}.json`)),0o600,'the same endpoint file again, owner-only');
    assert.equal(fs.readFileSync(argvLog,'utf8'),before,'no Agent registers again');
    assert.equal(cli('link','--local').stdout.trim(),localLink,'restart keeps the local owner window link');
-  }finally{await running.stop();}
-  console.log('PASS node host command line: status, link (and its QR code) and register over an owner-only control socket; one host per library, help and a mistyped command start none; Claude Code and Codex register the fixed MCP home with their own commands and get the skill; endpoint files owner-only and the same across a restart; the link never in the service log');
+   // worldlet stop: the clean stop on every system (the desktop app sends it when it takes the library over).
+   const stopped=cli('stop');
+   assert.equal(stopped.status,0,stopped.stderr);
+   assert.equal(await Promise.race([running.exited,sleep(20_000).then(()=>'hung')]),0,'worldlet stop ends the host cleanly: '+running.output().slice(-400));
+   assert.ok(!fs.existsSync(socket),'and its socket goes');
+  }catch(error){await running.stop();throw error;}
+  console.log('PASS node host command line: status, link (and its QR code), register and stop over an owner-only control socket; one host per library, help and a mistyped command start none; Claude Code and Codex register the fixed MCP home with their own commands and get the skill; endpoint files owner-only and the same across a restart; the link never in the service log');
  }
 
  // The World in a browser on this computer, on a library that finished setup and holds one item.

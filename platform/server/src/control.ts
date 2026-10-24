@@ -22,7 +22,7 @@ export function controlSocketTooLong(file:string,limit=CONTROL_SOCKET_LIMIT):str
  const bytes=Buffer.byteLength(file);
  return bytes>limit?`The library path is too long for a control socket (${bytes} bytes, at most ${limit}): ${file}. Use a library with a shorter path (WORLDLET_PROFILE_ROOT).`:'';
 }
-export const CONTROL_COMMANDS=['setup','link','status','register','remote'] as const;
+export const CONTROL_COMMANDS=['setup','link','status','register','remote','stop'] as const;
 export type ControlCommand=typeof CONTROL_COMMANDS[number];
 /** `remote` takes `on` or `off` (remote access, agent/gate/REMOTE-MCP.md); without it, it only reports. */
 export type ControlRequest={command:ControlCommand;agent?:string;script?:string;local?:boolean;remote?:'on'|'off'|'token';name?:string};
@@ -112,7 +112,8 @@ export const CONTROL_USAGE=`Usage: worldlet <command>
   register --agent <id>  Register Worldlet's MCP server and skill in an Agent (claude-code or codex)
   remote [on|off]        Remote access for cloud connectors: turn it on or off, and print this World's address
   remote token <name>    A token for an Agent that cannot open a browser (a script, another computer); keep it secret
-  register --script <name>  Add an Agent for a script or daemon on this computer, and print its endpoint file`;
+  register --script <name>  Add an Agent for a script or daemon on this computer, and print its endpoint file
+  stop                   Stop Worldlet (a background service started at login starts it again then)`;
 
 /** The command line: parses `argv` (after the program), asks the host on `socket`, prints the answer. Returns the exit
  * code. */

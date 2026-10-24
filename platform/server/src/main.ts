@@ -197,6 +197,8 @@ serveWorld().catch(error=>{diagnostics.record(error,'worldWeb');log('World page 
 const setupDone=()=>store.state.cloudConsent===true&&!onboardingUnfinished(store.state.onboarding);
 const NOT_SET_UP='The person has not finished setup yet: World tools answer only after they open the World (worldlet link --local prints its link) and finish setup there.';
 async function answer(request:ControlRequest):Promise<ControlReply> {
+ // A clean stop that works on every system (the desktop app sends it when it takes over this library).
+ if(request.command==='stop'){setTimeout(()=>shutdown(0),50);return {lines:['Worldlet is stopping.']};}
  if(request.command==='link'){
   // Only the owner-only control socket returns this existing local window link; no new token or pairing.
   if(request.local)return {lines:[await serveWorld()]};
