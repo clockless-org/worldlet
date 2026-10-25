@@ -11,7 +11,8 @@ app ([Agent identity, Grants and audit](../../agent/gate/GRANTS.md#the-standing-
 this host's own vault.
 
 This is the headless service: the host, the `worldlet` command line that talks to it, the fixed MCP home Agents
-register, and its [Linux package](#package), which the [one-line installer](../install/README.md#linux) installs.
+register, and its [packages](#package) for Linux, Mac and Windows. The [one-line installer](../install/README.md#linux) installs
+the Linux one; on a Mac or Windows computer it still installs the desktop app.
 
 ## What it runs
 
