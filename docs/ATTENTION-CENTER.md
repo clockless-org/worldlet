@@ -126,12 +126,12 @@ the same result reaches the paired phone while it is fresh (twelve hours):
 
 | Result | Becomes | Opens |
 | --- | --- | --- |
-| The morning brief and the day's summary ([the day's plan and summary](../context/store/ARTIFACTS.md#the-days-plan-and-summary)) | Worth Knowing, "Today’s prep · Oct 7" or "Wrap up today · Oct 7", owned by `worldlet`; a run that made no card is Worth Doing, saying so | Its card's line "In your Journal · Open" (and its Source) opens the Journal on that card |
+| The morning brief and the day's summary ([the day's plan and summary](../context/store/ARTIFACTS.md#the-days-plan-and-summary)) | Worth Knowing, "Today’s prep · Oct 7" or "Wrap up today · Oct 7", owned by `worldlet`, important enough for a seat in Now; a run that made no card is Worth Doing, saying so. A newer day's card takes over: that routine's earlier results become read and its runs that made no card, that day's included, done (`dailySuperseded`), so the Center holds the latest of each | Its card's line "In your Journal · Open" (and its Source) opens the Journal on that card |
 | A run of Worldlet's own routine | Worth Knowing; one that did not finish, Worth Doing | Its card, with what the Agent returned when it returned text |
 | A run of a job on the person's Agent's own scheduler ([scheduled jobs](../agent/gate/PORTABILITY.md#scheduled-jobs-on-the-persons-own-agent)) | Worth Knowing with its output; a failed run, Worth Doing; a silent run, nothing | Its card |
 
 These items have no source fact behind them, so they stay current until the person settles them (Got it, Done,
-Later), and opening one keeps no second copy in the Journal when the result already is a Journal card. The Task
+Later) or, for the brief and the summary, a newer day's card takes over, and opening one keeps no second copy in the Journal when the result already is a Journal card. The Task
 panel lists the next brief and summary among its Routines; finished runs are not listed there
 ([agent/tasks/README.md](../agent/tasks/README.md#task-panel)).
 
