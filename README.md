@@ -47,7 +47,7 @@ Worldlet on your own Harness is a desktop environment, like GNOME; with the Herm
 
 ## Install
 
-**macOS**
+**macOS and Linux**
 
 ```sh
 curl -fsSL https://worldlet.ai/install.sh | sh
@@ -59,7 +59,7 @@ curl -fsSL https://worldlet.ai/install.sh | sh
 irm https://worldlet.ai/install.ps1 | iex
 ```
 
-The installer downloads the newest release, checks its SHA-256 (and the app's signature on Mac), installs it and opens it. To connect a particular Agent without being asked, name it: `openclaw`, `hermes`, `pi`, `claude-code` or `codex`.
+The installer downloads the newest release, checks its SHA-256, installs Worldlet as a background service for your own account that starts when you log in, and opens your World in the browser (on Linux, or a computer with no screen, it prints your World's link and a QR code to open it from a phone or another computer). If the Worldlet app is already installed, it just opens the app. To connect a particular Agent without being asked, name it: `openclaw`, `hermes`, `pi`, `claude-code` or `codex`.
 
 ```sh
 curl -fsSL https://worldlet.ai/install.sh | sh -s -- --agent openclaw
@@ -69,7 +69,7 @@ curl -fsSL https://worldlet.ai/install.sh | sh -s -- --agent openclaw
 & ([scriptblock]::Create((irm https://worldlet.ai/install.ps1))) -Agent hermes
 ```
 
-Prefer a regular installer? [Download from worldlet.ai](https://worldlet.ai/download/) or take one from [GitHub Releases](https://github.com/clockless-org/worldlet/releases). **Linux or no screen**: the same `install.sh` command installs the [headless Worldlet service](platform/install/README.md#linux) and prints your World's link and a QR code to open it from a phone or another computer.
+Want an app window? [Download the app from worldlet.ai](https://worldlet.ai/download/) or take it from [GitHub Releases](https://github.com/clockless-org/worldlet/releases): it opens the same World and takes over from the background service. Details: [one-line installers](platform/install/README.md).
 
 **Let your Agent do it**: tell it 「Install Worldlet: follow https://worldlet.ai/agent.md」. [agent.md](platform/install/agent.md) has any Agent run the installer with its own name, register Worldlet in itself and reply with the link and QR code; the [`worldlet` skill](harness/skills/worldlet/SKILL.md) says the same. Details: [one-line installers](platform/install/README.md).
 

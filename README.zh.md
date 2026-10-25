@@ -47,7 +47,7 @@ Worldlet 跑在你自己的 Harness 上，就像桌面环境 GNOME；加上它�
 
 ## 安装
 
-**macOS**
+**macOS 和 Linux**
 
 ```sh
 curl -fsSL https://worldlet.ai/install.sh | sh
@@ -59,7 +59,7 @@ curl -fsSL https://worldlet.ai/install.sh | sh
 irm https://worldlet.ai/install.ps1 | iex
 ```
 
-安装脚本会下载最新版本，校验 SHA-256（Mac 上还会校验 App 签名），装好并打开。想直接连上某个 Agent、不被询问，就指定它：`openclaw`、`hermes`、`pi`、`claude-code` 或 `codex`。
+安装脚本会下载最新版本，校验 SHA-256，把 Worldlet 装成你自己账户下的后台服务、登录时自动启动，并在浏览器里打开你的 World（在 Linux 或没有屏幕的电脑上，它会打印 World 链接和二维码，用手机或另一台电脑打开）。如果已经装了 Worldlet App，就只打开 App。想直接连上某个 Agent、不被询问，就指定它：`openclaw`、`hermes`、`pi`、`claude-code` 或 `codex`。
 
 ```sh
 curl -fsSL https://worldlet.ai/install.sh | sh -s -- --agent openclaw
@@ -69,7 +69,7 @@ curl -fsSL https://worldlet.ai/install.sh | sh -s -- --agent openclaw
 & ([scriptblock]::Create((irm https://worldlet.ai/install.ps1))) -Agent hermes
 ```
 
-想用普通安装包？到 [worldlet.ai 下载](https://worldlet.ai/download/)，或者从 [GitHub Releases](https://github.com/clockless-org/worldlet/releases) 取。**Linux 或没有屏幕的电脑**：同一条 `install.sh` 命令会安装[无界面的 Worldlet 服务](platform/install/README.md#linux)，并打印你的 World 链接和二维码，用手机或另一台电脑打开。
+想要 App 窗口？到 [worldlet.ai 下载 App](https://worldlet.ai/download/)，或者从 [GitHub Releases](https://github.com/clockless-org/worldlet/releases) 取：它打开的是同一个 World，并接替后台服务。细节见[一行安装脚本](platform/install/README.md)。
 
 **交给你的 Agent**：对它说「Install Worldlet: follow https://worldlet.ai/agent.md」。[agent.md](platform/install/agent.md) 让任何 Agent 用自己的名字运行安装脚本、把 Worldlet 注册进自己，然后回复链接和二维码；[`worldlet` 技能](harness/skills/worldlet/SKILL.md)说的是同样的步骤。细节见[一行安装脚本](platform/install/README.md)。
 

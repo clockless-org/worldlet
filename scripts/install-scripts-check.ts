@@ -1,6 +1,6 @@
-// The one-line installers (platform/install/README.md): shell syntax, the same Agent ids as setup, checksum and
-// signature checks before installing, and the `--connect` hand-off to the app; on Linux the headless service's install
-// steps; and agent.md, the page every Agent follows, saying the same commands as the Worldlet skill.
+// The one-line installers (platform/install/README.md): shell syntax, the same Agent ids as setup, the headless
+// service's install steps in order on every system (the desktop app, when a Mac or Windows computer has it, is kept and
+// opened with `--connect`), and agent.md, the page every Agent follows, saying the same commands as the Worldlet skill.
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {existsSync,readFileSync,realpathSync} from 'node:fs';
@@ -23,26 +23,24 @@ const local=readFileSync('agent/gate/local-harness.ts','utf8');
 for(const id of ids)assert.match(local,new RegExp(`['"]${id}['"]`),`${id} is a setup Agent id`);
 assert.ok(sh.includes(`""|${ids.join('|')})`),'install.sh accepts exactly the setup Agent ids');
 assert.ok(ps.includes(`ValidateSet('', ${ids.map(id=>`'${id}'`).join(', ')})`),'install.ps1 accepts exactly the setup Agent ids');
-assert.ok(sh.indexOf('shasum -a 256')<sh.indexOf('ditto'),'Mac checks the checksum before installing');
-assert.ok(sh.indexOf('codesign --verify')<sh.indexOf('ditto'),'Mac verifies the signature before installing');
-assert.ok(ps.indexOf('Get-FileHash')<ps.indexOf("-ArgumentList '/S'"),'Windows checks the checksum before installing');
-assert.match(sh,/--args "--connect=\$AGENT"/);
-assert.match(ps,/"--connect=\$Agent"/);
-assert.match(sh,/\/downloads\/appcast\.xml/);
-assert.match(ps,/\/downloads\/windows-preview\.json/);
-assert.match(sh,/target="\$\{WORLDLET_INSTALL_DIR:-\/Applications\}"/,'Mac installs into WORLDLET_INSTALL_DIR when set (release machines\' Beta install check)');
+// Every system installs the headless service (README.md): every file checked before anything runs, then the service,
+// the Agent and the link. A Mac or Windows computer that has the desktop app keeps it and opens it instead.
+const order=(text:string,name:string,...parts:string[])=>parts.every((part,index)=>{const at=text.indexOf(part);assert.ok(at>=0,`${name} has ${part}`);return index===0||text.indexOf(parts[index-1])<at;});
+assert.ok(order(sh,'install.sh','/Applications/Worldlet.app','--args "--connect=$AGENT"','/downloads/server.json','.sha256','[ "$expected" = "$actual" ]','tar -xzf','SHA256SUMS','ln -sfn "$label" "$home/current"','Starting the Worldlet service','setup --agent "$AGENT"','link --local'),'install.sh: the app first, then checksum, unpack, file sums, current, service, setup, World link in that order');
+assert.ok(order(ps,'install.ps1','Programs\\Worldlet\\app\\Worldlet.exe','"--connect=$Agent"','/downloads/server.json','Get-FileHash','tar.exe','SHA256SUMS','New-Item -ItemType Junction','WorldletService','setup --agent $Agent','link --local','Start-Process $link'),'install.ps1: the app first, then checksum, unpack, file sums, current, login start, setup, World link in that order');
+assert.ok(!sh.includes('register --agent "$AGENT"')&&!ps.includes('register --agent $Agent'),'setup registers Claude Code and Codex itself, so the installers do not register them twice');
+const service=readFileSync('platform/host/service.ts','utf8');
+assert.match(service,/MAC_SERVICE_LABEL='ai\.worldlet\.service'/);assert.ok(sh.includes('ai.worldlet.service.plist')&&sh.includes('<string>ai.worldlet.service</string>'),'install.sh writes the launch agent the app removes when it takes over');
+assert.match(service,/WINDOWS_SERVICE_RUN_VALUE='WorldletService'/);assert.ok(ps.includes("-Name 'WorldletService'"),'install.ps1 writes the Run value the app removes when it takes over');
+for(const part of ['launchctl bootstrap','<key>KeepAlive</key><dict><key>SuccessfulExit</key><false/></dict>','systemctl --user enable --now worldlet.service','loginctl enable-linger','nohup "$node" "$program"','qrencode -t ANSIUTF8','link --qr','ssh -L','$HOME/.local/bin/worldlet','for candidate in hermes openclaw claude codex','WORLDLET_NO_LOGIN_START','WORLDLET_NO_BROWSER'])assert.ok(sh.includes(part),'install.sh has '+part);
+for(const part of ["foreach ($candidate in 'hermes', 'openclaw', 'claude', 'codex')",'WORLDLET_NO_LOGIN_START','WORLDLET_NO_BROWSER',"Ask 'stop'"])assert.ok(ps.includes(part),'install.ps1 has '+part);
 assert.ok(!/sudo/.test(sh),'never asks for an administrator password');
 // macOS /bin/sh is bash 3.2: in a UTF-8 Terminal it reads a non-ASCII byte right after `$name` as part of the name
 // (`$file…` failed as `file?: unbound variable` under `set -u`), so such variables are written `${name}`.
 for(const [name,text] of [['install.sh',sh],['install.ps1',ps]])assert.doesNotMatch(text,/\$[A-Za-z_][A-Za-z0-9_]*[^\x00-\x7f]/,`${name} braces a variable that is followed by a non-ASCII character`);
-// Linux: the headless service (README.md#linux), every file checked before anything runs, then the service, the Agent
-// and the link.
-const linux=sh.slice(sh.indexOf('install_linux() {'),sh.indexOf('\n}\n',sh.indexOf('install_linux() {')));
-assert.ok(linux.length>200&&sh.includes('[ "$(uname -s)" != "Linux" ] || { install_linux; exit 0; }'),'Linux runs its own branch, before the Mac checks');
-const order=(...parts:string[])=>parts.every((part,index)=>{const at=linux.indexOf(part);assert.ok(at>=0,'install.sh Linux has '+part);return index===0||linux.indexOf(parts[index-1])<at;});
-assert.ok(order('/downloads/linux.json','.sha256','[ "$expected" = "$actual" ]','tar -xzf','SHA256SUMS','ln -sfn "$label" "$home/current"','systemctl --user enable --now worldlet.service','setup --agent "$AGENT"','link </dev/null'),'Linux: checksum, unpack, file sums, current, service, setup, link in that order');
-assert.ok(!linux.includes('register --agent "$AGENT"'),'Linux: setup registers Claude Code and Codex itself, so the installer does not register them twice');
-for(const part of ['loginctl enable-linger','nohup "$node" "$program"','qrencode -t ANSIUTF8','link --qr','ssh -L','$HOME/.local/bin/worldlet','for candidate in hermes openclaw claude codex'])assert.ok(linux.includes(part),'install.sh Linux has '+part);
+// The package names the installers look for are the ones the release publishes.
+const release=readFileSync('scripts/ci-release.mjs','utf8');
+assert.ok(release.includes("server:'server.json'")&&release.includes("'macos-arm64'")&&release.includes("'windows-x64'"),'the Beta service feed and its Mac and Windows targets');
 // agent.md (served at https://worldlet.ai/agent.md) and the Worldlet skill give an Agent the same commands, and those
 // commands exist.
 const agentPage=readFileSync('platform/install/agent.md','utf8'),skillText=readFileSync('harness/skills/worldlet/SKILL.md','utf8');
@@ -56,5 +54,5 @@ assert.ok(control.includes("rest.includes('--qr')"),'and link --qr');
 assert.ok(!/password|token|api key/i.test(agentPage.replace(/needs no password, token or API key|never pass it one|paste a key, password or token/gi,'')),'agent.md never asks for a secret');
 const acceptance=readFileSync('platform/install/install-acceptance.ps1','utf8');
 assert.match(acceptance,/irm \$site\/install\.ps1 \| iex/,'acceptance runs the published one-liner');
-assert.match(acceptance,/windows-preview\.json/,'acceptance compares with the public manifest');
-console.log('PASS one-line installers: syntax, Agent ids, checksum and signature before install, --connect hand-off, the Linux service steps in order, agent.md and the skill name the same commands, real-device acceptance');
+assert.match(acceptance,/server\.json/,'acceptance compares with the public service feed');
+console.log('PASS one-line installers: syntax, Agent ids, an installed app kept and opened, the headless service steps in order on Mac, Linux and Windows, the login starts the app removes, agent.md and the skill name the same commands, real-device acceptance');

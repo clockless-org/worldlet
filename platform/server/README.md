@@ -11,8 +11,7 @@ app ([Agent identity, Grants and audit](../../agent/gate/GRANTS.md#the-standing-
 this host's own vault.
 
 This is the headless service: the host, the `worldlet` command line that talks to it, the fixed MCP home Agents
-register, and its [packages](#package) for Linux, Mac and Windows. The [one-line installer](../install/README.md#linux) installs
-the Linux one; on a Mac or Windows computer it still installs the desktop app.
+register, and its [packages](#package) for Linux, Mac and Windows, which the [one-line installers](../install/README.md) install.
 
 ## What it runs
 
@@ -170,7 +169,7 @@ tarball's `.sha256`, the record `worldlet-server-<label>.json` (Build, version a
 `release.json`. Release machine 02 builds them with the Mac package of the same commit, and `node scripts/ci-release.mjs
 publish --platform server` puts them on the Build's release and writes the channel's service feed (`server-dev.json`,
 `server-alpha.json`, `server.json` on Beta) and the older Linux-only feed (`linux-dev.json`, `linux-alpha.json`,
-`linux.json`) that install.sh reads today; a promotion moves them with Mac ([releasing](../../docs/RELEASING.md)).
+`linux.json`) that older copies of install.sh read; a promotion moves them with Mac ([releasing](../../docs/RELEASING.md)).
 
 ### Periodic Service collection
 

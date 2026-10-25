@@ -1,48 +1,50 @@
 # Real-device acceptance of the Windows one-line installer (README.md): runs exactly what people paste,
 #   irm https://worldlet.ai/install.ps1 | iex
-# on this computer, then checks the installed app against the public manifest. Run it on 01 after a release, locally
-# or over SSH:
+# on this computer, then checks the headless service it installed against the public service feed. Run it on 01 after
+# a release, locally or over SSH:
 #   powershell -NoProfile -ExecutionPolicy Bypass -File platform/install/install-acceptance.ps1 [-Out result.json]
-# It replaces the installed Worldlet with the published Build (an RC's update acceptance installs the next RC again),
-# stops the copy the installer opened, and prints one JSON result. Exit 0 only when every check passed.
-# An SSH session has no desktop, so the window is not looked at here, and SmartScreen never sees an `irm` download
-# (no Mark-of-the-Web); both need a person or the RC smoke.
+# The service goes into a temporary folder on a library of its own (WORLDLET_HOME, WORLDLET_PROFILE_ROOT), with no start
+# at login and no browser opened, so an installed app and its World stay as they are. It is stopped and removed at the
+# end, and the script prints one JSON result. Exit 0 only when every check passed.
 param([string]$Out = '')
 $ErrorActionPreference = 'Stop'
 $site = if ($env:WORLDLET_SITE) { $env:WORLDLET_SITE } else { 'https://worldlet.ai' }
-$app = Join-Path $env:LOCALAPPDATA 'Programs\Worldlet\app\Worldlet.exe'
-function Version($path) { if (Test-Path $path) { (Get-Item $path).VersionInfo.FileVersion } else { $null } }
+$work = Join-Path ([IO.Path]::GetTempPath()) ('worldlet-install-acceptance-' + [Guid]::NewGuid().ToString('N').Substring(0, 8))
+$worldlet = Join-Path $work 'home\current\bin\worldlet.cmd'
 
 $started = Get-Date
-$before = Version $app
-$manifest = Invoke-RestMethod "$site/downloads/windows-preview.json"
-$file = Split-Path -Leaf $manifest.url
-$expected = if ($file -match '^Worldlet-([\d.]+)-(\d+)-windows-x64') { "$($Matches[1]).$($Matches[2])" } else { $null }
+$manifest = Invoke-RestMethod "$site/downloads/server.json"
+$file = "$($manifest.files.'windows-x64'.name)"
+$expected = "$($manifest.version)"
 
 $clock = [Diagnostics.Stopwatch]::StartNew()
 # A child PowerShell, as a person's own window would be: the installer's `exit 1` must not end this script.
-$output = powershell -NoProfile -Command "`$env:WORLDLET_SITE='$site'; irm $site/install.ps1 | iex" 2>&1 | ForEach-Object { "$_" }
+$output = powershell -NoProfile -Command "`$env:WORLDLET_SITE='$site'; `$env:WORLDLET_HOME='$work\home'; `$env:WORLDLET_PROFILE_ROOT='$work\library'; `$env:WORLDLET_NO_LOGIN_START='1'; `$env:WORLDLET_NO_BROWSER='1'; irm $site/install.ps1 | iex" 2>&1 | ForEach-Object { "$_" }
 $exit = $LASTEXITCODE
 $clock.Stop()
 
-$after = Version $app
-$signature = if (Test-Path $app) { "$((Get-AuthenticodeSignature $app).Status)" } else { $null }
+$env:WORLDLET_HOME = "$work\home"; $env:WORLDLET_PROFILE_ROOT = "$work\library"
+$status = if (Test-Path $worldlet) { (cmd.exe /d /c "`"$worldlet`" status 2>&1") -join "`n" } else { '' }
+$running = $LASTEXITCODE -eq 0 -and $status
 $defender = @(Get-WinEvent -FilterHashtable @{ LogName = 'Microsoft-Windows-Windows Defender/Operational'; StartTime = $started } -ErrorAction SilentlyContinue |
   Where-Object { $_.Id -in 1006, 1007, 1015, 1116, 1117 } | ForEach-Object { @{ id = $_.Id; at = $_.TimeCreated.ToUniversalTime().ToString('o') } })
-# The installer opens Worldlet; over SSH that copy has no window. Leave nothing running behind the check.
-$opened = @(Get-Process Worldlet -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $app })
-$opened | Stop-Process -Force -ErrorAction SilentlyContinue
+# Leave nothing running or installed behind the check.
+if (Test-Path $worldlet) {
+  cmd.exe /d /c "`"$worldlet`" stop >nul 2>&1"
+  for ($waited = 0; $waited -lt 30; $waited++) { cmd.exe /d /c "`"$worldlet`" status >nul 2>&1"; if ($LASTEXITCODE -eq 3) { break }; Start-Sleep 1 }
+}
+Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue
 
 $failures = @()
 if ($exit -ne 0) { $failures += "installer exited with $exit" }
-if (-not $after) { $failures += 'Worldlet.exe missing after install' }
-elseif ($expected -and $after -ne $expected) { $failures += "installed $after, manifest names $expected" }
+if (-not $running) { $failures += 'the Worldlet service was not running after the install' }
+elseif ($status -notmatch "^Worldlet $([regex]::Escape($expected)) is running") { $failures += "the running service is not $expected" }
 if ($defender.Count) { $failures += "Defender reported $($defender.Count) event(s)" }
 
 $result = [ordered]@{
   check = 'install-acceptance-windows'; at = $started.ToUniversalTime().ToString('o'); site = $site; file = $file
-  before = $before; expected = $expected; installed = $after; exit = $exit; seconds = [Math]::Round($clock.Elapsed.TotalSeconds, 1)
-  signature = $signature; defender = $defender; opened = $opened.Count; output = $output
+  expected = $expected; service = $status; exit = $exit; seconds = [Math]::Round($clock.Elapsed.TotalSeconds, 1)
+  defender = $defender; output = $output
   status = if ($failures.Count) { 'failed' } else { 'passed' }; failures = $failures
 }
 $json = $result | ConvertTo-Json -Depth 5
