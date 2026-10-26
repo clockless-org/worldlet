@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,claudeCodeSignInExpired,claudeCodeSignInElsewhere,CLAUDE_CODE_NOT_SIGNED_IN,CLAUDE_CODE_SIGN_IN_EXPIRED,codexProblem,codexWorldToolsFailed,modelAtCapacity,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
+import {LOCAL_HARNESSES,finishLocalHarness,openClawMissingKey,claudeCodeSignInExpired,claudeCodeSignInElsewhere,CLAUDE_CODE_NOT_SIGNED_IN,CLAUDE_CODE_SIGN_IN_EXPIRED,CODEX_LOG_FILTER,codexGaveUp,codexProblem,codexWorldToolsFailed,modelAtCapacity,openClawToolConfig,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,recommendLocalHarness,
  type LocalHarnessId} from '../agent/gate/index.ts';
 import {spawn} from 'node:child_process';
 import {openWorldToolBridge} from '../platform/host/modules/gate/world-tool-bridge.ts';
@@ -201,6 +201,12 @@ assert.equal(codexProblem('stream error: unexpected status 401 Unauthorized'),'C
 assert.deepEqual(read('codex',[{type:'turn.failed',error:{message:'You\'ve hit your usage limit. Try again in 2 hours.'}}],1).outcome,{error:'Codex has reached its usage limit. Try again later, or use another Agent in Settings › Agents.'});
 assert.deepEqual(read('codex',[],1,'Error: Not logged in. Run codex login.').outcome,{error:codexProblem('not logged in')});
 assert.equal(codexProblem('stream disconnected before completion'),null);
+// Codex that gave up on its model says so only in its log, and waits on (Mac Alpha 4633/4634, #835).
+const gaveUp='2026-10-26T09:50:01.000000Z  WARN codex_core::responses_retry: stream disconnected - retrying sampling request (5/5 in 3.2s)...\n2026-10-26T09:50:04.000000Z  WARN codex_core::session: turn turn_id=x error=exceeded retry limit, last status: 429 Too Many Requests\n';
+assert.equal(codexGaveUp(gaveUp),'Codex has reached its usage limit. Try again later, or use another Agent in Settings › Agents.');
+assert.equal(codexGaveUp('WARN codex_core::session: error=exceeded retry limit, last status: 502 Bad Gateway'),'Codex could not reach its model (last status: 502 Bad Gateway). Try again.');
+assert.equal(codexGaveUp(gaveUp.split('\n')[0]),null,'still retrying is not giving up');
+assert.deepEqual(read('codex',[{type:'thread.started',thread_id:'t'},{type:'turn.started'}],null,gaveUp).outcome,{error:codexGaveUp(gaveUp)},'the stopped turn says why, not "took too long"');
 // A required World tool server that never started: Codex's own reason, not the last line of its stack trace.
 const handshake='2026-10-15T18:06:06.483153Z ERROR codex_core::session: Failed to create session: required MCP servers failed to initialize: worldlet: timed out handshaking with MCP server after 29.99s\nError: thread/start: thread/start failed: error creating thread: Fatal error: Failed to initialize session: required MCP servers failed to initialize: worldlet: timed out handshaking with MCP server after 29.99s (code -32603)\n\nStack backtrace:\n   0: <unknown>\n';
 assert.equal(codexWorldToolsFailed(handshake),'Codex could not start Worldlet’s tools: worldlet: timed out handshaking with MCP server after 29.99s. Try again.');
@@ -411,6 +417,16 @@ await withTempDir('worldlet-local-harness-',async scratch=>{
   const runs='if [ "$1" = "--version" ]; then echo "2.1.0 (Claude Code)"; exit 0; fi\n';
   script(path.join(bin,'claude'),runs+'echo "Error: connect ECONNREFUSED" >&2\nexit 1\n');
   await assert.rejects(new LocalHarnessRuntime(found[0],unix).run({action:'chat',text:'Hi'},agentHome),/Claude Code could not answer: Error: connect ECONNREFUSED/);
+  // Codex that gave up on its model (429) says so only in its log and waits on (Mac Alpha 4633/4634, #835): the turn
+  // stops at that line with the reason, not minutes later as "took too long". Its log carries warnings for this.
+  {
+   const codexBin=path.join(bin,'codex-gave-up'),logFilter=path.join(scratch,'codex-rust-log.txt');
+   script(codexBin,`printf '%s' "$RUST_LOG" > "${logFilter}"\ncat > /dev/null\necho '{"type":"thread.started","thread_id":"t"}'\necho '{"type":"turn.started"}'\necho "2026-10-26T09:50:04Z  WARN codex_core::session: turn error=exceeded retry limit, last status: 429 Too Many Requests" >&2\nsleep 30\n`);
+   const began=Date.now();
+   await assert.rejects(new LocalHarnessRuntime({id:'codex',title:'Codex',command:codexBin,prefix:[],configured:true} as any,unix).run({action:'chat',text:'Hi'},agentHome),/Codex has reached its usage limit/);
+   assert.ok(Date.now()-began<10_000,`stopped at the line, not at the deadline (${Date.now()-began} ms)`);
+   assert.equal(fs.readFileSync(logFilter,'utf8'),CODEX_LOG_FILTER,'Codex logs its warnings for the turn');
+  }
   // A turn the provider turns away as busy before anything happened runs again after a wait (Mac Alpha 4312, #416):
   // the person sees that it is trying again, then the answer; one that stays busy fails with the provider's words.
   {
