@@ -59,7 +59,7 @@ curl -fsSL https://worldlet.ai/install.sh | sh
 irm https://worldlet.ai/install.ps1 | iex
 ```
 
-The installer downloads the newest release, checks its SHA-256, installs Worldlet as a background service for your own account that starts when you log in, and opens your World in the browser (on Linux, or a computer with no screen, it prints your World's link and a QR code to open it from a phone or another computer). If the Worldlet app is already installed, it just opens the app. To connect a particular Agent without being asked, name it: `openclaw`, `hermes`, `pi`, `claude-code` or `codex`.
+The installer downloads the newest release, checks its SHA-256, installs Worldlet as a background service for your own account that starts when you log in, and opens your World in the browser (on Linux it prints your World's link and a QR code to open it from a phone or another computer). If the Worldlet app is already installed, it just opens the app. To connect a particular Agent without being asked, name it: `openclaw`, `hermes`, `pi`, `claude-code` or `codex`.
 
 ```sh
 curl -fsSL https://worldlet.ai/install.sh | sh -s -- --agent openclaw

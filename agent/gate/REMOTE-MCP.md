@@ -38,7 +38,7 @@ The tools carry MCP annotations, which app directories ask for: `search`, `fetch
 
 An Agent that cannot open a browser, such as a script, a daemon on another computer or a scheduled job, uses a token instead. Run `worldlet remote token "<name>"` on the Node host (host action `remoteMcp` `token`); Settings no longer makes tokens (owner request 2026-10-22). The token is shown once. The Agent sends it as `Authorization: Bearer <token>` with MCP requests to the same address.
 
-The token makes an Agent of its own (kind `remote`, Harness `token`), listed in Settings › Agents with the default Grants, its own audit and **Remove**. It does not run out. Making a new token for the same Agent (`remoteMcp` `token` with its `id`) stops the old one, and Revoke ends it. Only its SHA-256 hash is kept, in the vault. Anyone who has the token can act as that Agent, so keep it as secret as a password.
+The token makes an Agent of its own (kind `remote`, Harness `token`), listed in Settings › Agents with the default Grants, its own audit and **Remove**. It does not run out. Making a new token for the same Agent (`remoteMcp` `token` with its `id`) stops the old one, and **Remove** ends it. Only its SHA-256 hash is kept, in the vault. Anyone who has the token can act as that Agent, so keep it as secret as a password.
 
 A new address (`remoteMcp` `renew`) ends every connection and registration, and each client must be added again; [the World's address](WORLD-ADDRESS.md) is the room, so it changes with it. Turning it off stops the address answering but keeps it, so turning it on again needs no new connectors.
 

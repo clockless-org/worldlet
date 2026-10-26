@@ -1,4 +1,4 @@
-// The Node host (platform/server/README.md): Worldlet with no screen, for Linux and any computer without a display. It
+// The Node host (platform/server/README.md): Worldlet with no window, on Linux, Mac and Windows and with no display. It
 // builds the same Host as the Electron host (platform/desktop/src/main.ts) with no window, installs the host modules
 // that work without one, and starts their work at once: Attention reading, routines, the standing `worldlet` MCP for
 // Hermes and the browser link through the pairing room. The World page itself opens in a web browser on this computer:
