@@ -1,6 +1,6 @@
 ---
 name: worldlet
-description: "Install Worldlet, a World for this Agent, as a background service on Mac, Windows or Linux"
+description: "Install Worldlet, a World for this Agent, on any computer"
 ---
 
 # Install Worldlet

@@ -59,7 +59,7 @@ curl -fsSL https://worldlet.ai/install.sh | sh
 irm https://worldlet.ai/install.ps1 | iex
 ```
 
-安装脚本会下载最新版本，校验 SHA-256，把 Worldlet 装成你自己账户下的后台服务、登录时自动启动，并在浏览器里打开你的 World（在 Linux 或没有屏幕的电脑上，它会打印 World 链接和二维码，用手机或另一台电脑打开）。如果已经装了 Worldlet App，就只打开 App。想直接连上某个 Agent、不被询问，就指定它：`openclaw`、`hermes`、`pi`、`claude-code` 或 `codex`。
+安装脚本会下载最新版本，校验 SHA-256，把 Worldlet 装成你自己账户下的后台服务、登录时自动启动，并在浏览器里打开你的 World（在 Linux 上，它会打印 World 链接和二维码，用手机或另一台电脑打开）。如果已经装了 Worldlet App，就只打开 App。想直接连上某个 Agent、不被询问，就指定它：`openclaw`、`hermes`、`pi`、`claude-code` 或 `codex`。
 
 ```sh
 curl -fsSL https://worldlet.ai/install.sh | sh -s -- --agent openclaw

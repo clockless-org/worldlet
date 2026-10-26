@@ -1,6 +1,6 @@
 # Node host (layer 03 · Platform)
 
-Worldlet with no screen: a plain Node process for Linux and any computer without a display. It runs the same host
+Worldlet with no window: a plain Node process, on Linux, Mac and Windows and on a computer without a display. It runs the same host
 modules as the [Electron host](../desktop/README.md) that work without a window, so Attention reading, routines, the
 standing `worldlet` MCP server for Hermes Agent and the [browser link](../web/README.md#web) run as they do
 in the desktop app, and a phone or any web browser reaches this computer through the pairing room. The World itself,
