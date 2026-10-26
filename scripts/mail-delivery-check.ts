@@ -1,5 +1,5 @@
-/** Real decoder, scene registration and lifecycle at the review viewport. Motion is the default whatever the host says: a
- * Windows host with animation effects off reports reduced motion, and the room's delivery then rightly stays still (#841). */
+/** Real decoder, scene registration and lifecycle at the review viewport. Motion is the default whatever the host says, and
+ * the theme stub matches either path separator: on Windows a `/`-only filter misses and the real theme declares no delivery (#841). */
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {bundleScript,withBrowser,pageErrors} from './browser-test.ts';
@@ -11,7 +11,7 @@ const spec=(d:any)=>({...presentation,appletScenes:{gmail:{background:'assets/ro
 assert.doesNotThrow(()=>parseThemePresentation(spec(delivery)));
 for(const d of [{...delivery,video:'https://example.com/a.webm'},{...delivery,duration:21},{...delivery,bounds:[0,.6,1,.3]},{...delivery,loop:true}])assert.throws(()=>parseThemePresentation(spec(d)));
 const script=await bundleScript({stdin:{contents:"export {mountAppletScene} from './ui/applets/scene/applet-scene.ts';",resolveDir:process.cwd(),loader:'ts'},globalName:'Scene'});
-const arrivalScript=await bundleScript({stdin:{contents:"export {createMailArrival} from './ui/world/mail-arrival.ts';",resolveDir:process.cwd(),loader:'ts'},globalName:'Arrival',plugins:[{name:'static-mail-declaration',setup(b){b.onLoad({filter:/ui\/style\/themes\/index\.ts$/},()=>({contents:"export {createThemeEvents} from './theme-events.ts';export const ACTIVE_THEME={pack:{motion:{events:{},sound:{events:{}}}}};export const activeBuildTheme=()=>({package:{presentation:{appletScenes:{gmail:{mailDelivery:{}}}}}});export const playThemeSound=()=>{globalThis.soundCount=(globalThis.soundCount||0)+1;};",loader:'ts',resolveDir:process.cwd()+'/ui/style/themes'}));}}]});
+const arrivalScript=await bundleScript({stdin:{contents:"export {createMailArrival} from './ui/world/mail-arrival.ts';",resolveDir:process.cwd(),loader:'ts'},globalName:'Arrival',plugins:[{name:'static-mail-declaration',setup(b){b.onLoad({filter:/ui[\\/]style[\\/]themes[\\/]index\.ts$/},()=>({contents:"export {createThemeEvents} from './theme-events.ts';export const ACTIVE_THEME={pack:{motion:{events:{},sound:{events:{}}}}};export const activeBuildTheme=()=>({package:{presentation:{appletScenes:{gmail:{mailDelivery:{}}}}}});export const playThemeSound=()=>{globalThis.soundCount=(globalThis.soundCount||0)+1;};",loader:'ts',resolveDir:process.cwd()+'/ui/style/themes'}));}}]});
 await withBrowser(async browser=>{
  const page=await browser.newPage({viewport:{width:1500,height:844},reducedMotion:'no-preference'}),errors=pageErrors(page);
  await page.setContent('<title>Mail delivery lifecycle</title><main id="host" style="position:fixed;inset:0"></main>');await page.addStyleTag({content:await readFile('ui/applets/scene/applet-scene.css','utf8')});await page.addScriptTag({content:script});
