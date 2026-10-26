@@ -255,6 +255,17 @@ export function codexProblem(text:string):string|null {
  if(/not (?:logged|signed) in|\b401\b|unauthori[sz]ed|refresh token|token (?:has )?expired|codex login/i.test(text))return 'Codex is not signed in. Open Terminal, run codex login, then try again.';
  return null;
 }
+/** Codex gave up on its model and says so only in its log ("WARN … error=exceeded retry limit, last status: 429 Too Many
+ * Requests", Mac Alpha 4633/4634, #835): its --json stream ends at turn.started and the process waits on, so the turn
+ * would only time out as "took too long". The words for the person, from that line; null while Codex is still trying.
+ * Its warnings reach stderr only with CODEX_LOG_FILTER. */
+export function codexGaveUp(stderr:string):string|null {
+ const line=stderr.split('\n').reverse().find(text=>/exceeded retry limit/i.test(text));
+ if(line===undefined)return null;
+ return codexProblem(line)??`Codex could not reach its model (${clip(line.replace(/^.*exceeded retry limit,?\s*/i,'').trim()||'it stopped retrying',200)}). Try again.`;
+}
+/** RUST_LOG for a Codex turn when the person set none: errors, plus Codex's own warnings, where it says it gave up. */
+export const CODEX_LOG_FILTER='error,codex_core=warn';
 /** Codex's own line when the required World tool server did not start ("required MCP servers failed to initialize:
  * worldlet: timed out handshaking …"): one plain line naming why, never its stack trace. Null when the text is not that. */
 export function codexWorldToolsFailed(text:string):string|null {
@@ -409,7 +420,7 @@ export function finishLocalHarness(id:LocalHarnessId,state:LocalHarnessStream,ex
  const detail=exit.stderr.trim().split('\n').filter(Boolean).pop()??'';
  if(id==='openclaw'){const missing=openClawMissingKey(exit.stderr);if(missing)return {error:missing};}
  if(id==='claude-code'){const expired=claudeCodeSignInExpired(exit.stderr+'\n'+(state.final??state.text));if(expired)return {error:expired};}
- if(id==='codex'){const problem=codexWorldToolsFailed(exit.stderr)??codexProblem(exit.stderr);if(problem)return {error:problem};}
+ if(id==='codex'){const problem=codexWorldToolsFailed(exit.stderr)??codexGaveUp(exit.stderr)??codexProblem(exit.stderr);if(problem)return {error:problem};}
  if(detail)return {error:`${title} could not answer: ${clip(detail,300)}`};
  // Nothing says why: name what happened rather than guess a sign-in.
  if(exit.code===0)return {error:`${title} finished without an answer. Try again.`};

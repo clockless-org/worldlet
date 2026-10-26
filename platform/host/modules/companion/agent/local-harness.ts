@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawn,type ChildProcess} from 'node:child_process';
-import {claudeCodeNeedsSignIn,claudeCodeSignInElsewhere,LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,PROVIDER_SETTING,backgroundModel,chosenModel,hermesConfigValues,LOCAL_HARNESS_SPARE,modelAtCapacity,modelRefusedByAccount,providerModel,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessOriginId,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
+import {claudeCodeNeedsSignIn,claudeCodeSignInElsewhere,CODEX_LOG_FILTER,codexGaveUp,LOCAL_HARNESSES,LOCAL_HARNESS_RESIDENT,PROVIDER_SETTING,backgroundModel,chosenModel,hermesConfigValues,LOCAL_HARNESS_SPARE,modelAtCapacity,modelRefusedByAccount,providerModel,acpApprovalOutcome,acpApprovalRequest,acpChangesAsked,changesAnswered,acpPermissionReply,finishLocalHarness,harnessApprovalFeatures,harnessService,harnessOriginId,harnessSessionThread,harnessTurnTimings,isHarnessAgentId,isHarnessModelId,openClawAgentModel,openClawModels,openClawGateway,openClawToolConfig,localHarness,localHarnessAdapterId,localHarnessInvocation,localHarnessStream,localHarnessTurn,rankLocalHarnesses,readLocalHarnessLine,
  readWorldSince,HERMES_CHANNEL_READ_ONLY,HERMES_STANDING_WRITE_DECLINED,HermesOwnCalls,hermesStandingWriteApproval,type LocalHarnessId,type ModelTier} from '../../../../../agent/gate/index.ts';
 import {WorldletError,writeAtomic} from '../../../files.ts';
 import {readAgentSetting,writeAgentSetting} from '../../../store/agent-settings.ts';
@@ -367,6 +367,7 @@ export class LocalHarnessRuntime implements AgentRuntime {
   const bridge=tools?await openWorldToolBridge(home,{sample,dispatch:(name,args)=>dispatch.run(name,args)}):null;
   let child:ChildProcess;
   const env=harnessEnvironment(this.install,this.environment);
+  if(this.install.id==='codex'&&!env.RUST_LOG)env.RUST_LOG=CODEX_LOG_FILTER;
   // OpenClaw: its own workspace, and with tools a configuration for this turn that includes the person's own.
   let config:string|null=null,workspace:string|null=null,model:string|null=null;
   if(this.install.id==='openclaw'){
@@ -394,7 +395,9 @@ export class LocalHarnessRuntime implements AgentRuntime {
   if(!child.pid){child.kill();bridge?.close();throw new WorldletError(`${this.install.title} could not start.`);}
   child.stdin!.on('error',()=>{});
   const stderr={text:''};
-  child.stderr!.on('data',(chunk:Buffer)=>{stderr.text=(stderr.text+chunk.toString('utf8')).slice(-8000);});
+  // Codex that gave up on its model waits on without a word on its stream: it stops then, and the turn says why.
+  const codex=this.install.id==='codex';
+  child.stderr!.on('data',(chunk:Buffer)=>{stderr.text=(stderr.text+chunk.toString('utf8')).slice(-8000);if(codex&&codexGaveUp(stderr.text))stopChild(child);});
   return {child,bridge,key,stderr,dispatch};
  }
  /** Starts the next turn's process now, with this turn's command line, so the next turn need not wait for it. */
