@@ -115,8 +115,16 @@ if (-not $Agent) {
 }
 
 Step 'Opening your World in the browser...'
-$link = (& $worldlet link --local | Select-Object -First 1)
-if ($LASTEXITCODE -ne 0 -or -not $link) { Fail 'the service made no World link yet. Try again in a minute: worldlet link --local' }
+# The whole answer, not `| Select-Object -First 1`: that stops the command as its line arrives, and its exit code with it
+# (Beta 4633 on Windows, #838); stderr dropped through cmd, as Ask does. A World page still starting answers a few
+# seconds later.
+$link = ''
+for ($waited = 0; $waited -lt 30 -and -not $link; $waited++) {
+  $said = cmd.exe /d /c "`"$worldlet`" link --local 2>nul"
+  if ($LASTEXITCODE -eq 0) { $link = "$(@($said)[0])".Trim() }
+  if (-not $link) { Start-Sleep 1 }
+}
+if (-not $link) { Fail 'the service made no World link yet. Try again in a minute: worldlet link --local' }
 if (-not $env:WORLDLET_NO_BROWSER) { Start-Process $link }
 Write-Progress -Activity 'Installing Worldlet' -Completed
 Write-Host ''

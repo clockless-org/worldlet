@@ -194,7 +194,16 @@ fi
 
 if [ "$os" = macos ]; then
   step "Opening your World in the browser…"
-  local_link="$("$worldlet" link --local </dev/null)" || fail "the service made no World link yet. Try again in a minute: $worldlet link --local"
+  # A World page still starting answers a few seconds later.
+  local_link=""
+  waited=0
+  while [ -z "$local_link" ]; do
+    local_link="$("$worldlet" link --local </dev/null 2>/dev/null)" || local_link=""
+    [ -n "$local_link" ] && break
+    waited=$((waited + 1))
+    [ "$waited" -lt 30 ] || fail "the service made no World link yet. Try again in a minute: $worldlet link --local"
+    sleep 1
+  done
   if [ -z "${WORLDLET_NO_BROWSER:-}" ]; then open "$local_link" || echo "      Open this link in your browser: $local_link"; fi
   echo
   echo "Done. Finish the short setup in your browser. Worldlet keeps running in the background and starts when you log in."
