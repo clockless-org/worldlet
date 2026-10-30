@@ -181,7 +181,7 @@ The selected Agent forwards playback through the cancellable host audio bridge, 
 
 ### Host playback and honest state
 
-Playback runs in audio elements of the host's media surface, a hidden Chromium view that outlives World reloads and the desktop Companion (`platform/host/modules/app/surface.ts`, `audio.ts`).
+Playback runs in audio elements of the host's media surface, a hidden Chromium view that outlives World reloads (`platform/host/modules/app/surface.ts`, `audio.ts`).
 
 - `RadioMusic` with `RadioDirectory` (`audio.ts`, `directory.ts`; Radio Browser directory): uses the directory's dynamic DNS entry with mirror discovery and an identifiable User-Agent; searches by tag, filters unavailable stations and unsupported streams, and only selects HTTPS URLs. After playback really starts it reports one station click as the directory requires; no chat content is reported. Up to three candidates are tried in bounded fashion. States are loading / playing / buffering / paused / stopped / error; the start receipt waits until the player is actually playing and the media is ready.
 - `BackgroundMusic`: plays the bundled CC0 ambience and the original offline tracks.

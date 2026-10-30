@@ -191,8 +191,8 @@ shows and hides the page as `browserPip` says (`contracts/browser-surface.ts`;
   which takes no input there), its name or its **Back** button opens the Applet, and the same page returns to the panel at full
   size, still playing, on the platform it had. Close leaves the page as any page the person
   leaves: hidden, media paused and muted, live for a quick return. While it shows, the window's
-  page is live and takes one of the two live places. A world switch, a World page reload or
-  the window detaching into the desktop Companion closes it.
+  page is live and takes one of the two live places. A world switch or a World page reload
+  closes it.
 - **Not Chromium's own picture in picture.** Chromium's picture-in-picture feature opens a
   separate floating window rather than one inside the World beside Fox; it is not used, and
   the owner does not want that window.

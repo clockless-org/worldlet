@@ -76,10 +76,10 @@ and interim-caption support may differ; do not claim parity without device evide
 
 Animation follows observed task state and otherwise stays quiet. Reduced motion and
 hidden-window suspension apply. Current animation drafts are not final art acceptance.
-The desktop Companion reuses the existing world/conversation; no second Agent runs.
+Fox lives only in the World window (nothing stays on the desktop since 2026-10-29); no second Agent runs.
 
 The companion's name is the person's to change: click it in Settings › Fox (or Rename beside it), or ask Fox
-to. Both save `worldlet.companionName` and the companion profile, and the World, desktop Fox's name tag, the
+to. Both save `worldlet.companionName` and the companion profile, and the World, Fox's name tag, the
 message bar ("Message <name>") and the paired phone all follow.
 
 ## Responsiveness and recovery
@@ -90,4 +90,4 @@ opportunity and completion without conflating clocks or nested stages. Cancellat
 worker restart and expired credentials must preserve user records and reject stale events.
 
 [Conversation, model setup and speech details](../ui/companion/CONVERSATION.md),
-[animation](../ui/companion/ANIMATION.md), and [desktop Companion lifecycle](../platform/desktop/COMPANION.md) own execution specifics.
+[animation](../ui/companion/ANIMATION.md), and [World window lifecycle](../platform/desktop/COMPANION.md) own execution specifics.

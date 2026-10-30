@@ -7,7 +7,7 @@ Reusable [personal Applet scene presets](presets/personal-scenes/README.md) prov
 Start with [STYLE.md](STYLE.md): the currently used World, Applet and Fox images are the visual authority, not historical concepts or a new generation. Day/night references resolve directly to the live 4K pair.
 
 The [HUD material family](assets/hud/README.md) is shared by world controls,
-Companion, panels and the desktop pet. It uses generated paper material and
+Companion and panels. It uses generated paper material and
 clean interior windows into the button atlas. The [design masters](drafts/hud-v1/README.md)
 retain their provenance; their raw alpha gutters are not displayed in production.
 

@@ -28,7 +28,7 @@ decisions. See the [architecture](../../docs/UI-CORE-PLATFORM.md).
 | `src/modules/world` | World ambience, music, radio/podcasts, the computer's own music players |
 | `src/modules/companion` | Fox's dictation and Talk capture, local Whisper, spoken replies, cloud requests |
 | `src/modules/applets` | Voice Memos, weather, Codex and Claude Code sessions, delegated coding tasks |
-| `src/modules/app` | Menus, desktop Companion, updates, diagnostics, feedback, analytics, World backup |
+| `src/modules/app` | Menus, hiding and restoring the World window, updates, diagnostics, feedback, analytics, World backup |
 | `distribution/` | Public update feed config, analytics capture key, Mac entitlements, Mac release scripts (`mac/`), Windows installer and Store identity (`windows/`) |
 
 Modules register their own page actions and provide services through the contracts in
@@ -108,7 +108,7 @@ memory (`diagnostics.recent()`, never written to disk). Its log is
 `.local/electron-checks/onboarding-flow.log`; a failed run keeps its library for diagnosis.
 `npm run test:onboarding:paths` (no RC gate; the RC package smoke runs it on the signed app) runs `--check onboarding-paths` once per phase
 on one disposable library through a local Agent (a fixture OpenClaw when the host has none): quit on the apps page
-and resume, Mail starting Google sign-in in the tour and again from the World, the desktop Companion, Reset Fox,
+and resume, Mail starting Google sign-in in the tour and again from the World, closing the finished World (it hides with Fox inside), Reset Fox,
 Quit Completely with nothing left running ([details](../../scripts/DEVELOPMENT.md)).
 `npm run test:onboarding:options` (advisory, no RC gate since 2026-10-05) runs `--check setup-options` once per way in on setup's
 sign-in page, each on a fresh library: mock Google, Codex, and each local Agent brought in from fixture homes, then Fox
@@ -135,5 +135,5 @@ No pictures, no Codex sign-in or a Codex error is a SKIP. `node scripts/ui-revie
 answer shape and a run against a fake CLI.
 
 Signing, publication, the Mac updater and Windows delivery are in [DISTRIBUTION.md](DISTRIBUTION.md);
-the desktop Companion window is in [COMPANION.md](COMPANION.md). Development workflow and checks
+closing and restoring the World window is in [COMPANION.md](COMPANION.md). Development workflow and checks
 are in [Development and release](../../scripts/DEVELOPMENT.md).
