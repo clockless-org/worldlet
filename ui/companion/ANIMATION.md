@@ -99,7 +99,7 @@ playful gestures do not send a conversation or change actual task state.
 Idle stays quiet. User input and required approvals outrank decorative movement.
 Double-click preview and Dev controls use the existing action mapping; they are
 not evidence every experimental state is authored. Dragging repositions the Fox
-cluster while preserving click/hold semantics; native desktop drag remains host IO.
+cluster while preserving click/hold semantics.
 
 ## Transition and anatomy contract
 
@@ -130,7 +130,7 @@ fallback only, so its geometry, render and study checks were removed; Git keeps 
 
 Use the [animation inspector](../../resources/styles/builtin/references/companion/index.html) for rendered review.
 Inspect actual HUD size, dark backgrounds, narrow windows, rapid interruptions,
-prop handoffs, planted paws and native World/desktop transitions.
+prop handoffs, planted paws and native World transitions.
 
 The recorded native explanation/acknowledgment run had a 66ms maximum frame gap;
 it is not explained by isolated CPU optimization. Cached ear-weight work measured

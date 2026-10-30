@@ -36,8 +36,8 @@ Differences from the desktop app:
   no `rtcPage` service, so every frame of a browser link goes through the pairing room.
 - **The World page is in a browser.** World tools that run only on the page (navigation, websites, widgets, Applets)
   work while a browser has the World open, and otherwise answer that the World must be open. What a browser window
-  cannot do is not offered there: websites and the Browser open in a new tab, and YouTube, the World's sound, voice and
-  the desktop Companion are hidden ([what a browser window cannot do](../../docs/UI-CORE-PLATFORM.md#the-world-in-a-web-browser)).
+  cannot do is not offered there: websites and the Browser open in a new tab, and YouTube, the World's sound and voice
+  are hidden ([what a browser window cannot do](../../docs/UI-CORE-PLATFORM.md#the-world-in-a-web-browser)).
 - **Its own vault.** The secrets are as safe as `vault.key` (the computer account and disk encryption), not tied to a
   keychain. A vault the Electron host wrote with `safeStorage` is not readable here; this one opens in the desktop app
   when it [takes the library over](#the-desktop-app-takes-over), which seals it again with its keychain.

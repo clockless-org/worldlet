@@ -119,9 +119,7 @@ then the microphone and Send. At rest it is 256px and reads “Click to type · 
 speak”; typing widens it to 320px over 220ms (reduced motion: immediately). A click on
 the bar types, a hold speaks. Clicking Fox types too; a 44px settings circle on Fox's left
 opens the Companion panel (owner feedback 2026-10-04). Send matches the microphone. Dragging Fox never
-starts speech. On the desktop Fox stands with its bar alone (owner request 2026-10-11): no
-settings circle or dock actions beside it, and the microphone (with the Order bug in Alpha and
-Dev) as plain 36px icons inside the bar's right end. Native crop measurement follows the bar's width.
+starts speech.
 drafts survive dismissal. Speech supports click-to-start/send and hold-to-speak,
 with a waveform rather than partial transcript text. Thinking uses head dots;
 observed work/status text appears above the head, never in the input.

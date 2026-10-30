@@ -88,8 +88,8 @@ Use the [architecture audit checklist](../docs/UI-CORE-PLATFORM.md#architecture-
 ## Delivery scope
 
 World/HUD, website and restricted media surfaces are Electron `WebContentsView`s on
-every OS. The same trusted live World view moves into the desktop Companion window
-(`modules/companion/window.ts`), preserving its conversation and draft. Shared Core
+every OS. Closing the World window hides it with the same trusted live World view inside
+(`modules/companion/window.ts`), preserving its conversation and draft; nothing moves to the desktop. Shared Core
 runs in-process (`platform/host/core.ts`); it is not a UI renderer. OS input,
 composition, focus and pixel presentation are IO; World rendering and interaction
 decisions stay in shared UI.

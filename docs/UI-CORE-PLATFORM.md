@@ -146,7 +146,7 @@ page none; it talks to the host over one WebSocket at `/world/socket`, and the h
 - **Beside the app's window.** In the app, the window's World page and a browser's do not take the World from each
   other (`createPagePair`). The window stays the World's page; a browser's page is an extra one, and the takeover
   rule above holds among browser tabs only. Events and the World's snapshot reach both pages. Calls only a window
-  answers (its native views, menus, sound, voice, the desktop Companion) reach the window. A call about work a page
+  answers (its native views, menus, sound, voice, hiding and restoring the World) reach the window. A call about work a page
   started (a Fox turn, an Applet task, a cloud stream, named by the `id` or `streamId` of its request or the `id` the
   host answered) goes back to that page. Anything else goes to the window while its page is loaded, else to the
   browser's (Run in background loads no window page). A browser tab coming and going is not the window's page
@@ -161,14 +161,14 @@ leaves them out, unlike the host services, which fail closed: every app window h
 
 - **Websites and the Browser** open in a new tab instead of a native view over the panel.
 - **Hidden:** YouTube (the World leaves it out and the catalog does not offer it), the World's sound and music
-  players, the microphone (speaking to Fox, Talk, dictation and spoken replies), the desktop Companion window, and the
+  players, the microphone (speaking to Fox, Talk, dictation and spoken replies), and the
   corner room the Mac keeps for its window buttons.
 - **Fox's tools** that need one of these (the built-in browser, YouTube, the World's sound, music players) answer
   that it is not available in a browser window ([page-features.ts](../agent/gate/page-features.ts)) instead of failing
   on their own.
 - **The host refuses them too.** Before the router, a browser's page is refused the actions behind each of these
   features (`WEB_PAGE_ACTIONS`: the native website views and what drives them, YouTube, the World's sound, music
-  players, speech and the desktop Companion), with the same reason Fox's tools give, so a page that asks anyway
+  players, speech and the old desktop Companion actions, no-ops since 2026-10-29), with the same reason Fox's tools give, so a page that asks anyway
   reaches nothing on this computer's screen. The list of sites the built-in browser visited stays readable.
 
 The World on another device meets the computer through the pairing room, as a third page with less trust (`ROOM_ALLOWED`): [the World on another device](../platform/web/README.md#the-world-on-another-device).

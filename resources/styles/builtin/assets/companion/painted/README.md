@@ -14,7 +14,7 @@ seated body-weight shifts, shoulder raises, forepaw flexes, head gestures and ta
 motion over it. `fox-pose-transition.ts` preserves pose and velocity on interrupted
 state changes (420 ms normally, 180 ms for listening, 750 ms for rest). Real work interrupts previews,
 and reduced motion shows a static semantic pose. There are no added dialogue
-messages. World and desktop pet use the same portrait component.
+messages. The World uses this portrait component.
 
 These are restrained seated gestures: waving is a paw greeting, stretching is a
 seated shoulder stretch, and reading/working are posture cues. This single-view
