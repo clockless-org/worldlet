@@ -304,19 +304,10 @@ hides the page as before. The Browser panel (`ui/applets/browser-device.ts`) app
   out of sight, or the one the person took back into the panel during the turn (`foxPageHeld`).
   Moving around the World therefore does not stop Fox. Opening another website Applet does: that
   Applet's page is the person's.
-- **Beside the desktop Companion.** Closing or minimizing the World window stops website pages
-  ([desktop Companion](../desktop/COMPANION.md)), except Fox's own page: one out of sight, or one
-  Fox is driving in the panel.
-  - That page moves into a window of its own beside the Companion's window, placed by
-    `desktopTaskPictureInPicturePlacement` (`platform/host/modules/applets/task-window.ts`).
-    It keeps its size there, and Fox keeps working.
-  - While the World is away, the panel's layouts only tell the host whether Fox is working; Fox's
-    steps card follows the page.
-  - Pressing the window brings the World back with the page's Applet. Once Fox's turn has ended, a
-    close control there leaves the page, and the World's window ends with it.
-  - Fox's steps on its held page do not reopen the World. Any other way back puts the page where
-    the World last placed it.
-  - Other pages open again when the World returns.
+- **When the World hides.** Closing the World window hides its pages with it and stops the inline player
+  ([desktop Companion](../desktop/COMPANION.md)); Fox keeps working on its own page there. Before 2026-10-29
+  Fox's page moved into a window beside a desktop Companion (`desktopTaskPictureInPicturePlacement`,
+  `platform/host/modules/applets/task-window.ts`), which nothing opens now.
 
 Checks:
 - `node scripts/applet-task-pip-check.ts`: the World UI with a faked bridge. It covers the page

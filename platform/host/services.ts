@@ -352,26 +352,16 @@ export const SPEECH='speech';
 
 // App shell (modules/app) -------------------------------------------------------------------
 export interface DesktopCompanionService {
+ /** Always false: Fox stays in the World window (modules/companion/window.ts). Kept for pages that still ask. */
  readonly isDesktop:boolean;
- /** Window close/minimize keeps Fox on the desktop instead of quitting; so does the World losing the foreground. */
+ /** Window close hides the World while the app keeps running (until onboarding is over it quits). */
  shouldKeepOpen():boolean;
  restoreWorld():Promise<void>;
  syncPresentation():void;
+ /** Before the World window hides: websites and the inline player stop. */
  beforeDetach(listener:()=>void):void;
- /** After the Companion's window shows on the desktop (`true`) or the World view is back in the World
-  * window (`false`). */
- onPresentation(listener:(desktop:boolean)=>void):void;
- /** While any check is true, another app coming to the foreground leaves Fox in the World. */
- keepInWorld(check:()=>boolean):void;
- /** The Companion's floating window on screen while on the desktop. */
- panelBounds():{x:number;y:number;width:number;height:number}|null;
- /** Fox's hide button: the Companion's window goes away until the World is opened again. */
- hide():void;
- readonly isHidden:boolean;
  /** Run in background: no Worldlet window stays on screen while the app keeps running; false until onboarding is over. */
  background():boolean;
- /** While Fox is on the desktop because another app is in front: the World as the window behind Fox shows it. */
- backdropImage?():NativeImage|null;
 }
 export const DESKTOP_COMPANION='desktopCompanion';
 /** Run in background (platform/web/README.md#web): a preference set from the browser link's section (modules/app) and

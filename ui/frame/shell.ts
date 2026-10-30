@@ -19,7 +19,6 @@ export {mountFirstValue} from './first-value.ts';
 export {mountWorldTour} from './world-tour.ts';
 export {setupText} from './setup-language.ts';
 export {mountLoginItemOffer} from './login-item-offer.ts';
-export {mountDesktopCompanionHint,desktopCompanionHintText} from './desktop-companion-hint.ts';
 // What was the distribution folder (#714).
 export {latestMacRelease,mountMacDownload} from './mac-release.ts';
 export {displayReleaseVersion} from './release-version.ts';
