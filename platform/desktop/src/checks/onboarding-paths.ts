@@ -1,5 +1,5 @@
 import path from 'node:path';
-import {dialog,Menu,shell,type BaseWindow,type MenuItem,type WebContents,type WebContentsView} from 'electron';
+import {dialog,Menu,shell,BaseWindow,type MenuItem,type WebContents,type WebContentsView} from 'electron';
 import {AGENT,ANALYTICS,DESKTOP_COMPANION,type AgentService,type AnalyticsService,type DesktopCompanionService} from '../../../host/services.ts';
 import {readSelection} from '../../../host/modules/companion/agent/local-harness.ts';
 import {readAdopted} from '../../../host/modules/companion/agent/local-memory.ts';
@@ -18,7 +18,7 @@ import {setTimeout as sleep} from 'node:timers/promises';
 //   Center; it never offers Mail sign-in, owner decision 2026-10-10) and, with nothing connected, Fox waits on nothing:
 //   the tour closes with the phone step (owner request 2026-10-06), which turning the Tutorial switch off ends → opening
 //   Mail from the World starts Google sign-in (google_connect_started, never google_connect_failed; the 10-03 meeting) →
-//   Cancel → Reset Fox → the setup page. Before Reset, closing the World keeps Fox on the desktop and Back to World
+//   Cancel → Reset Fox → the setup page. Before Reset, closing the World hides it with Fox inside and Back to World
 //   restores it. Mail from the World and the desktop Companion are ADVISORY (a failure prints ADVISORY FAIL) until they
 //   have passed on the Mac and Windows hosts, except the desktop Companion on the Mac, which always blocked.
 // - after-reset: the relaunch after Reset Fox opens on the setup page's choices with no local Agent chosen.
@@ -109,7 +109,7 @@ export async function onboardingPaths({host,window,view}:CheckContext){
   console.log(`PASS onboarding paths ${phase}: chose ${choice} on the setup page and brought it in (${Math.round((Date.now()-started)/1000)}s); closing the window mid-onboarding`);
   window.close();
   await sleep(15000);
-  const message=`closing the window during onboarding did not quit the app (Fox on the desktop: ${host.use<DesktopCompanionService>(DESKTOP_COMPANION).isDesktop})`;
+  const message=`closing the window during onboarding did not quit the app (World visible: ${window.isVisible()})`;
   if(CLOSE_QUITS_BLOCKING)throw Error(message);
   console.log(`ADVISORY FAIL onboarding paths ${phase}, close quits during onboarding: ${message}`);
   await host.use<DesktopCompanionService>(DESKTOP_COMPANION).restoreWorld().catch(()=>{});
@@ -167,8 +167,8 @@ export async function onboardingPaths({host,window,view}:CheckContext){
    if(ended()==='google_connect_failed')throw Error('cancelling Google sign-in from the World reported google_connect_failed');
    mark('Cancel stopped the sign-in');
   });
-  // The same code keeps Fox on the desktop on every OS (COMPANION.md), once onboarding is over; Windows
-  // returns through the tray icon. During the tour closing quits, so the tour is skipped first.
+  // Once onboarding is over closing hides the World on every OS (COMPANION.md); Windows returns through the
+  // tray icon. During the tour closing quits, so the tour is skipped first.
   if(await js(tourOn)===true)await skipTutorial();
   await advisory('desktop Companion',process.platform==='darwin'||COMPANION_ELSEWHERE_BLOCKING,()=>desktopCompanion(host.use<DesktopCompanionService>(DESKTOP_COMPANION),window,view,mark));
   // Reset Fox from Settings, as a person does; the native confirmation answers Reset.
@@ -211,27 +211,18 @@ async function clickAt(web:WebContents,js:(code:string)=>Promise<any>,what:strin
  web.sendInputEvent({type:'mouseUp',x:at.x,y:at.y,button:'left',clickCount:1});
 }
 
-/** Closing the World window keeps Fox on the desktop (the World view moves into the Companion's floating
- * window), and Back to World puts the same view back in the shown World window (modules/companion/window.ts).
- * The one-time hint needs a finished onboarding, so the mock-Google journey checks it (onboarding-flow.ts). */
-export async function desktopCompanion(companion:DesktopCompanionService,window:BaseWindow,view:WebContentsView,mark:(step:string)=>void,onDesktop?:()=>Promise<void>){
+/** Closing the World window hides it with Fox inside: no window stays on the desktop and the view stays in the World
+ * window (owner request 2026-10-29), and Back to World shows it again (modules/companion/window.ts). */
+export async function desktopCompanion(companion:DesktopCompanionService,window:BaseWindow,view:WebContentsView,mark:(step:string)=>void){
  window.close();
- for(let i=0;i<50&&!(companion.isDesktop&&!window.isVisible()&&companion.panelBounds());i++)await sleep(200);
- if(!companion.isDesktop||window.isVisible()||!companion.panelBounds())throw Error(`closing the World window did not leave Fox on the desktop (${JSON.stringify({desktop:companion.isDesktop,worldVisible:window.isVisible(),panel:companion.panelBounds()})})`);
- if(window.contentView.children.includes(view))throw Error('the World view stayed in the closed World window instead of moving to the Companion');
- mark('closing the World window left Fox on the desktop');
- await onDesktop?.();
- const frames=()=>view.webContents.executeJavaScript("document.querySelector('#notionWorld')?.sceneMetrics?.performance?.frames??null",false).catch(()=>null) as Promise<number|null>;
- const before=await frames();
+ for(let i=0;i<50&&window.isVisible();i++)await sleep(200);
+ if(companion.isDesktop||window.isVisible())throw Error(`closing the World window did not hide it (${JSON.stringify({desktop:companion.isDesktop,worldVisible:window.isVisible()})})`);
+ if(!window.contentView.children.includes(view))throw Error('the World view left the closed World window');
+ const shown=BaseWindow.getAllWindows().filter(other=>other!==window&&!other.isDestroyed()&&other.isVisible()&&other.getTitle()==='Worldlet Companion');
+ if(shown.length)throw Error('a Companion window stayed on the desktop after the World closed');
+ mark('closing the World window hid it and left nothing on the desktop');
  await companion.restoreWorld();
- for(let i=0;i<50&&!(window.isVisible()&&!companion.isDesktop);i++)await sleep(200);
+ for(let i=0;i<50&&!window.isVisible();i++)await sleep(200);
  if(companion.isDesktop||!window.isVisible()||!window.contentView.children.includes(view))throw Error(`Back to World did not bring the World window back (${JSON.stringify({desktop:companion.isDesktop,worldVisible:window.isVisible()})})`);
- // The World stops drawing while Fox is on the desktop; back in its window it draws again (Mac Alpha 4132, #182: the
- // last picture showed the bare sky and labels without the World's art).
- if(typeof before==='number'){
-  let after=await frames();
-  for(let i=0;i<25&&!(typeof after==='number'&&after>=before+2);i++){await sleep(200);after=await frames();}
-  if(!(typeof after==='number'&&after>=before+2))throw Error(`Back to World showed the window but the World did not draw again (frames ${before} → ${after})`);
- }
  mark('Back to World restored the World window');
 }

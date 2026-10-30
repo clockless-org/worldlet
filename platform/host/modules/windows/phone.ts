@@ -259,7 +259,7 @@ export function installPhone(host:Host){
   onChange:status=>{
    if(status.state==='paired'&&webPaired===false)usage('phone_paired',{phone_platform:'web'});
    webPaired=status.state==='paired';
-   // Running in background is for this link: once it ends, closing the World leaves Fox on the desktop again.
+   // Running in background is for this link: once it ends, closing the World hides it again.
    if(status.state==='none'&&local.status().state==='none'&&host.preferences.bool(RUN_IN_BACKGROUND))host.preferences.set(RUN_IN_BACKGROUND,false);
    host.page.event('worldlet:web-pair-status',webStatus(status));
   },

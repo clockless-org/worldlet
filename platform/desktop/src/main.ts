@@ -220,7 +220,7 @@ async function start(){
  });
 
  const preload=path.join(__dirname,'world-preload.cjs');
- // Launched by the login item: the World opens minimized and Fox waits on the desktop, nothing takes focus.
+ // Launched by the login item: the World opens minimized, nothing takes focus.
  const quiet=profile.channel==='release'&&!capture&&!probe&&!loginCheck&&!profile.smoke&&openedAtLogin({platform:process.platform,argv:process.argv,wasOpenedAtLogin:process.platform==='darwin'?app.getLoginItemSettings({type:'mainAppService'}).wasOpenedAtLogin:false});
  // Set to run in background with onboarding over: the login launch opens no window at all (the Dock or tray brings it).
  const hidden=quiet&&preferences.bool(RUN_IN_BACKGROUND)&&!onboardingUnfinished(store.state.onboarding);

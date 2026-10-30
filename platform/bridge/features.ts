@@ -36,8 +36,6 @@ export const googleSignInStart=(info:any):'connecting'|'browser'=>hostFeatures(i
 export function hostCopy(info:any) {
  const windows=info?.platform==='windows';
  return {
- // Fox's first line on the desktop: how to go back or quit (Mac has the Dock menu, Windows the tray icon, Linux neither).
- desktopCompanionHint:'I’ll keep working here in the background. Right-click me'+(windows?' (or the tray icon)':info?.platform==='macos'?' (or the Dock icon)':'')+' to go **Back to World** or **Quit Completely**.',
  googleConnect:windows?'I’m opening your browser. Sign in with Google to read Gmail and Calendar here. This connection is read only.':'I’m opening your **browser**. **Sign in with Google** there so Mail can find what needs your attention.\n\nIf Google shows an unverified-app warning, choose **Advanced** → **Go to Worldlet**, then **Continue** to finish connecting.',
  voice:windows?'**Talk or type**\n\nHold Fox or Space to speak, then release to send. Esc cancels. Recognition runs locally; first use downloads a speech model. Allow desktop microphone access in Windows privacy settings. You can also type. Replies can be read aloud using installed Windows voices.':undefined,
  voices:windows?'Automatic voice follows the reply language using installed Windows voices, with the system default as a fallback.':'System voices are installed on this Mac; automatic voice follows the reply language.',

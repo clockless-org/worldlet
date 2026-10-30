@@ -24,25 +24,21 @@ export function installBrowser(host:Host){
  const player=new YouTubePlayer(host,device.surface,()=>websiteSession(store.sampleEnabled()?'practice':'personal',()=>{}));
  const stripe=new StripeService(host);
  const desktop=()=>host.optional<DesktopCompanionService>(DESKTOP_COMPANION);
- // Fox leaving the World window for the desktop stops every page, as the Mac host does, except Fox's
- // own task page: it shows beside the Companion and Fox keeps working (#1175).
+ // Closing the World window stops the inline player; pages hide with the window and Fox's task page keeps working.
  let detachHooked=false;
  const hookDetach=()=>{
   if(detachHooked)return;
   const companion=desktop();if(!companion)return;
-  detachHooked=true;companion.beforeDetach(()=>{device.detach();player.stop();});
-  companion.onPresentation(away=>{if(away)device.placeTask(companion.panelBounds());else device.attach();});
-  // Switching to another app must not close a website, a video or a call the person has open in the World.
-  companion.keepInWorld(()=>device.visiblePage!==null||player.playing||device.inCall);
+  detachHooked=true;companion.beforeDetach(()=>player.stop());
  };
  device.restoreWorld=()=>desktop()?.restoreWorld();
  host.onPageLoaded(hookDetach);
  const object=(value:unknown):Row=>value&&typeof value==='object'&&!Array.isArray(value)?value as Row:{};
  host.register({
-  browserShow:request=>{hookDetach();if(!desktop()?.isDesktop)device.show(request);return {ok:true};},
+  browserShow:request=>{hookDetach();device.show(request);return {ok:true};},
   browserLayout:request=>{device.layout(object(request.rect),request.fox,request.page,request.press===true,request.copy,request.takeCopy===true,request.paperEdge);return {ok:true};},
   browserHide:request=>{device.hide(request.live);return {ok:true};},
-  browserPip:request=>{hookDetach();if(!desktop()?.isDesktop)device.pip(String(request.applet??''),request.rect,request.live);return {ok:true};},
+  browserPip:request=>{hookDetach();device.pip(String(request.applet??''),request.rect,request.live);return {ok:true};},
   browserCommand:request=>device.command(typeof request.operation==='string'?request.operation:'',object(request.args),request.agent===true),
   browserBookmarks:()=>discoverBookmarks(),
   // The World's Task panel shows the page Fox is driving in a small window (ui/world/task-panel.ts): a small picture of

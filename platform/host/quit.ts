@@ -10,7 +10,7 @@ export const QUIT_ARGUMENT='--quit';
 export const wantsQuit=(argv:readonly string[])=>argv.includes(QUIT_ARGUMENT);
 
 /** Windows: right-clicking the taskbar button offers Quit Worldlet beside Close window, which only
- * closes the World and leaves Fox on the desktop. Packaged builds only: a checkout's electron.exe
+ * hides the World while the app keeps running. Packaged builds only: a checkout's electron.exe
  * would need the app path too. */
 export function installQuitTask(platform:NodeJS.Platform=process.platform){
  if(platform!=='win32'||!app.isPackaged)return;

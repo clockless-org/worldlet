@@ -89,10 +89,10 @@ export function installShell(host:Host){
  // whether one exists. The reports stay in logs/crashes, newest few kept.
  const nativeCrash=uncleanExit&&crashedSince(runMarker,app.getPath('crashDumps'));
  try{fs.mkdirSync(path.dirname(runMarker),{recursive:true});fs.writeFileSync(runMarker,JSON.stringify({startedAt:new Date().toISOString()}),{mode:0o600});}catch{}
- // Websites and inline players never follow Fox onto the desktop.
+ // Websites and inline players stop when the World window hides.
  companion.beforeDetach(()=>browser()?.stop());
 
- const showControls=(screen:string)=>{if(companion.isDesktop)void companion.restoreWorld();void page.call('worldletShowControls',screen,null);};
+ const showControls=(screen:string)=>{void page.call('worldletShowControls',screen,null);};
  // Mac World menu: the World UI's own actions; a refusal is shown like the page shows it.
  const sources=()=>host.optional<SourcesService>(SOURCES);
  const worldAction=(operation:string,work:()=>unknown)=>{void (async()=>{try{await work();}catch(error){
@@ -149,7 +149,6 @@ export function installShell(host:Host){
  // The person's own keys, clicks and scrolls on the World page (user_engaged); app_active below only says the app ran.
  const watched=new WeakSet<object>();
  host.onPageLoaded(()=>{
-  companion.attach();
   companion.syncPresentation();
   const contents=host.worldView()?.webContents;
   if(contents&&!watched.has(contents)){watched.add(contents);analytics.watchInput(contents);}
@@ -220,11 +219,12 @@ export function installShell(host:Host){
    throw new WorldletError('Unknown login item operation.');
   },
   companionMenu:()=>{setImmediate(()=>companion.showMenu());return {ok:true};},
-  desktopCompanionSize:request=>{companion.setBounds(request.rect);return {ok:true};},
-  desktopCompanionDrag:request=>{if(request.phase==='start')companion.beginDrag();else companion.endDrag();return {ok:true};},
-  desktopCompanionState:()=>({enabled:companion.isDesktop}),
-  desktopCompanionHide:()=>{companion.hide();return {ok:true};},
-  desktopCompanionPointer:request=>{companion.pointer(request.over===true);return {ok:true};},
+  // Fox no longer goes to the desktop (owner request 2026-10-29); pages from older builds may still ask.
+  desktopCompanionSize:()=>({ok:true}),
+  desktopCompanionDrag:()=>({ok:true}),
+  desktopCompanionState:()=>({enabled:false}),
+  desktopCompanionHide:()=>{companion.background();return {ok:true};},
+  desktopCompanionPointer:()=>({ok:true}),
   // The timing stays in logs/fox-timing.jsonl; PostHog gets only its buckets (core foxTimingEvent), to see Fox slowing down.
   foxTiming:request=>{try{const timing=foxTimingEvent(recordFoxTiming(store.root,request));if(timing)analytics.recordProductEvent(timing.event,timing.duration,timing.dimensions);}catch{}return {ok:true};},
   appUpdate:request=>updates.activate(request),

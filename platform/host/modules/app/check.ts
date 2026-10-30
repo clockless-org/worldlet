@@ -376,41 +376,39 @@ try{
  const fake:TrayFactory=()=>{const tray={tooltip:'',menu:null as Menu|null,click:()=>{},destroyed:false};trays.push(tray);
   return {setToolTip:text=>{tray.tooltip=text;},setContextMenu:menu=>{tray.menu=menu;},on:(_event,listener)=>{tray.click=listener;},destroy:()=>{tray.destroyed=true;}};};
  let quits=0,closeQuits=0,unfinished=true;
- const desktop:DesktopCompanion=new DesktopCompanion(live,companionEntry(live,{back:()=>{void desktop.restoreWorld();},quit:()=>{quits+=1;}},'win32',fake),{quit:()=>{closeQuits+=1;},unfinished:()=>unfinished,follows:false,hideApp:()=>{}});
- desktop.attach();
- // Until onboarding is over, closing quits and Fox does not stay on the desktop (owner request 2026-10-04).
- assert(desktop.shouldKeepOpen(),'closing during onboarding keeps the window from merely closing');
- await new Promise(resolve=>setImmediate(resolve));
- assert.equal(closeQuits,1,'closing during onboarding quits the app');
- assert(!desktop.isDesktop&&trays.length===0,'and leaves no Fox on the desktop');
- unfinished=false;
- // Fox's task page follows the presentation (#1175): told after the Companion's window shows and
- // after the World is back, with that window's bounds while it is out.
- const presentations:boolean[]=[];desktop.onPresentation(away=>presentations.push(away));
+ const desktop:DesktopCompanion=new DesktopCompanion(live,companionEntry(live,{back:()=>{void desktop.restoreWorld();},quit:()=>{quits+=1;}},'win32',fake),{quit:()=>{closeQuits+=1;},unfinished:()=>unfinished,hideApp:()=>{}});
  const tick=()=>new Promise(resolve=>setImmediate(resolve));
- // Back to World focuses the World; Mac delivers that focus later, and a late focus would restore the next detach.
- const focused=()=>new Promise<void>(resolve=>{const timer=setTimeout(resolve,2000);world.once('focus',()=>{clearTimeout(timer);resolve();});});
- const detach=async()=>{assert(desktop.shouldKeepOpen(),'closing the World keeps Fox on the desktop');await tick();await tick();assert(desktop.isDesktop);};
- assert.equal(desktop.panelBounds(),null,'no Companion window while the World shows');
- await detach();
- assert.deepEqual(presentations,[true],'told once the Companion is on the desktop');
- const out=desktop.panelBounds();
- assert(out&&out.width>0&&out.height>0,'the Companion window\'s bounds while it is out: '+JSON.stringify(out));
- assert.equal(trays.length,1,'detaching adds one tray icon');
+ world.showInactive();
+ // Until onboarding is over, closing quits (owner request 2026-10-04).
+ assert(desktop.shouldKeepOpen(),'closing during onboarding keeps the window from merely closing');
+ await tick();
+ assert.equal(closeQuits,1,'closing during onboarding quits the app');
+ assert(trays.length===0,'and adds no tray icon');
+ unfinished=false;
+ // After onboarding, closing hides the World with Fox inside; nothing stays on the desktop (owner request 2026-10-29).
+ let stopped=0;desktop.beforeDetach(()=>{stopped+=1;});
+ const close=async()=>{assert(desktop.shouldKeepOpen(),'closing the World keeps the app running');await tick();assert(!desktop.isDesktop&&!world.isVisible(),'the World hides and Fox stays in it');};
+ await close();
+ assert(world.contentView.children.includes(view),'the World view stays in the World window');
+ assert.equal(BaseWindow.getAllWindows().filter(other=>other.isVisible()).length,0,'no window stays on the desktop');
+ assert.equal(stopped,1,'websites and the player stop when the World hides');
+ assert.equal(trays.length,1,'closing adds one tray icon');
  assert.equal(trays[0].tooltip,'Worldlet Check');
- assert(!world.isVisible(),'the World is hidden');
  assert.deepEqual(trays[0].menu!.items.map(item=>item.label),['Back to World','','Quit Completely']);
- let back=focused();trays[0].click();await back;await tick();
- assert(!desktop.isDesktop&&world.isVisible(),'clicking the icon restores the World');
- assert.deepEqual(presentations,[true,false],'told once the World is back');assert.equal(desktop.panelBounds(),null);
+ trays[0].click();await tick();
+ assert(world.isVisible(),'clicking the icon restores the World');
  assert(trays[0].destroyed,'the icon goes when the World returns');
- await detach();
+ await close();
  assert.equal(trays.length,2);
  desktop.shouldKeepOpen();await tick();
- assert.equal(trays.length,2,'closing again while on the desktop adds no second icon');
- back=focused();trays[1].menu!.items[0].click();await back;await tick();
- assert(!desktop.isDesktop&&trays[1].destroyed,'Back to World restores the World and removes the icon');
- await detach();
+ assert.equal(trays.length,2,'closing again while hidden adds no second icon');
+ trays[1].menu!.items[0].click();await tick();
+ assert(world.isVisible()&&trays[1].destroyed,'Back to World restores the World and removes the icon');
+ // Minimizing only minimizes: nothing comes out.
+ world.minimize();await new Promise(resolve=>setTimeout(resolve,200));
+ assert(!desktop.isDesktop&&world.contentView.children.includes(view),'minimizing leaves Fox in the World');
+ desktop.reopen();await tick();
+ await close();
  trays[2].menu!.items[2].click();
  assert.equal(quits,1,'Quit Completely quits');
  desktop.stop();await tick();
@@ -420,103 +418,31 @@ try{
   const real=companionEntry(host,noop)!;
   real.show();assert(real.shown);real.hide();await tick();assert(!real.shown);
  }
- console.log('PASS on Windows the desktop Companion keeps a tray way back to the World, removed on restore, with Quit Completely');
- // Another app in front (owner Order 2026-10-09): Fox floats on top while the World window stays where it was.
+ console.log('PASS closing the World hides it with Fox inside; on Windows a tray way back, removed on restore, with Quit Completely');
+ // Run in background (platform/web/README.md#web): no window stays while the app keeps running for a browser link.
  {
   const world=new BaseWindow({width:400,height:300,show:false}),view=new WebContentsView();
   world.contentView.addChildView(view);view.setBounds({x:0,y:0,width:400,height:300});
-  const page={...host.page,ready:()=>true,call:async(name:string)=>name==='worldletCompanionGeometry'?{x:10,y:10,width:120,height:140}:undefined} as Host['page'];
-  const live:Host={...host,window:()=>world,worldView:()=>view,page};
-  let front=true,busy=false,unfinished=true;
-  const trays:string[]=[];
-  const fake:TrayFactory=()=>{trays.push('shown');return {setToolTip:()=>{},setContextMenu:()=>{},on:()=>{},destroy:()=>{}};};
-  const desktop=new DesktopCompanion(live,companionEntry(live,noop,'win32',fake),{quit:()=>{},unfinished:()=>unfinished,inFront:()=>front,follows:true,hideApp:()=>{}});
-  desktop.keepInWorld(()=>busy);
-  desktop.attach();world.showInactive();
-  const away=async()=>{world.emit('blur');for(let i=0;i<20&&!desktop.isDesktop;i++)await new Promise(resolve=>setTimeout(resolve,50));};
-  front=false;await away();
-  assert(!desktop.isDesktop,'during onboarding Fox stays in the World when another app comes to the front');
-  unfinished=false;front=true;await away();
-  assert(!desktop.isDesktop,'focus moving to another Worldlet window keeps Fox in the World');
-  front=false;busy=true;await away();
-  assert(!desktop.isDesktop,'a website, video or call open in the World keeps Fox there');
-  busy=false;await away();
-  assert(desktop.isDesktop&&desktop.panelBounds(),'another app in front puts Fox on the desktop');
-  assert(world.isVisible()&&!world.contentView.children.includes(view),'the World window stays where it was while Fox is out');
-  assert.equal(trays.length,0,'the World keeps its taskbar button, so no tray icon');
-  // Fox's hide button (owner Order 2026-10-12): Fox goes away and stays away until the World is opened again.
-  desktop.hide();
-  assert(desktop.isDesktop&&desktop.isHidden&&!world.isVisible(),'hiding puts Fox and the World away; neither comes forward');
-  assert.equal(trays.length,1,'the tray (Windows) is the way back while both are away');
-  world.emit('blur');await new Promise(resolve=>setTimeout(resolve,250));
-  assert(desktop.isHidden,'another app coming to the front again does not bring a hidden Fox back');
-  world.emit('focus');await new Promise(resolve=>setImmediate(resolve));
-  assert(!desktop.isDesktop&&world.contentView.children.includes(view),'bringing the World back to the front brings Fox back into it');
-  assert(!desktop.isHidden,'opening the World ends the hiding');
-  desktop.stop();
-  console.log('PASS another app in front puts Fox on the desktop; the World coming back brings it home');
- }
- // Run in background (platform/web/README.md#web): no window stays, not even Fox, while the app keeps running for a browser link.
- {
-  const world=new BaseWindow({width:400,height:300,show:false}),view=new WebContentsView();
-  world.contentView.addChildView(view);view.setBounds({x:0,y:0,width:400,height:300});
-  const page={...host.page,ready:()=>true,call:async(name:string)=>name==='worldletCompanionGeometry'?{x:10,y:10,width:120,height:140}:undefined} as Host['page'];
-  const live:Host={...host,window:()=>world,worldView:()=>view,page};
+  const live:Host={...host,window:()=>world,worldView:()=>view,page:{...host.page,ready:()=>true}};
   let unfinished=true,hides=0;
   const trays:string[]=[];
   const fake:TrayFactory=()=>{trays.push('shown');return {setToolTip:()=>{},setContextMenu:()=>{},on:()=>{},destroy:()=>{}};};
-  const desktop=new DesktopCompanion(live,companionEntry(live,noop,'win32',fake),{quit:()=>{},unfinished:()=>unfinished,follows:false,hideApp:()=>{hides+=1;}});
-  desktop.attach();world.showInactive();
+  const desktop=new DesktopCompanion(live,companionEntry(live,noop,'win32',fake),{quit:()=>{},unfinished:()=>unfinished,hideApp:()=>{hides+=1;}});
+  world.showInactive();
   assert(!desktop.background()&&world.isVisible(),'nothing runs in background until onboarding is over');
   unfinished=false;
   assert(desktop.background(),'running in background');
-  assert(!world.isVisible()&&!desktop.isDesktop,'the World goes away and Fox does not come out');
+  assert(!world.isVisible()&&!desktop.isDesktop,'the World goes away');
   assert.equal(trays.length,1,'the tray (Windows) is the way back');assert.equal(hides,1,'the Mac gives the foreground back');
   world.showInactive();
   preferences.set(RUN_IN_BACKGROUND,true);
   try{
    assert(desktop.shouldKeepOpen(),'closing the World set to run in background keeps the app');
-   await new Promise(resolve=>setImmediate(resolve));await new Promise(resolve=>setImmediate(resolve));
-   assert(!world.isVisible()&&!desktop.isDesktop,'and leaves no window, not even Fox');
+   assert(!world.isVisible(),'and leaves no window');
+   assert.equal(hides,2,'and gives the foreground back');
   }finally{preferences.set(RUN_IN_BACKGROUND,false);}
-  world.showInactive();
-  assert(desktop.shouldKeepOpen());
-  for(let i=0;i<20&&!desktop.isDesktop;i++)await new Promise(resolve=>setTimeout(resolve,25));
-  assert(desktop.isDesktop,'without it, closing the World leaves Fox on the desktop as before');
   desktop.stop();world.destroy();
-  console.log('PASS run in background leaves no window, not even Fox, once onboarding is over');
- }
- // A World page that never answers (one reloading mid-call) still lets closing the World put Fox on the desktop,
- // and the next close still works (Mac Alpha 4496, #651: the window stayed open, Fox never came out).
- {
-  const world=new BaseWindow({width:400,height:300,show:false}),view=new WebContentsView();
-  world.contentView.addChildView(view);view.setBounds({x:0,y:0,width:400,height:300});
-  const page={...host.page,ready:()=>true,call:()=>new Promise<undefined>(()=>{})} as Host['page'];
-  const desktop=new DesktopCompanion({...host,window:()=>world,worldView:()=>view,page},companionEntry(host,noop,'darwin'),{quit:()=>{},unfinished:()=>false,follows:false,hideApp:()=>{}});
-  desktop.attach();world.showInactive();
-  const leaves=async(what:string)=>{
-   assert(desktop.shouldKeepOpen(),what+' keeps the app');
-   for(let i=0;i<100&&!(desktop.isDesktop&&!world.isVisible());i++)await new Promise(resolve=>setTimeout(resolve,100));
-   assert(desktop.isDesktop&&!world.isVisible()&&desktop.panelBounds(),what+' puts Fox on the desktop although the page never answers');
-  };
-  await leaves('closing the World');
-  desktop.restoreWorld().catch(()=>{});world.showInactive();
-  assert(!desktop.isDesktop,'Back to World does not wait for the page');
-  await leaves('closing the World again');
-  desktop.stop();world.destroy();
-  console.log('PASS a World page that never answers still lets closing the World put Fox on the desktop');
- }
- // The World closing (quit, restart) while the page answers leaves nothing to detach: once an unhandled
- // "Object has been destroyed" from detach on a Mac.
- {
-  const world=new BaseWindow({width:400,height:300,show:false}),view=new WebContentsView();
-  world.contentView.addChildView(view);view.setBounds({x:0,y:0,width:400,height:300});
-  const page={...host.page,ready:()=>true,call:async(name:string)=>{if(name==='worldletCompanionGeometry'){world.destroy();return {x:10,y:10,width:120,height:140};}}} as Host['page'];
-  const desktop=new DesktopCompanion({...host,window:()=>world,worldView:()=>view,page},companionEntry(host,noop,'darwin'),{quit:()=>{},unfinished:()=>false,follows:false,hideApp:()=>{}});
-  await desktop.showDesktop(true);
-  assert(!desktop.isDesktop&&desktop.panelBounds()===null,'a World destroyed mid-detach stays home');
-  desktop.stop();if(!view.webContents.isDestroyed())view.webContents.close();
-  console.log('PASS the World closing while Fox leaves for the desktop is not an error');
+  console.log('PASS run in background leaves no window once onboarding is over');
  }
  for(const window of BaseWindow.getAllWindows())window.destroy();
 }catch(error){console.error('FAIL shell:',error);process.exitCode=1;}

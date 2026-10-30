@@ -5,7 +5,7 @@ import {appletSupport,appletsOffPage,connectionLive} from '../context/applets/in
 import {startWebAnalytics,withProductAnalytics} from './frame/index.ts';
 import {settleItemPage} from '../context/store/index.ts';
 import {installDesktopCompanion} from './companion/index.ts';
-import {mountDesktopCompanionHint,mountFirstValue,mountLoginItemOffer,mountWorldTour} from './frame/index.ts';
+import {mountFirstValue,mountLoginItemOffer,mountWorldTour} from './frame/index.ts';
 import {landSetupDevices} from './frame/index.ts';
 import {mountStartupSetup} from './frame/index.ts';
 import {celebrateWorld,celebrateWin} from './frame/index.ts';
@@ -90,7 +90,7 @@ function reloadWithoutHash(){const url=new URL(location.href);url.hash='';locati
 async function toggleSample(){await save.catch(()=>{});await call('setSampleEnabled',{enabled:!sample});reloadWithoutHash();}
 
 
-let firstValue=null,worldTour=null,loginItemOffer=null,desktopHint=null;
+let firstValue=null,worldTour=null,loginItemOffer=null;
 let lastGoogleState:string|null=null,reportedWorld=false;
 async function applyReceivedSnapshot(state,isCurrent=()=>true){
  if(!state.sampleEnabled){
@@ -160,7 +160,6 @@ async function applyReceivedSnapshot(state,isCurrent=()=>true){
  if(!sample&&!worldTour)worldRoot?.addEventListener('worldlet:first-win',()=>celebrateWin(worldRoot));
  if(!sample){if(!worldTour)worldTour=mountWorldTour({root:worldRoot,view,call,state,arriving:setupArrivalPending,connectApplet:key=>onboarding?.show('connection','home',key)});else worldTour.update(state);}
  if(!sample){if(!loginItemOffer)loginItemOffer=mountLoginItemOffer({root:worldRoot,view,call,state});else loginItemOffer.update(state);}
- if(!sample&&hostFeatures(state).desktopCompanion!==false){if(!desktopHint)desktopHint=mountDesktopCompanionHint({root:worldRoot,view,state});else desktopHint.update(state);}
  if(!sample&&!reportedWorld){reportedWorld=true;track('world_entered');}
  if(setupFinished&&!onboarding)worldRoot.dispatchEvent(new CustomEvent('worldlet:intro-devices',{detail:[]}));
  if(!sample){if(!onboarding)onboarding=mountWorldOnboarding({root:worldRoot,call,view,state,toggleSample,applySnapshot:receive});else onboarding.update(state);}

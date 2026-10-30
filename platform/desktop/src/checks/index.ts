@@ -31,9 +31,8 @@ export async function runCheck(name:string,context:CheckContext):Promise<number>
 /** RC 录像 (owner request 2026-10-02): with WORLDLET_CHECK_FRAMES=<folder> the run keeps a picture of the World view every
  * FRAME_MS (unchanged pictures skipped) and each printed PASS/FAIL line with its time, in <folder>/index.json, so
  * scripts/ui-review.ts can have Codex look at the run's UI afterwards. capturePage reads the app's own rendering:
- * no Screen Recording permission; website panels drawn by other views are not in the pictures. While the World window is
- * closed and Fox stays on the desktop, the view sits in the Companion's transparent window and captures as a black World
- * (RC f79c2afa's review blocker), so only the view shown in the visible World window is recorded. */
+ * no Screen Recording permission; website panels drawn by other views are not in the pictures. A hidden World window
+ * captures as a black World (RC f79c2afa's review blocker), so only the view shown in the visible World window is recorded. */
 export const FRAME_MS=1500,MAX_FRAMES=900,FRAME_WIDTH=1280;
 function recordFrames(name:string,{window,view}:CheckContext,folder:string|undefined){
  if(!folder)return null;

@@ -192,7 +192,7 @@ windows), checks the lock between steps, the card's own Done under the spotlight
 the bottom-right corner during the first run and gone after it.
 
 Closing the window before onboarding is over (setup, then this tour) quits Worldlet instead of
-leaving Fox on the desktop, and minimizing only minimizes (owner request 2026-10-04,
+hiding the World, and minimizing only minimizes (owner request 2026-10-04,
 `platform/host/modules/companion/window.ts`); the next launch resumes at the same step.
 `onboarding-first-value-check.ts` verifies selection, retry, the still-open choice and the first win after a Go ahead, which waits for Fox's reply.
 `onboarding-first-value-world-check.ts` exercises late Attention publication and the
