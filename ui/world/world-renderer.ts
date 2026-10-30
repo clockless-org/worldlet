@@ -42,7 +42,7 @@ export interface WorldState {
  pins:Readonly<Record<string,readonly (string|null)[]>>;
  environment:WorldRecord;
  motion:boolean;
- /** Nobody can see the World right now (Fox floats on the desktop, or the window is hidden). Stop drawing. */
+ /** Nobody can see the World right now (the window is hidden). Stop drawing. */
  paused?:boolean;
  /** Applets that arrive next, before `applet.arrived` shows them: the World puts them where they will land. */
  arriving?:readonly string[];

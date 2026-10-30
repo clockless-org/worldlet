@@ -220,8 +220,7 @@ rehearsal site. It uses no network and no account. It checks that:
   `pageFrameRate` in the panel, the window and out of sight;
 - a one-second H.264/AAC clip (`platform/browser/fixtures/h264-aac.mp4`) plays on Worldlet's own
   CEF build, and the standard build reports that it cannot play it;
-- through the panel's own device and real windows, Fox's page moves beside the desktop Companion
-  and back;
+- through the panel's own device, Fox's page shows smaller in the World's task window at its own size;
 - two pages render and take input each on its own, two Fox drivers run at once on separate pages,
   and one page plays sound at a time.
 

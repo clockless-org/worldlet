@@ -156,7 +156,7 @@ page none; it talks to the host over one WebSocket at `/world/socket`, and the h
 **What a browser window cannot do.** Some of the app window's features have no browser equivalent. The socket's
 handshake names them (`WEB_PAGE_FEATURES`), and the page turns those `HostFeatures` off whatever the snapshot says
 ([features.ts](../platform/bridge/features.ts) `pageFeatures`). The app's own page hears no such flags and is
-unchanged. The page flags (`websitePages`, `youtube`, `worldAudio`, `voice`, `desktopCompanion`) are on when a host
+unchanged. The page flags (`websitePages`, `youtube`, `worldAudio`, `voice`, `madePages`) are on when a host
 leaves them out, unlike the host services, which fail closed: every app window has them.
 
 - **Websites and the Browser** open in a new tab instead of a native view over the panel.
@@ -168,7 +168,7 @@ leaves them out, unlike the host services, which fail closed: every app window h
   on their own.
 - **The host refuses them too.** Before the router, a browser's page is refused the actions behind each of these
   features (`WEB_PAGE_ACTIONS`: the native website views and what drives them, YouTube, the World's sound, music
-  players, speech and the old desktop Companion actions, no-ops since 2026-10-29), with the same reason Fox's tools give, so a page that asks anyway
+  players and speech, and Fox's right-click menu through `WEB_DENIED`), with the same reason Fox's tools give, so a page that asks anyway
   reaches nothing on this computer's screen. The list of sites the built-in browser visited stays readable.
 
 The World on another device meets the computer through the pairing room, as a third page with less trust (`ROOM_ALLOWED`): [the World on another device](../platform/web/README.md#the-world-on-another-device).

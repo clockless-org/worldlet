@@ -1,11 +1,9 @@
-import {isDesktopCompanion} from './world-surface.ts';
 // A single anchor for the lower Companion cluster. No world/content transforms.
 export function companionPosition(root:HTMLElement,hud:HTMLElement,avatar:HTMLElement){
  let anchor:number[]|null=null,offset=[0,0],start:number[]|null=null,frame=0;
  try{const p=JSON.parse(localStorage.getItem('worldlet.companion.position')||'null');if(Array.isArray(p)&&p.length===2&&p.every(v=>Number.isFinite(v)&&v>=0&&v<=1))anchor=p;}catch{}
  const reading=()=>root.dataset.detailOpen==='true'||root.dataset.depth==='object';
  function apply(){
-  if(isDesktopCompanion())return;
   // Reader mode owns a reserved lane. Restore the user's world anchor on exit.
   if(reading()){offset=[0,0];hud.style.translate='';delete hud.dataset.positioned;const dialogue=hud.querySelector<HTMLElement>('.companion-dialogue');if(dialogue)dialogue.style.translate='';return;}
   if(!anchor)return;
@@ -28,7 +26,6 @@ export function companionPosition(root:HTMLElement,hud:HTMLElement,avatar:HTMLEl
  const schedule=()=>{cancelAnimationFrame(frame);frame=requestAnimationFrame(apply);};
  new ResizeObserver(schedule).observe(root);
  new MutationObserver(schedule).observe(root,{attributes:true,attributeFilter:['data-depth','data-detail-open']});
- window.addEventListener('worldlet:desktop-companion',schedule);
  hud.addEventListener('transitionend',schedule);
  new MutationObserver(schedule).observe(hud,{subtree:true,attributes:true,attributeFilter:['hidden']});
  schedule();

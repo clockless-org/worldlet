@@ -85,14 +85,12 @@ function place(width:number,viewport:{width:number;height:number},boxes:readonly
  *   back in the window. It is never hidden under Fox.
  * - A page Fox opens in the panel moves to the window as soon as it shows.
  * - The page renders at the window's lower frame rate (`pageFrameRate`).
- * - While the World window is closed or minimized (the desktop Companion), the page waits in a window
- *   of its own beside the Companion instead (`desktopTaskPictureInPicturePlacement`), still Fox's.
  * - It closes only once Fox's turn has ended; until the person opens or closes it, it keeps showing
  *   the page Fox ended on.
  * - Hosts that draw pages as textures offer it (`browserTaskPictureInPicture`). Elsewhere Fox works in
  *   the Applet's panel as before.
  */
-export const TASK_PICTURE_IN_PICTURE=Object.freeze({minAspect:1,maxAspect:2.2,fps:Object.freeze({panel:60,display:120,scaled:15,waiting:4}),desktop:Object.freeze({width:360,gap:12,margin:16})});
+export const TASK_PICTURE_IN_PICTURE=Object.freeze({minAspect:1,maxAspect:2.2,fps:Object.freeze({panel:60,display:120,scaled:15,waiting:4})});
 /** Frames per second for a page the host draws: full rate where the person works with it, about 15
  * shown smaller in the task window, and low but never zero while the window waits out of sight
  * (zero-size), so the page's animation-frame callbacks, which Fox's steps wait on, keep running.
@@ -103,19 +101,6 @@ export function pageFrameRate({width,height,scaled,refresh}:{width:number;height
  if(width<1||height<1)return fps.waiting;
  if(scaled)return fps.scaled;
  return typeof refresh==='number'&&Number.isFinite(refresh)?Math.min(fps.display,Math.max(fps.panel,Math.round(refresh))):fps.panel;
-}
-/** The task window beside the desktop Companion, in screen coordinates: `desktop.width` wide (less on
- * a narrow screen) in the page's shape, bottom-aligned with the Companion's window on its left, or
- * on its right when the left has no room, and always inside the work area. Without the Companion's
- * window it takes the work area's bottom-right corner. */
-export function desktopTaskPictureInPicturePlacement({area,companion,aspect}:{area:SurfaceRect;companion:SurfaceRect|null;aspect:number}):SurfaceRect {
- const {width:wanted,gap,margin}=TASK_PICTURE_IN_PICTURE.desktop;
- const width=Math.max(1,Math.round(Math.min(wanted,area.width-2*margin))),height=Math.max(1,Math.round(width/aspect));
- const left=area.x+margin,right=area.x+area.width-margin-width,top=area.y+margin,bottom=area.y+area.height-margin-height;
- let x=companion?companion.x-gap-width:right,y=companion?companion.y+companion.height-height:bottom;
- if(companion&&x<left)x=companion.x+companion.width+gap;
- x=Math.min(Math.max(x,left),right);y=Math.min(Math.max(y,top),bottom);
- return {x:Math.round(x),y:Math.round(y),width,height};
 }
 /** The window's shape: the page's own, kept between square and a wide 2.2:1. */
 export function taskPictureInPictureAspect(page:{width:number;height:number}):number {

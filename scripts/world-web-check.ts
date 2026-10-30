@@ -150,8 +150,8 @@ await withTempDir('worldlet-world-web-',async root=>{
   assert.deepEqual(nativeCalls.at(-1),['worldletAgentTool','turn-native',{type:'tool'}]);
   // Window calls reach only the window; the World's snapshot and events reach both pages.
   const callsBefore=first.frames.filter(frame=>'c' in frame).length;
-  await pages.page.call('worldletDesktopCompanion',true);
-  assert.deepEqual(nativeCalls.at(-1),['worldletDesktopCompanion',true]);
+  await pages.page.call('worldletShowControls','settings',null);
+  assert.deepEqual(nativeCalls.at(-1),['worldletShowControls','settings',null]);
   const receive=pages.page.call('worldletReceive',{revision:7});
   const snapshot=await within(first.next(frame=>frame.name==='worldletReceive'),'snapshot');
   assert.deepEqual(snapshot.args,[{revision:7}]);first.send({r:snapshot.c});

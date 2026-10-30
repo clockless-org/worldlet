@@ -94,12 +94,12 @@ export function mountWorldAudio(call){
  const update=e=>render(e.detail);window.addEventListener('worldlet:audio',update);
   const world=document.querySelector<HTMLElement>('#notionWorld');let lastPresentation='',presentationGeneration=0,disposed=false;
  const present=()=>{
-  const track=world?.dataset.soundTrack||themeAmbientTrack(ACTIVE_THEME.pack),active=!document.hidden&&windowActive()&&!document.documentElement.classList.contains('desktop-companion'),key=track+':'+active;
+  const track=world?.dataset.soundTrack||themeAmbientTrack(ACTIVE_THEME.pack),active=!document.hidden&&windowActive(),key=track+':'+active;
   if(key===lastPresentation||disposed)return;lastPresentation=key;const generation=++presentationGeneration;
   void call('worldAudio',{operation:'presentation',track,active}).then(value=>{if(!disposed&&generation===presentationGeneration)render(value);}).catch(()=>{if(!disposed&&generation===presentationGeneration){lastPresentation='';status.textContent='Sound unavailable';}});
  };
  const sceneObserver=new MutationObserver(present);if(world)sceneObserver.observe(world,{attributes:true,attributeFilter:['data-sound-track']});
- const projectionEvents=['worldlet:app-active','worldlet:app-inactive','worldlet:desktop-companion','focus','blur'];
+ const projectionEvents=['worldlet:app-active','worldlet:app-inactive','focus','blur'];
  for(const event of projectionEvents)window.addEventListener(event,present);document.addEventListener('visibilitychange',present);
  call('worldAudio',{operation:'start'}).then(value=>{if(!disposed){render(value);present();}})
   .catch(()=>{status.textContent='Sound unavailable'});

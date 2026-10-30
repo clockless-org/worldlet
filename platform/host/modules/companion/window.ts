@@ -25,8 +25,6 @@ export class DesktopCompanion implements DesktopCompanionService {
   this.host=host;this.quit=quit;this.unfinished=unfinished;this.hideApp=hideApp;
   this.entry=entry===undefined?companionEntry(host,{back:()=>{this.reattach();},quit:()=>app.quit()}):entry;
  }
- /** Fox never leaves the World window. */
- get isDesktop(){return false;}
  beforeDetach(listener:()=>void){this.listeners.push(listener);}
  /** Native dialogs attached to the World run as they are: nothing moves the World while they are open. */
  whileSheet<T>(work:()=>Promise<T>):Promise<T> {return work();}
@@ -64,8 +62,6 @@ export class DesktopCompanion implements DesktopCompanionService {
  }
  /** Window-system reopen (Dock click, second launch) brings the World back. */
  reopen(){const world=this.host.window();if(world&&!world.isDestroyed()&&(!world.isVisible()||world.isMinimized()))this.reattach();}
- /** A page that loaded while an older build had Fox on the desktop puts it back in the World. */
- syncPresentation(){void this.host.page.call('worldletDesktopCompanion',false).catch(()=>{});}
  showMenu(){
   const menu=Menu.buildFromTemplate(companionMenu({back:()=>{this.reattach();},quit:()=>app.quit()}));
   const window=this.host.window();

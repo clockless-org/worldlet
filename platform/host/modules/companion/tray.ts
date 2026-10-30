@@ -20,7 +20,7 @@ export function trayIcon(host:Host){
 
 const realTray:TrayFactory=icon=>new Tray(icon?nativeImage.createFromPath(icon):nativeImage.createEmpty());
 
-/** Windows: the hidden World has no taskbar button while Fox is on the desktop, so a
+/** Windows: the hidden World has no taskbar button, so a
  * notification-area icon is the way back until the World returns. Mac keeps its Dock. */
 export class CompanionTray {
  private tray:TrayLike|null=null;

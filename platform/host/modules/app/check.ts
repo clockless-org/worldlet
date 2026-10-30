@@ -2,7 +2,7 @@
 // preferences, refuses an archive missing its database or an original, and a restore replaces the
 // World while this computer's analytics choice and installation identity (imported once from the
 // Mac host) stay as they were. The Mac World menu carries the native labels and follows the World UI's
-// enablement rules from shared Core. On Windows the desktop Companion adds a notification-area way back
+// enablement rules from shared Core. On Windows closing the World adds a notification-area way back
 // to the hidden World, removed when the World returns; Mac and Linux add none. Runs in an Electron main process: npm run test:electron -- shell
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -387,7 +387,7 @@ try{
  unfinished=false;
  // After onboarding, closing hides the World with Fox inside; nothing stays on the desktop (owner request 2026-10-29).
  let stopped=0;desktop.beforeDetach(()=>{stopped+=1;});
- const close=async()=>{assert(desktop.shouldKeepOpen(),'closing the World keeps the app running');await tick();assert(!desktop.isDesktop&&!world.isVisible(),'the World hides and Fox stays in it');};
+ const close=async()=>{assert(desktop.shouldKeepOpen(),'closing the World keeps the app running');await tick();assert(!world.isVisible(),'the World hides and Fox stays in it');};
  await close();
  assert(world.contentView.children.includes(view),'the World view stays in the World window');
  assert.equal(BaseWindow.getAllWindows().filter(other=>other.isVisible()).length,0,'no window stays on the desktop');
@@ -406,7 +406,7 @@ try{
  assert(world.isVisible()&&trays[1].destroyed,'Back to World restores the World and removes the icon');
  // Minimizing only minimizes: nothing comes out.
  world.minimize();await new Promise(resolve=>setTimeout(resolve,200));
- assert(!desktop.isDesktop&&world.contentView.children.includes(view),'minimizing leaves Fox in the World');
+ assert(world.contentView.children.includes(view),'minimizing leaves Fox in the World');
  desktop.reopen();await tick();
  await close();
  trays[2].menu!.items[2].click();
@@ -432,7 +432,7 @@ try{
   assert(!desktop.background()&&world.isVisible(),'nothing runs in background until onboarding is over');
   unfinished=false;
   assert(desktop.background(),'running in background');
-  assert(!world.isVisible()&&!desktop.isDesktop,'the World goes away');
+  assert(!world.isVisible(),'the World goes away');
   assert.equal(trays.length,1,'the tray (Windows) is the way back');assert.equal(hides,1,'the Mac gives the foreground back');
   world.showInactive();
   preferences.set(RUN_IN_BACKGROUND,true);

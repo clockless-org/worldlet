@@ -8,7 +8,7 @@ export interface WorldWindowHooks {
  openURL(url:string):void;
  loaded():void;
  navigating():void;
- /** Return true to keep the window from closing (e.g. Fox stays as the desktop Companion). */
+ /** Return true to keep the window from closing (e.g. the World hides while the app keeps running). */
  closing():boolean;
  activated(active:boolean):void;
  resized(bounds:Rectangle):void;

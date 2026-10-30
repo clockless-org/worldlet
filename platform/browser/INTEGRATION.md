@@ -305,28 +305,22 @@ hides the page as before. The Browser panel (`ui/applets/browser-device.ts`) app
   Moving around the World therefore does not stop Fox. Opening another website Applet does: that
   Applet's page is the person's.
 - **When the World hides.** Closing the World window hides its pages with it and stops the inline player
-  ([desktop Companion](../desktop/COMPANION.md)); Fox keeps working on its own page there. Before 2026-10-29
-  Fox's page moved into a window beside a desktop Companion (`desktopTaskPictureInPicturePlacement`,
-  `platform/host/modules/applets/task-window.ts`), which nothing opens now.
+  ([COMPANION.md](../desktop/COMPANION.md)); Fox keeps working on its own page there.
 
 Checks:
 - `node scripts/applet-task-pip-check.ts`: the World UI with a faked bridge. It covers the page
   staying in the panel, leaving it out of sight at its size with the badge, Fox's next steps, the
-  badge's return, leaving it after the turn, the World away for the desktop Companion, ordinary
-  pages opening again after it, and a host without the feature.
-- `node scripts/companion-main-session-check.ts`: Fox's steps on its held page pass the view guard
-  and do not reopen the World from the desktop, and relative actions are still refused.
-- `node scripts/picture-in-picture-check.ts`: the window's shape, frame rates and the placement
-  beside the Companion.
+  badge's return, leaving it after the turn, Fox's copy, and a host without the feature.
+- `node scripts/companion-main-session-check.ts`: Fox's steps on its held page pass the view guard,
+  and relative actions are still refused.
+- `node scripts/picture-in-picture-check.ts`: the window's shape and frame rates.
 - `npm run test:onboarding` on the CEF engine: Fox's first task with real Fox, finished in the
   Applet's panel.
 - The engine check (`npm run test:electron -- modules/applets/engine`):
   - shown smaller, the page keeps its size and reports presses instead of taking clicks;
   - Fox's driver clicks a page element at the page's own coordinates;
   - the frame rate follows `pageFrameRate`;
-  - through the panel's own device and real windows, Fox's page moves beside the Companion and back
-    with its press and close.
-- `npm run test:electron -- modules/app`: the Companion tells the panel when it is out and back.
+  - through the panel's own device, Fox's page shows smaller in the World's task window at its own size.
 - The browser surface contract check.
 
 ## Saving X posts

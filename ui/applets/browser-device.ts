@@ -118,7 +118,7 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   geometry();
   // The turn is over: a page Fox kept working on out of sight is left like any page the person left,
   // and its device says Fox is done.
-  if(!active&&taskPip&&!away)finishTask();
+  if(!active&&taskPip)finishTask();
  }
  // The palette and pace live in CSS with the frame they color, so both surfaces agree.
  function foxGlow(){
@@ -462,20 +462,6 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
  // The Applet whose page Fox works on from the window this turn, also once the person took it back
  // into the panel: Fox's steps reach that page wherever the person is (`foxPageHeld`).
  let taskApplet='';
- // The World window is away for the desktop Companion: the host shows Fox's page beside it and stops
- // the others (`keptAway` says whether this panel's page was Fox's, so it is still alive).
- let away=false,keptAway=false;
- window.addEventListener('worldlet:desktop-companion',(event:any)=>{
-  const next=event.detail===true;if(next===away)return;
-  if(next)keptAway=showing&&(!!taskPip||foxControl);
-  // The host takes Fox's copy along beside the Companion while Fox works, and closes it otherwise.
-  if(next&&copyPage){copyPage=null;if(foxControl)copyOff=true;markFoxControl();}
-  // Back in the World: a page the host stopped opens again; Fox's page is placed where it was.
-  else if(showing&&!keptAway)showing=false;
-  away=next;lastRect='';geometry();
-  // Fox's turn ended while the World was away: its page is left like any page the person left.
-  if(!away&&taskPip&&!foxControl)finishTask();
- });
  const taskHost=()=>!!native?.browser?.taskPictureInPicture?.();
  // The World hears whether Fox is working on an Applet's page out of sight (`worldlet:fox-task`).
  const announce=(applet:string,working:boolean)=>root.dispatchEvent(new CustomEvent('worldlet:fox-task',{detail:{applet:getApp(applet)?.id||applet,working}}));
@@ -524,15 +510,6 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
    let done=false;let timer=0;let animation=0;
    const update=()=>{if(done)return;done=true;clearTimeout(timer);cancelAnimationFrame(animation);frameID=false;flushGeometry=null;try{
    const left=!opened||!slot?.isConnected||content.hidden,visible=!left&&!covered(),wanted=pipWanted;pipWanted='';
-   // Away on the desktop the host keeps Fox's page beside the Companion (#1175); layouts only say
-   // whether Fox is working.
-   if(away){
-    if(showing&&keptAway){
-     const glow=foxGlow(),key=JSON.stringify({away:true,fox:glow&&{...glow,phaseSeconds:undefined}});
-     if(key!==lastRect){lastRect=key;void queue('browserLayout',{rect:{x:0,y:0,width:0,height:0},...taskPip&&taskPage?{page:taskPage,press:true}:{},...glow?{fox:glow}:{}});}
-    }
-    syncPipOffer();return;
-   }
    // The person leaves Fox's page during Fox's turn: it stays Fox's, out of sight, instead of
    // hiding, and Fox keeps working on it.
    if(left&&showing&&!taskPip&&foxControl&&taskHost()&&panelRect&&appletKey&&(taskApplet===appletKey||!taskWatched))enterTask(panelRect);
@@ -608,8 +585,6 @@ export function createBrowserPanel({root,content,native,notify,openApplet=(_id:s
   // The window's page reports a press on it, or that the host closed it.
   if(value?.phase==='task-pip'){
    if(taskPip&&value.event==='press')restoreTask();
-   // The host closed Fox's page beside the desktop Companion after Fox's turn.
-   else if(value.event==='closed'){endTask();taskApplet='';keptAway=false;if(showing){showing=false;lastRect='';}syncPipOffer();}
    return;
   }
   // Fox's copy: a press takes Fox's page into the panel, its close (after Fox's turn) leaves the

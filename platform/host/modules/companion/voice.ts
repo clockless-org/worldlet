@@ -2,7 +2,7 @@ import {contextReader} from '../../../../context/store/index.ts';
 import {app,BaseWindow} from 'electron';
 import {SPEECH_VOCABULARY,TALK,speechPrompt,speechTerms} from '../../../../agent/companion/index.ts';
 import {WorldletError} from '../../files.ts';
-import {AUDIO,BROWSER,DESKTOP_COMPANION,MEDIA,SPEECH,type AudioService,type BrowserService,type DesktopCompanionService,type MediaService,type SpeechService} from '../../services.ts';
+import {AUDIO,BROWSER,MEDIA,SPEECH,type AudioService,type BrowserService,type MediaService,type SpeechService} from '../../services.ts';
 import type {Host,Row} from '../../types.ts';
 import {LocalSpeech,SpeechInput,SpeechOutput} from './speech.ts';
 import {CompanionCloud} from './cloud.ts';
@@ -31,8 +31,6 @@ export function installVoice(host:Host){
  // Setup scope: no cloud consent yet, unless a practice world already read private browser context.
  const setupScope=()=>!(sample()&&!(host.optional<BrowserService>(BROWSER)?.privateContextWasRead()??false))&&!store.state.cloudConsent;
  const showControls=(screen:string)=>{
-  const desktop=host.optional<DesktopCompanionService>(DESKTOP_COMPANION);
-  if(desktop?.isDesktop)void desktop.restoreWorld();
   void page.call('worldletShowControls',screen,null);
  };
  const appActive=()=>BaseWindow.getFocusedWindow()!==null;

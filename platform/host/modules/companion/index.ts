@@ -8,9 +8,9 @@ import {characterCount,characterPrefix,writeAtomic,WorldletError} from '../../fi
 import {canBuild} from '../../store/world-store.ts';
 import {presentMailRead as presentLiveMail} from '../connectors/records.ts';
 import type {Host,Row} from '../../types.ts';
-import {AGENT,ANALYTICS,AUDIO,BROWSER,COMPANION,DESKTOP_COMPANION,FOX,SOURCES,SPEECH,WORLD_TOOLS,
+import {AGENT,ANALYTICS,AUDIO,BROWSER,COMPANION,FOX,SOURCES,SPEECH,WORLD_TOOLS,
  type AgentRoutines,type AgentRuntime,type AgentScope,type AgentService,type AnalyticsService,type AudioService,type BrowserService,
- ONGOING,PHONE,WORLD_WEB,type PhoneService,type WorldWebService,type OngoingService,type CompanionService,type DesktopCompanionService,type FoxService,type SourcesService,type SpeechService,type WorldToolsService} from '../../services.ts';
+ ONGOING,PHONE,WORLD_WEB,type PhoneService,type WorldWebService,type OngoingService,type CompanionService,type FoxService,type SourcesService,type SpeechService,type WorldToolsService} from '../../services.ts';
 import {createCompanion,decode,type Scope} from './companion.ts';
 import {resetToFirstLaunch} from './reset.ts';
 import {readLocalAgentMemory,summarizeLocalAgent} from './agent/local-memory.ts';
@@ -201,8 +201,6 @@ export function installFox(host:Host){
    working:[...appletTasks.values()].filter(task=>!task.quiet).map(task=>({id:task.id,applet:task.key,at:task.startedAt}))};
  }
  function showControls(screen:string,provider?:string|null){
-  const desktop=host.optional<DesktopCompanionService>(DESKTOP_COMPANION);
-  if(desktop?.isDesktop)void desktop.restoreWorld();
   void page.call('worldletShowControls',screen,provider??null);
  }
  /** Mac `store.stop()` + runtime shutdown around restart, reset, memory saves and transfer. */

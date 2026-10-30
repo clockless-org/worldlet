@@ -119,7 +119,7 @@ await withTempDir('wl-',async temp=>{
  assert.equal(contract.status,0,contract.stderr);
  const report=JSON.parse(contract.stdout.split('\n').find(line=>line.startsWith('{'))!);
  for(const action of ['phonePair','phonePublish','agentChat','agentHarness','onboarding','snapshot','calendarEvents','artifacts','ongoing'])assert.ok(report.actions.includes(action),'registers '+action);
- for(const action of ['browserShow','appUpdate','desktopCompanionState'])assert.ok(!report.actions.includes(action),'no window action '+action);
+ for(const action of ['browserShow','appUpdate'])assert.ok(!report.actions.includes(action),'no window action '+action);
  for(const service of ['agent','fox','phone','sources','vault','worldTools'])assert.ok(report.services.includes(service),'provides '+service);
  assert.ok(!report.services.includes('rtcPage'),'no direct lines: browser links run through the room');
  assert.ok(!fs.existsSync(library),'the contract check never opens the named library');
@@ -345,8 +345,8 @@ await withTempDir('wl-',async temp=>{
    assert.equal(await refused({action:'dataBackup',operation:'restore',id:'x'}),WEB_DENIED_MESSAGE,'restore is refused');
    assert.equal(await refused({action:'phonePair',kind:'phone',operation:'start'}),WEB_DENIED_MESSAGE,'pairing is refused');
    assert.equal(await refused({action:'deleteSourceData',provider:'gmail'}),WEB_DENIED_MESSAGE,'local data deletion is refused');
-   // And what the page's window cannot do, though the page hides it: the native browser, YouTube, sound, the
-   // microphone and the desktop Companion, each with the reason Fox's tools give.
+   // And what the page's window cannot do, though the page hides it: the native browser, YouTube, sound and the
+   // microphone, each with the reason Fox's tools give.
    assert.equal(await refused({action:'browserShow',url:'https://example.com/'}),WEB_PAGE_UNAVAILABLE.websitePages,'a native website view is refused');
    assert.equal(await refused({action:'browserCommand',operation:'navigate',args:{url:'https://example.com/'},agent:true}),WEB_PAGE_UNAVAILABLE.websitePages,'and driving one');
    assert.equal(await refused({action:'speechStart',language:'en'}),WEB_PAGE_UNAVAILABLE.voice,'the microphone is refused');

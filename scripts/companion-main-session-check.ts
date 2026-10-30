@@ -94,14 +94,6 @@ try{
  assert.match(held.before.error,/changed views/,'a page step after the person moved on is refused');
  assert.equal(held.after.ok,true,'Fox\'s step on its held page continues');
  assert.match(held.moved.error,/changed views/,'relative UI actions are still refused while Fox\'s page is held');
- // On the desktop Companion the held page shows beside Fox, so its steps do not reopen the World.
- const away=await page.evaluate(async()=>{
-  const w=window as any,turn=w.turns.at(-1);document.documentElement.classList.add('desktop-companion');w.foxPageHeld=true;
-  const before=w.openedWorld||0,step=await turn.execute('automate_browser',{operation:'snapshot'});
-  w.foxPageHeld=false;document.documentElement.classList.remove('desktop-companion');
-  return {step,opened:(w.openedWorld||0)-before};
- });
- assert.equal(away.step.ok,true);assert.equal(away.opened,0,'Fox\'s step on its held page stays on the desktop');
  await page.evaluate(async()=>{const w=window as any;await w.turns.at(-1).execute('read_content',{id:'A'});w.holds['wait A']();await w.pending;});
  assert.doesNotMatch(await page.locator('#worldConversation').textContent(),/Reply to wait A/,'late reply cannot appear on C');
  await page.evaluate(async()=>{const w=window as any;w.view('explore','D');await w.fox.submit('continue');});

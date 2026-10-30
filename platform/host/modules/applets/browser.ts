@@ -31,7 +31,6 @@ export function installBrowser(host:Host){
   const companion=desktop();if(!companion)return;
   detachHooked=true;companion.beforeDetach(()=>player.stop());
  };
- device.restoreWorld=()=>desktop()?.restoreWorld();
  host.onPageLoaded(hookDetach);
  const object=(value:unknown):Row=>value&&typeof value==='object'&&!Array.isArray(value)?value as Row:{};
  host.register({

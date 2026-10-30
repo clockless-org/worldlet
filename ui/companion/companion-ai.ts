@@ -10,7 +10,6 @@ import {createNativeChat} from './native-chat.ts';
 import {installFieldDictation} from './field-dictation.ts';
 import {foxContext} from './fox-context.ts';
 import {contextThread} from '../attention/index.ts';
-import {isDesktopCompanion} from './world-surface.ts';
 import {WEB_PAGE_UNAVAILABLE} from '../../contracts/web-world.ts';
 
 // Tools that act on the visible page; the ones that can move it also update the tracked view.
@@ -19,13 +18,7 @@ const VIEW_DEPENDENT_TOOLS=new Set([...VIEW_CHANGING_TOOLS,'scroll_browser','aut
 
 // Chat uses the selected Agent adapter.
 export function createCompanionAI(unavailable: any,transport: any={}){return (options: any)=>{
- const desktop=isDesktopCompanion;
- const worldRoute=options.chatRoute,worldExecute=withToolAnalytics(options.execute,transport.nativeCall,()=>!!transport.nativeCall&&!transport.sample);
- options={...options,chatRoute:()=>desktop()?null:worldRoute?.(),execute:async(name,args,meta)=>{
-  // Fox's held page shows beside the desktop Companion (#1175): its steps need no World.
-  if(desktop()&&VIEW_DEPENDENT_TOOLS.has(name)&&!(name==='automate_browser'&&options.foxPageHeld?.()))await transport.nativeCall?.('openWorld');
-  return worldExecute(name,args,meta);
- }};
+ options={...options,execute:withToolAnalytics(options.execute,transport.nativeCall,()=>!!transport.nativeCall&&!transport.sample)};
  if(typeof transport.runAgent!=='function')throw Error('Fox requires an Agent adapter.');
  transport.runAgent.useWorld?.({execute:options.execute,codex:transport.codex});
  let controller=null,activeRun=null;
