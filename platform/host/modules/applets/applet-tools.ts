@@ -1,6 +1,6 @@
 import path from 'node:path';
 import {WorldletError} from '../../files.ts';
-import {DESKTOP_COMPANION,DEVELOPMENT_SESSIONS,MEDIA,type DesktopCompanionService,type DevelopmentSessionsService,type MediaService} from '../../services.ts';
+import {DEVELOPMENT_SESSIONS,MEDIA,type DevelopmentSessionsService,type MediaService} from '../../services.ts';
 import type {Host,Row} from '../../types.ts';
 import {VoiceMemos} from './voice-memos.ts';
 import {weatherActions} from './weather.ts';
@@ -21,8 +21,6 @@ export function installAppletTools(host:Host){
  const sample=()=>store.sampleEnabled();
  const personal=(message:string)=>{if(!store.writable||sample())throw new WorldletError(message);};
  const showControls=(screen:string)=>{
-  const desktop=host.optional<DesktopCompanionService>(DESKTOP_COMPANION);
-  if(desktop?.isDesktop)void desktop.restoreWorld();
   void page.call('worldletShowControls',screen,null);
  };
  // The Mac library recorded the discovered CLI the first time it found one.

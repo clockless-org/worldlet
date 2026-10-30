@@ -19,8 +19,8 @@ import {setTimeout as sleep} from 'node:timers/promises';
 //   the tour closes with the phone step (owner request 2026-10-06), which turning the Tutorial switch off ends → opening
 //   Mail from the World starts Google sign-in (google_connect_started, never google_connect_failed; the 10-03 meeting) →
 //   Cancel → Reset Fox → the setup page. Before Reset, closing the World hides it with Fox inside and Back to World
-//   restores it. Mail from the World and the desktop Companion are ADVISORY (a failure prints ADVISORY FAIL) until they
-//   have passed on the Mac and Windows hosts, except the desktop Companion on the Mac, which always blocked.
+//   restores it. Mail from the World and closing the World are ADVISORY (a failure prints ADVISORY FAIL) until they
+//   have passed on the Mac and Windows hosts, except closing the World on the Mac, which always blocked.
 // - after-reset: the relaunch after Reset Fox opens on the setup page's choices with no local Agent chosen.
 // The launcher puts a fixture OpenClaw on this computer's path (scripts/setup-fixtures.ts), so there is
 // always a local Agent to choose; finding none fails.
@@ -216,13 +216,13 @@ async function clickAt(web:WebContents,js:(code:string)=>Promise<any>,what:strin
 export async function desktopCompanion(companion:DesktopCompanionService,window:BaseWindow,view:WebContentsView,mark:(step:string)=>void){
  window.close();
  for(let i=0;i<50&&window.isVisible();i++)await sleep(200);
- if(companion.isDesktop||window.isVisible())throw Error(`closing the World window did not hide it (${JSON.stringify({desktop:companion.isDesktop,worldVisible:window.isVisible()})})`);
+ if(window.isVisible())throw Error(`closing the World window did not hide it (${JSON.stringify({worldVisible:window.isVisible()})})`);
  if(!window.contentView.children.includes(view))throw Error('the World view left the closed World window');
  const shown=BaseWindow.getAllWindows().filter(other=>other!==window&&!other.isDestroyed()&&other.isVisible()&&other.getTitle()==='Worldlet Companion');
  if(shown.length)throw Error('a Companion window stayed on the desktop after the World closed');
  mark('closing the World window hid it and left nothing on the desktop');
  await companion.restoreWorld();
  for(let i=0;i<50&&!window.isVisible();i++)await sleep(200);
- if(companion.isDesktop||!window.isVisible()||!window.contentView.children.includes(view))throw Error(`Back to World did not bring the World window back (${JSON.stringify({desktop:companion.isDesktop,worldVisible:window.isVisible()})})`);
+ if(!window.isVisible()||!window.contentView.children.includes(view))throw Error(`Back to World did not bring the World window back (${JSON.stringify({worldVisible:window.isVisible()})})`);
  mark('Back to World restored the World window');
 }

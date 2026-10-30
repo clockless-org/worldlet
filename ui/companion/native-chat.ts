@@ -7,7 +7,6 @@ import {mountCompanionInfo} from './companion-info.ts';
 import {watchModelNeeded} from './model-needed.ts';
 import {mountAppletTaskResults} from './applet-task-results.ts';
 import {mountFoxProactive,arriveProactive,PROACTIVE_LINE_MS} from './fox-proactive.ts';
-import {isDesktopCompanion,requireWorldSurface} from './world-surface.ts';
 import {errorFields,isRequestCancellation,reportEngagement,reportProductEvent} from '../frame/index.ts';
 import {FOX_RETRY_ACTION,FOX_RETRY_DELAY_MS,foxTurnFailureText,foxTurnRetry} from '../../agent/companion/index.ts';
 import {contextThread,cleanRecall,FOX_MAIN_THREAD,restoredMainHistory} from '../attention/index.ts';
@@ -67,8 +66,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  // 一个常驻action到companion左边"). Fox itself is a way to talk, like the message bar (owner feedback 2026-10-04).
  const side=make('div','companion-side');
  // The Journal is today's date in the World's top-left corner, the Attention Center's header (owner requests 2026-10-08 and
- // 2026-10-11), not a button beside Fox. Both step aside inside an Applet (controls.css), and the
- // desktop Fox shows neither (desktop-companion.css).
+ // 2026-10-11), not a button beside Fox. Both step aside inside an Applet (controls.css).
  const sideButton=(cls:string,icon:string,label:string,setting:string)=>{
   const b=make('button',cls+' fox-side-button');b.type='button';b.innerHTML=uiIcon(icon)+'<span>'+label+'</span>';
   b.addEventListener('pointerdown',(e:Event)=>e.stopPropagation());
@@ -77,13 +75,6 @@ export function createNativeChat(call){return function({button,input,status,exec
  };
  const panelButton=sideButton('companion-panel-button','settings','Agent','agents'),phoneButton=sideButton('companion-phone-button','phone','Phone','phone');
  side.append(panelButton,phoneButton);pet.append(side);hud.append(pet);
- // On the desktop a small hide button shows at Fox's shoulder while the pointer is on Fox (owner Order 2026-10-12);
- // Fox stays away until the person opens the World again (modules/companion/window.ts hide).
- const hideButton=make('button','companion-hide-button');hideButton.type='button';hideButton.innerHTML=uiIcon('hide');
- hideButton.setAttribute('aria-label','Hide');hideButton.title='Hide';
- hideButton.addEventListener('pointerdown',(e:Event)=>e.stopPropagation());
- hideButton.onclick=(e:Event)=>{e.stopPropagation();void call('desktopCompanionHide').catch(()=>{});};
- pet.append(hideButton);
  // Once a phone is paired, Phone steps aside (owner Order 2026-10-11: "如果已经配对手机了那个phone的那个action button就可以消失了");
  // it comes back when no phone is paired. Settings › Phone still has the pairing.
  let phoneHeard=false;
@@ -114,7 +105,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  const controls=make('div','companion-controls'),speechButton=make('button','companion-speech-button');controls.setAttribute('role','group');controls.setAttribute('aria-label','Companion controls');speechButton.type='button';speechButton.innerHTML=uiIcon('microphone');entry.prepend(controls);
  // No microphone where the page has no voice (a World page in a web browser, contracts/web-world.ts).
  if(!voice){speechButton.hidden=true;speechButton.dataset.voice='off';}
- // The bug and the microphone stand inside the bar's right end, in the World and on the desktop alike (owner request
+ // The bug and the microphone stand inside the bar's right end (owner request
  // 2026-10-11: "把那个报 bug 的按钮和语音的按钮都融到那个 input box 里面去").
  const voiceControls=make('div','companion-controls companion-voice-controls');voiceControls.setAttribute('role','group');voiceControls.setAttribute('aria-label','Voice');// While the microphone listens the bar works like Claude's (owner request 2026-10-12): ✕ at its left cancels, a dotted
  // sound wave moves left with the voice, Stop puts the words into the line to edit, and the microphone, now Send, sends.
@@ -398,8 +389,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  // A conversation action lives in the bubble OR the dock, never both.
  function recommendedActions(){return panel.hidden?conversationActions():[];}
  function visibleActionIds(){return panel.hidden?[]:conversationActions().map(a=>a.identity);}
- const onDesktop=isDesktopCompanion;
- function insideApplet(){return !onDesktop()&&root.dataset.depth==='object'&&root.dataset.page?.startsWith('app-');}
+ function insideApplet(){return root.dataset.depth==='object'&&root.dataset.page?.startsWith('app-');}
  function contextualDialogue(){return insideApplet()||!!visibleContent()||context.key.split(':')[0]!=='overview';}
  let renderPending=false;
  // A route updates context, visibility and HUD synchronously. Paint their final
@@ -474,7 +464,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   // Folded beside an Applet, only the front card shows; a long one scrolls inside it.
   const folded=beside&&chatFolded;
   const history=!onboarding&&!folded&&(expanded||beside);
-  windowOpen=history&&!beside&&!onDesktop();panel.dataset.window=String(windowOpen);
+  windowOpen=history&&!beside;panel.dataset.window=String(windowOpen);
   const cards=earlier;
   deck.hidden=history||!text||!earlier.length;deck.dataset.depth=String(Math.min(1,earlier.length));deck.dataset.unfold=String(folded&&!deck.hidden);
   foldButton.hidden=!beside||onboarding||!earlier.length;
@@ -616,7 +606,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   actionBar.hidden=guideActions.hidden&&actionFooter.hidden&&attentionActions.hidden;
   replyNav.setAttribute('aria-busy',String(unavailable));
   // The sessions stand left of the card while it shows in the World (not beside an Applet, not in the first run).
-  sessionColumn.show({visible:!panel.hidden&&!windowOpen&&!onboarding&&!beside&&!onDesktop()&&root.dataset.onboarding!=='true'&&!root.dataset.tourStep,sessions:sessionList,here:foxSessionOf(context.key),name:companionName});
+  sessionColumn.show({visible:!panel.hidden&&!windowOpen&&!onboarding&&!beside&&root.dataset.onboarding!=='true'&&!root.dataset.tourStep,sessions:sessionList,here:foxSessionOf(context.key),name:companionName});
   chatWindow.show({visible:windowOpen&&!panel.hidden,sessions:sessionList,here:foxSessionOf(context.key),name:companionName,
    title:sessionHere?sessionHere.title:companionName,detail:sessionHere?foxSessionLine(sessionHere,Date.now()/1000):'Main conversation',messages:windowOpen?chatMessages(segment,remembered):[]});
   root.dataset.expressionMode=panel.hidden?'idle':'reply';hud.classList.toggle('composer-expanded',!panel.hidden);hud.classList.toggle('is-chat-peeking',!panel.hidden);root.classList.toggle('companion-talking',!panel.hidden);
@@ -741,7 +731,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  entry.addEventListener('focusout',()=>queueMicrotask(()=>{if(!entry.contains(document.activeElement)&&!input.value.trim()){editing=false;}render();}));
  avatar.addEventListener('worldlet:preview-action',()=>{if(active||recording||starting||transcribing)return;editing=false;hoverInput=false;input.blur();render();});
  let draggingFox=false;
- function clearAvatarPress(){if(draggingFox){draggingFox=false;if(onDesktop())void call('desktopCompanionDrag',{phase:'end'}).catch(()=>{});else position.end();}clearTimeout(avatarHoldTimer);avatarHoldTimer=null;avatarPress=null;root.classList.remove('is-pressing-fox','is-dragging-fox');}
+ function clearAvatarPress(){if(draggingFox){draggingFox=false;position.end();}clearTimeout(avatarHoldTimer);avatarHoldTimer=null;avatarPress=null;root.classList.remove('is-pressing-fox','is-dragging-fox');}
  // The listening bar's dotted wave: each dot is one moment of the voice, rising with its loudness, the newest at the right.
  const waveLevels:number[]=[];
  function paintWave(){const dots=waveform.children;for(let i=0;i<dots.length;i++){const level=waveLevels[waveLevels.length-dots.length+i];(dots[i] as HTMLElement).style.height=level===undefined?'':(3+level*26).toFixed(1)+'px';(dots[i] as HTMLElement).classList.toggle('is-heard',level!==undefined);}}
@@ -766,7 +756,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   e.preventDefault();avatarSuppressClick=false;avatarPress={id:e.pointerId,x:e.clientX,y:e.clientY,held:false};root.classList.add('is-pressing-fox');target.setPointerCapture(e.pointerId);
   if(holdToSpeak&&(companionInfo.feedbackActive||!active||(steering&&!chatRoute?.())))avatarHoldTimer=setTimeout(()=>{if(!avatarPress)return;avatarPress.held=true;avatarSuppressClick=true;editing=false;input.blur();if(companionInfo.feedbackActive)void companionInfo.feedback.startVoice();else beginSpeech(true);},280);
  });
- target.addEventListener('pointermove',e=>{if(avatarPress&&!avatarPress.held&&!draggingFox&&Math.hypot(e.clientX-avatarPress.x,e.clientY-avatarPress.y)>12){avatarSuppressClick=true;if(target===avatar){clearTimeout(avatarHoldTimer);draggingFox=true;root.classList.add('is-dragging-fox');if(onDesktop())void call('desktopCompanionDrag',{phase:'start'}).catch(()=>clearAvatarPress());else position.start(avatarPress.x,avatarPress.y);}else{clearAvatarPress();if(target===input)focusInput();}}if(draggingFox&&!onDesktop())position.move(e.clientX,e.clientY);});
+ target.addEventListener('pointermove',e=>{if(avatarPress&&!avatarPress.held&&!draggingFox&&Math.hypot(e.clientX-avatarPress.x,e.clientY-avatarPress.y)>12){avatarSuppressClick=true;if(target===avatar){clearTimeout(avatarHoldTimer);draggingFox=true;root.classList.add('is-dragging-fox');position.start(avatarPress.x,avatarPress.y);}else{clearAvatarPress();if(target===input)focusInput();}}if(draggingFox)position.move(e.clientX,e.clientY);});
  target.addEventListener('pointerup',e=>{
   if(!avatarPress||avatarPress.id!==e.pointerId)return;const held=avatarPress.held,dragged=draggingFox;clearAvatarPress();if(target.hasPointerCapture(e.pointerId))target.releasePointerCapture(e.pointerId);
   avatarSuppressClick=true;if(held)finishSpeech();else if(!dragged){if(target===avatar||target===input)focusInput();else void toggleSpeech();}
@@ -776,7 +766,6 @@ export function createNativeChat(call){return function({button,input,status,exec
  target.addEventListener('contextmenu',e=>{e.preventDefault();if(target===avatar)void call('companionMenu').catch(()=>{});});
  }
  function visibleContent(){
-  if(onDesktop())return null;
   const attention=root.querySelector('#attentionPreview');
   const artifact=root.querySelector('#foxArtifact');
   const surface=artifact&&!artifact.hidden?artifact:attention&&!attention.hidden?attention:dialog.open?dialog:!reader.hidden?reader:null;
@@ -800,14 +789,14 @@ export function createNativeChat(call){return function({button,input,status,exec
  panel.addEventListener('click',async e=>{
   const link=e.target.closest('a');if(!link||(!log.contains(link)&&!actionFooter.contains(link)&&!threadList.contains(link)&&!chatWindow.element.contains(link))||!link.getAttribute('href')?.startsWith('#'))return;
   e.preventDefault();e.stopPropagation();
-  if(!link.classList.contains('fox-inline-action')){const href=link.getAttribute('href');try{await requireWorldSurface(call);onReplyNavigate?.(href);}catch(error){say(error.message);}return;}
+  if(!link.classList.contains('fox-inline-action')){onReplyNavigate?.(link.getAttribute('href'));return;}
   // Try again sends the failed message once more, as the person wrote it.
   if(link.getAttribute('href')===FOX_RETRY_ACTION){if(active||recording||starting||transcribing||!lastFailed)return;const again=lastFailed;lastFailed=null;void submit(again.text,undefined,false,again.origin,again.displayText,again.icon);return;}
   if(actionPending||active||recording||starting||transcribing)return;
   actionPending=true;link.setAttribute('aria-busy','true');link.setAttribute('aria-disabled','true');
   if(link.getAttribute('href').startsWith('#fox-action=open.')){editing=false;input.blur();}
   const previousReply=reply,requestContext=context.key;
-  try{const href=link.getAttribute('href'),label=link.textContent;if(href.startsWith('#fox-action=open.'))await requireWorldSurface(call);await call('replyAction',{href,label});}
+  try{await call('replyAction',{href:link.getAttribute('href'),label:link.textContent});}
   catch(error){if(reply===previousReply&&context.key===requestContext)say(error.message||'The action could not finish.');}
   finally{actionPending=false;link.removeAttribute('aria-busy');link.removeAttribute('aria-disabled');}
  });
@@ -1043,7 +1032,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   // No Agent on this computer: Fox points to Settings › Agents, where it is chosen (owner request 2026-10-05).
   if(guide||root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true'||root.classList.contains('companion-info-open'))return false;
   const choose=make('button','','Choose an Agent'),later=make('button','','Not now');choose.type=later.type='button';
-  choose.onclick=async()=>{api.setGuide(null,{only:'model-needed'});try{if(isDesktopCompanion())await requireWorldSurface(call);await companionInfo.open('Settings','model');}catch(error){setStatus(error.message||'Could not reopen World. Try again.');}};
+  choose.onclick=async()=>{api.setGuide(null,{only:'model-needed'});try{await companionInfo.open('Settings','model');}catch(error){setStatus(error.message||'Could not reopen World. Try again.');}};
   later.onclick=()=>api.setGuide(null,{only:'model-needed'});
   api.setGuide({source:'model-needed',takeover:false,text,actions:[choose,later]});api.revealGuide();return true;
  }});
@@ -1061,7 +1050,7 @@ export function createNativeChat(call){return function({button,input,status,exec
  // Fox speaks first at a quiet moment, when it has one line worth saying (fox-proactive.ts); never while a tour
  // step shows or the phone step after the first win is still to come (Mac RC 3017, 3035).
  mountFoxProactive({call,
-  thread:()=>onDesktop()||root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true'||!!root.dataset.tourStep?'':segmentNow(),
+  thread:()=>root.dataset.onboarding==='true'||root.dataset.onboardingLocked==='true'||!!root.dataset.tourStep?'':segmentNow(),
   world:()=>context.key.split(':')[0]==='overview'&&!contentIdentity(),
   // Fox's own last line does not hold the next one (owner 2026-10-13: speak every so often); a question, notice or card does.
   busy:()=>active||streamingReply||recording||starting||transcribing||editing||!!input.value.trim()||!!guideShown&&!spokeFirstLine(guideShown)||guideHere(guide)&&!spokeFirstLine(guide)||root.classList.contains('companion-info-open'),
@@ -1094,7 +1083,7 @@ export function createNativeChat(call){return function({button,input,status,exec
   revealGuide(){dismissed=false;peeking=false;render();},
   setStatus,
   setGuide(value,{forget=false,only=null}={}){if(only&&guide?.source!==only)return;if(!value&&(!dismissed||forget))dismissedGuide=null;if(value)dismissedGuide=null;if(!value&&guide?.source==='model-setup'&&root.dataset.onboarding==='true'){root.dataset.onboarding='false';queueMicrotask(()=>root.dispatchEvent(new Event('worldlet:recommendations')));}/* A guide is a line said now: it takes the front at once, even during a turn (natural order). */if(value){for(const button of value.actions||[])if(button instanceof HTMLElement&&!choiceButtons.has(button)){choiceButtons.add(button);button.addEventListener('click',()=>{choice={label:button.textContent.trim(),at:Date.now()};},{capture:true});}if(choice&&Date.now()-choice.at<5000){value.answered=choice.label;choice=null;}}if(value?.takeover){editing=false;input.blur();}if(value)bindGuide(value);guide=value;guideTurn=value&&active?generation:-1;guideActions.replaceChildren(...(value?.actions||[]));guideContent.replaceChildren(...(value?.body?[value.body]:[]));if(value){if(value.remember&&value.text){reply={id:'attention:'+Date.now(),text:value.text,key:context.key,view:contentIdentity(),location:context.title};lastReply=reply;rememberContext(reply);const turns=threadHistory.get(FOX_MAIN_THREAD)||[];if(turns.at(-1)?.text!==value.text){threadHistory.set(FOX_MAIN_THREAD,[...turns,{role:'assistant',text:value.text}].slice(-6));saveRecall();}}preview=false;expanded=false;}render();if(value?.onPage&&pageIndex===0)value.onPage(0);},
-  setContext(value){if(!value)return;worldContext=value;if(sessionHere){if(!onDesktop()&&String(value.key||'').split(':')[0]==='overview'&&!contentIdentity())value=sessionContext(sessionHere);else sessionHere=null;}if(onDesktop())value={key:'overview:desktop',title:'Desktop Companion',detail:'The world window is closed. Fox is a desktop companion. No Thing or desktop content is visible; do not infer what is on the user’s screen.'};/* A turn that opened a view (an artifact) said its answer there before the World's context caught up: that is not the person moving, so the answer stays. */const anchor=recallKey(value.key,contentIdentity()),saidHere=!!reply?.text&&reply.key===value.key&&reply.view===contentIdentity(),changed=contextAnchor!==anchor&&!saidHere;contextAnchor=anchor;if(changed){peeking=false;hoverReply=null;reply=null;preview=false;expanded=false;}
+  setContext(value){if(!value)return;worldContext=value;if(sessionHere){if(String(value.key||'').split(':')[0]==='overview'&&!contentIdentity())value=sessionContext(sessionHere);else sessionHere=null;}/* A turn that opened a view (an artifact) said its answer there before the World's context caught up: that is not the person moving, so the answer stays. */const anchor=recallKey(value.key,contentIdentity()),saidHere=!!reply?.text&&reply.key===value.key&&reply.view===contentIdentity(),changed=contextAnchor!==anchor&&!saidHere;contextAnchor=anchor;if(changed){peeking=false;hoverReply=null;reply=null;preview=false;expanded=false;}
    if(changed){
     // A guide stays the newest line of the place it appeared in (bindGuide), like a reply,
     // and shows only there; the person's next message or Fox's next reply supersedes it.
@@ -1116,9 +1105,5 @@ export function createNativeChat(call){return function({button,input,status,exec
   /** Settings, at a section or a part of one (companion-settings.ts), e.g. `access` from the board's empty state. */
   openSettings:(setting?:string)=>companionInfo.open('Settings',setting),submit,ask:(text: string,{origin='user',displayText,icon,quiet=false}: {origin?: 'user'|'system';displayText?:string;icon?:string;quiet?:boolean}={})=>submit(text,undefined,false,origin,displayText,icon,quiet)
  };
- // On the desktop Fox stands with its message bar alone (owner request 2026-10-11): nothing beside Fox or the bar
- // (Settings, the dock's actions; right-click Fox, the Dock or tray icon goes back to the World).
- window.addEventListener('worldlet:desktop-companion',()=>api.setContext(worldContext));
- if(onDesktop())api.setContext(worldContext);
  return api;
 }}

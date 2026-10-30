@@ -57,11 +57,11 @@ export function mountLocalMusic(call:(action:string,body:any)=>Promise<any>){
  let watching:boolean|null=null;
  const present=()=>{
   if(disposed)return;
-  const active=!document.hidden&&windowActive()&&!document.documentElement.classList.contains('desktop-companion');
+  const active=!document.hidden&&windowActive();
   if(active===watching)return;watching=active;
   void call('localMusic',{operation:'watch',active}).then(value=>{if(!disposed&&value)render(value);}).catch(()=>{});
  };
- const events=['worldlet:app-active','worldlet:app-inactive','worldlet:desktop-companion','focus','blur'];
+ const events=['worldlet:app-active','worldlet:app-inactive','focus','blur'];
  for(const name of events)window.addEventListener(name,present);document.addEventListener('visibilitychange',present);
  present();
  return ()=>{

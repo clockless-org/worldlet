@@ -14,8 +14,6 @@
 //   working there.
 // - After Fox's turn the page out of sight is left like any page left behind, the screen goes and the
 //   device shows a Done mark until the person opens the Applet.
-// - While the World window is away for the desktop Companion, the host shows Fox's page beside it;
-//   the UI only says whether Fox works.
 // - Without the capability Fox works in the panel as before.
 // Set TASK_PIP_SHOTS=<dir> to keep screenshots.
 import assert from 'node:assert/strict';
@@ -200,49 +198,6 @@ const heldByFox=(page:Page)=>page.waitForFunction(()=>{const b=(window as any).s
   assert.deepEqual(errors,[]);
   await page.close();
   console.log('PASS Fox\'s copy: a press takes Fox\'s page into the panel; after Fox\'s turn it closes by itself; without one Fox works in the panel');
- }
- {
-  // The World window goes away for the desktop Companion while Fox works: the host shows Fox's page
-  // beside the Companion, so the UI only tells it whether Fox works, and Fox's steps go on. Back in
-  // the World the page is where it was. Closed beside the Companion after Fox's turn, the World's
-  // window ends too.
-  const {page,errors}=await open();
-  await foxStep(page);
-  await page.waitForFunction(()=>(window as any).surface.at(-1)?.fox);
-  await page.locator('.fox-action-left [data-slot=home]').click();
-  await heldByFox(page);
-  const sent=await page.evaluate(()=>(window as any).surface.length);
-  await page.evaluate(()=>(window as any).worldletDesktopCompanion(true));
-  await page.waitForFunction(()=>{const b=(window as any).surface.at(-1);return b?.action==='browserLayout'&&b.rect.width===0&&b.press;});
-  const away=await last(page);
-  assert.ok(away.fox&&away.page,'the host hears that Fox works on the page it shows beside the Companion: '+JSON.stringify(away));
-  const commands=await page.evaluate(()=>(window as any).commands.length);
-  assert.ok(!(await foxStep(page))?.error,'Fox\'s next step reaches the page while the World is away');
-  assert.ok(await page.evaluate(n=>(window as any).commands.length>n,commands));
-  await foxIdle(page);
-  await page.waitForFunction(()=>{const b=(window as any).surface.at(-1);return b?.action==='browserLayout'&&b.rect.width===0&&!b.fox;});
-  assert.ok(await page.evaluate(n=>(window as any).surface.slice(n).every(b=>b.action==='browserLayout'),sent),'nothing hid or reopened the page while away');
-  // Back in the World after Fox's turn, the page is left like any page and no screen stays.
-  await page.evaluate(()=>(window as any).worldletDesktopCompanion(false));
-  await page.waitForFunction(()=>(window as any).surface.at(-1)?.action==='browserHide');
-  assert.equal(await screen(page),null,'no screen is left in the World');
-  assert.deepEqual(errors,[]);
-  await page.close();
-  console.log('PASS with the World away for the desktop Companion, Fox\'s page stays Fox\'s beside it; back after Fox\'s turn it is left like any page');
- }
- {
-  // Ordinary browsing: the host stops pages when the World goes away; back in the World the panel
-  // opens its page again instead of staying blank.
-  const {page,errors}=await open();
-  const shows=await page.evaluate(()=>(window as any).surface.filter(b=>b.action==='browserShow').length);
-  await page.evaluate(()=>(window as any).worldletDesktopCompanion(true));
-  await page.waitForTimeout(300);
-  assert.equal(await page.evaluate(()=>(window as any).surface.at(-1)?.press),undefined,'nothing of Fox\'s is held');
-  await page.evaluate(()=>(window as any).worldletDesktopCompanion(false));
-  await page.waitForFunction(n=>(window as any).surface.filter(b=>b.action==='browserShow').length>n,shows);
-  assert.deepEqual(errors,[]);
-  await page.close();
-  console.log('PASS ordinary browsing: back from the desktop Companion the panel opens its page again');
  }
  {
   // A host that draws pages at their own size only (Electron's views): Fox works in the panel.

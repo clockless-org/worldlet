@@ -1,9 +1,9 @@
 import {connectorWriter} from '../../../../context/connectors/index.ts';
 import {contextChanges,contextReads,ledgerContext} from '../../store/context-storage.ts';
 import crypto from 'node:crypto';
-import {WebContentsView,screen,session,type BaseWindow,type Rectangle,type View} from 'electron';
+import {WebContentsView,session,type BaseWindow,type Rectangle,type View} from 'electron';
 import {openInBrowser} from '../../system-browser.ts';
-import {PAGE_MEMORY,RAW_KINDS,WEB_RECORD,type WebRecord,webSite,desktopTaskPictureInPicturePlacement,googleSignInRejected,memoryPressure,focusHost,pageFocusPlan,readSiteFocus,siteFocusFor,siteFocusRecord,PAGE_FOCUS_LIMITS,type PageFocusPlan,type SiteFocusRecord,signInRejectedMessage,linkRefusedMessage,type RefusedLink,sitePage,taskPictureInPictureAspect,type MemoryReading,VIDEO_FORMATS,needsProprietaryVideo,videoFormatHost,carriedStorage,storageCarryScript,STORAGE_READ,readLoginSignal,loginSite,loginUsername,loginOffer,loginsFor,tabApplet,isBrowserTab} from '../../../../agent/applets/index.ts';
+import {PAGE_MEMORY,RAW_KINDS,WEB_RECORD,type WebRecord,webSite,googleSignInRejected,memoryPressure,focusHost,pageFocusPlan,readSiteFocus,siteFocusFor,siteFocusRecord,PAGE_FOCUS_LIMITS,type PageFocusPlan,type SiteFocusRecord,signInRejectedMessage,linkRefusedMessage,type RefusedLink,sitePage,taskPictureInPictureAspect,type MemoryReading,VIDEO_FORMATS,needsProprietaryVideo,videoFormatHost,carriedStorage,storageCarryScript,STORAGE_READ,readLoginSignal,loginSite,loginUsername,loginOffer,loginsFor,tabApplet,isBrowserTab} from '../../../../agent/applets/index.ts';
 import {SavedLogins} from './logins.ts';
 import {pageScript} from './page-scripts.ts';
 import {WorldletError} from '../../files.ts';
@@ -17,7 +17,7 @@ import {AgentBrowser,type AgentBrowserEnvironment} from './agent.ts';
 import {PaperEdge} from './paper-edge.ts';
 import type {BrowserPaperEdge} from '../../../../contracts/browser-surface.ts';
 import {FoxGlow,glowStyle,type GlowStyle} from './glow.ts';
-import {PressOverlay,TaskWindow} from './task-window.ts';
+import {PressOverlay} from './press-overlay.ts';
 import {BrowserHistory,historyDestination} from './history.ts';
 import {ActivityRecorder} from './activity.ts';
 import {WebRecorder,manageRecordings,readRecordings,type RecordedVisit} from './recorder.ts';
@@ -97,17 +97,11 @@ export class BrowserDevice {
  private pagesWindow:BaseWindow|null=null;
  private watchedWindow:BaseWindow|null=null;
  makeAgent:((view:WebPage)=>AgentBrowser)|null=null;
- // Task picture in picture (#1175). `worldLayout` is where the World last placed the visible page,
- // applied again when the World comes back. While the World window is away for the desktop
- // Companion, Fox's page waits beside it in `task` (task-window.ts), at `taskSize`.
+ // Task picture in picture (#1175). `worldLayout` is where the World last placed the visible page.
  private worldLayout:Layout|null=null;
- private away=false;
- private task:TaskWindow|null=null;
  // Fox's copy of the visible page while the person keeps it (agent/applets/picture-in-picture.ts FOX_COPY).
  private copy:Copy|null=null;
- private taskSize:{width:number;height:number}|null=null;
- private taskFox:GlowStyle|null=null;
- // Fox's pointer moves over the page as it shows: smaller in a task window.
+ // Fox's pointer moves over the page as it shows: smaller in Fox's copy.
  private pointerScale=1;
  private pointer={point:(x:number,y:number)=>this.glow.point(x*this.pointerScale,y*this.pointerScale)};
  // The call being transcribed (Meetings; it starts with the call and the person can stop it): its page, the transcriber and session.
@@ -121,8 +115,6 @@ export class BrowserDevice {
  private mediaAsking=new WeakMap<WebPage,Promise<boolean>>();
  // Whether this run already asked the OS for a call's camera and microphone, or said where to turn them on.
  private mediaPrepared=false;
- /** Brings the World window back (the desktop Companion's Back to World). */
- restoreWorld:()=>Promise<void>|void=()=>{};
  constructor(host:Host,agent:Omit<AgentBrowserEnvironment,'pointer'>){
   this.host=host;this.surface=new Surface(host);this.activity=new ActivityRecorder(host.store);
   this.battles=new BattleReviews({day:at=>localDay(at),local:at=>new Date(at*1000).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),
@@ -177,7 +169,7 @@ export class BrowserDevice {
    const follow=()=>{if(this.watchedWindow===window&&this.browser){const screen=this.surface.toScreen(this.browser.frameRect());if(screen){this.glow.place(screen);this.paperEdge.place(screen);}}};
    window.on('move',follow);window.on('resize',follow);
    const hidePaper=()=>{if(this.watchedWindow===window)this.paperEdge.hide();};
-   const restorePaper=()=>{const layout=this.worldLayout;if(this.watchedWindow===window&&this.browser&&!this.browser.hidden&&!this.away&&layout)this.layout(layout.rect,layout.fox,layout.page,layout.press,layout.copy,false,layout.paperEdge);};
+   const restorePaper=()=>{const layout=this.worldLayout;if(this.watchedWindow===window&&this.browser&&!this.browser.hidden&&layout)this.layout(layout.rect,layout.fox,layout.page,layout.press,layout.copy,false,layout.paperEdge);};
    window.on('hide',hidePaper);window.on('minimize',hidePaper);window.on('show',restorePaper);window.on('restore',restorePaper);
   }
   return window;
@@ -384,7 +376,7 @@ export class BrowserDevice {
   * restarts and the page loads again; diagnostics get the outcome only, never the page. */
  private checkEngine(){
   const view=this.browser;
-  if(!(view instanceof CefPageView)||this.away||!this.surface.windowVisible())return;
+  if(!(view instanceof CefPageView)||!this.surface.windowVisible())return;
   const outcome=view.checkStall();
   if(outcome)this.host.diagnostics.record(new Error(outcome==='restarted'?'The website engine drew nothing; it restarted.':'The website engine drew nothing after a restart.'),'webEngineStall');
  }
@@ -453,7 +445,7 @@ export class BrowserDevice {
   view.onPermission=request=>void this.permission(view,request);
   view.onRefused=refused=>{if(visible())this.linkRefused(refused);};
   // A press on the task picture-in-picture window; the shared UI decides what follows.
-  view.onPress=()=>{if(!visible())return;if(this.away)this.pressTask();else this.emit({phase:'task-pip',event:'press'});};
+  view.onPress=()=>{if(visible())this.emit({phase:'task-pip',event:'press'});};
  }
  private async permission(view:WebPage,request:PermissionRequest){
   const origin=parse(request.origin),page=parse(view.url);
@@ -505,9 +497,6 @@ export class BrowserDevice {
  };
  private screenRect(frame:Rectangle){return this.surface.toScreen(frame);}
  layout(rect:Row,fox?:Row,page?:Row,press=false,copy?:Row,takeCopy=false,paperEdge?:BrowserPaperEdge){
-  // While the World is away, the page keeps its window beside the Companion; layouts only say
-  // whether Fox is working.
-  if(this.away){this.taskGlow(glowStyle(fox));return;}
   this.worldLayout={rect,fox,page,press,copy,paperEdge};
   // Fox's copy lasts while layouts carry it; taken, it becomes the visible page.
   if(takeCopy)this.takeCopy();else if(!copy)this.closeCopy();
@@ -579,79 +568,19 @@ export class BrowserDevice {
   this.bind(view);view.mute(false);view.raise();this.status();
  }
  private pageSize(page?:Row){return page&&typeof page.width==='number'&&typeof page.height==='number'?this.surface.toParent({x:0,y:0,width:page.width,height:page.height},false):null;}
- /** The World window leaves for the desktop Companion. Fox's page, in the task window or driven by
-  * Fox in the panel, stays alive to show beside the Companion (#1175); every other page stops. */
- detach(){
-  const layout=this.worldLayout,fox=glowStyle(layout?.fox),working=!!fox&&!fox.finished;
-  // Fox's copy goes along in place of the person's page while Fox works on it; after Fox's turn it closes.
-  const copied=working&&this.copy?this.copy.page:null;
-  if(copied)this.takeCopy();else this.closeCopy();
-  if(layout)layout.copy=undefined;
-  const view=this.browser;
-  const size=!(view instanceof CefPageView)||!layout?null:copied??(layout.press&&layout.page||working?this.pageSize(layout.page)??view.frameRect():null);
-  if(!size||size.width<1||size.height<1){this.stop();return;}
-  this.endPictureInPicture();
-  for(const page of this.parked.values())page.view.close();
-  this.parked.clear();this.stopMemoryWatch();this.dropGlow();
-  this.away=true;this.taskSize={width:size.width,height:size.height};this.taskFox=fox;
- }
- /** Once the Companion's window shows, Fox's page shows beside it (agent/applets/picture-in-picture.ts). */
- placeTask(companion:Rectangle|null){
-  const view=this.browser,size=this.taskSize;
-  if(!this.away||!(view instanceof CefPageView)||!size)return;
-  const area=screen.getDisplayMatching(companion??this.surface.window()?.getBounds()??screen.getPrimaryDisplay().bounds).workArea;
-  const bounds=desktopTaskPictureInPicturePlacement({area,companion,aspect:taskPictureInPictureAspect(size)});
-  const task=this.task??=new TaskWindow({onPress:()=>this.pressTask(),onClose:()=>this.closeTask()});
-  task.place(bounds);
-  view.moveTo(task.contentView,()=>task.window);
-  view.setFrame({x:0,y:0,width:bounds.width,height:bounds.height},size,true);
-  task.raise();task.show();
-  this.pointerScale=bounds.width/size.width;
-  this.taskGlow(this.taskFox);
- }
- /** Fox's glow follows the page beside the Companion; the close control shows only after Fox's turn
-  * (a finished card with Fox's result is after it). */
- private taskGlow(style:GlowStyle|null){
-  this.taskFox=style;
-  const task=this.task;
-  task?.closable(!style||!!style.finished);
-  if(!style||!task?.visible){this.glow.hide();return;}
-  this.glow.apply(style,task.window,task.window.getContentBounds());
- }
- /** A press beside the Companion brings the World back; the shared UI then opens the page's Applet. */
- private pressTask(){
-  if(!this.away)return;
-  void Promise.resolve(this.restoreWorld()).then(()=>this.emit({phase:'task-pip',event:'press'}),()=>{});
- }
- /** Close beside the Companion, once Fox's turn has ended, leaves the page, and the UI's window ends. */
- private closeTask(){
-  if(!this.away||this.taskFox&&!this.taskFox.finished)return;
-  this.close();this.away=false;this.taskSize=null;this.worldLayout=null;this.task?.hide();
-  this.emit({phase:'task-pip',event:'closed'});
- }
- /** The World window is back: the page returns to it where it last was, and the UI places it again. */
- attach(){
-  if(!this.away)return;
-  this.away=false;this.taskSize=null;this.taskFox=null;
-  const view=this.browser,parent=this.surface.parent();
-  if(view instanceof CefPageView&&parent)view.moveTo(parent,()=>this.surface.window());
-  this.task?.hide();this.dropGlow();
-  const layout=this.worldLayout;
-  if(layout)this.layout(layout.rect,layout.fox,layout.page,layout.press,layout.copy,false,layout.paperEdge);
- }
  /** Every layout carries the current glow; absent means Fox is not driving the page. */
  private applyGlow(style:GlowStyle|null,frame:Rectangle){
   if(!style){this.glow.hide();return;}
   this.glow.apply(style,this.surface.window(),this.screenRect(frame));
  }
  /** Leaving the panel keeps this Applet's page alive when the shared rule lists it in `live`. */
- hide(live?:string[]){if(this.away){this.release(live);return;}this.park(live);}
+ hide(live?:string[]){this.park(live);}
  /** Closes the visible page and every kept page (world closed, world switched, backup restored). */
  stop(){
   this.close();this.endPictureInPicture();
   for(const page of this.parked.values())page.view.close();
   this.parked.clear();this.held.clear();this.pagesScope=null;this.pagesWindow=null;this.stopMemoryWatch();
-  this.away=false;this.taskSize=null;this.taskFox=null;this.worldLayout=null;this.task?.destroy();this.task=null;this.paperEdge.close();
+  this.worldLayout=null;this.paperEdge.close();
  }
  private close(){
   this.closeCopy();this.endTranscript();
@@ -810,7 +739,7 @@ export class BrowserDevice {
   * address; its site opens there from now on (owner Order 2026-10-07: 越自动越好). Not while Fox drives it. */
  private async captureVideoFormats(){
   const view=this.browser;
-  if(!(view instanceof CefPageView)||view.hidden||view.isLoading||this.away||!this.surface.windowVisible()||Date.now()<this.signingInUntil)return;
+  if(!(view instanceof CefPageView)||view.hidden||view.isLoading||!this.surface.windowVisible()||Date.now()<this.signingInUntil)return;
   const fox=glowStyle(this.worldLayout?.fox);if(fox&&!fox.finished)return;
   let report:unknown=null;
   try{report=await view.evaluate('return globalThis.__worldletVideoFormats?.()??null',{},{isolated:false,timeoutSeconds:2});}catch{return;}
@@ -829,7 +758,7 @@ export class BrowserDevice {
   * LinkedIn), reopens on the CEF engine at the same address, whose Chromium draws the passkey and phone dialogs.
   * Its site still opens on Electron's views later for its video, signed in alike (cookie-bridge.ts). */
  private passkeyRequested(view:WebPage){
-  if(!(view instanceof PageView)||view!==this.browser||view.hidden||this.away||!sharedEngine(this.host.profile))return;
+  if(!(view instanceof PageView)||view!==this.browser||view.hidden||!sharedEngine(this.host.profile))return;
   this.host.diagnostics.log('A passkey sign-in on '+(parse(view.url)?.hostname??'a page')+'; the page moved to the website engine.');
   void this.move(view,view.url,'cef');
  }
@@ -838,7 +767,7 @@ export class BrowserDevice {
   * opener waits for it, reopens its page there to start again. The video move back waits until the sign-in is done;
   * the cookies go along both ways (cookie-bridge.ts). */
  private googleSignIn(view:WebPage,url:string,popup:boolean){
-  if(!(view instanceof PageView)||view!==this.browser||view.hidden||this.away||!sharedEngine(this.host.profile))return;
+  if(!(view instanceof PageView)||view!==this.browser||view.hidden||!sharedEngine(this.host.profile))return;
   this.host.diagnostics.log('A Google sign-in on '+(parse(view.url)?.hostname??'a page')+(popup?' (popup)':'')+'; the page moved to the website engine.');
   this.signingInUntil=Date.now()+GOOGLE_SIGN_IN_MS;
   void this.move(view,popup?view.url:url,'cef');

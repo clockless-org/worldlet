@@ -329,15 +329,6 @@ export class CefPageView {
  keepRunning(){}
  /** Raises the page above other views in the panel. */
  raise(){this.parent.addChildView(this.surface.view);}
- /** Shows the page in another window's view, as it is: the task window beside the desktop Companion
-  * while the World window is away, and back (#1175). The page itself goes on unchanged. */
- moveTo(parent:View,window:()=>BaseWindow|null){
-  if(parent===this.parent||this.closed)return;
-  try{this.parent.removeChildView(this.surface.view);}catch{}
-  this.parent=parent;this.window=window;
-  parent.addChildView(this.surface.view);
-  this.place();this.applyVisibility();
- }
  mute(muted:boolean){this.muted=muted;for(const entry of this.stack)this.engine.send({t:'mute',id:entry.id,muted});}
  markGesture(){this.lastGesture=Date.now();}
  /** The person's input on the surface, for the visible page. */

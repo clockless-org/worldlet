@@ -135,8 +135,6 @@
 /* The current card stays whole; earlier ones step back on the same frosted paper, paler with
    age, the oldest the palest, while their text keeps normal reading contrast (#1652). */
 #notionWorld.native-console.fox-first-console{--fox-glass:#f9f6e4f2;--fox-glass-blur:blur(28px) saturate(1.2)}
-/* On the desktop nothing of the World is behind the card to blur, so it stays opaque paper there. */
-.desktop-companion #notionWorld.native-console.fox-first-console{--fox-glass:#f9f6e4;--fox-glass-blur:none}
 #notionWorld.native-console .companion-thread-card{box-sizing:border-box;display:grid;gap:4px;flex-shrink:0;width:100%;padding:12px 16px;border-radius:20px;--fade:calc(min(var(--age,0),4) * 18% + 14%);background:color-mix(in srgb,#ecebe4e3 var(--fade),var(--fox-glass,#f9f6e4f2));backdrop-filter:var(--fox-glass-blur);-webkit-backdrop-filter:var(--fox-glass-blur);border:1px solid color-mix(in srgb,#dedcd3 var(--fade),#ebe5cc);box-shadow:0 3px 10px #162a3218;color:color-mix(in srgb,#56625a var(--fade),var(--ui-ink,#1f3a2a));font:400 14px/1.45 var(--ui-font-ui,system-ui)}
 /* A topic of several turns is one stack (owner Order 2026-10-08): its name and count on top, its newest turn,
    and two card edges peeking out under it; the name opens it into its turns and folds it again. */

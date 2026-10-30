@@ -1,10 +1,8 @@
-// The task picture-in-picture window beside the desktop Companion (#1175, agent/applets/picture-in-picture.ts).
-// While the World window is closed or minimized, Fox's page shows here smaller, at its own size, and
-// keeps working. A transparent overlay above the page takes the person's input: a press brings the
-// World back with the page's Applet, and once Fox's turn has ended a close control leaves the page.
-// Fox's copy of a page in the panel's corner (device.ts) takes its input through the same overlay.
+// A transparent overlay above a page shown smaller takes the person's input: Fox's copy of a page in the
+// panel's corner (device.ts, agent/applets/picture-in-picture.ts FOX_COPY) reports a press and, once Fox's
+// turn has ended, its close control.
 import crypto from 'node:crypto';
-import {BaseWindow,WebContentsView,session,type Rectangle} from 'electron';
+import {WebContentsView,session} from 'electron';
 
 const overlayPage=(nonce:string)=>`<!doctype html><html><head><style>
 html,body{margin:0;width:100%;height:100%;background:transparent;cursor:pointer;user-select:none;overflow:hidden}
@@ -41,34 +39,4 @@ export class PressOverlay {
  /** The close control shows only once Fox's turn has ended. */
  closable(on:boolean){void this.ready.then(()=>this.view.webContents.isDestroyed()?undefined:this.view.webContents.executeJavaScript(`setClosable(${on})`)).catch(()=>{});}
  destroy(){if(!this.view.webContents.isDestroyed())this.view.webContents.close();}
-}
-
-export class TaskWindow {
- readonly window:BaseWindow;
- private overlay:PressOverlay;
- constructor({onPress,onClose}:{onPress:()=>void;onClose:()=>void}){
-  const mac=process.platform==='darwin';
-  this.window=new BaseWindow({show:false,title:'Fox',frame:false,resizable:false,minimizable:false,maximizable:false,fullscreenable:false,
-   skipTaskbar:true,alwaysOnTop:true,hasShadow:true,backgroundColor:'#ffffff',...(mac?{type:'panel' as const}:{})});
-  this.window.setAlwaysOnTop(true,'floating');
-  // Keeps the app's Dock icon and Command-Tab entry (see DesktopCompanion.makePanel).
-  this.window.setVisibleOnAllWorkspaces(true,{visibleOnFullScreen:true,skipTransformProcessType:true});
-  // It goes with its page, never on its own.
-  this.window.on('close',event=>event.preventDefault());
-  this.overlay=new PressOverlay({onPress,onClose});
- }
- get contentView(){return this.window.contentView;}
- get visible(){return !this.window.isDestroyed()&&this.window.isVisible();}
- /** Places the window on screen; the page's surface and the overlay fill it. */
- place(bounds:Rectangle){this.window.setBounds(bounds);this.overlay.view.setBounds({x:0,y:0,width:bounds.width,height:bounds.height});}
- /** The overlay goes above the page's surface, which was added after it. */
- raise(){this.window.contentView.addChildView(this.overlay.view);}
- show(){if(!this.window.isVisible())this.window.showInactive();}
- hide(){if(!this.window.isDestroyed())this.window.hide();}
- /** The close control shows only once Fox's turn has ended. */
- closable(on:boolean){this.overlay.closable(on);}
- destroy(){
-  this.overlay.destroy();
-  if(!this.window.isDestroyed())this.window.destroy();
- }
 }

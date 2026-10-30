@@ -7,7 +7,7 @@ import type {Row} from '../../types.ts';
 
 // The host-owned playback and capture surface: a detached Chromium view that no window
 // shows, so ambience, radio, Voice Memos playback, speech capture and spoken replies keep
-// running while the World page reloads or hides into the desktop Companion. It has no
+// running while the World page reloads or the World window is hidden. It has no
 // host bridge; the host drives it with executeJavaScript and drains its events.
 const PAGE=`<!doctype html><meta charset="utf-8"><title>Worldlet media</title><script>
 'use strict';

@@ -1,7 +1,7 @@
 // Shared picture-in-picture rule for website Applets (#919, #950, agent/applets/picture-in-picture.ts):
 // which Applets offer it, where the window shows and goes, its size and how it counts against live pages.
 import assert from 'node:assert/strict';
-import {FOX_COPY,PAGE_RESUME,PICTURE_IN_PICTURE,foxCopyPlacement,TASK_PICTURE_IN_PICTURE,desktopTaskPictureInPicturePlacement,livePagePlan,pageFrameRate,pictureInPictureApplet,pictureInPicturePlacement,pictureInPictureShare,pictureInPictureShows,taskPictureInPictureAspect} from '../agent/applets/index.ts';
+import {FOX_COPY,PAGE_RESUME,PICTURE_IN_PICTURE,foxCopyPlacement,TASK_PICTURE_IN_PICTURE,livePagePlan,pageFrameRate,pictureInPictureApplet,pictureInPicturePlacement,pictureInPictureShare,pictureInPictureShows,taskPictureInPictureAspect} from '../agent/applets/index.ts';
 
 // Applets whose own view is their website; not local Applets, meetings or a scene Applet's Web mode.
 for(const key of ['youtube','tiktok','x','netflix','twitch','bilibili','browser','notion','github','stripe','paypal','todoist','linear','supabase','google-drive','google-docs','google-sheets','google-slides'])assert.equal(pictureInPictureApplet(key),true,key+' offers it');
@@ -49,30 +49,18 @@ assert.deepEqual(livePagePlan(hidden,now).live,['x','netflix'],'without a window
 console.log(`PASS picture in picture: website Applets offer it; in the World only, a 16:9 window in the right third (or the person's size, ${minWidth} px to ${maxShare*100}% of the World) moves up past what it would cover, narrows only when it must, or waits; it holds one of ${PAGE_RESUME.livePages} live places.`);
 
 // Task picture in picture (#1175): the window keeps the page's own shape between square and 2.2:1, renders
-// fewer frames shown smaller and never none out of sight, and beside the desktop Companion it sits on the
-// Companion's left (right when the left has no room), bottom-aligned, inside the work area.
+// fewer frames shown smaller and never none out of sight.
 assert.equal(taskPictureInPictureAspect({width:1000,height:600}),1000/600);
 assert.equal(taskPictureInPictureAspect({width:500,height:900}),TASK_PICTURE_IN_PICTURE.minAspect,'a tall page shows square');
 assert.equal(taskPictureInPictureAspect({width:3000,height:600}),TASK_PICTURE_IN_PICTURE.maxAspect,'a very wide page shows at most 2.2:1');
 assert.equal(taskPictureInPictureAspect({width:0,height:0}),PICTURE_IN_PICTURE.aspect,'no size yet: 16:9');
-const {fps,desktop}=TASK_PICTURE_IN_PICTURE;
+const {fps}=TASK_PICTURE_IN_PICTURE;
 assert.deepEqual([pageFrameRate({width:800,height:600,scaled:false}),pageFrameRate({width:320,height:240,scaled:true}),pageFrameRate({width:0,height:0,scaled:true})],[fps.panel,fps.scaled,fps.waiting]);
 // The panel follows the display's refresh rate, 60 to 120 (owner Order 2026-10-06: the browser felt laggy).
 assert.deepEqual([120,119.88,144,59.94,30,0,Number.NaN].map(refresh=>pageFrameRate({width:800,height:600,scaled:false,refresh})),[120,120,fps.display,60,fps.panel,fps.panel,fps.panel]);
 assert.equal(pageFrameRate({width:320,height:240,scaled:true,refresh:120}),fps.scaled);
 assert.ok(fps.panel>fps.scaled&&fps.scaled>fps.waiting&&fps.waiting>0,'out of sight is the lowest rate, never none');
-const area={x:0,y:25,width:1512,height:920},companion={x:1100,y:620,width:380,height:300};
-const beside=desktopTaskPictureInPicturePlacement({area,companion,aspect:1.6});
-assert.deepEqual(beside,{x:companion.x-desktop.gap-desktop.width,y:companion.y+companion.height-225,width:desktop.width,height:225},'left of the Companion, bottom-aligned: '+JSON.stringify(beside));
-const atLeft=desktopTaskPictureInPicturePlacement({area,companion:{x:20,y:620,width:380,height:300},aspect:1.6});
-assert.equal(atLeft.x,20+380+desktop.gap,'no room on the left: on the right');
-const high=desktopTaskPictureInPicturePlacement({area,companion:{x:1100,y:30,width:380,height:120},aspect:1});
-assert.equal(high.y,area.y+desktop.margin,'never above the work area');
-const corner=desktopTaskPictureInPicturePlacement({area,companion:null,aspect:2});
-assert.deepEqual(corner,{x:area.x+area.width-desktop.margin-desktop.width,y:area.y+area.height-desktop.margin-180,width:desktop.width,height:180},'without the Companion: the bottom-right corner');
-const narrow=desktopTaskPictureInPicturePlacement({area:{x:0,y:0,width:300,height:500},companion:null,aspect:1.5});
-assert.ok(narrow.width===300-2*desktop.margin&&narrow.x===desktop.margin,'a narrow screen narrows it to fit');
-console.log('PASS task picture in picture: the page\'s own shape (square to 2.2:1), frame rates by place (never none), and the window beside the desktop Companion inside the work area');
+console.log('PASS task picture in picture: the page\'s own shape (square to 2.2:1), frame rates by place (never none)');
 // Fox's copy of the page (owner request 2026-10-09): the panel's top-right corner, in the page's shape.
 {
  const panel={x:100,y:60,width:1200,height:760},spot=foxCopyPlacement({panel,page:panel})!;

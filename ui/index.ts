@@ -4,7 +4,6 @@ import {mountMemoryManager} from './companion/index.ts';
 import {appletSupport,appletsOffPage,connectionLive} from '../context/applets/index.ts';
 import {startWebAnalytics,withProductAnalytics} from './frame/index.ts';
 import {settleItemPage} from '../context/store/index.ts';
-import {installDesktopCompanion} from './companion/index.ts';
 import {mountFirstValue,mountLoginItemOffer,mountWorldTour} from './frame/index.ts';
 import {landSetupDevices} from './frame/index.ts';
 import {mountStartupSetup} from './frame/index.ts';
@@ -40,7 +39,6 @@ startWebAnalytics(callHost);
 // Only allowlisted dimensions pass (the host allowlists them again): an Applet key, `trigger` user|background,
 // setup's `dimensions` (agent/app/setup-events.ts) with a `duration` bucket and, for user_engaged, its kind. user_engaged is reported in the practice world too: a person exploring it is using the app.
 window.addEventListener('worldlet:product-event',(e:Event)=>{const detail=(e as CustomEvent).detail;if(typeof detail==='string')track(detail);else if(detail?.event==='user_engaged')void Promise.resolve(callHost('usageEvent',{event:'user_engaged',engagement_kind:detail.engagement_kind})).catch(()=>{});else if(detail)track(detail.event,typeof detail.duration==='string'?detail.duration:'',{...(detail.dimensions&&typeof detail.dimensions==='object'?detail.dimensions:{}),...(detail.applet?{applet:detail.applet}:{}),...(detail.trigger?{trigger:detail.trigger}:{})});});
-installDesktopCompanion();
 window.worldletAudio=value=>window.dispatchEvent(new CustomEvent('worldlet:audio',{detail:value}));
 window.worldletLocalMusic=value=>window.dispatchEvent(new CustomEvent('worldlet:local-music',{detail:value}));
 window.worldletYouTubePlayer=value=>window.dispatchEvent(new CustomEvent('worldlet:youtube-player',{detail:value}));

@@ -24,7 +24,7 @@ import {localDataFacts} from './data-size.ts';
 import {exitCodeName,foxTimingEvent,nativeCrashFromIps} from '../../../../agent/app/index.ts';
 import {setTimeout as sleep} from 'node:timers/promises';
 
-/** App shell: menus, the desktop Companion, updates, Open at Login, the default browser setting, diagnostics, feedback, usage analytics and World backups. */
+/** App shell: menus, hiding and restoring the World window, updates, Open at Login, the default browser setting, diagnostics, feedback, usage analytics and World backups. */
 export function installShell(host:Host){
  const {store,page}=host;
  const companion=host.provide(DESKTOP_COMPANION,new DesktopCompanion(host));
@@ -149,7 +149,6 @@ export function installShell(host:Host){
  // The person's own keys, clicks and scrolls on the World page (user_engaged); app_active below only says the app ran.
  const watched=new WeakSet<object>();
  host.onPageLoaded(()=>{
-  companion.syncPresentation();
   const contents=host.worldView()?.webContents;
   if(contents&&!watched.has(contents)){watched.add(contents);analytics.watchInput(contents);}
   if(started)return;
@@ -219,12 +218,6 @@ export function installShell(host:Host){
    throw new WorldletError('Unknown login item operation.');
   },
   companionMenu:()=>{setImmediate(()=>companion.showMenu());return {ok:true};},
-  // Fox no longer goes to the desktop (owner request 2026-10-29); pages from older builds may still ask.
-  desktopCompanionSize:()=>({ok:true}),
-  desktopCompanionDrag:()=>({ok:true}),
-  desktopCompanionState:()=>({enabled:false}),
-  desktopCompanionHide:()=>{companion.background();return {ok:true};},
-  desktopCompanionPointer:()=>({ok:true}),
   // The timing stays in logs/fox-timing.jsonl; PostHog gets only its buckets (core foxTimingEvent), to see Fox slowing down.
   foxTiming:request=>{try{const timing=foxTimingEvent(recordFoxTiming(store.root,request));if(timing)analytics.recordProductEvent(timing.event,timing.duration,timing.dimensions);}catch{}return {ok:true};},
   appUpdate:request=>updates.activate(request),

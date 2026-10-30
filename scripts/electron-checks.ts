@@ -88,7 +88,7 @@ if(wanted('smoke')){
  const probe=`(async()=>{const h=window.worldletHost,r=a=>h.request(a);const out={};
   out.platform=h.platform;
   const s=await r({action:'snapshot'});out.snapshot=['platform','hostCapabilities','onboarding','connections','worldItems','overlay'].every(k=>k in s);
-  for(const action of ['foxPreferences','modelStatus','companionProfile','worldHistory','diagnostics','worldAudio','weatherLoad','appUpdate','devBuildStatus','desktopCompanionState','conversationRecall','loginItem']){
+  for(const action of ['foxPreferences','modelStatus','companionProfile','worldHistory','diagnostics','worldAudio','weatherLoad','appUpdate','devBuildStatus','conversationRecall','loginItem']){
    try{await r({action,...(action==='worldAudio'?{operation:'status'}:{}),...(action==='emailAction'?{operation:'list'}:{})});out[action]='ok';}catch(e){out[action]='error: '+e.message;}
   }
   try{await r({action:'noSuchAction'});out.unknown='accepted';}catch(e){out.unknown='rejected';}

@@ -352,12 +352,9 @@ export const SPEECH='speech';
 
 // App shell (modules/app) -------------------------------------------------------------------
 export interface DesktopCompanionService {
- /** Always false: Fox stays in the World window (modules/companion/window.ts). Kept for pages that still ask. */
- readonly isDesktop:boolean;
  /** Window close hides the World while the app keeps running (until onboarding is over it quits). */
  shouldKeepOpen():boolean;
  restoreWorld():Promise<void>;
- syncPresentation():void;
  /** Before the World window hides: websites and the inline player stop. */
  beforeDetach(listener:()=>void):void;
  /** Run in background: no Worldlet window stays on screen while the app keeps running; false until onboarding is over. */

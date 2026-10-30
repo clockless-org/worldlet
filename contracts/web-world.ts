@@ -64,12 +64,12 @@ export type WorldHostFrame=
 export type WorldPageFrame={q:number;body:Record<string,unknown>}|{r:number;value?:unknown};
 /** What a World page in a web browser cannot do, though the app's window can, sent in the handshake (`h.features`):
  * the page turns these HostFeatures off whatever the snapshot says (platform/bridge/features.ts). Websites and the
- * Browser open in a new tab instead of a native view; YouTube, the World's sound, music players, voice and the desktop
- * Companion window are hidden; what Fox made that shows in a native view (a moment Applet's page, a made game) says it
+ * Browser open in a new tab instead of a native view; YouTube, the World's sound, music players and voice
+ * are hidden; what Fox made that shows in a native view (a moment Applet's page, a made game) says it
  * needs the app, and a card keeps its template instead of its page; the corner leaves no room for window buttons the
  * page does not have. */
 export const WEB_PAGE_FEATURES:Readonly<Partial<Record<keyof HostFeatures,false>>>=Object.freeze({
- websitePages:false,youtube:false,worldAudio:false,localMusic:false,voice:false,desktopCompanion:false,madePages:false,leadingWindowControls:false,
+ websitePages:false,youtube:false,worldAudio:false,localMusic:false,voice:false,madePages:false,leadingWindowControls:false,
 });
 /** What Fox's tools (and the page) answer when they need one of those. */
 export const WEB_PAGE_UNAVAILABLE:Readonly<Partial<Record<keyof HostFeatures,string>>>=Object.freeze({
@@ -78,7 +78,6 @@ export const WEB_PAGE_UNAVAILABLE:Readonly<Partial<Record<keyof HostFeatures,str
  worldAudio:'The World\'s sound is not available in a browser window. It needs the Worldlet app on this computer.',
  localMusic:'Music players on this computer are not available in a browser window. They need the Worldlet app on this computer.',
  voice:'Voice is not available in a browser window. Type to Fox instead, or use the Worldlet app on this computer.',
- desktopCompanion:'Fox\'s desktop Companion is not available in a browser window. It needs the Worldlet app on this computer.',
  madePages:'Things and games Fox made open in the Worldlet app on your computer, not in a browser window.',
 });
 /** The close code a page that was taken over receives. */
@@ -106,6 +105,8 @@ export const WEB_DENIED:Readonly<Record<string,true|readonly string[]>>=Object.f
  developmentSessions:true,
  voiceMemos:true,
  messages:true,
+ // Fox's right-click menu (Back to World, Quit Completely) acts on this computer's app.
+ companionMenu:true,
 });
 export const WEB_DENIED_MESSAGE='This needs the Worldlet app on this computer.';
 /** The host's actions behind each HostFeature a browser's World page lacks (WEB_PAGE_FEATURES): the page hides their
@@ -121,7 +122,6 @@ export const WEB_PAGE_ACTIONS:Readonly<Partial<Record<keyof HostFeatures,Readonl
  localMusic:Object.freeze({localMusic:true}),
  // Speech: the microphone and Fox's spoken replies through this computer's speakers.
  voice:Object.freeze({speechStart:true,speechKeep:true,speechTalk:true,speechStop:true,speechCancel:true,microphones:true,speakReply:true}),
- desktopCompanion:Object.freeze({desktopCompanionState:true,desktopCompanionSize:true,desktopCompanionDrag:true,desktopCompanionHide:true,desktopCompanionPointer:true,companionMenu:true}),
  // The native views that show what Fox made over the app's window; whether a card has a page, and making one, stay.
  madePages:Object.freeze({widgetPlayer:true,madeGamePlayer:true,artifactPages:Object.freeze({except:Object.freeze(['get','make'])})}),
 });

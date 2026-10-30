@@ -7,7 +7,6 @@ import {loadRiveFox} from './animation/fox-rive.ts';
 import {isFoxForegroundActivity} from '../../contracts/companion-activity.ts';
 import {createFoxSurfaceTiming,registerFoxFrameTiming} from './fox-frame-timing.ts';
 import {WORLD_FRAME_RATE,foxFrameRate,frameDue,windowActive} from '../world/index.ts';
-import {isDesktopCompanion} from './world-surface.ts';
 import {FOX_DEV_PREVIEW_EVENT} from './fox-dev-preview.ts';
 // The Rive Fox, with the painted Fox and then the expression atlas as fallbacks. No per-frame model calls.
 export function mountCompanionPortrait(host,options={}){
@@ -22,7 +21,7 @@ function mountPortrait(host,{bust=false}={}){
  const canvas=document.createElement('canvas');canvas.className='companion-model companion-sprite';canvas.setAttribute('aria-hidden','true');canvas.width=320;canvas.height=320;
  const timing=authored?createFoxSurfaceTiming():undefined;
  const releaseTiming=timing?registerFoxFrameTiming(canvas,timing):()=>{};
- const observeTiming=()=>timing?.observe(performance.now(),isDesktopCompanion()?'desktop':'world',document.hidden,document.hasFocus());
+ const observeTiming=()=>timing?.observe(performance.now(),'world',document.hidden,document.hasFocus());
  if(timing){observeTiming();window.addEventListener('focus',observeTiming);window.addEventListener('blur',observeTiming);document.addEventListener('visibilitychange',observeTiming);}
  const ctx=canvas.getContext('2d'),sheet=new Image(),reduced=matchMedia('(prefers-reduced-motion: reduce)');
  host.classList.add('companion-cozy');if(bust)host.classList.add('companion-bust');host.append(halo,canvas);
@@ -108,7 +107,7 @@ function mountPortrait(host,{bust=false}={}){
     canvas.dataset.frame=String(companionFrame(pose,now-poseStarted,reduced.matches));
     const begin=timing?performance.now():0;
     const sample=animation.draw(ctx,pose,now-poseStarted,now,reduced.matches);
-    timing?.record(begin,performance.now()-begin,typeof timestamp==='number'?timestamp:undefined,sample.key,isDesktopCompanion()?'desktop':'world','timingPhase' in sample?sample.timingPhase:undefined);
+    timing?.record(begin,performance.now()-begin,typeof timestamp==='number'?timestamp:undefined,sample.key,'world','timingPhase' in sample?sample.timingPhase:undefined);
     canvas.dataset.animationFrame=sample.key;
    }else draw(companionFrame(pose,now-poseStarted,reduced.matches),now-poseStarted);
    // Reduced motion still permits semantic changes (e.g. idle to asleep).

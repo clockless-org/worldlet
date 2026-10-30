@@ -84,13 +84,11 @@ export interface HostFeatures {
  worldAudio?:boolean;
  /** Speaking to Fox, Talk, dictation and spoken replies, through the host's microphone and voices. */
  voice?:boolean;
- /** Fox's desktop Companion window when the World is closed. */
- desktopCompanion?:boolean;
  /** What Fox made, shown in a native view over the World: a moment Applet's page, a made game and a card's page. */
  madePages?:boolean;
 }
 /** The page flags above, on unless a host or the page's transport says `false`. */
-export const PAGE_FEATURES=['websitePages','youtube','worldAudio','voice','desktopCompanion','madePages'] as const satisfies readonly (keyof HostFeatures)[];
+export const PAGE_FEATURES=['websitePages','youtube','worldAudio','voice','madePages'] as const satisfies readonly (keyof HostFeatures)[];
 /** `browserBudget` (#1176): the host's website page budget from its memory; absent on older hosts. */
 export interface HostCapabilities {version:1;features:HostFeatures;browserBudget?:BrowserBudget}
 /** Host → World page while Google connects: `new CustomEvent(GOOGLE_SIGN_IN_EVENT,{detail:stage})`.

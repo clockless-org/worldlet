@@ -1,8 +1,5 @@
 {
   "plumbing": [
-    "desktopCompanionSize",
-    "desktopCompanionState",
-    "desktopCompanionDrag",
     "worldHistory",
     "worldLog",
     "worldActivity",

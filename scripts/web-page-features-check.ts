@@ -23,7 +23,7 @@ for(const key of PAGE_FEATURES){
 }
 assert.equal(hostFeatures({platform:'macos',hostCapabilities:{version:1,features:{}}},{}).localMusic,false,'host services still fail closed');
 // A host that does not implement the action behind a page flag reports it off (the Node host has no browser or voice).
-const headless=hostCapabilities(feature=>!['websitePages','youtube','worldAudio','voice','desktopCompanion','madePages'].includes(feature)).features;
+const headless=hostCapabilities(feature=>!['websitePages','youtube','worldAudio','voice','madePages'].includes(feature)).features;
 for(const key of PAGE_FEATURES)assert.equal(headless[key],false,`a host without ${key}'s action reports it off`);
 
 // 2. The page's own transport turns them off whatever the snapshot says; the app's page has no such flags.
@@ -35,7 +35,7 @@ assert.equal(web.browserBookmarks,true,'flags the page does not touch stay as th
 const mac={platform:'macos',hostCapabilities:{version:1,features:{leadingWindowControls:true}}};
 assert.equal(hostFeatures(mac,{}).leadingWindowControls,true,'the Mac app keeps room for its window buttons');
 assert.equal(hostFeatures(mac,WEB_PAGE_FEATURES).leadingWindowControls,false,'a browser\'s page has no window buttons over its corner');
-for(const key of ['websitePages','youtube','worldAudio','localMusic','voice','desktopCompanion','madePages'])assert.ok(WEB_PAGE_UNAVAILABLE[key as keyof typeof WEB_PAGE_UNAVAILABLE]?.includes('browser window'),`${key} says why it is missing`);
+for(const key of ['websitePages','youtube','worldAudio','localMusic','voice','madePages'])assert.ok(WEB_PAGE_UNAVAILABLE[key as keyof typeof WEB_PAGE_UNAVAILABLE]?.includes('browser window'),`${key} says why it is missing`);
 
 // What Fox made shows in a native view over the app's window: a browser's page is told so, and a card there keeps its
 // template (artifactPages `get` and `make` stay; `show` is refused, which the card takes as no page).
@@ -82,4 +82,4 @@ const sent:string[]=[];
 const socket:PageSocket={send:text=>sent.push(text),close(){},onMessage(){},onClose(){}};
 createWebPage({platform:'linux',dispatch:async()=>null,loaded(){},gone(){}}).connect(socket);
 assert.deepEqual(JSON.parse(sent[0]),{h:{version:1,platform:'linux',features:WEB_PAGE_FEATURES}},'the handshake says what the page\'s window cannot do');
-console.log('PASS web page features: a browser\'s World page hears what its window cannot do, hides YouTube, sound, voice, the desktop Companion and window buttons, refuses the native views of what Fox made, opens websites in a new tab, and Fox\'s tools that need them say so; the app\'s page is unchanged');
+console.log('PASS web page features: a browser\'s World page hears what its window cannot do, hides YouTube, sound, voice and window buttons, refuses the native views of what Fox made, opens websites in a new tab, and Fox\'s tools that need them say so; the app\'s page is unchanged');

@@ -38,10 +38,9 @@ export const NO_PAGE:PageBridge={call:async()=>undefined,event(){},documentEvent
 /** Which page the host reaches: the app's own window's World page (`native`), a browser's on this computer (`web`) or
  * one on another device, met through the pairing room (`remote`). */
 export type PageOrigin='native'|'web'|'remote';
-/** Calls only the app's window answers: its native views and menus, sound, voice and the desktop Companion. A browser's
+/** Calls only the app's window answers: its native views and menus, sound and voice. A browser's
  * page has none of these (WEB_PAGE_FEATURES). */
-export const WINDOW_CALLS:ReadonlySet<string>=new Set(['worldletRestoreWorld','worldletDesktopCompanion','worldletCompanionBackdrop','worldletCompanionGeometry',
- 'worldletBrowserNavigate','worldletBrowser','worldletYouTubePlayer','worldletAudio','worldletLocalMusic','worldletSpeech','worldletShowControls']);
+export const WINDOW_CALLS:ReadonlySet<string>=new Set(['worldletBrowserNavigate','worldletBrowser','worldletYouTubePlayer','worldletAudio','worldletLocalMusic','worldletSpeech','worldletShowControls']);
 /** Calls every open page takes: the World's snapshot and the app's update state. */
 export const SHARED_CALLS:ReadonlySet<string>=new Set(['worldletReceive','worldletAppUpdate']);
 /** Calls whose first argument names work a page started (a Fox turn, an Applet task, a cloud stream): they go back to

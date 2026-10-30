@@ -27,7 +27,7 @@ export const parallelChecks=available([
  'scripts/attention-no-refill-check.ts','scripts/attention-actions-check.ts',
  'scripts/applet-focus-check.ts','scripts/startup-setup-check.ts','scripts/world-tour-check.ts',
  'scripts/attention-idle-check.ts','scripts/world-log-check.ts','scripts/your-agent-ui-check.ts','scripts/world-history-ui-check.ts','scripts/startup-check.ts','scripts/curated-source-applet-check.ts','scripts/browser-fox-glow-check.ts','scripts/demo-walkthrough-check.ts','scripts/applet-top-bar-check.ts','scripts/applet-shelf-ui-check.ts','scripts/text-reader-hud-check.ts',
- 'scripts/world-readability-check.ts','scripts/feature-audit-check.ts','scripts/ongoing-ui-check.ts','scripts/phone-pairing-ui-check.ts','scripts/web-open-check.ts','scripts/desktop-companion-ui-check.ts','scripts/fox-mac-controls-check.ts','scripts/sample-world-check.ts','scripts/widgets-ui-check.ts',
+ 'scripts/world-readability-check.ts','scripts/feature-audit-check.ts','scripts/ongoing-ui-check.ts','scripts/phone-pairing-ui-check.ts','scripts/web-open-check.ts','scripts/fox-mac-controls-check.ts','scripts/sample-world-check.ts','scripts/widgets-ui-check.ts',
  'scripts/companion-entry-check.ts','scripts/attention-group-identity-check.ts','scripts/fox-name-tag-check.ts',
  // Entering and leaving an Applet zooms, and Back from an area's Applet returns to its panel (owner Order 2026-10-07).
  'scripts/world-level-zoom-check.ts',
@@ -66,7 +66,7 @@ export const parallelChecks=available([
  'scripts/landmark-night-check.ts','scripts/onboarding-first-value-world-check.ts','scripts/content-scroll-check.ts','scripts/weather-applet-check.ts',
  'scripts/night-interaction-check.ts','scripts/external-agent-ui-check.ts','scripts/hud-panels-check.ts','scripts/hud-material-check.ts',
  'scripts/speech-focus-check.ts','scripts/fox-talk-ui-check.ts','scripts/world-filter-area-check.ts','scripts/quiet-source-ui-check.ts',
- 'scripts/snapshot-refresh-check.ts','scripts/empty-area-drop-check.ts','scripts/desktop-companion-root-check.ts',
+ 'scripts/snapshot-refresh-check.ts','scripts/empty-area-drop-check.ts',
  'scripts/windows-update-ui-check.ts','scripts/home-readers-check.ts','scripts/local-deletion-check.ts','scripts/agent-ui-boundary-check.ts',
  'scripts/applet-stage-idle-check.ts','scripts/ui-material-check.ts','scripts/activity-browser-check.ts','scripts/web-record-check.ts','scripts/saved-logins-check.ts','scripts/browser-applet-check.ts','scripts/page-focus-ui-check.ts',
  'scripts/windows-folder-ui-check.ts','scripts/windows-notion-ui-check.ts','scripts/github-token-ui-check.ts','scripts/posthog-token-ui-check.ts','scripts/onboarding-reservation-check.ts','scripts/home-review-check.ts',

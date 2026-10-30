@@ -101,8 +101,6 @@ await withBrowser(fileAccess,async browser=>{
    assert.equal(await page.locator('.setup-google-button').textContent(),'Finishing setup…');
    assert.match(await page.locator('.setup-google-help').textContent(),/Google authorized/);
    await page.evaluate(()=>window.dispatchEvent(new CustomEvent('worldlet:google-sign-in',{detail:'browser'})));
-   assert.equal(await page.evaluate(()=>(window as any).worldletCompanionGeometry(true)),null,'OAuth browser activation must not detach setup into a second Fox');
-   assert.equal(await page.locator('.desktop-companion-setup').isVisible(),false,'Setup shows no Fox');
    const waiting=await page.locator('.setup-google-button').boundingBox();
    const cancel=await page.getByRole('button',{name:'Cancel sign-in'}).boundingBox();
    assert.ok(Math.abs(before.x-waiting.x)<1&&Math.abs(before.height-waiting.height)<1,'Google button keeps its place in the row: '+JSON.stringify({before,waiting}));

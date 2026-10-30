@@ -8,4 +8,4 @@ export function shellInteraction(host:HTMLElement){
   detailOpen:shell?.getAttribute('data-detail-open')==='true',
   website:!!shell?.querySelector('#notionContent[data-template=browser]:not([hidden])')};
 }
-export const worldPaused=()=>document.documentElement.classList.contains('desktop-companion')||document.hidden;
+export const worldPaused=()=>document.hidden;

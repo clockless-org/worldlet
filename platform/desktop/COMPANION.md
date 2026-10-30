@@ -7,7 +7,7 @@ Fox lives only in the World window (owner request 2026-10-29: Fox no longer stay
 - Until onboarding is over (setup, then the first-run tour and first task, `onboardingUnfinished` in `agent/companion`), closing the World window quits Worldlet and minimizing only minimizes (owner request 2026-10-04). The next launch resumes setup or the tour where the person left it.
 - Run in background ([web](../web/README.md#web)): closing hides every Worldlet window and gives the foreground back (Mac), and a login launch opens none.
 
-Before 2026-10-29 closing, minimizing or switching apps moved the live World view into a transparent always-on-top window around Fox; that is in Git history. The page still answers the old `desktopCompanion*` actions, which the host now treats as no-ops (`desktopCompanionState` is always off).
+Before 2026-10-29 closing, minimizing or switching apps moved the live World view into a transparent always-on-top window around Fox; that code, the page's desktop presentation and Fox's task window beside it were removed and are in Git history.
 
 ## Ownership
 

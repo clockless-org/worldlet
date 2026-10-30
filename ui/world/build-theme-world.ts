@@ -122,7 +122,7 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
  let shellKey=JSON.stringify(shellInteraction(host))+paused(),checking=false;
  const follow=()=>{if(checking||disposed)return;checking=true;requestAnimationFrame(()=>{checking=false;const next=JSON.stringify(shellInteraction(host))+paused();if(next!==shellKey){shellKey=next;refresh();}});};
  const observer=new MutationObserver(follow);observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:['hidden','open','data-onboarding-locked','data-detail-open','data-attention-preview','data-map-attention','data-template']});
- document.addEventListener('visibilitychange',follow);window.addEventListener('worldlet:desktop-companion',follow);
+ document.addEventListener('visibilitychange',follow);
  // The World says when it is drawn (WorldMount.ready); the shell's loading page waits for it.
  queueMicrotask(()=>{if(!disposed){refresh();
   // Ready once the World's first frame is drawn (WorldMount.ready), or at once when it does not say.
@@ -166,6 +166,6 @@ export function createModuleScene(host,rooms,onPick,onProject,pages,options):any
   picture(){return mount.picture?.()||null;},
   get metrics(){
    const m=mount.metrics?.() as any||{};return {...m,theme:theme.id,presentation:{...m.presentation,stage:stage.metrics},levelZoom:levelZoom.metrics};},
-  destroy(){if(disposed)return;disposed=true;observer.disconnect();document.removeEventListener('visibilitychange',follow);window.removeEventListener('worldlet:desktop-companion',follow);mount.dispose();stage.destroy();imageLamps.destroy();for(const label of lampLabels.values())label.destroy();levelZoom.dispose();world.remove();delete shellRoot.dataset.worldRenderer;for(const key of ['ink','paper','accent','bodyFont'])shellRoot.style.removeProperty('--world-map-'+key);}
+  destroy(){if(disposed)return;disposed=true;observer.disconnect();document.removeEventListener('visibilitychange',follow);mount.dispose();stage.destroy();imageLamps.destroy();for(const label of lampLabels.values())label.destroy();levelZoom.dispose();world.remove();delete shellRoot.dataset.worldRenderer;for(const key of ['ink','paper','accent','bodyFont'])shellRoot.style.removeProperty('--world-map-'+key);}
  };
 }

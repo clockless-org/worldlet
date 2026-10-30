@@ -1,7 +1,6 @@
 import {readCompanionProfile,type CompanionKnowledge,type CompanionProfile} from '../../contracts/companion.ts';
 import {companionPersona} from '../../agent/companion/index.ts';
 import {node,uiIcon} from '../style/index.ts';
-import {isDesktopCompanion,requireWorldSurface} from './world-surface.ts';
 import {eventTrigger,reportProductEvent} from '../frame/index.ts';
 import {createCompanionFeedback} from './companion-feedback.ts';
 import {createActivityRecords} from './activity-records.ts';
@@ -15,12 +14,11 @@ import {readFoxSkills,skillOffers,type FoxSkills} from './companion-skills.ts';
 export function mountCompanionInfo({root,pet,call,getName}){
  const el:(tag:string,cls?:string,text?:unknown)=>any=node;
  const badge=el('button','companion-entry-action');badge.type='button';badge.dataset.slot='companion';pet.append(badge);
- const desktop=isDesktopCompanion;
  function syncEntry(){badge.innerHTML=uiIcon('companion');badge.title='Open companion panel';badge.setAttribute('aria-label',badge.title);badge.setAttribute('aria-haspopup','dialog');badge.setAttribute('aria-expanded',String(panel.open));badge.setAttribute('aria-controls',panel.id);}
  const panel=el('dialog','companion-info-panel ui-hud-panel');panel.id='companionInfo';panel.setAttribute('aria-label','Your companion');badge.setAttribute('aria-controls',panel.id);root.append(panel);
  // Agent beside Fox lands on Settings › Agents (owner Order 2026-10-07); the badge on Fox's profile.
  // With `setting` (Fox's Agent and Phone buttons) it opens that section, and closes only when it is already showing.
- async function toggle(section='Profile',setting?:string){if(desktop()){badge.disabled=true;try{await requireWorldSurface(call);await open(section,setting);}catch(error){badge.title=error.message||'Could not reopen World. Try again.';}finally{badge.disabled=false;}return;}if(panel.open&&(!setting||settings.selected===setting))dismiss(true);else await open(section,setting);}
+ async function toggle(section='Profile',setting?:string){if(panel.open&&(!setting||settings.selected===setting))dismiss(true);else await open(section,setting);}
  badge.onclick=e=>{e.stopPropagation();void toggle();};
  syncEntry();
  let dismissClick=false;
@@ -36,7 +34,6 @@ export function mountCompanionInfo({root,pet,call,getName}){
  const settingsButton=()=>root.querySelector('.companion-side .companion-panel-button') as HTMLElement|null;
  function closeFeedback(focus=false){if(!feedbackPanel.open)return;void feedback.cancelVoice();feedbackPanel.close();if(focus)settingsButton()?.focus();}
  async function openFeedback(){
-  if(desktop()){try{await requireWorldSurface(call);}catch{return;}}
   if(panel.open)dismiss();journal.close();feedbackPanel.show();(feedback.element.querySelector('textarea') as HTMLElement|null)?.focus();
  }
  feedbackClose.onclick=()=>closeFeedback(true);
@@ -52,7 +49,6 @@ export function mountCompanionInfo({root,pet,call,getName}){
  const journal=mountJournalBook({root,pages:artifacts.element,start:(day,card)=>artifacts.start(day,card),stop:()=>artifacts.stop(),returnFocus:()=>document.querySelector<HTMLElement>('.world-today-open')});
  async function openJournal(day='',card=''){
   const trigger=eventTrigger();
-  if(desktop()){try{await requireWorldSurface(call);}catch(error){badge.title=error.message||'Could not reopen World. Try again.';return;}}
   if(panel.open)dismiss();journal.open(day,card);
   if(!journal.isOpen)return;
   reportProductEvent('journal_opened',{trigger});
@@ -88,7 +84,6 @@ export function mountCompanionInfo({root,pet,call,getName}){
  function button(label,action){const b=el('button','companion-info-action',label);b.type='button';b.onclick=action;return b;}
  async function run(action){if(busy)return;busy=true;error='';render();try{await action();}catch(e){error=e.message||'Please try again.';}finally{busy=false;render();}}
  function dismiss(focus=false){generation++;records.stop();cancelAnimationFrame(anchorFrame);panel.close();root.classList.remove('companion-info-open');badge.setAttribute('aria-expanded','false');if(focus)(badge.isConnected?badge:pet.querySelector('.companion-panel-button')||badge).focus();root.dispatchEvent(new Event('worldlet:companion-info-closed'));}
- window.addEventListener('worldlet:desktop-companion',event=>{if((event as CustomEvent).detail&&root.classList.contains('companion-info-open'))dismiss();syncEntry();});
  const close=button('×',()=>dismiss(true));close.className='companion-info-close';close.setAttribute('aria-label','Close companion panel');
  const notice=el('p','companion-info-note');notice.setAttribute('role','status');notice.hidden=true;
  const body=el('div','companion-info-body');body.append(settings.element,notice);panel.append(body,close);

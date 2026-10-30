@@ -10,7 +10,6 @@ import {mountTaskPanel} from './task-panel.ts';
 import {agentVersionLine} from './agent-version.ts';
 import {summarizeRequest} from '../../agent/gate/index.ts';
 import {callHost} from '../../platform/bridge/host.ts';
-import {isDesktopCompanion,requireWorldSurface} from '../companion/index.ts';
 import {displayReleaseVersion} from '../frame/index.ts';
 import {attentionOrder,attentionFocusSet,attentionFocusFit,attentionFocusEvidence,attentionRelevant,attentionRankSignals,attentionLevel} from '../../agent/attention/index.ts';
 import {appHudIcon,momentLine,AGENT_ICONS} from '../applets/index.ts';
@@ -178,26 +177,22 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
   const webPage=!!root.querySelector('.browser-toolbar>.browser-back[data-web-page]');
   const common: any[]=[{id:'utility:home',label:'World',icon:'home',kind:'navigation',placement:'utility',slot:'home',run:webPage?leaveApplet:home},{id:'utility:next',label:next?({needsAction:'Review',event:'View event',unseen:'Read update'}[next.state]||'Do Work'):'Do Work',description:next?.fullAction||next?.actionTitle,icon:'spark',kind:'navigation',placement:'utility',slot:'next',side:'right',disabled:!next,run:nextFocus}];
 
-  // Desktop return is the fourth small Companion control, not a dock action.
-  if(isDesktopCompanion())common.shift();
   const local=options().filter(a=>a.placement==='contextual');
   if(s.data.personal&&!s.data.moduleCatalog)local.unshift({id:'utility:connect',label:'Connect sources',icon:'plus',kind:'navigation',placement:'contextual',run:connect});
-  const update=updates?.snapshot();
-  const release=update?.visible&&isDesktopCompanion()?[{id:'utility:update',label:update.label||'Update',icon:'download',kind:'update',placement:'contextual',disabled:!update.enabled,description:update.detail,run:()=>updates.activate()}]:[];
   const visible=new Set(chat()?.visibleActionIds?.()||[]);
   if(root.dataset.foxGuide==='true'&&!root.querySelector('#companionDialogue')?.hidden)visible.add('utility:connect');
   // Content actions belong to the selected Applet; global suggestions stay in World.
   // During onboarding the guide owns actions, avoiding competing navigation.
   const recommended=chat()?.recommendedActions?.()||[];
-  const contextualSuggestions=isDesktopCompanion()?recommended:local.some(a=>a.id.startsWith('attention:'))?[...local,...recommended]:[...recommended,...local];
-  const suggestions=root.dataset.onboarding==='true'?[]:[...contextualSuggestions,...(s.depth==='overview'||isDesktopCompanion()?common.filter(a=>a.side==='right'):[])];
+  const contextualSuggestions=local.some(a=>a.id.startsWith('attention:'))?[...local,...recommended]:[...recommended,...local];
+  const suggestions=root.dataset.onboarding==='true'?[]:[...contextualSuggestions,...(s.depth==='overview'?common.filter(a=>a.side==='right'):[])];
   const seen=new Set();
   const right=suggestions.filter(a=>{
    const identity=a.identity||a.id;
    if(a.disabled||visible.has(identity)||seen.has(identity))return false;
    seen.add(identity);return true;
   }).slice(0,3).map(a=>({...a,side:'right'}));
-  return [...common.filter(a=>a.slot==='home'&&(s.depth!=='overview'||isDesktopCompanion())),...release.slice(0,1),...right];
+  return [...common.filter(a=>a.slot==='home'&&s.depth!=='overview'),...right];
  }
  function trackedTasks(){return [...model.activities.filter(a=>a.state==='needsAction'),...tasks(),...model.activities.filter(a=>a.state==='unseen')].filter((a,i,list)=>list.findIndex(b=>b.id===a.id)===i).slice(0,3);}
  const nextVisited=new Set();
@@ -438,16 +433,13 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
   const choices=dockOptions();
   const left=el('div','fox-action-side fox-action-left'),right=el('div','fox-action-side fox-action-right');
   const restoreBackFocus=document.activeElement===backButton;
-  // sceneState still owns this required control during desktop → world
-  // restoration. Park it in the hidden context, not in the detached old row.
   // Moved only when it is not already there: re-inserting it on every sync redraws its frosted glass,
   // which flickers (owner report 2026-10-06).
-  if(isDesktopCompanion()){if(backButton.parentElement!==context)context.append(backButton);}
-  else if(barLeft.firstElementChild!==backButton)barLeft.prepend(backButton);
+  if(barLeft.firstElementChild!==backButton)barLeft.prepend(backButton);
   // Inside an Applet (or reading one of its items) Back alone leads the left of the title: it already leads up a level,
   // so the World button stays out of the bar. On a website Applet's page its toolbar's Back and Forward stand in for
   // Back (browser-device.ts), and World stands left of Fox in the dock (owner request 2026-10-06).
-  const inBar=!isDesktopCompanion()&&(snapshot().depth==='object'||root.dataset.detailOpen==='true');
+  const inBar=snapshot().depth==='object'||root.dataset.detailOpen==='true';
   const webPage=!!root.querySelector('.browser-toolbar>.browser-back[data-web-page]');
   for(const e of [...barLeft.children])if(e!==backButton)e.remove();
   choices.forEach(action=>{if(inBar&&action.slot==='home'&&!webPage)return;(action.side==='right'?right:left).append(button(action));});
@@ -459,9 +451,7 @@ if(s.depth==='note'&&s.current){const p=s.pages.get(s.current);if(p?.sourceId)li
  }
  function guideActions(text,choices){const fox=chat();if(!fox?.setGuide)return;const actions=choices.map(([label,run])=>{const b=el('button','',label);b.type='button';b.onclick=()=>{fox.setGuide(null);run();};return b;});const dismiss=el('button','','Not now');dismiss.type='button';dismiss.onclick=()=>fox.setGuide(null);fox.setGuide({source:'world-actions',takeover:true,text,actions:[...actions,dismiss]});}
  function listPages(ids,title){const choices=ids.map(id=>snapshot().pages.get(id)).filter(Boolean).map(p=>[p.title,()=>open(p.id)]);guideActions(title+(choices.length?'':' — no sources yet.'),choices);}
- window.addEventListener('worldlet:desktop-companion',()=>{forceNext=true;sync();});
  async function run(id){const fresh=[...dockOptions(),...options(),...(contextual()?.agentActions||[]),...model.activities,...tasks()].find(a=>a.id===id);if(!fresh||busy.has(id))return {error:'Action no longer available. Inspect the current context again.'};busy.add(id);[...actionsRow.querySelectorAll('button'),...barLeft.querySelectorAll('button')].forEach(b=>{if(b.dataset.actionId===id){b.disabled=true;b.setAttribute('aria-busy','true');}});
-  try{if(!id.startsWith('reply:')&&fresh.kind!=='update')await requireWorldSurface();}catch(error){busy.delete(id);chat()?.setStatus?.(error.message,{source:'navigation',persistent:true});forceNext=true;sync();return {error:error.message};}
   try{if(fresh.run)await fresh.run();else if(fresh.kind==='connect')await connect();else if(fresh.kind==='summarize'){await chat().ask(summarizeRequest(snapshot().pages.get(fresh.pageId)?.title),{origin:'system',displayText:fresh.label,icon:fresh.icon||'spark'});}else if(fresh.kind==='original')await original(fresh.pageId);else if(fresh.kind==='browse'){const s=snapshot().sections.find(s=>s.id===fresh.pageId);listPages(s?.children||[],s?.title||'Sources');}else {focusContent(fresh.pageId||fresh.pageIds?.[0]);}if(fresh.kind!=='update'&&!fresh.id.startsWith('reply:')&&!['utility:next','utility:fun','utility:connect'].includes(fresh.id))chat()?.recordAction?.(fresh);return {ok:true,action:fresh.label,...(fresh.resultHint?{effect:fresh.resultHint}:{})};}
   catch(e){if(fresh.kind==='update'){updates.failure?.(e);return {error:e.message};}guideActions('Action incomplete. '+e.message,[['Retry',()=>run(id)]]);return {error:e.message};}
   finally{busy.delete(id);forceNext=true;sync();}

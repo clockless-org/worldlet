@@ -14,17 +14,15 @@
 //   driver still clicks its elements at the page's own coordinates, and frame rates follow
 //   pageFrameRate (full in the panel, lower in the window, low but not zero out of sight);
 // - Worldlet's own CEF build plays H.264/AAC; the standard build reports it cannot (#1174);
-// - with the World window away for the desktop Companion, the panel moves Fox's page into a window
-//   of its own beside the Companion and back, still working, and its press and close are reported;
 // - a meeting site gets the camera and microphone once the person and the OS allow them; other sites do not;
 // - several pages at once (#1176): two pages render and take input each on its own, two Fox drivers
 //   run at once on separate pages, and one page plays sound at a time.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {BaseWindow,WebContentsView,screen,session} from 'electron';
+import {BaseWindow,WebContentsView,session} from 'electron';
 import {httpsUpgrade,opensAsTab,popupAllowed,publicPage} from '../rules.ts';
-import {TASK_PICTURE_IN_PICTURE,desktopTaskPictureInPicturePlacement,pageFrameRate,taskPictureInPictureAspect} from '../../../../../agent/applets/index.ts';
+import {TASK_PICTURE_IN_PICTURE,pageFrameRate} from '../../../../../agent/applets/index.ts';
 import {BrowserDevice} from '../device.ts';
 import {Cancelled} from '../page.ts';
 import type {Host} from '../../../types.ts';
@@ -412,56 +410,22 @@ const result={supported,played,width:video.videoWidth,error:video.error?.code??n
    }finally{device.stop();call.close();}
   }
 
-  // 8. Beside the desktop Companion (#1175), through the panel's own device: the World view under
+  // 8. Fox's page in the World's task window (#1175), through the panel's own device: the World view under
   // the page stands in for the World.
   const world=new WebContentsView();window.contentView.addChildView(world);world.setBounds({x:0,y:0,width:900,height:700});page.raise();
-  const events:any[]=[];let restored=0;
-  const host={profile,store:{sampleEnabled:()=>true,writable:false,state:{}},page:{call:async(name:string,event:unknown)=>{if(name==='worldletBrowser')events.push(event);},event:()=>{},documentEvent:()=>{},ready:()=>true},
+  const host={profile,store:{sampleEnabled:()=>true,writable:false,state:{}},page:{call:async()=>{},event:()=>{},documentEvent:()=>{},ready:()=>true},
    window:()=>window,worldView:()=>world,diagnostics:{record:()=>{},log:()=>{}}} as unknown as Host;
   const device=new BrowserDevice(host,{binary:()=>'',python:()=>'',script:''} as any),panel=device as any;
-  panel.browser=page;panel.bind(page);device.restoreWorld=()=>{restored++;};
+  panel.browser=page;panel.bind(page);
   const fox={label:'Fox is working on this page',colors:['#ff8a00','#2f6bff'],turnSeconds:0,phaseSeconds:0};
   const inWorld={x:560,y:420,width:320,height:240};
   device.layout(inWorld,fox,{width:800,height:600},true);
   assert.deepEqual(page.frameRect(),inWorld,'Fox\'s page is in the World\'s task window');
   assert.equal(panel.pointerScale,inWorld.width/800,'Fox\'s pointer lands where the smaller page shows its target');
-  const area=screen.getPrimaryDisplay().workArea,companion={x:area.x+area.width-316,y:area.y+area.height-296,width:300,height:280};
-  device.detach();device.placeTask(companion);
-  const task=panel.task,placed=desktopTaskPictureInPicturePlacement({area,companion,aspect:taskPictureInPictureAspect({width:800,height:600})});
-  assert.ok(task?.visible,'the window beside the Companion shows');
-  const bounds=task.window.getBounds();
-  // Windows rounds a frameless window's size by a DIP or two (1360,818 362×271 for 360×270).
-  assert.ok(['x','y','width','height'].every(key=>Math.abs(bounds[key]-placed[key])<=3),'beside the Companion as the shared rule places it: '+JSON.stringify({bounds,placed}));
-  assert.ok(task.contentView.children.includes(surface.view)&&!window.contentView.children.includes(surface.view),'the page\'s surface moved into it');
-  assert.deepEqual(page.frameRect(),{x:0,y:0,width:placed.width,height:placed.height});
-  assert.equal(panel.pointerScale,placed.width/800);
   assert.equal(JSON.stringify(await page.evaluate('return [innerWidth,innerHeight];',{},{isolated:false})),'[800,600]','the page keeps its size there');
-  await until('the page shows beside the Companion',async()=>{const value=await pixel();return value&&Math.abs(value[2]-255)<8&&Math.abs(value[1]-128)<8?value:null;});
-  assert.ok(panel.glow.isShowing,'Fox\'s glow follows the page');
-  assert.equal(await page.evaluate('return 6*7;',{},{isolated:false}),42,'Fox\'s steps still reach the page');
-  // Layouts from the World while it is away only say whether Fox works; the page stays.
-  device.layout({x:0,y:0,width:0,height:0},fox,{width:800,height:600},true);
-  assert.deepEqual(page.frameRect(),{x:0,y:0,width:placed.width,height:placed.height});
-  // A press there brings the World back, and the UI hears of it.
-  await task.overlay.ready;
-  for(const type of ['mouseDown','mouseUp'] as const)task.overlay.view.webContents.sendInputEvent({type,x:40,y:40,button:'left',clickCount:1});
-  await until('a press beside the Companion is reported',()=>restored===1&&events.some(event=>event.phase==='task-pip'&&event.event==='press'));
-  device.attach();
-  assert.ok(window.contentView.children.includes(surface.view)&&!task.visible,'back in the World window');
-  assert.deepEqual(page.frameRect(),inWorld,'where the World last placed it');
-  // After Fox's turn the window beside the Companion can be closed, which leaves the page.
-  device.layout(inWorld,undefined,{width:800,height:600},true);
-  device.detach();device.placeTask(companion);
-  assert.ok(task.visible&&!panel.glow.isShowing);
-  await until('the close control shows',async()=>await task.overlay.view.webContents.executeJavaScript("document.body.classList.contains('closable')"));
-  const close=await task.overlay.view.webContents.executeJavaScript("(()=>{const r=document.getElementById('close').getBoundingClientRect();return {x:Math.round(r.x+r.width/2),y:Math.round(r.y+r.height/2)};})()");
-  for(const type of ['mouseDown','mouseUp'] as const)task.overlay.view.webContents.sendInputEvent({type,...close,button:'left',clickCount:1});
-  await until('closing there is reported',()=>events.some(event=>event.phase==='task-pip'&&event.event==='closed'));
-  assert.ok(!task.visible&&device.visiblePage===null,'the page is left and the window goes');
-  assert.equal(restored,1,'closing does not bring the World back');
   device.stop();window.contentView.removeChildView(world);world.webContents.close();
   page=null;
-  console.log('PASS with the World away, the panel shows Fox\'s page beside the Companion at its own size, still working; a press brings the World back; back there it is where it was; after Fox\'s turn it closes there');
+  console.log('PASS Fox\'s page shows smaller in the World\'s task window at its own size, with Fox\'s pointer scaled to it');
 
   // 9. Several pages at once (#1176): two pages side by side render and take input each on its own,
   // two Fox drivers run at once on separate pages, and only one page plays sound at a time.
